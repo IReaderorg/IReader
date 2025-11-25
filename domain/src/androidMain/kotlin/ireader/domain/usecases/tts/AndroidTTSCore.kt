@@ -42,7 +42,7 @@ class AndroidTTSCore(
     private var currentPlayer: TTSPlayer? = null
     
     // Notification Manager
-    private val notificationManager = AndroidTTSNotificationManager(context, mediaSession)
+    val notificationManager = AndroidTTSNotificationManager(context, mediaSession)
     private val manageTTSNotification = ManageTTSNotification(notificationManager)
     
     // State
@@ -115,7 +115,7 @@ class AndroidTTSCore(
         this.onChapterComplete = onChapterComplete
         this.isPlaying = true
         
-        // Show notification
+        // Show notification FIRST (this creates the notification object)
         showNotification()
         
         // Start reading
@@ -126,24 +126,18 @@ class AndroidTTSCore(
      * Read specific paragraph
      */
     private fun readParagraph(index: Int) {
-        Log.info { "📖 readParagraph called: index=$index, isPlaying=$isPlaying, total=${currentParagraphs.size}" }
-        
         if (index >= currentParagraphs.size) {
-            Log.info { "📖 End of paragraphs reached" }
             handleChapterComplete()
             return
         }
         
         if (!isPlaying) {
-            Log.info { "📖 Not playing, skipping" }
             return
         }
         
         currentParagraphIndex = index
         val text = currentParagraphs[index]
         val utteranceId = "paragraph_$index"
-        
-        Log.info { "📖 Reading paragraph $index: ${text.take(50)}..." }
         
         // Update state to playing
         isPlaying = true
@@ -155,7 +149,6 @@ class AndroidTTSCore(
         
         // Speak on IO dispatcher to avoid blocking UI
         scope.launch(Dispatchers.IO) {
-            Log.info { "🎤 Calling speak for paragraph $index with ${currentPlayer?.getProviderName()}" }
             currentPlayer?.speak(text, utteranceId)
         }
         
@@ -168,23 +161,11 @@ class AndroidTTSCore(
      */
     private fun preloadNextParagraphs(currentIndex: Int) {
         if (currentPlayer?.getProviderName() != "Coqui TTS") {
-            Log.debug { "Skipping preload - not using Coqui TTS" }
             return
         }
         
-        val coquiAdapter = currentPlayer as? CoquiTTSPlayerAdapter
-        if (coquiAdapter == null) {
-            Log.warn { "Coqui adapter is null" }
-            return
-        }
-        
-        val coquiService = coquiAdapter.getCoquiService()
-        if (coquiService == null) {
-            Log.warn { "Coqui service is null" }
-            return
-        }
-        
-        Log.info { "Starting preload from paragraph $currentIndex" }
+        val coquiAdapter = currentPlayer as? CoquiTTSPlayerAdapter ?: return
+        val coquiService = coquiAdapter.getCoquiService() ?: return
         
         // Preload next 3 paragraphs
         scope.launch(Dispatchers.IO) {
@@ -192,23 +173,18 @@ class AndroidTTSCore(
                 val nextIndex = currentIndex + i
                 if (nextIndex < currentParagraphs.size && isPlaying) {
                     try {
-                        Log.info { "Preloading paragraph $nextIndex..." }
                         val result = coquiService.synthesize(
                             text = currentParagraphs[nextIndex],
                             voiceId = "default",
                             speed = currentPlayer?.getSpeechRate() ?: 1.0f,
                             pitch = currentPlayer?.getPitch() ?: 1.0f
                         )
-                        result.onSuccess {
-                            Log.info { "✅ Preloaded paragraph $nextIndex successfully" }
-                        }.onFailure { error ->
-                            Log.error { "❌ Failed to preload paragraph $nextIndex: ${error.message}" }
+                        result.onFailure { error ->
+                            Log.error { "Failed to preload paragraph $nextIndex: ${error.message}" }
                         }
                     } catch (e: Exception) {
-                        Log.error { "❌ Exception preloading paragraph $nextIndex: ${e.message}" }
+                        Log.error { "Exception preloading paragraph $nextIndex: ${e.message}" }
                     }
-                } else {
-                    Log.debug { "Skipping preload for paragraph $nextIndex (out of range or stopped)" }
                 }
             }
         }
@@ -397,17 +373,20 @@ class AndroidTTSCore(
     }
     
     private fun handleParagraphComplete() {
-        Log.info { "✅ handleParagraphComplete: paragraph $currentParagraphIndex done, isPlaying=$isPlaying" }
+        Log.info { "✅ handleParagraphComplete: paragraph $currentParagraphIndex done, isPlaying=$isPlaying, total=${currentParagraphs.size}" }
         
+        // Invoke callback BEFORE advancing
         onParagraphComplete?.invoke(currentParagraphIndex)
         
         // Auto-advance to next paragraph
         val nextIndex = currentParagraphIndex + 1
+        Log.info { "📊 Next index would be: $nextIndex (current=$currentParagraphIndex, total=${currentParagraphs.size})" }
+        
         if (isPlaying && nextIndex < currentParagraphs.size) {
             Log.info { "⏭️ Auto-advancing to paragraph $nextIndex" }
             readParagraph(nextIndex)
         } else {
-            Log.info { "🏁 No more paragraphs or stopped, handling chapter complete" }
+            Log.info { "🏁 No more paragraphs (nextIndex=$nextIndex >= total=${currentParagraphs.size}) or stopped (isPlaying=$isPlaying)" }
             handleChapterComplete()
         }
     }
@@ -438,6 +417,20 @@ class AndroidTTSCore(
         }
         
         manageTTSNotification.show(book, chapter, state)
+    }
+    
+    /**
+     * Get current notification for foreground service
+     */
+    fun getCurrentNotification(): android.app.Notification? {
+        return notificationManager.getCurrentNotification()
+    }
+    
+    /**
+     * Get notification ID
+     */
+    fun getNotificationId(): Int {
+        return notificationManager.getNotificationId()
     }
     
     private fun updateNotification() {

@@ -490,7 +490,7 @@ fun BookCoverImage(
                         Modifier
                     }
                 ),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Crop
         )
         
         // Show reveal icon when blurred

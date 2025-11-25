@@ -16,5 +16,6 @@ data class ChapterReview(
     val reviewText: String,
     val createdAt: Long,
     val updatedAt: Long,
-    val username: String? = null
+    val username: String? = null,
+    val userBadge: UserBadgeInfo? = null
 )

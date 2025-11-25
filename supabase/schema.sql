@@ -567,12 +567,12 @@ CREATE POLICY "Users can update their own NFT wallet"
 -- Automatically updates the updated_at column when a row is modified
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION update_updated_at_column() IS 'Automatically updates updated_at timestamp on row modification';
 
@@ -585,7 +585,7 @@ CREATE OR REPLACE FUNCTION award_badge(
     p_badge_id TEXT,
     p_metadata JSONB DEFAULT NULL
 )
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN AS $
 BEGIN
     INSERT INTO public.user_badges (user_id, badge_id, metadata)
     VALUES (p_user_id, p_badge_id, p_metadata)
@@ -593,7 +593,7 @@ BEGIN
     
     RETURN FOUND;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION award_badge(UUID, TEXT, JSONB) IS 'Awards a badge to a user';
 
@@ -615,7 +615,7 @@ RETURNS TABLE (
     is_featured BOOLEAN,
     earned_at TIMESTAMP WITH TIME ZONE,
     metadata JSONB
-) AS $$
+) AS $
 BEGIN
     RETURN QUERY
     SELECT
@@ -636,7 +636,7 @@ BEGIN
     WHERE ub.user_id = p_user_id
     ORDER BY ub.earned_at DESC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION get_user_badges(UUID) IS 'Returns all badges earned by a user with image URLs, type, and display flags';
 
@@ -659,7 +659,7 @@ RETURNS TABLE (
     is_primary BOOLEAN,
     is_featured BOOLEAN,
     metadata JSONB
-) AS $$
+) AS $
 BEGIN
     RETURN QUERY
     SELECT
@@ -681,7 +681,7 @@ BEGIN
     WHERE ub.user_id = p_user_id
     ORDER BY ub.earned_at DESC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION get_user_badges_with_details(UUID) IS 'Returns all badges earned by a user with complete details including primary/featured flags';
 
@@ -690,7 +690,7 @@ COMMENT ON FUNCTION get_user_badges_with_details(UUID) IS 'Returns all badges ea
 -- Automatically generates a username for users who don't have one
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION generate_default_username()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $
 BEGIN
     -- If username is NULL or empty, generate one from email or random
     IF NEW.username IS NULL OR LENGTH(TRIM(NEW.username)) = 0 THEN
@@ -704,7 +704,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION generate_default_username() IS 'Auto-generates username for users without one';
 
@@ -765,7 +765,7 @@ CREATE OR REPLACE FUNCTION check_and_award_achievement_badge(
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+AS $
 DECLARE
     v_already_has_badge BOOLEAN;
 BEGIN
@@ -786,7 +786,7 @@ BEGIN
     
     RETURN FALSE;
 END;
-$$;
+$;
 
 -- Grant execute permission
 GRANT EXECUTE ON FUNCTION check_and_award_achievement_badge(UUID, TEXT) TO authenticated;
@@ -805,7 +805,7 @@ RETURNS TABLE (
     read_chapters BIGINT,
     bookmarked_chapters BIGINT,
     books_in_progress BIGINT
-) AS $$
+) AS $
 BEGIN
     RETURN QUERY
     SELECT
@@ -821,7 +821,7 @@ BEGIN
     WHERE u.id = p_user_id
     GROUP BY u.id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION get_user_statistics(UUID) IS 'Returns reading statistics for a user';
 
@@ -1088,15 +1088,15 @@ ON CONFLICT (id) DO NOTHING;
 -- SUCCESS MESSAGE
 -- ============================================================================
 
-DO $$
+DO $
 BEGIN
     RAISE NOTICE 'IReader Sync schema created successfully!';
     RAISE NOTICE 'Tables: users, reading_progress, synced_books, book_reviews, chapter_reviews, badges, user_badges, payment_proofs, nft_wallets, leaderboard';
     RAISE NOTICE 'RLS: Enabled on all tables';
     RAISE NOTICE 'Policies: Created for all CRUD operations';
     RAISE NOTICE 'Triggers: Created for automatic timestamp updates';
-    RAISE NOTICE 'Views: user_reading_summary, recent_activity, leaderboard_with_rank';
-    RAISE NOTICE 'Functions: update_updated_at_column, get_user_statistics, award_badge, get_user_badges, get_user_badges_with_details, get_user_leaderboard_rank, get_top_leaderboard_users, get_leaderboard_around_rank';
+    RAISE NOTICE 'Views: user_reading_summary, recent_activity, leaderboard_with_rank, book_reviews_with_badges, chapter_reviews_with_badges';
+    RAISE NOTICE 'Functions: update_updated_at_column, get_user_statistics, award_badge, get_user_badges, get_user_badges_with_details, get_user_leaderboard_rank, get_top_leaderboard_users, get_leaderboard_around_rank, get_book_reviews_with_badges, get_chapter_reviews_with_badges';
     RAISE NOTICE '';
     RAISE NOTICE 'Features:';
     RAISE NOTICE '- Optimized storage: Essential book data synced';
@@ -1150,7 +1150,7 @@ BEGIN
     RAISE NOTICE '6. Monitor using the views and statistics function';
     RAISE NOTICE '7. Enable Realtime for leaderboard table (optional)';
     RAISE NOTICE '8. Test leaderboard sync from IReader app';
-END $$;
+END $;
 
 
 -- ----------------------------------------------------------------------------
@@ -1235,12 +1235,12 @@ USING (auth.uid() = user_id);
 
 -- Function to automatically update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_leaderboard_updated_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION update_leaderboard_updated_at() IS 'Automatically updates updated_at timestamp on leaderboard updates';
 
@@ -1292,7 +1292,7 @@ RETURNS TABLE (
     rank BIGINT,
     total_users BIGINT,
     percentile NUMERIC
-) AS $$
+) AS $
 BEGIN
     RETURN QUERY
     WITH user_rank AS (
@@ -1311,7 +1311,7 @@ BEGIN
     FROM user_rank ur, total_count tc
     WHERE ur.user_id = p_user_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION get_user_leaderboard_rank(UUID) IS 'Returns user rank, total users, and percentile on leaderboard';
 
@@ -1327,7 +1327,7 @@ RETURNS TABLE (
     reading_streak INTEGER,
     has_badge BOOLEAN,
     badge_type TEXT
-) AS $$
+) AS $
 BEGIN
     RETURN QUERY
     SELECT 
@@ -1344,7 +1344,7 @@ BEGIN
     ORDER BY l.total_reading_time_minutes DESC
     LIMIT p_limit;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION get_top_leaderboard_users(INTEGER) IS 'Returns top N users from leaderboard';
 
@@ -1356,7 +1356,7 @@ RETURNS TABLE (
     username TEXT,
     total_reading_time_minutes BIGINT,
     is_current_user BOOLEAN
-) AS $$
+) AS $
 DECLARE
     v_user_rank BIGINT;
 BEGIN
@@ -1386,7 +1386,7 @@ BEGIN
     WHERE ru.rank BETWEEN (v_user_rank - p_range) AND (v_user_rank + p_range)
     ORDER BY ru.rank;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION get_leaderboard_around_rank(UUID, INTEGER) IS 'Returns users around a specific user rank';
 
@@ -1414,4 +1414,190 @@ COMMENT ON FUNCTION get_leaderboard_around_rank(UUID, INTEGER) IS 'Returns users
 
 -- ============================================================================
 -- END OF SCHEMA
+-- ============================================================================
+
+-- ============================================================================
+-- REVIEWS WITH BADGES VIEWS
+-- ============================================================================
+
+-- Migration: Add views for reviews with user badges
+-- These views make it easy to fetch reviews with username and primary badge info
+
+-- Drop views if they exist
+DROP VIEW IF EXISTS book_reviews_with_badges;
+DROP VIEW IF EXISTS chapter_reviews_with_badges;
+
+-- ----------------------------------------------------------------------------
+-- Book Reviews with Badges View
+-- Combines book reviews with username and primary badge information
+-- ----------------------------------------------------------------------------
+
+CREATE OR REPLACE VIEW book_reviews_with_badges AS
+SELECT 
+    br.id,
+    br.user_id,
+    br.book_title,
+    br.rating,
+    br.review_text,
+    br.created_at,
+    u.username,
+    ub.badge_id,
+    b.name as badge_name,
+    b.icon as badge_icon,
+    b.image_url as badge_image_url
+FROM public.book_reviews br
+LEFT JOIN public.users u ON br.user_id = u.id
+LEFT JOIN public.user_badges ub ON br.user_id = ub.user_id AND ub.is_primary = true
+LEFT JOIN public.badges b ON ub.badge_id = b.id
+ORDER BY br.created_at DESC;
+
+-- Grant access to the view
+GRANT SELECT ON book_reviews_with_badges TO authenticated;
+GRANT SELECT ON book_reviews_with_badges TO anon;
+
+COMMENT ON VIEW book_reviews_with_badges IS 'Book reviews with username and primary badge information';
+
+-- ----------------------------------------------------------------------------
+-- Chapter Reviews with Badges View
+-- Combines chapter reviews with username and primary badge information
+-- ----------------------------------------------------------------------------
+
+CREATE OR REPLACE VIEW chapter_reviews_with_badges AS
+SELECT 
+    cr.id,
+    cr.user_id,
+    cr.book_title,
+    cr.chapter_name,
+    cr.rating,
+    cr.review_text,
+    cr.created_at,
+    u.username,
+    ub.badge_id,
+    b.name as badge_name,
+    b.icon as badge_icon,
+    b.image_url as badge_image_url
+FROM public.chapter_reviews cr
+LEFT JOIN public.users u ON cr.user_id = u.id
+LEFT JOIN public.user_badges ub ON cr.user_id = ub.user_id AND ub.is_primary = true
+LEFT JOIN public.badges b ON ub.badge_id = b.id
+ORDER BY cr.created_at DESC;
+
+-- Grant access to the view
+GRANT SELECT ON chapter_reviews_with_badges TO authenticated;
+GRANT SELECT ON chapter_reviews_with_badges TO anon;
+
+COMMENT ON VIEW chapter_reviews_with_badges IS 'Chapter reviews with username and primary badge information';
+
+-- ============================================================================
+-- REVIEWS WITH BADGES FUNCTIONS
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- Function: Get book reviews with badges (paginated)
+-- Returns book reviews with username and badge info, with pagination support
+-- ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION get_book_reviews_with_badges(
+    p_limit INTEGER DEFAULT 50,
+    p_offset INTEGER DEFAULT 0
+)
+RETURNS TABLE (
+    id UUID,
+    user_id UUID,
+    book_title TEXT,
+    rating INTEGER,
+    review_text TEXT,
+    created_at TIMESTAMP WITH TIME ZONE,
+    username TEXT,
+    badge_id TEXT,
+    badge_name TEXT,
+    badge_icon TEXT,
+    badge_image_url TEXT
+) AS $
+BEGIN
+    RETURN QUERY
+    SELECT 
+        br.id,
+        br.user_id,
+        br.book_title,
+        br.rating,
+        br.review_text,
+        br.created_at,
+        u.username,
+        ub.badge_id,
+        b.name as badge_name,
+        b.icon as badge_icon,
+        b.image_url as badge_image_url
+    FROM public.book_reviews br
+    LEFT JOIN public.users u ON br.user_id = u.id
+    LEFT JOIN public.user_badges ub ON br.user_id = ub.user_id AND ub.is_primary = true
+    LEFT JOIN public.badges b ON ub.badge_id = b.id
+    ORDER BY br.created_at DESC
+    LIMIT p_limit
+    OFFSET p_offset;
+END;
+$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION get_book_reviews_with_badges(INTEGER, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_book_reviews_with_badges(INTEGER, INTEGER) TO anon;
+
+COMMENT ON FUNCTION get_book_reviews_with_badges(INTEGER, INTEGER) IS 'Get book reviews with username and badge info, with pagination';
+
+-- ----------------------------------------------------------------------------
+-- Function: Get chapter reviews with badges (paginated)
+-- Returns chapter reviews with username and badge info, with pagination support
+-- ----------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION get_chapter_reviews_with_badges(
+    p_limit INTEGER DEFAULT 50,
+    p_offset INTEGER DEFAULT 0
+)
+RETURNS TABLE (
+    id UUID,
+    user_id UUID,
+    book_title TEXT,
+    chapter_name TEXT,
+    rating INTEGER,
+    review_text TEXT,
+    created_at TIMESTAMP WITH TIME ZONE,
+    username TEXT,
+    badge_id TEXT,
+    badge_name TEXT,
+    badge_icon TEXT,
+    badge_image_url TEXT
+) AS $
+BEGIN
+    RETURN QUERY
+    SELECT 
+        cr.id,
+        cr.user_id,
+        cr.book_title,
+        cr.chapter_name,
+        cr.rating,
+        cr.review_text,
+        cr.created_at,
+        u.username,
+        ub.badge_id,
+        b.name as badge_name,
+        b.icon as badge_icon,
+        b.image_url as badge_image_url
+    FROM public.chapter_reviews cr
+    LEFT JOIN public.users u ON cr.user_id = u.id
+    LEFT JOIN public.user_badges ub ON cr.user_id = ub.user_id AND ub.is_primary = true
+    LEFT JOIN public.badges b ON ub.badge_id = b.id
+    ORDER BY cr.created_at DESC
+    LIMIT p_limit
+    OFFSET p_offset;
+END;
+$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission
+GRANT EXECUTE ON FUNCTION get_chapter_reviews_with_badges(INTEGER, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_chapter_reviews_with_badges(INTEGER, INTEGER) TO anon;
+
+COMMENT ON FUNCTION get_chapter_reviews_with_badges(INTEGER, INTEGER) IS 'Get chapter reviews with username and badge info, with pagination';
+
+-- ============================================================================
+-- END OF REVIEWS WITH BADGES VIEWS
 -- ============================================================================

@@ -20,6 +20,8 @@ object NavigationRoutes {
     const val badgeManagement = "badgeManagement"
     const val adminBadgeVerification = "adminBadgeVerification"
     const val leaderboard = "leaderboard"
+    const val popularBooks = "popularBooks"
+    const val allReviews = "allReviews"
     const val fontSettings = "fontSettings"
     const val generalSettings = "generalSettings"
     const val readerSettings = "readerSettings"

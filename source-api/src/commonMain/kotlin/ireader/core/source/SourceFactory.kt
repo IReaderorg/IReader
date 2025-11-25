@@ -310,9 +310,9 @@ abstract class SourceFactory(
         // Improved: Better number parsing with fallback
         val number = processedNumber.toFloatOrNull() ?: -1f
         
-        // Improved: Better URL building
+        // FIXED: Use buildAbsoluteUrl to properly construct URLs with baseUrl
         val finalLink = if (chapterFetcher.addBaseUrlToLink) {
-            getAbsoluteUrl(baseUrl + link)
+            buildAbsoluteUrl(baseUrl, link)
         } else {
             link
         }
@@ -430,8 +430,9 @@ abstract class SourceFactory(
             detailFetcher.coverAtt
         ).trim()
         val processedCover = detailFetcher.onCover(rawCover)
+        // FIXED: Use buildAbsoluteUrl to properly construct URLs with baseUrl
         val cover = if (detailFetcher.addBaseurlToCoverLink) {
-            getAbsoluteUrl(if (processedCover.startsWith("/")) baseUrl + processedCover else processedCover)
+            buildAbsoluteUrl(baseUrl, processedCover)
         } else {
             processedCover
         }

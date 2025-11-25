@@ -80,6 +80,37 @@ class JSPluginLoader(
     }
     
     /**
+     * Create metadata files for existing plugins that don't have them.
+     * This is useful for migrating plugins installed before the metadata system was added.
+     * The metadata will be extracted from the plugin code and language will be converted.
+     */
+    suspend fun createMissingMetadataFiles() {
+        val pluginFiles = pluginsDirectory.listFiles { file ->
+            file.extension == "js" && file.canRead()
+        } ?: return
+        
+        pluginFiles.forEach { file ->
+            val pluginId = file.nameWithoutExtension
+            val metadataFile = File(file.parentFile, "${pluginId}.meta.json")
+            
+            if (!metadataFile.exists()) {
+                try {
+                    Log.info("JSPluginLoader: Creating missing metadata file for $pluginId")
+                    
+                    // Load the plugin to extract metadata
+                    val catalog = loadPlugin(file)
+                    if (catalog != null) {
+                        // Metadata was already saved by loadPlugin
+                        Log.info("JSPluginLoader: Created metadata file for $pluginId with language: ${catalog.metadata.lang}")
+                    }
+                } catch (e: Exception) {
+                    Log.error("JSPluginLoader: Failed to create metadata for $pluginId", e)
+                }
+            }
+        }
+    }
+    
+    /**
      * Loads stub sources instantly for fast startup.
      * Returns lightweight placeholder sources based on previously loaded plugins.
      * @return List of stub catalogs
@@ -152,6 +183,20 @@ class JSPluginLoader(
                 return cached.catalog
             }
             
+            // Try to load saved metadata first (contains language from remote catalog)
+            val metadataFile = File(file.parentFile, "${pluginId}.meta.json")
+            val savedMetadata = if (metadataFile.exists()) {
+                try {
+                    val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                    json.decodeFromString<PluginMetadata>(metadataFile.readText())
+                } catch (e: Exception) {
+                    Log.warn("JSPluginLoader: Failed to load saved metadata for $pluginId: ${e.message}")
+                    null
+                }
+            } else {
+                null
+            }
+            
             // Read plugin code
             val jsCode = file.readText()
             
@@ -176,15 +221,34 @@ class JSPluginLoader(
             // Load via JS engine
             val plugin = engine.loadPlugin(jsCode, pluginId)
             
-            // Get metadata from plugin
-            val metadata = PluginMetadata(
-                id = plugin.getId(),
-                name = plugin.getName(),
-                site = plugin.getSite(),
-                version = plugin.getVersion(),
-                lang = plugin.getLang(),
-                icon = plugin.getIcon()
-            )
+            // Use saved metadata if available (contains correct language from remote catalog)
+            // Otherwise extract from plugin and convert language name to code
+            val metadata = if (savedMetadata != null) {
+                // Use saved metadata but update version from plugin in case it changed
+                savedMetadata.copy(version = plugin.getVersion())
+            } else {
+                // Extract from plugin code and convert language
+                val rawLang = plugin.getLang()
+                val langCode = convertLanguageNameToCode(rawLang)
+                val site = plugin.getSite()
+                
+                // Log the site value for debugging
+                Log.info("JSPluginLoader: Plugin $pluginId site value: '$site'")
+                
+                // Validate site URL - if it's not a valid URL, log a warning
+                if (site.isBlank() || (!site.startsWith("http://") && !site.startsWith("https://"))) {
+                    Log.warn("JSPluginLoader: Plugin $pluginId has invalid site URL: '$site'. This will cause URL construction issues.")
+                }
+                
+                PluginMetadata(
+                    id = plugin.getId(),
+                    name = plugin.getName(),
+                    site = site,
+                    version = plugin.getVersion(),
+                    lang = langCode,
+                    icon = plugin.getIcon()
+                )
+            }
             
             // Create dependencies for the source wrapper
             val httpClientsInterface = object : ireader.core.http.HttpClientsInterface {
@@ -212,6 +276,21 @@ class JSPluginLoader(
             
             // Save stub for future fast loading
             stubManager.savePluginStub(metadata, file.nameWithoutExtension)
+            
+            // Save metadata file if it doesn't exist (for plugins without saved metadata)
+            if (savedMetadata == null) {
+                try {
+                    val metadataFile = File(file.parentFile, "${pluginId}.meta.json")
+                    val json = kotlinx.serialization.json.Json { 
+                        prettyPrint = true
+                        ignoreUnknownKeys = true 
+                    }
+                    val metadataJson = json.encodeToString(PluginMetadata.serializer(), metadata)
+                    metadataFile.writeText(metadataJson)
+                } catch (e: Exception) {
+                    Log.warn("JSPluginLoader: Failed to save metadata file for $pluginId: ${e.message}")
+                }
+            }
             
             return catalog
             
@@ -363,5 +442,74 @@ class JSPluginLoader(
      */
     fun getStubManager(): JSPluginStubManager {
         return stubManager
+    }
+    
+    /**
+     * Converts LNReader language names to ISO 639-1 language codes.
+     * LNReader plugins use full language names (e.g., "English", "العربية", "日本語") 
+     * while IReader uses language codes (e.g., "en", "ar", "ja").
+     */
+    private fun convertLanguageNameToCode(languageName: String?): String {
+        if (languageName.isNullOrBlank()) return "en"
+        
+        // Trim and normalize the input
+        val normalized = languageName.trim()
+        
+        // If it's already a 2-letter code, return it lowercase
+        if (normalized.length == 2 && normalized.all { it.isLetter() || it.isDigit() }) {
+            return normalized.lowercase()
+        }
+        
+        // Map of language names to ISO 639-1 codes (case-insensitive)
+        return when (normalized.lowercase()) {
+            "english" -> "en"
+            "العربية", "arabic" -> "ar"
+            "中文", "chinese", "中文 (简体)", "中文 (繁體)" -> "zh"
+            "español", "spanish" -> "es"
+            "français", "french" -> "fr"
+            "bahasa indonesia", "indonesian" -> "id"
+            "日本語", "japanese" -> "ja"
+            "한국어", "korean" -> "ko"
+            "português", "portuguese" -> "pt"
+            "русский", "russian" -> "ru"
+            "ไทย", "thai" -> "th"
+            "türkçe", "turkish" -> "tr"
+            "tiếng việt", "vietnamese" -> "vi"
+            "deutsch", "german" -> "de"
+            "italiano", "italian" -> "it"
+            "polski", "polish" -> "pl"
+            "українська", "ukrainian" -> "uk"
+            "filipino", "tagalog" -> "tl"
+            "magyar", "hungarian" -> "hu"
+            "čeština", "czech" -> "cs"
+            "română", "romanian" -> "ro"
+            "nederlands", "dutch" -> "nl"
+            "svenska", "swedish" -> "sv"
+            "norsk", "norwegian" -> "no"
+            "dansk", "danish" -> "da"
+            "suomi", "finnish" -> "fi"
+            "ελληνικά", "greek" -> "el"
+            "עברית", "hebrew" -> "he"
+            "हिन्दी", "hindi" -> "hi"
+            "বাংলা", "bengali" -> "bn"
+            "မြန်မာဘာသာ", "burmese" -> "my"
+            "català", "catalan" -> "ca"
+            "galego", "galician" -> "gl"
+            "euskara", "basque" -> "eu"
+            "lietuvių", "lithuanian" -> "lt"
+            "latviešu", "latvian" -> "lv"
+            "eesti", "estonian" -> "et"
+            "slovenčina", "slovak" -> "sk"
+            "slovenščina", "slovene" -> "sl"
+            "hrvatski", "croatian" -> "hr"
+            "srpski", "serbian" -> "sr"
+            "български", "bulgarian" -> "bg"
+            "македонски", "macedonian" -> "mk"
+            else -> {
+                // If we can't map it, log a warning and default to English
+                Log.warn("JSPluginLoader: Unknown language name: '$normalized', defaulting to 'en'")
+                "en"
+            }
+        }
     }
 }

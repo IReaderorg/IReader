@@ -28,7 +28,7 @@ fun IBookImageComposable(
         headers: ((url: String) -> okhttp3.Headers?)? = null
 ) {
     IImageLoader(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier,
             contentScale = contentScale,
             model =  image.cover?.toUri(), // coil3 only supports Uri data type right now
             contentDescription = "an image",

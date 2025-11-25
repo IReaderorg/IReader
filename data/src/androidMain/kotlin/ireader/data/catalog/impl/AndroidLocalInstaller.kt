@@ -117,10 +117,26 @@ class AndroidLocalInstaller(
             
             // Download the JS plugin file
             val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
+            val metadataFile = File(jsPluginsDir, "${catalog.pkgName}.meta.json")
+            
             val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
             jsResponse.saveTo(jsFile)
+            
+            // Save metadata from remote catalog (including language)
+            // This ensures the language from the remote API is preserved
+            val metadata = """
+                {
+                  "id": "${catalog.pkgName}",
+                  "name": "${catalog.name.replace("\"", "\\\"")}",
+                  "lang": "${catalog.lang}",
+                  "version": "${catalog.versionName}",
+                  "site": "${catalog.description.replace("\"", "\\\"")}",
+                  "icon": "${catalog.iconUrl.replace("\"", "\\\"")}"
+                }
+            """.trimIndent()
+            metadataFile.writeText(metadata)
             
             // No need to download icon - Coil will handle it via iconUrl with caching
             
@@ -161,10 +177,15 @@ class AndroidLocalInstaller(
             }
             
             val jsFile = File(jsPluginsDir, "$pkgName.js")
+            val metadataFile = File(jsPluginsDir, "$pkgName.meta.json")
             
             if (jsFile.exists()) {
                 jsFile.delete()
-                Log.info("Deleted JS plugin file: ${jsFile.absolutePath}")
+            }
+            
+            // Also delete metadata file
+            if (metadataFile.exists()) {
+                metadataFile.delete()
             }
             
             installationChanges.notifyAppUninstall(pkgName)

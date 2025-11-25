@@ -369,7 +369,7 @@ fun ModernListItem(
                             model = imageRequest,
                             contentDescription = book.title,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit,
+                            contentScale = ContentScale.Crop,
                             loading = {
                                 ShimmerLoadingEffect()
                             },
@@ -857,7 +857,7 @@ fun BookCoverImage(
         model = imageRequest,
         contentDescription = book.title,
         modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Fit,
+        contentScale = ContentScale.Crop,
         loading = {
             ShimmerLoadingEffect()
         },

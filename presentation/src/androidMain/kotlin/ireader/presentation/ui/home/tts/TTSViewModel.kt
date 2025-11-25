@@ -80,10 +80,9 @@ class TTSViewModel(
                 val spaceUrl = androidUiPreferences.coquiSpaceUrl().get()
                 if (spaceUrl.isNotEmpty()) {
                     aiTTSManager.configureCoqui(spaceUrl)
-                    ireader.core.log.Log.info { "✅ Coqui TTS configured: $spaceUrl" }
                 }
             } catch (e: Exception) {
-                ireader.core.log.Log.error { "❌ Failed to configure Coqui TTS: ${e.message}" }
+                ireader.core.log.Log.error { "Failed to configure Coqui TTS: ${e.message}" }
             }
         }
     }
@@ -95,8 +94,6 @@ class TTSViewModel(
         if (useCoquiTTS) {
             configureCoquiTTS()
         }
-        
-        ireader.core.log.Log.info { "TTS Engine switched to: ${if (useCoquiTTS) "Coqui TTS" else "Native TTS"}" }
     }
     
     var isCoquiLoading by mutableStateOf(false)
@@ -111,8 +108,6 @@ class TTSViewModel(
                     isCoquiLoading = true
                 }
                 
-                ireader.core.log.Log.info { "🎙️ Starting Coqui TTS synthesis..." }
-                
                 val speed = androidUiPreferences.coquiSpeed().get()
                 
                 aiTTSManager.synthesizeAndPlay(
@@ -121,18 +116,17 @@ class TTSViewModel(
                     voiceId = "default",
                     speed = speed
                 ).onSuccess {
-                    ireader.core.log.Log.info { "✅ Coqui TTS playing" }
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                         isCoquiLoading = false
                     }
                 }.onFailure { error ->
-                    ireader.core.log.Log.error { "❌ Coqui TTS failed: ${error.message}" }
+                    ireader.core.log.Log.error { "Coqui TTS failed: ${error.message}" }
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                         isCoquiLoading = false
                     }
                 }
             } catch (e: Exception) {
-                ireader.core.log.Log.error { "❌ Coqui TTS error: ${e.message}" }
+                ireader.core.log.Log.error { "Coqui TTS error: ${e.message}" }
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                     isCoquiLoading = false
                 }
@@ -232,6 +226,8 @@ class TTSViewModel(
     private fun initializeFromParams() {
         val (sourceId, chapterId, bookId, readingParagraph) = param
         
+        ireader.core.log.Log.error { "TTS_INIT: Params - bookId=$bookId, chapterId=$chapterId, sourceId=$sourceId" }
+        
         readingParagraph?.let { paragraph ->
             val maxIndex = ttsState.ttsContent?.value?.lastIndex ?: 0
             // Fixed: Use <= instead of < to allow setting the last paragraph
@@ -245,8 +241,22 @@ class TTSViewModel(
             ttsCatalog = getLocalCatalog.get(sourceId)
             
             scope.launch {
-                ttsBook = getBookUseCases.findBookById(bookId)
-                getLocalChapter(chapterId)
+                // Load book FIRST before loading chapter
+                if (ttsBook == null || ttsBook?.id != bookId) {
+                    ttsBook = getBookUseCases.findBookById(bookId)
+                    ireader.core.log.Log.error { "TTS_INIT: Loaded book - id=${ttsBook?.id}, title=${ttsBook?.title}" }
+                } else {
+                    ireader.core.log.Log.error { "TTS_INIT: Book already loaded - id=${ttsBook?.id}, title=${ttsBook?.title}" }
+                }
+                
+                // Now load chapter (this will call runTTSService which needs ttsBook)
+                if (ttsChapter == null || ttsChapter?.id != chapterId) {
+                    getLocalChapter(chapterId)
+                    ireader.core.log.Log.error { "TTS_INIT: After getLocalChapter - book=${ttsBook?.id}, chapter=${ttsChapter?.id}" }
+                } else {
+                    ireader.core.log.Log.error { "TTS_INIT: Chapter already loaded - id=${ttsChapter?.id}, name=${ttsChapter?.name}" }
+                }
+                
                 subscribeChapters(bookId)
                 readPreferences()
                 
@@ -403,7 +413,9 @@ class TTSViewModel(
             
             if (novelId != -1L && ttsBook?.id != novelId) {
                 scope.launch {
-                    ttsBook = getBookUseCases.findBookById(novelId)
+                    getBookUseCases.findBookById(novelId)?.let { book ->
+                        ttsBook = book
+                    }
                 }
             }
             
@@ -413,7 +425,9 @@ class TTSViewModel(
             
             if (chapterId != -1L && chapterId != ttsChapter?.id) {
                 scope.launch {
-                    ttsChapter = getChapterUseCase.findChapterById(chapterId)
+                    getChapterUseCase.findChapterById(chapterId)?.let { chapter ->
+                        ttsChapter = chapter
+                    }
                 }
             }
         }
@@ -425,6 +439,7 @@ class TTSViewModel(
     }
 
     fun runTTSService(command: Int = -1) {
+        ireader.core.log.Log.error { "TTS_RUN: Starting service - bookId=${ttsBook?.id}, chapterId=${ttsChapter?.id}, command=$command" }
         serviceUseCases.startTTSServicesUseCase(
             chapterId = ttsChapter?.id,
             bookId = ttsBook?.id,
@@ -439,8 +454,10 @@ class TTSViewModel(
 
     private fun getLocalChapter(chapterId: Long) {
         scope.launch {
+            ireader.core.log.Log.error { "TTS_LOAD_CHAPTER: Loading chapter $chapterId, current book=${ttsBook?.id}" }
             getChapterUseCase.findChapterById(chapterId)?.let { chapter ->
                 ttsChapter = chapter
+                ireader.core.log.Log.error { "TTS_LOAD_CHAPTER: Chapter loaded - id=${chapter.id}, name=${chapter.name}, book still=${ttsBook?.id}" }
                 if (chapter.isEmpty()) {
                     ttsSource?.let { getRemoteChapter(chapter) }
                 }

@@ -113,7 +113,7 @@ actual val DomainModule = module {
                 androidContext()
         )
     }
-    factory <TTSStateImpl> { ireader.domain.services.tts_service.TTSStateImpl() }
+    single <TTSStateImpl> { ireader.domain.services.tts_service.TTSStateImpl() }
     factory  { ireader.domain.services.update_service.UpdateApi(get()) }
 
     factory  { ireader.domain.usecases.services.StartDownloadServicesUseCase(get()) }

@@ -10,7 +10,9 @@ class BrowsePreferences(private val preferenceStore: PreferenceStore) {
     }
 
     fun selectedLanguages(): Preference<Set<String>> {
-        return preferenceStore.getStringSet("browse_selected_languages", setOf("en"))
+        // Default to empty set which means "all languages"
+        // This way users see all sources by default, not just English
+        return preferenceStore.getStringSet("browse_selected_languages", emptySet())
     }
 
     fun searchTimeout(): Preference<Long> {

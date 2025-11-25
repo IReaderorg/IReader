@@ -486,7 +486,7 @@ class AndroidJSEngine(
                 wrapper.getName = function() { return plugin.name || "Unknown Plugin"; };
                 wrapper.getSite = function() { return plugin.site || ""; };
                 wrapper.getVersion = function() { return plugin.version || "1.0.0"; };
-                wrapper.getLang = function() { return plugin.lang || "en"; };
+                wrapper.getLang = function() { return plugin.lang || plugin.language || "en"; };
                 wrapper.getIcon = function() { return plugin.icon || ""; };
                 
                 wrapper.searchNovels = function(query, page) {

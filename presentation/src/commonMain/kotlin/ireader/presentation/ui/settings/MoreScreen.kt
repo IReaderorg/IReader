@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material.icons.outlined.VerifiedUser
@@ -71,6 +73,8 @@ fun MoreScreen(
     onBadgeManagement: () -> Unit = {},
     onAdminBadgeVerification: () -> Unit = {},
     onLeaderboard: () -> Unit = {},
+    onPopularBooks: () -> Unit = {},
+    onAllReviews: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
@@ -293,6 +297,24 @@ fun MoreScreen(
                 description = "Compete with other readers based on reading time",
                 icon = Icons.Filled.EmojiEvents,
                 onClick = onLeaderboard
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Popular Books",
+                description = "Discover what the community is reading",
+                icon = Icons.Filled.TrendingUp,
+                onClick = onPopularBooks
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Community Reviews",
+                description = "Read reviews from other readers",
+                icon = Icons.Filled.RateReview,
+                onClick = onAllReviews
             )
         }
         

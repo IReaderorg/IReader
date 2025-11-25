@@ -15,5 +15,14 @@ data class BookReview(
     val reviewText: String,
     val createdAt: Long,
     val updatedAt: Long,
-    val username: String? = null
+    val username: String? = null,
+    val userBadge: UserBadgeInfo? = null
+)
+
+@Serializable
+data class UserBadgeInfo(
+    val badgeId: String,
+    val badgeName: String,
+    val badgeIcon: String,
+    val badgeImageUrl: String? = null
 )

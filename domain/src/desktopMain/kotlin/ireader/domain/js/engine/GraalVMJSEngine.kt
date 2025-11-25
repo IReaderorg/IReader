@@ -557,7 +557,7 @@ class GraalVMJSEngine(
                     getName: () => plugin.name || "Unknown Plugin",
                     getSite: () => plugin.site || "",
                     getVersion: () => plugin.version || "1.0.0",
-                    getLang: () => plugin.lang || "en",
+                    getLang: () => plugin.lang || plugin.language || "en",
                     getIcon: () => plugin.icon || "",
                     
                     searchNovels: async (query, page) => {

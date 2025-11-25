@@ -55,10 +55,28 @@ class TTSStateImpl() : AndroidTTSState {
     override var startTime by mutableStateOf<kotlin.time.Instant?>(null)
     override var sleepMode by mutableStateOf(false)
     override var prevSpeechSpeed by mutableStateOf(0.8f)
-    override var ttsBook by mutableStateOf<Book?>(null)
+    
+    private var _ttsBook by mutableStateOf<Book?>(null)
+    override var ttsBook: Book?
+        get() = _ttsBook
+        set(value) {
+            val stackTrace = Thread.currentThread().stackTrace.take(10).joinToString("\n") { "  at $it" }
+            ireader.core.log.Log.error { "TTS_STATE: ttsBook changed from ${_ttsBook?.id} to ${value?.id} - ${value?.title}\nStack:\n$stackTrace" }
+            _ttsBook = value
+        }
+    
     override val ttsSource by derivedStateOf { ttsCatalog?.source }
     override var ttsCatalog by mutableStateOf<CatalogLocal?>(null)
-    override var ttsChapter by mutableStateOf<Chapter?>(null)
+    
+    private var _ttsChapter by mutableStateOf<Chapter?>(null)
+    override var ttsChapter: Chapter?
+        get() = _ttsChapter
+        set(value) {
+            val stackTrace = Thread.currentThread().stackTrace.take(10).joinToString("\n") { "  at $it" }
+            ireader.core.log.Log.error { "TTS_STATE: ttsChapter changed from ${_ttsChapter?.id} to ${value?.id} - ${value?.name}\nStack:\n$stackTrace" }
+            _ttsChapter = value
+        }
+    
     override var ttsChapters by mutableStateOf<List<Chapter>>(emptyList())
     override var ttsCurrentChapterIndex by mutableStateOf(-1)
     override var utteranceId by mutableStateOf("")
@@ -66,4 +84,8 @@ class TTSStateImpl() : AndroidTTSState {
     override var isLoading: State<Boolean> = derivedStateOf { meta?.getLong(TTSService.IS_LOADING) == 1L }
     override var uiChapters: State<List<Chapter>> = derivedStateOf { if (!isDrawerAsc) ttsChapters else ttsChapters.reversed() }
     override var isDrawerAsc by mutableStateOf(false)
+    
+    init {
+        ireader.core.log.Log.error { "TTS_STATE: New TTSStateImpl instance created - ${this.hashCode()}" }
+    }
 }

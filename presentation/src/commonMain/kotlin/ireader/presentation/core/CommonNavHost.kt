@@ -113,6 +113,14 @@ fun CommonNavHost(
             ireader.presentation.core.ui.LeaderboardScreenSpec().Content()
         }
         
+        composable(NavigationRoutes.popularBooks) {
+            ireader.presentation.core.ui.PopularBooksScreenSpec().Content()
+        }
+        
+        composable(NavigationRoutes.allReviews) {
+            ireader.presentation.core.ui.AllReviewsScreenSpec().Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }

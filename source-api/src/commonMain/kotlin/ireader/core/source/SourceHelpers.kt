@@ -108,13 +108,40 @@ object SourceHelpers {
      * Build absolute URL from base and relative path
      */
     fun buildAbsoluteUrl(baseUrl: String, path: String): String {
+        // If path is already absolute, return it as-is
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+            return path
+        }
+        
+        // If path starts with //, add https:
+        if (path.startsWith("//")) {
+            return "https:$path"
+        }
+        
+        // If baseUrl is empty or invalid, return path as-is
+        // This handles cases where plugins don't have a valid site property
+        if (baseUrl.isBlank() || (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://"))) {
+            // If path looks like it should be absolute but isn't, try to fix it
+            if (path.startsWith("/") && !path.startsWith("//")) {
+                // Can't construct absolute URL without a valid base
+                return path
+            }
+            return path
+        }
+        
         val normalizedBase = normalizeUrl(baseUrl)
         
-        return when {
-            path.startsWith("http://") || path.startsWith("https://") -> path
-            path.startsWith("//") -> "https:$path"
-            path.startsWith("/") -> "$normalizedBase$path"
-            else -> "$normalizedBase/$path"
+        // If path starts with /, append directly to base
+        if (path.startsWith("/")) {
+            return "$normalizedBase$path"
+        }
+        
+        // For relative paths, ensure proper joining
+        // Check if base already ends with / to avoid double slashes
+        return if (normalizedBase.endsWith("/")) {
+            "$normalizedBase$path"
+        } else {
+            "$normalizedBase/$path"
         }
     }
     

@@ -67,13 +67,29 @@ class AndroidTTSNotificationManager(
         this.isShowing = true
         
         val notification = buildNotification(book, chapter, state)
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        // Don't notify here - let the service handle foreground notification
+        // notificationManager.notify(NOTIFICATION_ID, notification)
         
         // Update MediaSession metadata
         updateMediaSession(book, chapter, state)
         
         Log.info { "TTS notification shown: ${book.title} - ${chapter.name}" }
     }
+    
+    /**
+     * Get the current notification for foreground service
+     */
+    fun getCurrentNotification(): Notification? {
+        if (!isShowing || currentBook == null || currentChapter == null || currentState == null) {
+            return null
+        }
+        return buildNotification(currentBook!!, currentChapter!!, currentState!!)
+    }
+    
+    /**
+     * Get notification ID for foreground service
+     */
+    fun getNotificationId(): Int = NOTIFICATION_ID
     
     override fun updateNotification(state: TTSNotificationState) {
         if (!isShowing || currentBook == null || currentChapter == null) {
@@ -84,6 +100,7 @@ class AndroidTTSNotificationManager(
         this.currentState = state
         
         val notification = buildNotification(currentBook!!, currentChapter!!, state)
+        // Update the notification
         notificationManager.notify(NOTIFICATION_ID, notification)
         
         // Update MediaSession state

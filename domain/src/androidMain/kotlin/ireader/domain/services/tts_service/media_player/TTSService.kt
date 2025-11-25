@@ -5,9 +5,6 @@ import android.content.*
 import android.media.*
 import android.os.Build
 import android.os.Bundle
-import android.os.ResultReceiver
-import android.speech.tts.TextToSpeech
-import android.speech.tts.UtteranceProgressListener
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -15,7 +12,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.MediaBrowserServiceCompat
-import androidx.media.session.MediaButtonReceiver
 import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
@@ -26,79 +22,73 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.services.tts_service.Player
-import ireader.domain.services.tts_service.TTSState
-import ireader.domain.services.tts_service.TTSStateImpl
-import ireader.domain.services.tts_service.isSame
+import ireader.domain.services.tts_service.*
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.preferences.TextReaderPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.R
 import kotlinx.coroutines.*
-import  kotlin.time.Clock
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
-class TTSService(
-) : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
+/**
+ * Clean TTS Service with Unified Player Architecture
+ * 
+ * Only ONE TTS engine runs at a time (Native OR Coqui)
+ * All legacy code removed and moved to appropriate classes
+ */
+class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
+    
+    // Dependencies
     private val bookRepo: BookRepository by inject()
-
-
     private val chapterRepo: ChapterRepository by inject()
-
-
     private val chapterUseCase: LocalGetChapterUseCase by inject()
-
-
     private val remoteUseCases: RemoteUseCases by inject()
-
-
     private val extensions: CatalogStore by inject()
-
     private val textReaderPrefUseCase: TextReaderPrefUseCase by inject()
-
     private val readerPreferences: ReaderPreferences by inject()
     private val appPrefs: AppPreferences by inject()
     private val localizeHelper: LocalizeHelper by inject()
-    private val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase by inject()
     
-    // Unified TTS Core - Production-ready TTS management
-    private lateinit var ttsCore: ireader.domain.usecases.tts.AndroidTTSCore
+    // Unified TTS Player - ONLY ONE engine at a time
+    private var unifiedPlayer: UnifiedTTSPlayer? = null
+    private var currentEngine: TTSEngine = TTSEngine.NATIVE
     
-    // Legacy support - maintained for backward compatibility
-    private val aiTTSPlayer: ireader.domain.services.tts_service.media_player.AITTSPlayer by inject()
-    private val aiTTSManager: ireader.domain.services.tts.AITTSManager by inject()
-    private var player: TextToSpeech? = null
-    
+    // Service components
     lateinit var ttsNotificationBuilder: TTSNotificationBuilder
     lateinit var state: TTSStateImpl
-    private val noisyReceiver = NoisyReceiver()
-    private var noisyReceiverHooked = false
-    private val focusLock = Any()
-    private var resumeOnFocus = true
-
     lateinit var mediaSession: MediaSessionCompat
     lateinit var stateBuilder: PlaybackStateCompat.Builder
-    private val metadata = MediaMetadataCompat.Builder()
-
+    
     private lateinit var mediaCallback: TTSSessionCallback
     private lateinit var notificationController: NotificationController
     private var controller: MediaControllerCompat? = null
-
-    private var serviceJob: Job? = null
+    
+    private val noisyReceiver = NoisyReceiver()
+    private var noisyReceiverHooked = false
+    private var resumeOnFocus = true
     private var isPlayerDispose = false
-    private var isHooked = false
     private var focusRequest: AudioFocusRequest? = null
+    
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-
+    private val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
+    
+    var isNotificationForeground = false
+    private var silence: MediaPlayer? = null
+    
+    enum class TTSEngine {
+        NATIVE,
+        COQUI
+    }
+    
     companion object {
         const val TTS_SERVICE_NAME = "TTS_SERVICE"
         const val TTS_Chapter_ID = "chapterId"
         const val COMMAND = "command"
         const val TTS_BOOK_ID = "bookId"
-
+        
         const val ACTION_STOP = "actionStop"
         const val ACTION_PAUSE = "actionPause"
         const val ACTION_PLAY_PAUSE = "actionPlayPause"
@@ -106,12 +96,10 @@ class TTSService(
         const val ACTION_NEXT = "actionNext"
         const val ACTION_PREVIOUS = "actionPrevious"
         const val UPDATE_PAGER = "update_pager"
-
         const val PAGE = "page"
-
         const val ACTION_UPDATE = "actionUpdate"
         const val ACTION_CANCEL = "actionCancel"
-
+        
         const val NOVEL_ID = "novel_id"
         const val SOURCE_ID = "source_id"
         const val FAVORITE = "favorite"
@@ -124,10 +112,452 @@ class TTSService(
         const val IS_LOADING = "is_loading"
         const val ERROR = "error"
     }
-
+    
+    // ========== Lifecycle ==========
+    
+    // Inject shared state instead of creating new instance
+    private val sharedState: TTSStateImpl by inject()
+    
+    override fun onCreate() {
+        super.onCreate()
+        state = sharedState
+        readPrefs()
+        
+        // Initialize media session
+        mediaSession = MediaSessionCompat(this, TTS_SERVICE_NAME)
+        sessionToken = mediaSession.sessionToken
+        
+        stateBuilder = PlaybackStateCompat.Builder()
+            .setActions(
+                PlaybackStateCompat.ACTION_PLAY or
+                PlaybackStateCompat.ACTION_STOP or
+                PlaybackStateCompat.ACTION_PAUSE or
+                PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                PlaybackStateCompat.ACTION_FAST_FORWARD or
+                PlaybackStateCompat.ACTION_REWIND
+            )
+        mediaSession.setPlaybackState(stateBuilder.build())
+        
+        // Set callbacks
+        mediaCallback = TTSSessionCallback()
+        mediaSession.setCallback(mediaCallback)
+        
+        // Set media button receiver
+        val mediaReceiverPendingIntent = PendingIntent.getService(
+            this,
+            0,
+            Intent(this, TTSService::class.java).apply { action = ACTION_PLAY_PAUSE },
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        )
+        mediaSession.setMediaButtonReceiver(mediaReceiverPendingIntent)
+        
+        // Activate media session
+        try {
+            mediaSession.isActive = true
+        } catch (e: NullPointerException) {
+            mediaSession.isActive = false
+            mediaSession.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+                MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS or
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+            )
+            mediaSession.isActive = true
+        }
+        
+        // Initialize notification builder
+        ttsNotificationBuilder = TTSNotificationBuilder(this, localizeHelper)
+        
+        controller = MediaControllerCompat(this, mediaSession.sessionToken)
+        
+        notificationController = NotificationController()
+        notificationController.start()
+        
+        silence = MediaPlayer.create(this, R.raw.silence).apply {
+            isLooping = true
+        }
+        silence?.start()
+    }
+    
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.let {
+            when (it.action) {
+                ACTION_UPDATE -> {
+                    val command = it.getIntExtra(COMMAND, -1)
+                    val bookId = it.getLongExtra(TTS_BOOK_ID, -1)
+                    val chapterId = it.getLongExtra(TTS_Chapter_ID, -1)
+                    
+                    Log.error { "TTS_SERVICE: Received UPDATE - bookId=$bookId, chapterId=$chapterId, command=$command" }
+                    Log.error { "TTS_SERVICE: Current state - book=${state.ttsBook?.id}, chapter=${state.ttsChapter?.id}" }
+                    
+                    // Load book and chapter if provided - WAIT for completion
+                    scope.launch {
+                        // Only load book if provided and different from current
+                        if (bookId != -1L && state.ttsBook?.id != bookId) {
+                            state.ttsBook = bookRepo.findBookById(bookId)
+                            Log.error { "TTS_SERVICE: Loaded book - id=${state.ttsBook?.id}, title=${state.ttsBook?.title}" }
+                        } else if (bookId == -1L) {
+                            Log.error { "TTS_SERVICE: WARNING - No bookId provided!" }
+                        }
+                        
+                        // Only load chapter if provided and different from current
+                        if (chapterId != -1L && state.ttsChapter?.id != chapterId) {
+                            val chapter = chapterRepo.findChapterById(chapterId)
+                            state.ttsChapter = chapter
+                            Log.error { "TTS_SERVICE: Loaded chapter - id=${chapter?.id}, name=${chapter?.name}" }
+                            
+                            // Load chapters list
+                            state.ttsBook?.let { book ->
+                                state.ttsChapters = chapterRepo.findChaptersByBookId(book.id)
+                                state.ttsCatalog = extensions.get(book.sourceId)
+                            }
+                        } else if (chapterId == -1L) {
+                            Log.error { "TTS_SERVICE: WARNING - No chapterId provided!" }
+                        }
+                        
+                        Log.error { "TTS_SERVICE: After loading - book=${state.ttsBook?.id}, chapter=${state.ttsChapter?.id}" }
+                        
+                        // Execute command AFTER data is loaded
+                        if (command != -1) {
+                            startService(command)
+                        }
+                    }
+                }
+                ACTION_PLAY -> startService(Player.PLAY)
+                ACTION_PAUSE -> startService(Player.PAUSE)
+                ACTION_PLAY_PAUSE -> startService(Player.PLAY_PAUSE)
+                ACTION_STOP, ACTION_CANCEL -> scope.launch { handleCancel() }
+                ACTION_NEXT -> {
+                    val chapter = state.ttsChapter
+                    val chapters = state.ttsChapters
+                    val source = state.ttsCatalog
+                    if (chapter != null && source != null) {
+                        scope.launch { handleSkipNext(chapter, chapters, source) }
+                    }
+                }
+                ACTION_PREVIOUS -> {
+                    val chapter = state.ttsChapter
+                    val chapters = state.ttsChapters
+                    val source = state.ttsCatalog
+                    if (chapter != null && source != null) {
+                        scope.launch { handleSkipPrevious(chapter, chapters, source) }
+                    }
+                }
+            }
+        }
+        
+        return START_STICKY
+    }
+    
+    override fun onDestroy() {
+        // Cancel notification when service is destroyed
+        NotificationManagerCompat.from(this).cancel(NotificationsIds.ID_TTS)
+        
+        // Cleanup unified player
+        unifiedPlayer?.cleanup()
+        unifiedPlayer = null
+        
+        // Cleanup service components
+        serviceScope.cancel()
+        scope.cancel()
+        notificationController.stop()
+        silence?.release()
+        silence = null
+        
+        if (noisyReceiverHooked) {
+            runCatching { unregisterReceiver(noisyReceiver) }
+            noisyReceiverHooked = false
+        }
+        
+        unhookNotification()
+        
+        mediaSession.isActive = false
+        mediaSession.release()
+        
+        super.onDestroy()
+    }
+    
+    // ========== Unified TTS Player Management ==========
+    
+    /**
+     * Initialize the unified TTS player based on user preference
+     * Only ONE engine is active at a time
+     */
+    private fun initializeUnifiedPlayer() {
+        val useCoquiTTS = appPrefs.useCoquiTTS().get()
+        val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
+        
+        val desiredEngine = if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
+            TTSEngine.COQUI
+        } else {
+            TTSEngine.NATIVE
+        }
+        
+        // If engine changed, cleanup old one and create new one
+        if (currentEngine != desiredEngine || unifiedPlayer == null) {
+            unifiedPlayer?.cleanup()
+            unifiedPlayer = null
+            
+            unifiedPlayer = when (desiredEngine) {
+                TTSEngine.COQUI -> {
+                    CoquiTTSPlayer(
+                        context = this,
+                        spaceUrl = coquiSpaceUrl,
+                        apiKey = appPrefs.coquiApiKey().get().takeIf { it.isNotEmpty() }
+                    )
+                }
+                TTSEngine.NATIVE -> {
+                    NativeTTSPlayer(this)
+                }
+            }
+            
+            currentEngine = desiredEngine
+            
+            // Set callback for TTS events
+            unifiedPlayer?.setCallback(object : TTSCallback {
+                override fun onStart(utteranceId: String) {
+                    state.isPlaying = true
+                    state.utteranceId = utteranceId
+                    scope.launch { updateNotification() }
+                }
+                
+                override fun onDone(utteranceId: String) {
+                    handleParagraphComplete()
+                }
+                
+                override fun onError(utteranceId: String, error: String) {
+                    Log.error { "TTS error: $error" }
+                    handleParagraphComplete()
+                }
+            })
+            
+            // Apply current settings
+            unifiedPlayer?.setSpeed(readerPreferences.speechRate().get())
+            unifiedPlayer?.setPitch(readerPreferences.speechPitch().get())
+        }
+    }
+    
+    /**
+     * Read text using unified player
+     */
+    fun readText(context: Context, mediaSessionCompat: MediaSessionCompat) {
+        setBundle()
+        
+        val chapter = state.ttsChapter
+        val content = getCurrentContent()
+        val book = state.ttsBook
+        
+        Log.error { "TTS_READ: Attempting to read - book=${book?.id}/${book?.title}, chapter=${chapter?.id}/${chapter?.name}, content size=${content?.size}" }
+        
+        if (chapter == null || content == null || book == null) {
+            Log.error { "TTS_READ: ERROR - Missing data! book=${book?.title}, chapter=${chapter?.name}, content=${content?.size}" }
+            return
+        }
+        
+        if (state.currentReadingParagraph >= content.size) {
+            Log.error { "TTS_READ: ERROR - Paragraph index out of bounds: ${state.currentReadingParagraph} >= ${content.size}" }
+            return
+        }
+        
+        runCatching {
+            scope.launch { updateNotification() }
+            
+            // Initialize unified player if needed
+            initializeUnifiedPlayer()
+            
+            // Speak current paragraph
+            val text = content[state.currentReadingParagraph]
+            val utteranceId = state.currentReadingParagraph.toString()
+            
+            // For Native TTS, retry a few times if not ready yet
+            if (currentEngine == TTSEngine.NATIVE && !unifiedPlayer!!.isReady()) {
+                scope.launch {
+                    repeat(30) { attempt ->
+                        delay(100)
+                        if (unifiedPlayer?.isReady() == true) {
+                            unifiedPlayer?.speak(text, utteranceId)
+                            return@launch
+                        }
+                    }
+                    Log.error { "TTS: Native TTS failed to initialize" }
+                }
+            } else {
+                unifiedPlayer?.speak(text, utteranceId)
+            }
+            
+        }.onFailure { e ->
+            Log.error { "TTS: Error reading text - ${e.message}" }
+        }
+    }
+    
+    /**
+     * Handle paragraph completion and auto-advance
+     */
+    private fun handleParagraphComplete() {
+        checkSleepTime()
+        
+        val content = getCurrentContent() ?: return
+        val isFinished = state.currentReadingParagraph >= content.lastIndex
+        
+        if (!isFinished && state.currentReadingParagraph < content.size) {
+            state.currentReadingParagraph += 1
+            readText(this, mediaSession)
+            return
+        }
+        
+        if (isFinished && controller?.playbackState?.isPlaying == true) {
+            handleChapterFinished()
+        }
+    }
+    
+    /**
+     * Handle chapter completion and auto-next chapter
+     */
+    private fun handleChapterFinished() {
+        state.isPlaying = false
+        state.currentReadingParagraph = 0
+        unifiedPlayer?.stop()
+        
+        if (state.autoNextChapter) {
+            scope.launch {
+                val chapter = state.ttsChapter ?: return@launch
+                val chapters = state.ttsChapters
+                val source = state.ttsCatalog ?: return@launch
+                val index = getChapterIndex(chapter, chapters)
+                
+                if (index != chapters.lastIndex) {
+                    val nextChapterId = chapters[index + 1].id
+                    getRemoteChapter(nextChapterId, source, state) {
+                        state.currentReadingParagraph = 0
+                        updateNotification()
+                        readText(this@TTSService, mediaSession)
+                    }
+                }
+            }
+        }
+    }
+    
+    // ========== Playback Controls ==========
+    
+    private suspend fun handlePlay() {
+        setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+        hookNotification()
+        state.isPlaying = true
+        readText(this@TTSService, mediaSession)
+    }
+    
+    private suspend fun handlePause() {
+        setPlaybackState(PlaybackStateCompat.STATE_PAUSED)
+        state.isPlaying = false
+        unifiedPlayer?.pause()
+        updateNotification()
+    }
+    
+    private suspend fun handlePlayPause() {
+        if (state.isPlaying) {
+            handlePause()
+        } else {
+            handlePlay()
+        }
+    }
+    
+    private suspend fun handleTogglePlayPause() {
+        if (state.isPlaying) {
+            handlePause()
+        } else {
+            state.isPlaying = true
+            readText(this@TTSService, mediaSession)
+        }
+    }
+    
+    private suspend fun handleCancel() {
+        // Don't cancel notification here - let it persist
+        // Notification will be removed when service is destroyed
+        
+        unifiedPlayer?.stop()
+        state.utteranceId = ""
+        state.isPlaying = false
+        
+        abandonAudioFocus()
+        
+        // Keep notification visible but update it to show paused state
+        updateNotification()
+        
+        // Stop foreground but keep notification
+        if (isNotificationForeground) {
+            stopForeground(false) // false = keep notification
+            isNotificationForeground = false
+        }
+        
+        resumeOnFocus = false
+        notificationController.stop()
+        isPlayerDispose = true
+        setPlaybackState(PlaybackStateCompat.STATE_STOPPED)
+    }
+    
+    private suspend fun handleSkipNext(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
+        unifiedPlayer?.stop()
+        state.isPlaying = false
+        
+        val index = getChapterIndex(chapter, chapters)
+        if (index != chapters.lastIndex) {
+            val nextChapterId = chapters[index + 1].id
+            getRemoteChapter(nextChapterId, source, state) {
+                if (state.isPlaying) {
+                    readText(this@TTSService, mediaSession)
+                }
+            }
+        }
+    }
+    
+    private suspend fun handleSkipPrevious(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
+        unifiedPlayer?.stop()
+        state.isPlaying = false
+        
+        val index = getChapterIndex(chapter, chapters)
+        if (index != 0) {
+            val prevChapterId = chapters[index - 1].id
+            getRemoteChapter(prevChapterId, source, state) {
+                updateNotification()
+                if (state.isPlaying) {
+                    readText(this@TTSService, mediaSession)
+                }
+            }
+        }
+    }
+    
+    private suspend fun handleSkipNextParagraph() {
+        val content = getCurrentContent() ?: return
+        if (state.currentReadingParagraph < content.lastIndex) {
+            unifiedPlayer?.stop()
+            state.currentReadingParagraph += 1
+            if (state.isPlaying) {
+                readText(this@TTSService, mediaSession)
+                updateNotification()
+            }
+        }
+    }
+    
+    private suspend fun handleSkipPreviousParagraph() {
+        if (state.currentReadingParagraph > 0) {
+            unifiedPlayer?.stop()
+            state.currentReadingParagraph -= 1
+            if (state.isPlaying) {
+                readText(this@TTSService, mediaSession)
+                updateNotification()
+            }
+        }
+    }
+    
+    // ========== Helper Methods ==========
+    
     private fun readPrefs() {
         scope.launch {
-            // Load initial preferences
             with(state) {
                 autoNextChapter = readerPreferences.readerAutoNext().get()
                 currentLanguage = readerPreferences.speechLanguage().get()
@@ -138,130 +568,45 @@ class TTSService(
                 sleepMode = readerPreferences.sleepMode().get()
             }
             
-            // Observe preference changes
             observePreferenceChanges()
         }
     }
-
+    
     private fun CoroutineScope.observePreferenceChanges() {
         launch { readerPreferences.readerAutoNext().changes().collect { state.autoNextChapter = it } }
         launch { readerPreferences.speechLanguage().changes().collect { state.currentLanguage = it } }
         launch { appPrefs.speechVoice().changes().collect { state.currentVoice = it } }
         launch { readerPreferences.speechPitch().changes().collect { state.pitch = it } }
-        launch { readerPreferences.speechRate().changes().collect { state.speechSpeed = it } }
+        launch { 
+            readerPreferences.speechRate().changes().collect { 
+                state.speechSpeed = it
+                unifiedPlayer?.setSpeed(it)
+            } 
+        }
         launch { readerPreferences.sleepTime().changes().collect { state.sleepTime = it } }
         launch { readerPreferences.sleepMode().changes().collect { state.sleepMode = it } }
     }
-
-    var silence: MediaPlayer? = null
-    override fun onCreate() {
-        super.onCreate()
-        state = TTSStateImpl()
-
-        val pendingIntentFlags: Int =
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON)
-        val mbrIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, pendingIntentFlags)
-        val mbrComponent = ComponentName(this, MediaButtonReceiver::class.java)
-
-        /**
-         * Initializing the MediaSession
-         */
-        mediaSession = MediaSessionCompat(this, TTS_SERVICE_NAME, mbrComponent, mbrIntent)
-        /**
-         * setting a session token
-         */
-        mediaSession.apply {
-            setSessionToken(sessionToken)
+    
+    @OptIn(ExperimentalTime::class)
+    fun checkSleepTime() {
+        val lastCheckPref = state.startTime
+        val currentSleepTime = state.sleepTime.minutes
+        val now = kotlin.time.Clock.System.now()
+        if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode) {
+            startService(Player.CANCEL)
         }
-        /**
-         * setting the possible actions for mediabuttons
-         */
-        stateBuilder = PlaybackStateCompat.Builder()
-            .setActions(
-                PlaybackStateCompat.ACTION_PLAY or
-                    PlaybackStateCompat.ACTION_STOP or
-                    PlaybackStateCompat.ACTION_PAUSE or
-                    PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
-                    PlaybackStateCompat.ACTION_FAST_FORWARD or
-                    PlaybackStateCompat.ACTION_REWIND
-            )
-        mediaSession.setPlaybackState(stateBuilder.build())
-        /**
-         * setting a callbacks
-         */
-        mediaCallback = TTSSessionCallback()
-        mediaSession.setCallback(mediaCallback)
-        /**
-         * setting MediaButtonReceiver
-         */
-        val mediaReceiverPendingIntent =
-            PendingIntent.getService(
-                this@TTSService,
-                0,
-                Intent(this@TTSService, TTSService::class.java).apply {
-                    action = ACTION_PLAY_PAUSE
-                },
-                pendingIntentFlags
-            )
-        mediaSession.setMediaButtonReceiver(mediaReceiverPendingIntent)
-        /**
-         *  Media session need to be active before using media buttons
-         *  https://stackoverflow.com/questions/38247050/mediabuttonreceiver-not-working-with-mediabrowserservicecompat
-         */
-        try {
-            mediaSession.isActive = true
-        } catch (e: NullPointerException) {
-            mediaSession.isActive = false
-            mediaSession.setFlags(
-                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
-                    MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS or
-                    MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-            )
-            mediaSession.isActive = true
-        }
-        mediaButtonIntent.setClass(this, MediaButtonReceiver::class.java)
-
-        // Initialize old notification builder (for backward compatibility)
-        ttsNotificationBuilder = TTSNotificationBuilder(this, localizeHelper)
-        
-        // Initialize unified TTS Core
-        ttsCore = ireader.domain.usecases.tts.AndroidTTSCore(
-            context = this,
-            mediaSession = mediaSession,
-            appPreferences = appPrefs,
-            readerPreferences = readerPreferences
-        )
-        
-        // Initialize TTS Core asynchronously
-        serviceScope.launch {
-            ttsCore.initialize().onSuccess {
-                Log.info { "TTS Core initialized: ${ttsCore.getCurrentProviderName()}" }
-            }.onFailure { error ->
-                Log.error { "Failed to initialize TTS Core: ${error.message}" }
-            }
-        }
-        
-        controller = MediaControllerCompat(this, mediaSession.sessionToken)
-
-        /**
-         * Initializing the player
-         */
-        initPlayer()
-
-        notificationController = NotificationController()
-        notificationController.start()
-        silence = MediaPlayer.create(this, R.raw.silence).apply {
-            isLooping = true
-        }
-
-        silence?.start()
     }
-
-    var isNotificationForeground = false
-
+    
+    private fun getCurrentContent(): List<String>? {
+        return state.ttsContent?.value
+    }
+    
+    private fun getChapterIndex(chapter: Chapter, chapters: List<Chapter>): Int {
+        return chapters.indexOfFirst { it.id == chapter.id }
+    }
+    
+    // ========== Notification Management ==========
+    
     private fun hookNotification() {
         if (!isNotificationForeground) {
             runCatching {
@@ -269,11 +614,9 @@ class TTSService(
                     startForegroundService()
                     isNotificationForeground = true
                 }
+            }.onFailure { e ->
+                Log.error { "Failed to start foreground service: ${e.message}" }
             }
-        }
-        
-        if (isPlayerDispose) {
-            initPlayer()
         }
         
         if (!noisyReceiverHooked) {
@@ -283,7 +626,7 @@ class TTSService(
         
         initAudioManager()
     }
-
+    
     private suspend fun startForegroundService() {
         val notification = ttsNotificationBuilder.buildNotification(mediaSession.sessionToken)
         
@@ -297,787 +640,192 @@ class TTSService(
             startForeground(NotificationsIds.ID_TTS, notification)
         }
     }
-
+    
+    private fun unhookNotification() {
+        stopForeground(true)
+        runCatching { unregisterReceiver(noisyReceiver) }
+        noisyReceiverHooked = false
+    }
+    
+    private suspend fun updateNotification() {
+        setBundle()
+        
+        // Ensure metadata is set before building notification
+        if (state.meta == null) {
+            val meta = MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, state.ttsChapter?.name ?: "")
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, state.ttsBook?.title ?: "")
+                .putLong(IS_LOADING, if (state.isLoading.value) 1L else 0L)
+                .build()
+            state.meta = meta
+            mediaSession.setMetadata(meta)
+        }
+        
+        val notification = ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
+        NotificationManagerCompat.from(this).notify(NotificationsIds.ID_TTS, notification)
+    }
+    
+    fun setBundle(
+        book: Book? = state.ttsBook,
+        chapter: Chapter? = state.ttsChapter
+    ) {
+        val bundle = Bundle()
+        bundle.putLong(NOVEL_ID, book?.id ?: -1)
+        bundle.putLong(SOURCE_ID, book?.sourceId ?: -1)
+        bundle.putBoolean(FAVORITE, book?.favorite ?: false)
+        bundle.putString(NOVEL_TITLE, book?.title ?: "")
+        bundle.putString(NOVEL_COVER, book?.cover ?: "")
+        bundle.putInt(PROGRESS, state.currentReadingParagraph)
+        bundle.putInt(LAST_PARAGRAPH, getCurrentContent()?.size ?: 0)
+        bundle.putString(CHAPTER_TITLE, chapter?.name ?: "")
+        bundle.putLong(CHAPTER_ID, chapter?.id ?: -1)
+        bundle.putBoolean(IS_LOADING, state.isLoading.value)
+        bundle.putString(ERROR, "")
+        
+        controller?.sendCommand(UPDATE_PAGER, bundle, null)
+        
+        // Also update metadata for notification
+        val meta = MediaMetadataCompat.Builder()
+            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, chapter?.name ?: "")
+            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, book?.title ?: "")
+            .putString(NOVEL_COVER, book?.cover ?: "")
+            .putString(NOVEL_TITLE, book?.title ?: "")
+            .putLong(NOVEL_ID, book?.id ?: -1)
+            .putLong(SOURCE_ID, book?.sourceId ?: -1)
+            .putLong(CHAPTER_ID, chapter?.id ?: -1)
+            .putString(CHAPTER_TITLE, chapter?.name ?: "")
+            .putLong(PROGRESS, state.currentReadingParagraph.toLong())
+            .putLong(LAST_PARAGRAPH, getCurrentContent()?.size?.toLong() ?: 0L)
+            .putLong(IS_LOADING, if (state.isLoading.value) 1L else 0L)
+            .putLong(FAVORITE, if (book?.favorite == true) 1L else 0L)
+            .build()
+        state.meta = meta
+        mediaSession.setMetadata(meta)
+    }
+    
+    // ========== Audio Focus ==========
+    
     private fun initAudioManager() {
-        val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
-                setOnAudioFocusChangeListener(this@TTSService)
-                setAudioAttributes(
-                    AudioAttributes.Builder().run {
-                        setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        setUsage(AudioAttributes.USAGE_MEDIA)
-                        build()
-                    }
-                )
-                build()
-            }
-            focusRequest?.let { focusRequest ->
-                am.requestAudioFocus(focusRequest)
-            }
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build()
+            
+            focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(audioAttributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(this)
+                .build()
+            
+            audioManager.requestAudioFocus(focusRequest!!)
         } else {
             @Suppress("DEPRECATION")
-            am.requestAudioFocus(
-                this@TTSService,
+            audioManager.requestAudioFocus(
+                this,
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN
             )
         }
     }
-
-    private fun unhookNotification() {
-        stopForeground(true)
-        runCatching { unregisterReceiver(noisyReceiver) }
-        isNotificationForeground = false
-        noisyReceiverHooked = false
-    }
-
-    private fun initPlayer() {
-        player = TextToSpeech(this) { status ->
-            when (status) {
-                TextToSpeech.ERROR -> {
-                    Log.error { "Text-to-Speech Not Available" }
-                    setBundle(isLoading = false)
-                }
-                TextToSpeech.SUCCESS -> {
-                    runCatching {
-                        state.voices = player?.voices?.toList() ?: emptyList()
-                        state.languages = player?.availableLanguages?.toList() ?: emptyList()
-                    }
-                    readPrefs()
-                }
-            }
-        }
-        isPlayerDispose = false
-    }
-
-    override fun onGetRoot(
-        clientPackageName: String,
-        clientUid: Int,
-        rootHints: Bundle?,
-    ): BrowserRoot {
-        return BrowserRoot("NONE", null)
-    }
-
-    override fun onLoadChildren(
-        parentId: String,
-        result: Result<MutableList<MediaBrowserCompat.MediaItem>>,
-    ) {
-
-        result.sendResult(mutableListOf())
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Start foreground immediately to comply with Android 12+ requirements
-        if (!isNotificationForeground) {
-            serviceScope.launch {
-                startForegroundService()
-                isNotificationForeground = true
-            }
-        }
-
-        when (intent?.action) {
-            Intent.ACTION_MEDIA_BUTTON -> MediaButtonReceiver.handleIntent(mediaSession, intent)
-            ACTION_UPDATE -> {
-                val chapterId = intent.getLongExtra(TTS_Chapter_ID, -1)
-                val bookId = intent.getLongExtra(TTS_BOOK_ID, -1)
-                val command = intent.getIntExtra(COMMAND, -1)
-                serviceScope.launch {
-                    if (chapterId != -1L && bookId != -1L) {
-                        val book = bookRepo.findBookById(bookId)
-                        val chapter = chapterRepo.findChapterById(chapterId)
-                        val chapters = chapterRepo.findChaptersByBookId(bookId)
-                        val source = book?.sourceId?.let { extensions.get(it) }
-                        if (chapter != null && source != null) {
-                            state.ttsBook = book
-                            state.ttsChapter = chapter
-                            state.ttsChapters = chapters
-                            state.ttsCatalog = source
-                            state.currentReadingParagraph = 0
-                            
-                            // Load translated content for TTS if enabled
-                            loadTranslatedContentForTTS(chapterId)
-                            
-                            setBundle(book, chapter)
-                            startService(command)
-                        }
-                    }
-                }
-            }
-            ACTION_CANCEL -> {
-                startService(Player.CANCEL)
-            }
-            null -> {}
-            else -> Log.error { "Unknown Intent $intent" }
-        }
-        return START_NOT_STICKY
-    }
-
-    override fun onDestroy() {
-        // Shutdown unified TTS Core
-        ttsCore.shutdown()
-        
-        // Cleanup old players
-        player?.shutdown()
-        
-        notificationController.stop()
-        unhookNotification()
-        
-        mediaSession.isActive = false
-        mediaSession.release()
-        isPlayerDispose = true
-
-        super.onDestroy()
-    }
-
-    private fun setBundle(
-        book: Book? = state.ttsBook,
-        chapter: Chapter? = state.ttsChapter,
-        isLoading: Boolean = false,
-        error: Boolean = false
-    ) {
-        val data = metadata.apply {
-            val lastTrackNumber = state.ttsContent?.value?.lastIndex?.toLong()
-            
-            book?.let {
-                putText(NOVEL_TITLE, it.title)
-                putLong(NOVEL_ID, it.id)
-                putLong(FAVORITE, if (it.favorite) 1 else 0)
-                putLong(SOURCE_ID, it.sourceId)
-                putText(NOVEL_COVER, it.cover)
-                putText(MediaMetadata.METADATA_KEY_AUTHOR, it.author)
-            }
-            
-            chapter?.let {
-                putText(CHAPTER_TITLE, it.name)
-                putLong(CHAPTER_ID, it.id)
-                putText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, it.name)
-            }
-            
-            putLong(IS_LOADING, if (isLoading) 1L else 0L)
-            putLong(ERROR, if (error) 1L else 0L)
-            putLong(PROGRESS, state.currentReadingParagraph.toLong())
-            putLong(LAST_PARAGRAPH, lastTrackNumber ?: 1L)
-        }.build()
-        
-        mediaSession.setMetadata(data)
-    }
-
-    private inner class TTSSessionCallback : MediaSessionCompat.Callback() {
-
-        @OptIn(ExperimentalTime::class)
-        override fun onPlay() {
-            if (isPlayerDispose) initPlayer()
-            state.startTime = Clock.System.now()
-            startService(Player.PLAY)
-        }
-
-        override fun onPause() {
-            player?.stop()
-            startService(Player.PAUSE)
-        }
-
-        override fun onStop() {
-            player?.stop()
-            startService(Player.PAUSE)
-        }
-
-        override fun onRewind() = startService(Player.PREV_PAR)
-
-        override fun onFastForward() = startService(Player.NEXT_PAR)
-
-        override fun onSkipToNext() = startService(Player.SKIP_NEXT)
-
-        override fun onSkipToPrevious() = startService(Player.SKIP_PREV)
-
-        override fun onSeekTo(pos: Long) {
-            state.currentReadingParagraph = pos.toInt()
-            setBundle()
-            if (state.isPlaying) {
-                startService(Player.PLAY)
-            }
-        }
-    }
-
-    private inner class NotificationController : MediaControllerCompat.Callback() {
-
-        private val controller = MediaControllerCompat(this@TTSService, mediaSession.sessionToken)
-
-        fun start() {
-            controller.registerCallback(this)
-        }
-
-        fun stop() {
-            controller.unregisterCallback(this)
-        }
-
-        @android.annotation.SuppressLint("MissingPermission")
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            if (state != null && mediaSession.controller.metadata != null) {
-                scope.launch {
-                    // Update using new notification manager
-                    updateNotificationState()
-                    
-                    // Keep old notification for backward compatibility
-                    NotificationManagerCompat.from(applicationContext).notify(
-                        NotificationsIds.ID_TTS,
-                        ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
-                    )
-                }
-            }
-        }
-    }
-
-    private fun setPlaybackState(state: Int) {
-        mediaSession.setPlaybackState(
-            stateBuilder.setState(
-                state,
-                this.state.currentReadingParagraph.toLong() * 1000L,
-                0.0f
-            ).build()
-        )
-    }
-
-    @android.annotation.SuppressLint("MissingPermission")
-    private suspend fun updateNotification() {
-        // Update using new notification manager
-        updateNotificationState()
-        
-        // Keep old notification for backward compatibility
-        val notification = ttsNotificationBuilder.buildTTSNotification(mediaSession).build()
-        NotificationManagerCompat.from(this).notify(NotificationsIds.ID_TTS, notification)
-    }
     
-    /**
-     * Update notification using TTS Core (handled automatically)
-     */
-    private fun updateNotificationState() {
-        // Notification updates are now handled automatically by AndroidTTSCore
-        // This method kept for backward compatibility
-    }
-
-    fun startService(command: Int) {
-        if (isPlayerDispose) initPlayer()
-        hookNotification()
-        
-        serviceJob = scope.launch {
-            runCatching {
-                executeCommand(command)
-            }.onFailure { e ->
-                Log.error { "Service error: ${e.message}" }
-                setBundle()
-                updateNotification()
-            }
-        }
-    }
-
-    private suspend fun executeCommand(command: Int) {
-        val chapter = state.ttsChapter ?: return
-        val source = state.ttsCatalog ?: return
-        val chapters = state.ttsChapters
-        val book = state.ttsBook ?: return
-        
-        setBundle(book, chapter)
-        hookNotification()
-        
-        when (command) {
-            Player.CANCEL -> handleCancel()
-            Player.SKIP_PREV -> handleSkipPrevious(chapter, chapters, source)
-            Player.PREV_PAR -> handlePreviousParagraph()
-            Player.SKIP_NEXT -> handleSkipNext(chapter, chapters, source)
-            Player.NEXT_PAR -> handleNextParagraph()
-            Player.PLAY -> handlePlay()
-            Player.PAUSE -> handlePause()
-            Player.PLAY_PAUSE -> handlePlayPause()
-            else -> handleTogglePlayPause()
-        }
-    }
-
-    private suspend fun handleCancel() {
-        NotificationManagerCompat.from(this).cancel(NotificationsIds.ID_TTS)
-        
-        // Use unified TTS Core
-        ttsCore.stop()
-        state.utteranceId = ""
-        state.isPlaying = false
-        
-        abandonAudioFocus()
-        unhookNotification()
-        
-        if (isNotificationForeground) {
-            stopForeground(true)
-            isNotificationForeground = false
-        }
-        
-        resumeOnFocus = false
-        notificationController.stop()
-        isPlayerDispose = true
-        setPlaybackState(PlaybackStateCompat.STATE_NONE)
-        stopSelf()
-    }
-
     private fun abandonAudioFocus() {
-        val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            focusRequest?.let { am.abandonAudioFocusRequest(it) }
+            focusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
         } else {
             @Suppress("DEPRECATION")
-            am.abandonAudioFocus(this)
+            audioManager.abandonAudioFocus(this)
         }
     }
-
-    private suspend fun handleSkipPrevious(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
-        // Use unified TTS Core
-        ttsCore.stop()
-        state.isPlaying = false
-        
-        updateNotification()
-        
-        val index = getChapterIndex(chapter, chapters)
-        if (index > 0) {
-            val id = chapters[index - 1].id
-            getRemoteChapter(id, source, state) {
-                if (state.isPlaying) {
-                    readText(this@TTSService, mediaSession)
+    
+    override fun onAudioFocusChange(focusChange: Int) {
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                if (resumeOnFocus && !state.isPlaying) {
+                    scope.launch { handlePlay() }
                 }
             }
-        }
-        
-        state.currentReadingParagraph = 0
-        updateNotification()
-    }
-
-    private suspend fun handlePreviousParagraph() {
-        val content = getCurrentContent()
-        content?.let { paragraphs ->
-            if (state.currentReadingParagraph > 0 && state.currentReadingParagraph <= paragraphs.lastIndex) {
-                state.currentReadingParagraph -= 1
-                updateNotification()
+            AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 if (state.isPlaying) {
-                    readText(this@TTSService, mediaSession)
+                    scope.launch { handlePause() }
                 }
             }
         }
     }
-
-    private suspend fun handleSkipNext(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
-        player?.stop()
-        aiTTSPlayer.stop()
-        updateNotification()
-        
-        val index = getChapterIndex(chapter, chapters)
-        if (index != chapters.lastIndex) {
-            val id = chapters[index + 1].id
-            getRemoteChapter(id, source, state) {
-                if (state.isPlaying) {
-                    readText(this@TTSService, mediaSession)
-                }
-            }
+    
+    // ========== Media Session Callback ==========
+    
+    inner class TTSSessionCallback : MediaSessionCompat.Callback() {
+        override fun onPlay() {
+            scope.launch { handlePlay() }
         }
         
-        state.currentReadingParagraph = 0
-        updateNotification()
-    }
-
-    private suspend fun handleNextParagraph() {
-        val content = getCurrentContent()
-        content?.let { paragraphs ->
-            if (state.currentReadingParagraph in 0 until paragraphs.lastIndex) {
-                state.currentReadingParagraph += 1
-                if (state.isPlaying) {
-                    readText(this@TTSService, mediaSession)
-                    updateNotification()
-                }
-            }
+        override fun onPause() {
+            scope.launch { handlePause() }
+        }
+        
+        override fun onStop() {
+            scope.launch { handleCancel() }
+        }
+        
+        override fun onSkipToNext() {
+            val chapter = state.ttsChapter ?: return
+            val chapters = state.ttsChapters
+            val source = state.ttsCatalog ?: return
+            scope.launch { handleSkipNext(chapter, chapters, source) }
+        }
+        
+        override fun onSkipToPrevious() {
+            val chapter = state.ttsChapter ?: return
+            val chapters = state.ttsChapters
+            val source = state.ttsCatalog ?: return
+            scope.launch { handleSkipPrevious(chapter, chapters, source) }
+        }
+        
+        override fun onFastForward() {
+            scope.launch { handleSkipNextParagraph() }
+        }
+        
+        override fun onRewind() {
+            scope.launch { handleSkipPreviousParagraph() }
         }
     }
-
-    private suspend fun handlePlay() {
-        setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+    
+    // ========== Service Management ==========
+    
+    fun startService(command: Int) {
         hookNotification()
-        state.isPlaying = true
         
-        val book = state.ttsBook
-        val chapter = state.ttsChapter
-        val content = getCurrentContent()
-        
-        // Use ttsCore for reading
-        if (book != null && chapter != null && content != null) {
-            Log.info { "Using ttsCore for playback" }
-            ttsCore.startReading(
-                book = book,
-                chapter = chapter,
-                paragraphs = content,
-                startIndex = state.currentReadingParagraph,
-                onParagraphComplete = { index ->
-                    state.currentReadingParagraph = index
-                    state.utteranceId = index.toString()
-                    serviceScope.launch {
-                        setBundle()
-                        updateNotification()
-                    }
-                },
-                onChapterComplete = {
-                    serviceScope.launch {
-                        if (readerPreferences.readerAutoNext().get()) {
-                            // Auto-load next chapter
-                            mediaCallback.onSkipToNext()
-                        } else {
-                            handlePause()
-                        }
-                    }
-                }
-            )
-        } else {
-            // Fallback to old system
-            Log.warn { "Missing book/chapter/content, using legacy readText" }
-            readText(this@TTSService, mediaSession)
-        }
-    }
-
-    private suspend fun handlePause() {
-        setPlaybackState(PlaybackStateCompat.STATE_PAUSED)
-        state.isPlaying = false
-        
-        // Use unified TTS Core
-        ttsCore.pause()
-        
-        updateNotification()
-    }
-
-    private suspend fun handlePlayPause() {
-        if (state.isPlaying) {
-            handlePause()
-        } else {
-            handlePlay()
-        }
-    }
-
-    private suspend fun handleTogglePlayPause() {
-        if (state.isPlaying) {
-            state.isPlaying = false
-            player?.stop()
-            aiTTSPlayer.stop()
-            updateNotification()
-        } else {
-            state.isPlaying = true
-            readText(this@TTSService, mediaSession)
-        }
-    }
-
-    private fun getCurrentContent(): List<String>? {
-        return if (state.translatedTTSContent?.isNotEmpty() == true) {
-            state.translatedTTSContent
-        } else {
-            state.ttsContent?.value
-        }
-    }
-
-    private val ttsJob = Job()
-    val scope = CoroutineScope(Dispatchers.Main.immediate + ttsJob)
-    
-    fun readText(context: Context, mediaSessionCompat: MediaSessionCompat) {
-        setBundle()
-        
-        val chapter = state.ttsChapter ?: return
-        val content = getCurrentContent() ?: return
-        val book = state.ttsBook ?: return
-        
-        runCatching {
-            scope.launch { updateNotification() }
-            
-            // Check if Coqui TTS is enabled
-            val useCoquiTTS = appPrefs.useCoquiTTS().get()
-            val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
-            
-            if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
-                Log.info { "Using Coqui TTS" }
-                readTextWithCoquiTTS(context, mediaSessionCompat, chapter, content)
-            } else {
-                // Use native Android TTS
-                readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
-            }
-        }.onFailure { e ->
-            Log.error { "Error reading text: ${e.message}" }
-        }
-    }
-    
-    private fun readTextWithNativeTTS(
-        context: Context,
-        mediaSessionCompat: MediaSessionCompat,
-        chapter: Chapter,
-        content: List<String>
-    ) {
-        if (player == null) {
-            Log.error { "Native TTS player is null! Reinitializing..." }
-            initPlayer()
-            return
-        }
-        
-        updatePlayerSettings()
-        
-        if (state.utteranceId != state.currentReadingParagraph.toString()) {
-            player?.speak(
-                content[state.currentReadingParagraph],
-                TextToSpeech.QUEUE_FLUSH,
-                null,
-                state.currentReadingParagraph.toString()
-            )
-        }
-        
-        player?.setOnUtteranceProgressListener(createUtteranceListener(context, mediaSessionCompat, chapter, content))
-    }
-    
-    private fun readTextWithAITTS(
-        context: Context,
-        mediaSessionCompat: MediaSessionCompat,
-        chapter: Chapter,
-        content: List<String>
-    ) {
         scope.launch {
-            try {
-                // Check if Coqui TTS is enabled and configured
-                val useCoquiTTS = appPrefs.useCoquiTTS().get()
-                val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
-                
-                if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
-                    Log.info { "Using Coqui TTS for playback" }
-                    readTextWithCoquiTTS(context, mediaSessionCompat, chapter, content)
-                    return@launch
-                }
-                
-                // Check if AI TTS is actually available
-                if (!aiTTSManager.hasAvailableProvider()) {
-                    Log.warn { "No AI TTS provider available, falling back to native TTS" }
-                    readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
-                    return@launch
-                }
-                
-                val selectedProvider = try {
-                    ireader.domain.services.tts.AITTSProvider.valueOf(
-                        appPrefs.selectedAITTSProvider().get()
-                    )
-                } catch (e: Exception) {
-                    ireader.domain.services.tts.AITTSProvider.NATIVE_ANDROID
-                }
-                
-                val selectedVoiceId = appPrefs.selectedAIVoiceId().get()
-                
-                // Check if voice is selected and downloaded
-                if (selectedVoiceId.isEmpty() || !aiTTSManager.isVoiceDownloaded(selectedVoiceId)) {
-                    Log.warn { "AI TTS voice not selected or not downloaded, falling back to native TTS" }
-                    readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
-                    return@launch
-                }
-                
-                val speechSpeed = readerPreferences.speechRate().get()
-                val pitch = readerPreferences.speechPitch().get()
-                
-                state.utteranceId = state.currentReadingParagraph.toString()
-                
-                aiTTSPlayer.speak(
-                    text = content[state.currentReadingParagraph],
-                    provider = selectedProvider,
-                    voiceId = selectedVoiceId,
-                    speed = speechSpeed,
-                    pitch = pitch,
-                    onStart = {
-                        state.isPlaying = true
-                        state.utteranceId = state.currentReadingParagraph.toString()
-                    },
-                    onComplete = {
-                        handleAITTSComplete(context, mediaSessionCompat, chapter, content)
-                    },
-                    onError = { error ->
-                        Log.error { "AI TTS error: ${error.message}, falling back to native TTS" }
-                        // Fall back to native TTS on error
-                        readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
-                    }
-                )
-            } catch (e: Exception) {
-                Log.error { "AI TTS error: ${e.message}, falling back to native TTS" }
-                readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
+            when (command) {
+                Player.PLAY -> handlePlay()
+                Player.PAUSE -> handlePause()
+                Player.PLAY_PAUSE -> handlePlayPause()
+                else -> handleTogglePlayPause()
             }
         }
     }
     
-    /**
-     * Read text using Coqui TTS with preloading and auto-next features
-     */
-    private fun readTextWithCoquiTTS(
-        context: Context,
-        mediaSessionCompat: MediaSessionCompat,
-        chapter: Chapter,
-        content: List<String>
-    ) {
-        scope.launch {
-            try {
-                val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
-                val coquiApiKey = appPrefs.coquiApiKey().get().takeIf { it.isNotEmpty() }
-                val speechSpeed = readerPreferences.speechRate().get()
-                
-                // Create Coqui TTS service
-                val coquiService = ireader.domain.services.tts.CoquiTTSService(context, coquiSpaceUrl, coquiApiKey)
-                
-                // Start reading with auto-advance and preloading
-                coquiService.startReading(
-                    paragraphs = content,
-                    startIndex = state.currentReadingParagraph,
-                    speed = speechSpeed,
-                    autoNext = true,
-                    onParagraphComplete = { paragraphIndex ->
-                        // Update state and notification
-                        state.currentReadingParagraph = paragraphIndex
-                        state.utteranceId = paragraphIndex.toString()
-                        scope.launch {
-                            setBundle()
-                            updateNotification()
-                        }
-                    },
-                    onChapterComplete = {
-                        // Chapter finished
-                        handleChapterFinished(context, mediaSessionCompat, chapter)
-                    }
-                )
-                
-                Log.info { "Started Coqui TTS playback with preloading" }
-                
-            } catch (e: Exception) {
-                Log.error { "Coqui TTS error: ${e.message}, falling back to native TTS" }
-                readTextWithNativeTTS(context, mediaSessionCompat, chapter, content)
-            }
-        }
+    private fun setPlaybackState(state: Int) {
+        stateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1f)
+        mediaSession.setPlaybackState(stateBuilder.build())
     }
     
-    private fun handleAITTSComplete(
-        context: Context,
-        mediaSessionCompat: MediaSessionCompat,
-        chapter: Chapter,
-        content: List<String>
-    ) {
-        checkSleepTime()
-        runCatching {
-            handleUtteranceDone(context, mediaSessionCompat, chapter, content)
-        }.onFailure { e ->
-            Log.error { "Error in AI TTS completion: ${e.message}" }
-        }
+    private fun setLoadingState(isLoading: Boolean) {
+        // Update metadata to reflect loading state
+        val meta = MediaMetadataCompat.Builder()
+            .putLong(IS_LOADING, if (isLoading) 1L else 0L)
+            .build()
+        state.meta = meta
+        scope.launch { updateNotification() }
     }
-
-    private fun updatePlayerSettings() {
-        with(state) {
-            if (languages.isEmpty()) {
-                player?.availableLanguages?.let { languages = it.toList() }
-            }
-            if (voices.isEmpty()) {
-                player?.voices?.let { voices = it.toList() }
-            }
-            if (currentVoice != prevVoice) {
-                prevVoice = currentVoice
-                player?.voices?.firstOrNull { it.isSame(currentVoice) }?.let {
-                    player?.voice = it
-                }
-            }
-            if (currentLanguage != prevLanguage) {
-                prevLanguage = currentLanguage
-                player?.availableLanguages?.firstOrNull { it.displayName == currentLanguage }?.let {
-                    player?.language = it
-                }
-            }
-            if (pitch != prevPitch) {
-                prevPitch = pitch
-                player?.setPitch(pitch)
-            }
-            if (speechSpeed != prevSpeechSpeed) {
-                prevSpeechSpeed = speechSpeed
-                player?.setSpeechRate(speechSpeed)
-            }
-        }
-    }
-
-    private fun createUtteranceListener(
-        context: Context,
-        mediaSessionCompat: MediaSessionCompat,
-        chapter: Chapter,
-        content: List<String>
-    ) = object : UtteranceProgressListener() {
-        
-        override fun onStop(utteranceId: String?, interrupted: Boolean) {
-            super.onStop(utteranceId, interrupted)
-            state.utteranceId = ""
-        }
-
-        override fun onStart(utteranceId: String) {
-            state.isPlaying = true
-            state.utteranceId = utteranceId
-        }
-
-        override fun onDone(utteranceId: String) {
-            checkSleepTime()
-            runCatching {
-                handleUtteranceDone(context, mediaSessionCompat, chapter, content)
-            }.onFailure { e ->
-                Log.error { "Error in onDone: ${e.message}" }
-            }
-        }
-
-        override fun onError(utteranceId: String) {
-            state.isPlaying = false
-        }
-    }
-
-    private fun handleUtteranceDone(
-        context: Context,
-        mediaSessionCompat: MediaSessionCompat,
-        chapter: Chapter,
-        content: List<String>
-    ) {
-        val isFinished = state.currentReadingParagraph >= content.lastIndex
-        
-        if (!isFinished && state.currentReadingParagraph < content.size) {
-            state.currentReadingParagraph += 1
-            readText(context, mediaSessionCompat)
-            return
-        }
-        
-        if (isFinished && controller?.playbackState?.isPlaying == true) {
-            handleChapterFinished(context, mediaSessionCompat, chapter)
-        }
-    }
-
-    private fun handleChapterFinished(context: Context, mediaSessionCompat: MediaSessionCompat, chapter: Chapter) {
-        state.isPlaying = false
-        state.currentReadingParagraph = 0
-        player?.stop()
-        aiTTSPlayer.stop()
-        
-        if (state.autoNextChapter) {
-            scope.launch {
-                val chapters = state.ttsChapters
-                val source = state.ttsCatalog ?: return@launch
-                val index = getChapterIndex(chapter, chapters)
-                
-                if (index != chapters.lastIndex) {
-                    val nextChapterId = chapters[index + 1].id
-                    getRemoteChapter(nextChapterId, source, state) {
-                        state.currentReadingParagraph = 0
-                        updateNotification()
-                        readText(context, mediaSessionCompat)
-                    }
-                }
-            }
-        }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    fun checkSleepTime() {
-        val lastCheckPref = state.startTime
-        val currentSleepTime = state.sleepTime.minutes
-        val now = kotlin.time.Clock.System.now()
-        if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode) {
-            startService(Player.CANCEL)
-        }
-    }
-
+    
+    // ========== Chapter Loading ==========
+    
     suspend fun getRemoteChapter(
         chapterId: Long,
         source: CatalogLocal,
@@ -1088,149 +836,88 @@ class TTSService(
             setLoadingState(true)
             state.currentReadingParagraph = 0
             
-            val localChapter = chapterRepo.findChapterById(chapterId) ?: return
+            val chapter = chapterRepo.findChapterById(chapterId) ?: return
             
-            if (!localChapter.isEmpty()) {
-                handleLocalChapter(localChapter, chapterId, onSuccess)
+            if (chapter.content.isEmpty()) {
+                val catalog = extensions.get(source.sourceId)
+                if (catalog != null) {
+                    remoteUseCases.getRemoteReadingContent(
+                        chapter = chapter,
+                        catalog = catalog,
+                        onSuccess = { remoteChapter ->
+                            scope.launch {
+                                chapterRepo.insertChapter(remoteChapter)
+                                ttsState.ttsChapter = remoteChapter
+                                setLoadingState(false)
+                                onSuccess()
+                            }
+                        },
+                        onError = { error ->
+                            Log.error { "Failed to load chapter content: $error" }
+                            setLoadingState(false)
+                        }
+                    )
+                } else {
+                    Log.error { "Catalog not found for source: ${source.sourceId}" }
+                    setLoadingState(false)
+                }
             } else {
-                handleRemoteChapter(localChapter, source, chapterId, onSuccess)
+                ttsState.ttsChapter = chapter
+                setLoadingState(false)
+                onSuccess()
             }
+            
         } catch (e: Exception) {
             Log.error { "Error loading chapter: ${e.message}" }
-            setBundle(error = true)
-            updateNotification()
-        }
-    }
-
-    private suspend fun setLoadingState(isLoading: Boolean) {
-        setBundle(isLoading = isLoading)
-        updateNotification()
-    }
-
-    private suspend fun handleLocalChapter(chapter: Chapter, chapterId: Long, onSuccess: suspend () -> Unit) {
-        state.ttsChapter = chapter
-        state.currentReadingParagraph = 0
-        
-        loadTranslatedContentForTTS(chapterId)
-        
-        setLoadingState(false)
-        chapterUseCase.updateLastReadTime(chapter, updateDateFetched = false)
-        onSuccess()
-    }
-
-    private suspend fun handleRemoteChapter(
-        chapter: Chapter,
-        source: CatalogLocal,
-        chapterId: Long,
-        onSuccess: suspend () -> Unit
-    ) {
-        remoteUseCases.getRemoteReadingContent(
-            chapter = chapter,
-            source,
-            onSuccess = { result ->
-                if (result.content.joinToString().isNotEmpty()) {
-                    updateStateWithRemoteChapter(result, chapterId, onSuccess)
-                }
-            },
-            onError = {
-                setLoadingState(false)
-            }
-        )
-    }
-
-    private suspend fun updateStateWithRemoteChapter(chapter: Chapter, chapterId: Long, onSuccess: suspend () -> Unit) {
-        state.ttsChapter = chapter
-        state.currentReadingParagraph = 0
-        state.ttsChapters = chapterRepo.findChaptersByBookId(chapter.bookId)
-        
-        chapterUseCase.updateLastReadTime(chapter, updateDateFetched = true)
-        
-        loadTranslatedContentForTTS(chapterId)
-        setLoadingState(false)
-        onSuccess()
-    }
-
-    private suspend fun loadTranslatedContentForTTS(chapterId: Long) {
-        // Check if TTS with translated text is enabled
-        val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().get()
-        
-        if (!useTTSWithTranslatedText) {
-            state.translatedTTSContent = null
-            return
-        }
-        
-        // Get translation preferences
-        val targetLanguage = readerPreferences.translatorTargetLanguage().get()
-        val engineId = readerPreferences.translatorEngine().get()
-        
-        try {
-            // Try to get translated chapter
-            val translatedChapter = getTranslatedChapterUseCase.execute(
-                chapterId = chapterId,
-                targetLanguage = targetLanguage,
-                engineId = engineId
-            )
-            
-            if (translatedChapter != null) {
-                // Extract text from translated content
-                val translatedText = translatedChapter.translatedContent
-                    .filterIsInstance<ireader.core.source.model.Text>()
-                    .map { it.text }
-                    .filter { it.isNotBlank() }
-                    .map { it.trim() }
-                
-                state.translatedTTSContent = translatedText
-                Log.info { "Loaded translated content for TTS: ${translatedText.size} paragraphs" }
-            } else {
-                state.translatedTTSContent = null
-                Log.info { "No translated content available for TTS, will use original text" }
-            }
-        } catch (e: Exception) {
-            Log.error(e, "Error loading translated content for TTS")
-            state.translatedTTSContent = null
+            setLoadingState(false)
         }
     }
     
-    fun getChapterIndex(chapter: Chapter, chapters: List<Chapter>): Int {
-        val chaptersIds = chapters.map { it.name }
-        val index = chaptersIds.indexOfFirst { it == chapter.name }
-
-        return if (index != -1) {
-            index
-        } else {
-            Log.error("TTSService", "Chapter '${chapter.name}' not found in chapters list. Returning 0 as fallback.")
-            0 // Return first chapter as fallback instead of crashing
-        }
+    // ========== Media Browser Service ==========
+    
+    override fun onGetRoot(
+        clientPackageName: String,
+        clientUid: Int,
+        rootHints: Bundle?
+    ): BrowserRoot {
+        return BrowserRoot(TTS_SERVICE_NAME, null)
     }
-
-    private inner class NoisyReceiver : BroadcastReceiver() {
+    
+    override fun onLoadChildren(
+        parentId: String,
+        result: Result<MutableList<MediaBrowserCompat.MediaItem>>
+    ) {
+        result.sendResult(mutableListOf())
+    }
+    
+    // ========== Noisy Receiver ==========
+    
+    inner class NoisyReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
-                resumeOnFocus = false
-                player?.stop()
-                aiTTSPlayer.stop()
+                scope.launch { handlePause() }
             }
         }
     }
-
-    override fun onAudioFocusChange(focusChange: Int) {
-        Log.debug("TAG", "Focus change $focusChange")
-        when (focusChange) {
-            AudioManager.AUDIOFOCUS_GAIN -> if (resumeOnFocus) {
-                synchronized(focusLock) { resumeOnFocus = false }
-                startService(Player.PLAY)
-            }
-            AudioManager.AUDIOFOCUS_LOSS -> {
-                synchronized(focusLock) { resumeOnFocus = false }
-                player?.stop()
-                aiTTSPlayer.stop()
-            }
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                synchronized(focusLock) { resumeOnFocus = state.isPlaying }
-                player?.stop()
-                aiTTSPlayer.stop()
+    
+    // ========== Notification Controller ==========
+    
+    inner class NotificationController {
+        private var job: Job? = null
+        
+        fun start() {
+            job = scope.launch {
+                while (isActive) {
+                    delay(1000)
+                    if (state.isPlaying) {
+                        updateNotification()
+                    }
+                }
             }
         }
+        
+        fun stop() {
+            job?.cancel()
+        }
     }
-
 }

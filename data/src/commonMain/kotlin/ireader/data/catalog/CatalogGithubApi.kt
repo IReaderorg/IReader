@@ -138,8 +138,11 @@ class CatalogGithubApi(
             val baseHash = plugin.id.hashCode().toLong()
             val numericId = 1_000_000_000_000L + (if (baseHash < 0) -baseHash else baseHash)
             
+            // Convert language name to language code
+            val languageCode = convertLanguageNameToCode(plugin.lang)
+            
             // Fix icon URL to ensure it's a direct image URL
-            val iconUrl = fixLNReaderIconUrl(plugin.iconUrl, plugin.id, plugin.lang, repo)
+            val iconUrl = fixLNReaderIconUrl(plugin.iconUrl, plugin.id, languageCode, repo)
             
             CatalogRemote(
                 name = plugin.name,
@@ -148,7 +151,7 @@ class CatalogGithubApi(
                 pkgName = plugin.id,
                 versionName = plugin.version,
                 versionCode = plugin.version.replace(".", "").toIntOrNull() ?: 1,
-                lang = plugin.lang ?: "en",
+                lang = languageCode,
                 pkgUrl = plugin.url,
                 iconUrl = iconUrl,
                 nsfw = false, // LNReader plugins don't typically have NSFW flag
@@ -157,6 +160,75 @@ class CatalogGithubApi(
                 repositoryId = repo.id,
                 repositoryType = "LNREADER" // Mark as LNReader repository
             )
+        }
+    }
+    
+    /**
+     * Converts LNReader language names to ISO 639-1 language codes.
+     * LNReader uses full language names (e.g., "English", "العربية", "日本語") 
+     * while IReader uses language codes (e.g., "en", "ar", "ja").
+     */
+    private fun convertLanguageNameToCode(languageName: String?): String {
+        if (languageName.isNullOrBlank()) return "en"
+        
+        // Trim and normalize the input
+        val normalized = languageName.trim()
+        
+        // If it's already a 2-letter code, return it lowercase
+        if (normalized.length == 2 && normalized.all { it.isLetter() || it.isDigit() }) {
+            return normalized.lowercase()
+        }
+        
+        // Map of language names to ISO 639-1 codes (case-insensitive)
+        return when (normalized.lowercase()) {
+            "english" -> "en"
+            "العربية", "arabic" -> "ar"
+            "中文", "chinese", "中文 (简体)", "中文 (繁體)" -> "zh"
+            "español", "spanish" -> "es"
+            "français", "french" -> "fr"
+            "bahasa indonesia", "indonesian" -> "id"
+            "日本語", "japanese" -> "ja"
+            "한국어", "korean" -> "ko"
+            "português", "portuguese" -> "pt"
+            "русский", "russian" -> "ru"
+            "ไทย", "thai" -> "th"
+            "türkçe", "turkish" -> "tr"
+            "tiếng việt", "vietnamese" -> "vi"
+            "deutsch", "german" -> "de"
+            "italiano", "italian" -> "it"
+            "polski", "polish" -> "pl"
+            "українська", "ukrainian" -> "uk"
+            "filipino", "tagalog" -> "tl"
+            "magyar", "hungarian" -> "hu"
+            "čeština", "czech" -> "cs"
+            "română", "romanian" -> "ro"
+            "nederlands", "dutch" -> "nl"
+            "svenska", "swedish" -> "sv"
+            "norsk", "norwegian" -> "no"
+            "dansk", "danish" -> "da"
+            "suomi", "finnish" -> "fi"
+            "ελληνικά", "greek" -> "el"
+            "עברית", "hebrew" -> "he"
+            "हिन्दी", "hindi" -> "hi"
+            "বাংলা", "bengali" -> "bn"
+            "မြန်မာဘာသာ", "burmese" -> "my"
+            "català", "catalan" -> "ca"
+            "galego", "galician" -> "gl"
+            "euskara", "basque" -> "eu"
+            "lietuvių", "lithuanian" -> "lt"
+            "latviešu", "latvian" -> "lv"
+            "eesti", "estonian" -> "et"
+            "slovenčina", "slovak" -> "sk"
+            "slovenščina", "slovene" -> "sl"
+            "hrvatski", "croatian" -> "hr"
+            "srpski", "serbian" -> "sr"
+            "български", "bulgarian" -> "bg"
+            "македонски", "macedonian" -> "mk"
+            else -> {
+                // If we can't map it, log a warning and default to English
+                ireader.core.log.Log.warn("Unknown language name: '$normalized', defaulting to 'en'")
+                "en"
+            }
         }
     }
     

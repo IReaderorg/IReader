@@ -40,4 +40,18 @@ val screenModelModule = module {
             get()
         )
     }
+    
+    // Community screens
+    factory {
+        ireader.presentation.ui.community.PopularBooksViewModel(
+            popularBooksRepository = get(),
+            bookRepository = get()
+        )
+    }
+    
+    factory {
+        ireader.presentation.ui.community.AllReviewsViewModel(
+            allReviewsRepository = get()
+        )
+    }
 }

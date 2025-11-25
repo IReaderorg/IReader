@@ -88,15 +88,11 @@ class BrowseSettingsViewModel(
         scope.launch {
             val current = state.selectedLanguages.toMutableSet()
             if (languageCode in current) {
-                // Don't allow removing the last language
-                if (current.size > 1) {
-                    current.remove(languageCode)
-                    browsePreferences.selectedLanguages().set(current)
-                    updateExtensionViewModelLanguages(current)
-                    showSnackBar(UiText.DynamicString("Language removed"))
-                } else {
-                    showSnackBar(UiText.DynamicString("At least one language must be selected"))
-                }
+                current.remove(languageCode)
+                // If empty after removal, it means "all languages"
+                browsePreferences.selectedLanguages().set(current)
+                updateExtensionViewModelLanguages(current)
+                showSnackBar(UiText.DynamicString(if (current.isEmpty()) "All languages selected" else "Language removed"))
             } else {
                 current.add(languageCode)
                 browsePreferences.selectedLanguages().set(current)
@@ -117,16 +113,16 @@ class BrowseSettingsViewModel(
 
     fun deselectAll() {
         scope.launch {
-            // Keep at least English selected
-            val englishOnly = setOf("en")
-            browsePreferences.selectedLanguages().set(englishOnly)
-            updateExtensionViewModelLanguages(englishOnly)
-            showSnackBar(UiText.DynamicString("Selection cleared"))
+            // Empty set means "all languages"
+            val allLanguages = emptySet<String>()
+            browsePreferences.selectedLanguages().set(allLanguages)
+            updateExtensionViewModelLanguages(allLanguages)
+            showSnackBar(UiText.DynamicString("All languages selected"))
         }
     }
 }
 
 data class BrowseSettingsState(
     val availableLanguages: List<String> = emptyList(),
-    val selectedLanguages: Set<String> = setOf("en")
+    val selectedLanguages: Set<String> = emptySet() // Empty = all languages
 )

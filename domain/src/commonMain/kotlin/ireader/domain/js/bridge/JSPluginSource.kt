@@ -3,6 +3,7 @@ package ireader.domain.js.bridge
 import ireader.core.log.Log
 import ireader.core.source.Dependencies
 import ireader.core.source.HttpSource
+import ireader.core.source.SourceHelpers
 import ireader.core.source.model.*
 import ireader.domain.js.models.PluginMetadata
 import ireader.domain.js.util.JSFilterConverter
@@ -19,7 +20,9 @@ class JSPluginSource(
     
     override val name: String = metadata.name
     override val lang: String = metadata.lang
-    override val baseUrl: String = metadata.site
+    override val baseUrl: String = metadata.site.takeIf { 
+        it.isNotBlank() && (it.startsWith("http://") || it.startsWith("https://"))
+    } ?: ""
     class LatestListing() : Listing(name = "Latest")
     class PopularListing() : Listing(name = "Popular")
     
@@ -105,9 +108,16 @@ class JSPluginSource(
             
             val details = plugin.getNovelDetails(manga.key)
             
+            // FIXED: Ensure cover URL is absolute
+            val absoluteCover = if (details.cover.isNotBlank()) {
+                SourceHelpers.buildAbsoluteUrl(baseUrl, details.cover)
+            } else {
+                ""
+            }
+            
             manga.copy(
                 title = details.name,
-                cover = details.cover,
+                cover = absoluteCover,
                 author = details.author ?: "",
                 description = details.description ?: "",
                 genres = details.genres,
@@ -127,9 +137,10 @@ class JSPluginSource(
             
             Log.info("JSPluginSource: [$name] Got ${chapters.size} chapters from plugin")
             
+            // FIXED: Ensure chapter URLs are absolute by prepending baseUrl if needed
             chapters.mapIndexed { index, chapter ->
                 ChapterInfo(
-                    key = chapter.url,
+                    key = SourceHelpers.buildAbsoluteUrl(baseUrl, chapter.url),
                     name = chapter.name,
                     number = (index + 1).toFloat(),
                     dateUpload = parseDate(chapter.releaseTime)
@@ -252,12 +263,13 @@ class JSPluginSource(
     
     /**
      * Convert plugin novel to MangaInfo
+     * FIXED: Ensure URLs are absolute by prepending baseUrl if needed
      */
     private fun PluginNovel.toMangaInfo(): MangaInfo {
         return MangaInfo(
-            key = this.url,
+            key = SourceHelpers.buildAbsoluteUrl(baseUrl, this.url),
             title = this.name,
-            cover = this.cover
+            cover = if (this.cover.isNotBlank()) SourceHelpers.buildAbsoluteUrl(baseUrl, this.cover) else ""
         )
     }
     

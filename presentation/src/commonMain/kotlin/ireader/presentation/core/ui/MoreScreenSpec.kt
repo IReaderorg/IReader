@@ -99,6 +99,12 @@ object MoreScreenSpec : Tab {
                 onLeaderboard = {
                     navController.navigate(NavigationRoutes.leaderboard)
                 },
+                onPopularBooks = {
+                    navController.navigate(NavigationRoutes.popularBooks)
+                },
+                onAllReviews = {
+                    navController.navigate(NavigationRoutes.allReviews)
+                },
             )
         }
 
