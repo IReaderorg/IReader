@@ -21,6 +21,7 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.core.IModalSheets
+import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.imageloader.convertToOkHttpRequest
 import ireader.presentation.ui.component.IScaffold
@@ -131,9 +132,11 @@ data class ExploreScreenSpec(
                                 },
                                 onWebView = {
                                     if (source is HttpSource) {
+                                        // Ensure URL is absolute (baseUrl should already be absolute)
+                                        val absoluteUrl = ensureAbsoluteUrlForWebView(source.baseUrl, source)
                                         navController.navigateTo(
                                                 WebViewScreenSpec(
-                                                        url = (source).baseUrl,
+                                                        url = absoluteUrl,
                                                         sourceId = source.id,
                                                         chapterId = null,
                                                         bookId = null,
@@ -195,9 +198,11 @@ data class ExploreScreenSpec(
 
                             },
                             onAppbarWebView = {
+                                // Ensure URL is absolute before passing to WebView
+                                val absoluteUrl = ensureAbsoluteUrlForWebView(it, source)
                                 navController.navigateTo(
                                         WebViewScreenSpec(
-                                                url = it,
+                                                url = absoluteUrl,
                                                 sourceId = source.id,
                                                 enableBookFetch = true,
                                                 enableChaptersFetch = true,

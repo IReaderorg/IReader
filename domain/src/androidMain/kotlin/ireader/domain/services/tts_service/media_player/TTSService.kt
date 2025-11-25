@@ -310,7 +310,6 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             // Set callback for TTS events
             unifiedPlayer?.setCallback(object : TTSCallback {
                 override fun onStart(utteranceId: String) {
-                    Log.error { "TTS_CALLBACK: onStart - utteranceId=$utteranceId, engine=$currentEngine" }
                     state.isPlaying = true
                     state.utteranceId = utteranceId
                     setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
@@ -318,13 +317,11 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 }
                 
                 override fun onDone(utteranceId: String) {
-                    Log.error { "TTS_CALLBACK: onDone - utteranceId=$utteranceId, engine=$currentEngine" }
-                    // Don't change isPlaying state here - let handleParagraphComplete manage it
                     handleParagraphComplete()
                 }
                 
                 override fun onError(utteranceId: String, error: String) {
-                    Log.error { "TTS_CALLBACK: onError - $error, engine=$currentEngine" }
+                    Log.error { "TTS error: $error" }
                     handleParagraphComplete()
                 }
             })
@@ -431,24 +428,19 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
      * Handle paragraph completion and auto-advance
      */
     private fun handleParagraphComplete() {
-        Log.error { "TTS_COMPLETE: Paragraph ${state.currentReadingParagraph} complete, isPlaying=${state.isPlaying}" }
         checkSleepTime()
         
         val content = getCurrentContent() ?: return
         val isFinished = state.currentReadingParagraph >= content.lastIndex
         
-        Log.error { "TTS_COMPLETE: isFinished=$isFinished, current=${state.currentReadingParagraph}, lastIndex=${content.lastIndex}, size=${content.size}" }
-        
         // Keep playing state true for auto-advance
         if (!isFinished && state.currentReadingParagraph < content.size && state.isPlaying) {
             state.currentReadingParagraph += 1
-            Log.error { "TTS_COMPLETE: Advancing to paragraph ${state.currentReadingParagraph}" }
             readText(this, mediaSession)
             return
         }
         
         if (isFinished && state.isPlaying) {
-            Log.error { "TTS_COMPLETE: Chapter finished, handling auto-next" }
             handleChapterFinished()
         }
     }

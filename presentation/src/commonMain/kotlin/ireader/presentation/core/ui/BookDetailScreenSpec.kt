@@ -41,6 +41,7 @@ import ireader.i18n.resources.start
 import ireader.i18n.resources.success
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
@@ -446,9 +447,11 @@ data class BookDetailScreenSpec constructor(
                         },
                         onWebView = {
                             if (source != null && source is HttpSource && book != null) {
+                                // Ensure URL is absolute before passing to WebView
+                                val absoluteUrl = ensureAbsoluteUrlForWebView(book.key, source)
                                 navController.navigateTo(
                                     WebViewScreenSpec(
-                                        url = book.key,
+                                        url = absoluteUrl,
                                         sourceId = book.sourceId,
                                         bookId = book.id,
                                         chapterId = null,

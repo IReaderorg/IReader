@@ -183,7 +183,7 @@ class AndroidJSEngine(
             // Blob polyfill
             ${getBlobPolyfill()}
             
-            // Cheerio stub (can be enhanced later)
+            // Cheerio stub with DOM manipulation support
             (function() {
                 var cheerio = {};
                 cheerio.load = function(html) {
@@ -201,10 +201,94 @@ class AndroidJSEngine(
                             mapResult.get = function() { return []; };
                             return mapResult;
                         };
+                        result.append = function() { return result; };
+                        result.prepend = function() { return result; };
+                        result.after = function() { return result; };
+                        result.before = function() { return result; };
+                        result.remove = function() { return result; };
+                        result.empty = function() { return result; };
                         return result;
                     };
                 };
                 globalThis.cheerio = cheerio;
+            })();
+            
+            // Document polyfill for DOM manipulation
+            ${getDocumentPolyfill()}
+            
+            // Add DOM methods to Object prototype as fallback for bundled code
+            // This ensures any object can use append/prepend methods
+            (function() {
+                if (typeof Object.prototype.append === 'undefined') {
+                    Object.defineProperty(Object.prototype, 'append', {
+                        value: function() {
+                            // If this object has children array, use it
+                            if (Array.isArray(this.children)) {
+                                for (var i = 0; i < arguments.length; i++) {
+                                    var child = arguments[i];
+                                    if (typeof child === 'string') {
+                                        if (typeof this.textContent === 'string') {
+                                            this.textContent += child;
+                                        }
+                                    } else {
+                                        this.children.push(child);
+                                    }
+                                }
+                            }
+                            // Otherwise, initialize children array
+                            else {
+                                if (!this.children) this.children = [];
+                                if (!this.textContent) this.textContent = '';
+                                for (var i = 0; i < arguments.length; i++) {
+                                    var child = arguments[i];
+                                    if (typeof child === 'string') {
+                                        this.textContent += child;
+                                    } else {
+                                        this.children.push(child);
+                                    }
+                                }
+                            }
+                            return this;
+                        },
+                        writable: true,
+                        configurable: true,
+                        enumerable: false
+                    });
+                }
+                
+                if (typeof Object.prototype.prepend === 'undefined') {
+                    Object.defineProperty(Object.prototype, 'prepend', {
+                        value: function() {
+                            if (!this.children) this.children = [];
+                            if (!this.textContent) this.textContent = '';
+                            for (var i = arguments.length - 1; i >= 0; i--) {
+                                var child = arguments[i];
+                                if (typeof child === 'string') {
+                                    this.textContent = child + this.textContent;
+                                } else {
+                                    this.children.unshift(child);
+                                }
+                            }
+                            return this;
+                        },
+                        writable: true,
+                        configurable: true,
+                        enumerable: false
+                    });
+                }
+                
+                if (typeof Object.prototype.appendChild === 'undefined') {
+                    Object.defineProperty(Object.prototype, 'appendChild', {
+                        value: function(child) {
+                            if (!this.children) this.children = [];
+                            this.children.push(child);
+                            return child;
+                        },
+                        writable: true,
+                        configurable: true,
+                        enumerable: false
+                    });
+                }
             })();
             
             // Wrapper function
@@ -345,9 +429,34 @@ class AndroidJSEngine(
                             }
                         }
                     }
+                    
+                    this.append = function(key, value) {
+                        if (!this.params[key]) {
+                            this.params[key] = [];
+                        }
+                        this.params[key].push(String(value));
+                    };
+                    
+                    this.delete = function(key) {
+                        delete this.params[key];
+                    };
+                    
                     this.get = function(key) {
                         return this.params[key] ? this.params[key][0] : null;
                     };
+                    
+                    this.getAll = function(key) {
+                        return this.params[key] || [];
+                    };
+                    
+                    this.has = function(key) {
+                        return key in this.params;
+                    };
+                    
+                    this.set = function(key, value) {
+                        this.params[key] = [String(value)];
+                    };
+                    
                     this.toString = function() {
                         var parts = [];
                         for (var key in this.params) {
@@ -358,6 +467,32 @@ class AndroidJSEngine(
                             }
                         }
                         return parts.join('&');
+                    };
+                    
+                    this.entries = function() {
+                        var entries = [];
+                        for (var key in this.params) {
+                            if (this.params.hasOwnProperty(key)) {
+                                this.params[key].forEach(function(value) {
+                                    entries.push([key, value]);
+                                });
+                            }
+                        }
+                        return entries;
+                    };
+                    
+                    this.keys = function() {
+                        return Object.keys(this.params);
+                    };
+                    
+                    this.values = function() {
+                        var values = [];
+                        for (var key in this.params) {
+                            if (this.params.hasOwnProperty(key)) {
+                                values.push.apply(values, this.params[key]);
+                            }
+                        }
+                        return values;
                     };
                 };
             }
@@ -471,6 +606,136 @@ class AndroidJSEngine(
                         var text = this.parts.join('');
                         var encoder = new TextEncoder();
                         return Promise.resolve(encoder.encode(text).buffer);
+                    };
+                };
+            }
+        """.trimIndent()
+    }
+    
+    private fun getDocumentPolyfill(): String {
+        return """
+            // Basic DOM Element polyfill
+            if (typeof Element === 'undefined') {
+                globalThis.Element = function() {
+                    this.children = [];
+                    this.innerHTML = '';
+                    this.textContent = '';
+                    this.attributes = {};
+                    
+                    this.appendChild = function(child) {
+                        if (!this.children) this.children = [];
+                        this.children.push(child);
+                        return child;
+                    };
+                    
+                    this.append = function() {
+                        if (!this.children) this.children = [];
+                        if (!this.textContent) this.textContent = '';
+                        for (var i = 0; i < arguments.length; i++) {
+                            var child = arguments[i];
+                            if (typeof child === 'string') {
+                                this.textContent += child;
+                            } else {
+                                this.children.push(child);
+                            }
+                        }
+                    };
+                    
+                    this.prepend = function() {
+                        if (!this.children) this.children = [];
+                        if (!this.textContent) this.textContent = '';
+                        for (var i = arguments.length - 1; i >= 0; i--) {
+                            var child = arguments[i];
+                            if (typeof child === 'string') {
+                                this.textContent = child + this.textContent;
+                            } else {
+                                this.children.unshift(child);
+                            }
+                        }
+                    };
+                    
+                    this.removeChild = function(child) {
+                        if (!this.children) this.children = [];
+                        var index = this.children.indexOf(child);
+                        if (index > -1) {
+                            this.children.splice(index, 1);
+                        }
+                        return child;
+                    };
+                    
+                    this.remove = function() {
+                        if (this.parentNode) {
+                            this.parentNode.removeChild(this);
+                        }
+                    };
+                    
+                    this.getAttribute = function(name) {
+                        if (!this.attributes) this.attributes = {};
+                        return this.attributes[name] || null;
+                    };
+                    
+                    this.setAttribute = function(name, value) {
+                        if (!this.attributes) this.attributes = {};
+                        this.attributes[name] = String(value);
+                    };
+                    
+                    this.querySelector = function() {
+                        return null;
+                    };
+                    
+                    this.querySelectorAll = function() {
+                        return [];
+                    };
+                };
+            }
+            
+            // Basic Document polyfill
+            if (typeof document === 'undefined') {
+                globalThis.document = {
+                    createElement: function(tagName) {
+                        var el = new Element();
+                        el.tagName = String(tagName).toUpperCase();
+                        el.nodeName = el.tagName;
+                        return el;
+                    },
+                    createTextNode: function(text) {
+                        return { nodeValue: String(text), textContent: String(text) };
+                    },
+                    querySelector: function() {
+                        return null;
+                    },
+                    querySelectorAll: function() {
+                        return [];
+                    },
+                    getElementById: function() {
+                        return null;
+                    },
+                    getElementsByTagName: function() {
+                        return [];
+                    },
+                    getElementsByClassName: function() {
+                        return [];
+                    }
+                };
+            }
+            
+            // Polyfill for DOMParser (used by some plugins)
+            if (typeof DOMParser === 'undefined') {
+                globalThis.DOMParser = function() {
+                    this.parseFromString = function(str, type) {
+                        // Return a minimal document-like object
+                        var doc = {
+                            documentElement: new Element(),
+                            createElement: globalThis.document.createElement,
+                            createTextNode: globalThis.document.createTextNode,
+                            querySelector: function() { return null; },
+                            querySelectorAll: function() { return []; },
+                            getElementById: function() { return null; },
+                            getElementsByTagName: function() { return []; },
+                            getElementsByClassName: function() { return []; }
+                        };
+                        doc.documentElement.innerHTML = str;
+                        return doc;
                     };
                 };
             }

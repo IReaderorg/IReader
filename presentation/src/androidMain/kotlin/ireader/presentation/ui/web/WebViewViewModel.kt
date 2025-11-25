@@ -121,10 +121,14 @@ class WebViewPageModel(
     )
 
     init {
-        val url = URLDecoder.decode(
+        val decodedUrl = URLDecoder.decode(
             param.url,
             StandardCharsets.UTF_8.name()
         )
+        
+        // Ensure URL is absolute before using it in WebView
+        val url = ensureAbsoluteUrl(decodedUrl, param.sourceId)
+        
         val bookId = param.bookId
         val sourceId = param.sourceId
         val chapterId = param.chapterId
@@ -150,6 +154,37 @@ class WebViewPageModel(
         }
         updateUrl(url)
         updateWebUrl(url = url)
+    }
+    
+    /**
+     * Ensure URL is absolute by prepending source baseUrl if needed.
+     * This is critical for WebView which requires absolute URLs.
+     */
+    private fun ensureAbsoluteUrl(url: String, sourceId: Long?): String {
+        // If already absolute, return as-is
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url
+        }
+        
+        // Try to get baseUrl from source
+        sourceId?.let { id ->
+            val source = extensions.get(id)
+            if (source is ireader.core.source.HttpSource) {
+                val baseUrl = source.baseUrl
+                if (baseUrl.isNotBlank() && (baseUrl.startsWith("http://") || baseUrl.startsWith("https://"))) {
+                    // Construct absolute URL
+                    return if (url.startsWith("/")) {
+                        "$baseUrl$url"
+                    } else {
+                        "$baseUrl/$url"
+                    }
+                }
+            }
+        }
+        
+        // If we can't make it absolute, return as-is and log warning
+        ireader.core.log.Log.warn("WebViewPageModel: Cannot convert relative URL to absolute: $url")
+        return url
     }
 
     fun toggleLoading(loading: Boolean) {

@@ -40,6 +40,7 @@ import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.getContextWrapper
@@ -362,9 +363,13 @@ data class ReaderScreenSpec(
                                     onWebView = {
                                         try {
                                             catalog?.let { catalog ->
+                                                // Ensure URL is absolute before passing to WebView
+                                                val absoluteUrl = chapter?.key?.let { url ->
+                                                    ensureAbsoluteUrlForWebView(url, catalog.source)
+                                                }
                                                 navController.navigateTo(
                                                     WebViewScreenSpec(
-                                                        url = chapter?.key,
+                                                        url = absoluteUrl,
                                                         sourceId = catalog.sourceId,
                                                         chapterId = chapter?.id,
                                                         bookId = book?.id,

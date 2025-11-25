@@ -234,8 +234,6 @@ class TTSNotificationBuilder constructor(
                 else -> "Paragraph ${progress + 1} of ${lastPar + 1}"
             }
         
-        Log.error { "NOTIFICATION: bookName=$bookName, chapterTitle=$chapterTitle, contentText=$contentText, progress=$progress, lastPar=$lastPar" }
-        
         // Build actions list first to avoid concurrent modification
         val actions = buildList {
             add(rewindAction)
@@ -244,8 +242,6 @@ class TTSNotificationBuilder constructor(
             add(close)
             add(openTTSScreen(bookId, sourceId, chapterId))
         }
-        
-        Log.error { "NOTIFICATION_FINAL: Title='$contentText', Text='$chapterTitle'" }
         
         return NotificationCompat.Builder(
             context,
