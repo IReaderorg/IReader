@@ -1,14 +1,18 @@
 package ireader.domain.usecases.local.book_usecases
 
 import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.services.StartDownloadServicesUseCase
+import ireader.domain.services.common.DownloadService
+import ireader.domain.services.common.ServiceResult
 
 /**
  * Use case for downloading all unread chapters for a list of books
+ * 
+ * Note: This now uses DownloadService directly instead of StartDownloadServicesUseCase
+ * to avoid circular dependency (DownloadUseCases → DownloadUnreadChaptersUseCase → StartDownloadServicesUseCase → DownloadUseCases)
  */
 class DownloadUnreadChaptersUseCase(
     private val localGetChapterUseCase: LocalGetChapterUseCase,
-    private val startDownloadServicesUseCase: StartDownloadServicesUseCase,
+    private val downloadService: DownloadService,
 ) {
     /**
      * Download all unread chapters for the given book IDs
@@ -30,20 +34,28 @@ class DownloadUnreadChaptersUseCase(
         }
         
         return if (unreadChapterIds.isNotEmpty()) {
-            try {
-                startDownloadServicesUseCase.start(
-                    chapterIds = unreadChapterIds.toLongArray()
-                )
-                DownloadResult.Success(
-                    totalChapters = unreadChapterIds.size,
-                    totalBooks = bookIds.size - failedBooks.size,
-                    failedBooks = failedBooks
-                )
-            } catch (e: Exception) {
-                DownloadResult.Failure(
-                    message = e.message ?: "Failed to start download service",
-                    failedBooks = bookIds
-                )
+            when (val result = downloadService.queueChapters(unreadChapterIds)) {
+                is ServiceResult.Success -> {
+                    DownloadResult.Success(
+                        totalChapters = unreadChapterIds.size,
+                        totalBooks = bookIds.size - failedBooks.size,
+                        failedBooks = failedBooks
+                    )
+                }
+                is ServiceResult.Error -> {
+                    DownloadResult.Failure(
+                        message = result.message,
+                        failedBooks = bookIds
+                    )
+                }
+                is ServiceResult.Loading -> {
+                    // Loading state shouldn't be returned from queueChapters, but handle it anyway
+                    DownloadResult.Success(
+                        totalChapters = unreadChapterIds.size,
+                        totalBooks = bookIds.size - failedBooks.size,
+                        failedBooks = failedBooks
+                    )
+                }
             }
         } else {
             DownloadResult.NoUnreadChapters(bookIds.size)

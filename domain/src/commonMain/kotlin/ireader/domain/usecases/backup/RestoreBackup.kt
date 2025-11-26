@@ -272,6 +272,42 @@ class RestoreBackup internal constructor(
         }
     }
 
+    /**
+     * Restore backup from byte array
+     * This is a convenience method for restoring from in-memory data
+     */
+    suspend fun restoreFromBytes(bytes: ByteArray): Result {
+        return try {
+            val backup = loadDump(bytes)
+
+            transactions.run {
+                restoreCategories(backup.categories)
+                val backupCategoriesWithId = getCategoryIdsByBackupId(backup.categories)
+                for (manga in backup.library) {
+                    val mangaId = restoreManga(manga)
+                    val categoryIdsOfManga =
+                        manga.categories.mapNotNull(backupCategoriesWithId::get)
+                    try {
+                        restoreChapters(manga)
+                    } catch (_: Exception) {
+                    }
+                    try {
+                        restoreCategoriesOfBook(mangaId, categoryIdsOfManga)
+                    } catch (_: Exception) {
+                    }
+                    try {
+                        restoreTracks(manga, mangaId)
+                    } catch (_: Exception) {
+                    }
+                }
+            }
+            Result.Success
+        } catch (e: Exception) {
+            ireader.core.log.Log.error(e, "Restore Backup from bytes failed")
+            Result.Error(e)
+        }
+    }
+
     sealed class Result {
         object Success : Result()
         data class Error(val error: Exception) : Result()

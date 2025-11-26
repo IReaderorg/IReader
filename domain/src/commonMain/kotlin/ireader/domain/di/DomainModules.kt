@@ -46,7 +46,6 @@ val DomainServices = module {
 
     single<DownloadServiceStateImpl> { ireader.domain.services.downloaderService.DownloadServiceStateImpl() }
 
-
     single { ireader.domain.preferences.prefs.PlayerPreferences(get()) }
     single { ireader.domain.preferences.prefs.DownloadPreferences(get()) }
 
@@ -244,10 +243,7 @@ val DomainServices = module {
     // Analytics Module
     includes(analyticsModule)
     
-    // Preferences Module
-    includes(preferencesInjectModule)
-    
-    // New Use Case Module following Mihon's pattern
-    includes(useCaseModule)
+    // Note: Preferences, UseCases, and Repository UseCases are loaded separately
+    // to avoid circular dependencies with UseCasesInject module
 
 }

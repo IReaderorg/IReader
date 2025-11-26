@@ -390,8 +390,8 @@ private fun ReadingScreenContent(
                             
                             // Translation toggle button
                             TranslationToggleButton(
-                                isTranslated = vm.translationState.isShowingTranslation,
-                                hasTranslation = vm.translationState.hasTranslation,
+                                isTranslated = vm.showTranslatedContent.value,
+                                hasTranslation = vm.translationViewModel.translationState.hasTranslation,
                                 onToggle = { vm.toggleTranslation() },
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
@@ -400,7 +400,7 @@ private fun ReadingScreenContent(
                             )
                             
                             // Translation badge
-                            if (vm.translationState.isShowingTranslation) {
+                            if (vm.showTranslatedContent.value) {
                                 TranslationBadge(
                                     isTranslated = true,
                                     textColor = vm.textColor.value,
@@ -413,14 +413,16 @@ private fun ReadingScreenContent(
                             
                             // Translation progress indicator
                             TranslationProgressIndicator(
-                                isVisible = vm.translationState.isTranslating,
-                                progress = vm.translationState.translationProgress,
-                                completedItems = (vm.translationState.translationProgress * 100).toInt(),
+                                isVisible = vm.translationViewModel.isTranslating,
+                                progress = vm.translationViewModel.translationProgress,
+                                completedItems = (vm.translationViewModel.translationProgress * 100).toInt(),
                                 totalItems = 100,
                                 engine = vm.translationEnginesManager.get(),
                                 textColor = vm.textColor.value,
                                 onCancel = { 
-                                    vm.translationState.isTranslating = false
+                                    vm.scope.launch {
+                                        vm.translationViewModel.cancelTranslation()
+                                    }
                                 },
                                 modifier = Modifier
                                     .align(Alignment.Center)
@@ -527,11 +529,11 @@ private fun ReadingScreenContent(
                         }
                         
                         // Glossary dialog
-                        if (vm.translationState.showGlossaryDialog) {
+                        if (vm.translationViewModel.translationState.showGlossaryDialog) {
                             GlossaryDialogWithFilePickers(
-                                glossaryEntries = vm.translationState.glossaryEntries,
+                                glossaryEntries = vm.translationViewModel.glossaryEntries,
                                 bookTitle = vm.book?.title,
-                                onDismiss = { vm.translationState.showGlossaryDialog = false },
+                                onDismiss = { vm.translationViewModel.translationState.showGlossaryDialog = false },
                                 onAddEntry = { source, target, type, notes ->
                                     vm.addGlossaryEntry(source, target, type, notes)
                                 },

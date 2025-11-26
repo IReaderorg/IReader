@@ -1,6 +1,9 @@
 package ireader.domain.di
 
 import ireader.domain.services.common.*
+import ireader.domain.services.ChapterCacheService
+import ireader.domain.services.ChapterCacheServiceImpl
+import ireader.domain.services.platform.*
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.module
 
@@ -46,9 +49,43 @@ val ServiceModule = module {
         }
     }
     
-    // TODO: Implement these services
-    // single<BackupService> { ServiceFactory.createBackupService() }
-    // single<TTSService> { ServiceFactory.createTTSService() }
-    // single<SyncService> { ServiceFactory.createSyncService() }
-    // single<CacheService> { ServiceFactory.createCacheService() }
+    single<BackupService> { 
+        ServiceFactory.createBackupService().apply {
+            runBlocking { initialize() }
+        }
+    }
+    
+    single<CacheService> { 
+        ServiceFactory.createCacheService().apply {
+            runBlocking { initialize() }
+        }
+    }
+    
+    single<TTSService> { 
+        ServiceFactory.createTTSService().apply {
+            runBlocking { initialize() }
+        }
+    }
+    
+    single<SyncService> { 
+        ServiceFactory.createSyncService().apply {
+            runBlocking { initialize() }
+        }
+    }
+    
+    // NEW: Chapter Cache Service
+    single<ChapterCacheService> {
+        ChapterCacheServiceImpl(
+            maxCapacity = 5,
+            maxMemoryMB = 50
+        )
+    }
+    
+    // NEW: Platform Services (implementations provided by platform-specific modules)
+    // These will be provided by DomainModulePlatform
+    // single<DeviceInfoService> { ... }
+    // single<NetworkService> { ... }
+    // single<BiometricService> { ... }
+    // single<HapticService> { ... }
+    // single<SecureStorageService> { ... }
 }

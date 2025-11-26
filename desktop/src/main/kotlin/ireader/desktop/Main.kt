@@ -119,8 +119,26 @@ fun main() {
         
         val koinApp = startKoin {
             modules(
-                localModule,dataPlatformModule, CatalogModule, DataModule,preferencesInjectModule,
-                repositoryInjectModule, remotePlatformModule, remoteModule, reviewModule, UseCasesInject, PresentationModules,DomainServices,DomainModule,PluginModule,presentationPlatformModule, DesktopDI
+                localModule,
+                dataPlatformModule, 
+                CatalogModule, 
+                DataModule,
+                preferencesInjectModule,
+                repositoryInjectModule, 
+                remotePlatformModule, 
+                remoteModule, 
+                reviewModule, 
+                ireader.domain.di.platformServiceModule,
+                DomainModule,
+                ireader.domain.di.ServiceModule,
+                ireader.domain.di.useCaseModule,
+                ireader.domain.di.repositoryUseCaseModule,
+                UseCasesInject,
+                PresentationModules,
+                DomainServices,
+                PluginModule,
+                presentationPlatformModule, 
+                DesktopDI
             )
         }
         
@@ -162,6 +180,18 @@ fun main() {
                     val getSimpleStorage: GetSimpleStorage = koinInject()
                     val coverCache: CoverCache = CoverCache(context)
                     val httpClients: HttpClients = koinInject()
+                    
+                    // Initialize notification manager and test
+                    val notificationManager = koinInject<ireader.domain.notification.PlatformNotificationManager>() as? ireader.domain.notification.DesktopNotificationManager
+                    androidx.compose.runtime.LaunchedEffect(Unit) {
+                        notificationManager?.let { manager ->
+                            ireader.domain.notification.TestNotification.setManager(manager)
+                            // Show test notification on startup
+                            kotlinx.coroutines.delay(2000) // Wait 2 seconds after app starts
+                            ireader.domain.notification.TestNotification.showTest()
+                        }
+                    }
+                    
                     setSingletonImageLoaderFactory { context ->
                         newImageLoader(
                             catalogStore = catalogStore,

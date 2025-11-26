@@ -18,10 +18,11 @@ data class ChapterTranslationState(
     val showGlossaryDialog: Boolean = false
 )
 
-class TranslationStateImpl {
+class TranslationStateHolder {
     var isShowingTranslation by mutableStateOf(false)
     var hasTranslation by mutableStateOf(false)
     var translatedChapter by mutableStateOf<TranslatedChapter?>(null)
+    var translatedContent by mutableStateOf<List<Page>>(emptyList())
     var isTranslating by mutableStateOf(false)
     var translationProgress by mutableStateOf(0f)
     var translationError by mutableStateOf<String?>(null)
@@ -32,6 +33,7 @@ class TranslationStateImpl {
         isShowingTranslation = false
         hasTranslation = false
         translatedChapter = null
+        translatedContent = emptyList()
         isTranslating = false
         translationProgress = 0f
         translationError = null

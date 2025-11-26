@@ -37,6 +37,32 @@ interface DownloadServiceState {
     var downloadProgress: Map<Long, DownloadProgress>
 }
 
+/**
+ * @deprecated Use DownloadService.state instead
+ * 
+ * This class is deprecated and will be removed in a future release.
+ * Use the DownloadService interface and observe its state property instead.
+ * 
+ * Migration example:
+ * ```
+ * // Before
+ * val downloadServiceState: DownloadServiceStateImpl
+ * val isPaused = downloadServiceState.isPaused
+ * 
+ * // After
+ * val downloadService: DownloadService
+ * val serviceState = downloadService.state.collectAsState()
+ * val isPaused = serviceState.value == ServiceState.PAUSED
+ * ```
+ */
+@Deprecated(
+    message = "Use DownloadService.state instead. This will be removed in version 2.0",
+    replaceWith = ReplaceWith(
+        "downloadService.state",
+        "ireader.domain.services.common.DownloadService"
+    ),
+    level = DeprecationLevel.WARNING
+)
 class DownloadServiceStateImpl : DownloadServiceState {
     companion object {
         const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"

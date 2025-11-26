@@ -76,9 +76,12 @@ val repositoryInjectModule = module {
     single<ChapterRepository> { ChapterRepositoryImpl(get()) }
     single<ChapterHealthRepository> { ChapterHealthRepositoryImpl(get()) }
     single<SourceComparisonRepository> { SourceComparisonRepositoryImpl(get()) }
-    single<BookRepository> { BookRepositoryImpl(get(), get<BookCategoryRepository>()) }
-    single<HistoryRepository> { HistoryRepositoryImpl(get()) }
     single<BookCategoryRepository> { BookCategoryRepositoryImpl(get()) }
+    single<BookRepository> { BookRepositoryImpl(get(), get<BookCategoryRepository>()) }
+    single<ireader.domain.data.repository.consolidated.BookRepository> { 
+        ireader.data.repository.ConsolidatedBookRepositoryImpl(get<BookRepository>(), get<BookCategoryRepository>()) 
+    }
+    single<HistoryRepository> { HistoryRepositoryImpl(get()) }
     single<ThemeRepository> { ThemeRepositoryImpl(get()) }
     single<ReaderThemeRepository> { ReaderThemeRepositoryImpl(get()) }
     

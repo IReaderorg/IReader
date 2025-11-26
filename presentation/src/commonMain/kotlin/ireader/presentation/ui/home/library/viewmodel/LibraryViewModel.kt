@@ -65,7 +65,17 @@ class LibraryViewModel(
         private val getLastReadNovelUseCase: ireader.domain.usecases.history.GetLastReadNovelUseCase,
         private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
         private val importEpub: ireader.domain.usecases.epub.ImportEpub,
-        private val downloadService: ireader.domain.services.common.DownloadService
+        private val downloadService: ireader.domain.services.common.DownloadService,
+        // NEW: Clean architecture use cases
+        private val bookUseCases: ireader.domain.usecases.book.BookUseCases,
+        private val chapterUseCases: ireader.domain.usecases.chapter.ChapterUseCases,
+        private val categoryUseCases: ireader.domain.usecases.category.CategoryUseCases,
+        private val downloadUseCases: ireader.domain.usecases.download.DownloadUseCases,
+        private val historyUseCases: ireader.domain.usecases.history.HistoryUseCases,
+        // Platform services - Clean architecture
+        private val clipboardService: ireader.domain.services.platform.ClipboardService,
+        private val shareService: ireader.domain.services.platform.ShareService,
+        private val fileSystemService: ireader.domain.services.platform.FileSystemService,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -1063,4 +1073,110 @@ fun performBatchOperation(operation: ireader.presentation.ui.home.library.compon
         }
     }
 }
+
+    
+    // ==================== Platform Service Methods ====================
+    
+    /**
+     * Copy book title to clipboard using platform service
+     */
+    fun copyBookTitle(book: ireader.domain.models.entities.Book) {
+        scope.launch {
+            when (val result = clipboardService.copyText(book.title, "Book Title")) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Title copied to clipboard"))
+                }
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${result.message}"))
+                }
+                else -> {}
+            }
+        }
+    }
+    
+    /**
+     * Share book information using platform service
+     */
+    fun shareBook(book: ireader.domain.models.entities.Book) {
+        scope.launch {
+            val shareText = buildString {
+                append(book.title)
+                if (book.author.isNotBlank()) {
+                    append(" by ${book.author}")
+                }
+                append("\n\n")
+                if (book.description.isNotBlank()) {
+                    append(book.description)
+                    append("\n\n")
+                }
+                append("Read on iReader")
+            }
+            
+            when (val result = shareService.shareText(shareText, book.title)) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    // Success - no message needed
+                }
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to share: ${result.message}"))
+                }
+                else -> {}
+            }
+        }
+    }
+    
+    /**
+     * Pick EPUB files for import using platform service
+     */
+    fun pickEpubFiles() {
+        scope.launch {
+            when (val result = fileSystemService.pickMultipleFiles(
+                fileTypes = listOf("epub"),
+                title = "Select EPUB files to import"
+            )) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    val uris = result.data.map { it.toString() }
+                    importEpubFiles(uris)
+                }
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to pick files: ${result.message}"))
+                }
+                else -> {}
+            }
+        }
+    }
+    
+    /**
+     * Export book as EPUB and save using platform service
+     */
+    fun exportBookAsEpubWithPicker(
+        bookId: Long,
+        epubExportService: ireader.domain.services.epub.EpubExportService? = null
+    ) {
+        scope.launch {
+            try {
+                val book = localGetBookUseCases.findBookById(bookId) ?: run {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Book not found"))
+                    return@launch
+                }
+                
+                // Pick save location
+                when (val result = fileSystemService.saveFile(
+                    defaultFileName = "${book.title}.epub",
+                    fileExtension = "epub",
+                    title = "Save EPUB"
+                )) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        // Export to the selected location
+                        exportBookAsEpub(bookId, epubExportService)
+                    }
+                    is ireader.domain.services.common.ServiceResult.Error -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Export cancelled"))
+                    }
+                    else -> {}
+                }
+            } catch (e: Exception) {
+                showSnackBar(ireader.i18n.UiText.DynamicString("Export error: ${e.message}"))
+            }
+        }
+    }
 }

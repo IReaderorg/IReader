@@ -177,20 +177,28 @@ val UseCasesInject = module {
         subscribeUpdates = SubscribeUpdates(get()),
         deleteAllUpdates = DeleteAllUpdates(get()),
     ) }
+    
+    // Download use cases
+    single<DeleteAllSavedDownload> { DeleteAllSavedDownload(get()) }
+    single<DeleteSavedDownloads> { DeleteSavedDownloads(get()) }
+    single<UpdateDownloadPriority> { UpdateDownloadPriority(get()) }
+    single<SubscribeDownloadsUseCase> { SubscribeDownloadsUseCase(get()) }
 
     single<DownloadUseCases> {
         DownloadUseCases(
-        deleteAllSavedDownload = DeleteAllSavedDownload(get()),
-        deleteSavedDownload = DeleteSavedDownload(get()),
-        deleteSavedDownloadByBookId = DeleteSavedDownloadByBookId(get()),
-        deleteSavedDownloads = DeleteSavedDownloads(get()),
-        findAllDownloadsUseCase = FindAllDownloadsUseCase(get()),
-        findDownloadsUseCase = FindDownloadsUseCase(get()),
-        insertDownload = InsertDownload(get()),
-        insertDownloads = InsertDownloads(get()),
-        subscribeDownloadsUseCase = SubscribeDownloadsUseCase(get()),
-        updateDownloadPriority = UpdateDownloadPriority(get()),
-    ) }
+            downloadChapter = ireader.domain.usecases.download.DownloadChapterUseCase(get()),
+            downloadChapters = ireader.domain.usecases.download.DownloadChaptersUseCase(get()),
+            downloadUnreadChapters = ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get()),
+            cancelDownload = ireader.domain.usecases.download.CancelDownloadUseCase(get()),
+            pauseDownload = ireader.domain.usecases.download.PauseDownloadUseCase(get()),
+            resumeDownload = ireader.domain.usecases.download.ResumeDownloadUseCase(get()),
+            getDownloadStatus = ireader.domain.usecases.download.GetDownloadStatusUseCase(get()),
+            subscribeDownloadsUseCase = get(),
+            deleteAllSavedDownload = get(),
+            deleteSavedDownloads = get(),
+            updateDownloadPriority = get()
+        )
+    }
     
     // Translation use cases
     single { ireader.domain.usecases.translation.SaveTranslatedChapterUseCase(get()) }

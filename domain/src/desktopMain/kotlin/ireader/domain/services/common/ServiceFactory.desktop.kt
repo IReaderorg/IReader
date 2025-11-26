@@ -30,18 +30,18 @@ actual object ServiceFactory {
     }
     
     actual fun createBackupService(): BackupService {
-        TODO("Desktop BackupService implementation")
+        return DesktopBackupService()
     }
     
     actual fun createTTSService(): TTSService {
-        TODO("Desktop TTSService implementation")
+        return DesktopTTSService()
     }
     
     actual fun createSyncService(): SyncService {
-        TODO("Desktop SyncService implementation")
+        return DesktopSyncService()
     }
     
     actual fun createCacheService(): CacheService {
-        TODO("Desktop CacheService implementation")
+        return DesktopCacheService()
     }
 }

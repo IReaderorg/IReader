@@ -18,6 +18,8 @@ class HistoryViewModel(
     private val state: HistoryStateImpl,
     val historyUseCase: HistoryUseCase,
     val uiPreferences: UiPreferences,
+    // NEW: Clean architecture use cases (for future enhancements)
+    private val historyUseCases: ireader.domain.usecases.history.HistoryUseCases,
 ) : BaseViewModel(), HistoryState by state {
 
     val relative by uiPreferences.relativeTime().asState()

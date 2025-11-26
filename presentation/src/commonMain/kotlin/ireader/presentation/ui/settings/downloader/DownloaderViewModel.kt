@@ -7,9 +7,7 @@ import ireader.domain.services.common.NotificationService
 import ireader.domain.services.common.NotificationPriority
 import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.common.ServiceState
-import ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import ireader.domain.usecases.download.DownloadUseCases
-import ireader.domain.usecases.services.ServiceUseCases
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,27 +17,39 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 
+/**
+ * ViewModel for managing downloads
+ * 
+ * ✅ CLEAN ARCHITECTURE: This ViewModel correctly uses DownloadService interface
+ * instead of the deprecated DownloadServiceStateImpl. It observes service state
+ * through StateFlow and uses ServiceResult for error handling.
+ */
 class DownloaderViewModel(
         private val downloadUseCases: DownloadUseCases,
-        private val serviceUseCases: ServiceUseCases,
         private val downloadState: DownloadStateImpl,
-        val downloadServiceStateImpl: DownloadServiceStateImpl,
-        private val downloadService: DownloadService,
+        private val downloadService: DownloadService,  // ✅ Uses service interface
         private val notificationService: NotificationService
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DownloadState by downloadState {
 
-    // Expose new service states
-    val serviceDownloadState: StateFlow<ServiceState> = downloadService.state.stateIn(
+    // Expose service states
+    val downloadServiceState: StateFlow<ServiceState> = downloadService.state.stateIn(
         scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ServiceState.IDLE
     )
     
-    val serviceDownloadProgress = downloadService.downloadProgress.stateIn(
+    val downloadServiceProgress = downloadService.downloadProgress.stateIn(
         scope = scope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyMap()
     )
+    
+    // Computed properties for UI
+    val isRunning: Boolean
+        get() = downloadServiceState.value == ServiceState.RUNNING
+    
+    val isPaused: Boolean
+        get() = downloadServiceState.value == ServiceState.PAUSED
 
     init {
         subscribeDownloads()
@@ -53,24 +63,22 @@ class DownloaderViewModel(
     private fun subscribeDownloads() {
         getBooksJob?.cancel()
         getBooksJob = scope.launch {
-            downloadUseCases.subscribeDownloadsUseCase().distinctUntilChanged().collect { list ->
+            downloadUseCases.subscribeDownloadsUseCase().collect { list ->
                 downloads = list.filter { it.chapterId != 0L }
             }
         }
     }
 
     /**
-     * Start or resume downloads using new service abstraction
+     * Start or resume downloads
      */
     fun startDownloadService(chapterIds: List<Long>) {
         if (downloads.isEmpty()) return
         
         scope.launch {
-            if (serviceDownloadState.value == ServiceState.PAUSED) {
-                // Resume paused downloads
+            if (downloadServiceState.value == ServiceState.PAUSED) {
                 resumeDownloads()
             } else {
-                // Queue chapters using new service
                 when (val result = downloadService.queueChapters(chapterIds)) {
                     is ServiceResult.Success -> {
                         notificationService.showNotification(
@@ -95,29 +103,25 @@ class DownloaderViewModel(
     }
 
     /**
-     * Pause downloads using new service
+     * Pause downloads
      */
     fun pauseDownloads() {
         scope.launch {
             downloadService.pause()
-            // Also update old state for backward compatibility
-            downloadServiceStateImpl.isPaused = true
         }
     }
 
     /**
-     * Resume paused downloads using new service
+     * Resume paused downloads
      */
     fun resumeDownloads() {
         scope.launch {
             downloadService.resume()
-            // Also update old state for backward compatibility
-            downloadServiceStateImpl.isPaused = false
         }
     }
 
     /**
-     * Stop downloads completely using new service
+     * Stop downloads completely
      */
     fun stopDownloads() {
         scope.launch {
@@ -135,10 +139,6 @@ class DownloaderViewModel(
                 }
                 else -> {}
             }
-            
-            // Also update old state for backward compatibility
-            downloadServiceStateImpl.isRunning = false
-            downloadServiceStateImpl.isPaused = false
         }
     }
 
@@ -214,7 +214,7 @@ class DownloaderViewModel(
     }
     
     /**
-     * Retry a failed download using new service
+     * Retry a failed download
      */
     fun retryFailedDownload(chapterId: Long) {
         scope.launch {
@@ -236,18 +236,6 @@ class DownloaderViewModel(
                     )
                 }
                 else -> {}
-            }
-            
-            // Also update old state for backward compatibility
-            val currentProgress = downloadServiceStateImpl.downloadProgress[chapterId]
-            if (currentProgress != null) {
-                downloadServiceStateImpl.downloadProgress = downloadServiceStateImpl.downloadProgress + 
-                    (chapterId to currentProgress.copy(
-                        status = ireader.domain.services.downloaderService.DownloadStatus.QUEUED,
-                        progress = 0f,
-                        errorMessage = null,
-                        retryCount = 0
-                    ))
             }
         }
     }

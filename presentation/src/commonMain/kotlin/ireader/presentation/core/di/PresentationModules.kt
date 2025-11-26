@@ -23,6 +23,10 @@ import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenPreferencesStateImpl
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenStateImpl
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderStatisticsViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderTTSViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderTranslationViewModel
+import ireader.presentation.ui.reader.viewmodel.subviewmodels.ReaderSettingsViewModel
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.advance.AdvanceSettingViewModel
 import ireader.presentation.ui.settings.appearance.AppearanceViewModel
@@ -60,7 +64,7 @@ val PresentationModules = module {
     single<LibraryStateImpl> { LibraryStateImpl() }
     single<CatalogsStateImpl> { CatalogsStateImpl() }
     single<UpdateStateImpl> { UpdateStateImpl() }
-    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
     factory <ExploreStateImpl> { ExploreStateImpl() }
     factory <GlobalSearchStateImpl> { GlobalSearchStateImpl() }
@@ -72,8 +76,8 @@ val PresentationModules = module {
     single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
-    single  { HistoryViewModel(get(), get(), get()) }
-    single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get()) }
+    single  { HistoryViewModel(get(), get(), get(),get(),) }
+    single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     single  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     
@@ -86,7 +90,7 @@ val PresentationModules = module {
 
     single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull(),get()) }
+    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull(),get(),get(),get(),get(),get()) }
     single  { 
         MainSettingScreenViewModel(
             uiPreferences = get(),
@@ -98,8 +102,8 @@ val PresentationModules = module {
     }
     factory  { AppearanceViewModel(get(), get()) }
 
-    factory  { CategoryScreenViewModel(get(), get(), get(),get(),get()) }
-    factory  { DownloaderViewModel(get(), get(), get(), get(), get(), get()) }
+    factory  { CategoryScreenViewModel(get(), get(), get(), get(), get()) }
+    factory  { DownloaderViewModel(get(), get(), get(), get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { TranslationSettingsViewModel(get(), get()) }
@@ -174,7 +178,14 @@ val PresentationModules = module {
     factory <ReaderScreenStateImpl> { ReaderScreenStateImpl() }
     factory <ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }
 
-    factory< ReaderScreenViewModel>  { ReaderScreenViewModel(
+    // Reader sub-viewmodels
+    factory { ireader.presentation.ui.reader.viewmodel.subviewmodels.ReaderChapterViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { ReaderSettingsViewModel(get()) }
+    factory { ReaderTranslationViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { ReaderTTSViewModel(get(), get()) }
+    factory { ReaderStatisticsViewModel(get(), get()) }
+
+    factory< ReaderScreenViewModel>  { (params: ReaderScreenViewModel.Param) -> ReaderScreenViewModel(
         get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
         get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
         // Translation use cases
@@ -187,8 +198,10 @@ val PresentationModules = module {
         get(),
         // Font use case
         get(),
+        // Chapter health
+        get(),get(),get(),
         // Params and scope
-        get(),get(),get(),get(),get(),get()
+        get(),params,get(),get(),get(),get(),get(),get(),get()
     ) }
 
     // New StateScreenModel implementations following Mihon's pattern

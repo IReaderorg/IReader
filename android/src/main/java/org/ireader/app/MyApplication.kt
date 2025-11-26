@@ -21,6 +21,7 @@ import ireader.domain.di.DomainServices
 import ireader.domain.di.PluginModule
 import ireader.domain.di.UseCasesInject
 import ireader.domain.di.localModule
+import ireader.domain.di.platformServiceModule
 import ireader.domain.di.preferencesInjectModule
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
@@ -60,6 +61,8 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             modules(remotePlatformModule)
             modules(remoteModule)
             modules(reviewModule)
+            modules(platformServiceModule)
+            modules(ireader.domain.di.ServiceModule)
             modules(UseCasesInject)
             modules(PresentationModules)
             modules(DomainServices)

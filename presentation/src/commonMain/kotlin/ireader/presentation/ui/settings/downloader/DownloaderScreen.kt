@@ -170,8 +170,8 @@ fun DownloaderScreen(
             },
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
-                val isRunning = vm.downloadServiceStateImpl.isRunning
-                val isPaused = vm.downloadServiceStateImpl.isPaused
+                val isRunning = vm.isRunning
+                val isPaused = vm.isPaused
                 val hasDownloads = downloads.isNotEmpty()
                 
                 if (hasDownloads && !vm.hasSelection) {
@@ -217,14 +217,14 @@ fun DownloaderScreen(
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             // Download status header
-            if (vm.downloadServiceStateImpl.isRunning) {
+            if (vm.isRunning) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     tonalElevation = 4.dp,
                     shape = MaterialTheme.shapes.medium,
-                    color = if (vm.downloadServiceStateImpl.isPaused) {
+                    color = if (vm.isPaused) {
                         MaterialTheme.colorScheme.secondaryContainer
                     } else {
                         MaterialTheme.colorScheme.primaryContainer
@@ -237,22 +237,22 @@ fun DownloaderScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val activeCount = vm.downloadServiceStateImpl.downloadProgress.values
-                            .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING }
-                        val completedCount = vm.downloadServiceStateImpl.downloadProgress.values
-                            .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED }
-                        val totalCount = vm.downloadServiceStateImpl.downloadProgress.size
+                        val activeCount = vm.downloadServiceProgress.value.values
+                            .count { it.status == ireader.domain.services.common.DownloadStatus.DOWNLOADING }
+                        val completedCount = vm.downloadServiceProgress.value.values
+                            .count { it.status == ireader.domain.services.common.DownloadStatus.COMPLETED }
+                        val totalCount = vm.downloadServiceProgress.value.size
                         
                         Column {
                             Text(
-                                text = if (vm.downloadServiceStateImpl.isPaused) {
+                                text = if (vm.isPaused) {
                                     localize(Res.string.resume)
                                 } else {
                                     localize(Res.string.downloading)
                                 },
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (vm.downloadServiceStateImpl.isPaused) {
+                                color = if (vm.isPaused) {
                                     MaterialTheme.colorScheme.onSecondaryContainer
                                 } else {
                                     MaterialTheme.colorScheme.onPrimaryContainer
@@ -262,7 +262,7 @@ fun DownloaderScreen(
                             Text(
                                 text = "$completedCount/$totalCount completed",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = if (vm.downloadServiceStateImpl.isPaused) {
+                                color = if (vm.isPaused) {
                                     MaterialTheme.colorScheme.onSecondaryContainer
                                 } else {
                                     MaterialTheme.colorScheme.onPrimaryContainer
@@ -270,7 +270,7 @@ fun DownloaderScreen(
                             )
                         }
                         
-                        if (!vm.downloadServiceStateImpl.isPaused && activeCount > 0) {
+                        if (!vm.isPaused && activeCount > 0) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(32.dp),
                                 strokeWidth = 3.dp,
@@ -338,7 +338,7 @@ private fun ActiveDownloadsContent(
             IVerticalFastScroller(listState = scrollState) {
                 LazyColumn(modifier = Modifier.padding(paddingValues), state = scrollState) {
                     items(count = downloads.size) { index ->
-                        val progress = vm.downloadServiceStateImpl.downloadProgress[downloads[index].chapterId]
+                        val progress = vm.downloadServiceProgress.value[downloads[index].chapterId]
                         DownloadScreenItem(
                                 downloads[index].toSavedDownload(),
                                 onClickItem = {
@@ -396,7 +396,7 @@ fun DownloadScreenItem(
         onClickItem: (SavedDownload) -> Unit,
         onLongClickItem: (SavedDownload) -> Unit,
         isSelected: Boolean = false,
-        downloadProgress: ireader.domain.services.downloaderService.DownloadProgress? = null,
+        downloadProgress: ireader.domain.services.common.DownloadProgress? = null,
         onCancelDownload: (SavedDownload) -> Unit,
         onCancelAllFromThisSeries: (SavedDownload) -> Unit,
         onMovePriorityUp: ((SavedDownload) -> Unit)? = null,
@@ -405,11 +405,11 @@ fun DownloadScreenItem(
         canMoveUp: Boolean = false,
         canMoveDown: Boolean = false,
 ) {
-    val status = downloadProgress?.status ?: ireader.domain.services.downloaderService.DownloadStatus.QUEUED
-    val isDownloading = status == ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING
-    val isCompleted = status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED
-    val isFailed = status == ireader.domain.services.downloaderService.DownloadStatus.FAILED
-    val isPaused = status == ireader.domain.services.downloaderService.DownloadStatus.PAUSED
+    val status = downloadProgress?.status ?: ireader.domain.services.common.DownloadStatus.QUEUED
+    val isDownloading = status == ireader.domain.services.common.DownloadStatus.DOWNLOADING
+    val isCompleted = status == ireader.domain.services.common.DownloadStatus.COMPLETED
+    val isFailed = status == ireader.domain.services.common.DownloadStatus.FAILED
+    val isPaused = status == ireader.domain.services.common.DownloadStatus.PAUSED
     var isMenuExpanded by remember {
         mutableStateOf(false)
     }

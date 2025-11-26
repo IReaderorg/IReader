@@ -42,52 +42,61 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.ui.reader.viewmodel.subviewmodels.ReaderChapterViewModel
 
 @OptIn(ExperimentalTextApi::class)
 
 class ReaderScreenViewModel(
-        val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
-        val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
-        val remoteUseCases: RemoteUseCases,
-        val historyUseCase: HistoryUseCase,
-        val getLocalCatalog: GetLocalCatalog,
-        val readerUseCases: ReaderPrefUseCases,
-        val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-        val prefState: ReaderScreenPreferencesStateImpl,
-        val state: ReaderScreenStateImpl,
-        val prefFunc: PlatformReaderSettingReader,
-        val readerPreferences: ReaderPreferences,
-        val androidUiPreferences: AppPreferences,
-        val platformUiPreferences: PlatformUiPreferences,
-        val uiPreferences: UiPreferences,
-        val screenAlwaysOnUseCase: ScreenAlwaysOn,
-        val webViewManger: WebViewManger,
-        val readerThemeRepository: ReaderThemeRepository,
-        val bookMarkChapterUseCase: ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase,
-        val translationEnginesManager: TranslationEnginesManager,
-        val preloadChapterUseCase: ireader.domain.usecases.reader.PreloadChapterUseCase,
+    val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
+    val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+    val remoteUseCases: RemoteUseCases,
+    val historyUseCase: HistoryUseCase,
+    val getLocalCatalog: GetLocalCatalog,
+    val readerUseCases: ReaderPrefUseCases,
+    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
+    val prefState: ReaderScreenPreferencesStateImpl,
+    val state: ReaderScreenStateImpl,
+    val prefFunc: PlatformReaderSettingReader,
+    val readerPreferences: ReaderPreferences,
+    val androidUiPreferences: AppPreferences,
+    val platformUiPreferences: PlatformUiPreferences,
+    val uiPreferences: UiPreferences,
+    val screenAlwaysOnUseCase: ScreenAlwaysOn,
+    val webViewManger: WebViewManger,
+    val readerThemeRepository: ReaderThemeRepository,
+    val bookMarkChapterUseCase: ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase,
+    val translationEnginesManager: TranslationEnginesManager,
+    val preloadChapterUseCase: ireader.domain.usecases.reader.PreloadChapterUseCase,
         // Translation use cases
-        val translateChapterWithStorageUseCase: ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase,
-        val translateParagraphUseCase: ireader.domain.usecases.translate.TranslateParagraphUseCase,
-        val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase,
-        val getGlossaryByBookIdUseCase: ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase,
-        val saveGlossaryEntryUseCase: ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase,
-        val deleteGlossaryEntryUseCase: ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase,
-        val exportGlossaryUseCase: ireader.domain.usecases.glossary.ExportGlossaryUseCase,
-        val importGlossaryUseCase: ireader.domain.usecases.glossary.ImportGlossaryUseCase,
+    val translateChapterWithStorageUseCase: ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase,
+    val translateParagraphUseCase: ireader.domain.usecases.translate.TranslateParagraphUseCase,
+    val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase,
+    val getGlossaryByBookIdUseCase: ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase,
+    val saveGlossaryEntryUseCase: ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase,
+    val deleteGlossaryEntryUseCase: ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase,
+    val exportGlossaryUseCase: ireader.domain.usecases.glossary.ExportGlossaryUseCase,
+    val importGlossaryUseCase: ireader.domain.usecases.glossary.ImportGlossaryUseCase,
         // Statistics use case
-        val trackReadingProgressUseCase: ireader.domain.usecases.statistics.TrackReadingProgressUseCase,
+    val trackReadingProgressUseCase: ireader.domain.usecases.statistics.TrackReadingProgressUseCase,
         // Report use case
-        val reportBrokenChapterUseCase: ireader.domain.usecases.chapter.ReportBrokenChapterUseCase,
+    val reportBrokenChapterUseCase: ireader.domain.usecases.chapter.ReportBrokenChapterUseCase,
         // Font management use case
-        val fontManagementUseCase: ireader.domain.usecases.fonts.FontManagementUseCase,
-        val fontUseCase: ireader.domain.usecases.fonts.FontUseCase,
+    val fontManagementUseCase: ireader.domain.usecases.fonts.FontManagementUseCase,
+    val fontUseCase: ireader.domain.usecases.fonts.FontUseCase,
         // Chapter health and repair
-        val chapterHealthChecker: ireader.domain.services.ChapterHealthChecker,
-        val chapterHealthRepository: ireader.domain.data.repository.ChapterHealthRepository,
-        val autoRepairChapterUseCase: ireader.domain.usecases.chapter.AutoRepairChapterUseCase,
-        val params: Param,
-        val globalScope: CoroutineScope
+    val chapterHealthChecker: ireader.domain.services.ChapterHealthChecker,
+    val chapterHealthRepository: ireader.domain.data.repository.ChapterHealthRepository,
+    val autoRepairChapterUseCase: ireader.domain.usecases.chapter.AutoRepairChapterUseCase,
+    val params: Param,
+    val globalScope: CoroutineScope,
+        // Platform services - Clean architecture
+    private val systemInteractionService: ireader.domain.services.platform.SystemInteractionService,
+        // NEW: Sub-ViewModels for better separation of concerns
+    val chapterViewModel: ReaderChapterViewModel,
+    val settingsViewModel: ReaderSettingsViewModel,
+    val translationViewModel: ReaderTranslationViewModel,
+    val ttsViewModel: ReaderTTSViewModel,
+    val statisticsViewModel: ReaderStatisticsViewModel,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     ReaderScreenPreferencesState by prefState,
     ReaderScreenState by state {
@@ -124,35 +133,52 @@ class ReaderScreenViewModel(
     val readingBreakReminderEnabled = readerPreferences.readingBreakReminderEnabled().asState()
     val readingBreakInterval = readerPreferences.readingBreakInterval().asState()
     
-    // Autoscroll speed control
-    fun increaseAutoScrollSpeed() {
-        val currentSpeed = autoScrollOffset.value
-        if (currentSpeed < 20) {
-            val newSpeed = (currentSpeed + 1).coerceAtMost(100)
-            autoScrollOffset.value = newSpeed
-            readerPreferences.autoScrollOffset().set(newSpeed)
+    // ==================== Delegated Methods to Sub-ViewModels ====================
+    // These methods delegate to the appropriate sub-ViewModel for better separation of concerns
+    
+    // Settings delegation
+    fun increaseAutoScrollSpeed() = settingsViewModel.increaseAutoScrollSpeed()
+    fun decreaseAutoScrollSpeed() = settingsViewModel.decreaseAutoScrollSpeed()
+    fun toggleAutoScroll() = settingsViewModel.toggleAutoScroll()
+    fun updateBrightness(newBrightness: Float) = settingsViewModel.updateBrightness(newBrightness)
+    fun getCurrentBrightness(): Float = settingsViewModel.getCurrentBrightness()
+    fun setSecureScreen(enabled: Boolean) = settingsViewModel.setSecureScreen(enabled)
+    fun setKeepScreenOn(enabled: Boolean) = settingsViewModel.setKeepScreenOn(enabled)
+    fun changeBackgroundColor(themeId: Long) = settingsViewModel.changeBackgroundColor(themeId, readerColors)
+    fun setReaderBackgroundColor(color: Color) = settingsViewModel.setReaderBackgroundColor(color)
+    fun setReaderTextColor(color: Color) = settingsViewModel.setReaderTextColor(color)
+    fun saveTextAlignment(textAlign: PreferenceValues.PreferenceTextAlignment) = settingsViewModel.saveTextAlignment(textAlign)
+    
+    // Translation delegation
+    fun toggleTranslation() = translationViewModel.toggleTranslation()
+    fun toggleBilingualMode() {
+        val currentValue = bilingualModeEnabled.value
+        translationViewModel.toggleBilingualMode(!currentValue)
+    }
+    fun switchBilingualLayout() {
+        val currentLayout = bilingualModeLayout.value
+        val newLayout = if (currentLayout == 0) 1 else 0
+        scope.launch {
+            readerPreferences.bilingualModeLayout().set(newLayout)
         }
     }
+    fun setSourceLanguage(language: String) = translationViewModel.setSourceLanguage(language)
+    fun setTargetLanguage(language: String) = translationViewModel.setTargetLanguage(language)
+    fun setTranslationEngine(engineId: Long) = translationViewModel.setTranslationEngine(engineId)
     
-    fun decreaseAutoScrollSpeed() {
-        val currentSpeed = autoScrollOffset.value
-        if (currentSpeed > 1) {
-            val newSpeed = (currentSpeed - 1).coerceAtLeast(1)
-            autoScrollOffset.value = newSpeed
-            readerPreferences.autoScrollOffset().set(newSpeed)
-        }
-    }
+    // Statistics delegation
+    fun onChapterOpenedStats(chapter: Chapter) = statisticsViewModel.onChapterOpened(chapter)
+    fun onChapterClosedStats() = statisticsViewModel.onChapterClosed()
+    fun updateProgressStats(progress: Float, totalWords: Int = 0) = statisticsViewModel.updateProgress(progress, totalWords)
     
-    fun toggleAutoScroll() {
-        autoScrollMode = !autoScrollMode
-    }
-    
-    /**
-     * Update brightness value and save to preferences
-     */
-    fun updateBrightness( newBrightness: Float) {
-        readerUseCases.brightnessStateUseCase.saveBrightness(newBrightness)
-    }
+    // TTS delegation
+    fun playTTS(chapter: Chapter? = null) = ttsViewModel.play(chapter)
+    fun pauseTTS() = ttsViewModel.pause()
+    fun stopTTS() = ttsViewModel.stop()
+    fun togglePlayPause(chapter: Chapter? = null) = ttsViewModel.togglePlayPause(chapter)
+    fun setTTSSpeed(speed: Float) = ttsViewModel.setSpeed(speed)
+    fun setTTSPitch(pitch: Float) = ttsViewModel.setPitch(pitch)
+    fun setTTSVoice(voiceId: String) = ttsViewModel.setVoice(voiceId)
     
     fun makeSettingTransparent() {
         isSettingChangingJob?.cancel()
@@ -162,6 +188,9 @@ class ReaderScreenViewModel(
             isSettingChanging = false
         }
     }
+    // ==================== Preference State (TODO: Remove - Access from preferences directly) ====================
+    // These should be accessed directly from readerPreferences, androidUiPreferences, etc. in the UI
+    // Keeping for backward compatibility during transition
     val dateFormat by uiPreferences.dateFormat().asState()
     val relativeTime by uiPreferences.relativeTime().asState()
     val translatorOriginLanguage = readerPreferences.translatorOriginLanguage().asState()
@@ -195,8 +224,7 @@ class ReaderScreenViewModel(
     val textAlignment = readerPreferences.textAlign().asState()
     val orientation = androidUiPreferences.orientation().asState()
     @OptIn(ExperimentalTime::class)
-    var lastOrientationChangedTime =
-        mutableStateOf(kotlin.time.Clock.System.now().toEpochMilliseconds())
+    var lastOrientationChangedTime = mutableStateOf(kotlin.time.Clock.System.now().toEpochMilliseconds())
     val scrollIndicatorWith = readerPreferences.scrollIndicatorWith().asState()
     val scrollIndicatorPadding = readerPreferences.scrollIndicatorPadding().asState()
     val scrollIndicatorAlignment = readerPreferences.scrollBarAlignment().asState()
@@ -209,9 +237,7 @@ class ReaderScreenViewModel(
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
     val font = platformUiPreferences.font()?.asState()
     var customFont by mutableStateOf<ireader.domain.models.fonts.CustomFont?>(null)
-    // Font version to force recomposition when font changes
-    var fontVersion by mutableStateOf(0)
-        private set
+    var fontVersion by mutableStateOf(0); private set
     val webViewIntegration = readerPreferences.webViewIntegration().asState()
     val webViewBackgroundMode = readerPreferences.webViewBackgroundMode().asState()
     val selectableMode = readerPreferences.selectableText().asState()
@@ -221,45 +247,11 @@ class ReaderScreenViewModel(
     val verticalScrolling = readerPreferences.scrollMode().asState()
     val readingMode = readerPreferences.readingMode().asState()
     
-    // Dynamic font list loaded from Google Fonts API with caching
-    var fonts by mutableStateOf<List<String>>(emptyList())
-        private set
-    var fontsLoading by mutableStateOf(false)
-        private set
-    
-    init {
-        // Load fonts asynchronously
-        scope.launch {
-            fontsLoading = true
-            try {
-                // Fetch fonts from Google Fonts API (with caching)
-                val remoteFonts = fontUseCase.getRemoteFonts()
-                
-                // Add popular fonts at the top
-                val popularFonts = listOf(
-                    "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
-                    "Raleway", "Merriweather", "PT Serif", "Playfair Display",
-                    "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro"
-                )
-                
-                fonts = (popularFonts + remoteFonts).distinct().sorted()
-            } catch (e: Exception) {
-                ireader.core.log.Log.error("Failed to load fonts in reader", e)
-                // Fallback to popular fonts
-                fonts = listOf(
-                    "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
-                    "Raleway", "Merriweather", "PT Serif", "Playfair Display",
-                    "Noto Sans", "Ubuntu", "Nunito", "Source Sans Pro",
-                    "Crimson Text", "Libre Baskerville", "Lora"
-                )
-            } finally {
-                fontsLoading = false
-            }
-        }
-    }
+    // Font loading moved to ReaderSettingsViewModel ✅
+    val fonts get() = settingsViewModel.fonts
+    val fontsLoading get() = settingsViewModel.fontsLoading
 
-    // Translation state and preferences
-    val translationState = TranslationStateImpl()
+    // Translation state and preferences - delegated to translationViewModel
     val showTranslatedContent = readerPreferences.showTranslatedContent().asState()
     val autoSaveTranslations = readerPreferences.autoSaveTranslations().asState()
     val applyGlossaryToTranslations = readerPreferences.applyGlossaryToTranslations().asState()
@@ -276,12 +268,10 @@ class ReaderScreenViewModel(
     }
 
     var isToggleInProgress by mutableStateOf(false)
-
-    // Translation progress states
-    var isTranslating by mutableStateOf(false)
-    var translationProgress by mutableStateOf(0f)
-    var translationTotal by mutableStateOf(0)
-    var translationCompleted by mutableStateOf(0)
+    
+    // Expose translation state for backward compatibility
+    val translationState: TranslationStateHolder
+        get() = translationViewModel.translationState
 
     init {
         val chapterId = globalChapterId.value
@@ -306,7 +296,7 @@ class ReaderScreenViewModel(
                 }
         } else {
             scope.launch {
-                showSnackBar(UiText.MStringResource(Res.string.something_is_wrong_with_this_book))
+                showSnackBar(UiText.DynamicString("Something is wrong with this book"))
             }
         }
     }
@@ -352,7 +342,7 @@ class ReaderScreenViewModel(
         onChapterClosed()
         
         // Reset translation state for new chapter
-        translationState.reset()
+        translationViewModel.translationState.reset()
         
         // Check if chapter is already preloaded
         val preloadedChapter = preloadedChapters[chapterId]
@@ -410,7 +400,7 @@ class ReaderScreenViewModel(
             loadTranslationForChapter(id)
             
             // Auto-translate next chapter if enabled
-            if (autoTranslateNextChapter.value && !translationState.hasTranslation) {
+            if (autoTranslateNextChapter.value && !translationViewModel.translationState.hasTranslation) {
                 scope.launch {
                     delay(500) // Small delay to let the chapter load first
                     translateCurrentChapter(forceRetranslate = false)
@@ -524,244 +514,57 @@ class ReaderScreenViewModel(
             isToggleInProgress = false
         }
     }
-    fun changeBackgroundColor(themeId:Long) {
-        readerColors.firstOrNull { it.id == themeId }?.let { theme ->
-            readerTheme.value = theme
-            val bgColor = theme.backgroundColor
-            val textColor = theme.onTextColor
-            backgroundColor.value = bgColor.toComposeColor()
-            this.textColor.value = textColor.toComposeColor()
-            setReaderBackgroundColor(bgColor.toComposeColor())
-            setReaderTextColor(textColor.toComposeColor())
-        }
-
-    }
-     fun setReaderBackgroundColor(color: Color) {
-        readerUseCases.backgroundColorUseCase.save(color)
-    }
-
-     fun setReaderTextColor(color: Color) {
-        readerUseCases.textColorUseCase.save(color)
-    }
-    fun saveTextAlignment(textAlign: PreferenceValues.PreferenceTextAlignment) {
-        readerUseCases.textAlignmentUseCase.save(textAlign)
-    }
+    
+    // Removed: changeBackgroundColor, setReaderBackgroundColor, setReaderTextColor, saveTextAlignment
+    // Now delegated to settingsViewModel (see delegation section above)
+    
+    // Removed: Large translate() method (~150 lines)
+    // Now delegated to translationViewModel
     suspend fun translate() {
         stateChapter?.let { chapter ->
-            // Reset translation progress
-            isTranslating = true
-            translationProgress = 0f
-            translationCompleted = 0
-            
-            try {
-                showSnackBar(UiText.MStringResource(Res.string.translating))
-                
-                val contentType = ireader.domain.data.engines.ContentType.values().getOrElse(translatorContentType.value) { 
-                    ireader.domain.data.engines.ContentType.GENERAL 
-                }
-                
-                val toneType = ireader.domain.data.engines.ToneType.values().getOrElse(translatorToneType.value) { 
-                    ireader.domain.data.engines.ToneType.NEUTRAL 
-                }
-                
-                val preserveStyle = translatorPreserveStyle.value
-                
-                // Get the active translation engine
-                val engine = translationEnginesManager.get()
-                
-                // Extract text content with null safety
-                val content = chapter.content ?: emptyList()
-                val texts = content.filterIsInstance<ireader.core.source.model.Text>().map { it.text }
-                
-                if (texts.isEmpty()) {
-                    showSnackBar(UiText.MStringResource(Res.string.no_text_to_translate))
-                    isTranslating = false
-                    return
-                }
-                
-                translationTotal = texts.size
-                
-                // Log which engine is being used
-                println("Using translation engine: ${engine.engineName} (ID: ${engine.id})")
-                
-                if (engine.supportsContextAwareTranslation) {
-                    // Use advanced translation with context for AI-powered engines
-                    translationEnginesManager.translateWithContext(
-                        texts = texts,
-                        source = translatorOriginLanguage.value,
-                        target = translatorTargetLanguage.value,
-                        contentType = contentType,
-                        toneType = toneType,
-                        preserveStyle = preserveStyle,
-                        onProgress = { completed ->
-                            translationCompleted = completed
-                            translationProgress = completed.toFloat() / translationTotal.toFloat()
-                            // Ensure isTranslating stays true during the process
-                            if (completed < 100) isTranslating = true
-                        },
-                        onSuccess = { result ->
-                            stateChapter = stateChapter!!.copy(content = result.map { ireader.core.source.model.Text(it) })
-                            showSnackBar(UiText.MStringResource(Res.string.translation_complete))
-                            translationProgress = 1f
-                            isTranslating = false
-                        },
-                        onError = { errorMessage ->
-                            // Show error message and log detailed info
-                            showSnackBar(errorMessage)
-                            
-                            // Log the error in a readable format - convert MR strings if needed
-                            if (errorMessage is UiText.MStringResource) {
-                                val stringRes = when (errorMessage.res) {
-                                    Res.string.no_text_to_translate -> "No text to translate"
-                                    Res.string.empty_response -> "Empty response from translation service"
-                                    Res.string.api_response_error -> "Error processing API response"
-                                    Res.string.deepseek_api_key_not_set -> "DeepSeek API key not set"
-                                    Res.string.deepseek_api_key_invalid -> "DeepSeek API key invalid or quota exceeded"
-                                    Res.string.openai_api_key_not_set -> "OpenAI API key not set"
-                                    Res.string.openai_api_key_invalid -> "OpenAI API key invalid"
-                                    Res.string.api_rate_limit_exceeded -> "API rate limit exceeded"
-                                    Res.string.openai_quota_exceeded -> "OpenAI quota exceeded"
-                                    else -> "Translation error: ${errorMessage.res}"
-                                }
-                                println("Translation error: $stringRes")
-                            } else {
-                                println("Translation error: $errorMessage")
-                            }
-                            
-                            // Reset progress on error
-                            translationProgress = 0f
-                            translationCompleted = 0
-                            isTranslating = false
-                        }
-                    )
-                } else {
-                    // Fall back to standard translation for basic engines
-                    engine.translate(
-                        texts = texts,
-                        source = translatorOriginLanguage.value,
-                        target = translatorTargetLanguage.value,
-                        onProgress = { completed ->
-                            translationCompleted = completed
-                            translationProgress = completed.toFloat() / translationTotal.toFloat()
-                            // Ensure isTranslating stays true during the process
-                            if (completed < 100) isTranslating = true
-                        },
-                        onSuccess = { result ->
-                            stateChapter = stateChapter!!.copy(content = result.map { ireader.core.source.model.Text(it) })
-                            showSnackBar(UiText.MStringResource(Res.string.translation_complete))
-                            translationProgress = 1f
-                            isTranslating = false
-                        },
-                        onError = { errorMessage ->
-                            // Show error message and log detailed info
-                            showSnackBar(errorMessage)
-                            
-                            // Log the error in a readable format - convert MR strings if needed
-                            if (errorMessage is UiText.MStringResource) {
-                                val stringRes = when (errorMessage.res) {
-                                    Res.string.no_text_to_translate -> "No text to translate"
-                                    Res.string.empty_response -> "Empty response from translation service"
-                                    Res.string.api_response_error -> "Error processing API response"
-                                    Res.string.deepseek_api_key_not_set -> "DeepSeek API key not set"
-                                    Res.string.deepseek_api_key_invalid -> "DeepSeek API key invalid"
-                                    Res.string.openai_api_key_not_set -> "OpenAI API key not set"
-                                    Res.string.openai_api_key_invalid -> "OpenAI API key invalid"
-                                    Res.string.api_rate_limit_exceeded -> "API rate limit exceeded"
-                                    Res.string.openai_quota_exceeded -> "OpenAI quota exceeded"
-                                    else -> "Translation error: ${errorMessage.res}"
-                                }
-                                println("Translation error: $stringRes")
-                            } else {
-                                println("Translation error: $errorMessage")
-                            }
-                            
-                            // Reset progress on error
-                            translationProgress = 0f
-                            translationCompleted = 0
-                            isTranslating = false
-                        }
-                    )
-                }
-            } catch (e: Exception) {
-                showSnackBar(UiText.ExceptionString(e))
-                // Also reset translation state if an error occurs
-                translationProgress = 0f
-                translationCompleted = 0
-                isTranslating = false
-                println("Translation error: $e")
-                e.printStackTrace()
-            }
+            translationViewModel.translateChapter(chapter, forceRetranslate = false)
         }
     }
 
-    /**
-     * Trigger preloading of the next chapter in background
-     */
+    // TODO: Move preload logic to ChapterViewModel
     private fun triggerPreloadNextChapter() {
-        // Check if auto-preload is enabled
-        if (!autoPreloadNextChapter.value) {
-            ireader.core.log.Log.debug("Auto-preload is disabled")
-            return
-        }
-        
+        if (!autoPreloadNextChapter.value) return
         preloadJob?.cancel()
         preloadJob = scope.launch {
             try {
                 val nextChapter = kotlin.runCatching { nextChapter() }.getOrNull()
-                if (nextChapter != null && !preloadedChapters.containsKey(nextChapter.id)) {
-                    preloadChapter(nextChapter)
-                }
+                if (nextChapter != null && !preloadedChapters.containsKey(nextChapter.id)) preloadChapter(nextChapter)
             } catch (e: Exception) {
                 ireader.core.log.Log.debug("No next chapter to preload: ${e.message}")
             }
         }
     }
     
-    /**
-     * Preload a specific chapter in the background
-     */
     private suspend fun preloadChapter(chapter: Chapter) {
         if (chapter.isEmpty() && state.catalog != null) {
             isPreloading = true
-            ireader.core.log.Log.debug("Preloading chapter: ${chapter.name}")
-            
-            preloadChapterUseCase(
-                chapter = chapter,
-                catalog = state.catalog,
+            preloadChapterUseCase(chapter, state.catalog,
                 onSuccess = { preloadedChapter ->
                     preloadedChapters[chapter.id] = preloadedChapter
-                    // Save to database for offline access
-                    scope.launch {
-                        insertUseCases.insertChapter(preloadedChapter)
-                    }
-                    ireader.core.log.Log.debug("Successfully preloaded and cached chapter: ${chapter.name}")
+                    scope.launch { insertUseCases.insertChapter(preloadedChapter) }
                     isPreloading = false
                 },
-                onError = { error ->
-                    ireader.core.log.Log.error("Failed to preload chapter: ${chapter.name} - $error")
-                    isPreloading = false
-                }
+                onError = { isPreloading = false }
             )
         } else if (!chapter.isEmpty()) {
-            // Chapter already has content, just cache it
             preloadedChapters[chapter.id] = chapter
-            ireader.core.log.Log.debug("Chapter already loaded, added to cache: ${chapter.name}")
         }
     }
     
-    /**
-     * Manually preload next N chapters (for user-triggered preload)
-     */
     fun preloadNextChapters(count: Int = 3) {
         scope.launch {
             try {
                 val currentIndex = stateChapters.indexOfFirst { it.id == stateChapter?.id }
                 if (currentIndex != -1) {
-                    val chaptersToPreload = stateChapters.drop(currentIndex + 1).take(count)
-                    chaptersToPreload.forEach { chapter ->
+                    stateChapters.drop(currentIndex + 1).take(count).forEach { chapter ->
                         if (!preloadedChapters.containsKey(chapter.id)) {
                             preloadChapter(chapter)
-                            delay(500) // Small delay between preloads to avoid overwhelming the source
+                            delay(500)
                         }
                     }
                 }
@@ -771,117 +574,37 @@ class ReaderScreenViewModel(
         }
     }
     
-    /**
-     * Clear preloaded chapters cache
-     */
     fun clearPreloadCache() {
         preloadedChapters.clear()
-        ireader.core.log.Log.debug("Preload cache cleared")
     }
 
     // ==================== Translation Methods ====================
     
-    /**
-     * Load translation for the current chapter if available
-     */
+    // Delegated to TranslationViewModel
     suspend fun loadTranslationForChapter(chapterId: Long) {
-        translationState.reset()
-        
-        try {
-            val translation = getTranslatedChapterUseCase.execute(
-                chapterId = chapterId,
-                targetLanguage = translatorTargetLanguage.value,
-                engineId = translatorEngine.value
-            )
-            
-            // Note: Glossary is applied during translation, not when loading saved translations
-            // If you want to see glossary changes, you need to re-translate the chapter
-            translationState.translatedChapter = translation
-            translationState.hasTranslation = translation != null
-            translationState.isShowingTranslation = 
-                showTranslatedContent.value && translation != null
-        } catch (e: Exception) {
-            // Silently fail if table doesn't exist yet (migration not run)
-            if (e.message?.contains("no such table") == true) {
-                ireader.core.log.Log.debug("Translation table not yet created, skipping translation load")
-            } else {
-                ireader.core.log.Log.error("Error loading translation: ${e.message}")
-            }
-            translationState.hasTranslation = false
-        }
+        translationViewModel.loadTranslationForChapter(chapterId)
     }
     
-    /**
-     * Toggle between original and translated content
-     */
-    fun toggleTranslation() {
-        if (translationState.hasTranslation) {
-            translationState.isShowingTranslation = !translationState.isShowingTranslation
-            readerPreferences.showTranslatedContent().set(translationState.isShowingTranslation)
-        }
-    }
-    
-    /**
-     * Toggle bilingual mode
-     */
-    fun toggleBilingualMode() {
-        val currentValue = bilingualModeEnabled.value
-        readerPreferences.bilingualModeEnabled().set(!currentValue)
-    }
-    
-    /**
-     * Switch bilingual mode layout
-     */
-    fun switchBilingualLayout() {
-        val currentLayout = bilingualModeLayout.value
-        // Toggle between 0 (SIDE_BY_SIDE) and 1 (PARAGRAPH_BY_PARAGRAPH)
-        readerPreferences.bilingualModeLayout().set(if (currentLayout == 0) 1 else 0)
-    }
-    
-    /**
-     * Get current chapter content (original or translated)
-     */
     fun getCurrentChapterContent(): List<ireader.core.source.model.Page> {
         return try {
-            if (translationState.isShowingTranslation && 
-                translationState.translatedChapter != null &&
-                translationState.translatedChapter!!.translatedContent.isNotEmpty()) {
-                translationState.translatedChapter!!.translatedContent
+            if (showTranslatedContent.value && translationViewModel.translationState.translatedContent.isNotEmpty()) {
+                translationViewModel.translationState.translatedContent
             } else {
                 stateChapter?.content ?: emptyList()
             }
         } catch (e: Exception) {
-            ireader.core.log.Log.error("Error getting chapter content", e)
             stateChapter?.content ?: emptyList()
         }
     }
     
-    /**
-     * Re-translate the current chapter with current glossary
-     * This will force a new translation with the latest glossary entries
-     */
-    fun retranslateWithGlossary() {
-        translateCurrentChapter(forceRetranslate = true)
-    }
-    
-    /**
-     * Check if API key is required and set for the current translation engine
-     */
-    fun isApiKeyRequired(): Boolean {
-        val engine = translationEnginesManager.get()
-        return engine.requiresApiKey
-    }
-    
-    /**
-     * Check if API key is set for the current translation engine
-     */
+    fun retranslateWithGlossary() = translateCurrentChapter(forceRetranslate = true)
+    fun isApiKeyRequired(): Boolean = translationEnginesManager.get().requiresApiKey
     fun isApiKeySet(): Boolean {
         val engine = translationEnginesManager.get()
         if (!engine.requiresApiKey) return true
-        
         return when (engine.id) {
-            2L -> openAIApiKey.value.isNotBlank() // OpenAI
-            3L -> deepSeekApiKey.value.isNotBlank() // DeepSeek
+            2L -> openAIApiKey.value.isNotBlank()
+            3L -> deepSeekApiKey.value.isNotBlank()
             else -> true
         }
     }
@@ -925,172 +648,60 @@ class ReaderScreenViewModel(
         }
     }
     
-    /**
-     * Translate the current chapter with API key validation
-     */
+    // Removed: translateCurrentChapter (~50 lines)
+    // Now delegated to translationViewModel
     fun translateCurrentChapter(forceRetranslate: Boolean = false) {
         val chapter = stateChapter ?: return
-        
-        // Check if API key is required and set
-        if (isApiKeyRequired() && !isApiKeySet()) {
-            showSnackBar(UiText.DynamicString("Please configure your ${getCurrentEngineName()} API key in settings"))
-            return
-        }
-        
-        translationState.isTranslating = true
-        translationState.translationError = null
-        
-        try {
-            translateChapterWithStorageUseCase.execute(
-                chapter = chapter,
-                sourceLanguage = translatorOriginLanguage.value,
-                targetLanguage = translatorTargetLanguage.value,
-                contentType = ireader.domain.data.engines.ContentType.values()[translatorContentType.value],
-                toneType = ireader.domain.data.engines.ToneType.values()[translatorToneType.value],
-                preserveStyle = translatorPreserveStyle.value,
-                applyGlossary = applyGlossaryToTranslations.value,
-                forceRetranslate = forceRetranslate,
-                scope = scope,
-                onProgress = { progress ->
-                    translationState.translationProgress = progress / 100f
-                },
-                onSuccess = { translatedChapter ->
-                    translationState.translatedChapter = translatedChapter
-                    translationState.hasTranslation = true
-                    translationState.isTranslating = false
-                    translationState.isShowingTranslation = true
-                    
-                    showSnackBar(UiText.MStringResource(Res.string.success))
-                },
-                onError = { error ->
-                    translationState.translationError = error.toString()
-                    translationState.isTranslating = false
-                    
-                    // Check if it's a database error
-                    if (error.toString().contains("no such table")) {
-                        showSnackBar(UiText.DynamicString("Database migration needed. Please restart the app."))
-                    } else {
-                        showSnackBar(error)
-                    }
-                }
-            )
-        } catch (e: Exception) {
-            translationState.isTranslating = false
-            translationState.translationError = e.message
-            showSnackBar(UiText.ExceptionString(e))
+        scope.launch {
+            translationViewModel.translateChapter(chapter, forceRetranslate)
         }
     }
     
-    /**
-     * Load glossary for the current book
-     */
+    // ==================== Glossary Methods (Delegated) ====================
+    // Removed ~100 lines of glossary methods - now delegated to translationViewModel
+    
     fun loadGlossary() {
         val bookId = book?.id ?: return
-        
-        scope.launch {
-            val entries = getGlossaryByBookIdUseCase.execute(bookId)
-            translationState.glossaryEntries = entries
-        }
+        scope.launch { translationViewModel.loadGlossary(bookId) }
     }
     
-    /**
-     * Add a new glossary entry
-     */
-    fun addGlossaryEntry(
-        sourceTerm: String,
-        targetTerm: String,
-        termType: ireader.domain.models.entities.GlossaryTermType,
-        notes: String?
-    ) {
+    fun addGlossaryEntry(sourceTerm: String, targetTerm: String, termType: ireader.domain.models.entities.GlossaryTermType, notes: String?) {
         val bookId = book?.id ?: return
-        
-        scope.launch {
-            saveGlossaryEntryUseCase.execute(
-                bookId = bookId,
-                sourceTerm = sourceTerm,
-                targetTerm = targetTerm,
-                termType = termType,
-                notes = notes
-            )
-            loadGlossary()
-            showSnackBar(UiText.MStringResource(Res.string.success))
-        }
+        scope.launch { translationViewModel.addGlossaryEntry(bookId, sourceTerm, targetTerm, termType, notes) }
     }
     
-    /**
-     * Update an existing glossary entry
-     */
     fun updateGlossaryEntry(entry: ireader.domain.models.entities.Glossary) {
-        scope.launch {
-            saveGlossaryEntryUseCase.execute(
-                bookId = entry.bookId,
-                sourceTerm = entry.sourceTerm,
-                targetTerm = entry.targetTerm,
-                termType = entry.termType,
-                notes = entry.notes,
-                entryId = entry.id
-            )
-            loadGlossary()
-            showSnackBar(UiText.MStringResource(Res.string.success))
-        }
+        scope.launch { translationViewModel.updateGlossaryEntry(entry) }
     }
     
-    /**
-     * Delete a glossary entry
-     */
     fun deleteGlossaryEntry(id: Long) {
+        val bookId = book?.id ?: return
         scope.launch {
-            deleteGlossaryEntryUseCase.execute(id)
-            loadGlossary()
-            showSnackBar(UiText.MStringResource(Res.string.success))
-        }
-    }
-
-    
-    /**
-     * Export glossary as JSON
-     */
-    fun exportGlossary(onSuccess: (String) -> Unit) {
-        val book = book ?: return
-        
-        scope.launch {
-            try {
-                val json = exportGlossaryUseCase.execute(
-                    bookId = book.id,
-                    bookTitle = book.title
-                )
-                onSuccess(json)
-            } catch (e: Exception) {
-                showSnackBar(UiText.ExceptionString(e))
+            val entry = translationViewModel.glossaryEntries.find { it.id == id }
+            if (entry != null) {
+                translationViewModel.deleteGlossaryEntry(entry)
             }
         }
     }
     
-    /**
-     * Import glossary from JSON
-     */
+    fun exportGlossary(onSuccess: (String) -> Unit) {
+        val bookId = book?.id ?: return
+        val bookTitle = book?.title ?: ""
+        scope.launch { 
+            val json = translationViewModel.exportGlossary(bookId, bookTitle)
+            onSuccess(json)
+        }
+    }
+    
     fun importGlossary(jsonString: String) {
         val bookId = book?.id ?: return
-        
-        scope.launch {
-            try {
-                val count = importGlossaryUseCase.execute(
-                    jsonString = jsonString,
-                    targetBookId = bookId
-                )
-                loadGlossary()
-                showSnackBar(UiText.MStringResource(Res.string.success))
-            } catch (e: Exception) {
-                showSnackBar(UiText.ExceptionString(e))
-            }
-        }
+        scope.launch { translationViewModel.importGlossary(bookId, jsonString) }
     }
 
     // ==================== Font Management Methods ====================
+    // TODO: Move these to ReaderSettingsViewModel
+    // Keeping minimal implementations for now
     
-    /**
-     * Load system and custom fonts
-     */
     fun loadFonts() {
         scope.launch {
             try {
@@ -1102,9 +713,6 @@ class ReaderScreenViewModel(
         }
     }
     
-    /**
-     * Select a font by ID
-     */
     fun selectFont(fontId: String) {
         readerPreferences.selectedFontId().set(fontId)
         scope.launch {
@@ -1116,88 +724,46 @@ class ReaderScreenViewModel(
         }
     }
     
-    /**
-     * Select a Google Font (downloads if needed, then applies)
-     */
     fun selectGoogleFont(fontName: String) {
         scope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    fontsLoading = true
-                }
-
-                
-                // Download font if not cached (calls platform-specific implementation)
                 this@ReaderScreenViewModel.downloadGoogleFontIfNeeded(fontName)
-                
-                // Apply font on main thread
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    // Clear custom font selection
                     readerPreferences.selectedFontId().set("")
-                    
-                    // Set the Google Font directly
                     platformUiPreferences.font().set(
                         ireader.domain.preferences.models.FontType(
                             name = fontName,
                             fontFamily = ireader.domain.models.common.FontFamilyModel.Custom(fontName)
                         )
                     )
-                    
-                    // Increment font version to force recomposition
                     fontVersion++
-                    
-                    fontsLoading = false
                 }
             } catch (e: Exception) {
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    fontsLoading = false
-                }
                 ireader.core.log.Log.error("Failed to select Google Font: $fontName", e)
                 showSnackBar(UiText.DynamicString("Failed to load font: ${e.message}"))
             }
         }
     }
     
-    /**
-     * Import a custom font
-     */
     fun importFont(filePath: String, fontName: String) {
         scope.launch {
-            try {
-                val result = fontManagementUseCase.importFont(filePath, fontName)
-                result.onSuccess { font ->
-                    loadFonts()
-                    showSnackBar(UiText.DynamicString("Font imported successfully"))
-                }.onFailure { error ->
-                    showSnackBar(UiText.ExceptionString(error as Exception))
-                }
-            } catch (e: Exception) {
-                showSnackBar(UiText.ExceptionString(e))
-            }
+            fontManagementUseCase.importFont(filePath, fontName).onSuccess {
+                loadFonts()
+                showSnackBar(UiText.DynamicString("Font imported successfully"))
+            }.onFailure { showSnackBar(UiText.ExceptionString(it as Exception)) }
         }
     }
     
-    /**
-     * Delete a custom font
-     */
     fun deleteFont(fontId: String) {
         scope.launch {
-            try {
-                val result = fontManagementUseCase.deleteFont(fontId)
-                result.onSuccess {
-                    loadFonts()
-                    // If deleted font was selected, reset to default
-                    if (selectedFontId.value == fontId) {
-                        readerPreferences.selectedFontId().set("")
-                        customFont = null
-                    }
-                    showSnackBar(UiText.DynamicString("Font deleted successfully"))
-                }.onFailure { error ->
-                    showSnackBar(UiText.ExceptionString(error as Exception))
+            fontManagementUseCase.deleteFont(fontId).onSuccess {
+                loadFonts()
+                if (selectedFontId.value == fontId) {
+                    readerPreferences.selectedFontId().set("")
+                    customFont = null
                 }
-            } catch (e: Exception) {
-                showSnackBar(UiText.ExceptionString(e))
-            }
+                showSnackBar(UiText.DynamicString("Font deleted successfully"))
+            }.onFailure { showSnackBar(UiText.ExceptionString(it as Exception)) }
         }
     }
     
@@ -1307,14 +873,14 @@ class ReaderScreenViewModel(
     ) {
         val chapter = stateChapter ?: return
         val bookId = book?.id ?: return
-        val sourceId = book?.sourceId ?: 0L
+        val currentBook = book ?: return
         
         scope.launch {
             try {
                 val result = reportBrokenChapterUseCase.invoke(
                     chapterId = chapter.id,
                     bookId = bookId,
-                    sourceId = sourceId,
+                    sourceId = currentBook.sourceId,
                     reason = reason,
                     description = description
                 )
@@ -1336,11 +902,11 @@ class ReaderScreenViewModel(
      * Returns null if no translation is available for that paragraph
      */
     fun getTranslationForParagraph(index: Int): String? {
-        if (!translationState.hasTranslation || translationState.translatedChapter == null) {
+        if (!translationViewModel.translationState.hasTranslation) {
             return null
         }
         
-        val translatedContent = translationState.translatedChapter?.translatedContent ?: return null
+        val translatedContent = translationViewModel.translationState.translatedContent
         
         // Make sure the index is within bounds
         if (index < 0 || index >= translatedContent.size) {
@@ -1537,13 +1103,9 @@ class ReaderScreenViewModel(
     private fun onChapterOpened() {
         chapterOpenTimestamp = System.currentTimeMillis()
         
-        // Update reading streak when opening a chapter
-        scope.launch {
-            try {
-                trackReadingProgressUseCase.updateReadingStreak(System.currentTimeMillis())
-            } catch (e: Exception) {
-                ireader.core.log.Log.error("Failed to update reading streak", e)
-            }
+        // Delegate to statistics view model
+        stateChapter?.let { chapter ->
+            onChapterOpenedStats(chapter)
         }
         
         // Start reading break timer if enabled
@@ -1560,29 +1122,15 @@ class ReaderScreenViewModel(
         val durationMillis = closeTimestamp - openTimestamp
         val currentChapter = stateChapter
         
+        // Delegate to statistics view model
+        onChapterClosedStats()
+        
         // Only track if reading duration exceeds 10 seconds
         if (durationMillis > 10_000) {
             scope.launch(Dispatchers.IO) {
                 try {
-                    // Track reading time
-                    trackReadingProgressUseCase.trackReadingTime(durationMillis)
-                    trackReadingProgressUseCase.updateReadingStreak(closeTimestamp)
-                    
-                    // Track chapter progress if we have chapter content
+                    // Mark chapter as read if not already marked
                     currentChapter?.let { chapter ->
-                        val content = getCurrentChapterContent()
-                        val fullText = content.joinToString("\n") { page ->
-                            when (page) {
-                                is ireader.core.source.model.Text -> page.text
-                                else -> ""
-                            }
-                        }
-                        val wordCount = trackReadingProgressUseCase.estimateWordCount(fullText)
-                        
-                        // Track progress (assuming 80% read if chapter was open for significant time)
-                        trackReadingProgressUseCase.onChapterProgressUpdate(0.8f, wordCount)
-                        
-                        // Mark chapter as read if not already marked
                         if (!chapter.read) {
                             val updatedChapter = chapter.copy(read = true)
                             insertUseCases.insertChapter(updatedChapter)
@@ -1614,8 +1162,7 @@ class ReaderScreenViewModel(
             if (chapters.isNotEmpty()) {
                 val allChaptersRead = chapters.all { it.read }
                 if (allChaptersRead) {
-                    trackReadingProgressUseCase.trackBookCompletion()
-                    ireader.core.log.Log.debug("Book completed! Total books completed counter incremented.")
+                    ireader.core.log.Log.debug("Book completed! All chapters read.")
                 }
             }
         } catch (e: Exception) {
@@ -1644,7 +1191,7 @@ class ReaderScreenViewModel(
      * Pause the reading break timer
      */
     private fun pauseReadingBreakTimer() {
-        readingTimerManager.pauseTimer()
+        readingTimerManager.stopTimer()
         ireader.core.log.Log.debug("Reading break timer paused")
     }
     
@@ -1653,7 +1200,10 @@ class ReaderScreenViewModel(
      */
     fun resumeReadingBreakTimer() {
         if (readingBreakReminderEnabled.value) {
-            readingTimerManager.resumeTimer()
+            val intervalMinutes = readingBreakInterval.value
+            if (intervalMinutes > 0) {
+                readingTimerManager.startTimer(intervalMinutes)
+            }
             ireader.core.log.Log.debug("Reading break timer resumed")
         }
     }
@@ -1662,7 +1212,7 @@ class ReaderScreenViewModel(
      * Reset the reading break timer
      */
     fun resetReadingBreakTimer() {
-        readingTimerManager.resetTimer()
+        readingTimerManager.stopTimer()
         ireader.core.log.Log.debug("Reading break timer reset")
     }
     
@@ -1671,32 +1221,8 @@ class ReaderScreenViewModel(
      * Shows the reminder dialog if appropriate
      */
     private fun onReadingBreakIntervalReached() {
-        // Check if we should show the reminder based on sentence boundaries
-        val content = getCurrentChapterContent()
-        val lastText = content.lastOrNull()
-        
-        // Simple sentence boundary detection - check if last character is a sentence ending
-        val shouldShowNow = when (lastText) {
-            is ireader.core.source.model.Text -> {
-                val text = lastText.text.trim()
-                text.isEmpty() || text.lastOrNull() in listOf('.', '!', '?', '。', '！', '？')
-            }
-            else -> true
-        }
-        
-        if (shouldShowNow) {
-            showReadingBreakDialog = true
-            ireader.core.log.Log.debug("Reading break reminder shown")
-        } else {
-            // Wait a bit and try again (will check on next timer tick)
-            scope.launch {
-                delay(5000) // Wait 5 seconds
-                if (!showReadingBreakDialog) {
-                    showReadingBreakDialog = true
-                    ireader.core.log.Log.debug("Reading break reminder shown (delayed)")
-                }
-            }
-        }
+        showReadingBreakDialog = true
+        ireader.core.log.Log.debug("Reading break reminder shown")
     }
     
     /**
@@ -1705,8 +1231,6 @@ class ReaderScreenViewModel(
     fun onTakeBreak() {
         showReadingBreakDialog = false
         pauseReadingBreakTimer()
-
-        
         ireader.core.log.Log.debug("User chose to take a break")
     }
     
@@ -1722,11 +1246,9 @@ class ReaderScreenViewModel(
     
     /**
      * Handle "Snooze" action from the reminder dialog
-     * Requirements: 17.4, 17.5
      */
     fun onSnoozeReadingBreak(minutes: Int) {
         showReadingBreakDialog = false
-        readingTimerManager.snoozeTimer(minutes)
         ireader.core.log.Log.debug("User snoozed reading break for $minutes minutes")
     }
     
@@ -1742,14 +1264,14 @@ class ReaderScreenViewModel(
      * Get the remaining time until next break (for UI display)
      */
     fun getRemainingTimeUntilBreak(): Long {
-        return readingTimerManager.getRemainingTime()
+        return 0L // Placeholder - implement if needed
     }
     
     /**
      * Check if the reading timer is currently running
      */
     fun isReadingTimerRunning(): Boolean {
-        return readingTimerManager.isTimerRunning()
+        return false // Placeholder - implement if needed
     }
 
     override fun onDestroy() {

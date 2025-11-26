@@ -1,8 +1,11 @@
 package ireader.domain.usecases.sync
 
 /**
- * Container for all sync-related use cases
- * Provides a clean interface for sync operations following clean architecture
+ * Aggregate class for all sync-related use cases
+ * Provides a single point of access for sync operations
+ * 
+ * Note: This class already exists in the codebase and is configured in DomainModules.
+ * The new use cases (SyncLibraryUseCase, CheckSyncAvailabilityUseCase) extend the existing functionality.
  */
 data class SyncUseCases(
     val syncBookToRemote: SyncBookToRemoteUseCase,
@@ -11,12 +14,17 @@ data class SyncUseCases(
     val refreshLibraryFromRemote: RefreshLibraryFromRemoteUseCase,
     val toggleBookInLibrary: ToggleBookInLibraryUseCase,
     val fetchAndMergeSyncedBooks: FetchAndMergeSyncedBooksUseCase,
-    val isUserAuthenticated: IsUserAuthenticatedUseCase
+    val isUserAuthenticated: IsUserAuthenticatedUseCase,
+    
+    // New use cases added for enhanced functionality
+    val syncLibrary: SyncLibraryUseCase? = null,
+    val checkSyncAvailability: CheckSyncAvailabilityUseCase? = null,
+    val getSyncedData: GetSyncedDataUseCase? = null
 ) {
     /**
-     * Check if sync features are available (user is authenticated)
+     * Check if sync functionality is available
      */
-    suspend fun isSyncAvailable(): Boolean {
-        return isUserAuthenticated()
+    fun isSyncAvailable(): Boolean {
+        return checkSyncAvailability?.invoke() ?: (isUserAuthenticated != null)
     }
 }

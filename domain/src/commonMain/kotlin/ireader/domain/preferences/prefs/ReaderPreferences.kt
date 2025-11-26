@@ -605,6 +605,37 @@ class ReaderPreferences constructor(
     fun chaptersCompleted(): Preference<Long> {
         return preferenceStore.getLong("chapters_completed", 0L)
     }
+
+
+    // Daily reading goal (in minutes)
+    fun dailyReadingGoal(): Preference<Int> {
+        return preferenceStore.getInt("daily_reading_goal", 30)
+    }
+
+    // TTS preferences
+    fun ttsSpeed(): Preference<Float> {
+        return preferenceStore.getFloat("tts_speed", 1.0f)
+    }
+
+    fun ttsPitch(): Preference<Float> {
+        return preferenceStore.getFloat("tts_pitch", 1.0f)
+    }
+
+    fun ttsVoice(): Preference<String> {
+        return preferenceStore.getString("tts_voice", "")
+    }
+
+    fun ttsAutoPlay(): Preference<Boolean> {
+        return preferenceStore.getBoolean("tts_auto_play", false)
+    }
+
+    fun ttsHighlightText(): Preference<Boolean> {
+        return preferenceStore.getBoolean("tts_highlight_text", true)
+    }
+
+    fun ttsSkipEmptyLines(): Preference<Boolean> {
+        return preferenceStore.getBoolean("tts_skip_empty_lines", true)
+    }
 }
 
 enum class ReadingMode {

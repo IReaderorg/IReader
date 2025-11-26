@@ -52,8 +52,8 @@ import java.io.File
 actual val DomainModule = module {
     // Include sync module for sync functionality
     includes(syncModule)
-    // Include service abstraction module
-    includes(ServiceModule)
+    // Note: ServiceModule is not included here to avoid conflicts with platform-specific services
+    // Platform services are provided by platformServiceModule
     
     // FileSystem implementation for Android
     single<ireader.core.io.FileSystem> {

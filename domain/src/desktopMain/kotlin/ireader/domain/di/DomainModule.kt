@@ -26,7 +26,6 @@ import ireader.domain.usecases.services.StartDownloadServicesUseCase
 import ireader.domain.usecases.services.StartExtensionManagerService
 import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
 import ireader.domain.usecases.services.StartTTSServicesUseCase
-import ireader.domain.utils.NotificationManager
 import ireader.domain.notification.PlatformNotificationManager
 import ireader.domain.notification.DesktopNotificationManager
 import ireader.i18n.LocalizeHelper
@@ -42,8 +41,8 @@ import org.koin.dsl.module
 actual val DomainModule: Module = module {
     // Include sync module for sync functionality
     includes(syncModule)
-    // Include service abstraction module
-    includes(ServiceModule)
+    // Note: ServiceModule is not included here to avoid conflicts with platform-specific services
+    // Platform services are provided by platformServiceModule
     
     // FileSystem implementation for desktop
     single<ireader.core.io.FileSystem> {
@@ -97,29 +96,30 @@ actual val DomainModule: Module = module {
     }
     single { LocalizeHelper() }
 
+    // Service Use Cases - now properly resolved without circular dependency
     single<StartDownloadServicesUseCase> {
         StartDownloadServicesUseCase(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get()
+            bookRepo = get(),
+            chapterRepo = get(),
+            remoteUseCases = get(),
+            localizeHelper = get(),
+            extensions = get(),
+            insertUseCases = get(),
+            downloadUseCases = get(),
+            downloadServiceState = get(),
+            notificationManager = get(),
+            downloadPreferences = get()
         )
     }
     
     single<StartLibraryUpdateServicesUseCase> {
         StartLibraryUpdateServicesUseCase(
-            get(),
-            get(),
-            get(),
-            get(),
-            get(),
-            get()
+            getBookUseCases = get(),
+            getChapterUseCase = get(),
+            remoteUseCases = get(),
+            getLocalCatalog = get(),
+            insertUseCases = get(),
+            notificationManager = get()
         )
     }
     
@@ -160,11 +160,12 @@ actual val DomainModule: Module = module {
         StartTTSServicesUseCase(get())
     }
 
+    // ServiceUseCases - now can use get() since the use cases are defined above
     single<ServiceUseCases> {
         ServiceUseCases(
             startDownloadServicesUseCase = get(),
             startLibraryUpdateServicesUseCase = get(),
-            startTTSServicesUseCase = get(),
+            startTTSServicesUseCase = get()
         )
     }
     // Network components

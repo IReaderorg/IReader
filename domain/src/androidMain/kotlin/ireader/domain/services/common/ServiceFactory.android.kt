@@ -35,18 +35,18 @@ actual object ServiceFactory : KoinComponent {
     }
     
     actual fun createBackupService(): BackupService {
-        TODO("Android BackupService implementation")
+        return AndroidBackupService(context)
     }
     
     actual fun createTTSService(): TTSService {
-        TODO("Android TTSService implementation")
+        return AndroidTTSService(context)
     }
     
     actual fun createSyncService(): SyncService {
-        TODO("Android SyncService implementation")
+        return AndroidSyncService(context)
     }
     
     actual fun createCacheService(): CacheService {
-        TODO("Android CacheService implementation")
+        return AndroidCacheService(context)
     }
 }

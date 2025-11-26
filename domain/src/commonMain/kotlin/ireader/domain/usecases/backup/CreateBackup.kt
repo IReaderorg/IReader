@@ -99,4 +99,29 @@ class CreateBackup  internal constructor(
             .filter { !it.category.isSystemCategory }
             .fastMap { cat -> CategoryProto.fromDomain(cat.category) }
     }
+    
+    /**
+     * Create backup data from a list of books
+     * Returns compressed backup data as ByteArray
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun createBackupData(books: List<ireader.domain.models.entities.Book>): ByteArray {
+        val backup = transactions.run {
+            val bookProtos = books.fastMap { book ->
+                val chapters = dumpChapters(book.id) { }
+                val mangaCategories = dumpMangaCategories(book.id)
+                val tracks = dumpTracks(book.id)
+                val histories = dumpHistories(book.id)
+
+                BookProto.fromDomain(book, chapters, mangaCategories, tracks, histories = histories)
+            }
+            
+            Backup(
+                library = bookProtos,
+                categories = dumpCategories()
+            )
+        }
+
+        return kotlinx.serialization.protobuf.ProtoBuf.encodeToByteArray(backup)
+    }
 }

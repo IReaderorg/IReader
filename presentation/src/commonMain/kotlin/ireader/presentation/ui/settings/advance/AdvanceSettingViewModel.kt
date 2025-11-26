@@ -4,13 +4,13 @@ package ireader.presentation.ui.settings.advance
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.data.repository.BookRepository
-import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ThemeRepository
 import ireader.domain.models.entities.Category
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.usecases.category.CategoryUseCases
 import ireader.domain.usecases.database.RepairDatabaseUseCase
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.files.GetSimpleStorage
@@ -23,6 +23,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.settings.reader.SettingState
+import kotlinx.coroutines.launch
 
 
 class AdvanceSettingViewModel(
@@ -35,7 +36,8 @@ class AdvanceSettingViewModel(
     private val readerPreferences: ReaderPreferences,
     private val androidReaderPreferences: PlatformUiPreferences,
     private val themeRepository: ThemeRepository,
-    private val categoryRepository: CategoryRepository,
+    // NEW: Clean architecture use cases
+    private val categoryUseCases: CategoryUseCases,
     private val appPreferences: AppPreferences,
     private val repairDatabaseUseCase: RepairDatabaseUseCase,
     private val bookRepository: BookRepository,
@@ -85,11 +87,38 @@ class AdvanceSettingViewModel(
         }
     }
 
+    /**
+     * Reset categories to default base categories
+     * Uses the new use case layer for proper cleanup and recreation
+     */
     fun resetCategories() {
-        scope.launchIO {
-            categoryRepository.deleteAll()
-            categoryRepository.insert(Category.baseCategories)
-            showSnackBar(UiText.MStringResource(Res.string.success))
+        scope.launch {
+            try {
+                // Get all existing categories
+                val existingCategories = categoryUseCases.getCategories()
+                
+                // Delete all non-system categories
+                existingCategories.forEach { category ->
+                    if (!category.isSystemCategory) {
+                        categoryUseCases.deleteCategory(category.id, moveToDefaultCategory = true)
+                    }
+                }
+                
+                // Recreate base categories
+                Category.baseCategories.forEach { baseCategory ->
+                    val result = categoryUseCases.createCategory(baseCategory.name)
+                    result.onFailure { error ->
+                        // Category might already exist, that's okay
+                        if (!error.message?.contains("already exists")!!) {
+                            throw error
+                        }
+                    }
+                }
+                
+                showSnackBar(UiText.MStringResource(Res.string.success))
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Failed to reset categories: ${e.message}"))
+            }
         }
     }
 

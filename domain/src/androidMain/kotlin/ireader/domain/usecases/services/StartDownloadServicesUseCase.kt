@@ -12,8 +12,16 @@ import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Compan
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.utils.toast
 
-
-
+/**
+ * Android implementation of StartDownloadServicesUseCase
+ * 
+ * ✅ CLEAN ARCHITECTURE: This use case correctly uses WorkManager to start
+ * the download service. It only uses constants from DownloadServiceStateImpl
+ * for backward compatibility with the WorkManager implementation.
+ * 
+ * Note: The constants (DOWNLOADER_BOOKS_IDS, etc.) are used for WorkManager
+ * data passing and can be moved to a separate constants file in the future.
+ */
 actual class StartDownloadServicesUseCase( private val context: Context) {
     actual fun start(
             bookIds: LongArray?,

@@ -540,7 +540,7 @@ fun GeneralScreenTab(
                 onClick = {
                     vm.translateCurrentChapter()
                 },
-                isTranslating = vm.translationState.isTranslating,
+                isTranslating = vm.translationViewModel.isTranslating,
                 engine = vm.translationEnginesManager.get(),
                 vm = vm
             )
@@ -551,7 +551,7 @@ fun GeneralScreenTab(
             PreferenceRow(
                 onClick = {
                     vm.loadGlossary()
-                    vm.translationState.showGlossaryDialog = true
+                    vm.translationViewModel.translationState.showGlossaryDialog = true
                 },
                 title = "Manage Glossary"
             )

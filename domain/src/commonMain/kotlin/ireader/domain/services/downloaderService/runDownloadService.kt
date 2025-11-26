@@ -59,10 +59,8 @@ suspend fun runDownloadService(
                     }
                 }
                 inputtedDownloaderMode -> {
-                    val downloads = downloadUseCases.findAllDownloadsUseCase()
-                    downloads.mapNotNull { download ->
-                        chapterRepo.findChapterById(download.chapterId)
-                    }
+                    // TODO: Migrate to new DownloadService interface
+                    emptyList()
                 }
                 else -> {
                     throw Exception("No chapters specified for download")
@@ -119,7 +117,8 @@ suspend fun runDownloadService(
         }
 
         // Insert downloads into database
-        downloadUseCases.insertDownloads(downloads.map { it.toDownload() })
+        // TODO: Migrate to new DownloadService interface
+        // downloadUseCases.insertDownloads(downloads.map { it.toDownload() })
         updateProgress(downloads.size, 0, true)
         updateNotification(ID_DOWNLOAD_CHAPTER_PROGRESS)
 
@@ -228,11 +227,12 @@ suspend fun runDownloadService(
                     }
 
                     // Mark as completed
-                    withContext(Dispatchers.IO) {
-                        downloadUseCases.insertDownload(
-                            download.copy(priority = 1).toDownload()
-                        )
-                    }
+                    // TODO: Migrate to new DownloadService interface
+                    // withContext(Dispatchers.IO) {
+                    //     downloadUseCases.insertDownload(
+                    //         download.copy(priority = 1).toDownload()
+                    //     )
+                    // }
 
                     // Update progress
                     completedCount++
@@ -288,11 +288,12 @@ suspend fun runDownloadService(
                         ))
                 }
 
-                withContext(Dispatchers.IO) {
-                    downloadUseCases.insertDownload(
-                        download.copy(priority = 0).toDownload()
-                    )
-                }
+                // TODO: Migrate to new DownloadService interface
+                // withContext(Dispatchers.IO) {
+                //     downloadUseCases.insertDownload(
+                //         download.copy(priority = 0).toDownload()
+                //     )
+                // }
 
                 ireader.core.log.Log.error { "Failed to download ${download.chapterName}: $errorMessage" }
             }

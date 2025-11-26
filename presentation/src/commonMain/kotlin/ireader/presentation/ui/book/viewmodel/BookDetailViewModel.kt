@@ -62,13 +62,20 @@ class BookDetailViewModel(
     val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val param: Param,
     val booksState: BooksState,
+    @Deprecated("Use clipboardService and shareService instead")
     val platformHelper: PlatformHelper,
     private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
     private val checkSourceAvailabilityUseCase: ireader.domain.usecases.source.CheckSourceAvailabilityUseCase,
     private val migrateToSourceUseCase: ireader.domain.usecases.source.MigrateToSourceUseCase,
     private val catalogStore: ireader.domain.catalogs.CatalogStore,
     private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
-    private val downloadService: ireader.domain.services.common.DownloadService
+    private val downloadService: ireader.domain.services.common.DownloadService,
+    // NEW: Clean architecture use cases
+    private val bookUseCases: ireader.domain.usecases.book.BookUseCases,
+    private val chapterUseCases: ireader.domain.usecases.chapter.ChapterUseCases,
+    // Platform services - Clean architecture
+    private val clipboardService: ireader.domain.services.platform.ClipboardService,
+    private val shareService: ireader.domain.services.platform.ShareService,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DetailState by state, ChapterState by chapterState {
     data class Param(val bookId: Long?)
 
@@ -469,7 +476,7 @@ class BookDetailViewModel(
     }
     
     /**
-     * Share book information
+     * Share book information using platform service
      */
     fun shareBook() {
         val book = booksState.book ?: return
@@ -489,14 +496,17 @@ class BookDetailViewModel(
                     append("Read on iReader")
                 }
                 
-                // Use platform helper to share with error handling
-                try {
-                    platformHelper.shareText(shareText)
-                } catch (e: Exception) {
-                    Log.error("Platform share failed", e)
-                    withUIContext {
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to share: ${e.message}"))
+                // Use new platform service with clean error handling
+                when (val result = shareService.shareText(shareText, book.title)) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        // Success - no need to show message
                     }
+                    is ireader.domain.services.common.ServiceResult.Error -> {
+                        withUIContext {
+                            showSnackBar(ireader.i18n.UiText.DynamicString("Failed to share: ${result.message}"))
+                        }
+                    }
+                    else -> {}
                 }
             } catch (e: Exception) {
                 Log.error("Error sharing book", e)
@@ -508,39 +518,43 @@ class BookDetailViewModel(
     }
     
     /**
-     * Copy book title to clipboard
+     * Copy book title to clipboard using platform service
      */
     fun copyBookTitle(title: String) {
         scope.launch {
-            try {
-                platformHelper.copyToClipboard("Book Title", title)
-                withUIContext {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Title copied to clipboard"))
+            when (val result = clipboardService.copyText(title, "Book Title")) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    withUIContext {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Title copied to clipboard"))
+                    }
                 }
-            } catch (e: Exception) {
-                Log.error("Error copying title", e)
-                withUIContext {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${e.message}"))
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    withUIContext {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${result.message}"))
+                    }
                 }
+                else -> {}
             }
         }
     }
     
     /**
-     * Copy text to clipboard
+     * Copy text to clipboard using platform service
      */
     fun copyToClipboard(label: String, text: String) {
         scope.launch {
-            try {
-                platformHelper.copyToClipboard(label, text)
-                withUIContext {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Copied to clipboard"))
+            when (val result = clipboardService.copyText(text, label)) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    withUIContext {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Copied to clipboard"))
+                    }
                 }
-            } catch (e: Exception) {
-                Log.error("Error copying to clipboard", e)
-                withUIContext {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${e.message}"))
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    withUIContext {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${result.message}"))
+                    }
                 }
+                else -> {}
             }
         }
     }
@@ -628,17 +642,16 @@ class BookDetailViewModel(
             .trim()
     }
 
+    /**
+     * Archive a book using the new use case layer
+     * Provides better error handling and consistency
+     */
     fun archiveBook(book: Book) {
         applicationScope.launch {
             try {
-                archiveBookUseCase.toggleArchive(book.id, true).onSuccess {
-                    withUIContext {
-                        showSnackBar(UiText.DynamicString("${book.title} has been archived"))
-                    }
-                }.onFailure { error ->
-                    withUIContext {
-                        showSnackBar(UiText.ExceptionString(error))
-                    }
+                bookUseCases.updateArchiveStatus(book.id, isArchived = true)
+                withUIContext {
+                    showSnackBar(UiText.DynamicString("${book.title} has been archived"))
                 }
             } catch (e: Exception) {
                 withUIContext {
@@ -648,17 +661,15 @@ class BookDetailViewModel(
         }
     }
 
+    /**
+     * Unarchive a book using the new use case layer
+     */
     fun unarchiveBook(book: Book) {
         applicationScope.launch {
             try {
-                archiveBookUseCase.toggleArchive(book.id, false).onSuccess {
-                    withUIContext {
-                        showSnackBar(UiText.DynamicString("${book.title} has been unarchived"))
-                    }
-                }.onFailure { error ->
-                    withUIContext {
-                        showSnackBar(UiText.ExceptionString(error))
-                    }
+                bookUseCases.updateArchiveStatus(book.id, isArchived = false)
+                withUIContext {
+                    showSnackBar(UiText.DynamicString("${book.title} has been unarchived"))
                 }
             } catch (e: Exception) {
                 withUIContext {
@@ -686,9 +697,19 @@ class BookDetailViewModel(
     }
 
 
+    /**
+     * Delete chapters using the new use case layer
+     * Provides proper cleanup and error handling
+     */
     fun deleteChapters(chapters: List<Chapter>) {
         scope.launch(Dispatchers.IO) {
-            deleteUseCase.deleteChapters(chapters)
+            try {
+                chapterUseCases.deleteChapters(chapters)
+            } catch (e: Exception) {
+                withUIContext {
+                    showSnackBar(UiText.ExceptionString(e))
+                }
+            }
         }
     }
 
