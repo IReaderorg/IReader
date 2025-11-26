@@ -1,5 +1,6 @@
 package ireader.presentation.ui.reader.viewmodel.subviewmodels
 
+import ireader.core.utils.LruCache
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.history.HistoryUseCase
 import ireader.domain.usecases.local.LocalGetChapterUseCase
@@ -45,48 +46,15 @@ class ReaderChapterViewModel(
     private val _chapters = MutableStateFlow<List<Chapter>>(emptyList())
     val chapters: StateFlow<List<Chapter>> = _chapters.asStateFlow()
 
-    // LRU Cache for preloaded chapters - FIXES MEMORY LEAK
-    private val preloadCache = ChapterLRUCache(maxSize = 5)
+    // Thread-safe LRU Cache for preloaded chapters - FIXES MEMORY LEAK
+    private val preloadCache = LruCache<Long, Chapter>(
+        maxSize = 5,
+        onEvicted = { chapterId, _ ->
+            ireader.core.log.Log.debug("LRU: Evicted chapter $chapterId from cache")
+        }
+    )
     
     private var preloadJob: Job? = null
-
-    /**
-     * LRU Cache implementation to prevent memory leaks from unlimited chapter preloading.
-     * Maintains a maximum of [maxSize] chapters in memory.
-     */
-    private class ChapterLRUCache(private val maxSize: Int = 5) {
-        private val cache = LinkedHashMap<Long, Chapter>(maxSize, 0.75f, true)
-
-        fun put(id: Long, chapter: Chapter) {
-            synchronized(cache) {
-                if (cache.size >= maxSize) {
-                    // Remove least recently used (first entry)
-                    val lruKey = cache.keys.first()
-                    cache.remove(lruKey)
-                    ireader.core.log.Log.debug("LRU: Evicted chapter $lruKey from cache")
-                }
-                cache[id] = chapter
-                ireader.core.log.Log.debug("LRU: Cached chapter $id (size: ${cache.size}/$maxSize)")
-            }
-        }
-
-        fun get(id: Long): Chapter? = synchronized(cache) {
-            cache[id]
-        }
-
-        fun contains(id: Long): Boolean = synchronized(cache) {
-            cache.containsKey(id)
-        }
-
-        fun clear() = synchronized(cache) {
-            cache.clear()
-            ireader.core.log.Log.debug("LRU: Cache cleared")
-        }
-
-        fun size(): Int = synchronized(cache) {
-            cache.size
-        }
-    }
 
     /**
      * Set the list of chapters for navigation
@@ -165,7 +133,7 @@ class ReaderChapterViewModel(
         preloadJob = scope.launch {
             try {
                 val nextChapter = getNextChapter()
-                if (nextChapter != null && !preloadCache.contains(nextChapter.id)) {
+                if (nextChapter != null && !preloadCache.containsKey(nextChapter.id)) {
                     preloadChapter(nextChapter)
                 }
             } catch (e: Exception) {
@@ -186,9 +154,11 @@ class ReaderChapterViewModel(
                 chapter = chapter,
                 catalog = catalog,
                 onSuccess = { preloadedChapter ->
-                    preloadCache.put(chapter.id, preloadedChapter)
-                    // Save to database for offline access
                     scope.launch {
+                        val cacheSize = preloadCache.size()
+                        preloadCache.put(chapter.id, preloadedChapter)
+                        ireader.core.log.Log.debug("LRU: Cached chapter ${chapter.id} (size: ${cacheSize + 1}/5)")
+                        // Save to database for offline access
                         insertUseCases.insertChapter(preloadedChapter)
                     }
                     ireader.core.log.Log.debug("Successfully preloaded chapter: ${chapter.name}")
@@ -216,7 +186,7 @@ class ReaderChapterViewModel(
                 if (currentIndex != -1) {
                     val chaptersToPreload = _chapters.value.drop(currentIndex + 1).take(count)
                     chaptersToPreload.forEach { chapter ->
-                        if (!preloadCache.contains(chapter.id)) {
+                        if (!preloadCache.containsKey(chapter.id)) {
                             preloadChapter(chapter, catalog)
                             delay(500) // Small delay between preloads to avoid overwhelming the source
                         }
@@ -231,7 +201,7 @@ class ReaderChapterViewModel(
     /**
      * Get a preloaded chapter from cache
      */
-    fun getPreloadedChapter(chapterId: Long): Chapter? {
+    suspend fun getPreloadedChapter(chapterId: Long): Chapter? {
         return preloadCache.get(chapterId)
     }
 
@@ -239,14 +209,16 @@ class ReaderChapterViewModel(
      * Clear preloaded chapters cache
      */
     fun clearPreloadCache() {
-        preloadCache.clear()
-        ireader.core.log.Log.debug("Preload cache cleared")
+        scope.launch {
+            preloadCache.clear()
+            ireader.core.log.Log.debug("Preload cache cleared")
+        }
     }
 
     /**
      * Get cache statistics for debugging
      */
-    fun getCacheStats(): String {
+    suspend fun getCacheStats(): String {
         return "Cache size: ${preloadCache.size()}/5"
     }
 
