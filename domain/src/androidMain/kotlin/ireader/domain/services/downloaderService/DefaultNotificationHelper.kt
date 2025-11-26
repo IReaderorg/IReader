@@ -113,7 +113,7 @@ class DefaultNotificationHelper(
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_LOW
             setAutoCancel(false) // Don't auto-cancel on click
-            setOngoing(false) // Make it dismissable
+            setOngoing(true) // Keep notification ongoing during download
             addAction(
                 R.drawable.baseline_close_24,
                 localizeHelper.localize(Res.string.cancel),

@@ -62,13 +62,24 @@ class DesktopNotificationManager : PlatformNotificationManager {
      * Show desktop notification using available methods
      */
     private fun showDesktopNotification(notification: NotificationData) {
-        // Try Compose Desktop notification first
+        // Try Compose Desktop notification first (requires TrayState)
         if (showComposeNotification(notification)) {
             return
         }
         
-        // Fallback to AWT system tray notification
-        showAWTNotification(notification)
+        // Try AWT system tray notification (requires tray icon)
+        if (showAWTNotification(notification)) {
+            return
+        }
+        
+        // Fallback to console logging if no notification method available
+        Log.info { "NOTIFICATION: ${notification.title} - ${notification.content}" }
+        println("═══════════════════════════════════════════════════════")
+        println("📢 NOTIFICATION")
+        println("Title: ${notification.title}")
+        println("Content: ${notification.content}")
+        println("Priority: ${notification.priority}")
+        println("═══════════════════════════════════════════════════════")
     }
     
     /**
@@ -105,23 +116,33 @@ class DesktopNotificationManager : PlatformNotificationManager {
      * - Windows: Shows Windows Toast Notification
      * - macOS: Shows macOS Notification Center notification
      * - Linux: Uses libnotify (if available)
+     * 
+     * @return true if notification was shown successfully, false otherwise
      */
-    private fun showAWTNotification(notification: NotificationData) {
+    private fun showAWTNotification(notification: NotificationData): Boolean {
         try {
             if (!java.awt.SystemTray.isSupported()) {
                 Log.warn { "System tray not supported on this platform" }
-                return
+                return false
             }
             
             val tray = java.awt.SystemTray.getSystemTray()
-            val trayIcons = tray.trayIcons
             
-            if (trayIcons.isEmpty()) {
-                Log.warn { "No tray icon available for notification" }
-                return
+            // If no tray icon exists, create a temporary one for notifications
+            val trayIcon = if (tray.trayIcons.isEmpty()) {
+                createTemporaryTrayIcon()?.also { icon ->
+                    tray.add(icon)
+                    Log.info { "Created temporary tray icon for notifications" }
+                }
+            } else {
+                tray.trayIcons[0]
             }
             
-            val trayIcon = trayIcons[0]
+            if (trayIcon == null) {
+                Log.warn { "Could not create tray icon for notification" }
+                return false
+            }
+            
             val messageType = when (notification.priority) {
                 NotificationPriority.HIGH -> java.awt.TrayIcon.MessageType.WARNING
                 NotificationPriority.LOW -> java.awt.TrayIcon.MessageType.INFO
@@ -135,8 +156,33 @@ class DesktopNotificationManager : PlatformNotificationManager {
             )
             
             Log.info { "AWT notification shown: ${notification.title}" }
+            return true
         } catch (e: Exception) {
             Log.error { "Failed to show AWT notification: ${e.message}" }
+            return false
+        }
+    }
+    
+    /**
+     * Create a temporary tray icon for showing notifications
+     */
+    private fun createTemporaryTrayIcon(): java.awt.TrayIcon? {
+        return try {
+            // Create a simple 16x16 icon
+            val image = java.awt.image.BufferedImage(16, 16, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+            val g = image.createGraphics()
+            
+            // Draw a simple notification icon (bell shape)
+            g.color = java.awt.Color(33, 150, 243) // Blue color
+            g.fillOval(4, 2, 8, 8)
+            g.fillRect(6, 10, 4, 2)
+            g.fillOval(5, 12, 6, 3)
+            g.dispose()
+            
+            java.awt.TrayIcon(image, "iReader Notifications")
+        } catch (e: Exception) {
+            Log.error { "Failed to create temporary tray icon: ${e.message}" }
+            null
         }
     }
 }

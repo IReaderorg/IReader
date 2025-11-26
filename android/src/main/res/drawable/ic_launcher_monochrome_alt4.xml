@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Alternative Icon 4: Minimalist "i" for IReader -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.7"
+        android:scaleY="0.7"
+        android:translateX="16.2"
+        android:translateY="16.2">
+        <!-- Dot of "i" -->
+        <path
+            android:fillColor="#000000"
+            android:pathData="M54,20 m-8,0 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0" />
+        <!-- Stem of "i" with book pages -->
+        <path
+            android:fillColor="#000000"
+            android:pathData="M46,35 L46,88 L62,88 L62,35 Z M50,75 L50,80 L58,80 L58,75 Z M50,65 L50,70 L58,70 L58,65 Z M50,55 L50,60 L58,60 L58,55 Z M50,45 L50,50 L58,50 L58,45 Z" />
+    </group>
+</vector>

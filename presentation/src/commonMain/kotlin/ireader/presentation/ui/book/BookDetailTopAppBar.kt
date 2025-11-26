@@ -55,7 +55,6 @@ fun BookDetailTopAppBar(
     onRefresh: () -> Unit,
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
-    onShare: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?,
     state: BookDetailViewModel,
     onClickCancelSelection: () -> Unit,
@@ -88,7 +87,6 @@ fun BookDetailTopAppBar(
                 RegularChapterDetailTopAppBar(
                     onPopBackStack = onPopBackStack,
                     scrollBehavior = scrollBehavior,
-                    onShare = onShare,
                     onCommand = onCommand,
                     onRefresh = onRefresh,
                     source = source,
@@ -114,7 +112,6 @@ fun RegularChapterDetailTopAppBar(
     onRefresh: () -> Unit,
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
-    onShare: () -> Unit,
     onInfo: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?,
     onArchive: () -> Unit = {},

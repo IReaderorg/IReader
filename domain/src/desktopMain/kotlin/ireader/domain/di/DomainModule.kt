@@ -42,6 +42,8 @@ import org.koin.dsl.module
 actual val DomainModule: Module = module {
     // Include sync module for sync functionality
     includes(syncModule)
+    // Include service abstraction module
+    includes(ServiceModule)
     
     // FileSystem implementation for desktop
     single<ireader.core.io.FileSystem> {
@@ -77,11 +79,7 @@ actual val DomainModule: Module = module {
         DesktopNotificationManager()
     }
     
-    // Legacy notification manager for backward compatibility
-    factory  {
-        NotificationManager(
-        )
-    }
+
     single<GetSimpleStorage> {
         DesktopGetSimpleStorage()
     }

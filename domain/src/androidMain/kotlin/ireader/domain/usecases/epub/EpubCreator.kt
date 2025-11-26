@@ -31,23 +31,41 @@ actual class EpubCreator(
     ) {
         withContext(Dispatchers.IO) {
             try {
+                android.util.Log.d("EpubCreator", "Starting EPUB export for book: ${book.title}")
+                android.util.Log.d("EpubCreator", "Output URI: ${uri.androidUri}")
                 currentEvent("Loading chapters...")
                 val chapters = chapterRepository.findChaptersByBookId(book.id)
+                android.util.Log.d("EpubCreator", "Found ${chapters.size} chapters")
                 
                 if (chapters.isEmpty()) {
                     throw Exception("No chapters found for this book")
                 }
                 
                 // Get cover file path if available
+                android.util.Log.d("EpubCreator", "Getting cover file...")
                 val coverFile = coverCache.getCoverFile(BookCover.Companion.from(book))
-                val coverUrl = if (coverFile?.exists() == true) {
-                    "file://${coverFile.path}"
-                } else {
+                val coverUrl = try {
+                    if (coverFile != null && coverFile.exists()) {
+                        // Verify the file actually exists on disk
+                        val javaFile = File(coverFile.path)
+                        if (javaFile.exists() && javaFile.canRead()) {
+                            "file://${coverFile.path}"
+                        } else {
+                            book.cover
+                        }
+                    } else {
+                        book.cover
+                    }
+                } catch (e: Exception) {
+                    // If there's any error accessing the cover, use the original URL
                     book.cover
                 }
                 
+                android.util.Log.d("EpubCreator", "Cover URL: $coverUrl")
+                
                 // Create temp file for EpubBuilder
                 val tempFile = File.createTempFile("epub_export_", ".epub", appContext.cacheDir)
+                android.util.Log.d("EpubCreator", "Temp file created: ${tempFile.absolutePath}")
                 
                 // Use EpubBuilder with export options
                 val options = ExportOptions(
@@ -55,31 +73,53 @@ actual class EpubCreator(
                     selectedChapters = emptySet() // Export all chapters
                 )
                 
+                android.util.Log.d("EpubCreator", "Calling epubBuilder.createEpub...")
                 val result = epubBuilder.createEpub(
                     book = book.copy(cover = coverUrl),
                     chapters = chapters,
                     options = options,
-                    outputUri = tempFile.absolutePath
+                    outputUri = tempFile.absolutePath,
+                    tempDirPath = appContext.cacheDir.absolutePath
                 )
                 
                 result.onSuccess { tempPath ->
                     // Copy from temp file to Android URI
                     currentEvent("Saving EPUB file...")
-                    val contentResolver = appContext.contentResolver
-                    contentResolver.openOutputStream(uri.androidUri)?.use { outputStream ->
-                        File(tempPath).inputStream().use { inputStream ->
-                            inputStream.copyTo(outputStream)
+                    try {
+                        val sourceFile = File(tempPath)
+                        if (!sourceFile.exists()) {
+                            throw Exception("Generated EPUB file not found at: $tempPath")
                         }
+                        
+                        val contentResolver = appContext.contentResolver
+                        val outputStream = contentResolver.openOutputStream(uri.androidUri)
+                            ?: throw Exception("Failed to open output stream for URI: ${uri.androidUri}")
+                        
+                        outputStream.use { output ->
+                            sourceFile.inputStream().use { input ->
+                                input.copyTo(output)
+                            }
+                        }
+                        
+                        tempFile.delete()
+                        currentEvent("EPUB created successfully!")
+                    } catch (e: Exception) {
+                        tempFile.delete()
+                        throw Exception("Failed to save EPUB: ${e.message}", e)
                     }
-                    tempFile.delete()
-                    currentEvent("EPUB created successfully!")
                 }.onFailure { error ->
                     tempFile.delete()
-                    throw error
+                    throw Exception("EPUB generation failed: ${error.message}", error)
                 }
             } catch (e: Exception) {
-                currentEvent("Error: ${e.message}")
-                throw e
+                val errorMessage = "Error: ${e.message ?: "Unknown error"}"
+                android.util.Log.e("EpubCreator", "EPUB creation failed", e)
+                android.util.Log.e("EpubCreator", "Error details: ${e.javaClass.name}: ${e.message}")
+                android.util.Log.e("EpubCreator", "Stack trace: ${e.stackTraceToString()}")
+                currentEvent(errorMessage)
+                // Log the full stack trace for debugging
+                e.printStackTrace()
+                throw Exception("EPUB creation failed: ${e.message}", e)
             }
         }
     }
@@ -94,11 +134,13 @@ actual class EpubCreator(
     actual fun onEpubCreateRequested(book: Book, onStart: @Composable ((Any) -> Unit)) {
         val mimeTypes = arrayOf("application/epub+zip")
         val filename = "${sanitizeFilename(book.title)}.epub"
+        android.util.Log.d("EpubCreator", "Creating file picker intent for: $filename")
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
             .setType("application/epub+zip")
             .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             .putExtra(Intent.EXTRA_TITLE, filename)
+        android.util.Log.d("EpubCreator", "Launching file picker intent")
         onStart(intent)
     }
 }

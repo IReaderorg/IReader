@@ -114,48 +114,8 @@ data class BookDetailScreenSpec constructor(
         val topbarState = rememberTopAppBarState()
         val snackBarHostState = SnackBarListener(vm)
         
-        // State to control when to trigger epub export
-        var triggerEpubExport = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-        var triggerEpubExportFromDialog = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-        
-        // ActivityResultListeners must be created at the top level of the Composable
-        val onShare = ActivityResultListener(onSuccess = { uri ->
-            vm.booksState.book?.let { book ->
-                vm.createEpub(book, uri, currentEvent = {
-                    vm.showSnackBar(UiText.DynamicString(it))
-                })
-            }
-            vm.showSnackBar(UiText.MStringResource(Res.string.success))
-        }) { e ->
-            vm.showSnackBar(UiText.ExceptionString(e))
-        }
-        
-        val onShareEpub = ActivityResultListener(onSuccess = { uri ->
-            vm.booksState.book?.let { book ->
-                vm.createEpub(book, uri, currentEvent = {
-                    vm.showSnackBar(UiText.DynamicString(it))
-                })
-            }
-            vm.showSnackBar(UiText.MStringResource(Res.string.success))
-        }) { e ->
-            vm.showSnackBar(UiText.ExceptionString(e))
-        }
-        
-        // Trigger epub export when requested from menu
-        if (triggerEpubExport.value && book != null) {
-            vm.createEpub.onEpubCreateRequested(book) { uri ->
-                onShare.launch(uri)
-                triggerEpubExport.value = false
-            }
-        }
-        
-        // Trigger epub export when requested from End of Life dialog
-        if (triggerEpubExportFromDialog.value && book != null) {
-            vm.createEpub.onEpubCreateRequested(book) { uri ->
-                onShareEpub.launch(uri)
-                triggerEpubExportFromDialog.value = false
-            }
-        }
+        // EPUB export now uses the export dialog with options
+        // The old createEpub flow has been removed in favor of exportBookAsEpubUseCase
         
         // Handle back button to close modal sheet instead of closing screen
         // BackHandler removed - Android-specific, implement in androidMain if needed
@@ -262,9 +222,6 @@ data class BookDetailScreenSpec constructor(
                                 scope.launch {
                                     sheetState.show()
                                 }
-                            },
-                            onShare = {
-                                triggerEpubExport.value = true
                             },
                             state = vm,
                             onSelectBetween = {
@@ -495,7 +452,7 @@ data class BookDetailScreenSpec constructor(
                     book?.let { vm.archiveBook(it) }
                 },
                 onExportEpub = {
-                    triggerEpubExportFromDialog.value = true
+                    vm.showEpubExportDialog = true
                 }
             )
         }

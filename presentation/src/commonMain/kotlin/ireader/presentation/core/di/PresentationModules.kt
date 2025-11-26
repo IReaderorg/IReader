@@ -73,7 +73,7 @@ val PresentationModules = module {
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
     single  { HistoryViewModel(get(), get(), get()) }
-    single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get()) }
+    single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get()) }
     single  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     
@@ -84,9 +84,9 @@ val PresentationModules = module {
     factory { ireader.presentation.ui.home.sources.migration.MigrationViewModel(get(), get(), get()) }
 
 
-    single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull()) }
+    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull(),get()) }
     single  { 
         MainSettingScreenViewModel(
             uiPreferences = get(),
@@ -99,7 +99,7 @@ val PresentationModules = module {
     factory  { AppearanceViewModel(get(), get()) }
 
     factory  { CategoryScreenViewModel(get(), get(), get(),get(),get()) }
-    factory  { DownloaderViewModel(get(), get(), get(), get()) }
+    factory  { DownloaderViewModel(get(), get(), get(), get(), get(), get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { TranslationSettingsViewModel(get(), get()) }

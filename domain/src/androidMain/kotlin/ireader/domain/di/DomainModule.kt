@@ -38,7 +38,6 @@ import ireader.domain.usecases.services.StartDownloadServicesUseCase
 import ireader.domain.usecases.services.StartExtensionManagerService
 import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
 import ireader.domain.usecases.services.StartTTSServicesUseCase
-import ireader.domain.utils.NotificationManager
 import ireader.domain.notification.PlatformNotificationManager
 import ireader.domain.notification.AndroidNotificationManager
 import ireader.i18n.LocalizeHelper
@@ -53,6 +52,8 @@ import java.io.File
 actual val DomainModule = module {
     // Include sync module for sync functionality
     includes(syncModule)
+    // Include service abstraction module
+    includes(ServiceModule)
     
     // FileSystem implementation for Android
     single<ireader.core.io.FileSystem> {
@@ -81,13 +82,7 @@ actual val DomainModule = module {
     single<PlatformNotificationManager> {
         AndroidNotificationManager(get())
     }
-    
-    // Legacy notification manager for backward compatibility
-    factory {
-        NotificationManager(
-            get(),
-        )
-    }
+
     worker {
         ExtensionManagerService(
             androidContext(),

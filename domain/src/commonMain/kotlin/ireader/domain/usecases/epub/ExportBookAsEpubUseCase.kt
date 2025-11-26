@@ -67,13 +67,30 @@ class ExportBookAsEpubUseCase(
             
             onProgress("Creating EPUB file...")
             
+            // For content URIs (Android), we need to create a temp file first
+            // then copy it to the content URI
+            val isContentUri = outputUri.toString().startsWith("content://")
+            val tempFilePath = if (isContentUri) {
+                // Create temp file path - platform-specific temp dir will be used
+                createTempEpubPath()
+            } else {
+                outputUri.toString()
+            }
+            
             // Create EPUB
             val result = epubBuilder.createEpub(
                 book = book,
                 chapters = selectedChapters,
                 options = options,
-                outputUri = outputUri.toString()
+                outputUri = tempFilePath
             )
+            
+            // If we used a temp file for content URI, we need to copy it
+            if (isContentUri && result.isSuccess) {
+                result.onSuccess { tempPath ->
+                    copyTempFileToContentUri(tempPath, outputUri)
+                }
+            }
             
             result.onSuccess {
                 onProgress("EPUB created successfully!")
@@ -88,4 +105,30 @@ class ExportBookAsEpubUseCase(
             Result.failure(e)
         }
     }
+    
+    /**
+     * Create a temporary file path for EPUB creation
+     * Platform-specific implementation will provide appropriate temp directory
+     */
+    private fun createTempEpubPath(): String {
+        return createPlatformTempEpubPath()
+    }
+    
+    /**
+     * Copy temp file to content URI (Android only)
+     * Desktop implementation will be a no-op
+     */
+    private suspend fun copyTempFileToContentUri(tempPath: String, contentUri: Uri) {
+        copyPlatformTempFileToContentUri(tempPath, contentUri)
+    }
 }
+
+/**
+ * Platform-specific temp file creation
+ */
+expect fun createPlatformTempEpubPath(): String
+
+/**
+ * Platform-specific content URI handling
+ */
+expect suspend fun copyPlatformTempFileToContentUri(tempPath: String, contentUri: Uri)

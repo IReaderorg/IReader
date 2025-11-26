@@ -39,17 +39,19 @@ class EpubBuilder(
      * @param chapters The chapters to include
      * @param options Export configuration options
      * @param outputUri The destination file path
+     * @param tempDirPath Optional custom temp directory path (for Android compatibility)
      * @return Result containing the file path or an error
      */
     suspend fun createEpub(
         book: Book,
         chapters: List<Chapter>,
         options: ExportOptions,
-        outputUri: String
+        outputUri: String,
+        tempDirPath: String? = null
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             // Create temporary directory for EPUB structure
-            val tempDir = createTempDirectory()
+            val tempDir = createTempDirectory(tempDirPath)
             
             // Build EPUB structure
             createEpubStructure(tempDir)
@@ -86,9 +88,12 @@ class EpubBuilder(
         }
     }
     
-    private fun createTempDirectory(): File {
-        val tempDir = File(System.getProperty("java.io.tmpdir"), "epub_${UUID.randomUUID()}")
-        tempDir.mkdirs()
+    private fun createTempDirectory(customPath: String? = null): File {
+        val basePath = customPath ?: System.getProperty("java.io.tmpdir")
+        val tempDir = File(basePath, "epub_${UUID.randomUUID()}")
+        if (!tempDir.mkdirs() && !tempDir.exists()) {
+            throw Exception("Failed to create temp directory: ${tempDir.absolutePath}")
+        }
         return tempDir
     }
     
@@ -371,14 +376,20 @@ img {
     }
     
     private fun packageAsEpub(sourceDir: File, outputUri: String): String {
+        Log.info { "packageAsEpub called with outputUri: $outputUri" }
+        
         // Handle both file:// URIs and absolute paths
         val outputPath = if (outputUri.startsWith("file://")) {
             outputUri.removePrefix("file://")
                 .replace("%20", " ") // Decode URL-encoded spaces
+        } else if (outputUri.startsWith("content://")) {
+            // Content URIs cannot be used as file paths
+            throw IllegalArgumentException("Content URIs must be handled by the caller. Use a temp file path instead. Got: $outputUri")
         } else {
             outputUri
         }
         
+        Log.info { "Resolved output path: $outputPath" }
         val outputFile = File(outputPath)
         
         // Ensure parent directory exists

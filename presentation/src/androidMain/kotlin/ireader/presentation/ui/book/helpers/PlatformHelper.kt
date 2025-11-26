@@ -36,25 +36,40 @@ actual class PlatformHelper(private val context: Context) {
             val sanitizedAuthor = author.replace(Regex("[^a-zA-Z0-9\\s-]"), "")
             val fileName = "$sanitizedTitle - $sanitizedAuthor.epub"
             
-            // Use MediaStore for Android 10+
+            // Use MediaStore for Android 10+ (API 29+)
+            // Create in Downloads/IReader directory
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val contentValues = ContentValues().apply {
                     put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
                     put(MediaStore.MediaColumns.MIME_TYPE, "application/epub+zip")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                    // Save to Downloads/IReader directory
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/IReader")
                 }
                 
                 val uri = context.contentResolver.insert(
                     MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                     contentValues
                 )
+                
+                if (uri != null) {
+                    Log.info { "EPUB will be saved to: Downloads/IReader/$fileName" }
+                }
+                
                 uri?.toString()
             } else {
-                // For older Android versions, use Downloads directory
+                // For older Android versions (API 28 and below), use Downloads/IReader directory
                 val downloadsDir = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOWNLOADS
                 )
-                val file = File(downloadsDir, fileName)
+                val ireaderDir = File(downloadsDir, "IReader")
+                
+                // Create IReader directory if it doesn't exist
+                if (!ireaderDir.exists()) {
+                    ireaderDir.mkdirs()
+                }
+                
+                val file = File(ireaderDir, fileName)
+                Log.info { "EPUB will be saved to: ${file.absolutePath}" }
                 file.toURI().toString()
             }
         } catch (e: Exception) {

@@ -74,7 +74,8 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:screenOrientation="fullSensor"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Splash">
+        android:theme="@style/Theme.Splash"
+        tools:targetApi="33">
         <activity
             android:name="org.ireader.app.crash.CrashActivity"
             android:exported="false"

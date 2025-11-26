@@ -64,7 +64,8 @@ class LibraryViewModel(
         private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
         private val getLastReadNovelUseCase: ireader.domain.usecases.history.GetLastReadNovelUseCase,
         private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
-        private val importEpub: ireader.domain.usecases.epub.ImportEpub
+        private val importEpub: ireader.domain.usecases.epub.ImportEpub,
+        private val downloadService: ireader.domain.services.common.DownloadService
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -251,8 +252,18 @@ class LibraryViewModel(
     }
 
 fun downloadChapters() {
-    serviceUseCases.startDownloadServicesUseCase.start(bookIds = selectedBooks.toLongArray())
-    selectedBooks.clear()
+    scope.launch {
+        when (val result = downloadService.queueBooks(selectedBooks.toList())) {
+            is ireader.domain.services.common.ServiceResult.Success -> {
+                showSnackBar(ireader.i18n.UiText.DynamicString("${selectedBooks.size} books queued for download"))
+                selectedBooks.clear()
+            }
+            is ireader.domain.services.common.ServiceResult.Error -> {
+                showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+            }
+            else -> {}
+        }
+    }
 }
 
 /**

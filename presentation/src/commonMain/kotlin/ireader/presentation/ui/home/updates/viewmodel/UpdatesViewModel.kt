@@ -19,7 +19,8 @@ class UpdatesViewModel(
         private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
         private val serviceUseCases: ServiceUseCases,
         private val uiPreferences: UiPreferences,
-        private val categoryUseCases: ireader.domain.usecases.category.CategoriesUseCases
+        private val categoryUseCases: ireader.domain.usecases.category.CategoriesUseCases,
+        private val downloadService: ireader.domain.services.common.DownloadService
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), UpdateState by updateStateImpl {
     val after = uiPreferences.showUpdatesAfter().asState()
     val relativeFormat by uiPreferences.relativeTime().asState()
@@ -77,9 +78,15 @@ class UpdatesViewModel(
         scope.launch {
             val chapterIds =
                 updates.values.flatMap { it }.filter { it.chapterId in selection }.map { it.chapterId }
-            serviceUseCases.startDownloadServicesUseCase.start(
-                chapterIds = chapterIds.toLongArray()
-            )
+            when (val result = downloadService.queueChapters(chapterIds)) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("${chapterIds.size} chapters queued for download"))
+                }
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                }
+                else -> {}
+            }
         }
     }
     fun refreshUpdate() {

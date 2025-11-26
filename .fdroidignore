@@ -1,0 +1,7 @@
+# Desktop-only native binaries and resources - not included in Android builds
+domain/src/desktopMain/resources/native/
+
+# Gradle wrapper files - F-Droid uses its own gradle wrapper
+gradlew
+gradlew.bat
+gradle/wrapper/gradle-wrapper.jar

@@ -201,6 +201,11 @@ suspend fun runDownloadService(
                         }
                     )
 
+                    // Check if cancelled immediately after network call
+                    if (!downloadServiceState.isRunning || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
+                        break
+                    }
+
                     // Check result
                     if (downloadError != null) {
                         throw downloadError!!

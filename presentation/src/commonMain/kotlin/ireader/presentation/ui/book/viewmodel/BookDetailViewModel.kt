@@ -67,7 +67,8 @@ class BookDetailViewModel(
     private val checkSourceAvailabilityUseCase: ireader.domain.usecases.source.CheckSourceAvailabilityUseCase,
     private val migrateToSourceUseCase: ireader.domain.usecases.source.MigrateToSourceUseCase,
     private val catalogStore: ireader.domain.catalogs.CatalogStore,
-    private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null
+    private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
+    private val downloadService: ireader.domain.services.common.DownloadService
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DetailState by state, ChapterState by chapterState {
     data class Param(val bookId: Long?)
 
@@ -601,9 +602,11 @@ class BookDetailViewModel(
                 
                 result.onSuccess { filePath ->
                     withUIContext {
-                        showSnackBar(UiText.DynamicString("EPUB exported successfully"))
+                        // Show success message with save location
+                        showSnackBar(UiText.DynamicString("EPUB exported successfully to Downloads/IReader/"))
                     }
                     Log.info { "EPUB export successful: $filePath" }
+                    Log.info { "File saved to: Downloads/IReader/${book.title}.epub" }
                 }.onFailure { error ->
                     withUIContext {
                         showSnackBar(UiText.DynamicString("Export failed: ${error.message}"))
@@ -691,20 +694,47 @@ class BookDetailViewModel(
 
     fun downloadChapters() {
         booksState.book?.let { book ->
-            serviceUseCases.startDownloadServicesUseCase.start(chapterIds = this.selection.toLongArray())
+            scope.launch {
+                when (val result = downloadService.queueChapters(this@BookDetailViewModel.selection.toList())) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("${this@BookDetailViewModel.selection.size} chapters queued for download"))
+                    }
+                    is ireader.domain.services.common.ServiceResult.Error -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                    }
+                    else -> {}
+                }
+            }
         }
     }
 
     fun startDownloadService(book: Book) {
-        serviceUseCases.startDownloadServicesUseCase.start(bookIds = longArrayOf(book.id))
+        scope.launch {
+            when (val result = downloadService.queueBooks(listOf(book.id))) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Book queued for download"))
+                }
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                }
+                else -> {}
+            }
+        }
     }
     
     fun downloadUnreadChapters() {
-        val unreadChapterIds = chapters.filter { !it.read }.map { it.id }.toLongArray()
+        val unreadChapterIds = chapters.filter { !it.read }.map { it.id }
         if (unreadChapterIds.isNotEmpty()) {
-            serviceUseCases.startDownloadServicesUseCase.start(chapterIds = unreadChapterIds)
             scope.launch {
-                showSnackBar(ireader.i18n.UiText.DynamicString("Downloading ${unreadChapterIds.size} unread chapters"))
+                when (val result = downloadService.queueChapters(unreadChapterIds)) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Downloading ${unreadChapterIds.size} unread chapters"))
+                    }
+                    is ireader.domain.services.common.ServiceResult.Error -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                    }
+                    else -> {}
+                }
             }
         } else {
             scope.launch {
@@ -714,11 +744,18 @@ class BookDetailViewModel(
     }
     
     fun downloadUndownloadedChapters() {
-        val undownloadedChapterIds = chapters.filter { it.content.joinToString("").isBlank() }.map { it.id }.toLongArray()
+        val undownloadedChapterIds = chapters.filter { it.content.joinToString("").isBlank() }.map { it.id }
         if (undownloadedChapterIds.isNotEmpty()) {
-            serviceUseCases.startDownloadServicesUseCase.start(chapterIds = undownloadedChapterIds)
             scope.launch {
-                showSnackBar(ireader.i18n.UiText.DynamicString("Downloading ${undownloadedChapterIds.size} chapters"))
+                when (val result = downloadService.queueChapters(undownloadedChapterIds)) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Downloading ${undownloadedChapterIds.size} chapters"))
+                    }
+                    is ireader.domain.services.common.ServiceResult.Error -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                    }
+                    else -> {}
+                }
             }
         } else {
             scope.launch {
