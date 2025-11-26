@@ -181,17 +181,6 @@ fun main() {
                     val coverCache: CoverCache = CoverCache(context)
                     val httpClients: HttpClients = koinInject()
                     
-                    // Initialize notification manager and test
-                    val notificationManager = koinInject<ireader.domain.notification.PlatformNotificationManager>() as? ireader.domain.notification.DesktopNotificationManager
-                    androidx.compose.runtime.LaunchedEffect(Unit) {
-                        notificationManager?.let { manager ->
-                            ireader.domain.notification.TestNotification.setManager(manager)
-                            // Show test notification on startup
-                            kotlinx.coroutines.delay(2000) // Wait 2 seconds after app starts
-                            ireader.domain.notification.TestNotification.showTest()
-                        }
-                    }
-                    
                     setSingletonImageLoaderFactory { context ->
                         newImageLoader(
                             catalogStore = catalogStore,

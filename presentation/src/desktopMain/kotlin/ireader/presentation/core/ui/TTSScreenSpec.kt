@@ -1,6 +1,7 @@
 package ireader.presentation.core.ui
 
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -470,8 +471,8 @@ actual class TTSScreenSpec actual constructor(
                             TextButton(
                                 onClick = {
                                     ttsService.state.sourceNotInstalledError = false
-                                    // Navigate to extensions/sources screen
-                                    navController.navigate("extensions")
+                                    // Navigate to repository screen to install sources
+                                    navController.navigate(NavigationRoutes.repository)
                                 }
                             ) {
                                 Text("Install Source")
