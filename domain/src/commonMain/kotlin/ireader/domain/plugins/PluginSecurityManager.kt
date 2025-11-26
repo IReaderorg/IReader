@@ -1,9 +1,9 @@
 package ireader.domain.plugins
 
+import ireader.core.io.FileSystem
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
 
 /**
  * Central security manager coordinating plugin sandboxing, permissions, and resource monitoring
@@ -11,11 +11,11 @@ import java.io.File
  */
 class PluginSecurityManager(
     private val permissionManager: PluginPermissionManager,
-    private val pluginsBaseDir: File
+    private val fileSystem: FileSystem
 ) {
     private val mutex = Mutex()
     private val sandboxes = mutableMapOf<String, PluginSandbox>()
-    private val contextFactory = PluginContextFactory(permissionManager, pluginsBaseDir)
+    private val contextFactory = PluginContextFactory(permissionManager, fileSystem)
     
     /**
      * Pending permission requests from plugins
@@ -47,7 +47,7 @@ class PluginSecurityManager(
                     pluginId = pluginId,
                     manifest = manifest,
                     permissionManager = permissionManager,
-                    pluginsBaseDir = pluginsBaseDir
+                    fileSystem = fileSystem
                 )
                 sandboxes[pluginId] = sandbox
             }
@@ -119,7 +119,7 @@ class PluginSecurityManager(
      * Validate file access for a plugin
      * Requirements: 10.3, 10.4
      */
-    fun validateFileAccess(pluginId: String, path: String): Result<Unit> {
+    suspend fun validateFileAccess(pluginId: String, path: String): Result<Unit> {
         val sandbox = sandboxes[pluginId]
             ?: return Result.failure(SecurityException("Plugin sandbox not found"))
         

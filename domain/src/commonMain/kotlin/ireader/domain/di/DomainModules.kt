@@ -221,6 +221,7 @@ val DomainServices = module {
     // Plugin Manager
     single {
         PluginManager(
+            fileSystem = get(),
             loader = get(),
             registry = get(),
             preferences = get(),

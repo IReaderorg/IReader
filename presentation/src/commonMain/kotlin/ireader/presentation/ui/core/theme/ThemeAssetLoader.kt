@@ -3,15 +3,18 @@ package ireader.presentation.ui.core.theme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
+import ireader.core.io.FileSystem
+import ireader.core.io.VirtualFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * Utility for loading theme assets (backgrounds, images)
  * Requirements: 3.4
  */
-class ThemeAssetLoader {
+class ThemeAssetLoader(
+    private val fileSystem: FileSystem
+) {
     private val cache = mutableMapOf<String, ImageBitmap>()
     
     /**
@@ -31,7 +34,8 @@ class ThemeAssetLoader {
                         loadImageFromUrl(path)
                     }
                     else -> {
-                        loadImageFromFile(path)
+                        val file = fileSystem.getFile(path)
+                        loadImageFromFile(file)
                     }
                 }
             }
@@ -47,7 +51,7 @@ class ThemeAssetLoader {
     /**
      * Load image from a local file
      */
-    private fun loadImageFromFile(path: String): ImageBitmap {
+    private suspend fun loadImageFromFile(file: VirtualFile): ImageBitmap {
         // Platform-specific implementation would go here
         // For now, throw an exception to indicate not implemented
         throw NotImplementedError("File loading not implemented for this platform")
@@ -56,7 +60,7 @@ class ThemeAssetLoader {
     /**
      * Load image from a URL
      */
-    private fun loadImageFromUrl(url: String): ImageBitmap {
+    private suspend fun loadImageFromUrl(url: String): ImageBitmap {
         // Platform-specific implementation would go here
         // For now, throw an exception to indicate not implemented
         throw NotImplementedError("URL loading not implemented for this platform")
@@ -80,11 +84,12 @@ class ThemeAssetLoader {
 /**
  * Composable for loading and displaying theme background
  * Requirements: 3.4
+ * Note: assetLoader must be provided via dependency injection or composition local
  */
 @Composable
 fun rememberThemeBackground(
     backgroundPath: String?,
-    assetLoader: ThemeAssetLoader = remember { ThemeAssetLoader() }
+    assetLoader: ThemeAssetLoader
 ): State<ImageBitmap?> {
     val backgroundState = remember { mutableStateOf<ImageBitmap?>(null) }
     

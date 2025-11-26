@@ -7,6 +7,7 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.domain.storage.StorageManager
 import ireader.presentation.ui.settings.reader.SettingState
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
@@ -21,6 +22,7 @@ class BackupScreenViewModel(
     val createBackup: CreateBackup,
     val uiPreferences: UiPreferences,
     val getSimpleStorage: GetSimpleStorage,
+    val storageManager: StorageManager,
     private val scheduleAutomaticBackup: ireader.domain.usecases.backup.ScheduleAutomaticBackup? = null,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
@@ -41,6 +43,11 @@ class BackupScreenViewModel(
      */
     fun updateAutomaticBackupFrequency(frequency: ireader.domain.models.prefs.PreferenceValues.AutomaticBackup) {
         automaticBackup.value = frequency
+        
+        // Check storage permissions before scheduling
+        if (!storageManager.hasStoragePermission()) {
+            storageManager.initializeDirectories()
+        }
         
         if (frequency == ireader.domain.models.prefs.PreferenceValues.AutomaticBackup.Off) {
             scheduleAutomaticBackup?.cancel()

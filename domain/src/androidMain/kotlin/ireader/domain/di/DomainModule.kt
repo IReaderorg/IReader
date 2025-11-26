@@ -22,6 +22,10 @@ import ireader.domain.usecases.file.AndroidFileSaver
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.domain.storage.AndroidCacheManager
+import ireader.domain.storage.AndroidStorageManager
+import ireader.domain.storage.CacheManager
+import ireader.domain.storage.StorageManager
 import ireader.domain.usecases.local.LocalSourceImpl
 import ireader.domain.usecases.local.RefreshLocalLibrary
 import ireader.domain.usecases.preferences.AndroidReaderPrefUseCases
@@ -35,6 +39,8 @@ import ireader.domain.usecases.services.StartExtensionManagerService
 import ireader.domain.usecases.services.StartLibraryUpdateServicesUseCase
 import ireader.domain.usecases.services.StartTTSServicesUseCase
 import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
+import ireader.domain.notification.AndroidNotificationManager
 import ireader.i18n.LocalizeHelper
 import ireader.domain.services.ExtensionWatcherService
 import org.koin.android.ext.koin.androidContext
@@ -47,6 +53,11 @@ import java.io.File
 actual val DomainModule = module {
     // Include sync module for sync functionality
     includes(syncModule)
+    
+    // FileSystem implementation for Android
+    single<ireader.core.io.FileSystem> {
+        ireader.core.io.AndroidFileSystem(androidContext())
+    }
     
     // Plugins directory for Android
     single(named("pluginsDir")) {
@@ -66,6 +77,12 @@ actual val DomainModule = module {
             get(),
         )
     }
+    // New type-safe notification manager
+    single<PlatformNotificationManager> {
+        AndroidNotificationManager(get())
+    }
+    
+    // Legacy notification manager for backward compatibility
     factory {
         NotificationManager(
             get(),
@@ -133,6 +150,11 @@ actual val DomainModule = module {
     single<ExtensionWatcherService> {
         ExtensionWatcherService()
     }
+    
+    // Storage and Cache Managers
+    single<StorageManager> { AndroidStorageManager(get()) }
+    single<CacheManager> { AndroidCacheManager(get()) }
+    
     single<GetSimpleStorage>{ AndroidGetSimpleStorage(get()) }
     single<AndroidGetSimpleStorage>{ AndroidGetSimpleStorage(get()) }
     single<DefaultNotificationHelper> { DefaultNotificationHelper(get(),get()) }
@@ -148,7 +170,7 @@ actual val DomainModule = module {
 
         )
     }
-    single<ImportEpub> { ImportEpub(get(), get(),get(),get(),get()) }
+    single<ImportEpub> { ImportEpub(get(), get(), get(), get(), get(), get(), get()) }
     single<PlatformUiPreferences> {
         AndroidUiPreferences(get(), get())
     }
@@ -164,6 +186,38 @@ actual val DomainModule = module {
     single<LocalizeHelper> { LocalizeHelper(get()) }
     single<PreferenceStore> {
         get<PreferenceStoreFactory>().create("ireader")
+    }
+    
+    // Network components
+    single<io.ktor.client.plugins.cookies.CookiesStorage> { 
+        ireader.core.http.AcceptAllCookiesStorage() 
+    }
+    
+    single<ireader.core.http.WebViewCookieJar> { 
+        ireader.core.http.WebViewCookieJar(get())
+    }
+    
+    single<ireader.core.http.WebViewManger> { 
+        ireader.core.http.WebViewManger(androidContext())
+    }
+    
+    single<ireader.core.http.BrowserEngine> { 
+        ireader.core.http.BrowserEngine(get(), get())
+    }
+    
+    single<ireader.core.http.NetworkConfig> { 
+        ireader.core.http.NetworkConfig() 
+    }
+    
+    single<ireader.core.http.HttpClients> { 
+        ireader.core.http.HttpClients(
+            context = androidContext(),
+            browseEngine = get(),
+            cookiesStorage = get(),
+            webViewCookieJar = get(),
+            preferencesStore = get(),
+            webViewManager = get(),
+        )
     }
 
     // Local Library Source
@@ -220,5 +274,25 @@ actual val DomainModule = module {
             context = androidContext(),
             aiTTSManager = get()
         )
+    }
+    
+    // Unified Android TTS Service (new implementation)
+    single<ireader.domain.services.tts_service.AndroidTTSService> {
+        ireader.domain.services.tts_service.AndroidTTSService(
+            context = androidContext(),
+            bookRepo = get(),
+            chapterRepo = get(),
+            extensions = get(),
+            remoteUseCases = get(),
+            readerPreferences = get(),
+            appPrefs = get()
+        ).apply {
+            initialize()
+        }
+    }
+    
+    // Provide CommonTTSService interface using unified service
+    single<ireader.domain.services.tts_service.CommonTTSService> {
+        get<ireader.domain.services.tts_service.AndroidTTSService>()
     }
 }

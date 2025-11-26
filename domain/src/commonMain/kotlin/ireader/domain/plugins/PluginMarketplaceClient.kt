@@ -1,6 +1,6 @@
 package ireader.domain.plugins
 
-import java.io.File
+import ireader.core.io.VirtualFile
 
 /**
  * Client interface for interacting with the plugin marketplace
@@ -26,7 +26,7 @@ interface PluginMarketplaceClient {
     suspend fun downloadPlugin(
         url: String,
         onProgress: (Int) -> Unit = {}
-    ): File
+    ): VirtualFile
     
     /**
      * Get the download URL for a specific version of a plugin

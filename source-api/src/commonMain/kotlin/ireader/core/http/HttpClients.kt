@@ -9,15 +9,25 @@
 package ireader.core.http
 
 import io.ktor.client.*
-import ireader.core.http.BrowserEngine
 
+/**
+ * Unified HTTP client interface providing different client configurations
+ * for various use cases (default, Cloudflare bypass, browser engine)
+ */
 interface HttpClientsInterface {
   val browser: BrowserEngine
   val default: HttpClient
   val cloudflareClient: HttpClient
+  val config: NetworkConfig
+  val sslConfig: SSLConfiguration
+  val cookieSynchronizer: CookieSynchronizer
 }
-expect class HttpClients : HttpClientsInterface{
+
+expect class HttpClients : HttpClientsInterface {
   override val browser: BrowserEngine
   override val default: HttpClient
   override val cloudflareClient: HttpClient
+  override val config: NetworkConfig
+  override val sslConfig: SSLConfiguration
+  override val cookieSynchronizer: CookieSynchronizer
 }

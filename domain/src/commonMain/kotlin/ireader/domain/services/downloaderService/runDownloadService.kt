@@ -9,7 +9,7 @@ import ireader.domain.models.entities.buildSavedDownload
 import ireader.domain.notification.NotificationsIds.ID_DOWNLOAD_CHAPTER_PROGRESS
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.asString
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +33,7 @@ suspend fun runDownloadService(
     insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     downloadUseCases: DownloadUseCases,
     downloadServiceState: DownloadServiceStateImpl,
-    notificationManager: NotificationManager,
+    notificationManager: PlatformNotificationManager,
     updateProgress: (max: Int, current: Int, inProgress: Boolean) -> Unit,
     updateTitle: (String) -> Unit,
     updateSubtitle: (String) -> Unit,

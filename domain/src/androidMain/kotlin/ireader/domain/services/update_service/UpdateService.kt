@@ -13,7 +13,7 @@ import ireader.domain.notification.NotificationsIds.CHANNEL_APP_UPDATE
 import ireader.domain.notification.NotificationsIds.ID_APP_UPDATER
 import ireader.domain.notification.legacyFlags
 import ireader.domain.preferences.prefs.AppPreferences
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import ireader.i18n.R
 import kotlin.time.Instant
 import org.koin.core.component.KoinComponent
@@ -29,7 +29,7 @@ class UpdateService constructor(
     ) : CoroutineWorker(context, params), KoinComponent {
     private val appPreferences: AppPreferences by inject()
     private val api: UpdateApi by inject()
-    private val notificationManager: NotificationManager by inject()
+    private val notificationManager: PlatformNotificationManager by inject()
     @OptIn(ExperimentalTime::class)
     override suspend fun doWork(): Result {
         return try {
@@ -59,7 +59,7 @@ class UpdateService constructor(
                 // Update last check time before showing notification
                 appPreferences.lastUpdateCheck().set(now.toEpochMilliseconds())
                 
-                notificationManager.show(
+                notificationManager.showPlatformNotification(
                     ID_APP_UPDATER, 
                     createNotification(current, newVersion, createIntent(release))
                 )

@@ -1,8 +1,9 @@
 package ireader.domain.plugins
 
+import ireader.core.io.FileSystem
+import ireader.core.io.VirtualFile
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
 
 /**
  * Sandbox environment for plugin execution with permission checking and resource restrictions
@@ -12,7 +13,7 @@ class PluginSandbox(
     private val pluginId: String,
     private val manifest: PluginManifest,
     private val permissionManager: PluginPermissionManager,
-    private val pluginsBaseDir: File
+    private val fileSystem: FileSystem
 ) {
     private val resourceMonitor = PluginResourceMonitor(pluginId)
     private val mutex = Mutex()
@@ -35,13 +36,15 @@ class PluginSandbox(
      * Restrict file access to plugin's own directory
      * Requirements: 10.3, 10.4
      */
-    fun restrictFileAccess(path: String): Boolean {
+    suspend fun restrictFileAccess(path: String): Boolean {
         val pluginDataDir = getPluginDataDir(pluginId)
-        val normalizedPath = File(path).canonicalPath
-        val normalizedPluginDir = File(pluginDataDir).canonicalPath
+        
+        // Normalize paths for comparison
+        val requestedFile = fileSystem.getFile(path)
+        val pluginDir = fileSystem.getFile(pluginDataDir.path)
         
         // Only allow access within plugin's directory
-        if (!normalizedPath.startsWith(normalizedPluginDir)) {
+        if (!requestedFile.path.startsWith(pluginDir.path)) {
             return false
         }
         
@@ -66,18 +69,18 @@ class PluginSandbox(
     }
     
     /**
-     * Get plugin-specific data directory path
+     * Get plugin-specific data directory
      * Requirements: 10.4
      */
-    fun getPluginDataDir(pluginId: String): String {
-        val pluginDir = File(pluginsBaseDir, "data/$pluginId")
+    suspend fun getPluginDataDir(pluginId: String): VirtualFile {
+        val pluginDir = fileSystem.getDataDirectory().resolve("plugins/data/$pluginId")
         
         // Create directory if it doesn't exist
         if (!pluginDir.exists()) {
             pluginDir.mkdirs()
         }
         
-        return pluginDir.absolutePath
+        return pluginDir
     }
     
     /**
@@ -152,7 +155,7 @@ class PluginSandbox(
     /**
      * Validate file operation before allowing it
      */
-    fun validateFileOperation(path: String, operation: FileOperation): Result<Unit> {
+    suspend fun validateFileOperation(path: String, operation: FileOperation): Result<Unit> {
         if (!restrictFileAccess(path)) {
             return Result.failure(
                 SecurityException("Plugin $pluginId does not have access to path: $path")

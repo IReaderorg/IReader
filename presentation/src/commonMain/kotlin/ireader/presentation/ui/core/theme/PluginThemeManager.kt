@@ -154,6 +154,33 @@ class PluginThemeManager(
         val hash = "$pluginId-${if (isDark) "dark" else "light"}".hashCode()
         return hash.toLong().let { if (it < 0) -it else it } + 1000000L
     }
+    
+    /**
+     * Pre-load custom fonts for a theme asynchronously
+     * This should be called before applying a theme with custom fonts
+     * Requirements: 9.6
+     * 
+     * @param fontPath Path to the font file
+     * @param fontId Unique identifier for the font (typically the file path)
+     * @param fileSystem FileSystem instance for loading the font
+     */
+    suspend fun preloadThemeFont(fontPath: String, fontId: String, fileSystem: ireader.core.io.FileSystem) {
+        try {
+            val fontFile = fileSystem.getFile(fontPath)
+            if (fontFile.exists() && FontRegistry.validateFontFile(fontFile)) {
+                // Create a CustomFont object for loading
+                val customFont = ireader.domain.models.fonts.CustomFont(
+                    id = fontId,
+                    name = fontFile.name,
+                    filePath = fontPath
+                )
+                FontRegistry.loadFontFamily(customFont, fontFile)
+            }
+        } catch (e: Exception) {
+            // Font loading failed, will use default font
+            // Requirements: 9.7
+        }
+    }
 }
 
 /**
@@ -238,6 +265,9 @@ private fun ireader.domain.plugins.ThemeExtraColors.toExtraColors(): ExtraColors
 /**
  * Convert plugin ThemeTypography to Compose Typography
  * Requirements: 9.3, 9.6
+ * 
+ * Note: Font loading is now async. This function returns Typography with default font,
+ * and font loading should be handled separately via FontRegistry.loadFontFamily()
  */
 private fun ireader.domain.plugins.ThemeTypography.toTypography(): Typography? {
     // Only create custom typography if at least one value is specified
@@ -261,17 +291,14 @@ private fun ireader.domain.plugins.ThemeTypography.toTypography(): Typography? {
     }
     
     val defaultTypography = Typography()
+    
+    // Font loading is now async and should be handled separately
+    // For now, use default font family or check if already loaded in cache
     val family = fontFamily?.let { fontFamilyPath ->
         try {
-            // Load custom font from file path using FontRegistry
-            // Requirements: 9.6
-            val fontFile = java.io.File(fontFamilyPath)
-            if (fontFile.exists() && FontRegistry.validateFontFile(fontFile)) {
-                createFontFamilyFromFile(fontFile)
-            } else {
-                // Fallback to default if file doesn't exist or is invalid
-                FontFamily.Default
-            }
+            // Try to get from cache if already loaded
+            // The actual loading should be done asynchronously before calling this function
+            FontRegistry.getFontFamily(fontFamilyPath) ?: FontFamily.Default
         } catch (e: Exception) {
             // Fallback to default on any error
             // Requirements: 9.7

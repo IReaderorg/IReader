@@ -1,5 +1,7 @@
 package ireader.domain.plugins
 
+import kotlinx.coroutines.runBlocking
+
 /**
  * Sandboxed implementation of PluginContext
  * Provides secure, restricted access to app resources based on permissions
@@ -17,7 +19,9 @@ class SandboxedPluginContext(
      * Requirements: 10.4
      */
     override fun getDataDir(): String {
-        return sandbox.getPluginDataDir(pluginId)
+        return runBlocking {
+            sandbox.getPluginDataDir(pluginId).path
+        }
     }
     
     /**
@@ -45,7 +49,7 @@ class SandboxedPluginContext(
      * Validate file access before operation
      * Requirements: 10.3, 10.4
      */
-    fun validateFileAccess(path: String): Result<Unit> {
+    suspend fun validateFileAccess(path: String): Result<Unit> {
         return sandbox.validateFileOperation(path, FileOperation.READ)
     }
     
@@ -98,7 +102,7 @@ class RestrictedPluginPreferencesStore : PluginPreferencesStore {
  */
 class PluginContextFactory(
     private val permissionManager: PluginPermissionManager,
-    private val pluginsBaseDir: java.io.File
+    private val fileSystem: ireader.core.io.FileSystem
 ) {
     /**
      * Create a sandboxed context for a plugin
@@ -113,7 +117,7 @@ class PluginContextFactory(
             pluginId = pluginId,
             manifest = manifest,
             permissionManager = permissionManager,
-            pluginsBaseDir = pluginsBaseDir
+            fileSystem = fileSystem
         )
         
         return SandboxedPluginContext(

@@ -9,7 +9,7 @@ import ireader.domain.services.downloaderService.DownloadServiceStateImpl
 import ireader.domain.services.downloaderService.runDownloadService
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ actual class StartDownloadServicesUseCase(
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val downloadUseCases: DownloadUseCases,
     private val downloadServiceState: DownloadServiceStateImpl,
-    private val notificationManager: NotificationManager,
+    private val notificationManager: PlatformNotificationManager,
     private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences
 ) {
     private val parentJob = Job()

@@ -151,4 +151,15 @@ class AndroidTTSService(
             }
         }
     }
+    
+    override fun getPlatformAvailableEngines(): List<String> {
+        val engines = mutableListOf("Native Android TTS")
+        
+        val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
+        if (coquiSpaceUrl.isNotEmpty()) {
+            engines.add("Coqui TTS")
+        }
+        
+        return engines
+    }
 }

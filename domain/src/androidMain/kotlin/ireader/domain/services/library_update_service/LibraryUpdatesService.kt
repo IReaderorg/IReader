@@ -8,7 +8,7 @@ import androidx.work.WorkerParameters
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import ireader.i18n.R
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -24,7 +24,7 @@ class LibraryUpdatesService(
     private val remoteUseCases: RemoteUseCases by inject()
     private val getLocalCatalog: GetLocalCatalog by inject()
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by inject()
-    private val notificationManager: NotificationManager by inject()
+    private val notificationManager: PlatformNotificationManager by inject()
 
     companion object {
         const val LibraryUpdateTag = "Library_Update_SERVICE"
@@ -52,7 +52,8 @@ class LibraryUpdatesService(
         val forceUpdate = inputData.getBoolean(FORCE_UPDATE, false)
         val result = runLibraryUpdateService(
             onCancel = {e ->
-                notificationManager.show(NotificationsIds.ID_LIBRARY_ERROR,
+                notificationManager.showPlatformNotification(
+                    NotificationsIds.ID_LIBRARY_ERROR,
                     NotificationCompat.Builder(
                         applicationContext,
                         NotificationsIds.CHANNEL_LIBRARY_ERROR
@@ -67,18 +68,20 @@ class LibraryUpdatesService(
                         setSmallIcon(R.drawable.ic_update)
                         priority = NotificationCompat.PRIORITY_DEFAULT
                         setAutoCancel(true)
-                    }.build())
+                    }.build()
+                )
             },
             updateProgress = {max: Int,progress:Int, inProgress: Boolean ->
                 builder.setProgress(max, progress, inProgress)
             },
             updateNotification = {
-                notificationManager.show(it, builder.build())
+                notificationManager.showPlatformNotification(it, builder.build())
             },
             onSuccess = { size , skipped ->
 
                 notificationManager.cancel(NotificationsIds.ID_LIBRARY_PROGRESS)
-                notificationManager.show(NotificationsIds.ID_LIBRARY_PROGRESS,
+                notificationManager.showPlatformNotification(
+                    NotificationsIds.ID_LIBRARY_PROGRESS,
                     NotificationCompat.Builder(
                         applicationContext,
                         NotificationsIds.CHANNEL_LIBRARY_PROGRESS
@@ -91,7 +94,8 @@ class LibraryUpdatesService(
                         priority = NotificationCompat.PRIORITY_DEFAULT
                         setSubText("It was Updated Successfully")
                         setAutoCancel(true)
-                    }.build())
+                    }.build()
+                )
             },
             updateTitle = {
                 builder.setContentText(it)

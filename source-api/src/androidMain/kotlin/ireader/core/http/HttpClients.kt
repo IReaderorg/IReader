@@ -28,44 +28,60 @@ actual class HttpClients(
     cookiesStorage: CookiesStorage,
     webViewCookieJar: WebViewCookieJar,
     preferencesStore: PreferenceStore,
-    webViewManager: WebViewManger? = null
+    webViewManager: WebViewManger? = null,
+    networkConfig: NetworkConfig = NetworkConfig()
 ) : HttpClientsInterface {
+
+    actual override val config: NetworkConfig = networkConfig
 
     private val cache = run {
         val dir = File(context.cacheDir, "network_cache")
-        val size = 15L * 1024 * 1024
-        Cache(dir, size)
+        Cache(dir, config.cacheSize)
     }
 
     private val cookieJar = webViewCookieJar
 
-    private val basicClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.MINUTES)  // Increased for FlareSolverr
-        .callTimeout(5, TimeUnit.MINUTES)  // Increased for FlareSolverr (was 2 minutes)
-        .cookieJar(PersistentCookieJar(preferencesStore))
+    actual override val sslConfig = SSLConfiguration()
+    actual override val cookieSynchronizer = CookieSynchronizer(webViewCookieJar)
 
+    private val basicClient = OkHttpClient.Builder()
+        .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)
+        .readTimeout(config.readTimeoutMinutes, TimeUnit.MINUTES)
+        .callTimeout(config.callTimeoutMinutes, TimeUnit.MINUTES)
+        .cookieJar(PersistentCookieJar(preferencesStore))
+        .apply {
+            sslConfig.applyTo(this)
+        }
 
     actual override val browser = browseEngine
 
     actual override val default = HttpClient(OkHttp) {
         BrowserUserAgent()
         engine {
-            preconfigured = this@HttpClients.basicClient.cache(cache).build()
+            preconfigured = this@HttpClients.basicClient
+                .apply { if (config.enableCaching) cache(cache) }
+                .build()
         }
-        install(ContentNegotiation) {
-            gson()
+        if (config.enableCompression) {
+            install(ContentNegotiation) {
+                gson()
+            }
         }
-        install(HttpCookies) {
-            storage = cookiesStorage
+        if (config.enableCookies) {
+            install(HttpCookies) {
+                storage = cookiesStorage
+            }
         }
-        // Install HTTP response cache with 5 minute default
-        installCache(cacheDurationMs = 5 * 60 * 1000) {
-            enabled = true
-            cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
-            cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+        // Install HTTP response cache
+        if (config.enableCaching) {
+            installCache(cacheDurationMs = config.cacheDurationMs) {
+                enabled = true
+                cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
+                cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+            }
         }
     }
+    
     actual override val cloudflareClient = HttpClient(OkHttp) {
         BrowserUserAgent()
         engine {
@@ -77,14 +93,18 @@ actual class HttpClients(
                 )
             ).build()
         }
-        install(HttpCookies) {
-            storage = cookiesStorage
+        if (config.enableCookies) {
+            install(HttpCookies) {
+                storage = cookiesStorage
+            }
         }
-        // Install HTTP response cache with 5 minute default
-        installCache(cacheDurationMs = 5 * 60 * 1000) {
-            enabled = true
-            cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
-            cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+        // Install HTTP response cache
+        if (config.enableCaching) {
+            installCache(cacheDurationMs = config.cacheDurationMs) {
+                enabled = true
+                cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
+                cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+            }
         }
     }
 }

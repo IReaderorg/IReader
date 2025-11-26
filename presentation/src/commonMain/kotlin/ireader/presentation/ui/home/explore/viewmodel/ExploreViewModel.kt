@@ -112,7 +112,6 @@ class ExploreViewModel(
                                     var result = MangasPageInfo(emptyList(), false)
                                     
                                     // Use standard catalog source method
-                                    // TODO: Implement custom filter support for JS plugins in Zipline bridge
                                     remoteUseCases.getRemoteBooks(
                                             searchQuery,
                                             listing,

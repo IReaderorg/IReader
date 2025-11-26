@@ -1,48 +1,62 @@
 package ireader.domain.usecases.files
 
-import ireader.core.storage.AppDir
-import ireader.core.storage.ExtensionDir
+import ireader.domain.storage.CacheManager
+import ireader.domain.storage.DesktopCacheManager
+import ireader.domain.storage.DesktopStorageManager
+import ireader.domain.storage.StorageManager
 import java.io.File
 
 
 class DesktopGetSimpleStorage : GetSimpleStorage {
-    override val mainIReaderDir: File = AppDir
+    
+    private val storageManager: StorageManager = DesktopStorageManager()
+    private val cacheManager: CacheManager = DesktopCacheManager()
+    
+    override val mainIReaderDir: File
+        get() = storageManager.appDirectory
 
-    override fun ireaderDirectory(dirName: String): File = AppDir
+    override fun ireaderDirectory(dirName: String): File =
+        storageManager.getSubDirectory(dirName)
 
-    override fun extensionDirectory(): File = ExtensionDir
+    override fun extensionDirectory(): File =
+        storageManager.extensionsDirectory
 
-    override fun cacheExtensionDir() = ExtensionDir
+    override fun cacheExtensionDir() =
+        cacheManager.extensionCacheDirectory
 
-    override fun ireaderCacheDir() = AppDir
+    override fun ireaderCacheDir() =
+        cacheManager.cacheDirectory
 
-    override val backupDirectory: File = File(AppDir, "backup/")
-    override val booksDirectory: File = File(AppDir, "books/")
-    override val automaticBackupDirectory: File = File(AppDir, "backup/automatic/")
+    override val backupDirectory: File
+        get() = storageManager.backupDirectory
+        
+    override val booksDirectory: File
+        get() = storageManager.booksDirectory
+        
+    override val automaticBackupDirectory: File
+        get() = storageManager.automaticBackupDirectory
 
     override fun checkPermission(): Boolean {
-        return true
+        return storageManager.hasStoragePermission()
     }
 
     override fun createIReaderDir() {
-
+        storageManager.initializeDirectories()
     }
 
     override fun createNoMediaFile() {
-
+        storageManager.preventMediaIndexing()
     }
 
     override fun clearImageCache() {
-
+        cacheManager.clearImageCache()
     }
 
     override fun clearCache() {
-
+        cacheManager.clearAllCache()
     }
 
     override fun getCacheSize(): String {
-        return "Unknown"
+        return cacheManager.getCacheSize()
     }
-
-
 }

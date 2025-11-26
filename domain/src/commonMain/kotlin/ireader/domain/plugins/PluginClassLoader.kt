@@ -1,6 +1,6 @@
 package ireader.domain.plugins
 
-import java.io.File
+import ireader.core.io.VirtualFile
 
 /**
  * Platform-specific plugin class loader
@@ -14,5 +14,5 @@ expect class PluginClassLoader {
      * @param manifest The plugin manifest
      * @return The loaded plugin class
      */
-    fun loadPluginClass(file: File, manifest: PluginManifest): Class<out Plugin>
+    suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Class<out Plugin>
 }

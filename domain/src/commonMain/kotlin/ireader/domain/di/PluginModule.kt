@@ -7,7 +7,6 @@ import ireader.domain.services.tts.PluginTTSManager
 import ireader.domain.services.tts.TTSErrorHandler
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import java.io.File
 
 /**
  * Koin module for plugin system dependencies
@@ -34,7 +33,7 @@ val PluginModule = module {
     // Plugin Loader
     single {
         PluginLoader(
-            pluginsDir = get(named("pluginsDir")),
+            fileSystem = get(),
             validator = get(),
             classLoader = get()
         )
@@ -51,7 +50,7 @@ val PluginModule = module {
     single {
         PluginSecurityManager(
             permissionManager = get(),
-            pluginsBaseDir = get(named("pluginsDir"))
+            fileSystem = get()
         )
     }
     
@@ -71,6 +70,7 @@ val PluginModule = module {
     // Plugin Manager
     single {
         PluginManager(
+            fileSystem = get(),
             loader = get(),
             registry = get(),
             preferences = get(),

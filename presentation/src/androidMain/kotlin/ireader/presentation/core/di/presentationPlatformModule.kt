@@ -69,7 +69,7 @@ actual val presentationPlatformModule = module  {
             get(),
         )
     }
-    single<CoverCache> { CoverCache(get<Context>(), get())}
+    single<CoverCache> { CoverCache(get<Context>()) }
     single<PlatformReaderSettingReader> { PlatformReaderSettingReader(get()) }
     
     // Material You dynamic colors support

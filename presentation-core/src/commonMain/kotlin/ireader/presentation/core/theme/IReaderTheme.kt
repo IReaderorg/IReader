@@ -69,32 +69,33 @@ private fun BaseIReaderTheme(
 }
 
 @Composable
-@ReadOnlyComposable
 private fun getThemeColorScheme(
     appTheme: AppTheme,
     isAmoled: Boolean,
 ): ColorScheme {
+    val isDark = isSystemInDarkTheme()
+    
     val colorScheme = when (appTheme) {
-        AppTheme.DEFAULT -> if (isSystemInDarkTheme()) IReaderDarkColorScheme else IReaderLightColorScheme
-        AppTheme.MONET -> if (isSystemInDarkTheme()) IReaderDarkColorScheme else IReaderLightColorScheme // TODO: Implement Monet
-        AppTheme.GREEN_APPLE -> if (isSystemInDarkTheme()) GreenAppleDarkColorScheme else GreenAppleLightColorScheme
-        AppTheme.STRAWBERRY -> if (isSystemInDarkTheme()) StrawberryDarkColorScheme else StrawberryLightColorScheme
-        AppTheme.TAKO -> if (isSystemInDarkTheme()) TakoDarkColorScheme else TakoLightColorScheme
-        AppTheme.TACHIYOMI -> if (isSystemInDarkTheme()) TachiyomiDarkColorScheme else TachiyomiLightColorScheme
-        AppTheme.MIDNIGHT -> if (isSystemInDarkTheme()) MidnightDarkColorScheme else MidnightLightColorScheme
-        AppTheme.OCEAN_BLUE -> if (isSystemInDarkTheme()) OceanBlueDarkColorScheme else OceanBlueLightColorScheme
-        AppTheme.SUNSET_ORANGE -> if (isSystemInDarkTheme()) SunsetOrangeDarkColorScheme else SunsetOrangeLightColorScheme
-        AppTheme.LAVENDER_PURPLE -> if (isSystemInDarkTheme()) LavenderPurpleDarkColorScheme else LavenderPurpleLightColorScheme
-        AppTheme.FOREST_GREEN -> if (isSystemInDarkTheme()) ForestGreenDarkColorScheme else ForestGreenLightColorScheme
-        AppTheme.MONOCHROME_MINIMAL -> if (isSystemInDarkTheme()) MonochromeMinimalDarkColorScheme else MonochromeMinimalLightColorScheme
-        AppTheme.CHERRY_BLOSSOM -> if (isSystemInDarkTheme()) CherryBlossomDarkColorScheme else CherryBlossomLightColorScheme
-        AppTheme.MIDNIGHT_SKY -> if (isSystemInDarkTheme()) MidnightSkyDarkColorScheme else MidnightSkyLightColorScheme
-        AppTheme.AUTUMN_HARVEST -> if (isSystemInDarkTheme()) AutumnHarvestDarkColorScheme else AutumnHarvestLightColorScheme
-        AppTheme.EMERALD_FOREST -> if (isSystemInDarkTheme()) EmeraldForestDarkColorScheme else EmeraldForestLightColorScheme
-        AppTheme.ROSE_GOLD -> if (isSystemInDarkTheme()) RoseGoldDarkColorScheme else RoseGoldLightColorScheme
+        AppTheme.DEFAULT -> if (isDark) IReaderDarkColorScheme else IReaderLightColorScheme
+        AppTheme.MONET -> getMonetColorScheme(isDark) ?: if (isDark) IReaderDarkColorScheme else IReaderLightColorScheme
+        AppTheme.GREEN_APPLE -> if (isDark) GreenAppleDarkColorScheme else GreenAppleLightColorScheme
+        AppTheme.STRAWBERRY -> if (isDark) StrawberryDarkColorScheme else StrawberryLightColorScheme
+        AppTheme.TAKO -> if (isDark) TakoDarkColorScheme else TakoLightColorScheme
+        AppTheme.TACHIYOMI -> if (isDark) TachiyomiDarkColorScheme else TachiyomiLightColorScheme
+        AppTheme.MIDNIGHT -> if (isDark) MidnightDarkColorScheme else MidnightLightColorScheme
+        AppTheme.OCEAN_BLUE -> if (isDark) OceanBlueDarkColorScheme else OceanBlueLightColorScheme
+        AppTheme.SUNSET_ORANGE -> if (isDark) SunsetOrangeDarkColorScheme else SunsetOrangeLightColorScheme
+        AppTheme.LAVENDER_PURPLE -> if (isDark) LavenderPurpleDarkColorScheme else LavenderPurpleLightColorScheme
+        AppTheme.FOREST_GREEN -> if (isDark) ForestGreenDarkColorScheme else ForestGreenLightColorScheme
+        AppTheme.MONOCHROME_MINIMAL -> if (isDark) MonochromeMinimalDarkColorScheme else MonochromeMinimalLightColorScheme
+        AppTheme.CHERRY_BLOSSOM -> if (isDark) CherryBlossomDarkColorScheme else CherryBlossomLightColorScheme
+        AppTheme.MIDNIGHT_SKY -> if (isDark) MidnightSkyDarkColorScheme else MidnightSkyLightColorScheme
+        AppTheme.AUTUMN_HARVEST -> if (isDark) AutumnHarvestDarkColorScheme else AutumnHarvestLightColorScheme
+        AppTheme.EMERALD_FOREST -> if (isDark) EmeraldForestDarkColorScheme else EmeraldForestLightColorScheme
+        AppTheme.ROSE_GOLD -> if (isDark) RoseGoldDarkColorScheme else RoseGoldLightColorScheme
     }
     
-    return if (isAmoled && isSystemInDarkTheme()) {
+    return if (isAmoled && isDark) {
         colorScheme.copy(
             background = Color.Black,
             surface = Color.Black,

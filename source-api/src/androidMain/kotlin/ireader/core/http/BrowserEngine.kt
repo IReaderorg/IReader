@@ -35,6 +35,8 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
         this.webViewManger = webViewManger
         this.webViewCookieJar = webViewCookieJar
     }
+    
+    actual override fun isAvailable(): Boolean = true
 
     private val cloudflareBypassDetected = MutableStateFlow(false)
     private val ajaxCompleted = MutableStateFlow(false)
@@ -229,6 +231,7 @@ actual class BrowserEngine actual constructor() : BrowserEngineInterface {
         return Result(
             responseBody = html.html(),
             cookies = cookies,
+            statusCode = 200
         )
     }
     

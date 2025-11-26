@@ -3,7 +3,7 @@ package ireader.domain.usecases.services
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.services.library_update_service.runLibraryUpdateService
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import ireader.domain.utils.extensions.launchIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,7 @@ private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseC
 private val remoteUseCases: RemoteUseCases ,
 private val getLocalCatalog: GetLocalCatalog ,
 private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases ,
-private val notificationManager: NotificationManager,
+private val notificationManager: PlatformNotificationManager,
 )  {
 
     private val workerJob = Job()

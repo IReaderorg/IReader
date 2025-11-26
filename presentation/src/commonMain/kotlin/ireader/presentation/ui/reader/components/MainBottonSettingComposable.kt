@@ -69,8 +69,6 @@ fun MainBottomSettingComposable(
             onClick = { scope.launch { drawerState.open() } }
         )
 
-        // TODO: implement  TTS functionality in desktop
-
         AppIconButton(
             imageVector = Icons.Default.Headphones,
             contentDescription = localize(Res.string.play),

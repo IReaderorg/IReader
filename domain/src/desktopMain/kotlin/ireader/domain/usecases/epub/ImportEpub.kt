@@ -7,6 +7,8 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.storage.CacheManager
+import ireader.domain.storage.StorageManager
 import ireader.domain.usecases.files.GetSimpleStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -28,7 +30,9 @@ import java.util.zip.ZipFile
 actual class ImportEpub(
     private val bookRepository: BookRepository,
     private val chapterRepository: ChapterRepository,
-    private val getSimpleStorage: GetSimpleStorage
+    private val getSimpleStorage: GetSimpleStorage,
+    private val cacheManager: CacheManager,
+    private val storageManager: StorageManager
 ) {
     
     actual suspend fun parse(uris: List<ireader.domain.models.common.Uri>) = withContext(Dispatchers.IO) {
@@ -128,8 +132,7 @@ actual class ImportEpub(
     }
     
     private fun extractCover(zip: ZipFile, opfDoc: Document, key: String): String {
-        val cacheDir = File(getSimpleStorage.ireaderCacheDir(), "library_covers")
-        cacheDir.mkdirs()
+        val cacheDir = cacheManager.getCacheSubDirectory("library_covers")
         val coverFile = File(cacheDir, "$key.jpg")
         
         try {
@@ -225,10 +228,10 @@ actual class ImportEpub(
     }
 
     actual fun getCacheSize(): String {
-        return getSimpleStorage.getCacheSize()
+        return cacheManager.getCacheSize()
     }
 
     actual fun removeCache() {
-        return getSimpleStorage.clearCache()
+        return cacheManager.clearAllCache()
     }
 }

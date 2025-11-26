@@ -299,6 +299,24 @@ abstract class BaseTTSService(
         }
     }
     
+    override fun getAvailableEngines(): List<String> {
+        return getPlatformAvailableEngines()
+    }
+    
+    override fun getCurrentEngineName(): String {
+        return ttsEngine?.getEngineName() ?: "None"
+    }
+    
+    override fun isReady(): Boolean {
+        return ttsEngine?.isReady() ?: false
+    }
+    
+    /**
+     * Get platform-specific available engines
+     * Override in Android/Desktop implementations
+     */
+    protected abstract fun getPlatformAvailableEngines(): List<String>
+    
     override fun cleanup() {
         scope.launch {
             stop()

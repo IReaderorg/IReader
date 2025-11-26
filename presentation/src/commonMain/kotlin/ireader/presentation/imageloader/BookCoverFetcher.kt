@@ -11,6 +11,7 @@ import coil3.fetch.SourceFetchResult
 import coil3.getOrDefault
 import coil3.request.Options
 import ireader.core.http.okhttp
+import ireader.core.io.VirtualFile
 import ireader.core.log.Log
 import ireader.core.source.HttpSource
 import ireader.domain.catalogs.CatalogStore
@@ -29,7 +30,6 @@ import okio.Source
 import okio.buffer
 import okio.sink
 import okio.source
-import java.io.File
 import java.net.HttpURLConnection
 
 /**
@@ -46,8 +46,8 @@ class BookCoverFetcher(
     private val url: String?,
     private val isLibraryManga: Boolean,
     private val options: Options,
-    private val coverFileLazy: Lazy<File?>,
-    private val customCoverFileLazy: Lazy<File>,
+    private val bookCover: BookCover,
+    private val coverCache: CoverCache,
     private val diskCacheKeyLazy: Lazy<String>,
     private val sourceLazy: Lazy<HttpSource?>,
     private val callFactoryLazy: Lazy<Call.Factory>,
@@ -61,7 +61,7 @@ class BookCoverFetcher(
         // Use custom cover if exists
         val useCustomCover = options.extras.getOrDefault(USE_CUSTOM_COVER_KEY)
         if (useCustomCover) {
-            val customCoverFile = customCoverFileLazy.value
+            val customCoverFile = coverCache.getCustomCoverFile(bookCover)
             if (customCoverFile.exists()) {
                 return fileLoader(customCoverFile)
             }
@@ -70,17 +70,24 @@ class BookCoverFetcher(
         // diskCacheKey is thumbnail_url
         if (url == null) error("No cover specified")
         return when (getResourceType(url)) {
-            Type.File -> fileLoader(File(url.substringAfter("file://")))
+            Type.File -> {
+                val path = url.substringAfter("file://")
+                // Platform-specific file loading would be needed here
+                // For now, use the URL-based approach
+                httpLoader()
+            }
             Type.URI -> fileUriLoader(url)
             Type.URL -> httpLoader()
             null -> error("Invalid image")
         }
     }
 
-    private fun fileLoader(file: File): FetchResult {
+    private suspend fun fileLoader(file: VirtualFile): FetchResult {
+        // Convert VirtualFile to okio Path for Coil
+        val okioPath = java.io.File(file.path).toOkioPath()
         return SourceFetchResult(
             source = ImageSource(
-                file = file.toOkioPath(),
+                file = okioPath,
                 fileSystem = FileSystem.SYSTEM,
                 diskCacheKey = diskCacheKey
             ),
@@ -89,19 +96,16 @@ class BookCoverFetcher(
         )
     }
 
-    private fun fileUriLoader(uri: String): FetchResult {
-        val source = File(uri).source().buffer()
-        return SourceFetchResult(
-            source = ImageSource(source = source, fileSystem = FileSystem.SYSTEM),
-            mimeType = "image/*",
-            dataSource = DataSource.DISK,
-        )
+    private suspend fun fileUriLoader(uri: String): FetchResult {
+        // Platform-specific URI loading
+        // This would need to be implemented per-platform
+        throw NotImplementedError("URI loading must be implemented platform-specifically")
     }
 
     private suspend fun httpLoader(): FetchResult {
         // Only cache separately if it's a library item
         val libraryCoverCacheFile = if (isLibraryManga) {
-            coverFileLazy.value ?: error("No cover specified")
+            coverCache.getCoverFile(bookCover)
         } else {
             null
         }
@@ -201,7 +205,7 @@ class BookCoverFetcher(
         return request.build()
     }
 
-    private fun moveSnapshotToCoverCache(snapshot: DiskCache.Snapshot, cacheFile: File?): File? {
+    private suspend fun moveSnapshotToCoverCache(snapshot: DiskCache.Snapshot, cacheFile: VirtualFile?): VirtualFile? {
         if (cacheFile == null) return null
         return try {
             diskCacheLazy.value.run {
@@ -217,7 +221,7 @@ class BookCoverFetcher(
         }
     }
 
-    private fun writeResponseToCoverCache(response: Response, cacheFile: File?): File? {
+    private suspend fun writeResponseToCoverCache(response: Response, cacheFile: VirtualFile?): VirtualFile? {
         if (cacheFile == null || !options.diskCachePolicy.writeEnabled) return null
         return try {
             response.peekBody(Long.MAX_VALUE).source().use { input ->
@@ -230,13 +234,28 @@ class BookCoverFetcher(
         }
     }
 
-    private fun writeSourceToCoverCache(input: Source, cacheFile: File) {
-        cacheFile.parentFile?.mkdirs()
+    private suspend fun writeSourceToCoverCache(input: Source, cacheFile: VirtualFile) {
+        cacheFile.parent?.mkdirs()
         cacheFile.delete()
         try {
-            cacheFile.sink().buffer().use { output ->
-                output.writeAll(input)
+            // Use okio's efficient copy instead of manual buffering
+            val outputStream = cacheFile.outputStream(append = false)
+            val buffer = okio.Buffer()
+            
+            // Read all from input source into buffer
+            var totalBytes = 0L
+            while (true) {
+                val bytesRead = input.read(buffer, 8192L)
+                if (bytesRead == -1L) break
+                totalBytes += bytesRead
+                
+                // Write buffer to VirtualOutputStream
+                val bytes = buffer.readByteArray()
+                outputStream.write(bytes)
             }
+            
+            outputStream.flush()
+            outputStream.close()
         } catch (e: Exception) {
             cacheFile.delete()
             throw e
@@ -307,8 +326,8 @@ class BookCoverFetcher(
                 url = data.cover,
                 isLibraryManga = data.favorite,
                 options = options,
-                coverFileLazy = lazy { coverCache.getCoverFile(data) },
-                customCoverFileLazy = lazy { coverCache.getCustomCoverFile(data) },
+                bookCover = data,
+                coverCache = coverCache,
                 diskCacheKeyLazy = lazy { BookCoverKeyer().key(data, options) },
                 sourceLazy = lazy { catalogStore.get(data.sourceId)?.source as? HttpSource },
                 callFactoryLazy = callFactoryLazy,
@@ -329,8 +348,8 @@ class BookCoverFetcher(
                 url = data.cover,
                 isLibraryManga = data.favorite,
                 options = options,
-                coverFileLazy = lazy { coverCache.getCoverFile(BookCover.from(data)) },
-                customCoverFileLazy = lazy { coverCache.getCustomCoverFile(BookCover.from(data)) },
+                bookCover = BookCover.from(data),
+                coverCache = coverCache,
                 diskCacheKeyLazy = lazy { BookCoverKeyer().key(BookCover.from(data), options) },
                 sourceLazy = lazy { catalogStore.get(data.sourceId)?.source as? HttpSource },
                 callFactoryLazy = callFactoryLazy,

@@ -1,5 +1,6 @@
 package ireader.domain.plugins
 
+import ireader.core.io.VirtualFile
 import ireader.core.util.createICoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -7,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 
 /**
  * Service for checking and managing plugin updates
@@ -115,7 +115,7 @@ class PluginUpdateChecker(
      * Download an update for a specific plugin
      * Requirements: 12.2
      */
-    suspend fun downloadUpdate(pluginId: String): Result<File> {
+    suspend fun downloadUpdate(pluginId: String): Result<ireader.core.io.VirtualFile> {
         return try {
             // Update status to downloading
             updateStatusForPlugin(pluginId, UpdateStatus.Downloading(0))
@@ -145,7 +145,7 @@ class PluginUpdateChecker(
      * Replaces the old plugin with the new version
      * Requirements: 12.2, 12.3
      */
-    suspend fun installUpdate(pluginId: String, packageFile: File): Result<Unit> {
+    suspend fun installUpdate(pluginId: String, packageFile: ireader.core.io.VirtualFile): Result<Unit> {
         return try {
             // Update status to installing
             updateStatusForPlugin(pluginId, UpdateStatus.Installing)

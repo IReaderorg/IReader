@@ -126,7 +126,7 @@ fun BackUpAndRestoreScreen(
                         Res.string.automatic_backup
                     ),
                     onValue = { newValue ->
-                        vm.getSimpleStorage.checkPermission()
+                        vm.storageManager.hasStoragePermission()
                         vm.updateAutomaticBackupFrequency(newValue)
                     }
                 )

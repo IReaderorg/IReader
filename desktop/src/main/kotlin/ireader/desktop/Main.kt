@@ -160,7 +160,7 @@ fun main() {
                     val context = LocalPlatformContext.current
                     val catalogStore: CatalogStore = koinInject()
                     val getSimpleStorage: GetSimpleStorage = koinInject()
-                    val coverCache: CoverCache = CoverCache(context, getSimpleStorage)
+                    val coverCache: CoverCache = CoverCache(context)
                     val httpClients: HttpClients = koinInject()
                     setSingletonImageLoaderFactory { context ->
                         newImageLoader(

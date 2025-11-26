@@ -1,17 +1,19 @@
 package ireader.domain.plugins
 
+import ireader.core.io.FileSystem
+import ireader.core.io.VirtualFile
 import ireader.core.util.createICoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 
 /**
  * Central service for managing plugin lifecycle
  * Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 14.1, 14.2, 14.3, 14.4, 14.5
  */
 class PluginManager(
+    private val fileSystem: FileSystem,
     private val loader: PluginLoader,
     private val registry: PluginRegistry,
     private val preferences: PluginPreferences,
@@ -76,7 +78,7 @@ class PluginManager(
     /**
      * Install a plugin from a package file
      */
-    suspend fun installPlugin(packageFile: File): Result<PluginInfo> {
+    suspend fun installPlugin(packageFile: VirtualFile): Result<PluginInfo> {
         return try {
             val plugin = loader.loadPlugin(packageFile)
                 ?: return Result.failure(Exception("Failed to load plugin from package"))

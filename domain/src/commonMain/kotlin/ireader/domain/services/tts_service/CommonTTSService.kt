@@ -75,6 +75,21 @@ interface CommonTTSService {
     suspend fun jumpToParagraph(index: Int)
     
     /**
+     * Get available TTS engines for this platform
+     */
+    fun getAvailableEngines(): List<String>
+    
+    /**
+     * Get current engine name
+     */
+    fun getCurrentEngineName(): String
+    
+    /**
+     * Check if service is initialized and ready
+     */
+    fun isReady(): Boolean
+    
+    /**
      * Cleanup resources
      */
     fun cleanup()

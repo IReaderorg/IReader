@@ -2,13 +2,15 @@ package ireader.domain.usecases.files
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Environment
 import androidx.activity.ComponentActivity
-import androidx.documentfile.provider.DocumentFile
-import coil3.imageLoader
 import com.anggrayudi.storage.SimpleStorage
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.anggrayudi.storage.file.DocumentFileCompat
+import androidx.documentfile.provider.DocumentFile
+import ireader.domain.storage.AndroidCacheManager
+import ireader.domain.storage.AndroidStorageManager
+import ireader.domain.storage.CacheManager
+import ireader.domain.storage.StorageManager
 import java.io.File
 
 
@@ -18,98 +20,64 @@ class AndroidGetSimpleStorage(
 
     lateinit var storage: SimpleStorage
     lateinit var simpleStorageHelper: SimpleStorageHelper
+    
+    private val storageManager: StorageManager = AndroidStorageManager(context)
+    private val cacheManager: CacheManager = AndroidCacheManager(context)
 
     fun provideActivity(activity: ComponentActivity, savedState: Bundle?) {
         storage = SimpleStorage(activity, savedState)
         simpleStorageHelper = SimpleStorageHelper(activity, savedState)
     }
 
-    override val mainIReaderDir: File = File(Environment.getExternalStorageDirectory(), "IReader/")
-
-
+    override val mainIReaderDir: File
+        get() = storageManager.appDirectory
 
     override fun ireaderDirectory(dirName: String): File =
-        File(Environment.getExternalStorageDirectory(), "IReader/${dirName}/")
+        storageManager.getSubDirectory(dirName)
 
     override fun extensionDirectory(): File =
-        File(Environment.getExternalStorageDirectory(), "IReader/Extensions/")
+        storageManager.extensionsDirectory
 
-    override fun cacheExtensionDir() = File(context.cacheDir,"IReader/Extensions/")
-    override fun ireaderCacheDir() = File(context.cacheDir,"IReader/cache/")
+    override fun cacheExtensionDir() = cacheManager.extensionCacheDirectory
+    
+    override fun ireaderCacheDir() = cacheManager.cacheDirectory
 
-    override val backupDirectory: File =
-        File(Environment.getExternalStorageDirectory(), "IReader/Backups/")
-    override val booksDirectory: File =
-        File(Environment.getExternalStorageDirectory(), "IReader/Books/")
-    override  val automaticBackupDirectory: File =
-        File(Environment.getExternalStorageDirectory(), "IReader/Backups/Automatic/")
-
-    init {
-
-    }
+    override val backupDirectory: File
+        get() = storageManager.backupDirectory
+        
+    override val booksDirectory: File
+        get() = storageManager.booksDirectory
+        
+    override val automaticBackupDirectory: File
+        get() = storageManager.automaticBackupDirectory
 
     override fun checkPermission(): Boolean {
-        if (!mainIReaderDir.isDirectory) {
-            mainIReaderDir.deleteRecursively()
+        val hasPermission = storageManager.hasStoragePermission()
+        if (hasPermission) {
+            createIReaderDir()
+            createNoMediaFile()
         }
-        if (!backupDirectory.isDirectory) {
-            backupDirectory.deleteRecursively()
-        }
-        if (!automaticBackupDirectory.isDirectory) {
-            automaticBackupDirectory.deleteRecursively()
-        }
-        if (!booksDirectory.isDirectory) {
-            booksDirectory.deleteRecursively()
-        }
-
-        createIReaderDir()
-        createNoMediaFile()
-//        val isGranted = SimpleStorage.hasStorageAccess(
-//            context,
-//            mainIReaderDir.absolutePath,
-//            requiresWriteAccess = true
-//        )
-//        return if (!isGranted) {
-//            simpleStorageHelper.requestStorageAccess(
-//                200, expectedStorageType = StorageType.EXTERNAL, initialPath = FileFullPath(
-//                    context,
-//                    mainIReaderDir
-//                )
-//            )
-//            return false
-//        } else true
-        return true
+        return hasPermission
     }
 
     override fun createIReaderDir() {
-        kotlin.runCatching {
-            if (!mainIReaderDir.exists()) {
-                DocumentFile.fromFile(Environment.getExternalStorageDirectory())
-                    .createDirectory("IReader")
-            }
-        }
+        storageManager.initializeDirectories()
     }
 
     override fun createNoMediaFile() {
-
-        kotlin.runCatching {
-            val noMediaFile = File(mainIReaderDir, ".nomedia")
-            if (!noMediaFile.exists()) {
-                DocumentFile.fromFile(mainIReaderDir).createFile("", ".nomedia")
-            }
-        }
+        storageManager.preventMediaIndexing()
     }
 
     override fun clearImageCache() {
-        context.imageLoader.memoryCache?.clear()
+        cacheManager.clearImageCache()
     }
 
     override fun clearCache() {
-        context.cacheDir.deleteRecursively()
+        cacheManager.clearAllCache()
     }
 
     override fun getCacheSize(): String {
-        return ireader.domain.utils.getCacheSize(context = context)
+        return cacheManager.getCacheSize()
     }
 
     fun get(dirName: String): DocumentFile {

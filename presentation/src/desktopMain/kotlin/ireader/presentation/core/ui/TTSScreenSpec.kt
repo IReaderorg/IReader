@@ -63,7 +63,8 @@ actual class TTSScreenSpec actual constructor(
     @Composable
     actual fun Content() {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
-        val ttsService: DesktopTTSService = koinInject()
+        // Use the legacy service directly (adapter provides CommonTTSService interface)
+        val ttsService: ireader.domain.services.tts_service.DesktopTTSService = koinInject()
         
         // TTS Settings State - Use theme colors by default
         var useCustomColors by remember { mutableStateOf(false) }

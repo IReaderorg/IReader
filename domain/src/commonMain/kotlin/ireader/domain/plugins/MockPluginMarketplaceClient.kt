@@ -1,14 +1,17 @@
 package ireader.domain.plugins
 
+import ireader.core.io.FileSystem
+import ireader.core.io.VirtualFile
 import kotlinx.coroutines.delay
-import java.io.File
 
 /**
  * Mock implementation of PluginMarketplaceClient for testing and development
  * Production implementation should use actual REST API calls
  * Requirements: 12.1, 12.2
  */
-class MockPluginMarketplaceClient : PluginMarketplaceClient {
+class MockPluginMarketplaceClient(
+    private val fileSystem: FileSystem
+) : PluginMarketplaceClient {
     
     // Mock data for available plugin versions
     private val mockVersions = mutableMapOf<String, List<PluginVersionInfo>>()
@@ -36,7 +39,7 @@ class MockPluginMarketplaceClient : PluginMarketplaceClient {
     override suspend fun downloadPlugin(
         url: String,
         onProgress: (Int) -> Unit
-    ): File {
+    ): VirtualFile {
         // Simulate download with progress
         for (progress in 0..100 step 10) {
             delay(50)
@@ -44,8 +47,7 @@ class MockPluginMarketplaceClient : PluginMarketplaceClient {
         }
         
         // Create a temporary file to simulate downloaded plugin
-        val tempFile = File.createTempFile("plugin_", ".iplugin")
-        tempFile.deleteOnExit()
+        val tempFile = fileSystem.createTempFile("plugin_", ".iplugin")
         
         return tempFile
     }

@@ -75,6 +75,7 @@ kotlin {
             }
         }
          androidMain {
+            kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
                 implementation(androidx.core)
                 implementation(androidx.dataStore)

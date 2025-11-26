@@ -14,6 +14,8 @@ import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.database.RepairDatabaseUseCase
 import ireader.domain.usecases.epub.ImportEpub
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.domain.storage.CacheManager
+import ireader.domain.storage.StorageManager
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
@@ -27,6 +29,8 @@ class AdvanceSettingViewModel(
     val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
     private val prefUseCases: ReaderPrefUseCases,
     val getSimpleStorage: GetSimpleStorage,
+    val storageManager: StorageManager,
+    val cacheManager: CacheManager,
     val importEpub: ImportEpub,
     private val readerPreferences: ReaderPreferences,
     private val androidReaderPreferences: PlatformUiPreferences,
@@ -117,35 +121,23 @@ class AdvanceSettingViewModel(
      */
     fun getCoverCacheSize(): String {
         return try {
-            val cacheDir = getSimpleStorage.ireaderCacheDir()
-            
-            // Check if directory exists
-            if (!cacheDir.exists()) {
-                return "0 MB"
-            }
-            
-            // Calculate total size recursively
-            val totalBytes = cacheDir.walkTopDown()
-                .filter { it.isFile }
-                .map { it.length() }
-                .sum()
-            
-            // Format size based on magnitude
-            formatBytes(totalBytes)
+            cacheManager.getCacheSize()
         } catch (e: Exception) {
             "Error calculating size"
         }
     }
     
     /**
-     * Formats bytes into human-readable format
+     * Clear image cache using the cache manager
      */
-    private fun formatBytes(bytes: Long): String {
-        return when {
-            bytes < 1024 -> "$bytes B"
-            bytes < 1024 * 1024 -> String.format("%.1f KB", bytes / 1024.0)
-            bytes < 1024 * 1024 * 1024 -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
-            else -> String.format("%.2f GB", bytes / (1024.0 * 1024.0 * 1024.0))
-        }
+    fun clearImageCache() {
+        cacheManager.clearImageCache()
+    }
+    
+    /**
+     * Check storage permissions
+     */
+    fun checkStoragePermission(): Boolean {
+        return storageManager.hasStoragePermission()
     }
 }

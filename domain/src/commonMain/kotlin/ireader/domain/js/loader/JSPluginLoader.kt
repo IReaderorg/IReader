@@ -144,6 +144,9 @@ class JSPluginLoader(
             override val default: HttpClient = httpClient
             override val cloudflareClient: HttpClient = httpClient
             override val browser: ireader.core.http.BrowserEngine = ireader.core.http.BrowserEngine()
+            override val config: ireader.core.http.NetworkConfig = ireader.core.http.NetworkConfig()
+            override val sslConfig: ireader.core.http.SSLConfiguration = ireader.core.http.SSLConfiguration()
+            override val cookieSynchronizer: ireader.core.http.CookieSynchronizer = createCookieSynchronizer()
         }
         val dependencies = ireader.core.source.Dependencies(
             httpClients = httpClientsInterface,
@@ -239,6 +242,9 @@ class JSPluginLoader(
                 override val default: HttpClient = httpClient
                 override val cloudflareClient: HttpClient = httpClient
                 override val browser: ireader.core.http.BrowserEngine = ireader.core.http.BrowserEngine()
+                override val config: ireader.core.http.NetworkConfig = ireader.core.http.NetworkConfig()
+                override val sslConfig: ireader.core.http.SSLConfiguration = ireader.core.http.SSLConfiguration()
+                override val cookieSynchronizer: ireader.core.http.CookieSynchronizer = createCookieSynchronizer()
             }
             val dependencies = ireader.core.source.Dependencies(
                 httpClients = httpClientsInterface,
@@ -488,4 +494,20 @@ class JSPluginLoader(
             else -> "en"
         }
     }
+    
+    /**
+     * Platform-specific CookieSynchronizer creation
+     * Desktop doesn't need webViewCookieJar, Android does
+     */
+    private fun createCookieSynchronizer(): ireader.core.http.CookieSynchronizer {
+        // This will use the platform-specific constructor
+        // Desktop: no-arg constructor
+        // Android: requires webViewCookieJar (will be provided by platform-specific code)
+        return createPlatformCookieSynchronizer()
+    }
 }
+
+/**
+ * Platform-specific CookieSynchronizer creation
+ */
+expect fun createPlatformCookieSynchronizer(): ireader.core.http.CookieSynchronizer

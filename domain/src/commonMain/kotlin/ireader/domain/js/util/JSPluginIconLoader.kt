@@ -4,6 +4,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.readBytes
 import ireader.domain.js.models.JSPluginError
+import ireader.domain.storage.CacheManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -14,7 +15,7 @@ import java.io.File
  */
 class JSPluginIconLoader(
     private val httpClient: HttpClient,
-    private val cacheDir: File
+    private val cacheManager: CacheManager
 ) {
     
     companion object {
@@ -31,13 +32,8 @@ class JSPluginIconLoader(
         private const val EXPECTED_ICON_SIZE = 96
     }
     
-    init {
-        // Ensure cache directory exists
-        val iconCacheDir = File(cacheDir, "js-plugin-icons")
-        if (!iconCacheDir.exists()) {
-            iconCacheDir.mkdirs()
-        }
-    }
+    private val iconCacheDir: File
+        get() = cacheManager.getCacheSubDirectory("js-plugin-icons")
     
     /**
      * Loads an icon for a plugin.
@@ -163,7 +159,6 @@ class JSPluginIconLoader(
      * @return File object for the cached icon
      */
     private fun getIconCacheFile(pluginId: String): File {
-        val iconCacheDir = File(cacheDir, "js-plugin-icons")
         return File(iconCacheDir, "$pluginId.png")
     }
     
@@ -190,10 +185,7 @@ class JSPluginIconLoader(
      */
     fun clearAllCache() {
         try {
-            val iconCacheDir = File(cacheDir, "js-plugin-icons")
-            if (iconCacheDir.exists()) {
-                iconCacheDir.listFiles()?.forEach { it.delete() }
-            }
+            cacheManager.clearCacheDirectory(iconCacheDir)
         } catch (e: Exception) {
             JSPluginLogger.logError(
                 "icon-loader",

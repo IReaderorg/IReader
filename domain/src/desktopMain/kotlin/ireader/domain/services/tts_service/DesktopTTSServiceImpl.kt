@@ -111,6 +111,27 @@ class DesktopTTSServiceImpl(
         })
     }
     
+    override fun getPlatformAvailableEngines(): List<String> {
+        val engines = mutableListOf<String>()
+        
+        engines.add("Piper TTS")
+        
+        // Check if Kokoro is available
+        // This would need actual availability check
+        engines.add("Kokoro TTS (optional)")
+        
+        // Check if Maya is available
+        engines.add("Maya TTS (optional)")
+        
+        // Coqui TTS via HTTP
+        val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
+        if (coquiSpaceUrl.isNotEmpty()) {
+            engines.add("Coqui TTS")
+        }
+        
+        return engines
+    }
+    
     override suspend fun precacheNextParagraphs() {
         // Desktop engines don't support pre-caching yet
         // Could be added for Coqui HTTP TTS in the future

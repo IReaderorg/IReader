@@ -1,8 +1,8 @@
 package ireader.presentation.ui.core.theme
 
 import androidx.compose.ui.text.font.FontFamily
+import ireader.core.io.VirtualFile
 import ireader.domain.models.fonts.CustomFont
-import java.io.File
 
 /**
  * Registry for managing custom fonts and their FontFamily objects
@@ -15,12 +15,11 @@ object FontRegistry {
      * @param font The CustomFont to load
      * @return FontFamily or null if loading fails
      */
-    fun loadFontFamily(font: CustomFont): FontFamily? {
+    suspend fun loadFontFamily(font: CustomFont, fontFile: VirtualFile): FontFamily? {
         // Check cache first
         fontFamilyCache[font.id]?.let { return it }
         
         return try {
-            val fontFile = File(font.filePath)
             if (!fontFile.exists()) {
                 return null
             }
@@ -63,41 +62,39 @@ object FontRegistry {
      * @param file The file to validate
      * @return true if valid TTF or OTF file
      */
-    fun validateFontFile(file: File): Boolean {
-        if (!file.exists() || !file.canRead()) {
+    suspend fun validateFontFile(file: VirtualFile): Boolean {
+        if (!file.exists()) {
             return false
         }
         
         return try {
-            file.inputStream().use { input ->
-                val header = ByteArray(4)
-                val bytesRead = input.read(header)
+            val bytes = file.readBytes()
+            if (bytes.size < 4) {
+                return false
+            }
+            
+            val header = bytes.take(4).toByteArray()
+            
+            // Check for TTF magic bytes: 0x00 0x01 0x00 0x00 or "true" or "typ1"
+            // Check for OTF magic bytes: "OTTO"
+            when {
+                // TTF: 0x00010000
+                header[0] == 0x00.toByte() && header[1] == 0x01.toByte() && 
+                header[2] == 0x00.toByte() && header[3] == 0x00.toByte() -> true
                 
-                if (bytesRead < 4) {
-                    return false
-                }
+                // TTF: "true"
+                header[0] == 't'.code.toByte() && header[1] == 'r'.code.toByte() && 
+                header[2] == 'u'.code.toByte() && header[3] == 'e'.code.toByte() -> true
                 
-                // Check for TTF magic bytes: 0x00 0x01 0x00 0x00 or "true" or "typ1"
-                // Check for OTF magic bytes: "OTTO"
-                when {
-                    // TTF: 0x00010000
-                    header[0] == 0x00.toByte() && header[1] == 0x01.toByte() && 
-                    header[2] == 0x00.toByte() && header[3] == 0x00.toByte() -> true
-                    
-                    // TTF: "true"
-                    header[0] == 't'.code.toByte() && header[1] == 'r'.code.toByte() && 
-                    header[2] == 'u'.code.toByte() && header[3] == 'e'.code.toByte() -> true
-                    
-                    // TTF: "typ1"
-                    header[0] == 't'.code.toByte() && header[1] == 'y'.code.toByte() && 
-                    header[2] == 'p'.code.toByte() && header[3] == '1'.code.toByte() -> true
-                    
-                    // OTF: "OTTO"
-                    header[0] == 'O'.code.toByte() && header[1] == 'T'.code.toByte() && 
-                    header[2] == 'T'.code.toByte() && header[3] == 'O'.code.toByte() -> true
-                    
-                    else -> false
-                }
+                // TTF: "typ1"
+                header[0] == 't'.code.toByte() && header[1] == 'y'.code.toByte() && 
+                header[2] == 'p'.code.toByte() && header[3] == '1'.code.toByte() -> true
+                
+                // OTF: "OTTO"
+                header[0] == 'O'.code.toByte() && header[1] == 'T'.code.toByte() && 
+                header[2] == 'T'.code.toByte() && header[3] == 'O'.code.toByte() -> true
+                
+                else -> false
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -109,4 +106,4 @@ object FontRegistry {
 /**
  * Platform-specific font family creation
  */
-expect fun createFontFamilyFromFile(file: File): FontFamily
+expect suspend fun createFontFamilyFromFile(file: VirtualFile): FontFamily

@@ -11,7 +11,7 @@ import ireader.domain.usecases.local.LocalGetBookUseCases
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +30,7 @@ class LibraryUpdateService(
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
     private val insertUseCases: LocalInsertUseCases,
-    private val notificationManager: NotificationManager,
+    private val notificationManager: PlatformNotificationManager,
     private val libraryUpdateRepository: LibraryUpdateRepository
 ) {
     

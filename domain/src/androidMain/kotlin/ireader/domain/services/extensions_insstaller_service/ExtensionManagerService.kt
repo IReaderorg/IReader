@@ -9,7 +9,7 @@ import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.services.downloaderService.DefaultNotificationHelper
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import ireader.i18n.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ class ExtensionManagerService constructor(
     val getInstalledCatalog: GetInstalledCatalog by inject()
     private val installCatalog: InstallCatalog by inject()
     val defaultNotificationHelper: DefaultNotificationHelper by inject()
-    private val notificationManager: NotificationManager by inject()
+    private val notificationManager: PlatformNotificationManager by inject()
 
     private val downloadJob = Job()
     val scope = CoroutineScope(Dispatchers.Main.immediate + downloadJob)
@@ -47,34 +47,39 @@ class ExtensionManagerService constructor(
                 },
                 onCancel = {
                     notificationManager.cancel(NotificationsIds.ID_INSTALLER_PROGRESS)
-                    notificationManager.show(NotificationsIds.ID_INSTALLER_ERROR,
+                    notificationManager.showPlatformNotification(
+                        NotificationsIds.ID_INSTALLER_ERROR,
                         defaultNotificationHelper.baseInstallerNotification(
                             id,
                             false
                         ).apply {
                             setContentTitle("Installation was stopped.")
                             setOngoing(false)
-                        }.build())
+                        }.build()
+                    )
                 },
                 updateNotification = {
-                    notificationManager.show(NotificationsIds.ID_INSTALLER_COMPLETE,
-                        builder)
+                    notificationManager.showPlatformNotification(
+                        NotificationsIds.ID_INSTALLER_COMPLETE,
+                        builder.build()
+                    )
                 },
                 onSuccess = { notInstalled ->
                     notificationManager.cancel(NotificationsIds.ID_INSTALLER_PROGRESS)
-                    val notification = NotificationCompat.Builder(
-                        applicationContext.applicationContext,
-                        NotificationsIds.CHANNEL_INSTALLER_COMPLETE
-                    ).apply {
-                        setContentTitle("$notInstalled sources was Installed successfully.")
-                        setSmallIcon(R.drawable.ic_downloading)
-                        priority = NotificationCompat.PRIORITY_DEFAULT
-                        setSubText("Installed Successfully")
-                        setAutoCancel(true)
-                        setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                    }.build()
-                    notificationManager.show(NotificationsIds.ID_INSTALLER_COMPLETE,
-                        notification)
+                    notificationManager.showPlatformNotification(
+                        NotificationsIds.ID_INSTALLER_COMPLETE,
+                        NotificationCompat.Builder(
+                            applicationContext.applicationContext,
+                            NotificationsIds.CHANNEL_INSTALLER_COMPLETE
+                        ).apply {
+                            setContentTitle("$notInstalled sources was Installed successfully.")
+                            setSmallIcon(R.drawable.ic_downloading)
+                            priority = NotificationCompat.PRIORITY_DEFAULT
+                            setSubText("Installed Successfully")
+                            setAutoCancel(true)
+                            setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+                        }.build()
+                    )
                 }
             )
         return if (result) Result.success() else Result.failure()

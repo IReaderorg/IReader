@@ -41,7 +41,7 @@ actual class EpubCreator(
                 // Get cover file path if available
                 val coverFile = coverCache.getCoverFile(BookCover.Companion.from(book))
                 val coverUrl = if (coverFile?.exists() == true) {
-                    "file://${coverFile.absolutePath}"
+                    "file://${coverFile.path}"
                 } else {
                     book.cover
                 }

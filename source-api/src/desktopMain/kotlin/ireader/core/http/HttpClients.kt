@@ -22,52 +22,73 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 actual class HttpClients(
-    store: PreferenceStore
+    store: PreferenceStore,
+    networkConfig: NetworkConfig = NetworkConfig()
 ) : HttpClientsInterface {
+
+    actual override val config: NetworkConfig = networkConfig
 
     private val cache = run {
         val dir = File(AppDir, "network_cache/")
-        val size = 15L * 1024 * 1024
-        Cache(dir, size)
+        Cache(dir, config.cacheSize)
     }
 
+    actual override val sslConfig = SSLConfiguration()
+    actual override val cookieSynchronizer = CookieSynchronizer()
 
     private val basicClient = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.MINUTES)  // Increased for FlareSolverr
-        .callTimeout(5, TimeUnit.MINUTES)  // Increased for FlareSolverr (was 2 minutes)
+        .connectTimeout(config.connectTimeoutSeconds, TimeUnit.SECONDS)
+        .readTimeout(config.readTimeoutMinutes, TimeUnit.MINUTES)
+        .callTimeout(config.callTimeoutMinutes, TimeUnit.MINUTES)
         .cookieJar(PersistentCookieJar(store))
+        .apply {
+            sslConfig.applyTo(this)
+        }
 
 
   actual override val default = HttpClient(OkHttp) {
     BrowserUserAgent()
     engine {
-      preconfigured = this@HttpClients.basicClient.cache(cache).build()
+      preconfigured = this@HttpClients.basicClient
+        .apply { if (config.enableCaching) cache(cache) }
+        .build()
     }
-    install(ContentNegotiation) {
-      gson()
+    if (config.enableCompression) {
+      install(ContentNegotiation) {
+        gson()
+      }
     }
-    install(HttpCookies)
-    // Install HTTP response cache with 5 minute default
-    installCache(cacheDurationMs = 5 * 60 * 1000) {
-      enabled = true
-      cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
-      cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+    if (config.enableCookies) {
+      install(HttpCookies)
+    }
+    // Install HTTP response cache
+    if (config.enableCaching) {
+      installCache(cacheDurationMs = config.cacheDurationMs) {
+        enabled = true
+        cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
+        cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+      }
     }
   }
+  
   actual override val cloudflareClient = HttpClient(OkHttp) {
     BrowserUserAgent()
     engine {
       preconfigured = this@HttpClients.basicClient.build()
     }
-    install(HttpCookies)
-    // Install HTTP response cache with 5 minute default
-    installCache(cacheDurationMs = 5 * 60 * 1000) {
-      enabled = true
-      cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
-      cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+    if (config.enableCookies) {
+      install(HttpCookies)
+    }
+    // Install HTTP response cache
+    if (config.enableCaching) {
+      installCache(cacheDurationMs = config.cacheDurationMs) {
+        enabled = true
+        cacheableMethods = setOf(io.ktor.http.HttpMethod.Get)
+        cacheableStatusCodes = setOf(io.ktor.http.HttpStatusCode.OK)
+      }
     }
   }
+  
   actual override val browser: BrowserEngine
     get() = BrowserEngine()
 

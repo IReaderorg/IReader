@@ -4,7 +4,7 @@ import ireader.domain.catalogs.interactor.GetInstalledCatalog
 import ireader.domain.catalogs.interactor.InstallCatalog
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.services.extensions_insstaller_service.runExtensionService
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import ireader.domain.utils.extensions.launchIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,7 @@ actual class StartExtensionManagerService(
     private val repository: CatalogRemoteRepository,
     private val getInstalledCatalog: GetInstalledCatalog,
     private val installCatalog: InstallCatalog,
-    private val notificationManager: NotificationManager
+    private val notificationManager: PlatformNotificationManager
 ) {
 
     private val workerJob = Job()

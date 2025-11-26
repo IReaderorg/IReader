@@ -60,7 +60,7 @@ fun AdvanceSettings(
                 icon = Icons.Default.Storage
             ),
             Components.Row(
-                title = "${localizeHelper.localize(Res.string.clear_all_cache)} (${vm.importEpub.getCacheSize()})",
+                title = "${localizeHelper.localize(Res.string.clear_all_cache)} (${vm.cacheManager.getCacheSize()})",
                 subtitle = "Clear all cached data to free up storage space",
                 icon = Icons.Default.FolderDelete,
                 onClick = {
@@ -184,10 +184,10 @@ fun AdvanceSettings(
     if (showClearCache) {
         ConfirmationDialog(
             title = localizeHelper.localize(Res.string.clear_all_cache),
-            message = "This will clear all cached data (${vm.importEpub.getCacheSize()}). The app may need to re-download some content.",
+            message = "This will clear all cached data (${vm.cacheManager.getCacheSize()}). The app may need to re-download some content.",
             confirmText = "Clear",
             onConfirm = {
-                vm.importEpub.removeCache()
+                vm.cacheManager.clearAllCache()
                 vm.showSnackBar(UiText.DynamicString("Cache was cleared."))
                 showClearCache = false
             },
@@ -202,7 +202,7 @@ fun AdvanceSettings(
             message = "This will clear all cached book cover images. Covers will be re-downloaded when needed.",
             confirmText = "Clear",
             onConfirm = {
-                vm.getSimpleStorage.clearImageCache()
+                vm.clearImageCache()
                 vm.showSnackBar(UiText.DynamicString("Cover cache was cleared."))
                 showClearCoverCache = false
             },

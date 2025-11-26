@@ -11,9 +11,9 @@ val pluginUpdateModule = module {
     
     // Marketplace client - use mock for development, replace with production implementation
     single<PluginMarketplaceClient> {
-        MockPluginMarketplaceClient()
+        MockPluginMarketplaceClient(fileSystem = get())
         // In production, use:
-        // PluginMarketplaceClientImpl(httpClient = get())
+        // PluginMarketplaceClientImpl(httpClient = get(), fileSystem = get())
     }
     
     // Update history repository - use in-memory for development, replace with database implementation

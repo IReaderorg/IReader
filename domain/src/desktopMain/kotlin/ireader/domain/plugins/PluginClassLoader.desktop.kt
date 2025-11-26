@@ -1,5 +1,6 @@
 package ireader.domain.plugins
 
+import ireader.core.io.VirtualFile
 import java.io.File
 import java.net.URLClassLoader
 
@@ -13,11 +14,15 @@ actual class PluginClassLoader {
      * Load a plugin class from a package file
      * On Desktop, .iplugin files are JAR files that can be loaded with URLClassLoader
      */
-    actual fun loadPluginClass(file: File, manifest: PluginManifest): Class<out Plugin> {
+    actual suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Class<out Plugin> {
         try {
+            // Convert VirtualFile to java.io.File for URLClassLoader
+            // This is a temporary bridge until we have a full VirtualFile implementation
+            val javaFile = File(file.path)
+            
             // Create URLClassLoader to load the plugin JAR
             val classLoader = URLClassLoader(
-                arrayOf(file.toURI().toURL()),
+                arrayOf(javaFile.toURI().toURL()),
                 this::class.java.classLoader
             )
             

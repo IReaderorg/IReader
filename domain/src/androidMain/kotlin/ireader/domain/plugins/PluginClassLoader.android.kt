@@ -1,6 +1,7 @@
 package ireader.domain.plugins
 
 import dalvik.system.DexClassLoader
+import ireader.core.io.VirtualFile
 import java.io.File
 
 /**
@@ -15,14 +16,17 @@ actual class PluginClassLoader(
      * Load a plugin class from a package file
      * On Android, .iplugin files are APK/DEX files that can be loaded with DexClassLoader
      */
-    actual fun loadPluginClass(file: File, manifest: PluginManifest): Class<out Plugin> {
+    actual suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Class<out Plugin> {
         try {
+            // Convert VirtualFile to java.io.File for DexClassLoader
+            val javaFile = File(file.path)
+            
             // Create optimized dex output directory
             val optimizedDir = File(cacheDir, "plugin_dex").apply { mkdirs() }
             
             // Create DexClassLoader to load the plugin
             val classLoader = DexClassLoader(
-                file.absolutePath,
+                javaFile.absolutePath,
                 optimizedDir.absolutePath,
                 null,
                 this::class.java.classLoader

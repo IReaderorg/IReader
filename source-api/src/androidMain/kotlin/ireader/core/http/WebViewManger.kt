@@ -102,11 +102,13 @@ actual class WebViewManger(private val context: Context) {
         }
     }
     
+    actual  fun isAvailable(): Boolean = true
+    
     /**
      * Load URL in background mode (invisible to user)
      * Useful for bypassing Cloudflare without disrupting reading
      */
-    fun loadInBackground(url: String, selector: String? = null, onReady: (String) -> Unit) {
+    actual fun loadInBackground(url: String, selector: String?, onReady: (String) -> Unit) {
         isBackgroundMode = true
         this.selector = selector
         this.webUrl = url
@@ -123,7 +125,7 @@ actual class WebViewManger(private val context: Context) {
     /**
      * Check if WebView is currently processing in background
      */
-    fun isProcessingInBackground(): Boolean {
+    actual fun isProcessingInBackground(): Boolean {
         return isBackgroundMode && inProgress
     }
 

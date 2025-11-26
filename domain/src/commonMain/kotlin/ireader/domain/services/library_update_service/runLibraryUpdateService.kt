@@ -6,7 +6,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.notification.NotificationsIds.ID_LIBRARY_PROGRESS
 import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.time.ExperimentalTime
@@ -18,7 +18,7 @@ suspend fun runLibraryUpdateService(
     remoteUseCases: RemoteUseCases,
     getLocalCatalog: GetLocalCatalog,
     insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-    notificationManager: NotificationManager,
+    notificationManager: PlatformNotificationManager,
     forceUpdate:Boolean,
     updateProgress: (max: Int,progress: Int, inProgress: Boolean) -> Unit,
     updateTitle:(String) -> Unit,

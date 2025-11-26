@@ -8,7 +8,7 @@ import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.notification.NotificationsIds.ID_INSTALLER_PROGRESS
-import ireader.domain.utils.NotificationManager
+import ireader.domain.notification.PlatformNotificationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 suspend fun runExtensionService(repository: CatalogRemoteRepository,
                                 getInstalledCatalog: GetInstalledCatalog,
                                 installCatalog: InstallCatalog,
-                                notificationManager: NotificationManager,
+                                notificationManager: PlatformNotificationManager,
                                 updateProgress:(max: Int, current: Int, inProgress: Boolean) -> Unit,
                                 updateTitle: (String) -> Unit,
                                 onCancel:(error: Throwable) -> Unit,
