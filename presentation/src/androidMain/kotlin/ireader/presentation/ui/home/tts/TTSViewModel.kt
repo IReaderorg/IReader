@@ -95,26 +95,7 @@ class TTSViewModel(
             configureCoquiTTS()
         }
     }
-    
-    // DEPRECATED: Old Coqui TTS implementation - no longer used
-    // All TTS now goes through the unified service player
-    // Kept for reference only
-    /*
-    var isCoquiLoading by mutableStateOf(false)
-        private set
-    
-    @Deprecated("Use service's unified player instead", ReplaceWith("play(context)"))
-    fun speakWithCoqui(text: String) {
-        // This method is deprecated and should not be used
-        // All TTS playback now goes through TTSService's unified player
-    }
-    
-    @Deprecated("Use service's unified player instead")
-    fun stopCoquiTTS() {
-        // This method is deprecated and should not be used
-        // All TTS playback now goes through TTSService's unified player
-    }
-    */
+
     val autoNext = readerPreferences.readerAutoNext().asState()
     val voice = androidUiPreferences.speechVoice().asState()
     val language = readerPreferences.speechLanguage().asState()

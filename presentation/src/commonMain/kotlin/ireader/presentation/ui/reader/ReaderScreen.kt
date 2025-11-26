@@ -31,7 +31,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -180,16 +184,27 @@ private fun ReadingScreenContent(
         }
     }
     
+    // Track if we're currently syncing to prevent feedback loops
+    var isSyncing by remember { mutableStateOf(false) }
+    
     // Handle changes from modal sheet to reader mode
-    LaunchedEffect(key1 = modalBottomSheetState.currentValue, key2 = vm.initialized) {
-        // Only sync state after initialization to prevent conflicts
-        if (vm.initialized) {
-            when (modalBottomSheetState.currentValue) {
+    LaunchedEffect(key1 = modalBottomSheetState.targetValue, key2 = vm.initialized) {
+        // Only sync state after initialization and when not already syncing
+        if (vm.initialized && !isSyncing) {
+            when (modalBottomSheetState.targetValue) {
                 ModalBottomSheetValue.Expanded -> {
-                    if (vm.isReaderModeEnable) vm.isReaderModeEnable = false
+                    if (vm.isReaderModeEnable) {
+                        isSyncing = true
+                        vm.isReaderModeEnable = false
+                        isSyncing = false
+                    }
                 }
                 ModalBottomSheetValue.Hidden -> {
-                    if (!vm.isReaderModeEnable) vm.isReaderModeEnable = true
+                    if (!vm.isReaderModeEnable) {
+                        isSyncing = true
+                        vm.isReaderModeEnable = true
+                        isSyncing = false
+                    }
                 }
                 else -> {}
             }
@@ -198,27 +213,33 @@ private fun ReadingScreenContent(
     
     // Handle changes from reader mode to modal sheet
     LaunchedEffect(key1 = vm.isReaderModeEnable, key2 = vm.initialized) {
-        // Only sync state after initialization to prevent conflicts
-        if (vm.initialized) {
+        // Only sync state after initialization and when not already syncing
+        if (vm.initialized && !isSyncing) {
             when (vm.isReaderModeEnable) {
                 false -> {
-                    if (modalBottomSheetState.currentValue != ModalBottomSheetValue.Expanded) {
+                    if (modalBottomSheetState.targetValue != ModalBottomSheetValue.Expanded) {
+                        isSyncing = true
                         scope.launch {
                             try {
                                 modalBottomSheetState.show()
                             } catch (e: Exception) {
                                 ireader.core.log.Log.error("Error showing modal sheet", e)
+                            } finally {
+                                isSyncing = false
                             }
                         }
                     }
                 }
                 true -> {
-                    if (modalBottomSheetState.currentValue != ModalBottomSheetValue.Hidden) {
+                    if (modalBottomSheetState.targetValue != ModalBottomSheetValue.Hidden) {
+                        isSyncing = true
                         scope.launch {
                             try {
                                 modalBottomSheetState.hide()
                             } catch (e: Exception) {
                                 ireader.core.log.Log.error("Error hiding modal sheet", e)
+                            } finally {
+                                isSyncing = false
                             }
                         }
                     }

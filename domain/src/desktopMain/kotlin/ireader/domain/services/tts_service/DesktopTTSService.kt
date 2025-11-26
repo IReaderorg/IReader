@@ -126,8 +126,15 @@ class DesktopTTSService : KoinComponent {
                 // Load available and downloaded models
                 loadAvailableModels()
                 loadSelectedVoiceModel()
+            } catch (e: UnsatisfiedLinkError) {
+                Log.error { "Piper JNI library failed to load: ${e.message}" }
+                enableSimulationMode(
+                    "Piper TTS library failed to load. " +
+                    "Please install Kokoro or Maya TTS from TTS Manager."
+                )
             } catch (e: Exception) {
                 Log.error { "Failed to load Piper: ${e.message}" }
+                enableSimulationMode("Piper TTS not available. Please download a voice model or install Kokoro/Maya from TTS Manager.")
             }
             
             // Check if Kokoro is already installed (don't auto-install)
@@ -534,20 +541,45 @@ class DesktopTTSService : KoinComponent {
         val book = bookRepo.findBookById(bookId)
         val chapter = chapterRepo.findChapterById(chapterId)
         val chapters = chapterRepo.findChaptersByBookId(bookId)
-        val source = book?.sourceId?.let { extensions.get(it) }
+        
+        Log.info { "TTS startReading - book: ${book?.title}, chapter: ${chapter?.name}, content size: ${chapter?.content?.size}, sourceId: ${book?.sourceId}" }
 
-        if (chapter != null && source != null && book != null) {
+        if (chapter != null && book != null) {
+            // Try to get the source/catalog
+            val source = extensions.get(book.sourceId)
+            
+            if (source == null) {
+                Log.warn { "Source not installed for book: ${book.title}. TTS will work with cached content only." }
+            }
+            
             state.ttsBook = book
             state.ttsChapters = chapters
             state.ttsCatalog = source
             state.currentReadingParagraph = 0
             
-            // Load chapter content if empty
+            // Always set the chapter content if available
             if (chapter.isEmpty()) {
-                Log.info { "Chapter is empty, loading content from source..." }
-                loadChapter(chapterId)
+                Log.info { "Chapter is empty" }
+                if (source != null) {
+                    Log.info { "Attempting to load chapter content from source..." }
+                    loadChapter(chapterId)
+                } else {
+                    Log.error { "Cannot load chapter content: source is not installed. Please install the source extension." }
+                    // Set error state to show snackbar in UI
+                    state.sourceNotInstalledError = true
+                }
             } else {
+                Log.info { "Chapter has content, setting directly. Content items: ${chapter.content.size}" }
                 state.ttsChapter = chapter
+                
+                // Log the extracted content
+                val content = state.ttsContent?.value
+                Log.info { "TTS content after setting chapter: ${content?.size} paragraphs" }
+                
+                // If source is not installed, set warning state
+                if (source == null) {
+                    state.sourceNotInstalledError = true
+                }
             }
             
             // Load translated content if TTS with translated text is enabled
@@ -557,6 +589,8 @@ class DesktopTTSService : KoinComponent {
             if (autoPlay) {
                 startService(ACTION_PLAY)
             }
+        } else {
+            Log.error { "TTS startReading failed - book: ${book?.title}, chapter: ${chapter?.name}" }
         }
     }
     

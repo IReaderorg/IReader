@@ -268,6 +268,7 @@ class ReaderScreenViewModel(
     val volumeKeyNavigation = readerPreferences.volumeKeyNavigation().asState()
     val paragraphTranslationEnabled = readerPreferences.paragraphTranslationEnabled().asState()
     val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().asState()
+    val autoTranslateNextChapter = readerPreferences.autoTranslateNextChapter().asState()
     
     // Override to provide translation-aware content
     override fun getCurrentContent(): List<ireader.core.source.model.Page> {
@@ -407,6 +408,14 @@ class ReaderScreenViewModel(
         // Load translation if available
         chapterId?.let { id ->
             loadTranslationForChapter(id)
+            
+            // Auto-translate next chapter if enabled
+            if (autoTranslateNextChapter.value && !translationState.hasTranslation) {
+                scope.launch {
+                    delay(500) // Small delay to let the chapter load first
+                    translateCurrentChapter(forceRetranslate = false)
+                }
+            }
         }
         
         // Update reading time estimation for new chapter

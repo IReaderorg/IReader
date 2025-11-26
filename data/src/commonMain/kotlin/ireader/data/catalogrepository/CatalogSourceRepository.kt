@@ -27,6 +27,12 @@ class CatalogSourceRepositoryImpl(val handler: DatabaseHandler): CatalogSourceRe
         }
     }
 
+    override suspend fun update(extensionSource: ExtensionSource) {
+        handler.await {
+            repositoryQueries.update(extensionSource.name,extensionSource.key,extensionSource.owner,extensionSource.source,extensionSource.lastUpdate,extensionSource.isEnable,extensionSource.repositoryType,extensionSource.id)
+        }
+    }
+
     override suspend fun delete(extensionSource: ExtensionSource) {
         handler.await {
             repositoryQueries.delete(extensionSource.id)

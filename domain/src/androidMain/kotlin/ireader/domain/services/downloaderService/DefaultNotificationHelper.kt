@@ -112,8 +112,8 @@ class DefaultNotificationHelper(
             setSmallIcon(R.drawable.ic_downloading)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_LOW
-            setAutoCancel(true)
-            setOngoing(true)
+            setAutoCancel(false) // Don't auto-cancel on click
+            setOngoing(false) // Make it dismissable
             addAction(
                 R.drawable.baseline_close_24,
                 localizeHelper.localize(Res.string.cancel),

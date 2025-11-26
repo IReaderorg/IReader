@@ -23,8 +23,17 @@ data class GlobalSearchScreenSpec(
     fun Content(
 
     ) {
+        // Decode the URL-encoded query parameter
+        val decodedQuery = query?.let { 
+            try {
+                java.net.URLDecoder.decode(it, "UTF-8")
+            } catch (e: Exception) {
+                it // fallback to original if decode fails
+            }
+        }
+        
         val vm: GlobalSearchViewModel = getIViewModel(parameters =
-        { parametersOf(GlobalSearchViewModel.Param(query))}
+        { parametersOf(GlobalSearchViewModel.Param(decodedQuery))}
             )
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 

@@ -441,6 +441,8 @@
     <string name="auto_preload_next_chapter_summary">Automatically download the next chapter in the background for instant reading</string>
     <string name="preload_only_on_wifi">Preload only on WiFi</string>
     <string name="preload_only_on_wifi_summary">Restrict automatic preloading to WiFi connections only</string>
+    <string name="auto_translate_next_chapter">Auto-translate next chapter</string>
+    <string name="auto_translate_next_chapter_summary">Automatically translate the next chapter when navigating using the selected translation engine</string>
     <!--- core -->
     <string name="history_screen_label">History</string>
     <string name="updates_screen_label">Updates</string>

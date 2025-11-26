@@ -26,6 +26,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.repository.AddingRepositoryScreen
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
@@ -67,6 +68,13 @@ class RepositoryAddScreenSpec {
         ) { scaffoldPadding ->
             AddingRepositoryScreen(scaffoldPadding, onSave = {
                 scope.launch {
+                    // Disable all existing repositories first (only one can be active at a time)
+                    val existingRepos = vm.catalogSourceRepository.subscribe().first()
+                    existingRepos.filter { repo -> repo.isEnable }.forEach { repo ->
+                        vm.catalogSourceRepository.update(repo.copy(isEnable = false))
+                    }
+                    
+                    // Insert the new repository (enabled by default)
                     vm.catalogSourceRepository.insert(
                         ExtensionSource(
                             name = it.name,
@@ -80,6 +88,13 @@ class RepositoryAddScreenSpec {
                             repositoryType = it.repositoryType
                         )
                     )
+                    
+                    // Set as default repository
+                    val insertedRepo = vm.catalogSourceRepository.subscribe().first()
+                        .firstOrNull { repo -> repo.key == it.key }
+                    if (insertedRepo != null) {
+                        vm.default.value = insertedRepo.id
+                    }
                 }
                 navController.popBackStack()
             }

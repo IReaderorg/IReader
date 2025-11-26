@@ -10,11 +10,13 @@ import ireader.core.source.Source
 interface GlobalSearchState {
     var query: String
     var searchMode: Boolean
+    var isLoading: Boolean
 }
 
 open class GlobalSearchStateImpl  : GlobalSearchState {
     override var query: String by mutableStateOf("")
     override var searchMode: Boolean by mutableStateOf(false)
+    override var isLoading: Boolean by mutableStateOf(false)
 }
 
 data class SearchItem(

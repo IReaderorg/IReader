@@ -24,6 +24,7 @@ import ireader.i18n.UiText
 import ireader.presentation.ui.core.ui.asStateIn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -419,18 +420,33 @@ class ExtensionViewModel(
                 // Parse the URL to extract repository information
                 val repositoryInfo = parseRepositoryUrl(url)
                 
-                // Create ExtensionSource and insert it
+                // Disable all existing repositories first (only one can be active at a time)
+                val existingRepos = catalogSourceRepository.subscribe().first()
+                existingRepos.filter { it.isEnable }.forEach { repo ->
+                    catalogSourceRepository.update(repo.copy(isEnable = false))
+                }
+                
+                // Create ExtensionSource and insert it (enabled by default)
                 val extensionSource = ExtensionSource(
                     id = 0,
                     name = repositoryInfo.name,
                     key = repositoryInfo.url,
                     owner = repositoryInfo.owner,
                     source = repositoryInfo.source,
+                    isEnable = true,
                     repositoryType = repositoryInfo.type
                 )
                 
                 // Insert the repository
                 catalogSourceRepository.insert(extensionSource)
+                
+                // Set as default repository
+                val insertedRepo = catalogSourceRepository.subscribe().first()
+                    .firstOrNull { it.key == repositoryInfo.url }
+                if (insertedRepo != null) {
+                    uiPreferences.defaultRepository().set(insertedRepo.id)
+                }
+                
                 showSnackBar(UiText.DynamicString("Repository added successfully"))
                 
                 // Refresh catalogs to load from the new repository

@@ -95,6 +95,15 @@ actual class TTSScreenSpec actual constructor(
             ttsService.state.currentReadingParagraph = readingParagraph
         }
         
+        // Show snackbar if source is not installed
+        LaunchedEffect(ttsService.state.sourceNotInstalledError) {
+            if (ttsService.state.sourceNotInstalledError) {
+                // Reset the error state after showing
+                kotlinx.coroutines.delay(5000)
+                ttsService.state.sourceNotInstalledError = false
+            }
+        }
+        
         // Cleanup on dispose
         DisposableEffect(Unit) {
             onDispose {
@@ -428,6 +437,43 @@ actual class TTSScreenSpec actual constructor(
                         confirmButton = {
                             TextButton(onClick = { downloadError = null }) {
                                 Text("OK")
+                            }
+                        }
+                    )
+                }
+                
+                // Source Not Installed Warning
+                if (ttsService.state.sourceNotInstalledError) {
+                    AlertDialog(
+                        onDismissRequest = { ttsService.state.sourceNotInstalledError = false },
+                        title = { Text("Source Extension Not Installed") },
+                        text = { 
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    "The source extension for this book is not installed.",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    "You can still read the current chapter, but you won't be able to navigate to other chapters until you install the source extension.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = { ttsService.state.sourceNotInstalledError = false }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = {
+                                    ttsService.state.sourceNotInstalledError = false
+                                    // Navigate to extensions/sources screen
+                                    navController.navigate("extensions")
+                                }
+                            ) {
+                                Text("Install Source")
                             }
                         }
                     )

@@ -528,6 +528,14 @@ fun GeneralScreenTab(
         }
         
         item {
+            SwitchPreference(
+                preference = vm.autoTranslateNextChapter,
+                title = localizeHelper.localize(Res.string.auto_translate_next_chapter),
+                subtitle = localizeHelper.localize(Res.string.auto_translate_next_chapter_summary)
+            )
+        }
+        
+        item {
             TranslateButton(
                 onClick = {
                     vm.translateCurrentChapter()

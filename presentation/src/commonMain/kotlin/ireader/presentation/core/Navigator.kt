@@ -98,8 +98,8 @@ fun NavHostController.navigateTo(spec: RepositoryAddScreenSpec) {
 }
 
 fun NavHostController.navigateTo(spec: GlobalSearchScreenSpec) {
-    // Navigate without query parameter - the screen will handle it internally
-    navigate("globalSearch")
+    val query = spec.query?.let { "?query=${java.net.URLEncoder.encode(it, "UTF-8")}" } ?: ""
+    navigate("globalSearch$query")
 }
 
 fun NavHostController.navigateTo(spec: ChatGptLoginScreenSpec) {

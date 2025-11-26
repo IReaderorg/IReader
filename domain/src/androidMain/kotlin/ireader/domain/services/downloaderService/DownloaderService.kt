@@ -18,8 +18,10 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.NotificationManager
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.R
+import ireader.i18n.resources.the_downloads_was_interrupted
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -42,9 +44,57 @@ class DownloaderService constructor(
     private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences by inject()
     private val downloadJob = Job()
     val scope = createICoroutineScope(Dispatchers.Main.immediate + downloadJob)
+    
+    @Volatile
+    private var isCancelled = false
 
+    private fun cleanupOnCancel() {
+        ireader.core.log.Log.info { "DownloaderService: Cleaning up on cancellation" }
+        
+        // Cancel the download job
+        downloadJob.cancel()
+        
+        // Reset download service state - this will cause the download loop to exit
+        downloadServiceState.isRunning = false
+        downloadServiceState.isPaused = false
+        
+        // Get the current download info for the notification
+        val currentDownload = downloadServiceState.downloads.firstOrNull()
+        val bookName = currentDownload?.bookName ?: "Downloads"
+        
+        downloadServiceState.downloadProgress = emptyMap()
+        
+        // Cancel the progress notification
+        notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
+        ireader.core.log.Log.info { "DownloaderService: Cancelled notification $ID_DOWNLOAD_CHAPTER_PROGRESS" }
+        
+        // Show simple dismissable cancellation notification
+        val notification = NotificationCompat.Builder(
+            context,
+            ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_ERROR
+        ).apply {
+            setContentTitle("Download Cancelled")
+            setContentText("Download of $bookName was cancelled")
+            setSmallIcon(R.drawable.ic_downloading)
+            priority = NotificationCompat.PRIORITY_DEFAULT
+            setAutoCancel(true) // Dismissable
+            setOngoing(false) // Not persistent
+            setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+        }.build()
+        
+        notificationManager.show(ID_DOWNLOAD_CHAPTER_PROGRESS + 1, notification)
+        ireader.core.log.Log.info { "DownloaderService: Showed cancellation notification for $bookName" }
+    }
 
     override suspend fun doWork(): Result {
+        ireader.core.log.Log.info { "DownloaderService: Starting doWork()" }
+        
+        // Check if work is stopped at the beginning
+        if (isStopped) {
+            ireader.core.log.Log.info { "DownloaderService: Work already stopped at start" }
+            cleanupOnCancel()
+            return Result.failure()
+        }
         val inputtedChapterIds = inputData.getLongArray(DOWNLOADER_Chapters_IDS)?.distinct()
         val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
         val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
@@ -71,16 +121,21 @@ class DownloaderService constructor(
                 notificationManager.cancel(notificationId)
                 
                 val errorMessage = error.message ?: "Download failed"
-                notificationManager.show(
-                    notificationId + 1,
-                    defaultNotificationHelper.baseCancelledNotificationDownloader(
-                        bookName = bookName,
-                        error
-                    ).apply {
-                        setContentText(errorMessage)
-                        setStyle(NotificationCompat.BigTextStyle().bigText(errorMessage))
-                    }.build()
-                )
+                val notification = NotificationCompat.Builder(
+                    applicationContext,
+                    ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_ERROR
+                ).apply {
+                    setContentTitle("Download Failed")
+                    setContentText("$bookName: $errorMessage")
+                    setSmallIcon(R.drawable.ic_downloading)
+                    priority = NotificationCompat.PRIORITY_DEFAULT
+                    setAutoCancel(true) // Dismissable
+                    setOngoing(false) // Not persistent
+                    setStyle(NotificationCompat.BigTextStyle().bigText(errorMessage))
+                    setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+                }.build()
+                
+                notificationManager.show(notificationId + 1, notification)
             },
             onSuccess = {
                 notificationManager.cancel(notificationId)
@@ -125,12 +180,37 @@ class DownloaderService constructor(
                 builder.setContentText(it)
             },
             updateNotification = {
-                notificationManager.show(notificationId, builder.build())
+                // Only show notification if not cancelled
+                if (!isCancelled && !isStopped) {
+                    notificationManager.show(notificationId, builder.build())
+                }
             },
             downloadDelayMs = downloadPreferences.downloadDelayMs().get(),
-            concurrentLimit = 1 // Sequential downloads for simplicity
+            concurrentLimit = 1, // Sequential downloads for simplicity
+            checkCancellation = { 
+                if (isStopped && !isCancelled) {
+                    ireader.core.log.Log.info { "DownloaderService: Cancellation detected in checkCancellation" }
+                    isCancelled = true
+                    // Immediately stop the service state to break out of loops
+                    downloadServiceState.isRunning = false
+                    // Cancel notification immediately
+                    notificationManager.cancel(notificationId)
+                    ireader.core.log.Log.info { "DownloaderService: Immediately cancelled notification" }
+                }
+                isStopped 
+            }
         )
         
+        // Check if cancelled during execution
+        if (isStopped || isCancelled) {
+            ireader.core.log.Log.info { "DownloaderService: Work stopped during execution" }
+            // Make absolutely sure notification is cancelled
+            notificationManager.cancel(notificationId)
+            cleanupOnCancel()
+            return Result.failure()
+        }
+        
+        ireader.core.log.Log.info { "DownloaderService: doWork() completed with result=$result" }
         return if (result) Result.success() else Result.failure()
     }
 }

@@ -151,9 +151,29 @@ class RepositoryScreenSpec {
                                         }
                                     }, imageVector = Icons.Default.DeleteForever)
                                 }
-                                Switch(checked = vm.default.value == source.id, onCheckedChange = {
-                                    vm.default.value = source.id
-                                })
+                                Switch(
+                                    checked = source.isEnable,
+                                    onCheckedChange = { enabled ->
+                                        vm.scope.launch {
+                                            // If enabling this repository, disable all others
+                                            if (enabled) {
+                                                vm.sources.value.forEach { repo ->
+                                                    if (repo.id != source.id && repo.isEnable) {
+                                                        vm.catalogSourceRepository.update(repo.copy(isEnable = false))
+                                                    }
+                                                }
+                                                vm.catalogSourceRepository.update(source.copy(isEnable = true))
+                                                vm.default.value = source.id
+                                            } else {
+                                                vm.catalogSourceRepository.update(source.copy(isEnable = false))
+                                                // If this was the default, clear it
+                                                if (vm.default.value == source.id) {
+                                                    vm.default.value = -1
+                                                }
+                                            }
+                                        }
+                                    }
+                                )
                             }
                         })
 

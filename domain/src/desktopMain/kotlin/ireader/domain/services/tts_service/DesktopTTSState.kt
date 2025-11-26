@@ -29,13 +29,33 @@ class DesktopTTSState : TTSState {
     override var currentLanguage by mutableStateOf("")
     override var prevLanguage by mutableStateOf("")
     override var isPlaying by mutableStateOf(false)
-    override var ttsContent: State<List<String>?>? =
-        derivedStateOf { 
-            ttsChapter?.content
-                ?.filter { it is Text }
-                ?.map { (it as? Text)?.text }
-                ?.filter { it != null && it.isNotBlank() }
-                ?.mapNotNull { it?.trim() }
+    override var ttsContent: State<List<String>?>? = null
+        get() = derivedStateOf { 
+            val chapter = ttsChapter
+            when {
+                chapter == null -> null
+                chapter.content.isEmpty() -> emptyList()
+                // If content is Text objects
+                chapter.content.firstOrNull() is Text -> {
+                    chapter.content
+                        .filterIsInstance<Text>()
+                        .map { it.text }
+                        .filter { it.isNotBlank() }
+                        .map { it.trim() }
+                }
+                // Otherwise treat as generic content
+                else -> {
+                    chapter.content
+                        .map { 
+                            when (it) {
+                                is Text -> it.text
+                                else -> it.toString()
+                            }
+                        }
+                        .filter { it.isNotBlank() }
+                        .map { it.trim() }
+                }
+            }
         }
     override var autoNextChapter by mutableStateOf(false)
     
@@ -77,4 +97,7 @@ class DesktopTTSState : TTSState {
     
     /** Download progress for the current model download */
     var downloadProgress by mutableStateOf<DownloadProgress?>(null)
+    
+    /** Indicates if the source extension is not installed (for showing warning) */
+    var sourceNotInstalledError by mutableStateOf(false)
 }

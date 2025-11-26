@@ -7,8 +7,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,6 +31,8 @@ class StatisticsScreen : KoinComponent {
     fun Content() {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val statistics by viewModel.statistics.collectAsState()
+        val syncState by viewModel.syncState.collectAsState()
+        val userBadges by viewModel.userBadges.collectAsState()
 
         Scaffold(
             topBar = {
@@ -36,6 +40,14 @@ class StatisticsScreen : KoinComponent {
                     title = { Text("Reading Statistics") },
                     navigationIcon = {
                         TopAppBarBackButton(onClick = { navController.popBackStack() })
+                    },
+                    actions = {
+                        IconButton(onClick = { viewModel.syncWithRemote() }) {
+                            Icon(
+                                imageVector = Icons.Default.Sync,
+                                contentDescription = "Sync with cloud"
+                            )
+                        }
                     }
                 )
             }
@@ -47,6 +59,68 @@ class StatisticsScreen : KoinComponent {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Sync status
+                item {
+                    when (val state = syncState) {
+                        is StatisticsViewModel.SyncState.Syncing -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                    Text("Syncing with cloud...")
+                                }
+                            }
+                        }
+                        is StatisticsViewModel.SyncState.Success -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.CheckCircle, contentDescription = null)
+                                    Text(state.message)
+                                }
+                            }
+                            LaunchedEffect(Unit) {
+                                kotlinx.coroutines.delay(3000)
+                                viewModel.clearSyncState()
+                            }
+                        }
+                        is StatisticsViewModel.SyncState.Error -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.Error, contentDescription = null)
+                                    Text(state.message)
+                                }
+                            }
+                        }
+                        else -> {}
+                    }
+                }
+                
                 item {
                     Text(
                         text = "Your Reading Journey",
@@ -109,6 +183,36 @@ class StatisticsScreen : KoinComponent {
                     )
                 }
 
+                // User badges
+                if (userBadges.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Your Badges",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                    
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                userBadges.forEach { badge ->
+                                    BadgeItem(badge = badge)
+                                }
+                            }
+                        }
+                    }
+                }
+                
                 if (statistics.favoriteGenres.isNotEmpty()) {
                     item {
                         Text(
@@ -141,6 +245,49 @@ class StatisticsScreen : KoinComponent {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun BadgeItem(
+    badge: ireader.data.statistics.UserBadge,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "🏆",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Column {
+                Text(
+                    text = badge.badge_id.replace("_", " ").capitalize(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                badge.earned_at?.let {
+                    Text(
+                        text = "Earned: $it",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        if (badge.is_primary) {
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = "Primary badge",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

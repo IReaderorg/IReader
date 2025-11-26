@@ -1,15 +1,27 @@
 package ireader.data.statistics
 
+import ireader.core.log.Log
 import ireader.data.core.DatabaseHandler
+import ireader.data.remote.MultiSupabaseClientProvider
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.models.entities.GenreCount
 import ireader.domain.models.entities.ReadingStatisticsType1
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class ReadingStatisticsRepositoryImpl(
     private val handler: DatabaseHandler,
+    private val multiProvider: MultiSupabaseClientProvider? = null
 ) : ReadingStatisticsRepository {
+    
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val syncService: StatisticsSyncService? = multiProvider?.let {
+        StatisticsSyncService(it, this)
+    }
 
     /**
      * Ensures the reading_statistics table has the required row initialized
@@ -78,12 +90,16 @@ class ReadingStatisticsRepositoryImpl(
         handler.await {
             readingStatisticsQueries.incrementChaptersRead()
         }
+        // Trigger sync in background
+        triggerSync()
     }
 
     override suspend fun addReadingTime(minutes: Long) {
         handler.await {
             readingStatisticsQueries.addReadingTime(minutes)
         }
+        // Trigger sync in background
+        triggerSync()
     }
 
     override suspend fun updateStreak(streak: Int, lastReadDate: Long) {
@@ -105,6 +121,8 @@ class ReadingStatisticsRepositoryImpl(
         handler.await {
             readingStatisticsQueries.incrementBooksCompleted()
         }
+        // Trigger sync in background
+        triggerSync()
     }
 
     override suspend fun getBooksCompleted(): Int {
@@ -156,5 +174,60 @@ class ReadingStatisticsRepositoryImpl(
         } else {
             0
         }
+    }
+    
+    /**
+     * Trigger background sync to Supabase
+     * This is called after any statistics update
+     */
+    private fun triggerSync() {
+        if (syncService != null) {
+            scope.launch {
+                try {
+                    syncService.syncStatistics()
+                    syncService.checkAndAwardAchievements()
+                } catch (e: Exception) {
+                    Log.error(e, "Background sync failed")
+                }
+            }
+        }
+    }
+    
+    /**
+     * Initialize sync service and start periodic sync
+     * Should be called when the app starts
+     */
+    fun initializeSync() {
+        if (syncService != null) {
+            scope.launch {
+                try {
+                    // Initial sync on startup
+                    syncService.syncStatistics()
+                    syncService.checkAndAwardAchievements()
+                    
+                    // Start periodic sync
+                    syncService.startPeriodicSync()
+                    
+                    Log.info("Statistics sync initialized")
+                } catch (e: Exception) {
+                    Log.error(e, "Failed to initialize statistics sync")
+                }
+            }
+        }
+    }
+    
+    /**
+     * Manually trigger a full sync
+     * Can be called from UI (e.g., pull-to-refresh)
+     */
+    suspend fun manualSync(): Result<Unit> {
+        return syncService?.syncStatistics() ?: Result.failure(Exception("Sync service not available"))
+    }
+    
+    /**
+     * Get user badges from Supabase
+     */
+    suspend fun getUserBadges(): Result<List<UserBadge>> {
+        return syncService?.syncUserBadges() ?: Result.failure(Exception("Sync service not available"))
     }
 }

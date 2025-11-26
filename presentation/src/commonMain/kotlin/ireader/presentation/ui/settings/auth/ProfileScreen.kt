@@ -351,7 +351,7 @@ private fun LoginPromptCard(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                tint = MaterialTheme.colorScheme.onPrimary
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -360,7 +360,7 @@ private fun LoginPromptCard(
                 text = "Sign In to Sync",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimary
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -368,7 +368,7 @@ private fun LoginPromptCard(
             Text(
                 text = "Sign in to sync your reading progress across all your devices",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
             

@@ -65,6 +65,7 @@ fun GlobalSearchScreenModern(
     // Function to trigger search
     val triggerSearch = {
         if (searchQuery.isNotBlank()) {
+            vm.query = searchQuery
             vm.searchBooks(searchQuery)
         }
     }
@@ -95,22 +96,21 @@ fun GlobalSearchScreenModern(
                 .padding(paddingValues)
         ) {
             when {
+                // Initial loading state - search started and waiting for first result
+                vm.isLoading -> {
+                    InitialLoadingState()
+                }
+                
                 // Empty state - no search performed yet
-                searchQuery.isBlank() && vm.withResult.isEmpty() && 
+                vm.query.isBlank() && vm.withResult.isEmpty() && 
                 vm.inProgress.isEmpty() && vm.noResult.isEmpty() -> {
                     EmptySearchState()
                 }
                 
-                // Initial loading state - search started but no sources loaded yet
-                searchQuery.isNotBlank() && vm.withResult.isEmpty() && 
-                vm.inProgress.isEmpty() && vm.noResult.isEmpty() -> {
-                    InitialLoadingState()
-                }
-                
                 // All sources finished with no results
-                searchQuery.isNotBlank() && vm.withResult.isEmpty() && 
+                vm.query.isNotBlank() && vm.withResult.isEmpty() && 
                 vm.inProgress.isEmpty() && vm.noResult.isNotEmpty() -> {
-                    NoResultsState(query = searchQuery)
+                    NoResultsState(query = vm.query)
                 }
                 
                 // Show results
@@ -706,3 +706,6 @@ private enum class SourceSearchState {
     EMPTY,
     ERROR
 }
+
+// Extension function to generate unique key for Source
+private fun Source.getSourceKey(): String = "${this.id}-${this.name}"

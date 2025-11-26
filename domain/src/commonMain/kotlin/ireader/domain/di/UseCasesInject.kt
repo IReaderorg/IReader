@@ -241,9 +241,11 @@ val UseCasesInject = module {
     single { ExportStatisticsUseCase(get()) }
     single { ApplyAdvancedFiltersUseCase(get()) }
     single { GlobalSearchUseCase(get()) }
+    single { ireader.domain.usecases.statistics.SyncStatisticsUseCase(get()) }
     single { StatisticsUseCases(
         getReadingStatistics = get(),
-        trackReadingProgress = get()
+        trackReadingProgress = get(),
+        syncStatistics = get()
     ) }
     
     // Chapter report use cases

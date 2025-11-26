@@ -358,6 +358,11 @@ class ReaderPreferences constructor(
     fun useTTSWithTranslatedText(): Preference<Boolean> {
         return preferenceStore.getBoolean("use_tts_with_translated_text", false)
     }
+    
+    // Auto-translate next chapter preference
+    fun autoTranslateNextChapter(): Preference<Boolean> {
+        return preferenceStore.getBoolean("auto_translate_next_chapter", false)
+    }
 
     // ========== Advanced Reader System (Mihon-inspired) ==========
     // Requirements: 5.1, 5.2, 11.1, 11.2, 11.4, 11.5, 8.1, 8.2

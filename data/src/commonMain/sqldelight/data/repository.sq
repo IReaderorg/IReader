@@ -21,6 +21,8 @@ repository_type TEXT NOT NULL DEFAULT 'IREADER'
 insert:
 INSERT INTO repository(name,key,owner,source,last_update,is_enable,repository_type) VALUES (:name,:key,:owner,:source ,:lastUpdate,:isEnable,:repositoryType);
 
+update:
+UPDATE repository SET name = :name, key = :key, owner = :owner, source = :source, last_update = :lastUpdate, is_enable = :isEnable, repository_type = :repositoryType WHERE _id = :id;
 
 findAll:
 SELECT * FROM repository;

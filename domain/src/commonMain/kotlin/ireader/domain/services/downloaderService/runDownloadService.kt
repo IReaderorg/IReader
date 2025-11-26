@@ -41,7 +41,8 @@ suspend fun runDownloadService(
     onSuccess: () -> Unit,
     updateNotification: (Int) -> Unit,
     downloadDelayMs: Long = 1000L,
-    concurrentLimit: Int = 1 // Sequential downloads for simplicity
+    concurrentLimit: Int = 1, // Sequential downloads for simplicity
+    checkCancellation: () -> Boolean = { false }
 ): Boolean {
     try {
         // Get chapters to download
@@ -126,18 +127,22 @@ suspend fun runDownloadService(
 
         // Download chapters sequentially
         for (download in downloads) {
-            // Check if service is still running
-            if (!downloadServiceState.isRunning) {
+            // Check if service is still running, coroutine is cancelled, or work is stopped
+            if (!downloadServiceState.isRunning || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
                 break
             }
 
             // Wait while paused
             while (downloadServiceState.isPaused && downloadServiceState.isRunning) {
                 delay(500)
+                // Check if cancelled during pause
+                if (!withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
+                    break
+                }
             }
 
             // Check again after pause
-            if (!downloadServiceState.isRunning) {
+            if (!downloadServiceState.isRunning || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
                 break
             }
 
@@ -165,14 +170,18 @@ suspend fun runDownloadService(
             val maxRetries = 3
 
             for (attempt in 1..maxRetries) {
-                // Check if still running
-                if (!downloadServiceState.isRunning) {
+                // Check if still running, cancelled, or work is stopped
+                if (!downloadServiceState.isRunning || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
                     break
                 }
 
                 // Wait while paused
                 while (downloadServiceState.isPaused && downloadServiceState.isRunning) {
                     delay(500)
+                    // Check if cancelled during pause
+                    if (!withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
+                        break
+                    }
                 }
 
                 try {
@@ -295,9 +304,18 @@ suspend fun runDownloadService(
             downloadServiceState.isPaused = false
         }
 
+        // Check if we were cancelled - if so, don't call onSuccess
+        val wasCancelled = checkCancellation()
+        
         notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
-        onSuccess()
-        return true
+        
+        if (!wasCancelled) {
+            onSuccess()
+        } else {
+            ireader.core.log.Log.info { "Download service was cancelled, skipping onSuccess callback" }
+        }
+        
+        return !wasCancelled
 
     } catch (e: Throwable) {
         ireader.core.log.Log.error { "Download service error: ${e.message}" }

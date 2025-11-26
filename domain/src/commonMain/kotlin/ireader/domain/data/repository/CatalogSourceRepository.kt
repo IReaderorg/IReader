@@ -8,5 +8,6 @@ interface CatalogSourceRepository {
     fun subscribe() : Flow<List<ExtensionSource>>
     suspend fun find(id: Long) : ExtensionSource?
     suspend fun insert(extensionSource: ExtensionSource)
+    suspend fun update(extensionSource: ExtensionSource)
     suspend fun delete(extensionSource: ExtensionSource)
 }

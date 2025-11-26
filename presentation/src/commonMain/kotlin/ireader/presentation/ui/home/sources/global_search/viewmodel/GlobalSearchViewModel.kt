@@ -59,6 +59,9 @@ class GlobalSearchViewModel(
         inProgress = emptyList()
         noResult = emptyList()
         withResult = emptyList()
+        
+        // Set loading to true when search starts
+        isLoading = true
 
         searchJob = scope.launch {
             try {
@@ -67,6 +70,7 @@ class GlobalSearchViewModel(
 
                 if (catalogs.isEmpty()) {
                     Log.warn { "No catalogs available for search" }
+                    isLoading = false
                     return@launch
                 }
 
@@ -94,6 +98,12 @@ class GlobalSearchViewModel(
                     }
                     .collect { globalResult ->
                         Log.debug { "Received global search result with ${globalResult.sourceResults.size} source results" }
+                        
+                        // Set loading to false when first result comes in
+                        if (isLoading) {
+                            isLoading = false
+                            Log.debug { "First search result received, setting isLoading = false" }
+                        }
                         
                         // Process each source result
                         globalResult.sourceResults.forEach { sourceResult ->
@@ -144,10 +154,12 @@ class GlobalSearchViewModel(
                     }
             } catch (e: CancellationException) {
                 Log.debug { "Global search cancelled" }
+                isLoading = false
                 // Don't log cancellation as error, it's expected behavior
                 throw e
             } catch (e: Exception) {
                 Log.error(e, "Error during global search initialization")
+                isLoading = false
                 // Clear loading states on error
                 inProgress.forEach { item ->
                     item.handleSearchItems(loading = false)

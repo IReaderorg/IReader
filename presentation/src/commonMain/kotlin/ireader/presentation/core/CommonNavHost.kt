@@ -217,8 +217,20 @@ fun CommonNavHost(
             }
         }
         
-        composable(route = "globalSearch") {
-            GlobalSearchScreenSpec(null).Content()
+        composable(
+            route = "globalSearch?query={query}",
+            arguments = listOf(
+                navArgument("query") { 
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val query = remember(backStackEntry) {
+                backStackEntry.savedStateHandle.get<String>("query")
+            }
+            GlobalSearchScreenSpec(query).Content()
         }
         
         composable(
