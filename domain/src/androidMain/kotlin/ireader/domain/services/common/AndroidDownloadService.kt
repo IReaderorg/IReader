@@ -26,10 +26,10 @@ import org.koin.core.component.inject
 
 /**
  * Android implementation of DownloadService using WorkManager
- * 
+ *
  * This service integrates with the existing DownloaderService (WorkManager worker)
  * and DownloadStateHolder to provide a unified download management interface.
- * 
+ *
  * Key responsibilities:
  * - Queue downloads via WorkManager using DownloaderService
  * - Observe and expose download state from DownloadStateHolder
@@ -38,30 +38,29 @@ import org.koin.core.component.inject
 class AndroidDownloadService(
     private val context: Context
 ) : DownloadService, KoinComponent {
-    
+
     private val workManager = WorkManager.getInstance(context)
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    
+
     // Inject the shared download state that DownloaderService also uses
     private val downloadServiceState: DownloadStateHolder by inject()
     private val bookRepository: BookRepository by inject()
     private val chapterRepository: ChapterRepository by inject()
     private val downloadUseCases: DownloadUseCases by inject()
-    
+
     // Map legacy state to new ServiceState
     private val _state = MutableStateFlow<ServiceState>(ServiceState.IDLE)
     override val state: StateFlow<ServiceState> = _state.asStateFlow()
-    
+
     // Expose downloads from the shared state
     override val downloads: StateFlow<List<SavedDownload>> = downloadServiceState.downloads
-    
+
     // Map legacy DownloadProgress to new DownloadProgress format
     private val _downloadProgress = MutableStateFlow<Map<Long, DownloadProgress>>(emptyMap())
     override val downloadProgress: StateFlow<Map<Long, DownloadProgress>> = _downloadProgress.asStateFlow()
-    
-    override suspend fun initialize() {
-        _state.value = ServiceState.INITIALIZING
-        
+
+    // Set up observers immediately when service is created
+    init {
         // Observe legacy state and map to new state
         scope.launch {
             combine(
@@ -77,7 +76,7 @@ class AndroidDownloadService(
                 _state.value = newState
             }
         }
-        
+
         // Observe legacy download progress and map to new format
         scope.launch {
             downloadServiceState.downloadProgress.collect { legacyProgress ->
@@ -95,10 +94,15 @@ class AndroidDownloadService(
                 }
             }
         }
-        
+    }
+
+    override suspend fun initialize() {
+        _state.value = ServiceState.INITIALIZING
+
+        // Observers are now set up in init block, so just set state to IDLE
         _state.value = ServiceState.IDLE
     }
-    
+
     /**
      * Map legacy DownloadStatus to new DownloadStatus
      */
@@ -111,32 +115,32 @@ class AndroidDownloadService(
             ireader.domain.services.downloaderService.DownloadStatus.FAILED -> DownloadStatus.FAILED
         }
     }
-    
+
     override suspend fun start() {
         _state.value = ServiceState.RUNNING
     }
-    
+
     override suspend fun stop() {
         _state.value = ServiceState.STOPPED
         workManager.cancelAllWorkByTag(DOWNLOADER_SERVICE_NAME)
         downloadServiceState.setRunning(false)
         downloadServiceState.setPaused(false)
     }
-    
+
     override fun isRunning(): Boolean {
         return _state.value == ServiceState.RUNNING || downloadServiceState.isRunning.value
     }
-    
+
     override suspend fun cleanup() {
         stop()
         downloadServiceState.setDownloadProgress(emptyMap())
     }
-    
+
     override suspend fun queueChapters(chapterIds: List<Long>): ServiceResult<Unit> {
         if (chapterIds.isEmpty()) {
             return ServiceResult.Error("No chapters to queue")
         }
-        
+
         return try {
             // Get chapter and book info to insert into database immediately
             val chaptersToDownload = withContext(Dispatchers.IO) {
@@ -148,16 +152,16 @@ class AndroidDownloadService(
                 }
                 allChapters
             }
-            
+
             if (chaptersToDownload.isEmpty()) {
                 return ServiceResult.Error("No valid chapters found")
             }
-            
+
             // Insert downloads into database immediately so they appear in download screen
             withContext(Dispatchers.IO) {
                 downloadUseCases.insertDownloads(chaptersToDownload.map { it.toDownload() })
             }
-            
+
             // Initialize progress for queued chapters
             val initialProgress = chaptersToDownload.associate { download ->
                 download.chapterId to ireader.domain.services.downloaderService.DownloadProgress(
@@ -169,14 +173,14 @@ class AndroidDownloadService(
                 downloadServiceState.downloadProgress.value + initialProgress
             )
             downloadServiceState.setDownloads(chaptersToDownload)
-            
+
             // Create unique work name
             val workName = "${DOWNLOADER_SERVICE_NAME}_chapters_${chapterIds.hashCode()}_${System.currentTimeMillis()}"
-            
+
             val workData = Data.Builder()
                 .putLongArray(DOWNLOADER_CHAPTERS_IDS, chapterIds.toLongArray())
                 .build()
-            
+
             val workRequest = OneTimeWorkRequestBuilder<DownloaderService>()
                 .setInputData(workData)
                 .setConstraints(
@@ -186,7 +190,7 @@ class AndroidDownloadService(
                 )
                 .addTag(DOWNLOADER_SERVICE_NAME)
                 .build()
-            
+
             if (isRunning()) {
                 workManager.enqueue(workRequest)
             } else {
@@ -196,19 +200,19 @@ class AndroidDownloadService(
                     workRequest
                 )
             }
-            
+
             _state.value = ServiceState.RUNNING
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
-            ServiceResult.Error("Failed to queue chapters: ${e.message}", e)
+            ServiceResult.Error("Failed to queue chapters: \${e.message}", e)
         }
     }
-    
+
     override suspend fun queueBooks(bookIds: List<Long>): ServiceResult<Unit> {
         if (bookIds.isEmpty()) {
             return ServiceResult.Error("No books to queue")
         }
-        
+
         return try {
             // Get chapters for all books and insert them into the database immediately
             // so they appear in the download screen right away
@@ -217,13 +221,13 @@ class AndroidDownloadService(
                 for (bookId in bookIds) {
                     val book = bookRepository.findBookById(bookId) ?: continue
                     val chapters = chapterRepository.findChaptersByBookId(bookId)
-                    
+
                     // Filter chapters that need downloading (empty or very short content)
                     val needsDownload = chapters.filter { chapter ->
                         val contentText = chapter.content.joinToString("")
                         contentText.isEmpty() || contentText.length < 50
                     }
-                    
+
                     // Create SavedDownload entries
                     needsDownload.forEach { chapter ->
                         allChapters.add(buildSavedDownload(book, chapter))
@@ -231,16 +235,16 @@ class AndroidDownloadService(
                 }
                 allChapters
             }
-            
+
             if (chaptersToDownload.isEmpty()) {
                 return ServiceResult.Error("No chapters need downloading - all chapters already have content")
             }
-            
+
             // Insert downloads into database immediately so they appear in download screen
             withContext(Dispatchers.IO) {
                 downloadUseCases.insertDownloads(chaptersToDownload.map { it.toDownload() })
             }
-            
+
             // Initialize progress for queued chapters
             val initialProgress = chaptersToDownload.associate { download ->
                 download.chapterId to ireader.domain.services.downloaderService.DownloadProgress(
@@ -252,14 +256,14 @@ class AndroidDownloadService(
                 downloadServiceState.downloadProgress.value + initialProgress
             )
             downloadServiceState.setDownloads(chaptersToDownload)
-            
+
             // Create unique work name
-            val workName = "${DOWNLOADER_SERVICE_NAME}_books_${bookIds.hashCode()}_${System.currentTimeMillis()}"
-            
+            val workName = "${DOWNLOADER_SERVICE_NAME}_books_\${bookIds.hashCode()}_\${System.currentTimeMillis()}"
+
             val workData = Data.Builder()
                 .putLongArray(DOWNLOADER_BOOKS_IDS, bookIds.toLongArray())
                 .build()
-            
+
             val workRequest = OneTimeWorkRequestBuilder<DownloaderService>()
                 .setInputData(workData)
                 .setConstraints(
@@ -269,7 +273,7 @@ class AndroidDownloadService(
                 )
                 .addTag(DOWNLOADER_SERVICE_NAME)
                 .build()
-            
+
             if (isRunning()) {
                 workManager.enqueue(workRequest)
             } else {
@@ -279,18 +283,18 @@ class AndroidDownloadService(
                     workRequest
                 )
             }
-            
+
             _state.value = ServiceState.RUNNING
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
-            ServiceResult.Error("Failed to queue books: ${e.message}", e)
+            ServiceResult.Error("Failed to queue books: \${e.message}", e)
         }
     }
-    
+
     override suspend fun pause() {
         downloadServiceState.setPaused(true)
         _state.value = ServiceState.PAUSED
-        
+
         // Update all downloading items to paused status
         val currentProgress = downloadServiceState.downloadProgress.value
         val updatedProgress = currentProgress.mapValues { (chapterId, progress) ->
@@ -302,11 +306,11 @@ class AndroidDownloadService(
         }
         downloadServiceState.setDownloadProgress(updatedProgress)
     }
-    
+
     override suspend fun resume() {
         downloadServiceState.setPaused(false)
         _state.value = ServiceState.RUNNING
-        
+
         // Update all paused items back to downloading status
         val currentProgress = downloadServiceState.downloadProgress.value
         val updatedProgress = currentProgress.mapValues { (chapterId, progress) ->
@@ -318,7 +322,7 @@ class AndroidDownloadService(
         }
         downloadServiceState.setDownloadProgress(updatedProgress)
     }
-    
+
     override suspend fun cancelDownload(chapterId: Long): ServiceResult<Unit> {
         return try {
             // Update status to cancelled in progress map
@@ -329,41 +333,41 @@ class AndroidDownloadService(
                 errorMessage = "Cancelled by user"
             )
             downloadServiceState.setDownloadProgress(currentProgress)
-            
+
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
-            ServiceResult.Error("Failed to cancel download: ${e.message}", e)
+            ServiceResult.Error("Failed to cancel download: \${e.message}", e)
         }
     }
-    
+
     override suspend fun cancelAll(): ServiceResult<Unit> {
         return try {
             // Get current download info for notification before clearing
             val totalDownloads = downloadServiceState.downloads.value.size
             val completedCount = downloadServiceState.downloadProgress.value.values
                 .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED }
-            
+
             // Cancel all WorkManager jobs - this will trigger the worker's onStopped callback
             workManager.cancelAllWorkByTag(DOWNLOADER_SERVICE_NAME)
-            
+
             // Delete all pending downloads from database
             withContext(Dispatchers.IO) {
                 downloadUseCases.deleteAllSavedDownload()
             }
-            
+
             // Reset state
             downloadServiceState.setRunning(false)
             downloadServiceState.setPaused(false)
             downloadServiceState.setDownloadProgress(emptyMap())
             downloadServiceState.setDownloads(emptyList())
-            
+
             _state.value = ServiceState.IDLE
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
-            ServiceResult.Error("Failed to cancel all downloads: ${e.message}", e)
+            ServiceResult.Error("Failed to cancel all downloads: \${e.message}", e)
         }
     }
-    
+
     override suspend fun retryDownload(chapterId: Long): ServiceResult<Unit> {
         return try {
             val current = downloadServiceState.downloadProgress.value[chapterId]
@@ -373,7 +377,7 @@ class AndroidDownloadService(
             if (current.status != ireader.domain.services.downloaderService.DownloadStatus.FAILED) {
                 return ServiceResult.Error("Can only retry failed downloads")
             }
-            
+
             // Update status to queued with incremented retry count
             val updatedProgress = downloadServiceState.downloadProgress.value.toMutableMap()
             updatedProgress[chapterId] = current.copy(
@@ -382,17 +386,17 @@ class AndroidDownloadService(
                 retryCount = current.retryCount + 1
             )
             downloadServiceState.setDownloadProgress(updatedProgress)
-            
+
             // Re-queue the chapter
             queueChapters(listOf(chapterId))
         } catch (e: Exception) {
-            ServiceResult.Error("Failed to retry download: ${e.message}", e)
+            ServiceResult.Error("Failed to retry download: \${e.message}", e)
         }
     }
-    
+
     override fun getDownloadStatus(chapterId: Long): DownloadStatus? {
         val legacyStatus = downloadServiceState.downloadProgress.value[chapterId]?.status
         return legacyStatus?.let { mapLegacyStatus(it) }
     }
-    
+
 }

@@ -311,6 +311,14 @@ private fun ActiveDownloadsContent(
     // Collect progress map reactively so items update when download status changes
     val progressMap by vm.downloadServiceProgress.collectAsState()
     
+    // Debug logging for progress updates
+    LaunchedEffect(progressMap) {
+        ireader.core.log.Log.debug { "DownloaderScreen: Progress map updated with ${progressMap.size} items" }
+        progressMap.forEach { (chapterId, progress) ->
+            ireader.core.log.Log.debug { "  Chapter $chapterId: ${progress.status}" }
+        }
+    }
+    
     if (downloads.isEmpty()) {
         // Empty state
         Box(
@@ -347,28 +355,32 @@ private fun ActiveDownloadsContent(
     } else {
             IVerticalFastScroller(listState = scrollState) {
                 LazyColumn(modifier = Modifier.padding(paddingValues), state = scrollState) {
-                    items(count = downloads.size) { index ->
-                        val progress = progressMap[downloads[index].chapterId]
+                    items(
+                        count = downloads.size,
+                        key = { index -> downloads[index].chapterId }
+                    ) { index ->
+                        val download = downloads[index]
+                        val progress = progressMap[download.chapterId]
                         DownloadScreenItem(
-                                downloads[index].toSavedDownload(),
+                                download.toSavedDownload(),
                                 onClickItem = {
                                     if (vm.selection.isEmpty()) {
-                                        onDownloadItem(downloads[index])
+                                        onDownloadItem(download)
                                     } else {
-                                        when (vm.downloads[index].chapterId) {
+                                        when (download.chapterId) {
                                             in vm.selection -> {
-                                                vm.selection.remove(vm.downloads[index].chapterId)
+                                                vm.selection.remove(download.chapterId)
                                             }
                                             else -> {
-                                                vm.selection.add(vm.downloads[index].chapterId)
+                                                vm.selection.add(download.chapterId)
                                             }
                                         }
                                     }
                                 },
                                 onLongClickItem = {
-                                    vm.selection.add(vm.downloads[index].chapterId)
+                                    vm.selection.add(download.chapterId)
                                 },
-                                isSelected = downloads[index].chapterId in vm.selection,
+                                isSelected = download.chapterId in vm.selection,
                                 downloadProgress = progress,
                                 onCancelAllFromThisSeries = { item ->
                                     vm.deleteSelectedDownloads(

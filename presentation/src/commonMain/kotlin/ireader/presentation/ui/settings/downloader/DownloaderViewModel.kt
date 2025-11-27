@@ -39,7 +39,7 @@ class DownloaderViewModel(
     
     val downloadServiceProgress = downloadService.downloadProgress.stateIn(
         scope = scope,
-        started = SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.Eagerly,
         initialValue = emptyMap()
     )
     
