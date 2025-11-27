@@ -126,6 +126,8 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
                 implementation("io.mockk:mockk:1.13.8")
+                // Napier logging for tests
+                implementation("io.github.aakira:napier:2.7.1")
             }
         }
          androidMain {

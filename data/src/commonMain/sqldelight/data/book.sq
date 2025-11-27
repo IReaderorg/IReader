@@ -35,6 +35,8 @@ CREATE INDEX IF NOT EXISTS mangas_url_index ON book(url);
 -- Performance optimization indexes
 CREATE INDEX IF NOT EXISTS idx_book_favorite_id ON book(favorite, _id) WHERE favorite = 1;
 CREATE INDEX IF NOT EXISTS idx_book_source_favorite ON book(source, favorite);
+-- Unique index to prevent duplicate books with same url and source
+CREATE UNIQUE INDEX IF NOT EXISTS idx_book_url_source ON book(url, source);
 
 findAllBooks:
 SELECT * FROM book;
@@ -81,7 +83,7 @@ FROM book
 WHERE _id = :id;
 
 getBookByKey:
-SELECT * FROM book WHERE url = :key AND source = :sourceId;
+SELECT * FROM book WHERE url = :key AND source = :sourceId LIMIT 1;
 
 getMangaByUrlAndSource:
 SELECT *
@@ -261,6 +263,19 @@ WHERE _id = :bookId;
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID();
+
+-- Find all books by key and source (for handling duplicates)
+findAllBooksByKeyAndSource:
+SELECT * FROM book WHERE url = :key AND source = :sourceId;
+
+-- Delete duplicate books keeping only the one with lowest id
+deleteDuplicateBooks:
+DELETE FROM book 
+WHERE _id NOT IN (
+    SELECT MIN(_id) 
+    FROM book 
+    GROUP BY url, source
+);
 
 -- Performance optimized queries for statistics
 getCurrentlyReadingCount:

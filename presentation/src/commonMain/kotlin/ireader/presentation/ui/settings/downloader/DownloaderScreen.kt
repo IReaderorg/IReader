@@ -308,6 +308,9 @@ private fun ActiveDownloadsContent(
     onDownloadItem: (SavedDownloadWithInfo) -> Unit,
     paddingValues: PaddingValues
 ) {
+    // Collect progress map reactively so items update when download status changes
+    val progressMap by vm.downloadServiceProgress.collectAsState()
+    
     if (downloads.isEmpty()) {
         // Empty state
         Box(
@@ -345,7 +348,7 @@ private fun ActiveDownloadsContent(
             IVerticalFastScroller(listState = scrollState) {
                 LazyColumn(modifier = Modifier.padding(paddingValues), state = scrollState) {
                     items(count = downloads.size) { index ->
-                        val progress = vm.downloadServiceProgress.value[downloads[index].chapterId]
+                        val progress = progressMap[downloads[index].chapterId]
                         DownloadScreenItem(
                                 downloads[index].toSavedDownload(),
                                 onClickItem = {

@@ -35,10 +35,7 @@ class RestoreBackup internal constructor(
         onSuccess: () -> Unit
     ): Result {
         return try {
-
             val bytes = fileSaver.read(uri)
-
-            // val bytes = fileSystem.withAsyncGzipSource(path) { it.readByteArray() }
             val backup = loadDump(bytes)
 
             transactions.run {
@@ -50,25 +47,19 @@ class RestoreBackup internal constructor(
                         manga.categories.mapNotNull(backupCategoriesWithId::get)
                     try {
                         restoreChapters(manga)
-
-                    } catch (_: Exception) {
-
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore chapters for book: ${manga.title}")
                     }
                     try {
                         restoreCategoriesOfBook(mangaId, categoryIdsOfManga)
-
-                    } catch (_: Exception) {
-
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore categories for book: ${manga.title}")
                     }
                     try {
                         restoreTracks(manga, mangaId)
-
-                    } catch (_: Exception) {
-
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore tracks for book: ${manga.title}")
                     }
-
-
-                    // restoreHistories(manga, mangaId)
                 }
             }
             onSuccess()
@@ -96,11 +87,25 @@ class RestoreBackup internal constructor(
     }
 
     private suspend fun restoreManga(manga: BookProto): Long {
-        val dbManga = bookRepository.find(manga.key, manga.sourceId)
+        val dbManga = try {
+            bookRepository.find(manga.key, manga.sourceId)
+        } catch (e: Exception) {
+            // Handle case where there might be duplicate books in database
+            ireader.core.log.Log.warn(e, "Error finding book ${manga.title}, attempting to continue")
+            null
+        }
+        
         if (dbManga == null) {
             val newManga = manga.toDomain()
-            return bookRepository.upsert(newManga)
+            return try {
+                bookRepository.upsert(newManga)
+            } catch (e: Exception) {
+                // If upsert fails (e.g., due to unique constraint), try to find existing book
+                ireader.core.log.Log.warn(e, "Failed to upsert book ${manga.title}, trying to find existing")
+                bookRepository.find(manga.key, manga.sourceId)?.id ?: throw e
+            }
         }
+        
         if (manga.initialized != dbManga.initialized || !dbManga.favorite) {
             val update = Book(
                 dbManga.id,
@@ -120,7 +125,11 @@ class RestoreBackup internal constructor(
                 key = manga.key,
                 sourceId = manga.sourceId,
             )
-            bookRepository.updateBook(update)
+            try {
+                bookRepository.updateBook(update)
+            } catch (e: Exception) {
+                ireader.core.log.Log.warn(e, "Failed to update book ${manga.title}")
+            }
         }
         return dbManga.id
     }
@@ -128,7 +137,18 @@ class RestoreBackup internal constructor(
     private suspend fun restoreChapters(manga: BookProto) {
         if (manga.chapters.isEmpty()) return
 
-        val dbManga = checkNotNull(bookRepository.find(manga.key, manga.sourceId))
+        val dbManga = try {
+            bookRepository.find(manga.key, manga.sourceId)
+        } catch (e: Exception) {
+            ireader.core.log.Log.warn(e, "Error finding book for chapter restore: ${manga.title}")
+            null
+        }
+        
+        if (dbManga == null) {
+            ireader.core.log.Log.warn("Book not found for chapter restore: ${manga.title}")
+            return
+        }
+        
         val dbChapters = chapterRepository.findChaptersByBookId(dbManga.id)
 
         if (dbChapters.isEmpty()) {
@@ -136,19 +156,23 @@ class RestoreBackup internal constructor(
             return
         }
 
-        // Keep the backup chapters
-        if (manga.lastUpdate > dbManga.lastUpdate) {
-            chapterRepository.deleteChapters(dbChapters)
-            val dbChaptersMap = dbChapters.associateBy { it.key }
+        // Create maps for merging read/bookmark status
+        val dbChaptersMap = dbChapters.associateBy { it.key }
+        val backupChaptersMap = manga.chapters.associateBy { it.key }
 
+        // Keep the backup chapters (backup is newer)
+        if (manga.lastUpdate > dbManga.lastUpdate) {
+            // Build merged chapters list BEFORE deleting existing chapters
             val chaptersToAdd = mutableListOf<Chapter>()
             for (backupChapter in manga.chapters) {
                 val dbChapter = dbChaptersMap[backupChapter.key]
                 val newChapter = if (dbChapter != null) {
+                    // Merge read/bookmark status: preserve if either backup or db has it marked
                     kotlin.runCatching {
                         backupChapter.toDomain(dbManga.id).copy(
                             read = backupChapter.read || dbChapter.read,
                             bookmark = backupChapter.bookmark || dbChapter.bookmark,
+                            lastPageRead = maxOf(backupChapter.lastPageRead, dbChapter.lastPageRead)
                         )
                     }.getOrNull()
                 } else {
@@ -160,26 +184,47 @@ class RestoreBackup internal constructor(
                     chaptersToAdd.add(newChapter)
                 }
             }
+            
+            // Now delete existing chapters and insert merged ones
+            chapterRepository.deleteChapters(dbChapters)
             chapterRepository.insertChapters(chaptersToAdd)
         }
-        // Keep the database chapters
+        // Keep the database chapters (database is newer or same)
         else {
-            val backupChaptersMap = manga.chapters.associateBy { it.key }
-
             val chaptersToUpdate = mutableListOf<Chapter>()
+            val chaptersToAdd = mutableListOf<Chapter>()
+            
+            // Update existing chapters with backup read/bookmark status
             for (dbChapter in dbChapters) {
                 val backupChapter = backupChaptersMap[dbChapter.key]
                 if (backupChapter != null) {
-                    val update = dbChapter.copy(
-                        id = dbChapter.id,
-                        read = dbChapter.read || backupChapter.read,
-                        bookmark = dbChapter.bookmark || backupChapter.bookmark,
-                    )
-                    chaptersToUpdate.add(update)
+                    // Only update if there's something to merge
+                    if (backupChapter.read || backupChapter.bookmark || backupChapter.lastPageRead > 0) {
+                        val update = dbChapter.copy(
+                            id = dbChapter.id,
+                            read = dbChapter.read || backupChapter.read,
+                            bookmark = dbChapter.bookmark || backupChapter.bookmark,
+                            lastPageRead = maxOf(dbChapter.lastPageRead, backupChapter.lastPageRead)
+                        )
+                        chaptersToUpdate.add(update)
+                    }
                 }
             }
+            
+            // Add chapters from backup that don't exist in database
+            for (backupChapter in manga.chapters) {
+                if (!dbChaptersMap.containsKey(backupChapter.key)) {
+                    kotlin.runCatching {
+                        chaptersToAdd.add(backupChapter.toDomain(dbManga.id))
+                    }
+                }
+            }
+            
             if (chaptersToUpdate.isNotEmpty()) {
                 chapterRepository.insertChapters(chaptersToUpdate)
+            }
+            if (chaptersToAdd.isNotEmpty()) {
+                chapterRepository.insertChapters(chaptersToAdd)
             }
         }
     }
@@ -266,10 +311,16 @@ class RestoreBackup internal constructor(
 
     private suspend fun getCategoryIdsByBackupId(categories: List<CategoryProto>): Map<Long, Long> {
         val dbCategories = categoryRepository.findAll()
-        return categories.associate { backupCategory ->
-            val dbId = dbCategories.first { it.name.equals(backupCategory.name, true) }.id
-            backupCategory.order to dbId
-        }
+        return categories.mapNotNull { backupCategory ->
+            val dbCategory = dbCategories.find { it.name.equals(backupCategory.name, true) }
+            if (dbCategory != null) {
+                backupCategory.order to dbCategory.id
+            } else {
+                // Category not found in database, skip mapping
+                // This can happen if category restoration failed or was skipped
+                null
+            }
+        }.toMap()
     }
 
     /**
@@ -289,15 +340,18 @@ class RestoreBackup internal constructor(
                         manga.categories.mapNotNull(backupCategoriesWithId::get)
                     try {
                         restoreChapters(manga)
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore chapters for book: ${manga.title}")
                     }
                     try {
                         restoreCategoriesOfBook(mangaId, categoryIdsOfManga)
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore categories for book: ${manga.title}")
                     }
                     try {
                         restoreTracks(manga, mangaId)
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        ireader.core.log.Log.warn(e, "Failed to restore tracks for book: ${manga.title}")
                     }
                 }
             }
