@@ -30,45 +30,170 @@ interface AndroidTTSState : ireader.domain.services.tts_service.TTSState {
 }
 
 class TTSStateImpl() : AndroidTTSState {
-    override var isServiceConnected by mutableStateOf(false)
-    override var currentReadingParagraph by mutableStateOf(0)
-    override var previousReadingParagraph by mutableStateOf(0)
+    private val _isServiceConnected = kotlinx.coroutines.flow.MutableStateFlow(false)
+    override val isServiceConnected: kotlinx.coroutines.flow.StateFlow<Boolean> = _isServiceConnected
+    
+    private val _currentReadingParagraph = kotlinx.coroutines.flow.MutableStateFlow(0)
+    override val currentReadingParagraph: kotlinx.coroutines.flow.StateFlow<Int> = _currentReadingParagraph
+    
+    private val _previousReadingParagraph = kotlinx.coroutines.flow.MutableStateFlow(0)
+    override val previousReadingParagraph: kotlinx.coroutines.flow.StateFlow<Int> = _previousReadingParagraph
+    
     override var languages by mutableStateOf<List<Locale>>(emptyList())
     override var voices by mutableStateOf<List<Voice>>(emptyList())
     override val uiVoices by derivedStateOf { voices.map { it.toIReaderVoice() } }
-    override var currentVoice by mutableStateOf<IReaderVoice?>(null)
-    override var prevVoice by mutableStateOf<IReaderVoice?>(null)
-    override var currentLanguage by mutableStateOf("")
-    override var prevLanguage by mutableStateOf("")
-    override var isPlaying by mutableStateOf(false)
-    override var ttsContent: State<List<String>?>? =
-        derivedStateOf { ttsChapter?.content?.filter { it is Text }?.map { (it as? Text)?.text }?.filter { it != null && it.isNotBlank() }?.mapNotNull { it?.trim() } }
-    override var autoNextChapter by mutableStateOf(false)
+    
+    private val _currentVoice = kotlinx.coroutines.flow.MutableStateFlow<IReaderVoice?>(null)
+    override val currentVoice: kotlinx.coroutines.flow.StateFlow<IReaderVoice?> = _currentVoice
+    
+    private val _prevVoice = kotlinx.coroutines.flow.MutableStateFlow<IReaderVoice?>(null)
+    override val prevVoice: kotlinx.coroutines.flow.StateFlow<IReaderVoice?> = _prevVoice
+    
+    private val _currentLanguage = kotlinx.coroutines.flow.MutableStateFlow("")
+    override val currentLanguage: kotlinx.coroutines.flow.StateFlow<String> = _currentLanguage
+    
+    private val _prevLanguage = kotlinx.coroutines.flow.MutableStateFlow("")
+    override val prevLanguage: kotlinx.coroutines.flow.StateFlow<String> = _prevLanguage
+    
+    private val _isPlaying = kotlinx.coroutines.flow.MutableStateFlow(false)
+    override val isPlaying: kotlinx.coroutines.flow.StateFlow<Boolean> = _isPlaying
+    
+    private val _ttsChapter = kotlinx.coroutines.flow.MutableStateFlow<Chapter?>(null)
+    override val ttsChapter: kotlinx.coroutines.flow.StateFlow<Chapter?> = _ttsChapter
+    
+    private val _ttsContent = kotlinx.coroutines.flow.MutableStateFlow<List<String>?>(null)
+    override val ttsContent: kotlinx.coroutines.flow.StateFlow<List<String>?> = _ttsContent
+    
+    private val _autoNextChapter = kotlinx.coroutines.flow.MutableStateFlow(false)
+    override val autoNextChapter: kotlinx.coroutines.flow.StateFlow<Boolean> = _autoNextChapter
     
     // Translated content for TTS (set externally when translation is available)
     var translatedTTSContent by mutableStateOf<List<String>?>(null)
-    override var pitch by mutableStateOf(0.8f)
-    override var prevPitch by mutableStateOf(0.8f)
-    override var speechSpeed by mutableStateOf(0.8f)
-    override var sleepTime by mutableStateOf(0L)
-    @OptIn(ExperimentalTime::class)
-    override var startTime by mutableStateOf<kotlin.time.Instant?>(null)
-    override var sleepMode by mutableStateOf(false)
-    override var prevSpeechSpeed by mutableStateOf(0.8f)
     
-    override var ttsBook by mutableStateOf<Book?>(null)
-    override val ttsSource by derivedStateOf { ttsCatalog?.source }
-    override var ttsCatalog by mutableStateOf<CatalogLocal?>(null)
-    override var ttsChapter by mutableStateOf<Chapter?>(null)
-    override var ttsChapters by mutableStateOf<List<Chapter>>(emptyList())
-    override var ttsCurrentChapterIndex by mutableStateOf(-1)
-    override var utteranceId by mutableStateOf("")
+    private val _pitch = kotlinx.coroutines.flow.MutableStateFlow(0.8f)
+    override val pitch: kotlinx.coroutines.flow.StateFlow<Float> = _pitch
+    
+    private val _prevPitch = kotlinx.coroutines.flow.MutableStateFlow(0.8f)
+    override val prevPitch: kotlinx.coroutines.flow.StateFlow<Float> = _prevPitch
+    
+    private val _speechSpeed = kotlinx.coroutines.flow.MutableStateFlow(0.8f)
+    override val speechSpeed: kotlinx.coroutines.flow.StateFlow<Float> = _speechSpeed
+    
+    private val _sleepTime = kotlinx.coroutines.flow.MutableStateFlow(0L)
+    override val sleepTime: kotlinx.coroutines.flow.StateFlow<Long> = _sleepTime
+    
+    @OptIn(ExperimentalTime::class)
+    private val _startTime = kotlinx.coroutines.flow.MutableStateFlow<kotlin.time.Instant?>(null)
+    @OptIn(ExperimentalTime::class)
+    override val startTime: kotlinx.coroutines.flow.StateFlow<kotlin.time.Instant?> = _startTime
+    
+    private val _sleepMode = kotlinx.coroutines.flow.MutableStateFlow(false)
+    override val sleepMode: kotlinx.coroutines.flow.StateFlow<Boolean> = _sleepMode
+    
+    private val _prevSpeechSpeed = kotlinx.coroutines.flow.MutableStateFlow(0.8f)
+    override val prevSpeechSpeed: kotlinx.coroutines.flow.StateFlow<Float> = _prevSpeechSpeed
+    
+    private val _ttsBook = kotlinx.coroutines.flow.MutableStateFlow<Book?>(null)
+    override val ttsBook: kotlinx.coroutines.flow.StateFlow<Book?> = _ttsBook
+    
+    private val _ttsCatalog = kotlinx.coroutines.flow.MutableStateFlow<CatalogLocal?>(null)
+    override val ttsCatalog: kotlinx.coroutines.flow.StateFlow<CatalogLocal?> = _ttsCatalog
+    
+    private val _ttsSource = kotlinx.coroutines.flow.MutableStateFlow<Source?>(null)
+    override val ttsSource: kotlinx.coroutines.flow.StateFlow<Source?> = _ttsSource
+    
+    private val _ttsChapters = kotlinx.coroutines.flow.MutableStateFlow<List<Chapter>>(emptyList())
+    override val ttsChapters: kotlinx.coroutines.flow.StateFlow<List<Chapter>> = _ttsChapters
+    
+    private val _ttsCurrentChapterIndex = kotlinx.coroutines.flow.MutableStateFlow(-1)
+    override val ttsCurrentChapterIndex: kotlinx.coroutines.flow.StateFlow<Int> = _ttsCurrentChapterIndex
+    
+    private val _utteranceId = kotlinx.coroutines.flow.MutableStateFlow("")
+    override val utteranceId: kotlinx.coroutines.flow.StateFlow<String> = _utteranceId
+    
     override var meta by mutableStateOf<MediaMetadataCompat?>(null)
-    override var isLoading: State<Boolean> = derivedStateOf { meta?.getLong(TTSService.IS_LOADING) == 1L }
-    override var uiChapters: State<List<Chapter>> = derivedStateOf { if (!isDrawerAsc) ttsChapters else ttsChapters.reversed() }
-    override var isDrawerAsc by mutableStateOf(false)
+    
+    private val _isLoading = kotlinx.coroutines.flow.MutableStateFlow(false)
+    override val isLoading: kotlinx.coroutines.flow.StateFlow<Boolean> = _isLoading
+    
+    private val _uiChapters = kotlinx.coroutines.flow.MutableStateFlow<List<Chapter>>(emptyList())
+    override val uiChapters: kotlinx.coroutines.flow.StateFlow<List<Chapter>> = _uiChapters
+    
+    private val _isDrawerAsc = kotlinx.coroutines.flow.MutableStateFlow(false)
+    override val isDrawerAsc: kotlinx.coroutines.flow.StateFlow<Boolean> = _isDrawerAsc
     
     // Cache status for Coqui TTS paragraphs
     var cachedParagraphs by mutableStateOf<Set<Int>>(emptySet())
     var loadingParagraphs by mutableStateOf<Set<Int>>(emptySet())
+    
+    // Setter implementations
+    override fun setPlaying(value: Boolean) { _isPlaying.value = value }
+    override fun setTtsContent(value: List<String>?) { _ttsContent.value = value }
+    override fun setCurrentReadingParagraph(value: Int) { _currentReadingParagraph.value = value }
+    override fun setPreviousReadingParagraph(value: Int) { _previousReadingParagraph.value = value }
+    override fun setAutoNextChapter(value: Boolean) { _autoNextChapter.value = value }
+    override fun setCurrentVoice(value: IReaderVoice?) { _currentVoice.value = value }
+    override fun setPrevVoice(value: IReaderVoice?) { _prevVoice.value = value }
+    override fun setCurrentLanguage(value: String) { _currentLanguage.value = value }
+    override fun setUtteranceId(value: String) { _utteranceId.value = value }
+    override fun setPrevLanguage(value: String) { _prevLanguage.value = value }
+    override fun setPitch(value: Float) { _pitch.value = value }
+    override fun setPrevPitch(value: Float) { _prevPitch.value = value }
+    override fun setSpeechSpeed(value: Float) { _speechSpeed.value = value }
+    override fun setPrevSpeechSpeed(value: Float) { _prevSpeechSpeed.value = value }
+    override fun setSleepTime(value: Long) { _sleepTime.value = value }
+    override fun setTtsBook(value: Book?) { _ttsBook.value = value }
+    override fun setTtsChapter(value: Chapter?) { 
+        _ttsChapter.value = value
+        updateTtsContent()
+    }
+    override fun setTtsCatalog(value: CatalogLocal?) { 
+        _ttsCatalog.value = value
+        _ttsSource.value = value?.source
+    }
+    override fun setTtsChapters(value: List<Chapter>) { 
+        _ttsChapters.value = value
+        updateUiChapters()
+    }
+    override fun setTtsCurrentChapterIndex(value: Int) { _ttsCurrentChapterIndex.value = value }
+    override fun setServiceConnected(value: Boolean) { _isServiceConnected.value = value }
+    override fun setLoading(value: Boolean) { _isLoading.value = value }
+    override fun setUiChapters(value: List<Chapter>) { _uiChapters.value = value }
+    override fun setDrawerAsc(value: Boolean) { 
+        _isDrawerAsc.value = value
+        updateUiChapters()
+    }
+    @OptIn(ExperimentalTime::class)
+    override fun setStartTime(value: kotlin.time.Instant?) { _startTime.value = value }
+    override fun setSleepMode(value: Boolean) { _sleepMode.value = value }
+    
+    private fun updateTtsContent() {
+        val chapter = _ttsChapter.value
+        _ttsContent.value = when {
+            chapter == null -> null
+            chapter.content.isEmpty() -> emptyList()
+            chapter.content.firstOrNull() is Text -> {
+                chapter.content
+                    .filterIsInstance<Text>()
+                    .map { it.text }
+                    .filter { it.isNotBlank() }
+                    .map { it.trim() }
+            }
+            else -> {
+                chapter.content
+                    .map { 
+                        when (it) {
+                            is Text -> it.text
+                            else -> it.toString()
+                        }
+                    }
+                    .filter { it.isNotBlank() }
+                    .map { it.trim() }
+            }
+        }
+    }
+    
+    private fun updateUiChapters() {
+        _uiChapters.value = if (!_isDrawerAsc.value) _ttsChapters.value else _ttsChapters.value.reversed()
+    }
 }

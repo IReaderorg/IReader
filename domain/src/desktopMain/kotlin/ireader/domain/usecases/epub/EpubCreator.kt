@@ -54,16 +54,4 @@ actual class EpubCreator(
             }
         }
     }
-
-    @Composable
-    actual fun onEpubCreateRequested(book: Book, onStart: @Composable ((Any) -> Unit)) {
-        val filename = sanitizeFilename(book.title) + ".epub"
-        onStart(filename)
-    }
-    
-    private fun sanitizeFilename(name: String): String {
-        return name.replace(Regex("[|\\\\?*<\":>+\\[\\]/']+"), " ")
-            .replace(Regex("\\s+"), " ")
-            .trim()
-    }
 }

@@ -266,7 +266,7 @@ class DesktopTTSService : KoinComponent {
     private fun applySavedTTSSettings() {
         try {
             // Apply speech rate from preferences
-            val speechRate = state.speechSpeed
+            val speechRate = state.speechSpeed.value
             if (speechRate > 0 && speechRate in 0.5f..2.0f) {
                 try {
                     synthesizer.setSpeechRate(speechRate)
@@ -450,7 +450,7 @@ class DesktopTTSService : KoinComponent {
                     }
                     
                     // Check if still playing
-                    if (!state.isPlaying) {
+                    if (!state.isPlaying.value) {
                         break
                     }
                     
@@ -472,40 +472,40 @@ class DesktopTTSService : KoinComponent {
 
     private fun readPrefs() {
         serviceScope.launch {
-            state.autoNextChapter = readerPreferences.readerAutoNext().get()
-            state.currentLanguage = readerPreferences.speechLanguage().get()
-            state.currentVoice = appPrefs.speechVoice().get()
-            state.speechSpeed = readerPreferences.speechRate().get()
-            state.pitch = readerPreferences.speechPitch().get()
-            state.sleepTime = readerPreferences.sleepTime().get()
-            state.sleepMode = readerPreferences.sleepMode().get()
+            state.setAutoNextChapter(readerPreferences.readerAutoNext().get())
+            state.setCurrentLanguage(readerPreferences.speechLanguage().get())
+            state.setCurrentVoice(appPrefs.speechVoice().get())
+            state.setSpeechSpeed(readerPreferences.speechRate().get())
+            state.setPitch(readerPreferences.speechPitch().get())
+            state.setSleepTime(readerPreferences.sleepTime().get())
+            state.setSleepMode(readerPreferences.sleepMode().get())
         }
         
         // Listen to preference changes
         serviceScope.launch {
             readerPreferences.readerAutoNext().changes().collect {
-                state.autoNextChapter = it
+                state.setAutoNextChapter(it)
             }
         }
         serviceScope.launch {
             readerPreferences.speechLanguage().changes().collect {
-                state.currentLanguage = it
+                state.setCurrentLanguage(it)
             }
         }
         serviceScope.launch {
             appPrefs.speechVoice().changes().collect {
-                state.currentVoice = it
+                state.setCurrentVoice(it)
             }
         }
         serviceScope.launch {
             readerPreferences.speechPitch().changes().collect {
-                state.pitch = it
+                state.setPitch(it)
                 // Apply pitch change if not in simulation mode
             }
         }
         serviceScope.launch {
             readerPreferences.speechRate().changes().collect {
-                state.speechSpeed = it
+                state.setSpeechSpeed(it)
                 // Apply speech rate change if not in simulation mode
                 if (!isSimulationMode) {
                     try {
@@ -518,12 +518,12 @@ class DesktopTTSService : KoinComponent {
         }
         serviceScope.launch {
             readerPreferences.sleepTime().changes().collect {
-                state.sleepTime = it
+                state.setSleepTime(it)
             }
         }
         serviceScope.launch {
             readerPreferences.sleepMode().changes().collect {
-                state.sleepMode = it
+                state.setSleepMode(it)
             }
         }
         
@@ -552,10 +552,10 @@ class DesktopTTSService : KoinComponent {
                 Log.warn { "Source not installed for book: ${book.title}. TTS will work with cached content only." }
             }
             
-            state.ttsBook = book
-            state.ttsChapters = chapters
-            state.ttsCatalog = source
-            state.currentReadingParagraph = 0
+            state.setTtsBook(book)
+            state.setTtsChapters(chapters)
+            state.setTtsCatalog(source)
+            state.setCurrentReadingParagraph(0)
             
             // Always set the chapter content if available
             if (chapter.isEmpty()) {
@@ -570,10 +570,10 @@ class DesktopTTSService : KoinComponent {
                 }
             } else {
                 Log.info { "Chapter has content, setting directly. Content items: ${chapter.content.size}" }
-                state.ttsChapter = chapter
+                state.setTtsChapter(chapter)
                 
                 // Log the extracted content
-                val content = state.ttsContent?.value
+                val content = state.ttsContent.value
                 Log.info { "TTS content after setting chapter: ${content?.size} paragraphs" }
                 
                 // If source is not installed, set warning state
@@ -669,13 +669,13 @@ class DesktopTTSService : KoinComponent {
 
     @OptIn(ExperimentalTime::class)
     private suspend fun playReading() {
-        state.isPlaying = true
-        state.startTime = kotlin.time.Clock.System.now()
+        state.setPlaying(true)
+        state.setStartTime(kotlin.time.Clock.System.now())
         readText()
     }
 
     private fun pauseReading() {
-        state.isPlaying = false
+        state.setPlaying(false)
         
         // Pause audio playback (responds within 200ms as per requirements)
         if (!isSimulationMode) {
@@ -691,7 +691,7 @@ class DesktopTTSService : KoinComponent {
     }
 
     private fun stopReading() {
-        state.isPlaying = false
+        state.setPlaying(false)
         
         // Stop audio playback and clear buffers
         if (!isSimulationMode) {
@@ -709,13 +709,13 @@ class DesktopTTSService : KoinComponent {
         }
         
         // Reset state
-        state.currentReadingParagraph = 0
+        state.setCurrentReadingParagraph(0)
         state.currentWordBoundary = null
     }
 
     private suspend fun skipToNextChapter() {
-        val chapter = state.ttsChapter ?: return
-        val chapters = state.ttsChapters
+        val chapter = state.ttsChapter.value ?: return
+        val chapters = state.ttsChapters.value
         val index = getChapterIndex(chapter, chapters)
         
         // Stop audio playback before loading new chapter
@@ -733,13 +733,13 @@ class DesktopTTSService : KoinComponent {
         if (index < chapters.lastIndex) {
             val nextChapter = chapters[index + 1]
             loadChapter(nextChapter.id)
-            state.currentReadingParagraph = 0
+            state.setCurrentReadingParagraph(0)
             
             // Load translated content for the new chapter
             loadTranslatedContentForTTS(nextChapter.id)
             
             // Start reading if playing (responds within 500ms as per requirements)
-            if (state.isPlaying) {
+            if (state.isPlaying.value) {
                 readText()
             }
         }
@@ -749,8 +749,8 @@ class DesktopTTSService : KoinComponent {
     }
 
     private suspend fun skipToPreviousChapter() {
-        val chapter = state.ttsChapter ?: return
-        val chapters = state.ttsChapters
+        val chapter = state.ttsChapter.value ?: return
+        val chapters = state.ttsChapters.value
         val index = getChapterIndex(chapter, chapters)
         
         // Stop audio playback before loading new chapter
@@ -768,13 +768,13 @@ class DesktopTTSService : KoinComponent {
         if (index > 0) {
             val prevChapter = chapters[index - 1]
             loadChapter(prevChapter.id)
-            state.currentReadingParagraph = 0
+            state.setCurrentReadingParagraph(0)
             
             // Load translated content for the new chapter
             loadTranslatedContentForTTS(prevChapter.id)
             
             // Start reading if playing (responds within 500ms as per requirements)
-            if (state.isPlaying) {
+            if (state.isPlaying.value) {
                 readText()
             }
         }
@@ -788,11 +788,11 @@ class DesktopTTSService : KoinComponent {
         val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
             state.translatedTTSContent
         } else {
-            state.ttsContent?.value
+            state.ttsContent.value
         }
         
         content?.let { paragraphs ->
-            if (state.currentReadingParagraph < paragraphs.lastIndex) {
+            if (state.currentReadingParagraph.value < paragraphs.lastIndex) {
                 // Stop current audio playback
                 if (!isSimulationMode) {
                     audioEngine.stop()
@@ -806,10 +806,10 @@ class DesktopTTSService : KoinComponent {
                 state.currentWordBoundary = null
                 
                 // Move to next paragraph
-                state.currentReadingParagraph += 1
+                state.setCurrentReadingParagraph(state.currentReadingParagraph.value + 1)
                 
                 // Start reading if playing (responds within 500ms as per requirements)
-                if (state.isPlaying) {
+                if (state.isPlaying.value) {
                     serviceScope.launch { readText() }
                 }
             }
@@ -821,11 +821,11 @@ class DesktopTTSService : KoinComponent {
         val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
             state.translatedTTSContent
         } else {
-            state.ttsContent?.value
+            state.ttsContent.value
         }
         
         content?.let { paragraphs ->
-            if (state.currentReadingParagraph > 0) {
+            if (state.currentReadingParagraph.value > 0) {
                 // Stop current audio playback
                 if (!isSimulationMode) {
                     audioEngine.stop()
@@ -839,10 +839,10 @@ class DesktopTTSService : KoinComponent {
                 state.currentWordBoundary = null
                 
                 // Move to previous paragraph
-                state.currentReadingParagraph -= 1
+                state.setCurrentReadingParagraph(state.currentReadingParagraph.value - 1)
                 
                 // Start reading if playing (responds within 500ms as per requirements)
-                if (state.isPlaying) {
+                if (state.isPlaying.value) {
                     serviceScope.launch { readText() }
                 }
             }
@@ -854,29 +854,29 @@ class DesktopTTSService : KoinComponent {
         val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
             state.translatedTTSContent
         } else {
-            state.ttsContent?.value
+            state.ttsContent.value
         }
         
         if (content == null || content.isEmpty()) {
             return
         }
         
-        if (state.currentReadingParagraph >= content.size) {
+        if (state.currentReadingParagraph.value >= content.size) {
             handleEndOfChapter()
             return
         }
 
-        val text = content[state.currentReadingParagraph]
+        val text = content[state.currentReadingParagraph.value]
         
         if (text.isBlank()) {
             advanceToNextParagraph()
             return
         }
         
-        state.utteranceId = state.currentReadingParagraph.toString()
+        state.setUtteranceId(state.currentReadingParagraph.value.toString())
         
         // Pre-generate upcoming paragraphs for Kokoro (speeds up playback)
-        if (currentEngine == TTSEngine.KOKORO && state.currentReadingParagraph % 3 == 0) {
+        if (currentEngine == TTSEngine.KOKORO && state.currentReadingParagraph.value % 3 == 0) {
             serviceScope.launch {
                 preGenerateParagraphs(5)
             }
@@ -956,7 +956,7 @@ class DesktopTTSService : KoinComponent {
             checkSleepTime()
             
             // Move to next paragraph if still playing
-            if (state.isPlaying) {
+            if (state.isPlaying.value) {
                 advanceToNextParagraph()
             }
         }.onFailure { error ->
@@ -1014,7 +1014,7 @@ class DesktopTTSService : KoinComponent {
     private suspend fun readTextSimulation(text: String) {
         // Calculate reading time based on word count and speech rate
         val words = text.split("\\s+".toRegex())
-        val wordsPerMinute = 150 * state.speechSpeed // Base reading speed
+        val wordsPerMinute = 150 * state.speechSpeed.value // Base reading speed
         val readingTimeMs = (words.size / wordsPerMinute * 60 * 1000).toLong()
         
         delay(readingTimeMs)
@@ -1022,7 +1022,7 @@ class DesktopTTSService : KoinComponent {
         // Check sleep time
         checkSleepTime()
         
-        if (state.isPlaying) {
+        if (state.isPlaying.value) {
             advanceToNextParagraph()
         }
     }
@@ -1035,18 +1035,18 @@ class DesktopTTSService : KoinComponent {
             val voice = "af_bella" // TODO: Add voice selection to preferences
             
             // Check cache first
-            val cachedAudio = audioCache.get(text, voice, state.speechSpeed)
+            val cachedAudio = audioCache.get(text, voice, state.speechSpeed.value)
             
             val audioData = if (cachedAudio != null) {
                 Log.debug { "Using cached audio for Kokoro" }
                 cachedAudio
             } else {
                 // Synthesize with Kokoro
-                val result = kokoroAdapter.synthesize(text, voice, state.speechSpeed)
+                val result = kokoroAdapter.synthesize(text, voice, state.speechSpeed.value)
                 
                 result.onSuccess { audio ->
                     // Cache the generated audio
-                    audioCache.put(text, voice, state.speechSpeed, audio)
+                    audioCache.put(text, voice, state.speechSpeed.value, audio)
                 }.getOrNull()
             }
             
@@ -1064,7 +1064,7 @@ class DesktopTTSService : KoinComponent {
                 checkSleepTime()
                 
                 // Move to next paragraph if still playing
-                if (state.isPlaying) {
+                if (state.isPlaying.value) {
                     advanceToNextParagraph()
                 }
             } else {
@@ -1085,7 +1085,7 @@ class DesktopTTSService : KoinComponent {
             val language = "en" // TODO: Add language selection to preferences
             
             // Synthesize with Maya
-            val result = mayaAdapter.synthesize(text, language, state.speechSpeed)
+            val result = mayaAdapter.synthesize(text, language, state.speechSpeed.value)
             
             result.onSuccess { audioData ->
                 Log.debug { "Maya synthesis successful: ${audioData.samples.size} bytes" }
@@ -1101,7 +1101,7 @@ class DesktopTTSService : KoinComponent {
                 checkSleepTime()
                 
                 // Move to next paragraph if still playing
-                if (state.isPlaying) {
+                if (state.isPlaying.value) {
                     advanceToNextParagraph()
                 }
             }.onFailure { error ->
@@ -1120,11 +1120,11 @@ class DesktopTTSService : KoinComponent {
         val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
             state.translatedTTSContent
         } else {
-            state.ttsContent?.value
+            state.ttsContent.value
         } ?: return
         
-        if (state.currentReadingParagraph < content.lastIndex) {
-            state.currentReadingParagraph += 1
+        if (state.currentReadingParagraph.value < content.lastIndex) {
+            state.setCurrentReadingParagraph(state.currentReadingParagraph.value + 1)
             readText()
         } else {
             handleEndOfChapter()
@@ -1132,7 +1132,7 @@ class DesktopTTSService : KoinComponent {
     }
     
     private suspend fun handleEndOfChapter() {
-        if (state.autoNextChapter) {
+        if (state.autoNextChapter.value) {
             skipToNextChapter()
         } else {
             stopReading()
@@ -1141,20 +1141,20 @@ class DesktopTTSService : KoinComponent {
 
     @OptIn(ExperimentalTime::class)
     private fun checkSleepTime() {
-        val lastCheckPref = state.startTime
-        val currentSleepTime = state.sleepTime.minutes
+        val lastCheckPref = state.startTime.value
+        val currentSleepTime = state.sleepTime.value.minutes
         val now = kotlin.time.Clock.System.now()
-        if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode) {
+        if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode.value) {
             stopReading()
         }
     }
 
     private suspend fun loadChapter(chapterId: Long) {
         val localChapter = chapterRepo.findChapterById(chapterId)
-        val source = state.ttsCatalog ?: return
+        val source = state.ttsCatalog.value ?: return
 
         if (localChapter != null && !localChapter.isEmpty()) {
-            state.ttsChapter = localChapter
+            state.setTtsChapter(localChapter)
             chapterUseCase.updateLastReadTime(localChapter, updateDateFetched = false)
         } else if (localChapter != null) {
             remoteUseCases.getRemoteReadingContent(
@@ -1162,10 +1162,10 @@ class DesktopTTSService : KoinComponent {
                 source,
                 onSuccess = { result ->
                     if (result.content.joinToString().length > 1) {
-                        state.ttsChapter = result
+                        state.setTtsChapter(result)
                         chapterUseCase.updateLastReadTime(result, updateDateFetched = true)
                         chapterRepo.findChaptersByBookId(result.bookId).let { res ->
-                            state.ttsChapters = res
+                            state.setTtsChapters(res)
                         }
                     }
                 },
@@ -1225,8 +1225,8 @@ class DesktopTTSService : KoinComponent {
             Log.info { "Switching voice model to: $modelId" }
             
             // Save current playback state
-            val wasPlaying = state.isPlaying
-            val currentParagraph = state.currentReadingParagraph
+            val wasPlaying = state.isPlaying.value
+            val currentParagraph = state.currentReadingParagraph.value
             
             // Pause playback if active
             if (wasPlaying) {
@@ -1245,7 +1245,7 @@ class DesktopTTSService : KoinComponent {
             
             // Resume playback if requested and was playing
             if (resumePlayback && wasPlaying) {
-                state.currentReadingParagraph = currentParagraph
+                state.setCurrentReadingParagraph(currentParagraph)
                 playReading()
             }
             
@@ -1310,7 +1310,7 @@ class DesktopTTSService : KoinComponent {
             val currentModelId = appPrefs.selectedPiperModel().get()
             if (currentModelId == modelId) {
                 // Stop playback if active
-                if (state.isPlaying) {
+                if (state.isPlaying.value) {
                     stopReading()
                 }
                 
@@ -1372,8 +1372,8 @@ class DesktopTTSService : KoinComponent {
      */
     fun saveTTSSettings() {
         try {
-            readerPreferences.speechRate().set(state.speechSpeed)
-            readerPreferences.speechPitch().set(state.pitch)
+            readerPreferences.speechRate().set(state.speechSpeed.value)
+            readerPreferences.speechPitch().set(state.pitch.value)
         } catch (e: Exception) {
             Log.error { "Failed to save TTS settings: ${e.message}" }
         }
@@ -1383,7 +1383,7 @@ class DesktopTTSService : KoinComponent {
      * Update speech rate and save to preferences
      */
     fun setSpeechRate(rate: Float) {
-        state.speechSpeed = rate
+        state.setSpeechSpeed(rate)
         saveTTSSettings()
         
         // Apply to synthesizer if not in simulation mode
@@ -1403,7 +1403,7 @@ class DesktopTTSService : KoinComponent {
      * Update pitch and save to preferences
      */
     fun setPitch(pitch: Float) {
-        state.pitch = pitch
+        state.setPitch(pitch)
         saveTTSSettings()
         
         // Note: Piper may not support runtime pitch changes
@@ -1493,7 +1493,7 @@ class DesktopTTSService : KoinComponent {
     fun getServiceStatus(): ServiceStatus {
         return ServiceStatus(
             isInitialized = !isSimulationMode,
-            isPlaying = state.isPlaying,
+            isPlaying = state.isPlaying.value,
             currentVoice = getCurrentVoiceInfo(),
             performanceMetrics = getPerformanceMetrics(),
             simulationMode = isSimulationMode
@@ -1646,10 +1646,10 @@ class DesktopTTSService : KoinComponent {
         val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
             state.translatedTTSContent
         } else {
-            state.ttsContent?.value
+            state.ttsContent.value
         } ?: return
         
-        val currentIndex = state.currentReadingParagraph
+        val currentIndex = state.currentReadingParagraph.value
         
         // Get next N paragraphs
         val upcomingParagraphs = content
@@ -1669,10 +1669,10 @@ class DesktopTTSService : KoinComponent {
         audioCache.preGenerate(
             paragraphs = upcomingParagraphs,
             voice = voice,
-            speed = state.speechSpeed,
+            speed = state.speechSpeed.value,
             synthesizer = { text ->
                 when (currentEngine) {
-                    TTSEngine.KOKORO -> kokoroAdapter.synthesize(text, voice, state.speechSpeed)
+                    TTSEngine.KOKORO -> kokoroAdapter.synthesize(text, voice, state.speechSpeed.value)
                     else -> Result.failure(Exception("Engine not supported"))
                 }
             }
@@ -1699,7 +1699,7 @@ class DesktopTTSService : KoinComponent {
             delay(1000) // Wait for content to load
         }
         
-        val updatedChapter = state.ttsChapter
+        val updatedChapter = state.ttsChapter.value
             ?: return Result.failure(Exception("Failed to load chapter content"))
         
         Log.info { "Downloading chapter audio: ${updatedChapter.name}" }
@@ -1733,11 +1733,11 @@ class DesktopTTSService : KoinComponent {
                     TTSEngine.PIPER -> this.synthesizer.synthesize(text)
                     TTSEngine.KOKORO -> {
                         val voice = "af_bella"
-                        kokoroAdapter.synthesize(text, voice, state.speechSpeed)
+                        kokoroAdapter.synthesize(text, voice, state.speechSpeed.value)
                     }
                     TTSEngine.MAYA -> {
                         val language = "en"
-                        mayaAdapter.synthesize(text, language, state.speechSpeed)
+                        mayaAdapter.synthesize(text, language, state.speechSpeed.value)
                     }
                     TTSEngine.SIMULATION -> Result.failure(Exception("Cannot download in simulation mode"))
                 }

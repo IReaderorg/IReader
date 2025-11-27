@@ -12,6 +12,7 @@ import ireader.domain.models.theme.Theme
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.theme.*
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import ireader.presentation.core.toDomainColor
 
 
 

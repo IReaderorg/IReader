@@ -65,9 +65,9 @@ class RepositoryMigrationScript(
     private suspend fun backupDatabase() {
         Log.info("Creating database backup...")
         handler.await {
-            // Store counts for verification
+            // Store counts for verification (using light queries for performance)
             val bookCount = bookQueries.findAllBooks().executeAsList().size
-            val chapterCount = chapterQueries.findAll().executeAsList().size
+            val chapterCount = chapterQueries.findAllLight().executeAsList().size
             
             Log.info("Pre-migration counts:")
             Log.info("  Books: $bookCount")
@@ -82,8 +82,8 @@ class RepositoryMigrationScript(
     private suspend fun cleanupOrphanedData() {
         Log.info("Cleaning up orphaned data...")
         handler.await(inTransaction = true) {
-            // Remove chapters for books that no longer exist
-            val allChapters = chapterQueries.findAll().executeAsList()
+            // Remove chapters for books that no longer exist (using light queries for performance)
+            val allChapters = chapterQueries.findAllLight().executeAsList()
             val allBooks = bookQueries.findAllBooks().executeAsList()
             val bookIds = allBooks.map { it._id }.toSet()
             
@@ -127,15 +127,15 @@ class RepositoryMigrationScript(
             val libraryBookCount = bookQueries.findInLibraryBooks().executeAsList().size
             Log.info("Books: $bookCount (Library: $libraryBookCount)")
             
-            // Verify chapter count using SQLDelight queries
-            val chapterCount = chapterQueries.findAll().executeAsList().size
+            // Verify chapter count using SQLDelight queries (using light query for performance)
+            val chapterCount = chapterQueries.findAllLight().executeAsList().size
             Log.info("Chapters: $chapterCount")
             
             // Note: Category verification would require BookCategoryRepository
             Log.info("Category verification skipped (requires BookCategoryRepository)")
             
-            // Verify no orphaned data
-            val allChapters = chapterQueries.findAll().executeAsList()
+            // Verify no orphaned data (using light queries for performance)
+            val allChapters = chapterQueries.findAllLight().executeAsList()
             val allBooks = bookQueries.findAllBooks().executeAsList()
             val bookIds = allBooks.map { it._id }.toSet()
             val orphanedChapters = allChapters.count { it.book_id !in bookIds }
@@ -157,9 +157,9 @@ class RepositoryMigrationScript(
             // Since we're not modifying the schema, rollback is mainly about
             // logging the failure and ensuring data is still accessible
             handler.await {
-                // Verify data is still accessible
+                // Verify data is still accessible (using light query for performance)
                 val bookCount = bookQueries.findAllBooks().executeAsList().size
-                val chapterCount = chapterQueries.findAll().executeAsList().size
+                val chapterCount = chapterQueries.findAllLight().executeAsList().size
                 Log.info("Rollback verification - Books: $bookCount, Chapters: $chapterCount")
             }
             Log.info("Migration rolled back successfully")
@@ -174,8 +174,8 @@ class RepositoryMigrationScript(
     suspend fun isMigrationNeeded(): Boolean {
         return try {
             handler.await {
-                // Check if data cleanup is needed by looking for orphaned records
-                val allChapters = chapterQueries.findAll().executeAsList()
+                // Check if data cleanup is needed by looking for orphaned records (using light queries for performance)
+                val allChapters = chapterQueries.findAllLight().executeAsList()
                 val allBooks = bookQueries.findAllBooks().executeAsList()
                 val bookIds = allBooks.map { it._id }.toSet()
                 

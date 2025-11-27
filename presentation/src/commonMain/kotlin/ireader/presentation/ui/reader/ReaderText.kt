@@ -49,6 +49,8 @@ import coil3.request.ImageRequest
 import coil3.toUri
 import ireader.core.source.model.ImageUrl
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toDomainColor
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeFontFamily
 import ireader.presentation.core.toComposeTextAlign
 import ireader.core.source.model.Page
@@ -120,7 +122,7 @@ fun ReaderText(
                 enable = vm.readingMode.value == ReadingMode.Continues
             )
             .fillMaxSize()
-            .background(vm.backgroundColor.value),
+            .background(vm.backgroundColor.value.toComposeColor()),
     ) {
 
         val maxHeight = remember {
@@ -150,7 +152,7 @@ fun ReaderText(
                                 icon = Icons.Default.KeyboardArrowUp,
                                 swipeRefreshState = swipeState,
                                 refreshTriggerDistance = 80.dp,
-                                color = vm.textColor.value
+                                color = vm.textColor.value.toComposeColor()
                             )
                         }, onRefresh = {
                             onPrev()
@@ -167,7 +169,7 @@ fun ReaderText(
                                 icon = Icons.Default.KeyboardArrowDown,
                                 swipeRefreshState = swipeState,
                                 refreshTriggerDistance = 80.dp,
-                                color = vm.textColor.value
+                                color = vm.textColor.value.toComposeColor()
                             )
                         }
                     ),
@@ -298,8 +300,8 @@ private fun PagedReaderText(
             padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
             thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
             enabled = vm.showScrollIndicator.value,
-            thumbColor = vm.unselectedScrollBarColor.value,
-            thumbSelectedColor = vm.selectedScrollBarColor.value,
+            thumbColor = vm.unselectedScrollBarColor.value.toComposeColor(),
+            thumbSelectedColor = vm.selectedScrollBarColor.value.toComposeColor(),
             selectionMode = vm.isScrollIndicatorDraggable.value,
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right
         ) {
@@ -411,8 +413,8 @@ private fun StyleText(
                 vm.font?.value?.fontFamily?.toComposeFontFamily() 
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
-            originalColor = vm.textColor.value,
-            translatedColor = vm.textColor.value.copy(alpha = 0.9f),
+            originalColor = vm.textColor.value.toComposeColor(),
+            translatedColor = vm.textColor.value.toComposeColor().copy(alpha = 0.9f),
             lineHeight = vm.lineHeight.value.sp,
             letterSpacing = vm.betweenLetterSpaces.value.sp,
             fontWeight = FontWeight(vm.textWeight.value)
@@ -458,7 +460,7 @@ private fun StyleText(
                 vm.font?.value?.fontFamily?.toComposeFontFamily() 
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
-            color = vm.textColor.value,
+            color = vm.textColor.value.toComposeColor(),
             lineHeight = vm.lineHeight.value.sp,
             letterSpacing = vm.betweenLetterSpaces.value.sp,
             fontWeight = FontWeight(vm.textWeight.value),
@@ -475,7 +477,7 @@ private fun StyleText(
                 vm.font?.value?.fontFamily?.toComposeFontFamily() 
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
-            color = vm.textColor.value,
+            color = vm.textColor.value.toComposeColor(),
             lineHeight = vm.lineHeight.value.sp,
             letterSpacing = vm.betweenLetterSpaces.value.sp,
             fontWeight = FontWeight(vm.textWeight.value),
@@ -579,8 +581,8 @@ private fun ContinuesReaderPage(
         padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
         thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
         enable = vm.showScrollIndicator.value,
-        thumbColor = vm.unselectedScrollBarColor.value,
-        thumbSelectedColor = vm.selectedScrollBarColor.value,
+        thumbColor = vm.unselectedScrollBarColor.value.toComposeColor(),
+        thumbSelectedColor = vm.selectedScrollBarColor.value.toComposeColor(),
         selectionMode = vm.isScrollIndicatorDraggable.value,
         rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right,
     ) {

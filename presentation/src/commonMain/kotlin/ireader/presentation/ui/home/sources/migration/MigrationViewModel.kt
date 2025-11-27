@@ -97,7 +97,7 @@ class MigrationViewModel(
                 _targetSources.value = allSources
                 
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Failed to load novels: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Failed to load novels: ${e.message ?: "Unknown error"}"))
             } finally {
                 isLoadingNovels = false
             }
@@ -146,7 +146,7 @@ class MigrationViewModel(
         val source = sourceId
         
         if (target == null || source == null) {
-            showSnackBar(UiText.DynamicString("Please select a target source"))
+            showSnackBar(UiText.DynamicString("Please select target source"))
             return
         }
         
@@ -190,7 +190,7 @@ class MigrationViewModel(
                     // This is just the preparation phase
                 }
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Migration failed: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Migration failed: ${e.message ?: "Unknown error"}"))
             } finally {
                 isMigrating = false
                 _migrationResults.value = results

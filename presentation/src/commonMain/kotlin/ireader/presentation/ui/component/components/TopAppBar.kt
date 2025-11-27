@@ -23,6 +23,7 @@ import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.theme.AppColors
+import ireader.presentation.core.toComposeColor
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,8 +33,8 @@ fun Toolbar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable (() -> Unit) = {},
     actions: @Composable RowScope.() -> Unit = {},
-    backgroundColor: Color = AppColors.current.bars,
-    contentColor: Color = AppColors.current.onBars,
+    backgroundColor: Color = AppColors.current.bars.toComposeColor(),
+    contentColor: Color = AppColors.current.onBars.toComposeColor(),
     elevation: Dp = 0.dp,
     applyInsets: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null
@@ -82,8 +83,8 @@ fun MidSizeToolbar(
     modifier: Modifier = Modifier,
     navigationIcon: @Composable (() -> Unit) = {},
     actions: @Composable RowScope.() -> Unit = {},
-    backgroundColor: Color = AppColors.current.bars,
-    contentColor: Color = AppColors.current.onBars,
+    backgroundColor: Color = AppColors.current.bars.toComposeColor(),
+    contentColor: Color = AppColors.current.onBars.toComposeColor(),
     elevation: Dp = 0.dp,
     applyInsets: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null

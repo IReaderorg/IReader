@@ -8,6 +8,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.launchIO
@@ -17,7 +18,6 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
-import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,12 +31,12 @@ fun BackUpAndRestoreScreen(
     onNavigateToCloudBackup: () -> Unit = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
+    val scope = rememberCoroutineScope()
     val onShowRestore = remember { mutableStateOf(false) }
     val onShowBackup = remember { mutableStateOf(false) }
     OnShowRestore(onShowRestore.value, onFileSelected = {
         it?.let {files ->
-            globalScope.launchIO {
+            scope.launchIO {
                 vm.restoreBackup.restoreFrom(it, onError = {
                     vm.showSnackBar(it)
                 }, onSuccess = {
@@ -47,7 +47,7 @@ fun BackUpAndRestoreScreen(
     })
     OnShowBackup(onShowBackup.value, onFileSelected = {
         it?.let {files ->
-            globalScope.launchIO {
+            scope.launchIO {
                 vm.createBackup.saveTo(it, onError = {
                     vm.showSnackBar(it)
                 }, onSuccess = {

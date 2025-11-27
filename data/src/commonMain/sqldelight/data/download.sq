@@ -13,6 +13,10 @@ priority INTEGER AS Int NOT NULL,
 FOREIGN KEY(chapter_id)
 REFERENCES chapter(_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
+-- Performance optimization indexes
+CREATE INDEX IF NOT EXISTS idx_download_book_id ON download(book_id);
+CREATE INDEX IF NOT EXISTS idx_download_priority ON download(priority);
+
 
 findAll:
 SELECT download.*, book._id, book.title, chapter.url, chapter.name, chapter.scanlator,book.source, download.priority = 1 AS is_downloaded

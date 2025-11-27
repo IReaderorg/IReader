@@ -100,13 +100,9 @@ kotlin {
                 implementation(project(Modules.commonResources))
                 implementation(project(Modules.coreApi))
                 implementation(project(Modules.sourceApi))
-                // NOTE: Compose dependencies should be removed - domain should not depend on UI framework
-                // This is a clean architecture violation that will be fixed in Task 5
-                api(compose.ui)
-                api(compose.runtime)
+                // Compose dependencies removed - domain layer is now UI-framework agnostic ✅
+                // Only keeping resources for i18n support
                 api(compose.components.resources)
-                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.material3)
                 api(kotlinx.coroutines.core)
                 implementation(libs.ktor.core)
                 implementation(libs.ktor.contentNegotiation)

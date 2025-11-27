@@ -9,9 +9,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
+import ireader.domain.models.theme.toDomainColorScheme
 import ireader.domain.plugins.PluginManager
 import ireader.domain.plugins.PluginType
 import ireader.domain.plugins.ThemePlugin
+import ireader.presentation.core.toComposeColor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -83,11 +85,12 @@ class PluginThemeManager(
         return try {
             // Get color scheme and extra colors from plugin
             // Requirements: 9.2
-            val colorScheme = plugin.getColorScheme(isDark).toColorScheme(isDark)
+            //TODO add isDark to toDomainColorScheme
+            val colorScheme = plugin.getColorScheme(isDark).toDomainColorScheme()
             val extraColors = plugin.getExtraColors(isDark).toExtraColors()
             
             // Create a unique ID for this plugin theme
-            val themeId = generatePluginThemeId(plugin.manifest.id, isDark)
+            val themeId = generatePluginThemeId(plugin.manifest.id, isDark).toLong()
             
             val theme = Theme(
                 id = themeId,
@@ -257,8 +260,8 @@ private fun ireader.domain.plugins.ThemeColorScheme.toColorScheme(isDark: Boolea
  */
 private fun ireader.domain.plugins.ThemeExtraColors.toExtraColors(): ExtraColors {
     return ExtraColors(
-        bars = Color(this.bars),
-        onBars = Color(this.onBars),
+        bars = ireader.domain.models.common.DomainColor.fromArgb(this.bars.toInt()),
+        onBars = ireader.domain.models.common.DomainColor.fromArgb(this.onBars.toInt()),
     )
 }
 

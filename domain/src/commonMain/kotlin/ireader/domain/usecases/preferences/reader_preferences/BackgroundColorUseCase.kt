@@ -1,6 +1,6 @@
 package ireader.domain.usecases.preferences.reader_preferences
 
-import androidx.compose.ui.graphics.Color
+import ireader.domain.models.common.DomainColor
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
@@ -8,22 +8,22 @@ import ireader.domain.preferences.prefs.ReaderPreferences
 class BackgroundColorUseCase(
     private val prefs: AppPreferences,
 ) {
-    fun save(value: androidx.compose.ui.graphics.Color) {
+    fun save(value: DomainColor) {
         prefs.backgroundColorReader().set(value)
     }
 
-    suspend fun read(): androidx.compose.ui.graphics.Color {
+    suspend fun read(): DomainColor {
         return prefs.backgroundColorReader().get()
     }
 }
 class TextColorUseCase(
     private val prefs: AppPreferences,
 ) {
-    fun save(value: Color) {
+    fun save(value: DomainColor) {
         prefs.textColorReader().set(value)
     }
 
-    suspend fun read(): Color {
+    suspend fun read(): DomainColor {
         return prefs.textColorReader().get()
     }
 }

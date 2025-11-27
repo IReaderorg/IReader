@@ -1,8 +1,7 @@
 package ireader.domain.preferences.models.prefs
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import ireader.core.prefs.Preference
+import ireader.domain.models.common.DomainColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -10,24 +9,29 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+/**
+ * Preference wrapper for DomainColor that stores colors as ARGB integers
+ * 
+ * This replaces the Compose Color-based preference to maintain clean architecture.
+ */
 class ThemeColorPreference(
     private val preference: Preference<Int>
-) : Preference<Color> {
+) : Preference<DomainColor> {
 
     override fun key(): String {
         return preference.key()
     }
 
-    override fun get(): Color {
+    override fun get(): DomainColor {
         return if (isSet()) {
-            Color(preference.get())
+            DomainColor.fromArgb(preference.get())
         } else {
-            Color.Unspecified
+            DomainColor.Unspecified
         }
     }
 
-    override fun set(value: Color) {
-        if (value != Color.Unspecified) {
+    override fun set(value: DomainColor) {
+        if (value != DomainColor.Unspecified) {
             preference.set(value.toArgb())
         } else {
             preference.delete()
@@ -42,42 +46,42 @@ class ThemeColorPreference(
         preference.delete()
     }
 
-    override fun defaultValue(): Color {
-        return Color.Unspecified
+    override fun defaultValue(): DomainColor {
+        return DomainColor.Unspecified
     }
 
-    override fun changes(): Flow<Color> {
+    override fun changes(): Flow<DomainColor> {
         return preference.changes()
             .map { get() }
     }
 
-    override fun stateIn(scope: CoroutineScope): StateFlow<Color> {
+    override fun stateIn(scope: CoroutineScope): StateFlow<DomainColor> {
         return preference.changes().map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
     }
 }
 
-fun Preference<Int>.asColor(): ColorPreference {
+fun Preference<Int>.asDomainColor(): ColorPreference {
     return ColorPreference(this)
 }
 
 class ColorPreference(
     private val preference: Preference<Int>
-) : Preference<Color> {
+) : Preference<DomainColor> {
 
     override fun key(): String {
         return preference.key()
     }
 
-    override fun get(): Color {
+    override fun get(): DomainColor {
         return if (isSet()) {
-            Color(preference.get())
+            DomainColor.fromArgb(preference.get())
         } else {
             defaultValue()
         }
     }
 
-    override fun set(value: Color) {
-        if (value != Color.Unspecified) {
+    override fun set(value: DomainColor) {
+        if (value != DomainColor.Unspecified) {
             preference.set(value.toArgb())
         } else {
             preference.delete()
@@ -92,24 +96,41 @@ class ColorPreference(
         preference.delete()
     }
 
-    override fun defaultValue(): Color {
+    override fun defaultValue(): DomainColor {
         return kotlin.runCatching {
-            Color(preference.defaultValue())
+            DomainColor.fromArgb(preference.defaultValue())
         }.getOrElse {
-            Color.Unspecified
+            DomainColor.Unspecified
         }
     }
 
-    override fun changes(): Flow<Color> {
+    override fun changes(): Flow<DomainColor> {
         return preference.changes()
             .map { get() }
     }
 
-    override fun stateIn(scope: CoroutineScope): StateFlow<Color> {
+    override fun stateIn(scope: CoroutineScope): StateFlow<DomainColor> {
         return preference.changes().map { get() }.stateIn(scope, SharingStarted.Eagerly, get())
     }
 }
 
+fun Preference<Int>.asThemeDomainColor(): ThemeColorPreference {
+    return ThemeColorPreference(this)
+}
+
+// Backwards compatibility - deprecated
+@Deprecated(
+    "Use asDomainColor() instead",
+    ReplaceWith("asDomainColor()", "ireader.domain.preferences.models.prefs.asDomainColor")
+)
+fun Preference<Int>.asColor(): ColorPreference {
+    return ColorPreference(this)
+}
+
+@Deprecated(
+    "Use asThemeDomainColor() instead",
+    ReplaceWith("asThemeDomainColor()", "ireader.domain.preferences.models.prefs.asThemeDomainColor")
+)
 fun Preference<Int>.asThemeColor(): ThemeColorPreference {
     return ThemeColorPreference(this)
 }

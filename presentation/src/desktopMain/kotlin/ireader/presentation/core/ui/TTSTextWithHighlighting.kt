@@ -29,7 +29,7 @@ fun TTSTextWithHighlighting(
         }
     }
     
-    val annotatedText = if (currentBoundary != null && ttsState.isPlaying) {
+    val annotatedText = if (currentBoundary != null && ttsState.isPlaying.value) {
         buildAnnotatedString {
             val boundary = currentBoundary!!
             val startOffset = boundary.startOffset

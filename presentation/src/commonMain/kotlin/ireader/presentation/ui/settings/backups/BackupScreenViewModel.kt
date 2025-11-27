@@ -174,12 +174,12 @@ class BackupScreenViewModel(
                     showSnackBar(ireader.i18n.UiText.DynamicString("Backup created successfully"))
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to create backup: ${result.message}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to create backup: ${result.message ?: "Unknown error"}"))
                 }
                 else -> {}
             }
         } catch (e: Exception) {
-            showSnackBar(ireader.i18n.UiText.DynamicString("Backup error: ${e.message}"))
+            showSnackBar(ireader.i18n.UiText.DynamicString("Backup error: ${e.message ?: "Unknown error"}"))
         }
     }
     
@@ -198,12 +198,12 @@ class BackupScreenViewModel(
                     showSnackBar(ireader.i18n.UiText.DynamicString("Backup restored successfully"))
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to restore: ${result.message}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to restore: ${result.message ?: "Unknown error"}"))
                 }
                 else -> {}
             }
         } catch (e: Exception) {
-            showSnackBar(ireader.i18n.UiText.DynamicString("Restore error: ${e.message}"))
+            showSnackBar(ireader.i18n.UiText.DynamicString("Restore error: ${e.message ?: "Unknown error"}"))
         }
     }
 }

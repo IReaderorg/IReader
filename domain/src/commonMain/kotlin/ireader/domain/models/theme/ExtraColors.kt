@@ -1,20 +1,17 @@
 package ireader.domain.models.theme
 
-
-import androidx.compose.runtime.Stable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
+import ireader.domain.models.common.DomainColor
 
 /**
- * The extra colors of the application which are not included in [MaterialTheme.colorScheme]. An instance
- * of this class can be retrieved through the composition local [AppColors.current].
+ * The extra colors of the application which are not included in Material3 ColorScheme.
+ * 
+ * This uses DomainColor instead of Compose Color to maintain clean architecture.
  */
-@Stable
 data class ExtraColors(
-    val bars: Color = Color.Unspecified,
-    val onBars: Color = Color.Unspecified,
+    val bars: DomainColor = DomainColor.Unspecified,
+    val onBars: DomainColor = DomainColor.Unspecified,
 ) {
     // Calculate isBarLight dynamically based on current bars color
     val isBarLight: Boolean
-        get() = bars.luminance() > 0.5
+        get() = bars.isLight()
 }

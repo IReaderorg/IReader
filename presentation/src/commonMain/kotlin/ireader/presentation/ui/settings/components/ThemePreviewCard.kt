@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.theme.Theme
+import ireader.presentation.core.toComposeColor
 
 @Composable
 fun ThemePreviewCard(
@@ -79,7 +80,7 @@ fun ThemePreviewCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(13.dp))
-                        .background(theme.materialColors.background)
+                        .background(theme.materialColors.background.toComposeColor())
                 ) {
                     // Notch
                     PhoneNotch(
@@ -89,8 +90,8 @@ fun ThemePreviewCard(
 
                     // Status bar
                     PhoneStatusBar(
-                        backgroundColor = theme.materialColors.background,
-                        contentColor = theme.materialColors.onBackground
+                        backgroundColor = theme.materialColors.background.toComposeColor(),
+                        contentColor = theme.materialColors.onBackground.toComposeColor()
                     )
 
                     // App preview
@@ -102,7 +103,7 @@ fun ThemePreviewCard(
                     // Navigation bar
                     PhoneNavigationBar(
                         modifier = Modifier.fillMaxWidth(),
-                        color = theme.materialColors.background
+                        color = theme.materialColors.background.toComposeColor()
                     )
                 }
             }

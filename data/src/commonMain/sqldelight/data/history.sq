@@ -19,7 +19,12 @@ findHistoryByChapterId:
 SELECT * FROM history WHERE chapter_id = :chapterId ORDER BY history.last_read DESC LIMIT 1;
 
 findHistoryByBookId:
-SELECT * FROM history WHERE chapter_id IN (SELECT  chapter._id FROM chapter WHERE chapter.book_id = :bookId) ORDER BY history.last_read DESC LIMIT 1;
+SELECT history.* 
+FROM history
+JOIN chapter ON history.chapter_id = chapter._id
+WHERE chapter.book_id = :bookId
+ORDER BY history.last_read DESC 
+LIMIT 1;
 
 
 findHistories:
@@ -28,11 +33,11 @@ SELECT * FROM history;
 
 searchHistories:
 SELECT history.*,
-book.title,book.source, book.thumbnail_url, book.favorite,chapter.name,
-date(ROUND(last_read / 1000), 'unixepoch', 'localtime') AS date,chapter.chapter_number
+book.title, book.source, book.thumbnail_url, book.favorite, chapter.name,
+date(ROUND(last_read / 1000), 'unixepoch', 'localtime') AS date, chapter.chapter_number
     FROM history
     JOIN chapter ON history.chapter_id = chapter._id
-    JOIN book ON history.chapter_id = chapter._id
+    JOIN book ON chapter.book_id = book._id
     WHERE book.title LIKE '%' || :query || '%'
     ORDER BY history.last_read DESC;
 
@@ -61,6 +66,10 @@ ORDER BY last_read DESC;
 
 --
 CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);
+
+-- Additional performance indexes
+CREATE INDEX IF NOT EXISTS idx_history_chapter_last_read ON history(chapter_id, last_read DESC);
+CREATE INDEX IF NOT EXISTS idx_history_progress_last_read ON history(progress, last_read DESC);
 
 getHistoryByMangaId:
 SELECT

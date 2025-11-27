@@ -3,8 +3,10 @@ package ireader.presentation.core.ui
 import ireader.presentation.core.LocalNavigator
 
 import androidx.compose.animation.core.TweenSpec
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -52,6 +55,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 import java.math.RoundingMode
+import androidx.compose.runtime.collectAsState
 
 actual class TTSScreenSpec actual constructor(
     val bookId: Long,
@@ -108,11 +112,11 @@ actual class TTSScreenSpec actual constructor(
             sheetContent = {
                 val scope = rememberCoroutineScope()
                 val drawerScrollState = rememberLazyListState()
-                val chapter = vm.ttsChapter
+                val chapter = vm.ttsChapter.collectAsState()
                 LaunchedEffect(key1 =drawerState.targetValue) {
-                    if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsChapters.isNotEmpty()) {
+                    if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.ttsState.ttsChapters.value.isNotEmpty()) {
 
-                        val index = vm.ttsChapters.indexOfFirst { it.id == chapter.id }
+                        val index = vm.ttsState.ttsChapters.value.indexOfFirst { it.id == chapter.value?.id }
                         if (index != -1) {
                             drawerScrollState.scrollToItem(index)
                         }
@@ -121,22 +125,22 @@ actual class TTSScreenSpec actual constructor(
                 ReaderScreenDrawer(
                     modifier = Modifier.statusBarsPadding(),
                     onReverseIcon = {
-                        if (vm.ttsChapter != null) {
-                            vm.isDrawerAsc = !vm.isDrawerAsc
+                        if (vm.ttsState.ttsChapter.value != null) {
+                            vm.ttsState.setDrawerAsc(!vm.ttsState.isDrawerAsc.value)
                         }
                     },
                     onChapter = { ch ->
                         // Call public method instead of private getLocalChapter
                         vm.loadChapter(ch.id)
                     },
-                    chapter = vm.ttsChapter,
-                    chapters = vm.uiChapters.value,
+                    chapter = vm.ttsState.ttsChapter.collectAsState().value,
+                    chapters = vm.ttsState.uiChapters.collectAsState().value,
                     drawerScrollState = drawerScrollState,
                     onMap = { drawer ->
                         scope.launch {
                             try {
                                 val index =
-                                    vm.ttsState.uiChapters.value.indexOfFirst { it.id == vm.ttsChapter?.id }
+                                    vm.ttsState.uiChapters.value.indexOfFirst { it.id == vm.ttsState.ttsChapter.value?.id }
                                 if (index != -1) {
                                     drawer.scrollToItem(
                                         index,
@@ -162,7 +166,7 @@ actual class TTSScreenSpec actual constructor(
                     ) {
                         ChipChoicePreference(
                             preference = vm.voice,
-                            choices = vm.uiVoices.associate { voice ->
+                            choices = vm.ttsState.uiVoices.associate { voice ->
                                 return@associate voice to voice.localDisplayName
                             },
                             title = localizeHelper.localize(Res.string.voices),
@@ -170,7 +174,7 @@ actual class TTSScreenSpec actual constructor(
                         )
                         ChipChoicePreference(
                             preference = vm.language,
-                            choices = vm.languages.associate { language ->
+                            choices = vm.ttsState.languages.associate { language ->
                                 return@associate language.displayName to language.displayName
                             },
                             title = localizeHelper.localize(Res.string.languages),
@@ -182,12 +186,29 @@ actual class TTSScreenSpec actual constructor(
                             vm.theme.value == it
                         })
                         // TTS Engine Toggle
-                        SwitchPreference(
-                            preference = vm.useCoquiTTS,
-                            title = if (vm.useCoquiTTS) "Coqui TTS" else "Native TTS",
-                            subtitle = if (vm.useCoquiTTS) "Using your custom Space" else "Using device TTS",
-                            onValueChange = { vm.toggleTTSEngine() }
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                androidx.compose.material3.Text(
+                                    text = if (vm.useCoquiTTS) "Coqui TTS" else "Native TTS",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                androidx.compose.material3.Text(
+                                    text = if (vm.useCoquiTTS) "Using your custom Space" else "Using device TTS",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            androidx.compose.material3.Switch(
+                                checked = vm.useCoquiTTS,
+                                onCheckedChange = { vm.toggleTTSEngine() }
+                            )
+                        }
                         SwitchPreference(
                             preference = vm.isTtsTrackerEnable,
                             title = localizeHelper.localize(Res.string.tracker)
@@ -220,7 +241,7 @@ actual class TTSScreenSpec actual constructor(
                             title = localize(Res.string.sleep),
                             preferenceAsLong = vm.sleepTimeUi,
                             valueRange = 0F..60F,
-                            trailing = "${vm.sleepTimeUi.value.toInt()} M",
+                            trailing = "${vm.sleepTimeUi.value} M",
                             isEnable = vm.sleepModeUi.value
                         )
                         Components.Chip(
@@ -268,8 +289,8 @@ actual class TTSScreenSpec actual constructor(
                                         )
                                     }
                                 },
-                                title = vm.ttsChapter?.name?:"",
-                                    subtitle = vm.ttsBook?.title?:""
+                                title = vm.ttsState.ttsChapter.value?.name?:"",
+                                    subtitle = vm.ttsState.ttsBook.value?.title?:""
                             )
                         }
                     },
@@ -285,17 +306,17 @@ actual class TTSScreenSpec actual constructor(
                                     Column() {
                                         TTLScreenPlay(
                                             modifier = Modifier.padding(PaddingValues(0.dp)),
-                                            vm = vm,
+                                            vm = vm.ttsState,
                                             onValueChange = {
                                                 vm.controller?.transportControls?.seekTo(it.toLong())
                                             },
                                             onValueChangeFinished = {},
-                                            content = vm.ttsContent?.value
+                                            content = vm.ttsState.ttsContent.collectAsState().value
                                         )
 
                                         
                                         MediaControllers(
-                                            vm = vm,
+                                            vm = vm.ttsState,
                                             onPrev = {
                                                 vm.controller?.transportControls?.skipToPrevious()
                                             },
@@ -325,7 +346,7 @@ actual class TTSScreenSpec actual constructor(
                         onChapter = { ch ->
                             vm.loadChapter(ch.id)
                         },
-                        source = vm.ttsSource,
+                        source = vm.ttsState.ttsSource.collectAsState().value,
                         onPopStack = {
                             navController.popBackStack()
                         },
@@ -341,21 +362,22 @@ actual class TTSScreenSpec actual constructor(
                 }
             }
 
-            LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph) {
+            LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph.collectAsState()) {
                 try {
-                    if (vm.currentReadingParagraph != vm.previousReadingParagraph && vm.ttsState.currentReadingParagraph < lazyState.layoutInfo.totalItemsCount) {
-                        if (vm.currentReadingParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }
+                    val currentParagraph = vm.ttsState.currentReadingParagraph.value
+                    val previousParagraph = vm.ttsState.previousReadingParagraph.value
+                    
+                    if (currentParagraph != previousParagraph && currentParagraph < lazyState.layoutInfo.totalItemsCount) {
+                        if (currentParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }
                                 .dropLast(2) || vm.isTtsTrackerEnable.value) {
-                            lazyState.scrollToItem(
-                                vm.currentReadingParagraph
-                            )
+                            lazyState.scrollToItem(currentParagraph)
                         }
 
-                        if (vm.isPlaying) {
+                        if (vm.ttsState.isPlaying.value) {
                             delay(100)
-                            vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
+                            vm.controller?.transportControls?.seekTo(currentParagraph.toLong())
                         } else {
-                            vm.controller?.transportControls?.seekTo(vm.ttsState.currentReadingParagraph.toLong())
+                            vm.controller?.transportControls?.seekTo(currentParagraph.toLong())
                         }
                     }
                 } catch (e: Throwable) {

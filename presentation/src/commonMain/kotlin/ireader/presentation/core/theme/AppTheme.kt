@@ -8,6 +8,7 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.core.theme.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.core.toComposeColor
 import kotlinx.coroutines.CoroutineScope
 import org.koin.compose.koinInject
 
@@ -57,7 +58,7 @@ fun AppTheme(
             }
             // Priority 3: Default bars color
             else -> {
-                currentBarsColor to currentIsBarLight
+                currentBarsColor.toComposeColor() to currentIsBarLight
             }
         }
         
@@ -69,7 +70,7 @@ fun AppTheme(
             }
             // Priority 2: Default bars color (even with transparent status bar)
             else -> {
-                currentBarsColor to currentIsBarLight
+                currentBarsColor.toComposeColor() to currentIsBarLight
             }
         }
         
@@ -89,7 +90,7 @@ fun AppTheme(
         onDispose {
             // Reset to default on dispose
             systemUiController?.setSystemBarsColor(
-                color = currentBarsColor,
+                color = currentBarsColor.toComposeColor(),
                 darkIcons = currentIsBarLight,
                 isNavigationBarContrastEnforced = false
             )

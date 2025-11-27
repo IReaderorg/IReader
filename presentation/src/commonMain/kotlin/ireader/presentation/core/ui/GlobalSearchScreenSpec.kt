@@ -8,6 +8,7 @@ import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.home.sources.global_search.GlobalSearchScreen
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.core.parameter.parametersOf
 
@@ -50,7 +51,8 @@ data class GlobalSearchScreenSpec(
                 vm = vm,
                 onBook = { book ->
                     try {
-                        runBlocking {
+                        val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main)
+                        scope.launch {
                             vm.insertUseCases.insertBook(book).let { bookId ->
                                 navController.navigateTo(
                                     BookDetailScreenSpec(
@@ -58,9 +60,7 @@ data class GlobalSearchScreenSpec(
                                     )
                                 )
                             }
-
                         }
-
                     } catch (e: Throwable) {
                         Log.error(e, "")
                     }

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
+import ireader.presentation.core.toComposeColor
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -156,7 +157,7 @@ fun ReaderScreenTopBar(
         Toolbar(
             title = {},
             elevation = 0.dp,
-            backgroundColor = vm.backgroundColor.value,
+            backgroundColor = vm.backgroundColor.value.toComposeColor(),
             actions = {
                 if (chapter != null) {
                     AppIconButton(
@@ -165,7 +166,7 @@ fun ReaderScreenTopBar(
                         onClick = {
                             onRefresh()
                         },
-                        tint = vm.textColor.value
+                        tint = vm.textColor.value.toComposeColor()
                     )
                     AppIconButton(
                         imageVector = Icons.Default.Public,
@@ -173,14 +174,14 @@ fun ReaderScreenTopBar(
                         onClick = {
                             onWebView()
                         },
-                        tint = vm.textColor.value
+                        tint = vm.textColor.value.toComposeColor()
                     )
                 }
             },
             navigationIcon = {
                 TopAppBarBackButton(onClick = {
                     onPopBackStack()
-                }, tint = vm.textColor.value)
+                }, tint = vm.textColor.value.toComposeColor())
             }
         )
     }

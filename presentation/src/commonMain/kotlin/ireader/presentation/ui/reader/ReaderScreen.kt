@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.LocalPlatformContext
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.reader.components.AutoScrollSpeedControl
 import ireader.presentation.ui.reader.components.BrightnessControl
@@ -111,8 +112,8 @@ fun ReadingScreen(
     // Handle status bar for reading screen with proper colors based on background
     ireader.presentation.ui.core.theme.CustomSystemColor(
         enable = true,
-        statusBar = vm.backgroundColor.value,
-        navigationBar = vm.backgroundColor.value
+        statusBar = vm.backgroundColor.value.toComposeColor(),
+        navigationBar = vm.backgroundColor.value.toComposeColor()
     ) {
         ReadingScreenContent(
             vm = vm,
@@ -251,7 +252,7 @@ private fun ReadingScreenContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(vm.backgroundColor.value)
+            .background(vm.backgroundColor.value.toComposeColor())
             .volumeKeyHandler(
                 enabled = vm.volumeKeyNavigation.value,
                 onVolumeUp = { onPrev(true) },
@@ -270,7 +271,7 @@ private fun ReadingScreenContent(
                 true -> {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
-                        color = vm.backgroundColor.value
+                        color = vm.backgroundColor.value.toComposeColor()
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
@@ -403,7 +404,7 @@ private fun ReadingScreenContent(
                             if (vm.showTranslatedContent.value) {
                                 TranslationBadge(
                                     isTranslated = true,
-                                    textColor = vm.textColor.value,
+                                    textColor = vm.textColor.value.toComposeColor(),
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .padding(paddingValues)
@@ -418,7 +419,7 @@ private fun ReadingScreenContent(
                                 completedItems = (vm.translationViewModel.translationProgress * 100).toInt(),
                                 totalItems = 100,
                                 engine = vm.translationEnginesManager.get(),
-                                textColor = vm.textColor.value,
+                                textColor = vm.textColor.value.toComposeColor(),
                                 onCancel = { 
                                     vm.scope.launch {
                                         vm.translationViewModel.cancelTranslation()

@@ -82,7 +82,7 @@ class AdvanceSettingViewModel(
                 repairDatabaseUseCase.execute()
                 showSnackBar(UiText.MStringResource(Res.string.success))
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Database repair failed: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Database repair failed: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -117,7 +117,7 @@ class AdvanceSettingViewModel(
                 
                 showSnackBar(UiText.MStringResource(Res.string.success))
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Failed to reset categories: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Failed to reset categories: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -138,7 +138,7 @@ class AdvanceSettingViewModel(
                 bookRepository.repairCategoryAssignments()
                 showSnackBar(UiText.MStringResource(Res.string.success))
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Failed to repair categories: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Failed to repair categories: ${e.message ?: "Unknown error"}"))
             }
         }
     }

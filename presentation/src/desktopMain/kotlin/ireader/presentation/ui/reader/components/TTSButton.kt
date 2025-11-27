@@ -22,19 +22,19 @@ fun TTSButton(
     
     AppIconButton(
         imageVector = when {
-            state.isPlaying -> Icons.Default.Pause
-            state.ttsChapter != null -> Icons.Default.PlayArrow
+            state.isPlaying.value -> Icons.Default.Pause
+            state.ttsChapter.value != null -> Icons.Default.PlayArrow
             else -> Icons.Default.VolumeUp
         },
         contentDescription = "Text-to-Speech",
-        tint = if (state.isPlaying) 
+        tint = if (state.isPlaying.value) 
             MaterialTheme.colorScheme.primary 
         else 
             MaterialTheme.colorScheme.onBackground,
         onClick = {
-            if (state.isPlaying) {
+            if (state.isPlaying.value) {
                 ttsService.startService(DesktopTTSService.ACTION_PAUSE)
-            } else if (state.ttsChapter != null) {
+            } else if (state.ttsChapter.value != null) {
                 ttsService.startService(DesktopTTSService.ACTION_PLAY)
             } else {
                 // Show controls to load chapter

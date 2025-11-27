@@ -674,4 +674,253 @@
     <string name="publisher">Publisher</string>
     <string name="chapters">Chapters</string>
     <string name="import_action">Import</string>
+    
+    <!-- Error and Status Messages -->
+    <string name="something_wrong_with_book">Something is wrong with this book</string>
+    <string name="glossary_exported_successfully">Glossary exported successfully</string>
+    <string name="category_renamed">Category renamed to \'%1$s\'</string>
+    <string name="category_name_empty">Category name cannot be empty</string>
+    <string name="category_already_exists">Category \'%1$s\' already exists</string>
+    <string name="category_not_found">Category not found</string>
+    <string name="failed_to_rename">Failed to rename: %1$s</string>
+    <string name="backup_cancelled">Backup cancelled</string>
+    <string name="restore_cancelled">Restore cancelled</string>
+    <string name="creating_backup">Creating backup…</string>
+    <string name="failed_to_create_backup">Failed to create backup: %1$s</string>
+    <string name="backup_error">Backup error: %1$s</string>
+    <string name="restoring_backup">Restoring backup…</string>
+    <string name="backup_restored_successfully">Backup restored successfully</string>
+    <string name="failed_to_restore">Failed to restore: %1$s</string>
+    <string name="restore_error">Restore error: %1$s</string>
+    <string name="theme_exported_successfully">Theme exported successfully</string>
+    <string name="failed_to_export_theme">Failed to export theme</string>
+    <string name="no_custom_theme_selected">No custom theme selected</string>
+    <string name="theme_imported_successfully">Theme imported successfully</string>
+    <string name="failed_to_import_theme">Failed to import theme: %1$s</string>
+    <string name="failed_to_apply_plugin_theme">Failed to apply plugin theme: %1$s. Using default theme.</string>
+    <string name="error_applying_theme">Error applying theme: %1$s. Using default theme.</string>
+    <string name="plugin_theme_unavailable">Plugin theme is no longer available. Reverted to default theme.</string>
+    <string name="database_repair_failed">Database repair failed: %1$s</string>
+    <string name="failed_to_reset_categories">Failed to reset categories: %1$s</string>
+    <string name="failed_to_repair_categories">Failed to repair categories: %1$s</string>
+    <string name="cache_cleared">Cache was cleared.</string>
+    <string name="cover_cache_cleared">Cover cache was cleared.</string>
+    <string name="reader_settings_reset">Reader settings have been reset.</string>
+    <string name="database_deleted">Database has been deleted.</string>
+    <string name="chapter_repaired_successfully">Chapter repaired successfully from %1$s</string>
+    <string name="repair_failed">Repair failed: %1$s</string>
+    <string name="failed_to_set_secure_screen">Failed to set secure screen: %1$s</string>
+    
+    <!-- Reader and Font Messages -->
+    <string name="failed_to_load_font">Failed to load font: %1$s</string>
+    <string name="font_imported_successfully">Font imported successfully</string>
+    <string name="font_deleted_successfully">Font deleted successfully</string>
+    <string name="chapter_reported_successfully">Chapter reported successfully. Thank you for your feedback!</string>
+    <string name="failed_to_report_chapter">Failed to report chapter: %1$s</string>
+    
+    <!-- TTS Messages -->
+    <string name="tts_error">TTS error: %1$s</string>
+    <string name="downloading_voice">Downloading voice…</string>
+    <string name="voice_downloaded">Voice downloaded</string>
+    <string name="delete_voice_not_supported">Delete voice not supported yet</string>
+    <string name="delete_failed">Delete failed: %1$s</string>
+    
+    <!-- Translation Messages -->
+    <string name="glossary_entry_added">Glossary entry added</string>
+    <string name="failed_to_add_entry">Failed to add entry: %1$s</string>
+    <string name="glossary_entry_updated">Glossary entry updated</string>
+    <string name="failed_to_update_entry">Failed to update entry: %1$s</string>
+    <string name="glossary_entry_deleted">Glossary entry deleted</string>
+    <string name="failed_to_delete_entry">Failed to delete entry: %1$s</string>
+    <string name="glossary_exported">Glossary exported</string>
+    <string name="glossary_imported">Glossary imported: %1$s entries</string>
+    <string name="import_failed">Import failed: %1$s</string>
+    
+    <!-- Download Messages -->
+    <string name="chapters_queued_for_download">%1$s chapters queued for download</string>
+    
+    <!-- Plugin Messages -->
+    <string name="plugin_enabled_successfully">Plugin enabled successfully</string>
+    <string name="plugin_disabled_successfully">Plugin disabled successfully</string>
+    <string name="plugin_uninstalled_successfully">Plugin uninstalled successfully</string>
+    <string name="plugin_update_started">Plugin update started</string>
+    <string name="plugin_updated_successfully">Plugin updated successfully</string>
+    <string name="failed_to_update_plugin">Failed to update plugin</string>
+    <string name="all_plugins_updated_successfully">All plugins updated successfully</string>
+    <string name="js_plugins_enabled">JavaScript plugins enabled. You can now enable plugins.</string>
+    
+    <!-- UI Labels -->
+    <string name="tts_performance_settings">TTS Performance Settings</string>
+    <string name="tts_engine_manager">TTS Engine Manager</string>
+    <string name="performance">Performance</string>
+    <string name="test">Test</string>
+    <string name="delete_voice_model">Delete Voice Model</string>
+    <string name="delete_voice_model_confirmation">Are you sure you want to delete %1$s? This will free up %2$s of storage.</string>
+    <string name="open_tts_manager">Open TTS Manager</string>
+    <string name="downloading_chapter_audio">Downloading Chapter Audio</string>
+    <string name="download_complete">Download Complete</string>
+    <string name="chapter_audio_downloaded">Chapter audio has been downloaded successfully!</string>
+    <string name="ok">OK</string>
+    <string name="show_in_folder">Show in Folder</string>
+    <string name="download_failed_title">Download Failed</string>
+    <string name="source_extension_not_installed">Source Extension Not Installed</string>
+    <string name="install_source">Install Source</string>
+    <string name="not_implemented_yet">Not Implemented Yet</string>
+    <string name="required">Required</string>
+    <string name="download_update">Download Update</string>
+    <string name="install_now">Install Now</string>
+    <string name="select_voice">Select Voice</string>
+    <string name="testing_connection">Testing Connection…</string>
+    <string name="test_connection">Test Connection</string>
+    <string name="sign_in_to_deepseek">Sign in to DeepSeek</string>
+    <string name="enter_gemini_api_key">Enter your Gemini API key</string>
+    <string name="sync_interval">Sync Interval</string>
+    <string name="clear_sync_data">Clear Sync Data</string>
+    <string name="clear_sync_data_confirmation">This will remove all tracking data and logout from all services. You will need to re-login and re-track your books.</string>
+    
+    <!-- More Plugin Messages -->
+    <string name="plugin_enabled">Plugin enabled</string>
+    <string name="plugin_already_enabled">Plugin is already enabled</string>
+    <string name="review_submitted_successfully">Review submitted successfully</string>
+    <string name="failed_to_submit_review">Failed to submit review</string>
+    <string name="js_plugins_enabled_active">JavaScript plugins enabled. Plugin is now active.</string>
+    
+    <!-- Language and Browse Settings -->
+    <string name="language_added">Language added</string>
+    <string name="all_languages_selected">All languages selected</string>
+    <string name="settings_reset_to_defaults">Settings reset to defaults</string>
+    <string name="browse_settings_updated">Browse settings updated</string>
+    
+    <!-- Migration Messages -->
+    <string name="failed_to_load_novels">Failed to load novels: %1$s</string>
+    <string name="please_select_target_source">Please select a target source</string>
+    <string name="please_select_at_least_one_novel">Please select at least one novel</string>
+    <string name="migration_failed">Migration failed: %1$s</string>
+    <string name="migration_completed_successfully">Migration completed successfully</string>
+    
+    <!-- Extension Messages -->
+    <string name="extension_added">Extension added: %1$s</string>
+    <string name="extension_removed">Extension removed: %1$s</string>
+    <string name="login_successful">Login successful</string>
+    <string name="login_failed">Login failed: %1$s</string>
+    <string name="repository_added_successfully">Repository added successfully</string>
+    <string name="failed_to_add_repository">Failed to add repository: %1$s</string>
+    <string name="logged_out_successfully">Logged out successfully</string>
+    <string name="logout_failed">Logout failed: %1$s</string>
+    <string name="security_scan_complete">Security scan complete</string>
+    <string name="security_scan_failed">Security scan failed: %1$s</string>
+    <string name="trust_level_updated">Trust level updated</string>
+    <string name="failed_to_update_trust_level">Failed to update trust level: %1$s</string>
+    <string name="extension_installed_successfully">Extension installed successfully</string>
+    <string name="installation_failed">Installation failed: %1$s</string>
+    <string name="updated_extensions">Updated %1$s/%2$s extensions</string>
+    <string name="batch_update_failed">Batch update failed: %1$s</string>
+    <string name="updates_available">%1$s updates available</string>
+    <string name="all_extensions_up_to_date">All extensions are up to date</string>
+    <string name="update_check_failed">Update check failed: %1$s</string>
+    <string name="error_adding_repository">Error adding repository: %1$s</string>
+    <string name="books_queued_for_download">%1$s books queued for download</string>
+    
+    <!-- Download Screen Labels -->
+    <string name="downloads">Downloads</string>
+    <string name="pause_all">Pause All</string>
+    <string name="resume_all">Resume All</string>
+    <string name="show_completed">Show Completed</string>
+    <string name="show_failed">Show Failed</string>
+    <string name="all_status">All Status</string>
+    
+    <!-- Settings Screen Labels -->
+    <string name="privacy_settings">Privacy Settings</string>
+    <string name="enable_privacy_mode">Enable Privacy Mode</string>
+    <string name="disable_privacy_mode">Disable Privacy Mode</string>
+    <string name="enable">Enable</string>
+    <string name="test_coqui_tts">Test Coqui TTS</string>
+    
+    <!-- WebView Messages -->
+    <string name="error_failed_to_fetch_chapter">Error: %1$s</string>
+    <string name="chapter_content_extracted">Chapter content extracted using %1$s</string>
+    <string name="no_reliable_content_found">No reliable content found. Try a different page or source.</string>
+    <string name="failed_to_extract_content">Failed to extract content: %1$s</string>
+    <string name="failed_to_fetch_chapters">Failed to fetch chapters. Please ensure you\'re on the correct page and try again.</string>
+    <string name="no_chapters_found">No chapters found. Make sure you\'re on the chapter list page.</string>
+    <string name="failed_to_fetch_book_details">Failed to fetch book details. Please ensure you\'re on the book\'s detail page and try again.</string>
+    <string name="book_added_to_library">Book \'%1$s\' added to library</string>
+    <string name="could_not_extract_book_info">Could not extract book information from this page.</string>
+    
+    <!-- More Plugin Error Messages -->
+    <string name="installation_failed_generic">Installation failed</string>
+    <string name="purchase_failed">Purchase failed</string>
+    <string name="failed_to_start_trial">Failed to start trial</string>
+    <string name="failed_to_enable_plugin">Failed to enable plugin</string>
+    <string name="failed_to_open_plugin">Failed to open plugin</string>
+    <string name="failed_to_load_plugins">Failed to load plugins</string>
+    <string name="failed_to_disable_plugin">Failed to disable plugin</string>
+    <string name="failed_to_uninstall_plugin">Failed to uninstall plugin</string>
+    <string name="failed_to_update_plugins">Failed to update plugins</string>
+    
+    <!-- Dialog Titles -->
+    <string name="page_transitions">Page Transitions</string>
+    <string name="navigation_mode">Navigation Mode</string>
+    <string name="supabase_configuration">Supabase Configuration</string>
+    <string name="lock_method">Lock Method</string>
+    <string name="lock_after_inactivity">Lock After Inactivity</string>
+    <string name="clear_authentication_data">Clear Authentication Data</string>
+    <string name="clear_auth_data_confirmation">This will remove all saved authentication tokens and sessions. You will need to log in again to access protected sources.</string>
+    <string name="statistics_and_analytics">Statistics &amp; Analytics</string>
+    <string name="reading_statistics">Reading Statistics</string>
+    <string name="enable_privacy_mode_question">Enable Privacy Mode?</string>
+    <string name="privacy_mode_description">This will disable all data collection features including analytics, crash reporting, and diagnostics.</string>
+    <string name="default_sort">Default Sort</string>
+    <string name="update_interval">Update Interval</string>
+    <string name="update_restrictions">Update Restrictions</string>
+    <string name="support_development">Support Development</string>
+    <string name="download_location">Download Location</string>
+    <string name="max_concurrent_downloads">Max Concurrent Downloads</string>
+    <string name="clear_download_cache">Clear Download Cache</string>
+    <string name="clear_download_cache_confirmation">This will remove all temporary download files. Downloaded chapters will not be affected.</string>
+    <string name="cleanup_interval">Cleanup Interval</string>
+    <string name="max_cache_size">Max Cache Size</string>
+    <string name="image_quality">Image Quality</string>
+    <string name="clear_all_cache_confirmation">This will remove all cached images, chapters, and network data. This action cannot be undone.</string>
+    <string name="optimize_database">Optimize Database</string>
+    
+    <!-- Book Detail Messages -->
+    <string name="no_alternative_sources_available">No alternative sources available. Total sources: %1$s, Current: %2$s</string>
+    <string name="failed_to_load_sources">Failed to load sources: %1$s</string>
+    <string name="successfully_migrated_to">Successfully migrated to %1$s</string>
+    <string name="migration_failed_error">Migration failed: %1$s</string>
+    <string name="failed_to_share">Failed to share: %1$s</string>
+    <string name="title_copied_to_clipboard">Title copied to clipboard</string>
+    <string name="failed_to_copy">Failed to copy: %1$s</string>
+    <string name="preparing_epub_export">Preparing EPUB export…</string>
+    <string name="failed_to_select_save_location">Failed to select save location: %1$s</string>
+    <string name="export_cancelled">Export cancelled</string>
+    <string name="epub_exported_successfully">EPUB exported successfully to Downloads/IReader/</string>
+    <string name="export_failed_error">Export failed: %1$s</string>
+    <string name="book_archived">%1$s has been archived</string>
+    <string name="book_unarchived">%1$s has been unarchived</string>
+    <string name="chapters_queued_download">%1$s chapters queued for download</string>
+    <string name="book_queued_for_download">Book queued for download</string>
+    <string name="downloading_unread_chapters">Downloading %1$s unread chapters</string>
+    <string name="no_unread_chapters_to_download">No unread chapters to download</string>
+    <string name="downloading_chapters">Downloading %1$s chapters</string>
+    <string name="all_chapters_already_downloaded">All chapters are already downloaded</string>
+    
+    <!-- Additional Missing Strings -->
+    <string name="download_failed">Download failed: %1$s</string>
+    <string name="failed_to_set_brightness">Failed to set brightness: %1$s</string>
+    <string name="failed_to_set_keep_screen_on">Failed to set keep screen on: %1$s</string>
+    <string name="no_text_to_read">No text to read</string>
+    
+    <!-- Plugin Related Strings -->
+    
+    <!-- TTS Related Strings -->
+    
+    <!-- Translation Related Strings -->
+    
+    <!-- Glossary Related Strings -->
+    
+    <!-- Database Related Strings -->
+    
+    <!-- Theme Related Strings -->
 </resources>

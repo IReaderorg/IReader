@@ -64,6 +64,9 @@ class TTSViewModel(
     var useCoquiTTS by mutableStateOf(false)
         private set
     
+    val useCoquiTTSState: androidx.compose.runtime.State<Boolean>
+        get() = androidx.compose.runtime.derivedStateOf { useCoquiTTS }
+    
     init {
         // Load Coqui TTS preference
         useCoquiTTS = androidUiPreferences.useCoquiTTS().get()
@@ -126,7 +129,6 @@ class TTSViewModel(
     @Volatile
     private var textReader: TextToSpeech? = null
     
-    override var isServiceConnected = false
     private var initialize = false
     
     // Lock object for synchronizing media controller operations
@@ -140,32 +142,32 @@ class TTSViewModel(
         val (sourceId, chapterId, bookId, readingParagraph) = param
         
         readingParagraph?.let { paragraph ->
-            val maxIndex = ttsState.ttsContent?.value?.lastIndex ?: 0
+            val maxIndex = ttsState.ttsContent.value?.lastIndex ?: 0
             // Fixed: Use <= instead of < to allow setting the last paragraph
             // lastIndex is inclusive, so paragraph can equal maxIndex
             if (paragraph <= maxIndex) {
-                ttsState.currentReadingParagraph = paragraph
+                ttsState.setCurrentReadingParagraph(paragraph)
             }
         }
 
         if (sourceId != null && chapterId != null && bookId != null) {
-            ttsCatalog = getLocalCatalog.get(sourceId)
+            ttsState.setTtsCatalog(getLocalCatalog.get(sourceId))
             
             scope.launch {
                 // Load book FIRST before loading chapter
-                if (ttsBook == null || ttsBook?.id != bookId) {
-                    ttsBook = getBookUseCases.findBookById(bookId)
+                if (ttsState.ttsBook.value == null || ttsState.ttsBook.value?.id != bookId) {
+                    ttsState.setTtsBook(getBookUseCases.findBookById(bookId))
                 }
                 
                 // Now load chapter (this will call runTTSService which needs ttsBook)
-                if (ttsChapter == null || ttsChapter?.id != chapterId) {
+                if (ttsState.ttsChapter.value == null || ttsState.ttsChapter.value?.id != chapterId) {
                     getLocalChapter(chapterId)
                 }
                 
                 subscribeChapters(bookId)
                 readPreferences()
                 
-                if (ttsChapter?.id != chapterId) {
+                if (ttsState.ttsChapter.value?.id != chapterId) {
                     runTTSService(Player.PAUSE)
                 }
                 initialize = true
@@ -175,11 +177,11 @@ class TTSViewModel(
 
     private fun readPreferences() {
         scope.launch {
-            speechSpeed = speechPrefUseCases.readRate()
-            pitch = speechPrefUseCases.readPitch()
-            currentLanguage = speechPrefUseCases.readLanguage()
-            autoNextChapter = speechPrefUseCases.readAutoNext()
-            currentVoice = speechPrefUseCases.readVoice()
+            ttsState.setSpeechSpeed(speechPrefUseCases.readRate())
+            ttsState.setPitch(speechPrefUseCases.readPitch())
+            ttsState.setCurrentLanguage(speechPrefUseCases.readLanguage())
+            ttsState.setAutoNextChapter(speechPrefUseCases.readAutoNext())
+            ttsState.setCurrentVoice(speechPrefUseCases.readVoice())
         }
     }
 
@@ -244,7 +246,7 @@ class TTSViewModel(
     private fun createConnectionCallback(context: Context) = object : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             synchronized(mediaLock) {
-                isServiceConnected = true
+                ttsState.setServiceConnected(true)
                 browser?.sessionToken?.let { token ->
                     controller = MediaControllerCompat(context, token)
                     context.findComponentActivity()?.let { activity ->
@@ -261,14 +263,14 @@ class TTSViewModel(
 
         override fun onConnectionFailed() {
             synchronized(mediaLock) {
-                isServiceConnected = false
+                ttsState.setServiceConnected(false)
             }
         }
     }
 
     private fun cleanupMediaController() {
         synchronized(mediaLock) {
-            isServiceConnected = false
+            ttsState.setServiceConnected(false)
             
             // Fixed: Check controller is not null before unregistering callback
             val currentController = controller
@@ -316,22 +318,22 @@ class TTSViewModel(
             val currentParagraph = metadata.getLong(TTSService.PROGRESS)
             val chapterId = metadata.getLong(TTSService.CHAPTER_ID)
             
-            if (novelId != -1L && ttsBook?.id != novelId) {
+            if (novelId != -1L && ttsState.ttsBook.value?.id != novelId) {
                 scope.launch {
                     getBookUseCases.findBookById(novelId)?.let { book ->
-                        ttsBook = book
+                        ttsState.setTtsBook(book)
                     }
                 }
             }
             
-            if (currentParagraph != -1L && currentParagraph != currentReadingParagraph.toLong()) {
-                currentReadingParagraph = currentParagraph.toInt()
+            if (currentParagraph != -1L && currentParagraph != ttsState.currentReadingParagraph.value.toLong()) {
+                ttsState.setCurrentReadingParagraph(currentParagraph.toInt())
             }
             
-            if (chapterId != -1L && chapterId != ttsChapter?.id) {
+            if (chapterId != -1L && chapterId != ttsState.ttsChapter.value?.id) {
                 scope.launch {
                     getChapterUseCase.findChapterById(chapterId)?.let { chapter ->
-                        ttsChapter = chapter
+                        ttsState.setTtsChapter(chapter)
                     }
                 }
             }
@@ -339,14 +341,14 @@ class TTSViewModel(
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
-            isPlaying = state?.state == PlaybackStateCompat.STATE_PLAYING
+            ttsState.setPlaying(state?.state == PlaybackStateCompat.STATE_PLAYING)
         }
     }
 
     fun runTTSService(command: Int = -1) {
         serviceUseCases.startTTSServicesUseCase(
-            chapterId = ttsChapter?.id,
-            bookId = ttsBook?.id,
+            chapterId = ttsState.ttsChapter.value?.id,
+            bookId = ttsState.ttsBook.value?.id,
             command = command
         )
     }
@@ -359,9 +361,9 @@ class TTSViewModel(
     private fun getLocalChapter(chapterId: Long) {
         scope.launch {
             getChapterUseCase.findChapterById(chapterId)?.let { chapter ->
-                ttsChapter = chapter
+                ttsState.setTtsChapter(chapter)
                 if (chapter.isEmpty()) {
-                    ttsSource?.let { getRemoteChapter(chapter) }
+                    ttsState.ttsSource.value?.let { getRemoteChapter(chapter) }
                 }
                 runTTSService(Player.PAUSE)
             }
@@ -371,18 +373,18 @@ class TTSViewModel(
     private fun subscribeChapters(bookId: Long) {
         scope.launch {
             getChapterUseCase.subscribeChaptersByBookId(bookId).collect { chapters ->
-                ttsChapters = chapters
+                ttsState.setTtsChapters(chapters)
             }
         }
     }
 
     private suspend fun getRemoteChapter(chapter: Chapter) {
-        ttsState.ttsCatalog?.let { catalog ->
+        ttsState.ttsCatalog.value?.let { catalog ->
             remoteUseCases.getRemoteReadingContent(
                 chapter,
                 catalog,
                 onSuccess = { result ->
-                    ttsChapter = result
+                    ttsState.setTtsChapter(result)
                     insertUseCases.insertChapter(result)
                 },
                 onError = { error ->

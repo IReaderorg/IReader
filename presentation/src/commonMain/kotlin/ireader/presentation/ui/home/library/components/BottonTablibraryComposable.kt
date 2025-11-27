@@ -48,6 +48,7 @@ import ireader.i18n.asString
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.component.text_related.TextSection
 import ireader.presentation.ui.core.theme.AppColors
@@ -99,8 +100,8 @@ fun ScrollableTabs(
         androidx.compose.material3.ScrollableTabRow(
             modifier = modifier,
             selectedTabIndex = pagerState.currentPage,
-            containerColor = AppColors.current.bars,
-            contentColor = AppColors.current.onBars,
+            containerColor = AppColors.current.bars.toComposeColor(),
+            contentColor = AppColors.current.onBars.toComposeColor(),
             edgePadding = 0.dp,
         ) {
             libraryTabs.forEachIndexed { index, tab ->

@@ -1,6 +1,5 @@
 package ireader.domain.usecases.epub
 
-import androidx.compose.runtime.Composable
 import ireader.domain.models.common.Uri
 import ireader.domain.models.entities.Book
 
@@ -31,13 +30,18 @@ class ExportNovelAsEpubUseCase(
     }
     
     /**
-     * Initiates the file picker for ePub export.
+     * Generates a suggested filename for the ePub export.
      * 
      * @param book The book to export
-     * @param onStart Callback that receives the platform-specific file picker intent/dialog
+     * @return Sanitized filename with .epub extension
      */
-    @Composable
-    fun RequestExport(book: Book, onStart: @Composable (Any) -> Unit) {
-        epubCreator.onEpubCreateRequested(book, onStart)
+    fun getSuggestedFilename(book: Book): String {
+        return sanitizeFilename(book.title) + ".epub"
+    }
+    
+    private fun sanitizeFilename(name: String): String {
+        return name.replace(Regex("[|\\\\?*<\":>+\\[\\]/']+"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
     }
 }

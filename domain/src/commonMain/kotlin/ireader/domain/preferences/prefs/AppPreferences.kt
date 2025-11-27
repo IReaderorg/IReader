@@ -1,13 +1,12 @@
 package ireader.domain.preferences.prefs
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
+import ireader.domain.models.common.DomainColor
 import ireader.domain.models.library.LibrarySort
 import ireader.domain.preferences.models.ReaderColors
 import ireader.domain.preferences.models.prefs.IReaderVoice
-import ireader.domain.preferences.models.prefs.asColor
+import ireader.domain.preferences.models.prefs.asDomainColor
 import ireader.domain.preferences.models.prefs.asReaderTheme
 import ireader.domain.preferences.models.prefs.asVoice
 
@@ -54,11 +53,11 @@ class AppPreferences(
     fun readerTheme(): Preference<ReaderColors> {
         return preferenceStore.getLong("readerTheme", 0).asReaderTheme()
     }
-    fun textColorReader(): Preference<Color> {
-        return preferenceStore.getInt(ReaderPreferences.SAVED_TEXT_COLOR, Color(0xFFE9E9E9).toArgb()).asColor()
+    fun textColorReader(): Preference<DomainColor> {
+        return preferenceStore.getInt(ReaderPreferences.SAVED_TEXT_COLOR, 0xFFE9E9E9.toInt()).asDomainColor()
     }
-     fun backgroundColorReader(): Preference<Color> {
-        return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, Color(0xff262626).toArgb()).asColor()
+     fun backgroundColorReader(): Preference<DomainColor> {
+        return preferenceStore.getInt(SAVED_BACKGROUND_COLOR, 0xff262626.toInt()).asDomainColor()
     }
      fun backgroundColorTTS(): Preference<ReaderColors> {
         return preferenceStore.getLong("background_color_tts").asReaderTheme()
@@ -66,13 +65,13 @@ class AppPreferences(
     fun libraryLayoutType(): Preference<Long> {
         return preferenceStore.getLong(SAVED_LIBRARY_LAYOUT_KEY, 0)
     }
-    fun unselectedScrollBarColor(): Preference<Color> {
-        return preferenceStore.getInt(ReaderPreferences.SCROLL_INDICATOR_SELECTED_COLOR, Color(0xFF2A59B6).toArgb())
-                .asColor()
+    fun unselectedScrollBarColor(): Preference<DomainColor> {
+        return preferenceStore.getInt(ReaderPreferences.SCROLL_INDICATOR_SELECTED_COLOR, 0xFF2A59B6.toInt())
+                .asDomainColor()
     }
-    fun selectedScrollBarColor(): Preference<Color> {
-        return preferenceStore.getInt(ReaderPreferences.SCROLL_INDICATOR_UNSELECTED_COLOR, Color(0xFF5281CA).toArgb())
-                .asColor()
+    fun selectedScrollBarColor(): Preference<DomainColor> {
+        return preferenceStore.getInt(ReaderPreferences.SCROLL_INDICATOR_UNSELECTED_COLOR, 0xFF5281CA.toInt())
+                .asDomainColor()
     }
     fun orientation(): Preference<Int> {
         return preferenceStore.getInt(

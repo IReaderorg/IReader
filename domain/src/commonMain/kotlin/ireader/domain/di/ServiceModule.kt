@@ -4,73 +4,55 @@ import ireader.domain.services.common.*
 import ireader.domain.services.ChapterCacheService
 import ireader.domain.services.ChapterCacheServiceImpl
 import ireader.domain.services.platform.*
-import kotlinx.coroutines.runBlocking
 import org.koin.dsl.module
 
 /**
  * Koin module for platform-agnostic services
+ * 
+ * Note: Services are created without immediate initialization to avoid blocking.
+ * Each service implements lazy initialization on first use.
  */
 val ServiceModule = module {
     
-    // Core Services
+    // Core Services - lazy initialization on first use
     single<BackgroundTaskService> { 
-        ServiceFactory.createBackgroundTaskService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createBackgroundTaskService()
     }
     
     single<DownloadService> { 
-        ServiceFactory.createDownloadService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createDownloadService()
     }
     
     single<FileService> { 
-        ServiceFactory.createFileService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createFileService()
     }
     
     single<NotificationService> { 
-        ServiceFactory.createNotificationService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createNotificationService()
     }
     
     single<LibraryUpdateService> { 
-        ServiceFactory.createLibraryUpdateService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createLibraryUpdateService()
     }
     
     single<ExtensionService> { 
-        ServiceFactory.createExtensionService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createExtensionService()
     }
     
     single<BackupService> { 
-        ServiceFactory.createBackupService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createBackupService()
     }
     
     single<CacheService> { 
-        ServiceFactory.createCacheService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createCacheService()
     }
     
     single<TTSService> { 
-        ServiceFactory.createTTSService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createTTSService()
     }
     
     single<SyncService> { 
-        ServiceFactory.createSyncService().apply {
-            runBlocking { initialize() }
-        }
+        ServiceFactory.createSyncService()
     }
     
     // NEW: Chapter Cache Service

@@ -90,7 +90,7 @@ val PresentationModules = module {
 
     single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),getOrNull(),get(),get(),get(),get(),get()) }
+    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get()) }
     single  { 
         MainSettingScreenViewModel(
             uiPreferences = get(),
@@ -189,7 +189,7 @@ val PresentationModules = module {
         get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
         get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
         // Translation use cases
-        get(),get(),get(),get(),get(),get(),get(),
+        get(),get(),get(),get(),get(),get(),get(),get(),
         // Statistics use case
         get(),
         // Report use case
@@ -200,8 +200,10 @@ val PresentationModules = module {
         get(),
         // Chapter health
         get(),get(),get(),
-        // Params and scope
-        get(),params,get(),get(),get(),get(),get(),get(),get()
+        // Params
+        params,
+        // Platform services and sub-viewmodels
+        get(),get(),get(),get(),get(),get()
     ) }
 
     // New StateScreenModel implementations following Mihon's pattern

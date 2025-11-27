@@ -52,7 +52,7 @@ class CategoryScreenViewModel(
             val result = categoryUseCases.updateCategory.rename(categoryId, newName)
             
             result.onSuccess {
-                showSnackBar(ireader.i18n.UiText.DynamicString("Category renamed to '$newName'"))
+                showSnackBar(ireader.i18n.UiText.DynamicString("Category renamed: $newName"))
             }
             
             result.onFailure { error ->
@@ -60,11 +60,11 @@ class CategoryScreenViewModel(
                     error.message?.contains("blank") == true ->
                         showSnackBar(ireader.i18n.UiText.DynamicString("Category name cannot be empty"))
                     error.message?.contains("already exists") == true ->
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Category '$newName' already exists"))
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Category already exists: $newName"))
                     error.message?.contains("not found") == true ->
                         showSnackBar(ireader.i18n.UiText.DynamicString("Category not found"))
                     else ->
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to rename: ${error.message}"))
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to rename: ${error.message ?: "Unknown error"}"))
                 }
             }
         }

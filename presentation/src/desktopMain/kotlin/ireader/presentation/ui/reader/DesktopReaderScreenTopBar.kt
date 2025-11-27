@@ -28,6 +28,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.reader.components.TTSButton
@@ -156,8 +157,8 @@ fun DesktopReaderScreenTopBar(
         Toolbar(
             title = {},
             elevation = 0.dp,
-            backgroundColor = vm.backgroundColor.value.copy(ContentAlpha.disabled),
-            contentColor = vm.textColor.value,
+            backgroundColor = vm.backgroundColor.value.toComposeColor().copy(ContentAlpha.disabled),
+            contentColor = vm.textColor.value.toComposeColor(),
             actions = {
                 AppIconButton(
                     imageVector = Icons.Default.Autorenew,
@@ -165,13 +166,13 @@ fun DesktopReaderScreenTopBar(
                     onClick = {
                         onRefresh()
                     },
-                    tint = vm.textColor.value
+                    tint = vm.textColor.value.toComposeColor()
                 )
             },
             navigationIcon = {
                 TopAppBarBackButton(onClick = {
                     onPopBackStack()
-                }, tint = vm.textColor.value)
+                }, tint = vm.textColor.value.toComposeColor())
             }
         )
     }

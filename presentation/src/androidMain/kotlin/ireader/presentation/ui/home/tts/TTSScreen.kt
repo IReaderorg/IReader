@@ -80,9 +80,9 @@ fun TTSScreen(
         startY = 1f,  // 1/3
         endY = 1f,
     )
-    vm.ttsBook.let { book ->
-        vm.ttsChapter.let { chapter ->
-            (vm.ttsContent?.value ?: emptyList()).let { content ->
+    vm.ttsState.ttsBook.value.let { book ->
+        vm.ttsState.ttsChapter.value.let { chapter ->
+            (vm.ttsState.ttsContent.value ?: emptyList()).let { content ->
                 Box(
                     modifier = modifier
                         .fillMaxSize(),
@@ -95,7 +95,7 @@ fun TTSScreen(
                     )
                     LazyColumn(modifier = Modifier.matchParentSize(), state = lazyState, contentPadding = paddingValues) {
                         items(
-                            count = chapter?.content?.size ?: 0
+                            count = content.size
                         ) { index ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -108,27 +108,27 @@ fun TTSScreen(
                                         .padding(horizontal = vm.paragraphsIndent.value.dp)
                                         .clickableNoIndication(
                                             onClick = {
-                                                vm.currentReadingParagraph = index
+                                                vm.ttsState.setCurrentReadingParagraph(index)
 
                                             },
                                             onLongClick = {
                                                 vm.fullScreenMode = !vm.fullScreenMode
                                             }
                                         ),
-                                    text = if (content.isNotEmpty() && vm.currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index].plus(
+                                    text = if (content.isNotEmpty() && vm.ttsState.currentReadingParagraph.value <= content.lastIndex && index <= content.lastIndex) content[index].plus(
                                         "\n".repeat(vm.paragraphDistance.value)
                                     ) else "",
                                     fontSize = vm.fontSize.value.sp,
                                     fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
                                     textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
-                                    color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = if (index == vm.currentReadingParagraph) 1f else .6f),
+                                    color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = if (index == vm.ttsState.currentReadingParagraph.value) 1f else .6f),
                                     lineHeight = vm.lineHeight.value.sp,
                                     letterSpacing = vm.betweenLetterSpaces.value.sp,
                                     fontWeight = FontWeight(vm.textWeight.value),
                                 )
                                 
                                 // Cache indicator for Coqui TTS
-                                if (vm.useCoquiTTS && index > vm.currentReadingParagraph) {
+                                if (vm.useCoquiTTS && index > vm.ttsState.currentReadingParagraph.value) {
                                     when {
                                         vm.ttsState.loadingParagraphs.contains(index) -> {
                                             CircularProgressIndicator(
@@ -164,7 +164,7 @@ fun TTSScreen(
                                 .align(Alignment.BottomCenter)
                         ) {
                             SuperSmallTextComposable(
-                                text = "${vm.currentReadingParagraph + 1}/${vm.ttsContent?.value?.size ?: 0L}",
+                                text = "${vm.ttsState.currentReadingParagraph.value + 1}/${vm.ttsState.ttsContent.value?.size ?: 0}",
                                 color = vm.theme.value.onTextColor.toComposeColor(),
                             )
                         }
@@ -174,9 +174,9 @@ fun TTSScreen(
                                 AppIconButton(
                                     modifier = Modifier.size(48.dp), // Minimum 48dp touch target
                                     onClick = onPlay,
-                                    imageVector = if (vm.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    imageVector = if (vm.ttsState.isPlaying.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                                     tint = vm.theme.value.onTextColor.toComposeColor(),
-                                    contentDescription = if (vm.isPlaying) "Pause" else "Play"
+                                    contentDescription = if (vm.ttsState.isPlaying.value) "Pause" else "Play"
                                 )
                                 AppIconButton(
                                     modifier = Modifier.size(48.dp), // Minimum 48dp touch target
@@ -212,7 +212,7 @@ fun TTLScreenPlay(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                value = if (content.isEmpty()) 0F else vm.currentReadingParagraph.toFloat(),
+                value = if (content.isEmpty()) 0F else vm.currentReadingParagraph.value.toFloat(),
                 onValueChange = {
                     onValueChange(it)
                 },
@@ -277,7 +277,7 @@ fun MediaControllers(
                         ShowLoading()
                     }
                 }
-                vm.isPlaying -> {
+                vm.isPlaying.value -> {
                     AppIconButton(
                         modifier = Modifier.size(80.dp),
                         imageVector = Icons.Filled.PauseCircle,

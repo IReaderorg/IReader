@@ -60,7 +60,7 @@ class PluginManagementViewModel(
                     isLoading = false,
                     error = e.message ?: "Failed to load plugins"
                 )
-                showSnackBar(UiText.DynamicString(e.message ?: "Failed to load plugins"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_load_plugins))
             }
         }
     }
@@ -79,10 +79,10 @@ class PluginManagementViewModel(
             
             val result = pluginManager.enablePlugin(pluginId)
             result.onFailure { error ->
-                showSnackBar(UiText.DynamicString(error.message ?: "Failed to enable plugin"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_enable_plugin))
             }
             result.onSuccess {
-                showSnackBar(UiText.DynamicString("Plugin enabled successfully"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.plugin_enabled_successfully))
             }
         }
     }
@@ -95,10 +95,10 @@ class PluginManagementViewModel(
         scope.launch {
             val result = pluginManager.disablePlugin(pluginId)
             result.onFailure { error ->
-                showSnackBar(UiText.DynamicString(error.message ?: "Failed to disable plugin"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_disable_plugin))
             }
             result.onSuccess {
-                showSnackBar(UiText.DynamicString("Plugin disabled successfully"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.plugin_disabled_successfully))
             }
         }
     }
@@ -126,10 +126,10 @@ class PluginManagementViewModel(
         scope.launch {
             val result = pluginManager.uninstallPlugin(pluginId)
             result.onFailure { error ->
-                showSnackBar(UiText.DynamicString(error.message ?: "Failed to uninstall plugin"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_uninstall_plugin))
             }
             result.onSuccess {
-                showSnackBar(UiText.DynamicString("Plugin uninstalled successfully"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.plugin_uninstalled_successfully))
                 dismissUninstallConfirmation()
             }
         }
@@ -240,10 +240,10 @@ class PluginManagementViewModel(
                     updatesAvailable = emptyMap(),
                     isUpdatingAll = false
                 )
-                showSnackBar(UiText.DynamicString("All plugins updated successfully"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.all_plugins_updated_successfully))
             } catch (e: Exception) {
                 _state.value = _state.value.copy(isUpdatingAll = false)
-                showSnackBar(UiText.DynamicString(e.message ?: "Failed to update plugins"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_update_plugins))
             }
         }
     }
@@ -328,7 +328,7 @@ class PluginManagementViewModel(
         scope.launch {
             uiPreferences.enableJSPlugins().set(true)
             _state.value = _state.value.copy(showEnablePluginPrompt = false)
-            showSnackBar(UiText.DynamicString("JavaScript plugins enabled. You can now enable plugins."))
+            showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.js_plugins_enabled))
         }
     }
 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.core.theme.AppColors
 
 
@@ -51,8 +52,8 @@ internal fun LibrarySelectionBar(
                 .padding(bottom = 32.dp)
                 .fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
-            color = AppColors.current.bars,
-            contentColor = AppColors.current.onBars,
+            color = AppColors.current.bars.toComposeColor(),
+            contentColor = AppColors.current.onBars.toComposeColor(),
             tonalElevation = 4.dp
         ) {
             Row(

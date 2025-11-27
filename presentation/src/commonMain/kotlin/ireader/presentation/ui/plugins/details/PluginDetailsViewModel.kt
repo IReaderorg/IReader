@@ -11,6 +11,16 @@ import ireader.domain.plugins.PluginStatus
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.error_unknown
+import ireader.i18n.resources.failed_to_enable_plugin
+import ireader.i18n.resources.failed_to_open_plugin
+import ireader.i18n.resources.failed_to_start_trial
+import ireader.i18n.resources.failed_to_submit_review
+import ireader.i18n.resources.installation_failed_generic
+import ireader.i18n.resources.js_plugins_enabled_active
+import ireader.i18n.resources.plugin_already_enabled
+import ireader.i18n.resources.plugin_enabled
+import ireader.i18n.resources.purchase_failed
+import ireader.i18n.resources.review_submitted_successfully
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
@@ -235,7 +245,7 @@ class PluginDetailsViewModel(
                                 error.message ?: "Installation failed"
                             )
                         )
-                        showSnackBar(UiText.DynamicString(error.message ?: "Installation failed"))
+                        showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.installation_failed_generic))
                     }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
@@ -243,7 +253,7 @@ class PluginDetailsViewModel(
                         e.message ?: "Installation failed"
                     )
                 )
-                showSnackBar(UiText.DynamicString(e.message ?: "Installation failed"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.installation_failed_generic))
             }
         }
     }
@@ -269,11 +279,11 @@ class PluginDetailsViewModel(
                     installPlugin()
                 }.onFailure { error ->
                     _state.value = _state.value.copy(showPurchaseDialog = false)
-                    showSnackBar(UiText.DynamicString(error.message ?: "Purchase failed"))
+                    showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.purchase_failed))
                 }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(showPurchaseDialog = false)
-                showSnackBar(UiText.DynamicString(e.message ?: "Purchase failed"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.purchase_failed))
             }
         }
     }
@@ -297,10 +307,10 @@ class PluginDetailsViewModel(
                         installPlugin()
                     }
                     .onFailure { error ->
-                        showSnackBar(UiText.DynamicString(error.message ?: "Failed to start trial"))
+                        showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_start_trial))
                     }
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString(e.message ?: "Failed to start trial"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_start_trial))
             }
         }
     }
@@ -316,16 +326,16 @@ class PluginDetailsViewModel(
                 if (plugin.status == PluginStatus.DISABLED) {
                     pluginManager.enablePlugin(pluginId)
                         .onSuccess {
-                            showSnackBar(UiText.DynamicString("Plugin enabled"))
+                            showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.plugin_enabled))
                         }
                         .onFailure { error ->
-                            showSnackBar(UiText.DynamicString(error.message ?: "Failed to enable plugin"))
+                            showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_enable_plugin))
                         }
                 } else {
-                    showSnackBar(UiText.DynamicString("Plugin is already enabled"))
+                    showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.plugin_already_enabled))
                 }
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString(e.message ?: "Failed to open plugin"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_open_plugin))
             }
         }
     }
@@ -398,9 +408,9 @@ class PluginDetailsViewModel(
                     reviews = listOf(review) + _state.value.reviews.filter { it.userId != userId }
                 )
                 
-                showSnackBar(UiText.DynamicString("Review submitted successfully"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.review_submitted_successfully))
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString(e.message ?: "Failed to submit review"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_submit_review))
             }
         }
     }
@@ -512,10 +522,10 @@ class PluginDetailsViewModel(
             pluginManager.enablePlugin(pluginId)
                 .onSuccess {
                     _state.value = _state.value.copy(showSuccessMessage = true)
-                    showSnackBar(UiText.DynamicString("JavaScript plugins enabled. Plugin is now active."))
+                    showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.js_plugins_enabled_active))
                 }
                 .onFailure { error ->
-                    showSnackBar(UiText.DynamicString(error.message ?: "Failed to enable plugin"))
+                    showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_enable_plugin))
                 }
         }
     }

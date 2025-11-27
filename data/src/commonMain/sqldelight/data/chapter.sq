@@ -28,6 +28,14 @@ CREATE TABLE IF NOT EXISTS chapter(
 
 CREATE INDEX IF NOT EXISTS chapters_manga_id_index ON chapter(book_id);
 CREATE INDEX IF NOT EXISTS chapters_unread_by_manga_index ON chapter(book_id, read) WHERE read = 0;
+-- Performance optimization indexes
+CREATE INDEX IF NOT EXISTS idx_chapter_book_read ON chapter(book_id, read);
+CREATE INDEX IF NOT EXISTS idx_chapter_read ON chapter(read);
+-- Advanced indexes for sorting and filtering
+CREATE INDEX IF NOT EXISTS idx_chapter_book_number ON chapter(book_id, chapter_number);
+CREATE INDEX IF NOT EXISTS idx_chapter_date_upload ON chapter(date_upload DESC);
+CREATE INDEX IF NOT EXISTS idx_chapter_date_fetch ON chapter(date_fetch DESC);
+CREATE INDEX IF NOT EXISTS idx_chapter_bookmark ON chapter(bookmark) WHERE bookmark = 1;
 
 getChapterById:
 SELECT *

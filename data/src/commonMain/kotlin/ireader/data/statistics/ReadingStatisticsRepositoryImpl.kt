@@ -136,30 +136,26 @@ class ReadingStatisticsRepositoryImpl(
 
     override suspend fun getCurrentlyReading(): Int {
         return handler.await {
-            // Count books with at least one read chapter but not all chapters read
-            bookQueries.findAllBooks().executeAsList().count { book ->
-                val chapters = chapterQueries.getChaptersByMangaId(book._id).executeAsList()
-                val readChapters = chapters.count { it.read }
-                readChapters > 0 && readChapters < chapters.size
-            }
+            // Optimized: Use single SQL query instead of N+1 queries
+            // This counts books that have at least one read chapter but not all chapters read
+            val result = bookQueries.getCurrentlyReadingCount().executeAsList()
+            result.size
         }
     }
 
     private suspend fun getFavoriteGenres(): List<GenreCount> {
         return handler.await {
-            // Get all books in library and count genres
-            val books = bookQueries.findAllBooks().executeAsList()
+            // Optimized: Only fetch favorite books' genres from database
             val genreMap = mutableMapOf<String, Int>()
             
-            books.filter { it.favorite }.forEach { book ->
-                // Genre is now a List<String>
-                book.genre?.forEach { genre ->
+            bookQueries.getFavoriteGenres().executeAsList()
+                .flatMap { genreList -> genreList ?: emptyList() }
+                .forEach { genre ->
                     val trimmedGenre = genre.trim()
                     if (trimmedGenre.isNotBlank()) {
                         genreMap[trimmedGenre] = (genreMap[trimmedGenre] ?: 0) + 1
                     }
                 }
-            }
             
             genreMap.entries
                 .sortedByDescending { it.value }

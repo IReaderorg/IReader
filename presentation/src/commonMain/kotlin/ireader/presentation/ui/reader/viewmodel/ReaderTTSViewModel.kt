@@ -122,7 +122,7 @@ class ReaderTTSViewModel(
                     
                     when (result) {
                         is ServiceResult.Error -> {
-                            showSnackBar(UiText.DynamicString("TTS error: ${result.message}"))
+                            showSnackBar(UiText.DynamicString("TTS error: ${result.message ?: "Unknown error"}"))
                         }
                         is ServiceResult.Loading -> {
                             // Loading state - do nothing
@@ -138,7 +138,7 @@ class ReaderTTSViewModel(
                 
             } catch (e: Exception) {
                 Log.error("TTS play failed", e)
-                showSnackBar(UiText.DynamicString("TTS error: ${e.message}"))
+                showSnackBar(UiText.DynamicString("TTS error: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -152,7 +152,7 @@ class ReaderTTSViewModel(
                 ttsService.pause()
             } catch (e: Exception) {
                 Log.error("TTS pause failed", e)
-                showSnackBar(UiText.DynamicString("TTS error: ${e.message}"))
+                showSnackBar(UiText.DynamicString("TTS error: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -168,7 +168,7 @@ class ReaderTTSViewModel(
                 playbackProgress = 0f
             } catch (e: Exception) {
                 Log.error("TTS stop failed", e)
-                showSnackBar(UiText.DynamicString("TTS error: ${e.message}"))
+                showSnackBar(UiText.DynamicString("TTS error: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -412,11 +412,11 @@ class ReaderTTSViewModel(
             try {
                 // Note: TTSService doesn't have deleteVoice method
                 // This functionality may need to be implemented in the service
-                showSnackBar(UiText.DynamicString("Delete voice not supported yet"))
+                showSnackBar(UiText.DynamicString("Delete voice is not supported"))
                 
             } catch (e: Exception) {
                 Log.error("Failed to delete voice", e)
-                showSnackBar(UiText.DynamicString("Delete failed: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Delete failed: ${e.message ?: "Unknown error"}"))
             }
         }
     }

@@ -70,8 +70,8 @@ suspend fun runDownloadService(
 
         if (chapters.isEmpty()) {
             withContext(Dispatchers.Main) {
-                downloadServiceState.isRunning = false
-                downloadServiceState.isPaused = false
+                downloadServiceState.setRunning(false)
+                downloadServiceState.setPaused(false)
             }
             return true
         }
@@ -97,23 +97,23 @@ suspend fun runDownloadService(
 
         if (downloads.isEmpty()) {
             withContext(Dispatchers.Main) {
-                downloadServiceState.isRunning = false
-                downloadServiceState.isPaused = false
+                downloadServiceState.setRunning(false)
+                downloadServiceState.setPaused(false)
             }
             return true
         }
 
         // Initialize download state
         withContext(Dispatchers.Main) {
-            downloadServiceState.downloads = downloads
-            downloadServiceState.isRunning = true
-            downloadServiceState.isPaused = false
-            downloadServiceState.downloadProgress = downloads.associate {
+            downloadServiceState.setDownloads(downloads)
+            downloadServiceState.setRunning(true)
+            downloadServiceState.setPaused(false)
+            downloadServiceState.setDownloadProgress(downloads.associate {
                 it.chapterId to DownloadProgress(
                     chapterId = it.chapterId,
                     status = DownloadStatus.QUEUED
                 )
-            }
+            })
         }
 
         // Insert downloads into database
@@ -127,12 +127,12 @@ suspend fun runDownloadService(
         // Download chapters sequentially
         for (download in downloads) {
             // Check if service is still running, coroutine is cancelled, or work is stopped
-            if (!downloadServiceState.isRunning || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
+            if (!downloadServiceState.isRunning.value || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
                 break
             }
 
             // Wait while paused
-            while (downloadServiceState.isPaused && downloadServiceState.isRunning) {
+            while (downloadServiceState.isPaused.value && downloadServiceState.isRunning.value) {
                 delay(500)
                 // Check if cancelled during pause
                 if (!withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
@@ -141,7 +141,7 @@ suspend fun runDownloadService(
             }
 
             // Check again after pause
-            if (!downloadServiceState.isRunning || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
+            if (!downloadServiceState.isRunning.value || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
                 break
             }
 
@@ -151,12 +151,12 @@ suspend fun runDownloadService(
 
             // Update status to downloading
             withContext(Dispatchers.Main) {
-                downloadServiceState.downloadProgress = downloadServiceState.downloadProgress + 
+                downloadServiceState.setDownloadProgress(downloadServiceState.downloadProgress.value + 
                     (download.chapterId to DownloadProgress(
                         chapterId = download.chapterId,
                         status = DownloadStatus.DOWNLOADING,
                         progress = 0f
-                    ))
+                    )))
             }
 
             updateTitle("${download.bookName} - ${chapter.name}")
@@ -170,12 +170,12 @@ suspend fun runDownloadService(
 
             for (attempt in 1..maxRetries) {
                 // Check if still running, cancelled, or work is stopped
-                if (!downloadServiceState.isRunning || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
+                if (!downloadServiceState.isRunning.value || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
                     break
                 }
 
                 // Wait while paused
-                while (downloadServiceState.isPaused && downloadServiceState.isRunning) {
+                while (downloadServiceState.isPaused.value && downloadServiceState.isRunning.value) {
                     delay(500)
                     // Check if cancelled during pause
                     if (!withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
@@ -201,7 +201,7 @@ suspend fun runDownloadService(
                     )
 
                     // Check if cancelled immediately after network call
-                    if (!downloadServiceState.isRunning || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
+                    if (!downloadServiceState.isRunning.value || !withContext(Dispatchers.Main) { isActive } || checkCancellation()) {
                         break
                     }
 
@@ -241,12 +241,12 @@ suspend fun runDownloadService(
 
                     // Update status to completed
                     withContext(Dispatchers.Main) {
-                        downloadServiceState.downloadProgress = downloadServiceState.downloadProgress + 
+                        downloadServiceState.setDownloadProgress(downloadServiceState.downloadProgress.value + 
                             (download.chapterId to DownloadProgress(
                                 chapterId = download.chapterId,
                                 status = DownloadStatus.COMPLETED,
                                 progress = 1f
-                            ))
+                            )))
                     }
 
                     success = true
@@ -260,13 +260,13 @@ suspend fun runDownloadService(
                     if (attempt < maxRetries) {
                         // Update retry count
                         withContext(Dispatchers.Main) {
-                            downloadServiceState.downloadProgress = downloadServiceState.downloadProgress + 
+                            downloadServiceState.setDownloadProgress(downloadServiceState.downloadProgress.value + 
                                 (download.chapterId to DownloadProgress(
                                     chapterId = download.chapterId,
                                     status = DownloadStatus.DOWNLOADING,
                                     progress = 0f,
                                     retryCount = attempt
-                                ))
+                                )))
                         }
                         delay(1000L * attempt)
                     }
@@ -278,14 +278,14 @@ suspend fun runDownloadService(
                 val errorMessage = getUserFriendlyErrorMessage(lastError ?: Exception("Unknown error"))
                 
                 withContext(Dispatchers.Main) {
-                    downloadServiceState.downloadProgress = downloadServiceState.downloadProgress + 
+                    downloadServiceState.setDownloadProgress(downloadServiceState.downloadProgress.value + 
                         (download.chapterId to DownloadProgress(
                             chapterId = download.chapterId,
                             status = DownloadStatus.FAILED,
                             progress = 0f,
                             errorMessage = errorMessage,
                             retryCount = maxRetries
-                        ))
+                        )))
                 }
 
                 // TODO: Migrate to new DownloadService interface
@@ -306,8 +306,8 @@ suspend fun runDownloadService(
 
         // Clean up
         withContext(Dispatchers.Main) {
-            downloadServiceState.isRunning = false
-            downloadServiceState.isPaused = false
+            downloadServiceState.setRunning(false)
+            downloadServiceState.setPaused(false)
         }
 
         // Check if we were cancelled - if so, don't call onSuccess
@@ -327,9 +327,9 @@ suspend fun runDownloadService(
         ireader.core.log.Log.error { "Download service error: ${e.message}" }
         
         withContext(Dispatchers.Main) {
-            downloadServiceState.isRunning = false
-            downloadServiceState.isPaused = false
-            downloadServiceState.downloadProgress = emptyMap()
+            downloadServiceState.setRunning(false)
+            downloadServiceState.setPaused(false)
+            downloadServiceState.setDownloadProgress(emptyMap())
         }
 
         notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)

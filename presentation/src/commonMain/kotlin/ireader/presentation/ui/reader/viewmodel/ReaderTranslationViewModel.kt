@@ -172,7 +172,7 @@ class ReaderTranslationViewModel(
             
         } catch (e: Exception) {
             Log.error("Translation failed", e)
-            showSnackBar(UiText.DynamicString("Translation error: ${e.message}"))
+            showSnackBar(UiText.DynamicString("Translation error: ${e.message ?: "Unknown error"}"))
             isTranslating = false
         }
     }
@@ -196,7 +196,7 @@ class ReaderTranslationViewModel(
             )
         } catch (e: Exception) {
             Log.error("Paragraph translation failed", e)
-            showSnackBar(UiText.DynamicString("Translation error: ${e.message}"))
+            showSnackBar(UiText.DynamicString("Translation error: ${e.message ?: "Unknown error"}"))
         }
     }
     
@@ -317,7 +317,7 @@ class ReaderTranslationViewModel(
             
         } catch (e: Exception) {
             Log.error("Failed to add glossary entry", e)
-            showSnackBar(UiText.DynamicString("Failed to add entry: ${e.message}"))
+            showSnackBar(UiText.DynamicString("Failed to add entry: ${e.message ?: "Unknown error"}"))
         }
     }
     
@@ -342,7 +342,7 @@ class ReaderTranslationViewModel(
             
         } catch (e: Exception) {
             Log.error("Failed to update glossary entry", e)
-            showSnackBar(UiText.DynamicString("Failed to update entry: ${e.message}"))
+            showSnackBar(UiText.DynamicString("Failed to update entry: ${e.message ?: "Unknown error"}"))
         }
     }
     
@@ -360,7 +360,7 @@ class ReaderTranslationViewModel(
             
         } catch (e: Exception) {
             Log.error("Failed to delete glossary entry", e)
-            showSnackBar(UiText.DynamicString("Failed to delete entry: ${e.message}"))
+            showSnackBar(UiText.DynamicString("Failed to delete entry: ${e.message ?: "Unknown error"}"))
         }
     }
     
@@ -374,7 +374,7 @@ class ReaderTranslationViewModel(
             json
         } catch (e: Exception) {
             Log.error("Failed to export glossary", e)
-            showSnackBar(UiText.DynamicString("Export failed: ${e.message}"))
+            showSnackBar(UiText.DynamicString("Export failed: ${e.message ?: "Unknown error"}"))
             ""
         }
     }
@@ -392,7 +392,7 @@ class ReaderTranslationViewModel(
             showSnackBar(UiText.DynamicString("Glossary imported: $count entries"))
         } catch (e: Exception) {
             Log.error("Failed to import glossary", e)
-            showSnackBar(UiText.DynamicString("Import failed: ${e.message}"))
+            showSnackBar(UiText.DynamicString("Import failed: ${e.message ?: "Unknown error"}"))
         }
     }
     

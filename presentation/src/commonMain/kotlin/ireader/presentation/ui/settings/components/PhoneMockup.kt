@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.theme.Theme
+import ireader.presentation.core.toComposeColor
 
 @Composable
 fun PhoneNotch(
@@ -136,7 +137,7 @@ fun MiniAppPreview(
                 .fillMaxWidth()
                 .height(32.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(theme.materialColors.primary),
+                .background(theme.materialColors.primary.toComposeColor()),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
@@ -150,19 +151,19 @@ fun MiniAppPreview(
                     imageVector = Icons.Default.Menu,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
-                    tint = theme.materialColors.onPrimary
+                    tint = theme.materialColors.onPrimary.toComposeColor()
                 )
                 Text(
                     text = "Library",
                     style = MaterialTheme.typography.labelMedium,
-                    color = theme.materialColors.onPrimary,
+                    color = theme.materialColors.onPrimary.toComposeColor(),
                     fontSize = 10.sp
                 )
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
-                    tint = theme.materialColors.onPrimary
+                    tint = theme.materialColors.onPrimary.toComposeColor()
                 )
             }
         }
@@ -174,7 +175,7 @@ fun MiniAppPreview(
                     .fillMaxWidth()
                     .height(48.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(theme.materialColors.surfaceVariant),
+                    .background(theme.materialColors.surfaceVariant.toComposeColor()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -183,7 +184,7 @@ fun MiniAppPreview(
                     modifier = Modifier
                         .width(32.dp)
                         .fillMaxHeight()
-                        .background(theme.materialColors.primary.copy(alpha = 0.3f))
+                        .background(theme.materialColors.primary.toComposeColor().copy(alpha = 0.3f))
                 )
 
                 // Mini text lines
@@ -196,14 +197,14 @@ fun MiniAppPreview(
                             .fillMaxWidth(0.7f)
                             .height(8.dp)
                             .clip(RoundedCornerShape(2.dp))
-                            .background(theme.materialColors.onSurface.copy(alpha = 0.8f))
+                            .background(theme.materialColors.onSurface.toComposeColor().copy(alpha = 0.8f))
                     )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(0.5f)
                             .height(6.dp)
                             .clip(RoundedCornerShape(2.dp))
-                            .background(theme.materialColors.onSurface.copy(alpha = 0.5f))
+                            .background(theme.materialColors.onSurface.toComposeColor().copy(alpha = 0.5f))
                     )
                 }
             }
@@ -215,14 +216,14 @@ fun MiniAppPreview(
                 .align(Alignment.End)
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(theme.materialColors.secondary),
+                .background(theme.materialColors.secondary.toComposeColor()),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = null,
                 modifier = Modifier.size(16.dp),
-                tint = theme.materialColors.onSecondary
+                tint = theme.materialColors.onSecondary.toComposeColor()
             )
         }
     }

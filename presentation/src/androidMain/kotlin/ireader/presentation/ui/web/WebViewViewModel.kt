@@ -241,7 +241,7 @@ class WebViewPageModel(
                     trySmartExtraction(chapter, pageSource, url)
                 } catch (fallbackError: Exception) {
                     fetchChapterState = FetchButtonState.Enabled // Reset to enabled on error
-                    showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch chapter"}"))
+                    showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.error_failed_to_fetch_chapter, arrayOf(e.message ?: "Failed to fetch chapter")))
                 }
             }
         }
@@ -259,14 +259,14 @@ class WebViewPageModel(
                 webChapter = extractedChapter
                 insertChapter(extractedChapter)
                 fetchChapterState = FetchButtonState.Enabled // Reset to enabled
-                showSnackBar(UiText.DynamicString("Chapter content extracted using ${result.method}"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.chapter_content_extracted, arrayOf(result.method)))
             } else {
                 fetchChapterState = FetchButtonState.Enabled // Reset to enabled
-                showSnackBar(UiText.DynamicString("No reliable content found. Try a different page or source."))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.no_reliable_content_found))
             }
         } catch (e: Exception) {
             fetchChapterState = FetchButtonState.Enabled // Reset to enabled
-            showSnackBar(UiText.DynamicString("Failed to extract content: ${e.message}"))
+            showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_extract_content, arrayOf(e.message ?: "Unknown error")))
         }
     }
 
@@ -287,7 +287,7 @@ class WebViewPageModel(
                     onError = {
                         fetchChaptersState = FetchButtonState.Enabled // Reset to enabled on error
                         showSnackBar(it)
-                        showSnackBar(UiText.DynamicString("Failed to fetch chapters. Please ensure you're on the correct page and try again."))
+                        showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_fetch_chapters))
                     },
                     onSuccess = { result ->
                         webChapters = result
@@ -301,7 +301,7 @@ class WebViewPageModel(
                             showSnackBar(message)
                         } else {
                             fetchChaptersState = FetchButtonState.Enabled // Reset to enabled
-                            showSnackBar(UiText.DynamicString("No chapters found. Make sure you're on the chapter list page."))
+                            showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.no_chapters_found))
                         }
                     },
                     commands = listOf(Command.Chapter.Fetch(url = url, pageSource)),
@@ -309,7 +309,7 @@ class WebViewPageModel(
                 )
             } catch (e: Exception) {
                 fetchChaptersState = FetchButtonState.Enabled // Reset to enabled on error
-                showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch chapters"}"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.error_failed_to_fetch_chapter, arrayOf(e.message ?: "Failed to fetch chapters")))
             }
         }
     }
@@ -330,24 +330,24 @@ class WebViewPageModel(
                     onError = {
                         fetchBookState = FetchButtonState.Enabled // Reset to enabled on error
                         showSnackBar(it)
-                        showSnackBar(UiText.DynamicString("Failed to fetch book details. Please ensure you're on the book's detail page and try again."))
+                        showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.failed_to_fetch_book_details))
                     },
                     onSuccess = { result ->
                         if (result.title.isNotBlank()) {
                             webBook = result
                             insertBook(result.copy(favorite = true))
                             fetchBookState = FetchButtonState.Enabled // Reset to enabled after success
-                            showSnackBar(UiText.DynamicString("Book '${result.title}' added to library"))
+                            showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.book_added_to_library, arrayOf(result.title)))
                         } else {
                             fetchBookState = FetchButtonState.Enabled // Reset to enabled
-                            showSnackBar(UiText.DynamicString("Could not extract book information from this page."))
+                            showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.could_not_extract_book_info))
                         }
                     },
                     commands = listOf(Command.Detail.Fetch(url = url, pageSource))
                 )
             } catch (e: Exception) {
                 fetchBookState = FetchButtonState.Enabled // Reset to enabled on error
-                showSnackBar(UiText.DynamicString("Error: ${e.message ?: "Failed to fetch book details"}"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.error_failed_to_fetch_chapter, arrayOf(e.message ?: "Failed to fetch book details")))
             }
         }
     }
@@ -394,7 +394,7 @@ class WebViewPageModel(
                         // Success message is already shown by individual fetch methods
                     }
                     is FetchResult.Error -> {
-                        showSnackBar(UiText.DynamicString(result.message))
+                        showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.error_failed_to_fetch_chapter, arrayOf(result.message)))
                     }
                     FetchResult.Skipped -> {
                         // Do nothing, auto-fetch was skipped

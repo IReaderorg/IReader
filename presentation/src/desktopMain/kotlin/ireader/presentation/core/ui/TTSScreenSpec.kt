@@ -94,7 +94,7 @@ actual class TTSScreenSpec actual constructor(
         // Initialize TTS with the chapter
         LaunchedEffect(bookId, chapterId) {
             ttsService.startReading(bookId, chapterId)
-            ttsService.state.currentReadingParagraph = readingParagraph
+            ttsService.state.setCurrentReadingParagraph(readingParagraph)
         }
         
         // Show snackbar if source is not installed
@@ -116,9 +116,9 @@ actual class TTSScreenSpec actual constructor(
         val lazyListState = rememberLazyListState()
         
         // Auto-scroll to current paragraph
-        LaunchedEffect(ttsService.state.currentReadingParagraph) {
-            if (ttsService.state.isPlaying) {
-                lazyListState.animateScrollToItem(ttsService.state.currentReadingParagraph)
+        LaunchedEffect(ttsService.state.currentReadingParagraph.value) {
+            if (ttsService.state.isPlaying.value) {
+                lazyListState.animateScrollToItem(ttsService.state.currentReadingParagraph.value)
             }
         }
         
@@ -131,9 +131,9 @@ actual class TTSScreenSpec actual constructor(
                                 text = "Text-to-Speech",
                                 style = MaterialTheme.typography.titleMedium
                             )
-                            ttsService.state.ttsChapter?.let { chapter ->
+                            ttsService.state.ttsChapter.let { chapter ->
                                 Text(
-                                    text = chapter.name,
+                                    text = chapter.value?.name?:"",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -149,7 +149,7 @@ actual class TTSScreenSpec actual constructor(
                         // Download Chapter Button
                         IconButton(
                             onClick = {
-                                ttsService.state.ttsChapter?.let { chapter ->
+                                ttsService.state.ttsChapter.value?.let { chapter ->
                                     showDownloadDialog = true
                                     isDownloading = true
                                     downloadStartTime = System.currentTimeMillis()
@@ -211,7 +211,7 @@ actual class TTSScreenSpec actual constructor(
                             .weight(1f)
                             .fillMaxWidth()
                     ) {
-                        ttsService.state.ttsContent?.value?.let { content ->
+                        ttsService.state.ttsContent.value?.let { content ->
                             if (content.isNotEmpty()) {
                                 LazyColumn(
                                     state = lazyListState,
@@ -220,15 +220,15 @@ actual class TTSScreenSpec actual constructor(
                                     verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     items(content.size) { index ->
-                                        val isCurrentParagraph = index == ttsService.state.currentReadingParagraph
+                                        val isCurrentParagraph = index == ttsService.state.currentReadingParagraph.value
                                         
                                         Text(
                                             text = content[index],
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable {
-                                                    ttsService.state.currentReadingParagraph = index
-                                                    if (ttsService.state.isPlaying) {
+                                                    ttsService.state.setCurrentReadingParagraph(index)
+                                                    if (ttsService.state.isPlaying.value) {
                                                         ttsService.startService(DesktopTTSService.ACTION_PAUSE)
                                                         ttsService.startService(DesktopTTSService.ACTION_PLAY)
                                                     }

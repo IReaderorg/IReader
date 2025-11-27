@@ -39,15 +39,16 @@ class LoadJSPluginsInBackgroundUseCase(
             emit(PluginLoadProgress(0, totalCount, null, false))
             
             // Load plugins asynchronously
+            // Note: The callback is executed within the suspend context of loadJSPluginsAsync
             asyncLoader.loadJSPluginsAsync { catalog ->
                 loadedCount++
                 
-                // Replace stub in catalog store
+                // Replace stub in catalog store (suspend call within flow context)
                 runBlocking {
                     catalogStore.replaceStubSource(catalog)
                 }
                 
-                // Emit progress
+                // Emit progress (suspend call within flow context)
                 runBlocking {
                     emit(PluginLoadProgress(loadedCount, totalCount, catalog.name, false))
                 }

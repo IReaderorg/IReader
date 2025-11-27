@@ -7,6 +7,7 @@ import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.preferences.prefs.BrowsePreferences
 import ireader.i18n.UiText
+import ireader.i18n.resources.language_added
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.extension.Language
@@ -97,7 +98,7 @@ class BrowseSettingsViewModel(
                 current.add(languageCode)
                 browsePreferences.selectedLanguages().set(current)
                 updateExtensionViewModelLanguages(current)
-                showSnackBar(UiText.DynamicString("Language added"))
+                showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.language_added))
             }
         }
     }

@@ -62,8 +62,6 @@ class BookDetailViewModel(
     val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val param: Param,
     val booksState: BooksState,
-    @Deprecated("Use clipboardService and shareService instead")
-    val platformHelper: PlatformHelper,
     private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
     private val checkSourceAvailabilityUseCase: ireader.domain.usecases.source.CheckSourceAvailabilityUseCase,
     private val migrateToSourceUseCase: ireader.domain.usecases.source.MigrateToSourceUseCase,
@@ -76,6 +74,7 @@ class BookDetailViewModel(
     // Platform services - Clean architecture
     private val clipboardService: ireader.domain.services.platform.ClipboardService,
     private val shareService: ireader.domain.services.platform.ShareService,
+    private val platformHelper: PlatformHelper,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DetailState by state, ChapterState by chapterState {
     data class Param(val bookId: Long?)
 
@@ -127,21 +126,23 @@ class BookDetailViewModel(
     init {
         booksState.book = null
         val bookId = param.bookId
-        val sourceId = runBlocking {
-            bookId?.let { getBookUseCases.findBookById(it)?.sourceId }
-        }
 
-        if (bookId != null && sourceId != null) {
-            val catalogSource = getLocalCatalog.get(sourceId)
-            this.catalogSource = catalogSource
-
-            val source = catalogSource?.source
-            if (source is ireader.core.source.CatalogSource) {
-                this.modifiedCommands = source.getCommands()
-            }
+        if (bookId != null) {
             toggleBookLoading(true)
             chapterIsLoading = true
             scope.launch {
+                val sourceId = getBookUseCases.findBookById(bookId)?.sourceId
+                
+                if (sourceId != null) {
+                    val catalogSource = getLocalCatalog.get(sourceId)
+                    this@BookDetailViewModel.catalogSource = catalogSource
+
+                    val source = catalogSource?.source
+                    if (source is ireader.core.source.CatalogSource) {
+                        this@BookDetailViewModel.modifiedCommands = source.getCommands()
+                    }
+                }
+                
                 subscribeBook(bookId = bookId)
                 subscribeChapters(bookId = bookId)
                 getLastReadChapter(bookId)
@@ -426,11 +427,11 @@ class BookDetailViewModel(
                 
                 if (availableMigrationSources.isEmpty()) {
                     Log.warn { "No alternative sources available for migration" }
-                    showSnackBar(ireader.i18n.UiText.DynamicString("No alternative sources available. Total sources: ${allSources.size}, Current: $currentSourceId"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("No alternative sources available (Total: ${allSources.size}, Current: $currentSourceId)"))
                 }
             } catch (e: Exception) {
                 Log.error("Error loading migration sources", e)
-                showSnackBar(ireader.i18n.UiText.DynamicString("Failed to load sources: ${e.message}"))
+                showSnackBar(ireader.i18n.UiText.DynamicString("Failed to load sources: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -459,18 +460,18 @@ class BookDetailViewModel(
                             initBook(book.id)
                             
                             val targetSource = catalogStore.get(targetSourceId)
-                            showSnackBar(ireader.i18n.UiText.DynamicString("Successfully migrated to ${targetSource?.name}"))
+                            showSnackBar(ireader.i18n.UiText.DynamicString("Successfully migrated to ${targetSource?.name ?: "new source"}"))
                         } else {
                             delay(2000)
                             sourceSwitchingState.showMigrationDialog = false
-                            showSnackBar(ireader.i18n.UiText.DynamicString("Migration failed: ${progress.error}"))
+                            showSnackBar(ireader.i18n.UiText.DynamicString("Migration failed: ${progress.error ?: "Unknown error"}"))
                         }
                     }
                 }
             } catch (e: Exception) {
                 Log.error("Migration error", e)
                 sourceSwitchingState.showMigrationDialog = false
-                showSnackBar(ireader.i18n.UiText.DynamicString("Migration failed: ${e.message}"))
+                showSnackBar(ireader.i18n.UiText.DynamicString("Migration failed: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -525,12 +526,12 @@ class BookDetailViewModel(
             when (val result = clipboardService.copyText(title, "Book Title")) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
                     withUIContext {
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Title copied to clipboard"))
+                        showSnackBar(ireader.i18n.UiText.MStringResource(ireader.i18n.resources.Res.string.title_copied_to_clipboard))
                     }
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {
                     withUIContext {
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${result.message}"))
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${result.message ?: "Unknown error"}"))
                     }
                 }
                 else -> {}
@@ -546,12 +547,12 @@ class BookDetailViewModel(
             when (val result = clipboardService.copyText(text, label)) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
                     withUIContext {
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Copied to clipboard"))
+                        showSnackBar(ireader.i18n.UiText.MStringResource(ireader.i18n.resources.Res.string.copied_to_clipboard))
                     }
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {
                     withUIContext {
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${result.message}"))
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Failed to copy: ${result.message ?: "Unknown error"}"))
                     }
                 }
                 else -> {}
@@ -568,7 +569,7 @@ class BookDetailViewModel(
         
         scope.launch {
             try {
-                showSnackBar(UiText.DynamicString("Preparing EPUB export..."))
+                showSnackBar(UiText.MStringResource(Res.string.preparing_epub_export))
                 
                 Log.info { "Starting EPUB export for book: ${book.title}" }
                 
@@ -578,14 +579,14 @@ class BookDetailViewModel(
                 } catch (e: Exception) {
                     Log.error("Failed to create export URI", e)
                     withUIContext {
-                        showSnackBar(UiText.DynamicString("Failed to select save location: ${e.message}"))
+                        showSnackBar(UiText.DynamicString("Failed to select save location: ${e.message ?: "Unknown error"}"))
                     }
                     return@launch
                 }
                 
                 if (outputUri == null) {
                     Log.info { "EPUB export cancelled by user" }
-                    showSnackBar(UiText.DynamicString("Export cancelled"))
+                    showSnackBar(UiText.MStringResource(Res.string.export_cancelled))
                     return@launch
                 }
                 
@@ -651,7 +652,7 @@ class BookDetailViewModel(
             try {
                 bookUseCases.updateArchiveStatus(book.id, isArchived = true)
                 withUIContext {
-                    showSnackBar(UiText.DynamicString("${book.title} has been archived"))
+                    showSnackBar(UiText.DynamicString("Book archived: ${book.title}"))
                 }
             } catch (e: Exception) {
                 withUIContext {
@@ -669,7 +670,7 @@ class BookDetailViewModel(
             try {
                 bookUseCases.updateArchiveStatus(book.id, isArchived = false)
                 withUIContext {
-                    showSnackBar(UiText.DynamicString("${book.title} has been unarchived"))
+                    showSnackBar(UiText.DynamicString("Book unarchived: ${book.title}"))
                 }
             } catch (e: Exception) {
                 withUIContext {
@@ -721,7 +722,7 @@ class BookDetailViewModel(
                         showSnackBar(ireader.i18n.UiText.DynamicString("${this@BookDetailViewModel.selection.size} chapters queued for download"))
                     }
                     is ireader.domain.services.common.ServiceResult.Error -> {
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message ?: "Unknown error"}"))
                     }
                     else -> {}
                 }
@@ -733,10 +734,10 @@ class BookDetailViewModel(
         scope.launch {
             when (val result = downloadService.queueBooks(listOf(book.id))) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Book queued for download"))
+                    showSnackBar(ireader.i18n.UiText.MStringResource(ireader.i18n.resources.Res.string.book_queued_for_download))
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message ?: "Unknown error"}"))
                 }
                 else -> {}
             }
@@ -752,14 +753,14 @@ class BookDetailViewModel(
                         showSnackBar(ireader.i18n.UiText.DynamicString("Downloading ${unreadChapterIds.size} unread chapters"))
                     }
                     is ireader.domain.services.common.ServiceResult.Error -> {
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message ?: "Unknown error"}"))
                     }
                     else -> {}
                 }
             }
         } else {
             scope.launch {
-                showSnackBar(ireader.i18n.UiText.DynamicString("No unread chapters to download"))
+                showSnackBar(ireader.i18n.UiText.MStringResource(ireader.i18n.resources.Res.string.no_unread_chapters_to_download))
             }
         }
     }
@@ -773,14 +774,14 @@ class BookDetailViewModel(
                         showSnackBar(ireader.i18n.UiText.DynamicString("Downloading ${undownloadedChapterIds.size} chapters"))
                     }
                     is ireader.domain.services.common.ServiceResult.Error -> {
-                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message ?: "Unknown error"}"))
                     }
                     else -> {}
                 }
             }
         } else {
             scope.launch {
-                showSnackBar(ireader.i18n.UiText.DynamicString("All chapters are already downloaded"))
+                showSnackBar(ireader.i18n.UiText.MStringResource(ireader.i18n.resources.Res.string.all_chapters_already_downloaded))
             }
         }
     }
@@ -870,7 +871,7 @@ class BookDetailViewModel(
                         // Migration failed
                         delay(2000) // Show error for a bit longer
                         sourceSwitchingState.showMigrationDialog = false
-                        showSnackBar(UiText.DynamicString("Migration failed: ${progress.error}"))
+                        showSnackBar(UiText.DynamicString("Migration failed: ${progress.error ?: "Unknown error"}"))
                     }
                 }
             }

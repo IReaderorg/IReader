@@ -4,7 +4,7 @@ import ireader.domain.models.theme.CustomColorScheme
 import ireader.domain.models.theme.CustomExtraColors
 import ireader.domain.models.theme.ReaderTheme
 import ireader.domain.models.theme.Theme
-import ireader.domain.models.theme.toColorScheme
+import ireader.domain.models.theme.toDomainColorScheme
 import ireader.domain.models.theme.toExtraColor
 
 val  appThemeMapper = {
@@ -73,7 +73,7 @@ val  appThemeMapper = {
                 outline,
                 outlineVariant,
                 scrim,
-        ).toColorScheme(isDark),
+        ).toDomainColorScheme(),
         extraColors = CustomExtraColors(
                 bars,
                 onBars,

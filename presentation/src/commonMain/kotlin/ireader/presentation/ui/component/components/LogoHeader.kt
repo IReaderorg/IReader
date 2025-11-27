@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import ireader.i18n.Images.eternityLight
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.ui.Colour.Transparent
+import ireader.presentation.core.toComposeColor
 
 @Composable
 fun LogoHeader() {
@@ -59,8 +60,8 @@ fun LogoHeader() {
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.Transparent)
                 .fillMaxWidth(),
-            contentColor = AppColors.current.bars,
-            color = AppColors.current.bars
+            contentColor = AppColors.current.bars.toComposeColor(),
+            color = AppColors.current.bars.toComposeColor()
         ) {
             // Center the logo with Box
             Box(
@@ -72,7 +73,7 @@ fun LogoHeader() {
                 Icon(
                     imageVector = eternityLight(),
                     contentDescription = "IReader Logo",
-                    tint = AppColors.current.onBars,
+                    tint = AppColors.current.onBars.toComposeColor(),
                     modifier = Modifier
                         .size(140.dp) // Increased from 100.dp to 140.dp
                         .scale(scale)

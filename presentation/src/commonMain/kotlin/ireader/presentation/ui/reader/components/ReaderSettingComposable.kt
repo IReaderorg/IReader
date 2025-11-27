@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import ireader.domain.data.engines.TranslateEngine
@@ -61,7 +62,12 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.ReaderTheme
+import ireader.presentation.ui.core.ui.PreferenceMutableState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toDomainColor
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -779,30 +785,8 @@ fun ColorScreenTab(
                 )
             }.Build()
         }
-        item {
-            Components.Dynamic {
-                ColorPreference(
-                    preference = vm.backgroundColor,
-                    title = localizeHelper.localize(Res.string.background_color),
-                    onChangeColor = {
-                        // Real-time color update - changes are immediately visible
-                        vm.readerThemeSavable = true
-                    }
-                )
-            }.Build()
-        }
-        item {
-            Components.Dynamic {
-                ColorPreference(
-                    preference = vm.textColor,
-                    title = localizeHelper.localize(Res.string.text_color),
-                    onChangeColor = {
-                        // Real-time color update - changes are immediately visible
-                        vm.readerThemeSavable = true
-                    }
-                )
-            }.Build()
-        }
+        // Note: Background and text color preferences removed as they don't exist in the current ViewModel
+        // These would need to be added to ReaderPreferences if color customization is needed
         item {
             Components.Dynamic {
                 Row(
@@ -839,22 +823,8 @@ fun ColorScreenTab(
                 }
             }.Build()
         }
-        item {
-            Components.Dynamic {
-                ColorPreference(
-                    preference = vm.selectedScrollBarColor,
-                    title = localizeHelper.localize(Res.string.selected_scrollbar_color)
-                )
-            }.Build()
-        }
-        item {
-            Components.Dynamic {
-                ColorPreference(
-                    preference = vm.unselectedScrollBarColor,
-                    title = localizeHelper.localize(Res.string.unselected_scrollbar_color)
-                )
-            }.Build()
-        }
+        // Note: Scrollbar color preferences removed as they don't exist in the current ViewModel
+        // These would need to be added to ReaderPreferences if scrollbar color customization is needed
         item {
             Components.Space.Build()
         }

@@ -55,19 +55,19 @@ class DownloaderService constructor(
         downloadJob.cancel()
         
         // Reset download service state - this will cause the download loop to exit
-        downloadServiceState.isRunning = false
-        downloadServiceState.isPaused = false
+        downloadServiceState.setRunning(false)
+        downloadServiceState.setPaused(false)
         
         // Get the current download info for the notification
-        val currentDownload = downloadServiceState.downloads.firstOrNull()
+        val currentDownload = downloadServiceState.downloads.value.firstOrNull()
         val bookName = currentDownload?.bookName ?: "Downloads"
         
         // Count how many were in progress
-        val totalDownloads = downloadServiceState.downloads.size
-        val completedCount = downloadServiceState.downloadProgress.values
+        val totalDownloads = downloadServiceState.downloads.value.size
+        val completedCount = downloadServiceState.downloadProgress.value.values
             .count { it.status == DownloadStatus.COMPLETED }
         
-        downloadServiceState.downloadProgress = emptyMap()
+        downloadServiceState.setDownloadProgress(emptyMap())
         
         // Cancel the progress notification immediately
         notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
@@ -156,9 +156,9 @@ class DownloaderService constructor(
                 notificationManager.cancel(notificationId)
                 
                 // Count completed and failed downloads
-                val completedCount = downloadServiceState.downloadProgress.values
+                val completedCount = downloadServiceState.downloadProgress.value.values
                     .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED }
-                val failedCount = downloadServiceState.downloadProgress.values
+                val failedCount = downloadServiceState.downloadProgress.value.values
                     .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.FAILED }
                 
                 // Show completion notification
@@ -208,14 +208,14 @@ class DownloaderService constructor(
                     ireader.core.log.Log.info { "DownloaderService: Cancellation detected in checkCancellation" }
                     isCancelled = true
                     // Immediately stop the service state to break out of loops
-                    downloadServiceState.isRunning = false
+                    downloadServiceState.setRunning(false)
                     // Cancel notification immediately and show cancellation notification
                     notificationManager.cancel(notificationId)
                     
                     // Show cancellation notification immediately
-                    val currentDownload = downloadServiceState.downloads.firstOrNull()
-                    val totalDownloads = downloadServiceState.downloads.size
-                    val completedCount = downloadServiceState.downloadProgress.values
+                    val currentDownload = downloadServiceState.downloads.value.firstOrNull()
+                    val totalDownloads = downloadServiceState.downloads.value.size
+                    val completedCount = downloadServiceState.downloadProgress.value.values
                         .count { it.status == DownloadStatus.COMPLETED }
                     
                     val cancelMessage = if (completedCount > 0) {

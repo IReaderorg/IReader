@@ -181,18 +181,18 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             }
             
             override fun onNext() {
-                val chapter = state.ttsChapter
-                val chapters = state.ttsChapters
-                val source = state.ttsCatalog
+                val chapter = state.ttsChapter.value
+                val chapters = state.ttsChapters.value
+                val source = state.ttsCatalog.value
                 if (chapter != null && source != null) {
                     scope.launch { handleSkipNext(chapter, chapters, source) }
                 }
             }
             
             override fun onPrevious() {
-                val chapter = state.ttsChapter
-                val chapters = state.ttsChapters
-                val source = state.ttsCatalog
+                val chapter = state.ttsChapter.value
+                val chapters = state.ttsChapters.value
+                val source = state.ttsCatalog.value
                 if (chapter != null && source != null) {
                     scope.launch { handleSkipPrevious(chapter, chapters, source) }
                 }
@@ -240,19 +240,23 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                     // Load book and chapter if provided - WAIT for completion
                     scope.launch {
                         // Only load book if provided and different from current
-                        if (bookId != -1L && state.ttsBook?.id != bookId) {
-                            state.ttsBook = bookRepo.findBookById(bookId)
+                        if (bookId != -1L && state.ttsBook.value?.id != bookId) {
+                            state.setTtsBook(bookRepo.findBookById(bookId)
+)
                         }
                         
                         // Only load chapter if provided and different from current
-                        if (chapterId != -1L && state.ttsChapter?.id != chapterId) {
+                        if (chapterId != -1L && state.ttsChapter.value?.id != chapterId) {
                             val chapter = chapterRepo.findChapterById(chapterId)
-                            state.ttsChapter = chapter
+                            state.setTtsChapter(chapter
+)
                             
                             // Load chapters list
-                            state.ttsBook?.let { book ->
-                                state.ttsChapters = chapterRepo.findChaptersByBookId(book.id)
-                                state.ttsCatalog = extensions.get(book.sourceId)
+                            state.ttsBook.value?.let { book ->
+                                state.setTtsChapters(chapterRepo.findChaptersByBookId(book.id)
+)
+                                state.setTtsCatalog(extensions.get(book.sourceId)
+)
                             }
                         }
                         
@@ -267,17 +271,17 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 ACTION_PLAY_PAUSE -> startService(Player.PLAY_PAUSE)
                 ACTION_STOP, ACTION_CANCEL -> scope.launch { handleCancel() }
                 ACTION_NEXT -> {
-                    val chapter = state.ttsChapter
-                    val chapters = state.ttsChapters
-                    val source = state.ttsCatalog
+                    val chapter = state.ttsChapter.value
+                    val chapters = state.ttsChapters.value
+                    val source = state.ttsCatalog.value
                     if (chapter != null && source != null) {
                         scope.launch { handleSkipNext(chapter, chapters, source) }
                     }
                 }
                 ACTION_PREVIOUS -> {
-                    val chapter = state.ttsChapter
-                    val chapters = state.ttsChapters
-                    val source = state.ttsCatalog
+                    val chapter = state.ttsChapter.value
+                    val chapters = state.ttsChapters.value
+                    val source = state.ttsCatalog.value
                     if (chapter != null && source != null) {
                         scope.launch { handleSkipPrevious(chapter, chapters, source) }
                     }
@@ -297,7 +301,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     override fun onDestroy() {
         // Stop playback immediately
         ttsEngine?.stop()
-        state.isPlaying = false
+        state.setPlaying(false
+)
         
         // Cancel notification when service is destroyed
         NotificationManagerCompat.from(this).cancel(NotificationsIds.ID_TTS)
@@ -364,8 +369,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             // Set callback for TTS events
             ttsEngine?.setCallback(object : TTSEngineCallback {
                 override fun onStart(utteranceId: String) {
-                    state.isPlaying = true
-                    state.utteranceId = utteranceId
+                    state.setPlaying(true
+)
+                    state.setUtteranceId(utteranceId
+)
                     setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
                     scope.launch { updateNotification() }
                 }
@@ -392,16 +399,16 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     fun readText(context: Context, mediaSessionCompat: MediaSessionCompat) {
         setBundle()
         
-        val chapter = state.ttsChapter
+        val chapter = state.ttsChapter.value
         val content = getCurrentContent()
-        val book = state.ttsBook
+        val book = state.ttsBook.value
         
         if (chapter == null || content == null || book == null) {
             Log.error { "TTS: Missing data - book=${book?.title}, chapter=${chapter?.name}, content=${content?.size}" }
             return
         }
         
-        if (state.currentReadingParagraph >= content.size) {
+        if (state.currentReadingParagraph.value >= content.size) {
             Log.error { "TTS: Paragraph index out of bounds: ${state.currentReadingParagraph} >= ${content.size}" }
             return
         }
@@ -413,8 +420,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             initializeTTSEngine()
             
             // Speak current paragraph
-            val text = content[state.currentReadingParagraph]
-            val utteranceId = state.currentReadingParagraph.toString()
+            val text = content[state.currentReadingParagraph.value]
+            val utteranceId = state.currentReadingParagraph.value.toString()
             
             // Pre-cache next 3 paragraphs for Coqui TTS
             if (currentEngineType == TTSEngineType.COQUI) {
@@ -425,7 +432,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                     val loadingSet = mutableSetOf<Int>()
                     
                     for (i in 1..3) {
-                        val nextIndex = state.currentReadingParagraph + i
+                        val nextIndex = state.currentReadingParagraph.value + i
                         if (nextIndex < content.size) {
                             nextParagraphs.add(nextIndex.toString() to content[nextIndex])
                             loadingSet.add(nextIndex)
@@ -443,7 +450,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                             val loading = mutableSetOf<Int>()
                             
                             for (i in 1..3) {
-                                val nextIndex = state.currentReadingParagraph + i
+                                val nextIndex = state.currentReadingParagraph.value + i
                                 if (nextIndex < content.size) {
                                     when (engine.getCacheStatus(nextIndex.toString())) {
                                         CoquiTTSPlayer.CacheStatus.CACHED -> cached.add(nextIndex)
@@ -490,16 +497,16 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         checkSleepTime()
         
         val content = getCurrentContent() ?: return
-        val isFinished = state.currentReadingParagraph >= content.lastIndex
+        val isFinished = state.currentReadingParagraph.value >= content.lastIndex
         
         // Keep playing state true for auto-advance
-        if (!isFinished && state.currentReadingParagraph < content.size && state.isPlaying) {
-            state.currentReadingParagraph += 1
+        if (!isFinished && state.currentReadingParagraph.value < content.size && state.isPlaying.value) {
+            state.setCurrentReadingParagraph(state.currentReadingParagraph.value + 1)
             readText(this, mediaSession)
             return
         }
         
-        if (isFinished && state.isPlaying) {
+        if (isFinished && state.isPlaying.value) {
             handleChapterFinished()
         }
     }
@@ -508,21 +515,24 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
      * Handle chapter completion and auto-next chapter
      */
     private fun handleChapterFinished() {
-        state.isPlaying = false
-        state.currentReadingParagraph = 0
+        state.setPlaying(false
+)
+        state.setCurrentReadingParagraph(0
+)
         ttsEngine?.stop()
         
-        if (state.autoNextChapter) {
+        if (state.autoNextChapter.value) {
             scope.launch {
-                val chapter = state.ttsChapter ?: return@launch
-                val chapters = state.ttsChapters
-                val source = state.ttsCatalog ?: return@launch
+                val chapter = state.ttsChapter.value ?: return@launch
+                val chapters = state.ttsChapters.value
+                val source = state.ttsCatalog.value ?: return@launch
                 val index = getChapterIndex(chapter, chapters)
                 
                 if (index != chapters.lastIndex) {
                     val nextChapterId = chapters[index + 1].id
                     getRemoteChapter(nextChapterId, source, state) {
-                        state.currentReadingParagraph = 0
+                        state.setCurrentReadingParagraph(0
+)
                         updateNotification()
                         readText(this@TTSService, mediaSession)
                     }
@@ -536,19 +546,21 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private suspend fun handlePlay() {
         setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
         hookNotification()
-        state.isPlaying = true
+        state.setPlaying(true
+)
         readText(this@TTSService, mediaSession)
     }
     
     private suspend fun handlePause() {
         setPlaybackState(PlaybackStateCompat.STATE_PAUSED)
-        state.isPlaying = false
+        state.setPlaying(false
+)
         ttsEngine?.pause()
         updateNotification()
     }
     
     private suspend fun handlePlayPause() {
-        if (state.isPlaying) {
+        if (state.isPlaying.value) {
             handlePause()
         } else {
             handlePlay()
@@ -556,10 +568,11 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     private suspend fun handleTogglePlayPause() {
-        if (state.isPlaying) {
+        if (state.isPlaying.value) {
             handlePause()
         } else {
-            state.isPlaying = true
+            state.setPlaying(true
+)
             readText(this@TTSService, mediaSession)
         }
     }
@@ -567,8 +580,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private suspend fun handleCancel() {
         // Stop playback
         ttsEngine?.stop()
-        state.utteranceId = ""
-        state.isPlaying = false
+        state.setUtteranceId(""
+)
+        state.setPlaying(false
+)
         
         abandonAudioFocus()
         unhookNotification()
@@ -593,13 +608,14 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     
     private suspend fun handleSkipNext(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
         ttsEngine?.stop()
-        state.isPlaying = false
+        state.setPlaying(false
+)
         
         val index = getChapterIndex(chapter, chapters)
         if (index != chapters.lastIndex) {
             val nextChapterId = chapters[index + 1].id
             getRemoteChapter(nextChapterId, source, state) {
-                if (state.isPlaying) {
+                if (state.isPlaying.value) {
                     readText(this@TTSService, mediaSession)
                 }
             }
@@ -608,14 +624,15 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     
     private suspend fun handleSkipPrevious(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
         ttsEngine?.stop()
-        state.isPlaying = false
+        state.setPlaying(false
+)
         
         val index = getChapterIndex(chapter, chapters)
         if (index != 0) {
             val prevChapterId = chapters[index - 1].id
             getRemoteChapter(prevChapterId, source, state) {
                 updateNotification()
-                if (state.isPlaying) {
+                if (state.isPlaying.value) {
                     readText(this@TTSService, mediaSession)
                 }
             }
@@ -624,10 +641,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     
     private suspend fun handleSkipNextParagraph() {
         val content = getCurrentContent() ?: return
-        if (state.currentReadingParagraph < content.lastIndex) {
+        if (state.currentReadingParagraph.value < content.lastIndex) {
             ttsEngine?.stop()
-            state.currentReadingParagraph += 1
-            if (state.isPlaying) {
+            state.setCurrentReadingParagraph(state.currentReadingParagraph.value + 1)
+            if (state.isPlaying.value) {
                 readText(this@TTSService, mediaSession)
                 updateNotification()
             }
@@ -635,10 +652,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     private suspend fun handleSkipPreviousParagraph() {
-        if (state.currentReadingParagraph > 0) {
+        if (state.currentReadingParagraph.value > 0) {
             ttsEngine?.stop()
-            state.currentReadingParagraph -= 1
-            if (state.isPlaying) {
+            state.setCurrentReadingParagraph(state.currentReadingParagraph.value - 1)
+            if (state.isPlaying.value) {
                 readText(this@TTSService, mediaSession)
                 updateNotification()
             }
@@ -650,13 +667,13 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private fun readPrefs() {
         scope.launch {
             with(state) {
-                autoNextChapter = readerPreferences.readerAutoNext().get()
-                currentLanguage = readerPreferences.speechLanguage().get()
-                currentVoice = textReaderPrefUseCase.readVoice()
-                speechSpeed = readerPreferences.speechRate().get()
-                pitch = readerPreferences.speechPitch().get()
-                sleepTime = readerPreferences.sleepTime().get()
-                sleepMode = readerPreferences.sleepMode().get()
+                setAutoNextChapter(readerPreferences.readerAutoNext().get())
+                setCurrentLanguage(readerPreferences.speechLanguage().get())
+                setCurrentVoice(textReaderPrefUseCase.readVoice())
+                setSpeechSpeed(readerPreferences.speechRate().get())
+                setPitch(readerPreferences.speechPitch().get())
+                setSleepTime(readerPreferences.sleepTime().get())
+                setSleepMode(readerPreferences.sleepMode().get())
             }
             
             observePreferenceChanges()
@@ -664,32 +681,32 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     private fun CoroutineScope.observePreferenceChanges() {
-        launch { readerPreferences.readerAutoNext().changes().collect { state.autoNextChapter = it } }
-        launch { readerPreferences.speechLanguage().changes().collect { state.currentLanguage = it } }
-        launch { appPrefs.speechVoice().changes().collect { state.currentVoice = it } }
-        launch { readerPreferences.speechPitch().changes().collect { state.pitch = it } }
+        launch { readerPreferences.readerAutoNext().changes().collect { state.setAutoNextChapter(it) } }
+        launch { readerPreferences.speechLanguage().changes().collect { state.setCurrentLanguage(it) } }
+        launch { appPrefs.speechVoice().changes().collect { state.setCurrentVoice(it) } }
+        launch { readerPreferences.speechPitch().changes().collect { state.setPitch(it) } }
         launch { 
             readerPreferences.speechRate().changes().collect { 
-                state.speechSpeed = it
+                state.setSpeechSpeed(it)
                 ttsEngine?.setSpeed(it)
             } 
         }
-        launch { readerPreferences.sleepTime().changes().collect { state.sleepTime = it } }
-        launch { readerPreferences.sleepMode().changes().collect { state.sleepMode = it } }
+        launch { readerPreferences.sleepTime().changes().collect { state.setSleepTime(it) } }
+        launch { readerPreferences.sleepMode().changes().collect { state.setSleepMode(it) } }
     }
     
     @OptIn(ExperimentalTime::class)
     fun checkSleepTime() {
-        val lastCheckPref = state.startTime
-        val currentSleepTime = state.sleepTime.minutes
+        val lastCheckPref = state.startTime.value
+        val currentSleepTime = state.sleepTime.value.minutes
         val now = kotlin.time.Clock.System.now()
-        if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode) {
+        if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode.value) {
             startService(Player.CANCEL)
         }
     }
     
     private fun getCurrentContent(): List<String>? {
-        return state.ttsContent?.value
+        return state.ttsContent.value
     }
     
     private fun getChapterIndex(chapter: Chapter, chapters: List<Chapter>): Int {
@@ -724,16 +741,16 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         
         // Show notification using abstraction
         val data = TTSNotificationData(
-            title = state.ttsChapter?.name ?: "",
-            subtitle = state.ttsBook?.title ?: "",
-            coverUrl = state.ttsBook?.cover,
-            isPlaying = state.isPlaying,
+            title = state.ttsChapter.value?.name ?: "",
+            subtitle = state.ttsBook.value?.title ?: "",
+            coverUrl = state.ttsBook.value?.cover,
+            isPlaying = state.isPlaying.value,
             isLoading = state.isLoading.value,
-            currentParagraph = state.currentReadingParagraph,
+            currentParagraph = state.currentReadingParagraph.value,
             totalParagraphs = getCurrentContent()?.size ?: 0,
-            bookId = state.ttsBook?.id ?: -1,
-            chapterId = state.ttsChapter?.id ?: -1,
-            sourceId = state.ttsBook?.sourceId ?: -1
+            bookId = state.ttsBook.value?.id ?: -1,
+            chapterId = state.ttsChapter.value?.id ?: -1,
+            sourceId = state.ttsBook.value?.sourceId ?: -1
         )
         ttsNotification.show(data)
         
@@ -765,8 +782,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         // Ensure metadata is set before building notification
         if (state.meta == null) {
             val meta = MediaMetadataCompat.Builder()
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, state.ttsChapter?.name ?: "")
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, state.ttsBook?.title ?: "")
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, state.ttsChapter.value?.name ?: "")
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, state.ttsBook.value?.title ?: "")
                 .putLong(IS_LOADING, if (state.isLoading.value) 1L else 0L)
                 .build()
             state.meta = meta
@@ -775,23 +792,23 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         
         // Update notification using abstraction
         val data = TTSNotificationData(
-            title = state.ttsChapter?.name ?: "",
-            subtitle = state.ttsBook?.title ?: "",
-            coverUrl = state.ttsBook?.cover,
-            isPlaying = state.isPlaying,
+            title = state.ttsChapter.value?.name ?: "",
+            subtitle = state.ttsBook.value?.title ?: "",
+            coverUrl = state.ttsBook.value?.cover,
+            isPlaying = state.isPlaying.value,
             isLoading = state.isLoading.value,
-            currentParagraph = state.currentReadingParagraph,
+            currentParagraph = state.currentReadingParagraph.value,
             totalParagraphs = getCurrentContent()?.size ?: 0,
-            bookId = state.ttsBook?.id ?: -1,
-            chapterId = state.ttsChapter?.id ?: -1,
-            sourceId = state.ttsBook?.sourceId ?: -1
+            bookId = state.ttsBook.value?.id ?: -1,
+            chapterId = state.ttsChapter.value?.id ?: -1,
+            sourceId = state.ttsBook.value?.sourceId ?: -1
         )
         ttsNotification.show(data)
     }
     
     fun setBundle(
-        book: Book? = state.ttsBook,
-        chapter: Chapter? = state.ttsChapter
+        book: Book? = state.ttsBook.value,
+        chapter: Chapter? = state.ttsChapter.value
     ) {
         val bundle = Bundle()
         bundle.putLong(NOVEL_ID, book?.id ?: -1)
@@ -799,7 +816,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         bundle.putBoolean(FAVORITE, book?.favorite ?: false)
         bundle.putString(NOVEL_TITLE, book?.title ?: "")
         bundle.putString(NOVEL_COVER, book?.cover ?: "")
-        bundle.putInt(PROGRESS, state.currentReadingParagraph)
+        bundle.putInt(PROGRESS, state.currentReadingParagraph.value)
         bundle.putInt(LAST_PARAGRAPH, getCurrentContent()?.size ?: 0)
         bundle.putString(CHAPTER_TITLE, chapter?.name ?: "")
         bundle.putLong(CHAPTER_ID, chapter?.id ?: -1)
@@ -812,7 +829,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         val content = getCurrentContent()
         val paragraphText = when {
             state.isLoading.value -> "Loading..."
-            else -> "${state.currentReadingParagraph + 1}/${content?.size ?: 0}"
+            else -> "${state.currentReadingParagraph.value + 1}/${content?.size ?: 0}"
         }
         
         val meta = MediaMetadataCompat.Builder()
@@ -826,7 +843,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             .putLong(SOURCE_ID, book?.sourceId ?: -1)
             .putLong(CHAPTER_ID, chapter?.id ?: -1)
             .putString(CHAPTER_TITLE, chapter?.name ?: "")
-            .putLong(PROGRESS, state.currentReadingParagraph.toLong())
+            .putLong(PROGRESS, state.currentReadingParagraph.value.toLong())
             .putLong(LAST_PARAGRAPH, content?.size?.toLong() ?: 0L)
             .putLong(IS_LOADING, if (state.isLoading.value) 1L else 0L)
             .putLong(FAVORITE, if (book?.favorite == true) 1L else 0L)
@@ -877,12 +894,12 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     override fun onAudioFocusChange(focusChange: Int) {
         when (focusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
-                if (resumeOnFocus && !state.isPlaying) {
+                if (resumeOnFocus && !state.isPlaying.value) {
                     scope.launch { handlePlay() }
                 }
             }
             AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                if (state.isPlaying) {
+                if (state.isPlaying.value) {
                     scope.launch { handlePause() }
                 }
             }
@@ -905,16 +922,16 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         }
         
         override fun onSkipToNext() {
-            val chapter = state.ttsChapter ?: return
-            val chapters = state.ttsChapters
-            val source = state.ttsCatalog ?: return
+            val chapter = state.ttsChapter.value ?: return
+            val chapters = state.ttsChapters.value
+            val source = state.ttsCatalog.value ?: return
             scope.launch { handleSkipNext(chapter, chapters, source) }
         }
         
         override fun onSkipToPrevious() {
-            val chapter = state.ttsChapter ?: return
-            val chapters = state.ttsChapters
-            val source = state.ttsCatalog ?: return
+            val chapter = state.ttsChapter.value ?: return
+            val chapters = state.ttsChapters.value
+            val source = state.ttsCatalog.value ?: return
             scope.launch { handleSkipPrevious(chapter, chapters, source) }
         }
         
@@ -966,7 +983,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     ) {
         try {
             setLoadingState(true)
-            state.currentReadingParagraph = 0
+            state.setCurrentReadingParagraph(0
+)
             
             val chapter = chapterRepo.findChapterById(chapterId) ?: return
             
@@ -979,7 +997,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                         onSuccess = { remoteChapter ->
                             scope.launch {
                                 chapterRepo.insertChapter(remoteChapter)
-                                ttsState.ttsChapter = remoteChapter
+                                ttsState.setTtsChapter(remoteChapter)
                                 setLoadingState(false)
                                 onSuccess()
                             }
@@ -994,7 +1012,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                     setLoadingState(false)
                 }
             } else {
-                ttsState.ttsChapter = chapter
+                ttsState.setTtsChapter(chapter)
                 setLoadingState(false)
                 onSuccess()
             }
@@ -1041,7 +1059,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             job = scope.launch {
                 while (isActive) {
                     delay(1000)
-                    if (state.isPlaying) {
+                    if (state.isPlaying.value) {
                         updateNotification()
                     }
                 }

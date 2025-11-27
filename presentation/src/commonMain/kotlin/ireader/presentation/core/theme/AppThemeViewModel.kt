@@ -26,6 +26,9 @@ import ireader.presentation.ui.core.theme.getLightColors
 import ireader.presentation.ui.core.theme.isLight
 import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.core.ui.PreferenceMutableState
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toComposeColorScheme
+import ireader.presentation.core.toDomainColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -61,9 +64,9 @@ class AppThemeViewModel(
     @Composable
     fun getColors(): Pair<ColorScheme, ExtraColors> {
         val baseTheme = getBaseTheme(themeMode, colorTheme)
-        val isLight = baseTheme.materialColors.isLight()
+        val isLight = baseTheme.materialColors.toComposeColorScheme().isLight()
         
-        val colors = remember(baseTheme.materialColors.isLight()) {
+        val colors = remember(isLight) {
             baseThemeJob.cancelChildren()
             if (isLight) {
                 uiPreferences.getLightColors().asState(baseThemeScope)
@@ -76,23 +79,23 @@ class AppThemeViewModel(
         val useDynamicColors = dynamicColorMode && dynamicColorScheme.isSupported()
 
         // Step 1: Get base color scheme (either dynamic or theme-based)
-        var materialColors = if (useDynamicColors) {
+        var materialColors: ColorScheme = if (useDynamicColors) {
             try {
                 if (isLight) {
                     dynamicColorScheme.lightColorScheme()
                 } else {
                     dynamicColorScheme.darkColorScheme()
-                } ?: baseTheme.materialColors
+                } ?: baseTheme.materialColors.toComposeColorScheme()
             } catch (e: Exception) {
-                baseTheme.materialColors
+                baseTheme.materialColors.toComposeColorScheme()
             }
         } else {
-            baseTheme.materialColors
+            baseTheme.materialColors.toComposeColorScheme()
         }
         
         // Step 2: Apply custom primary/secondary colors if specified
-        val customPrimary = colors.primary.value.takeIf { it != Color.Unspecified }
-        val customSecondary = colors.secondary.value.takeIf { it != Color.Unspecified }
+        val customPrimary = colors.primary.value.toComposeColor().takeIf { it != Color.Unspecified }
+        val customSecondary = colors.secondary.value.toComposeColor().takeIf { it != Color.Unspecified }
         
         if (customPrimary != null || customSecondary != null) {
             materialColors = ThemeColorUtils.applyCustomColors(
@@ -113,7 +116,7 @@ class AppThemeViewModel(
         // Step 5: Create extra colors for bars
         val extraColors = createExtraColors(
             baseTheme.extraColors,
-            colors.bars.value,
+            colors.bars.value.toComposeColor(),
             materialColors,
             isLight
         )
@@ -129,7 +132,7 @@ class AppThemeViewModel(
         @Composable
         fun getTheme(fallbackIsLight: Boolean): Theme {
             return themes.firstOrNull { it.id == colorTheme }
-                ?: themes.first { it.materialColors.isLight() == fallbackIsLight }
+                ?: themes.first { it.materialColors.toComposeColorScheme().isLight() == fallbackIsLight }
         }
 
         return when (themeMode) {
@@ -154,7 +157,7 @@ class AppThemeViewModel(
         isLight: Boolean
     ): ExtraColors {
         // Read the bars color from baseExtraColors OUTSIDE remember to ensure proper snapshot context
-        val baseBarsColor = baseExtraColors.bars
+        val baseBarsColor = baseExtraColors.bars.toComposeColor()
         
         // Now use remember with the already-read value
         return remember(baseBarsColor, customBarsColor, materialColors.surface, isLight, useTrueBlack) {
@@ -166,7 +169,7 @@ class AppThemeViewModel(
             }
             
             // Apply true black to bars if enabled for dark themes
-            val finalBarsColor = if (!isLight && useTrueBlack) {
+            val finalBarsColor = if (isLight.not() && useTrueBlack) {
                 Color.Black
             } else {
                 barsColor
@@ -176,8 +179,8 @@ class AppThemeViewModel(
             val onBarsColor = ThemeColorUtils.getOnColor(finalBarsColor)
             
             ExtraColors(
-                bars = finalBarsColor,
-                onBars = onBarsColor
+                bars = finalBarsColor.toDomainColor(),
+                onBars = onBarsColor.toDomainColor()
             )
         }
     }

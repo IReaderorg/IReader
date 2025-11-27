@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import ireader.domain.models.common.Uri
 import ireader.domain.utils.extensions.convertLongToTime
 import ireader.domain.utils.extensions.launchIO

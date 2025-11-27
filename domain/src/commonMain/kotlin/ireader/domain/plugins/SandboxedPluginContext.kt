@@ -17,11 +17,18 @@ class SandboxedPluginContext(
     /**
      * Get the plugin's data directory for storing files
      * Requirements: 10.4
+     * 
+     * Note: This is cached on first access to avoid blocking calls.
+     * The sandbox should initialize the data directory eagerly.
      */
-    override fun getDataDir(): String {
-        return runBlocking {
+    private val cachedDataDir: String by lazy {
+        runBlocking {
             sandbox.getPluginDataDir(pluginId).path
         }
+    }
+    
+    override fun getDataDir(): String {
+        return cachedDataDir
     }
     
     /**

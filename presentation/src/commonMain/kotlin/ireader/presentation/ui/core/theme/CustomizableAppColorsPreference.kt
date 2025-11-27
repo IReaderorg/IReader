@@ -4,8 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
-import androidx.compose.ui.graphics.Color
 import ireader.core.prefs.Preference
+import ireader.domain.models.common.DomainColor
 import ireader.domain.preferences.models.prefs.asThemeColor
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.ui.PreferenceMutableState
@@ -13,15 +13,15 @@ import ireader.presentation.ui.core.ui.asStateIn
 import kotlinx.coroutines.CoroutineScope
 
 data class CustomizableAppColorsPreference(
-    val primary: Preference<Color>,
-    val secondary: Preference<Color>,
-    val bars: Preference<Color>,
+    val primary: Preference<DomainColor>,
+    val secondary: Preference<DomainColor>,
+    val bars: Preference<DomainColor>,
 )
 
 class CustomizableAppColorsPreferenceState(
-    val primaryState: PreferenceMutableState<Color>,
-    val secondaryState: PreferenceMutableState<Color>,
-    val barsState: PreferenceMutableState<Color>,
+    val primaryState: PreferenceMutableState<DomainColor>,
+    val secondaryState: PreferenceMutableState<DomainColor>,
+    val barsState: PreferenceMutableState<DomainColor>,
 ) {
     var primary by mutableStateOf(primaryState, structuralEqualityPolicy())
     var secondary by mutableStateOf(secondaryState, structuralEqualityPolicy())

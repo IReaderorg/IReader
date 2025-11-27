@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.CategoryWithCount
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.core.theme.AppColors
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -34,8 +35,8 @@ fun LibraryTabs(
     ) {
         androidx.compose.material3.ScrollableTabRow(
             selectedTabIndex = state.currentPage,
-            contentColor = AppColors.current.onBars,
-            containerColor = AppColors.current.bars,
+            contentColor = AppColors.current.onBars.toComposeColor(),
+            containerColor = AppColors.current.bars.toComposeColor(),
             edgePadding = 0.dp,
 
             ) {

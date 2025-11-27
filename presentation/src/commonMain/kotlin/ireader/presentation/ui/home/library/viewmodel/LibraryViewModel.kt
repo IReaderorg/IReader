@@ -78,6 +78,31 @@ class LibraryViewModel(
         private val fileSystemService: ireader.domain.services.platform.FileSystemService,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
+    // ==================== Performance Optimizations ====================
+    // Internal managers for optimized operations
+    private val internalSelectionManager = SelectionManager()
+    private val internalSearchManager = SearchManager(scope, debounceMillis = 300)
+    
+    // Sync internal selection manager with state's SnapshotStateList for backwards compatibility
+    init {
+        scope.launch {
+            internalSelectionManager.selectedIds.collect { newSelection ->
+                // Update SnapshotStateList to match internal state
+                val toAdd = newSelection - selectedBooks.toSet()
+                val toRemove = selectedBooks.toSet() - newSelection
+                selectedBooks.removeAll(toRemove)
+                selectedBooks.addAll(toAdd)
+            }
+        }
+        
+        // Sync search query
+        scope.launch {
+            internalSearchManager.debouncedQuery.collect { query ->
+                searchQuery = query.ifBlank { null }
+            }
+        }
+    }
+
     var lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
     var filters = libraryPreferences.filters(true).asState()
 
@@ -263,10 +288,12 @@ class LibraryViewModel(
 
 fun downloadChapters() {
     scope.launch {
-        when (val result = downloadService.queueBooks(selectedBooks.toList())) {
+        // Use optimized selection manager - convert Set to List
+        val selectedIds = internalSelectionManager.toSet().toList()
+        when (val result = downloadService.queueBooks(selectedIds)) {
             is ireader.domain.services.common.ServiceResult.Success -> {
-                showSnackBar(ireader.i18n.UiText.DynamicString("${selectedBooks.size} books queued for download"))
-                selectedBooks.clear()
+                showSnackBar(ireader.i18n.UiText.DynamicString("${selectedIds.size} books queued for download"))
+                internalSelectionManager.clear()
             }
             is ireader.domain.services.common.ServiceResult.Error -> {
                 showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
@@ -280,9 +307,11 @@ fun downloadChapters() {
  * Download all unread chapters for selected books
  */
 suspend fun downloadUnreadChapters(): DownloadResult {
-    val result = downloadUnreadChaptersUseCase.downloadUnreadChapters(selectedBooks.toList())
+    // Use optimized selection manager - convert Set to List
+    val selectedIds = internalSelectionManager.toSet().toList()
+    val result = downloadUnreadChaptersUseCase.downloadUnreadChapters(selectedIds)
     if (result is DownloadResult.Success || result is DownloadResult.NoUnreadChapters) {
-        selectedBooks.clear()
+        internalSelectionManager.clear()
     }
     return result
 }
@@ -291,9 +320,11 @@ suspend fun downloadUnreadChapters(): DownloadResult {
  * Mark all chapters as read for selected books with undo support
  */
 suspend fun markAsReadWithUndo(): MarkResult {
-    val result = markBookAsReadOrNotUseCase.markAsReadWithUndo(selectedBooks.toList())
+    // Use optimized selection manager - convert Set to List
+    val selectedIds = internalSelectionManager.toSet().toList()
+    val result = markBookAsReadOrNotUseCase.markAsReadWithUndo(selectedIds)
     if (result is MarkResult.Success) {
-        selectedBooks.clear()
+        internalSelectionManager.clear()
     }
     return result
 }
@@ -302,9 +333,11 @@ suspend fun markAsReadWithUndo(): MarkResult {
  * Mark all chapters as unread for selected books with undo support
  */
 suspend fun markAsUnreadWithUndo(): MarkResult {
-    val result = markBookAsReadOrNotUseCase.markAsUnreadWithUndo(selectedBooks.toList())
+    // Use optimized selection manager - convert Set to List
+    val selectedIds = internalSelectionManager.toSet().toList()
+    val result = markBookAsReadOrNotUseCase.markAsUnreadWithUndo(selectedIds)
     if (result is MarkResult.Success) {
-        selectedBooks.clear()
+        internalSelectionManager.clear()
     }
     return result
 }
@@ -468,7 +501,8 @@ fun setSelectedPage(index: Int) {
 }
 
 fun unselectAll() {
-    state.selectedBooks.clear()
+    // Use optimized selection manager
+    internalSelectionManager.clear()
 }
 
 /**
@@ -477,27 +511,22 @@ fun unselectAll() {
  * If the book is not selected, it will be selected
  */
 fun toggleSelection(bookId: Long) {
-    if (bookId in state.selectedBooks) {
-        state.selectedBooks.remove(bookId)
-    } else {
-        state.selectedBooks.add(bookId)
-    }
+    // Use optimized selection manager for O(1) toggle
+    internalSelectionManager.toggle(bookId)
 }
 
 fun selectAllInCurrentCategory() {
     val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
-    val currentSelected = selectedBooks.toList()
-    val mangaIds = mangaInCurrentCategory.map { it.id }.filter { it !in currentSelected }
-    state.selectedBooks.addAll(mangaIds)
+    val mangaIds = mangaInCurrentCategory.map { it.id }
+    // Use optimized selection manager - efficient bulk add
+    internalSelectionManager.addAll(mangaIds)
 }
 
 fun flipAllInCurrentCategory() {
     val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
-    val currentSelected = selectedBooks.toList()
-    val (toRemove, toAdd) = mangaInCurrentCategory.map { it.id }
-        .partition { it in currentSelected }
-    state.selectedBooks.removeAll(toRemove)
-    state.selectedBooks.addAll(toAdd)
+    val mangaIds = mangaInCurrentCategory.map { it.id }
+    // Use optimized selection manager - efficient flip operation
+    internalSelectionManager.flip(mangaIds)
 }
 
 fun getDefaultValue(categories: Category): ToggleableState {
@@ -964,10 +993,11 @@ fun syncWithRemote() {
 
 /**
  * Search in library with enhanced filtering
+ * Now uses optimized SearchManager with consistent 300ms debouncing
  */
 fun searchInLibrary(query: String) {
-    state.searchQuery = query
-    // The existing search logic in getLibraryForCategoryIndex will handle this
+    // Use optimized search manager with automatic debouncing
+    internalSearchManager.setQuery(query)
 }
 
 
@@ -1037,9 +1067,10 @@ fun performBatchOperation(operation: ireader.presentation.ui.home.library.compon
                 
                 ireader.presentation.ui.home.library.components.BatchOperation.DELETE -> {
                     // Delete books from library (unfavorite) with remote sync
-                    deleteUseCase.unFavoriteBook(selectedBooks.toList())
-                    state.batchOperationMessage = "Removed ${selectedBooks.size} book(s) from library"
-                    selectedBooks.clear()
+                    val selectedIds = internalSelectionManager.toSet().toList()
+                    deleteUseCase.unFavoriteBook(selectedIds)
+                    state.batchOperationMessage = "Removed ${selectedIds.size} book(s) from library"
+                    internalSelectionManager.clear()
                 }
                 
                 ireader.presentation.ui.home.library.components.BatchOperation.CHANGE_CATEGORY -> {
@@ -1049,11 +1080,12 @@ fun performBatchOperation(operation: ireader.presentation.ui.home.library.compon
                 }
                 
                 ireader.presentation.ui.home.library.components.BatchOperation.ARCHIVE -> {
-                    val result = archiveBookUseCase.archiveBooks(selectedBooks.toList())
+                    val selectedIds = internalSelectionManager.toSet().toList()
+                    val result = archiveBookUseCase.archiveBooks(selectedIds)
                     result.fold(
                         onSuccess = {
-                            state.batchOperationMessage = "Archived ${selectedBooks.size} book(s)"
-                            selectedBooks.clear()
+                            state.batchOperationMessage = "Archived ${selectedIds.size} book(s)"
+                            internalSelectionManager.clear()
                         },
                         onFailure = { e ->
                             state.batchOperationMessage = "Error archiving books: ${e.message}"

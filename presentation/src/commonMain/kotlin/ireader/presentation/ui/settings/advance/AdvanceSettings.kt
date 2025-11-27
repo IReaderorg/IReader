@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import ireader.core.log.Log
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
@@ -16,7 +17,6 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.components.SetupSettingComponents
-import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.serialization.ExperimentalSerializationApi
 import androidx.compose.runtime.getValue
@@ -30,7 +30,7 @@ fun AdvanceSettings(
     padding: PaddingValues
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
+    val scope = rememberCoroutineScope()
     val showImport = remember { mutableStateOf(false) }
     var showDeleteAllDb by remember { mutableStateOf(false) }
     var showClearAllDatabase by remember { mutableStateOf(false) }
@@ -188,7 +188,7 @@ fun AdvanceSettings(
             confirmText = "Clear",
             onConfirm = {
                 vm.cacheManager.clearAllCache()
-                vm.showSnackBar(UiText.DynamicString("Cache was cleared."))
+                vm.showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.cache_cleared))
                 showClearCache = false
             },
             onDismiss = { showClearCache = false },
@@ -203,7 +203,7 @@ fun AdvanceSettings(
             confirmText = "Clear",
             onConfirm = {
                 vm.clearImageCache()
-                vm.showSnackBar(UiText.DynamicString("Cover cache was cleared."))
+                vm.showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.cover_cache_cleared))
                 showClearCoverCache = false
             },
             onDismiss = { showClearCoverCache = false },
@@ -218,7 +218,7 @@ fun AdvanceSettings(
             confirmationWord = "RESET",
             onConfirm = {
                 vm.deleteDefaultSettings()
-                vm.showSnackBar(UiText.DynamicString("Reader settings have been reset."))
+                vm.showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.reader_settings_reset))
                 showResetReaderSettings = false
             },
             onDismiss = { showResetReaderSettings = false }
@@ -260,7 +260,7 @@ fun AdvanceSettings(
             confirmationWord = "DELETE",
             onConfirm = {
                 vm.deleteAllDatabase()
-                vm.showSnackBar(UiText.DynamicString("Database has been deleted."))
+                vm.showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.database_deleted))
                 showDeleteAllDb = false
             },
             onDismiss = { showDeleteAllDb = false }

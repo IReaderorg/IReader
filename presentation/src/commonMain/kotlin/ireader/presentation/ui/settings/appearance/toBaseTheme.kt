@@ -2,7 +2,7 @@ package ireader.presentation.ui.settings.appearance
 
 import ireader.domain.models.theme.CustomTheme
 import ireader.domain.models.theme.Theme
-import ireader.domain.models.theme.toColorScheme
+import ireader.domain.models.theme.toDomainColorScheme
 import ireader.domain.models.theme.toCustomColorScheme
 import ireader.domain.models.theme.toCustomExtraColors
 import ireader.domain.models.theme.toExtraColor
@@ -11,7 +11,7 @@ import ireader.domain.models.theme.toExtraColor
 fun CustomTheme.toBaseTheme(): Theme {
     return Theme(
         id = this.id,
-        materialColors = this.materialColor.toColorScheme(this.dark),
+        materialColors = this.materialColor.toDomainColorScheme(),
         extraColors = this.extraColors.toExtraColor(),
         isDark = this.dark
     )

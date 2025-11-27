@@ -32,6 +32,9 @@ CREATE TABLE IF NOT EXISTS book(
 
 CREATE INDEX IF NOT EXISTS library_favorite_index ON book(favorite) WHERE favorite = 1;
 CREATE INDEX IF NOT EXISTS mangas_url_index ON book(url);
+-- Performance optimization indexes
+CREATE INDEX IF NOT EXISTS idx_book_favorite_id ON book(favorite, _id) WHERE favorite = 1;
+CREATE INDEX IF NOT EXISTS idx_book_source_favorite ON book(source, favorite);
 
 findAllBooks:
 SELECT * FROM book;
@@ -123,33 +126,17 @@ WHERE favorite = 0
 GROUP BY source;
 
 getLibrary:
-SELECT M.*, COALESCE(MC.category_id, 0) AS category
-FROM (
-    SELECT book.*, COALESCE(UR.unreadCount, 0) AS unread_count, COALESCE(R.readCount, 0) AS read_count
-    FROM book
-    LEFT JOIN (
-        SELECT chapter.book_id, COUNT(*) AS unreadCount
-        FROM chapter
-        WHERE chapter.read = 0
-        GROUP BY chapter.book_id
-    ) AS UR
-    ON book._id = UR.book_id
-    LEFT JOIN (
-        SELECT chapter.book_id, COUNT(*) AS readCount
-        FROM chapter
-        WHERE chapter.read = 1
-        GROUP BY chapter.book_id
-    ) AS R
-    ON book._id = R.book_id
-    WHERE book.favorite = 1
-    GROUP BY book._id
-    ORDER BY book.title
-) AS M
-LEFT JOIN (
-    SELECT *
-    FROM bookcategories
-) AS MC
-ON M._id = MC.book_id;
+SELECT 
+    book.*,
+    COALESCE(MC.category_id, 0) AS category,
+    COALESCE(SUM(CASE WHEN chapter.read = 0 THEN 1 ELSE 0 END), 0) AS unread_count,
+    COALESCE(SUM(CASE WHEN chapter.read = 1 THEN 1 ELSE 0 END), 0) AS read_count
+FROM book
+LEFT JOIN chapter ON book._id = chapter.book_id
+LEFT JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1
+GROUP BY book._id, MC.category_id
+ORDER BY book.title;
 
 getDownloaded:
 SELECT book.* FROM book
@@ -274,3 +261,61 @@ WHERE _id = :bookId;
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID();
+
+-- Performance optimized queries for statistics
+getCurrentlyReadingCount:
+SELECT COUNT(DISTINCT book._id) AS count
+FROM book
+JOIN chapter ON book._id = chapter.book_id
+WHERE book.favorite = 1
+GROUP BY book._id
+HAVING 
+    SUM(CASE WHEN chapter.read = 1 THEN 1 ELSE 0 END) > 0
+    AND SUM(CASE WHEN chapter.read = 1 THEN 1 ELSE 0 END) < COUNT(chapter._id);
+
+getFavoriteGenres:
+SELECT genre
+FROM book
+WHERE favorite = 1 AND genre IS NOT NULL;
+
+-- Pagination support for large libraries
+getLibraryPaginated:
+SELECT 
+    book.*,
+    COALESCE(MC.category_id, 0) AS category,
+    COALESCE(SUM(CASE WHEN chapter.read = 0 THEN 1 ELSE 0 END), 0) AS unread_count,
+    COALESCE(SUM(CASE WHEN chapter.read = 1 THEN 1 ELSE 0 END), 0) AS read_count
+FROM book
+LEFT JOIN chapter ON book._id = chapter.book_id
+LEFT JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1
+GROUP BY book._id, MC.category_id
+ORDER BY book.title
+LIMIT :limit OFFSET :offset;
+
+getLibraryCount:
+SELECT COUNT(DISTINCT book._id) AS count
+FROM book 
+WHERE book.favorite = 1;
+
+-- Get books by category with pagination
+getLibraryByCategoryPaginated:
+SELECT 
+    book.*,
+    COALESCE(MC.category_id, 0) AS category,
+    COALESCE(SUM(CASE WHEN chapter.read = 0 THEN 1 ELSE 0 END), 0) AS unread_count,
+    COALESCE(SUM(CASE WHEN chapter.read = 1 THEN 1 ELSE 0 END), 0) AS read_count
+FROM book
+LEFT JOIN chapter ON book._id = chapter.book_id
+LEFT JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1 AND MC.category_id = :categoryId
+GROUP BY book._id, MC.category_id
+ORDER BY book.title
+LIMIT :limit OFFSET :offset;
+
+-- Search with pagination
+searchBooksPaginated:
+SELECT * FROM book 
+WHERE title LIKE '%' || :query || '%' AND favorite = 1
+ORDER BY title
+LIMIT :limit OFFSET :offset;

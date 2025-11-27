@@ -380,7 +380,7 @@ class ExtensionViewModel(
                 checkSourceHealth(sourceId)
                 showSnackBar(UiText.DynamicString("Login successful"))
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Login failed: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Login failed: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -452,7 +452,7 @@ class ExtensionViewModel(
                 // Refresh catalogs to load from the new repository
                 refreshCatalogs()
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Failed to add repository: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Failed to add repository: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -519,7 +519,7 @@ class ExtensionViewModel(
                 checkSourceHealth(sourceId)
                 showSnackBar(UiText.DynamicString("Logged out successfully"))
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Logout failed: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Logout failed: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -568,7 +568,7 @@ class ExtensionViewModel(
                     showSnackBar(UiText.DynamicString("Security scan complete"))
                 }
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Security scan failed: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Security scan failed: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -593,7 +593,7 @@ class ExtensionViewModel(
                 extensionSecurityManager?.setTrustLevel(extensionId, trustLevel)
                 showSnackBar(UiText.DynamicString("Trust level updated"))
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Failed to update trust level: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Failed to update trust level: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -610,10 +610,10 @@ class ExtensionViewModel(
                 extensionManager?.installExtension(catalog, method)?.onSuccess {
                     showSnackBar(UiText.DynamicString("Extension installed successfully"))
                 }?.onFailure { error ->
-                    showSnackBar(UiText.DynamicString("Installation failed: ${error.message}"))
+                    showSnackBar(UiText.DynamicString("Installation failed: ${error.message ?: "Unknown error"}"))
                 }
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Installation error: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Installation error: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -627,10 +627,10 @@ class ExtensionViewModel(
                 val installed = (pinnedCatalogs + unpinnedCatalogs).filterIsInstance<CatalogInstalled>()
                 extensionManager?.batchUpdateExtensions(installed)?.onSuccess { results ->
                     val successCount = results.values.count { it.isSuccess }
-                    showSnackBar(UiText.DynamicString("Updated $successCount/${installed.size} extensions"))
+                    showSnackBar(UiText.DynamicString("Updated $successCount of ${installed.size} extensions"))
                 }
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Batch update failed: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Batch update failed: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -645,10 +645,10 @@ class ExtensionViewModel(
                 if (updates != null && updates.isNotEmpty()) {
                     showSnackBar(UiText.DynamicString("${updates.size} updates available"))
                 } else {
-                    showSnackBar(UiText.DynamicString("All extensions are up to date"))
+                    showSnackBar(UiText.DynamicString("All extensions up to date"))
                 }
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Update check failed: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Update check failed: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -663,10 +663,10 @@ class ExtensionViewModel(
                     showSnackBar(UiText.DynamicString("Repository added successfully"))
                     refreshCatalogs()
                 }?.onFailure { error ->
-                    showSnackBar(UiText.DynamicString("Failed to add repository: ${error.message}"))
+                    showSnackBar(UiText.DynamicString("Failed to add repository: ${error.message ?: "Unknown error"}"))
                 }
             } catch (e: Exception) {
-                showSnackBar(UiText.DynamicString("Error adding repository: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Error adding repository: ${e.message ?: "Unknown error"}"))
             }
         }
     }

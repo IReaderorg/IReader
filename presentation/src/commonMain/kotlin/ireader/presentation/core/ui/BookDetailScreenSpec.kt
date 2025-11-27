@@ -50,8 +50,6 @@ import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.isTableUi
-import ireader.presentation.ui.component.utils.ActivityResultListener
-import ireader.presentation.ui.core.theme.LocalGlobalCoroutineScope
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.core.utils.isScrolledToEnd
@@ -202,12 +200,12 @@ data class BookDetailScreenSpec constructor(
                     topBarScrollBehavior = scrollBehavior,
                     snackbarHostState = snackbarHostState,
                     topBar = { scrollBehavior ->
-                        val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
+                        val scope = rememberCoroutineScope()
 
                         BookDetailTopAppBar(
                             scrollBehavior = scrollBehavior,
                             onRefresh = {
-                                globalScope.launch {
+                                scope.launch {
                                     if (book != null) {
                                         vm.getRemoteBookDetail(book, source = catalog)
                                         vm.getRemoteChapterDetail(book, catalog)
@@ -425,7 +423,7 @@ data class BookDetailScreenSpec constructor(
                             }
                         },
                         onCopyTitle = {
-                            vm.platformHelper.copyToClipboard(it, it)
+                            vm.copyToClipboard(it, it)
                         },
 
                     )

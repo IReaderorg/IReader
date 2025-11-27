@@ -77,9 +77,9 @@ actual class StartDownloadServicesUseCase(
                 },
                 onSuccess = {
                     // Count completed and failed downloads
-                    val completedCount = downloadServiceState.downloadProgress.values
+                    val completedCount = downloadServiceState.downloadProgress.value.values
                         .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.COMPLETED }
-                    val failedCount = downloadServiceState.downloadProgress.values
+                    val failedCount = downloadServiceState.downloadProgress.value.values
                         .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.FAILED }
                     
                     // Log success for desktop

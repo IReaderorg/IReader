@@ -21,6 +21,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.core.theme.AppColors
+import ireader.presentation.core.toComposeColor
 import kotlinx.coroutines.launch
 
 @Composable
@@ -43,8 +44,8 @@ fun ChapterDetailBottomBar(
                 .padding(horizontal = 16.dp, vertical = 32.dp)
                 .fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
-            color = AppColors.current.bars,
-            contentColor = AppColors.current.onBars,
+            color = AppColors.current.bars.toComposeColor(),
+            contentColor = AppColors.current.onBars.toComposeColor(),
             tonalElevation = 4.dp
         ) {
             Row(

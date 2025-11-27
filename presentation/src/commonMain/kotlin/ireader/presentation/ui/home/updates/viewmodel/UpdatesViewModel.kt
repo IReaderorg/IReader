@@ -83,7 +83,7 @@ class UpdatesViewModel(
                     showSnackBar(ireader.i18n.UiText.DynamicString("${chapterIds.size} chapters queued for download"))
                 }
                 is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message ?: "Unknown error"}"))
                 }
                 else -> {}
             }

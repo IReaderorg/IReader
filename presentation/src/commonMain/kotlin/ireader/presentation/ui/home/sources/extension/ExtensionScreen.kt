@@ -25,6 +25,7 @@ import ireader.i18n.UiEvent
 import ireader.i18n.asString
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -228,8 +229,8 @@ private fun ExtensionTabs(
     val scope = rememberCoroutineScope()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        containerColor = AppColors.current.bars,
-        contentColor = AppColors.current.onBars,
+        containerColor = AppColors.current.bars.toComposeColor(),
+        contentColor = AppColors.current.onBars.toComposeColor(),
     ) {
         pages.forEachIndexed { index, title ->
             Tab(

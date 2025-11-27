@@ -64,8 +64,8 @@ class DesktopTTSServiceAdapter(
     }
     
     override suspend fun jumpToParagraph(index: Int) {
-        service.state.currentReadingParagraph = index
-        if (service.state.isPlaying) {
+        service.state.setCurrentReadingParagraph(index)
+        if (service.state.isPlaying.value) {
             pause()
             play()
         }
@@ -145,15 +145,15 @@ class DesktopTTSStateAdapter(
     }
     
     private fun syncState() {
-        _isPlaying.value = desktopState.isPlaying
-        _currentBook.value = desktopState.ttsBook
-        _currentChapter.value = desktopState.ttsChapter
-        _currentParagraph.value = desktopState.currentReadingParagraph
-        _currentContent.value = desktopState.ttsContent?.value ?: emptyList()
-        _totalParagraphs.value = desktopState.ttsContent?.value?.size ?: 0
-        _speechSpeed.value = desktopState.speechSpeed
-        _speechPitch.value = desktopState.pitch
-        _autoNextChapter.value = desktopState.autoNextChapter
+        _isPlaying.value = desktopState.isPlaying.value
+        _currentBook.value = desktopState.ttsBook.value
+        _currentChapter.value = desktopState.ttsChapter.value
+        _currentParagraph.value = desktopState.currentReadingParagraph.value
+        _currentContent.value = desktopState.ttsContent.value ?: emptyList()
+        _totalParagraphs.value = desktopState.ttsContent.value?.size ?: 0
+        _speechSpeed.value = desktopState.speechSpeed.value
+        _speechPitch.value = desktopState.pitch.value
+        _autoNextChapter.value = desktopState.autoNextChapter.value
         _isLoading.value = desktopState.isLoading.value
     }
     

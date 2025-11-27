@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import ireader.presentation.core.toComposeColor
 
 /**
  * Helper composable to ensure proper system bars colors on screen navigation.
@@ -21,8 +22,8 @@ fun SystemBarsEffect(
     val appColors = AppColors.current
     
     DisposableEffect(statusBarColor, navigationBarColor) {
-        val finalStatusBarColor = statusBarColor ?: appColors.bars
-        val finalNavigationBarColor = navigationBarColor ?: appColors.bars
+        val finalStatusBarColor = statusBarColor ?: appColors.bars.toComposeColor()
+        val finalNavigationBarColor = navigationBarColor ?: appColors.bars.toComposeColor()
         
         val statusBarDarkIcons = finalStatusBarColor.luminance() > 0.5
         val navigationBarDarkIcons = finalNavigationBarColor.luminance() > 0.5
@@ -41,11 +42,11 @@ fun SystemBarsEffect(
         onDispose {
             // Restore default colors when leaving the screen
             systemUiController?.setStatusBarColor(
-                color = appColors.bars,
+                color = appColors.bars.toComposeColor(),
                 darkIcons = appColors.isBarLight
             )
             systemUiController?.setNavigationBarColor(
-                color = appColors.bars,
+                color = appColors.bars.toComposeColor(),
                 darkIcons = appColors.isBarLight,
                 navigationBarContrastEnforced = false
             )
@@ -65,7 +66,7 @@ fun EnsureSystemBars() {
     DisposableEffect(appColors.bars, appColors.isBarLight) {
         // Reapply system bars colors to fix any inconsistencies
         systemUiController?.setSystemBarsColor(
-            color = appColors.bars,
+            color = appColors.bars.toComposeColor(),
             darkIcons = appColors.isBarLight,
             isNavigationBarContrastEnforced = false
         )

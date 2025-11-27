@@ -3,7 +3,6 @@ package ireader.presentation.core.di
 import android.content.Context
 import ireader.domain.image.CoverCache
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
-import ireader.presentation.core.PlatformHelper
 import ireader.presentation.core.theme.IUseController
 import ireader.presentation.core.theme.LocaleHelper
 
@@ -59,7 +58,6 @@ actual val presentationPlatformModule = module  {
     factory <WebViewPageStateImpl> { WebViewPageStateImpl() }
 
     single { LocaleHelper(get(),get()) }
-    single { PlatformHelper(get()) }
     single { ireader.presentation.ui.book.helpers.PlatformHelper(get()) }
     single<IUseController> { IUseController() }
     single<CoilLoaderFactory>(createdAtStart = true) {

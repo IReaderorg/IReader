@@ -14,6 +14,7 @@ import ireader.domain.services.common.ServiceResult
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toDomainColor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -134,7 +135,7 @@ class ReaderSettingsViewModel(
                 is ServiceResult.Error -> {
                     // Still save to preferences even if system update fails
                     readerUseCases.brightnessStateUseCase.saveBrightness(newBrightness)
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set brightness: ${result.message}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set brightness: ${result.message ?: "Unknown error"}"))
                 }
                 else -> {}
             }
@@ -144,10 +145,8 @@ class ReaderSettingsViewModel(
     /**
      * Get current system brightness
      */
-    fun getCurrentBrightness(): Float {
-        return runBlocking {
-            systemInteractionService.getBrightness()
-        }
+    suspend fun getCurrentBrightness(): Float {
+        return systemInteractionService.getBrightness()
     }
     
     /**
@@ -208,14 +207,14 @@ class ReaderSettingsViewModel(
      * Set reader background color
      */
     fun setReaderBackgroundColor(color: Color) {
-        readerUseCases.backgroundColorUseCase.save(color)
+        readerUseCases.backgroundColorUseCase.save(color.toDomainColor())
     }
     
     /**
      * Set reader text color
      */
     fun setReaderTextColor(color: Color) {
-        readerUseCases.textColorUseCase.save(color)
+        readerUseCases.textColorUseCase.save(color.toDomainColor())
     }
     
     /**
@@ -269,7 +268,7 @@ class ReaderSettingsViewModel(
                     // Success
                 }
                 is ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set secure screen: ${result.message}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set secure screen: ${result.message ?: "Unknown error"}"))
                 }
                 else -> {}
             }
@@ -286,7 +285,7 @@ class ReaderSettingsViewModel(
                     readerPreferences.screenAlwaysOn().set(enabled)
                 }
                 is ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set keep screen on: ${result.message}"))
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set keep screen on: ${result.message ?: "Unknown error"}"))
                 }
                 else -> {}
             }

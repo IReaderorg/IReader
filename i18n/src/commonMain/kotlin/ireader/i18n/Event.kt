@@ -20,14 +20,3 @@ data class ResourceException(
     val e: Exception,
     val resId: Int,
 )
-
-sealed class UiText {
-
-    data class DynamicString(val text: String) : UiText()
-
-    data class StringResource(val resId: Int) : UiText()
-    data class MStringResource(val res: org.jetbrains.compose.resources.StringResource) : UiText()
-
-    data class ExceptionString(val e: Throwable) : UiText()
-
-}

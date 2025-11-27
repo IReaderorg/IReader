@@ -131,7 +131,7 @@ actual class EpubCreator(
     }
 
     @Composable
-    actual fun onEpubCreateRequested(book: Book, onStart: @Composable ((Any) -> Unit)) {
+    fun onEpubCreateRequested(book: Book, onStart: @Composable ((Any) -> Unit)) {
         val mimeTypes = arrayOf("application/epub+zip")
         val filename = "${sanitizeFilename(book.title)}.epub"
         android.util.Log.d("EpubCreator", "Creating file picker intent for: $filename")

@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toComposeColorScheme
 
 /**
  * Preview composable for theme options
@@ -26,14 +28,14 @@ fun ThemePreview(
     modifier: Modifier = Modifier
 ) {
     AppColors(
-        materialColors = theme.materialColors,
+        materialColors = theme.materialColors.toComposeColorScheme(),
         extraColors = theme.extraColors,
         typography = Typography(),
         shape = Shapes()
     ) {
         Surface(
             modifier = modifier,
-            color = theme.materialColors.background
+            color = theme.materialColors.background.toComposeColor()
         ) {
             Column(
                 modifier = Modifier
@@ -46,7 +48,7 @@ fun ThemePreview(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    color = theme.extraColors.bars,
+                    color = theme.extraColors.bars.toComposeColor(),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
@@ -58,7 +60,7 @@ fun ThemePreview(
                         Text(
                             text = "Preview",
                             style = MaterialTheme.typography.titleLarge,
-                            color = theme.extraColors.onBars
+                            color = theme.extraColors.onBars.toComposeColor()
                         )
                     }
                 }
@@ -75,8 +77,8 @@ fun ThemePreview(
                         onClick = {},
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = theme.materialColors.primary,
-                            contentColor = theme.materialColors.onPrimary
+                            containerColor = theme.materialColors.primary.toComposeColor(),
+                            contentColor = theme.materialColors.onPrimary.toComposeColor()
                         )
                     ) {
                         Text("Primary Button")
@@ -87,7 +89,7 @@ fun ThemePreview(
                         onClick = {},
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = theme.materialColors.secondary
+                            contentColor = theme.materialColors.secondary.toComposeColor()
                         )
                     ) {
                         Text("Secondary Button")
@@ -97,8 +99,8 @@ fun ThemePreview(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = theme.materialColors.surface,
-                            contentColor = theme.materialColors.onSurface
+                            containerColor = theme.materialColors.surface.toComposeColor(),
+                            contentColor = theme.materialColors.onSurface.toComposeColor()
                         )
                     ) {
                         Column(
@@ -108,12 +110,12 @@ fun ThemePreview(
                             Text(
                                 text = "Card Title",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = theme.materialColors.onSurface
+                                color = theme.materialColors.onSurface.toComposeColor()
                             )
                             Text(
                                 text = "This is a preview of how text will look in cards with this theme.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = theme.materialColors.onSurfaceVariant
+                                color = theme.materialColors.onSurfaceVariant.toComposeColor()
                             )
                         }
                     }
@@ -121,7 +123,7 @@ fun ThemePreview(
                     // Surface variant preview
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        color = theme.materialColors.surfaceVariant,
+                        color = theme.materialColors.surfaceVariant.toComposeColor(),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Row(
@@ -132,12 +134,12 @@ fun ThemePreview(
                             Icon(
                                 imageVector = Icons.Default.Favorite,
                                 contentDescription = null,
-                                tint = theme.materialColors.primary
+                                tint = theme.materialColors.primary.toComposeColor()
                             )
                             Text(
                                 text = "Surface Variant",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = theme.materialColors.onSurfaceVariant
+                                color = theme.materialColors.onSurfaceVariant.toComposeColor()
                             )
                         }
                     }
@@ -148,7 +150,7 @@ fun ThemePreview(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(80.dp),
-                    color = theme.materialColors.surfaceVariant,
+                    color = theme.materialColors.surfaceVariant.toComposeColor(),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
@@ -161,17 +163,17 @@ fun ThemePreview(
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = null,
-                            tint = theme.materialColors.primary
+                            tint = theme.materialColors.primary.toComposeColor()
                         )
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = null,
-                            tint = theme.materialColors.onSurfaceVariant
+                            tint = theme.materialColors.onSurfaceVariant.toComposeColor()
                         )
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = null,
-                            tint = theme.materialColors.onSurfaceVariant
+                            tint = theme.materialColors.onSurfaceVariant.toComposeColor()
                         )
                     }
                 }
@@ -191,7 +193,7 @@ fun ThemePreviewMini(
 ) {
     Surface(
         modifier = modifier,
-        color = theme.materialColors.background,
+        color = theme.materialColors.background.toComposeColor(),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column(
@@ -202,7 +204,7 @@ fun ThemePreviewMini(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(24.dp)
-                    .background(theme.extraColors.bars)
+                    .background(theme.extraColors.bars.toComposeColor())
             )
             
             // Content area with color samples
@@ -219,7 +221,7 @@ fun ThemePreviewMini(
                         .weight(1f)
                         .fillMaxHeight()
                         .background(
-                            theme.materialColors.primary,
+                            theme.materialColors.primary.toComposeColor(),
                             RoundedCornerShape(4.dp)
                         )
                 )
@@ -230,7 +232,7 @@ fun ThemePreviewMini(
                         .weight(1f)
                         .fillMaxHeight()
                         .background(
-                            theme.materialColors.secondary,
+                            theme.materialColors.secondary.toComposeColor(),
                             RoundedCornerShape(4.dp)
                         )
                 )
@@ -241,7 +243,7 @@ fun ThemePreviewMini(
                         .weight(1f)
                         .fillMaxHeight()
                         .background(
-                            theme.materialColors.tertiary,
+                            theme.materialColors.tertiary.toComposeColor(),
                             RoundedCornerShape(4.dp)
                         )
                 )

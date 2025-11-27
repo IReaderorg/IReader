@@ -243,6 +243,9 @@ val DomainServices = module {
     // Analytics Module
     includes(analyticsModule)
     
+    // Use Case Module - New clean architecture use cases
+    includes(useCaseModule)
+    
     // Note: Preferences, UseCases, and Repository UseCases are loaded separately
     // to avoid circular dependencies with UseCasesInject module
 

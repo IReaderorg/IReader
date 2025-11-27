@@ -66,6 +66,9 @@ import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.isLight
 import ireader.presentation.ui.settings.components.ThemePreviewCard
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toDomainColor
+import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -315,7 +318,7 @@ fun AppearanceSettingScreen(
                                 Surface(
                                     modifier = Modifier.size(48.dp),
                                     shape = MaterialTheme.shapes.small,
-                                    color = customizedColors.primaryState.value,
+                                    color = customizedColors.primaryState.value.toComposeColor(),
                                     tonalElevation = 2.dp
                                 ) {}
                                 Text(
@@ -333,7 +336,7 @@ fun AppearanceSettingScreen(
                                 Surface(
                                     modifier = Modifier.size(48.dp),
                                     shape = MaterialTheme.shapes.small,
-                                    color = customizedColors.secondaryState.value,
+                                    color = customizedColors.secondaryState.value.toComposeColor(),
                                     tonalElevation = 2.dp
                                 ) {}
                                 Text(
@@ -351,7 +354,7 @@ fun AppearanceSettingScreen(
                                 Surface(
                                     modifier = Modifier.size(48.dp),
                                     shape = MaterialTheme.shapes.small,
-                                    color = customizedColors.barsState.value,
+                                    color = customizedColors.barsState.value.toComposeColor(),
                                     tonalElevation = 2.dp
                                 ) {}
                                 Text(
@@ -367,11 +370,28 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
+                val scope = rememberCoroutineScope()
+                val defaultPrimaryColor = MaterialTheme.colorScheme.primary
+                // Create wrapper PreferenceMutableState that converts DomainColor to Color
+                val primaryColorPref: PreferenceMutableState<Color> = remember(customizedColors.primaryState.value, scope, defaultPrimaryColor) {
+                    val pref = object : ireader.core.prefs.Preference<Color> {
+                        override fun key(): String = "primaryColor"
+                        override fun get(): Color = customizedColors.primaryState.value.toComposeColor()
+                        override fun set(value: Color) { customizedColors.primaryState.value = value.toDomainColor() }
+                        override fun isSet(): Boolean = true
+                        override fun delete() { }
+                        override fun defaultValue(): Color = defaultPrimaryColor
+                        override fun changes(): kotlinx.coroutines.flow.Flow<Color> = kotlinx.coroutines.flow.flowOf(get())
+                        override fun stateIn(scope: kotlinx.coroutines.CoroutineScope): kotlinx.coroutines.flow.StateFlow<Color> = 
+                            kotlinx.coroutines.flow.MutableStateFlow(get())
+                    }
+                    PreferenceMutableState(pref, scope)
+                }
                 ColorPreference(
-                        preference = customizedColors.primaryState,
+                        preference = primaryColorPref,
                         title = "Color primary",
                         subtitle = "Displayed most frequently across your app",
-                        unsetColor = MaterialTheme.colorScheme.primary,
+                        unsetColor = defaultPrimaryColor,
                         onChangeColor = onColorChange,
                         onRestToDefault = onColorReset,
                         showColorDialog = showColorDialog,
@@ -383,11 +403,28 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
+                val scope = rememberCoroutineScope()
+                val defaultSecondaryColor = MaterialTheme.colorScheme.secondary
+                // Create wrapper PreferenceMutableState that converts DomainColor to Color
+                val secondaryColorPref: PreferenceMutableState<Color> = remember(customizedColors.secondaryState.value, scope, defaultSecondaryColor) {
+                    val pref = object : ireader.core.prefs.Preference<Color> {
+                        override fun key(): String = "secondaryColor"
+                        override fun get(): Color = customizedColors.secondaryState.value.toComposeColor()
+                        override fun set(value: Color) { customizedColors.secondaryState.value = value.toDomainColor() }
+                        override fun isSet(): Boolean = true
+                        override fun delete() { }
+                        override fun defaultValue(): Color = defaultSecondaryColor
+                        override fun changes(): kotlinx.coroutines.flow.Flow<Color> = kotlinx.coroutines.flow.flowOf(get())
+                        override fun stateIn(scope: kotlinx.coroutines.CoroutineScope): kotlinx.coroutines.flow.StateFlow<Color> = 
+                            kotlinx.coroutines.flow.MutableStateFlow(get())
+                    }
+                    PreferenceMutableState(pref, scope)
+                }
                 ColorPreference(
-                        preference = customizedColors.secondaryState,
+                        preference = secondaryColorPref,
                         title = "Color secondary",
                         subtitle = "Accents select parts of the UI",
-                        unsetColor = MaterialTheme.colorScheme.secondary,
+                        unsetColor = defaultSecondaryColor,
                         onChangeColor = onColorChange,
                         onRestToDefault = onColorReset,
                         showColorDialog = showColorDialog,
@@ -399,10 +436,27 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
+                val scope = rememberCoroutineScope()
+                val defaultBarsColor = AppColors.current.bars.toComposeColor()
+                // Create wrapper PreferenceMutableState that converts DomainColor to Color
+                val barsColorPref: PreferenceMutableState<Color> = remember(customizedColors.barsState.value, scope, defaultBarsColor) {
+                    val pref = object : ireader.core.prefs.Preference<Color> {
+                        override fun key(): String = "barsColor"
+                        override fun get(): Color = customizedColors.barsState.value.toComposeColor()
+                        override fun set(value: Color) { customizedColors.barsState.value = value.toDomainColor() }
+                        override fun isSet(): Boolean = true
+                        override fun delete() { }
+                        override fun defaultValue(): Color = defaultBarsColor
+                        override fun changes(): kotlinx.coroutines.flow.Flow<Color> = kotlinx.coroutines.flow.flowOf(get())
+                        override fun stateIn(scope: kotlinx.coroutines.CoroutineScope): kotlinx.coroutines.flow.StateFlow<Color> = 
+                            kotlinx.coroutines.flow.MutableStateFlow(get())
+                    }
+                    PreferenceMutableState(pref, scope)
+                }
                 ColorPreference(
-                        preference = customizedColors.barsState,
+                        preference = barsColorPref,
                         title = "Toolbar color",
-                        unsetColor = AppColors.current.bars,
+                        unsetColor = defaultBarsColor,
                         onChangeColor = onColorChange,
                         onRestToDefault = onColorReset,
                         showColorDialog = showColorDialog,
@@ -644,7 +698,7 @@ fun AppearanceSettingScreen(
                                 vm.showSnackBar(UiText.DynamicString("Theme imported successfully"))
                                 vm.showImportDialog = false
                             } else {
-                                vm.showSnackBar(UiText.DynamicString("Failed to import theme: ${result.exceptionOrNull()?.message}"))
+                                vm.showSnackBar(UiText.DynamicString("Failed to import theme: ${result.exceptionOrNull()?.message ?: "Unknown error"}"))
                             }
                         }
                     },

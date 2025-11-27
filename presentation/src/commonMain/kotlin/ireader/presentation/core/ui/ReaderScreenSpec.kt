@@ -42,6 +42,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
+import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.getContextWrapper
 import ireader.presentation.ui.core.theme.AppColors
@@ -167,10 +168,11 @@ data class ReaderScreenSpec(
         val bars = AppColors.current
 
         val customColor = remember {
+            val barsColor = bars.bars.toComposeColor()
             if (getBuildNumber() < 25 && bars.isBarLight) {
-                CustomSystemColor(Color.LightGray, bars.bars)
+                CustomSystemColor(Color.LightGray, barsColor)
             } else {
-                CustomSystemColor(bars.bars, bars.bars)
+                CustomSystemColor(barsColor, barsColor)
             }
 
         }
@@ -489,7 +491,7 @@ data class ReaderScreenSpec(
                             onBackgroundColorAndTextColorApply = { bgColor, txtColor ->
                                 try {
                                     if (bgColor.isNotBlank()) {
-                                        vm.setReaderBackgroundColor(vm.backgroundColor.value)
+                                        vm.setReaderBackgroundColor(vm.backgroundColor.value.toComposeColor())
                                     }
                                 } catch (e: Throwable) {
                                 }
@@ -497,7 +499,7 @@ data class ReaderScreenSpec(
                                 try {
                                     if (txtColor.isNotBlank()) {
                                         vm.prefFunc.apply {
-                                            vm.setReaderTextColor(vm.textColor.value)
+                                            vm.setReaderTextColor(vm.textColor.value.toComposeColor())
                                         }
                                     }
                                 } catch (e: Throwable) {

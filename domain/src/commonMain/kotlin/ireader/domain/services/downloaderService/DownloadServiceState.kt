@@ -1,9 +1,9 @@
 package ireader.domain.services.downloaderService
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import ireader.domain.models.entities.SavedDownload
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Represents the download status of a chapter
@@ -28,13 +28,13 @@ data class DownloadProgress(
 )
 
 /**
- * Manages the state of the download service
+ * Manages the state of the download service using StateFlow
  */
 interface DownloadServiceState {
-    var downloads: List<SavedDownload>
-    var isRunning: Boolean
-    var isPaused: Boolean
-    var downloadProgress: Map<Long, DownloadProgress>
+    val downloads: StateFlow<List<SavedDownload>>
+    val isRunning: StateFlow<Boolean>
+    val isPaused: StateFlow<Boolean>
+    val downloadProgress: StateFlow<Map<Long, DownloadProgress>>
 }
 
 /**
@@ -71,8 +71,32 @@ class DownloadServiceStateImpl : DownloadServiceState {
         const val DOWNLOADER_BOOKS_IDS = "booksIds"
     }
 
-    override var downloads: List<SavedDownload> by mutableStateOf(emptyList())
-    override var isRunning: Boolean by mutableStateOf(false)
-    override var isPaused: Boolean by mutableStateOf(false)
-    override var downloadProgress: Map<Long, DownloadProgress> by mutableStateOf(emptyMap())
+    private val _downloads = MutableStateFlow<List<SavedDownload>>(emptyList())
+    override val downloads: StateFlow<List<SavedDownload>> = _downloads.asStateFlow()
+    
+    private val _isRunning = MutableStateFlow(false)
+    override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+    
+    private val _isPaused = MutableStateFlow(false)
+    override val isPaused: StateFlow<Boolean> = _isPaused.asStateFlow()
+    
+    private val _downloadProgress = MutableStateFlow<Map<Long, DownloadProgress>>(emptyMap())
+    override val downloadProgress: StateFlow<Map<Long, DownloadProgress>> = _downloadProgress.asStateFlow()
+    
+    // Setters for backwards compatibility
+    fun setDownloads(value: List<SavedDownload>) {
+        _downloads.value = value
+    }
+    
+    fun setRunning(value: Boolean) {
+        _isRunning.value = value
+    }
+    
+    fun setPaused(value: Boolean) {
+        _isPaused.value = value
+    }
+    
+    fun setDownloadProgress(value: Map<Long, DownloadProgress>) {
+        _downloadProgress.value = value
+    }
 }

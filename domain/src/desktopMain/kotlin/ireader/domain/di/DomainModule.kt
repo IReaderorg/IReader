@@ -41,8 +41,8 @@ import org.koin.dsl.module
 actual val DomainModule: Module = module {
     // Include sync module for sync functionality
     includes(syncModule)
-    // Note: ServiceModule is not included here to avoid conflicts with platform-specific services
-    // Platform services are provided by platformServiceModule
+    // Include ServiceModule for platform services (DownloadService, NotificationService, etc.)
+    includes(ServiceModule)
     
     // FileSystem implementation for desktop
     single<ireader.core.io.FileSystem> {

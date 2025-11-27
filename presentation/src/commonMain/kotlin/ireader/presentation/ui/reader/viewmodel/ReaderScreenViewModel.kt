@@ -42,6 +42,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toDomainColor
+import ireader.presentation.ui.core.ui.PreferenceMutableState
 import ireader.presentation.ui.reader.viewmodel.subviewmodels.ReaderChapterViewModel
 
 @OptIn(ExperimentalTextApi::class)
@@ -88,7 +90,6 @@ class ReaderScreenViewModel(
     val chapterHealthRepository: ireader.domain.data.repository.ChapterHealthRepository,
     val autoRepairChapterUseCase: ireader.domain.usecases.chapter.AutoRepairChapterUseCase,
     val params: Param,
-    val globalScope: CoroutineScope,
         // Platform services - Clean architecture
     private val systemInteractionService: ireader.domain.services.platform.SystemInteractionService,
         // NEW: Sub-ViewModels for better separation of concerns
@@ -141,7 +142,7 @@ class ReaderScreenViewModel(
     fun decreaseAutoScrollSpeed() = settingsViewModel.decreaseAutoScrollSpeed()
     fun toggleAutoScroll() = settingsViewModel.toggleAutoScroll()
     fun updateBrightness(newBrightness: Float) = settingsViewModel.updateBrightness(newBrightness)
-    fun getCurrentBrightness(): Float = settingsViewModel.getCurrentBrightness()
+    suspend fun getCurrentBrightness(): Float = settingsViewModel.getCurrentBrightness()
     fun setSecureScreen(enabled: Boolean) = settingsViewModel.setSecureScreen(enabled)
     fun setKeepScreenOn(enabled: Boolean) = settingsViewModel.setKeepScreenOn(enabled)
     fun changeBackgroundColor(themeId: Long) = settingsViewModel.changeBackgroundColor(themeId, readerColors)
@@ -216,6 +217,36 @@ class ReaderScreenViewModel(
     var readerThemeSavable by mutableStateOf(false)
     val selectedScrollBarColor = androidUiPreferences.selectedScrollBarColor().asState()
     val unselectedScrollBarColor = androidUiPreferences.unselectedScrollBarColor().asState()
+    
+    // Wrapper properties for UI components that expect Color instead of DomainColor
+    val backgroundColorCompose = object : androidx.compose.runtime.MutableState<Color> {
+        override var value: Color
+            get() = backgroundColor.value.toComposeColor()
+            set(value) { backgroundColor.value = value.toDomainColor() }
+        override fun component1(): Color = value
+        override fun component2(): (Color) -> Unit = { value = it }
+    }
+    val textColorCompose = object : androidx.compose.runtime.MutableState<Color> {
+        override var value: Color
+            get() = textColor.value.toComposeColor()
+            set(value) { textColor.value = value.toDomainColor() }
+        override fun component1(): Color = value
+        override fun component2(): (Color) -> Unit = { value = it }
+    }
+    val selectedScrollBarColorCompose = object : androidx.compose.runtime.MutableState<Color> {
+        override var value: Color
+            get() = selectedScrollBarColor.value.toComposeColor()
+            set(value) { selectedScrollBarColor.value = value.toDomainColor() }
+        override fun component1(): Color = value
+        override fun component2(): (Color) -> Unit = { value = it }
+    }
+    val unselectedScrollBarColorCompose = object : androidx.compose.runtime.MutableState<Color> {
+        override var value: Color
+            get() = unselectedScrollBarColor.value.toComposeColor()
+            set(value) { unselectedScrollBarColor.value = value.toDomainColor() }
+        override fun component1(): Color = value
+        override fun component2(): (Color) -> Unit = { value = it }
+    }
     val lineHeight = readerPreferences.lineHeight().asState()
     val betweenLetterSpaces = readerPreferences.betweenLetterSpaces().asState()
     val textWeight = readerPreferences.textWeight().asState()
@@ -279,24 +310,21 @@ class ReaderScreenViewModel(
 
 
         if (bookId != null && chapterId != null) {
-            val source = runBlocking {
-                getBookUseCases.findBookById(bookId)?.let {
-                     getLocalCatalog.get(it.sourceId)
+            subscribeReaderThemes()
+            subscribeChapters(bookId)
+            scope.launch {
+                val source = getBookUseCases.findBookById(bookId)?.let {
+                    getLocalCatalog.get(it.sourceId)
                 }
-
-            }
                 state.catalog = source
-                subscribeReaderThemes()
-                subscribeChapters(bookId)
-                scope.launch {
-                    state.book = getBookUseCases.findBookById(bookId)
-                    setupChapters(bookId, chapterId)
-                    loadGlossary()
-                    loadFonts()
-                }
+                state.book = getBookUseCases.findBookById(bookId)
+                setupChapters(bookId, chapterId)
+                loadGlossary()
+                loadFonts()
+            }
         } else {
             scope.launch {
-                showSnackBar(UiText.DynamicString("Something is wrong with this book"))
+                showSnackBar(UiText.MStringResource(Res.string.something_wrong_with_book))
             }
         }
     }
@@ -740,7 +768,7 @@ class ReaderScreenViewModel(
                 }
             } catch (e: Exception) {
                 ireader.core.log.Log.error("Failed to select Google Font: $fontName", e)
-                showSnackBar(UiText.DynamicString("Failed to load font: ${e.message}"))
+                showSnackBar(UiText.DynamicString("Failed to load font: ${e.message ?: "Unknown error"}"))
             }
         }
     }
@@ -885,9 +913,9 @@ class ReaderScreenViewModel(
                     description = description
                 )
                 if (result.isSuccess) {
-                    showSnackBar(UiText.DynamicString("Chapter reported successfully. Thank you for your feedback!"))
+                    showSnackBar(UiText.DynamicString("Chapter reported successfully"))
                 } else {
-                    showSnackBar(UiText.DynamicString("Failed to report chapter: ${result.exceptionOrNull()?.message}"))
+                    showSnackBar(UiText.DynamicString("Failed to report chapter: ${result.exceptionOrNull()?.message ?: "Unknown error"}"))
                 }
             } catch (e: Exception) {
                 showSnackBar(UiText.ExceptionString(e))
@@ -942,9 +970,9 @@ class ReaderScreenViewModel(
                     description = description
                 )
                 if (result.isSuccess) {
-                    showSnackBar(UiText.DynamicString("Chapter reported successfully. Thank you for your feedback!"))
+                    showSnackBar(UiText.DynamicString("Chapter reported successfully"))
                 } else {
-                    showSnackBar(UiText.DynamicString("Failed to report chapter: ${result.exceptionOrNull()?.message}"))
+                    showSnackBar(UiText.DynamicString("Failed to report chapter: ${result.exceptionOrNull()?.message ?: "Unknown error"}"))
                 }
             } catch (e: Exception) {
                 showSnackBar(UiText.ExceptionString(e))

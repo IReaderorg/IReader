@@ -77,7 +77,7 @@ fun DesktopTTSControlPanel(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Progress indicator
-            state.ttsContent?.value?.let { content ->
+            state.ttsContent.value?.let { content ->
                 if (content.isNotEmpty()) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -87,7 +87,7 @@ fun DesktopTTSControlPanel(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Paragraph ${state.currentReadingParagraph + 1} / ${content.size}",
+                                text = "Paragraph ${state.currentReadingParagraph.value + 1} / ${content.size}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -102,7 +102,7 @@ fun DesktopTTSControlPanel(
                         }
                         
                         LinearProgressIndicator(
-                            progress = (state.currentReadingParagraph + 1).toFloat() / content.size,
+                            progress = (state.currentReadingParagraph.value + 1).toFloat() / content.size,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -118,7 +118,7 @@ fun DesktopTTSControlPanel(
                 // Previous Chapter
                 IconButton(
                     onClick = { ttsService.startService(DesktopTTSService.ACTION_SKIP_PREV) },
-                    enabled = state.ttsChapter != null
+                    enabled = state.ttsChapter.value != null
                 ) {
                     Icon(Icons.Default.SkipPrevious, "Previous Chapter")
                 }
@@ -126,7 +126,7 @@ fun DesktopTTSControlPanel(
                 // Previous Paragraph
                 IconButton(
                     onClick = { ttsService.startService(DesktopTTSService.ACTION_PREV_PAR) },
-                    enabled = state.currentReadingParagraph > 0
+                    enabled = state.currentReadingParagraph.value > 0
                 ) {
                     Icon(Icons.Default.FastRewind, "Previous Paragraph")
                 }
@@ -134,18 +134,18 @@ fun DesktopTTSControlPanel(
                 // Play/Pause (Large button)
                 FilledIconButton(
                     onClick = {
-                        if (state.isPlaying) {
+                        if (state.isPlaying.value) {
                             ttsService.startService(DesktopTTSService.ACTION_PAUSE)
                         } else {
                             ttsService.startService(DesktopTTSService.ACTION_PLAY)
                         }
                     },
-                    enabled = state.ttsChapter != null,
+                    enabled = state.ttsChapter.value != null,
                     modifier = Modifier.size(64.dp)
                 ) {
                     Icon(
-                        imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (state.isPlaying) "Pause" else "Play",
+                        imageVector = if (state.isPlaying.value) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (state.isPlaying.value) "Pause" else "Play",
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -153,8 +153,8 @@ fun DesktopTTSControlPanel(
                 // Next Paragraph
                 IconButton(
                     onClick = { ttsService.startService(DesktopTTSService.ACTION_NEXT_PAR) },
-                    enabled = state.ttsContent?.value?.let { 
-                        state.currentReadingParagraph < it.lastIndex 
+                    enabled = state.ttsContent.value?.let { 
+                        state.currentReadingParagraph.value < it.lastIndex 
                     } ?: false
                 ) {
                     Icon(Icons.Default.FastForward, "Next Paragraph")
@@ -163,7 +163,7 @@ fun DesktopTTSControlPanel(
                 // Next Chapter
                 IconButton(
                     onClick = { ttsService.startService(DesktopTTSService.ACTION_SKIP_NEXT) },
-                    enabled = state.ttsChapter != null
+                    enabled = state.ttsChapter.value != null
                 ) {
                     Icon(Icons.Default.SkipNext, "Next Chapter")
                 }
@@ -186,14 +186,14 @@ fun DesktopTTSControlPanel(
                             style = MaterialTheme.typography.labelMedium
                         )
                         Text(
-                            text = String.format("%.1fx", state.speechSpeed),
+                            text = String.format("%.1fx", state.speechSpeed.value),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
                     
                     Slider(
-                        value = state.speechSpeed,
+                        value = state.speechSpeed.value,
                         onValueChange = { ttsService.setSpeechRate(it) },
                         valueRange = 0.5f..2.0f,
                         steps = 14,
@@ -210,7 +210,7 @@ fun DesktopTTSControlPanel(
                         style = MaterialTheme.typography.labelSmall
                     )
                     Switch(
-                        checked = state.autoNextChapter,
+                        checked = state.autoNextChapter.value,
                         onCheckedChange = { /* Update via preferences */ }
                     )
                 }
