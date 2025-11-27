@@ -19,10 +19,12 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Button
@@ -35,8 +37,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -84,7 +89,8 @@ fun TTSEngineManagerScreen(
     var isInstallingKokoro by remember { mutableStateOf(false) }
     var isInstallingMaya by remember { mutableStateOf(false) }
     var installationLog by remember { mutableStateOf("") }
-    
+    var useCoquiTTS by remember { mutableStateOf(false) }
+
     // Check engine status on mount - only when screen opens
     LaunchedEffect(Unit) {
         // Check Piper
@@ -607,6 +613,351 @@ fun TTSEngineManagerScreen(
                 }
             }
             
+            // Coqui TTS (Online) - Your Custom HuggingFace Space
+            val appPrefs: ireader.domain.preferences.prefs.AppPreferences = koinInject()
+            var coquiSpaceUrl by remember { mutableStateOf("") }
+            var coquiSpeed by remember { mutableStateOf(1.0f) }
+            var coquiApiKey by remember { mutableStateOf("") }
+            var isCoquiTesting by remember { mutableStateOf(false) }
+            var coquiTestResult by remember { mutableStateOf<String?>(null) }
+            
+            // Load Coqui preferences on mount
+            LaunchedEffect(Unit) {
+                useCoquiTTS = appPrefs.useCoquiTTS().get()
+                coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
+                coquiSpeed = appPrefs.coquiSpeed().get()
+                coquiApiKey = appPrefs.coquiApiKey().get()
+                
+                Log.info { "Loaded Coqui prefs: enabled=$useCoquiTTS, url=$coquiSpaceUrl, speed=$coquiSpeed" }
+                
+                // Configure Coqui if enabled
+                if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
+                    ttsService.configureCoqui(coquiSpaceUrl, coquiApiKey.ifEmpty { null })
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Cloud,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(32.dp),
+                                    tint = if (useCoquiTTS)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Column {
+                                    Text(
+                                        text = "Coqui TTS (Online)",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "High-quality neural TTS via HuggingFace Space",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                        
+                        // Status badge
+                        if (useCoquiTTS && ttsService.coquiAvailable) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                shape = MaterialTheme.shapes.small,
+                                modifier = Modifier.padding(end = 12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = "Ready",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        }
+                        
+                        Switch(
+                            checked = useCoquiTTS,
+                            onCheckedChange = { enabled ->
+                                useCoquiTTS = enabled
+                                scope.launch {
+                                    appPrefs.useCoquiTTS().set(enabled)
+                                    Log.info { "Saved useCoquiTTS: $enabled" }
+                                    if (enabled && coquiSpaceUrl.isNotEmpty()) {
+                                        ttsService.configureCoqui(coquiSpaceUrl, coquiApiKey.ifEmpty { null })
+                                    } else if (!enabled) {
+                                        ttsService.configureCoqui("", null)
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    // Features list (always visible)
+                    Column(
+                        modifier = Modifier.padding(top = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(
+                            "High-quality neural voices",
+                            "No local installation required",
+                            "Works via internet connection",
+                            "Custom HuggingFace Space support"
+                        ).forEach { feature ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = feature,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+
+                    if (useCoquiTTS) {
+                        Divider(modifier = Modifier.padding(vertical = 12.dp))
+
+                        // Space URL
+                        Text(
+                            text = "HuggingFace Space URL",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = coquiSpaceUrl,
+                            onValueChange = { url ->
+                                coquiSpaceUrl = url
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("https://x-ireader.hf.space") },
+                            singleLine = true,
+                            label = { Text("Space URL") }
+                        )
+                        
+                        Text(
+                            text = "Example: https://x-ireader.hf.space",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // API Key (optional)
+                        Text(
+                            text = "API Key (Optional)",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = coquiApiKey,
+                            onValueChange = { key ->
+                                coquiApiKey = key
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("For private spaces only") },
+                            singleLine = true,
+                            label = { Text("API Key") }
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Speed control
+                        Text(
+                            text = "Speech Speed: ${"%.1f".format(coquiSpeed)}x",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Slider(
+                            value = coquiSpeed,
+                            onValueChange = { speed ->
+                                coquiSpeed = speed
+                            },
+                            valueRange = 0.5f..2.0f,
+                            steps = 15,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("0.5x", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("2.0x", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // Save button
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    // Save all preferences
+                                    appPrefs.coquiSpaceUrl().set(coquiSpaceUrl)
+                                    appPrefs.coquiApiKey().set(coquiApiKey)
+                                    appPrefs.coquiSpeed().set(coquiSpeed)
+                                    
+                                    Log.info { "Saved Coqui prefs: url=$coquiSpaceUrl, speed=$coquiSpeed" }
+                                    
+                                    // Configure the service
+                                    if (coquiSpaceUrl.isNotEmpty()) {
+                                        ttsService.configureCoqui(coquiSpaceUrl, coquiApiKey.ifEmpty { null })
+                                    }
+                                    
+                                    coquiTestResult = "✓ Settings saved successfully!"
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Save Settings")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Test result
+                        if (coquiTestResult != null) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (coquiTestResult!!.startsWith("✓"))
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.errorContainer
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = if (coquiTestResult!!.startsWith("✓")) 
+                                            Icons.Default.CheckCircle 
+                                        else 
+                                            Icons.Default.Error,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = if (coquiTestResult!!.startsWith("✓"))
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.error
+                                    )
+                                    Text(
+                                        text = coquiTestResult!!,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        // Test button
+                        OutlinedButton(
+                            onClick = {
+                                scope.launch {
+                                    isCoquiTesting = true
+                                    coquiTestResult = null
+                                    installationLog += "Testing Coqui TTS...\n"
+                                    installationLog += "URL: $coquiSpaceUrl\n"
+                                    
+                                    try {
+                                        // Save settings first
+                                        appPrefs.coquiSpaceUrl().set(coquiSpaceUrl)
+                                        appPrefs.coquiApiKey().set(coquiApiKey)
+                                        appPrefs.coquiSpeed().set(coquiSpeed)
+                                        
+                                        // Configure
+                                        ttsService.configureCoqui(coquiSpaceUrl, coquiApiKey.ifEmpty { null })
+                                        
+                                        if (ttsService.coquiAvailable) {
+                                            installationLog += "✓ Coqui TTS configured successfully\n"
+                                            coquiTestResult = "✓ Connection successful! Coqui TTS is ready."
+                                        } else {
+                                            installationLog += "✗ Failed to configure Coqui TTS\n"
+                                            coquiTestResult = "✗ Failed to connect. Check URL and internet connection."
+                                        }
+                                    } catch (e: Exception) {
+                                        installationLog += "✗ Test error: ${e.message}\n"
+                                        coquiTestResult = "✗ Error: ${e.message}"
+                                    } finally {
+                                        isCoquiTesting = false
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = coquiSpaceUrl.isNotEmpty() && !isCoquiTesting
+                        ) {
+                            if (isCoquiTesting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = null
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(if (isCoquiTesting) "Testing..." else "Test Connection")
+                        }
+                    }
+                }
+            }
+
             // Help section
             Card(
                 modifier = Modifier.fillMaxWidth(),

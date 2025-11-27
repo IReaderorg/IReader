@@ -202,6 +202,22 @@ class DesktopTTSService : KoinComponent {
             if (!synthesizer.isInitialized()) {
                 enableSimulationMode("Piper TTS not available. Please download a voice model or install Kokoro/Maya from TTS Manager.")
             }
+            
+            // Load Coqui TTS configuration from preferences
+            try {
+                val useCoqui = appPrefs.useCoquiTTS().get()
+                val coquiUrl = appPrefs.coquiSpaceUrl().get()
+                val coquiApiKey = appPrefs.coquiApiKey().get()
+                
+                Log.info { "Loading Coqui prefs: enabled=$useCoqui, url=$coquiUrl" }
+                
+                if (useCoqui && coquiUrl.isNotEmpty()) {
+                    configureCoqui(coquiUrl, coquiApiKey.ifEmpty { null })
+                    Log.info { "Coqui TTS configured from saved preferences" }
+                }
+            } catch (e: Exception) {
+                Log.error { "Failed to load Coqui preferences: ${e.message}" }
+            }
         }
     }
     
@@ -209,30 +225,85 @@ class DesktopTTSService : KoinComponent {
         PIPER,
         KOKORO,
         MAYA,
+        COQUI,
         SIMULATION
     }
     
+    // Coqui TTS components
+    private var coquiEngine: DesktopCoquiTTSEngine? = null
+    var coquiAvailable = false
+    
+    /**
+     * Desktop Coqui TTS Engine wrapper
+     */
+    private inner class DesktopCoquiTTSEngine(
+        private val spaceUrl: String,
+        private val apiKey: String?
+    ) {
+        private val httpClient = io.ktor.client.HttpClient()
+        private val audioPlayer = DesktopCoquiAudioPlayer()
+        private val engine = CoquiTTSEngine(spaceUrl, apiKey, httpClient, audioPlayer)
+        
+        suspend fun synthesize(text: String): Result<ireader.domain.services.tts_service.piper.AudioData> {
+            return try {
+                // Use the engine's speak method and capture audio
+                // For now, return a placeholder - the actual implementation uses callbacks
+                Result.failure(Exception("Use speak() method instead"))
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+        
+        suspend fun speak(text: String, utteranceId: String) = engine.speak(text, utteranceId)
+        fun stop() = engine.stop()
+        fun pause() = engine.pause()
+        fun resume() = engine.resume()
+        fun setSpeed(speed: Float) = engine.setSpeed(speed)
+        fun isReady() = engine.isReady()
+        fun cleanup() {
+            engine.cleanup()
+            httpClient.close()
+        }
+        fun setCallback(callback: TTSEngineCallback) = engine.setCallback(callback)
+    }
+    
     private suspend fun loadAvailableModels() {
+        Log.info { "DesktopTTSService.loadAvailableModels() - START" }
         try {
             // Get all available models
+            Log.info { "Calling modelManager.getAvailableModels()..." }
             val allModels = modelManager.getAvailableModels()
+            Log.info { "modelManager returned ${allModels.size} models" }
+            
+            if (allModels.isEmpty()) {
+                Log.warn { "No models returned from modelManager! Voice selection will be empty." }
+            } else {
+                Log.info { "First 3 models: ${allModels.take(3).map { it.id }}" }
+            }
             
             // Get downloaded models from preferences (for quick lookup)
             val downloadedModelIds = appPrefs.downloadedModels().get()
+            Log.info { "Downloaded model IDs from prefs: $downloadedModelIds" }
             
             // Mark models as downloaded based on preferences
             state.availableVoiceModels = allModels.map { model ->
                 model.copy(isDownloaded = downloadedModelIds.contains(model.id))
             }
+            Log.info { "Set state.availableVoiceModels to ${state.availableVoiceModels.size} models" }
             
             // Update selected model in state
             val selectedModelId = appPrefs.selectedPiperModel().get()
             if (selectedModelId.isNotEmpty()) {
                 state.selectedVoiceModel = state.availableVoiceModels.find { it.id == selectedModelId }
+                Log.info { "Selected model: ${state.selectedVoiceModel?.name ?: "not found"}" }
             }
             
+            Log.info { "DesktopTTSService.loadAvailableModels() - END (success)" }
         } catch (e: Exception) {
             Log.error { "Failed to load available models: ${e.message}" }
+            Log.error { "Exception type: ${e::class.simpleName}" }
+            e.printStackTrace()
+            Log.info { "DesktopTTSService.loadAvailableModels() - END (error)" }
         }
     }
     
@@ -891,6 +962,7 @@ class DesktopTTSService : KoinComponent {
                     TTSEngine.PIPER -> readTextWithPiper(text)
                     TTSEngine.KOKORO -> readTextWithKokoro(text)
                     TTSEngine.MAYA -> readTextWithMaya(text)
+                    TTSEngine.COQUI -> readTextWithCoqui(text)
                     TTSEngine.SIMULATION -> readTextSimulation(text)
                 }
             } catch (e: CancellationException) {
@@ -1118,6 +1190,58 @@ class DesktopTTSService : KoinComponent {
         }
     }
     
+    private suspend fun readTextWithCoqui(text: String) {
+        val engine = coquiEngine
+        if (engine == null) {
+            Log.error { "Coqui engine not configured" }
+            advanceToNextParagraph()
+            return
+        }
+        
+        try {
+            Log.debug { "Synthesizing with Coqui: text length=${text.length}" }
+            
+            // Create a callback to handle completion
+            var completed = false
+            engine.setCallback(object : TTSEngineCallback {
+                override fun onStart(utteranceId: String) {
+                    Log.debug { "Coqui started: $utteranceId" }
+                }
+                
+                override fun onDone(utteranceId: String) {
+                    Log.debug { "Coqui done: $utteranceId" }
+                    completed = true
+                }
+                
+                override fun onError(utteranceId: String, error: String) {
+                    Log.error { "Coqui error: $error" }
+                    completed = true
+                }
+            })
+            
+            // Speak the text
+            engine.speak(text, "coqui_${System.currentTimeMillis()}")
+            
+            // Wait for completion (with timeout)
+            val startTime = System.currentTimeMillis()
+            val timeout = 60000L // 60 second timeout
+            while (!completed && (System.currentTimeMillis() - startTime) < timeout) {
+                kotlinx.coroutines.delay(100)
+            }
+            
+            // Check sleep time
+            checkSleepTime()
+            
+            // Move to next paragraph if still playing
+            if (state.isPlaying.value) {
+                advanceToNextParagraph()
+            }
+        } catch (e: Exception) {
+            Log.error { "Coqui error: ${e.message}" }
+            advanceToNextParagraph()
+        }
+    }
+    
     private suspend fun advanceToNextParagraph() {
         // Use translated content if available, otherwise use original content
         val translatedContent = state.translatedTTSContent.value
@@ -1194,13 +1318,36 @@ class DesktopTTSService : KoinComponent {
         try {
             Log.info { "Selecting voice model: $modelId" }
             
-            // Check if model is downloaded
-            val model = state.availableVoiceModels.find { it.id == modelId }
+            // Check if model is downloaded - first try state, then model manager
+            var model = state.availableVoiceModels.find { it.id == modelId }
+            
             if (model == null) {
+                // State might be empty, try loading from model manager
+                Log.info { "Model not found in state, checking model manager..." }
+                val allModels = modelManager.getAvailableModels()
+                model = allModels.find { it.id == modelId }
+                
+                if (model != null) {
+                    // Update state with all models
+                    val downloadedIds = appPrefs.downloadedModels().get()
+                    state.availableVoiceModels = allModels.map { m ->
+                        m.copy(isDownloaded = downloadedIds.contains(m.id) || modelManager.getModelPaths(m.id) != null)
+                    }
+                    // Re-find the model with updated download status
+                    model = state.availableVoiceModels.find { it.id == modelId }
+                }
+            }
+            
+            if (model == null) {
+                Log.error { "Voice model not found in catalog: $modelId" }
                 throw IllegalArgumentException("Voice model not found: $modelId")
             }
             
-            if (!model.isDownloaded) {
+            // Check if model files exist (might be downloaded but not in prefs)
+            val modelPaths = modelManager.getModelPaths(modelId)
+            val isActuallyDownloaded = model.isDownloaded || modelPaths != null
+            
+            if (!isActuallyDownloaded) {
                 throw IllegalStateException("Voice model not downloaded: $modelId. Please download it first.")
             }
             
@@ -1208,10 +1355,10 @@ class DesktopTTSService : KoinComponent {
             appPrefs.selectedPiperModel().set(modelId)
             
             // Update state
-            state.selectedVoiceModel = model
+            state.selectedVoiceModel = model.copy(isDownloaded = true)
             
-            // Reload the voice model (this will be triggered by the preference change listener)
-            // No need to call loadSelectedVoiceModel() here as the listener will handle it
+            // Load the voice model
+            loadSelectedVoiceModel()
             
             Log.info { "Voice model selection saved: $modelId" }
         } catch (e: Exception) {
@@ -1267,7 +1414,24 @@ class DesktopTTSService : KoinComponent {
         try {
             Log.info { "Downloading voice model: $modelId" }
             
-            val model = state.availableVoiceModels.find { it.id == modelId }
+            // Check state first, then model manager
+            var model = state.availableVoiceModels.find { it.id == modelId }
+            
+            if (model == null) {
+                // State might be empty, try loading from model manager
+                Log.info { "Model not found in state for download, checking model manager..." }
+                val allModels = modelManager.getAvailableModels()
+                model = allModels.find { it.id == modelId }
+                
+                if (model != null) {
+                    // Update state with all models
+                    val downloadedIds = appPrefs.downloadedModels().get()
+                    state.availableVoiceModels = allModels.map { m ->
+                        m.copy(isDownloaded = downloadedIds.contains(m.id) || modelManager.getModelPaths(m.id) != null)
+                    }
+                }
+            }
+            
             if (model == null) {
                 throw IllegalArgumentException("Voice model not found: $modelId")
             }
@@ -1543,11 +1707,37 @@ class DesktopTTSService : KoinComponent {
                     Log.warn { "Maya not available. Please install from TTS Manager." }
                 }
             }
+            TTSEngine.COQUI -> {
+                if (coquiAvailable && coquiEngine != null) {
+                    currentEngine = TTSEngine.COQUI
+                    isSimulationMode = false
+                    Log.info { "Switched to Coqui TTS" }
+                } else {
+                    Log.warn { "Coqui not available. Please configure in TTS Settings." }
+                }
+            }
             TTSEngine.SIMULATION -> {
                 currentEngine = TTSEngine.SIMULATION
                 isSimulationMode = true
                 Log.info { "Switched to Simulation mode" }
             }
+        }
+    }
+    
+    /**
+     * Configure Coqui TTS with HuggingFace Space URL
+     */
+    fun configureCoqui(spaceUrl: String, apiKey: String? = null) {
+        if (spaceUrl.isNotEmpty()) {
+            coquiEngine?.cleanup()
+            coquiEngine = DesktopCoquiTTSEngine(spaceUrl, apiKey)
+            coquiAvailable = true
+            Log.info { "Coqui TTS configured with URL: $spaceUrl" }
+        } else {
+            coquiEngine?.cleanup()
+            coquiEngine = null
+            coquiAvailable = false
+            Log.info { "Coqui TTS disabled" }
         }
     }
     
@@ -1559,6 +1749,7 @@ class DesktopTTSService : KoinComponent {
             if (synthesizer.isInitialized()) add(TTSEngine.PIPER)
             if (kokoroAvailable) add(TTSEngine.KOKORO)
             if (mayaAvailable) add(TTSEngine.MAYA)
+            if (coquiAvailable) add(TTSEngine.COQUI)
             add(TTSEngine.SIMULATION)
         }
     }
@@ -1726,6 +1917,11 @@ class DesktopTTSService : KoinComponent {
                     return Result.failure(Exception("Maya TTS not available. Please initialize it first."))
                 }
             }
+            TTSEngine.COQUI -> {
+                if (!coquiAvailable || coquiEngine == null) {
+                    return Result.failure(Exception("Coqui TTS not available. Please configure it first."))
+                }
+            }
             TTSEngine.SIMULATION -> {
                 return Result.failure(Exception("Cannot download in simulation mode"))
             }
@@ -1743,6 +1939,10 @@ class DesktopTTSService : KoinComponent {
                     TTSEngine.MAYA -> {
                         val language = "en"
                         mayaAdapter.synthesize(text, language, state.speechSpeed.value)
+                    }
+                    TTSEngine.COQUI -> {
+                        // Coqui doesn't support direct synthesis to AudioData for chapter download
+                        Result.failure(Exception("Coqui TTS doesn't support chapter download"))
                     }
                     TTSEngine.SIMULATION -> Result.failure(Exception("Cannot download in simulation mode"))
                 }

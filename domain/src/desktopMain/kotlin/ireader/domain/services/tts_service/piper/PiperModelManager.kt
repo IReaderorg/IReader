@@ -32,11 +32,17 @@ class PiperModelManager(
     /**
      * Get list of all available voice models from embedded JSON resource
      */
-    override suspend fun getAvailableModels(): List<VoiceModel> = withContext(Dispatchers.IO) {
-        try {
-            loadModelsFromResource()
+    override suspend fun getAvailableModels(): List<VoiceModel> {
+        Log.info { "getAvailableModels() called" }
+        return try {
+            val models = withContext(Dispatchers.IO) {
+                loadModelsFromResource()
+            }
+            Log.info { "getAvailableModels returning ${models.size} models" }
+            models
         } catch (e: Exception) {
             Log.error { "Failed to load available models: ${e.message}" }
+            e.printStackTrace()
             emptyList()
         }
     }
@@ -137,51 +143,60 @@ class PiperModelManager(
      * Falls back to PiperVoiceCatalog if resource file is not found
      */
     private fun loadModelsFromResource(): List<VoiceModel> {
-        // Try to load from resource file first
-        val resourceStream = this::class.java.getResourceAsStream("/piper_models.json")
+        Log.info { "loadModelsFromResource() called - START" }
         
-        if (resourceStream != null) {
-            try {
-                val jsonContent = resourceStream.bufferedReader().use { it.readText() }
-                val modelsData = json.decodeFromString<VoiceModelsData>(jsonContent)
-                if (modelsData.models.isNotEmpty()) {
-                    Log.info { "Loaded ${modelsData.models.size} voice models from resource file" }
-                    return modelsData.models
-                }
-            } catch (e: Exception) {
-                Log.error { "Failed to parse piper_models.json: ${e.message}" }
+        // Skip resource file and go directly to PiperVoiceCatalog
+        // The resource file approach was causing issues
+        Log.info { "Loading voices directly from PiperVoiceCatalog..." }
+        
+        try {
+            Log.info { "Calling PiperVoiceCatalog.getAllVoices()..." }
+            val catalogModels = ireader.domain.catalogs.PiperVoiceCatalog.getAllVoices()
+            Log.info { "PiperVoiceCatalog.getAllVoices() returned ${catalogModels.size} voices" }
+            
+            if (catalogModels.isEmpty()) {
+                Log.error { "PiperVoiceCatalog returned empty list! This should not happen." }
+                return emptyList()
             }
-        } else {
-            Log.warn { "piper_models.json resource not found, using PiperVoiceCatalog fallback" }
-        }
-        
-        // Fallback to PiperVoiceCatalog
-        val catalogModels = ireader.domain.catalogs.PiperVoiceCatalog.getAllVoices()
-        Log.info { "Using PiperVoiceCatalog fallback with ${catalogModels.size} voices" }
-        
-        return catalogModels.map { catalogVoice ->
-            VoiceModel(
-                id = catalogVoice.id,
-                name = catalogVoice.name,
-                language = catalogVoice.locale,
-                quality = when (catalogVoice.quality) {
-                    ireader.domain.models.tts.VoiceQuality.LOW -> VoiceModel.Quality.LOW
-                    ireader.domain.models.tts.VoiceQuality.MEDIUM -> VoiceModel.Quality.MEDIUM
-                    ireader.domain.models.tts.VoiceQuality.HIGH -> VoiceModel.Quality.HIGH
-                    ireader.domain.models.tts.VoiceQuality.PREMIUM -> VoiceModel.Quality.HIGH
-                },
-                gender = when (catalogVoice.gender) {
-                    ireader.domain.models.tts.VoiceGender.MALE -> VoiceModel.Gender.MALE
-                    ireader.domain.models.tts.VoiceGender.FEMALE -> VoiceModel.Gender.FEMALE
-                    ireader.domain.models.tts.VoiceGender.NEUTRAL -> VoiceModel.Gender.NEUTRAL
-                },
-                sizeBytes = catalogVoice.modelSize,
-                modelUrl = catalogVoice.downloadUrl,
-                configUrl = catalogVoice.configUrl,
-                modelChecksum = catalogVoice.checksum.takeIf { it.isNotEmpty() && it != "sha256:placeholder" },
-                configChecksum = null,
-                isDownloaded = false
-            )
+            
+            // Log first few voices for debugging
+            catalogModels.take(3).forEach { voice ->
+                Log.info { "  Voice: ${voice.id} - ${voice.name} (${voice.locale})" }
+            }
+            
+            val result = catalogModels.map { catalogVoice ->
+                VoiceModel(
+                    id = catalogVoice.id,
+                    name = catalogVoice.name,
+                    language = catalogVoice.locale,
+                    quality = when (catalogVoice.quality) {
+                        ireader.domain.models.tts.VoiceQuality.LOW -> VoiceModel.Quality.LOW
+                        ireader.domain.models.tts.VoiceQuality.MEDIUM -> VoiceModel.Quality.MEDIUM
+                        ireader.domain.models.tts.VoiceQuality.HIGH -> VoiceModel.Quality.HIGH
+                        ireader.domain.models.tts.VoiceQuality.PREMIUM -> VoiceModel.Quality.HIGH
+                    },
+                    gender = when (catalogVoice.gender) {
+                        ireader.domain.models.tts.VoiceGender.MALE -> VoiceModel.Gender.MALE
+                        ireader.domain.models.tts.VoiceGender.FEMALE -> VoiceModel.Gender.FEMALE
+                        ireader.domain.models.tts.VoiceGender.NEUTRAL -> VoiceModel.Gender.NEUTRAL
+                    },
+                    sizeBytes = catalogVoice.modelSize,
+                    modelUrl = catalogVoice.downloadUrl,
+                    configUrl = catalogVoice.configUrl,
+                    modelChecksum = catalogVoice.checksum.takeIf { it.isNotEmpty() && !it.contains("placeholder") },
+                    configChecksum = null,
+                    isDownloaded = false
+                )
+            }
+            Log.info { "Successfully mapped ${result.size} voice models from catalog" }
+            Log.info { "loadModelsFromResource() - END (success)" }
+            return result
+        } catch (e: Exception) {
+            Log.error { "Failed to load from PiperVoiceCatalog: ${e.message}" }
+            Log.error { "Exception type: ${e::class.simpleName}" }
+            e.printStackTrace()
+            Log.info { "loadModelsFromResource() - END (error)" }
+            return emptyList()
         }
     }
     

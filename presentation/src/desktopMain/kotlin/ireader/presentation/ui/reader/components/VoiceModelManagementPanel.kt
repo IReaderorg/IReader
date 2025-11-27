@@ -56,6 +56,7 @@ fun VoiceModelManagementPanel(
     
     // Apply filters
     LaunchedEffect(availableModels, searchQuery, selectedLanguageFilter, selectedQualityFilter, selectedGenderFilter, showDownloadedOnly) {
+        Log.info { "Filter LaunchedEffect triggered with ${availableModels.size} available models" }
         filteredModels = availableModels.filter { model ->
             val matchesSearch = searchQuery.isBlank() || 
                 model.name.contains(searchQuery, ignoreCase = true) ||
@@ -74,26 +75,35 @@ fun VoiceModelManagementPanel(
             
             matchesSearch && matchesLanguage && matchesQuality && matchesGender && matchesDownloaded
         }
+        Log.info { "Filter result: ${filteredModels.size} filtered models" }
     }
     
     // Load available models and selected model on mount
     LaunchedEffect(Unit) {
         try {
+            Log.info { "VoiceModelManagementPanel: Loading voice models..." }
+            
             // Load selected model from preferences
             selectedModelId = appPrefs.selectedPiperModel().get()
+            Log.info { "VoiceModelManagementPanel: Selected model ID: $selectedModelId" }
             
             // Load available models
             val models = modelManager.getAvailableModels()
+            Log.info { "VoiceModelManagementPanel: Loaded ${models.size} available models" }
+            
             val downloadedModels = modelManager.getDownloadedModels()
+            Log.info { "VoiceModelManagementPanel: Found ${downloadedModels.size} downloaded models" }
             
             // Mark downloaded models
             availableModels = models.map { model ->
                 model.copy(isDownloaded = downloadedModels.any { it.id == model.id })
             }
             
+            Log.info { "VoiceModelManagementPanel: Final availableModels count: ${availableModels.size}" }
             isLoading = false
         } catch (e: Exception) {
             Log.error { "Failed to load voice models: ${e.message}" }
+            e.printStackTrace()
             isLoading = false
         }
     }

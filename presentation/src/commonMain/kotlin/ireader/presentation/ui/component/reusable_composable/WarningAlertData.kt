@@ -44,36 +44,36 @@ class WarningAlertData {
 
 }
 
-@Composable
-fun WarningAlert(
-    data: WarningAlertData,
-) {
-    if (data.enable) {
-        IAlertDialog(
-            title = if (data.title.value != null) {
-                {
-
-                    MidSizeTextComposable(text = data.title.value!!)
-                }
-            } else null,
-            text = if (data.text.value != null) {
-                {
-                    MidSizeTextComposable(text = data.text.value!!)
-                }
-            } else null,
-            onDismissRequest = {
-                data.onDismiss.value?.invoke()
-            },
-            confirmButton = {
-                TextButton(onClick = { data.onConfirm.value?.invoke() }) {
-                    Text(text = data.confirmText.value)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { data.onDismiss.value?.invoke() }) {
-                    Text(text = data.dismissText.value)
-                }
-            },
-        )
-    }
-}
+//@Composable
+//fun WarningAlert(
+//    data: WarningAlertData,
+//) {
+//    if (data.enable) {
+//        IAlertDialog(
+//            title = if (data.title.value != null) {
+//                {
+//
+//                    MidSizeTextComposable(text = data.title.value!!)
+//                }
+//            } else null,
+//            text = if (data.text.value != null) {
+//                {
+//                    MidSizeTextComposable(text = data.text.value!!)
+//                }
+//            } else null,
+//            onDismissRequest = {
+//                data.onDismiss.value?.invoke()
+//            },
+//            confirmButton = {
+//                TextButton(onClick = { data.onConfirm.value?.invoke() }) {
+//                    Text(text = data.confirmText.value)
+//                }
+//            },
+//            dismissButton = {
+//                TextButton(onClick = { data.onDismiss.value?.invoke() }) {
+//                    Text(text = data.dismissText.value)
+//                }
+//            },
+//        )
+//    }
+//}

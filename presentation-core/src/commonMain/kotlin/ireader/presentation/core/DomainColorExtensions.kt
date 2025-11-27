@@ -13,8 +13,15 @@ import ireader.domain.models.common.DomainColor
 
 /**
  * Convert DomainColor to Compose Color
+ * 
+ * Note: DomainColor.Unspecified is converted to Color.Unspecified to maintain
+ * proper comparison semantics in the presentation layer.
  */
 fun DomainColor.toComposeColor(): Color {
+    // Handle Unspecified case - DomainColor.Unspecified should map to Color.Unspecified
+    if (this == DomainColor.Unspecified) {
+        return Color.Unspecified
+    }
     return Color(
         red = this.red,
         green = this.green,
@@ -25,8 +32,15 @@ fun DomainColor.toComposeColor(): Color {
 
 /**
  * Convert Compose Color to DomainColor
+ * 
+ * Note: Color.Unspecified is converted to DomainColor.Unspecified to maintain
+ * proper comparison semantics across layers.
  */
 fun Color.toDomainColor(): DomainColor {
+    // Handle Unspecified case - Color.Unspecified should map to DomainColor.Unspecified
+    if (this == Color.Unspecified) {
+        return DomainColor.Unspecified
+    }
     return DomainColor(
         red = this.red,
         green = this.green,

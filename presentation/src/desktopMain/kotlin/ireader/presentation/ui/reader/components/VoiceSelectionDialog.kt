@@ -57,6 +57,7 @@ fun VoiceSelectionDialog(
                             DesktopTTSService.TTSEngine.KOKORO -> "Select Kokoro Voice"
                             DesktopTTSService.TTSEngine.MAYA -> "Select Maya Language"
                             DesktopTTSService.TTSEngine.SIMULATION -> "Simulation Mode"
+                            DesktopTTSService.TTSEngine.COQUI -> "Coqui Online Mode"
                         },
                         style = MaterialTheme.typography.headlineSmall
                     )
@@ -208,6 +209,23 @@ fun VoiceSelectionDialog(
                                         }
                                     }
                                 }
+                            }
+                            
+                            DesktopTTSService.TTSEngine.COQUI -> {
+                                Text(
+                                    text = "Coqui TTS (Online)",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    text = "Coqui TTS uses a HuggingFace Space for synthesis. Configure the Space URL in TTS Engine Manager settings.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "Voice selection is handled by the Space configuration.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                             
                             DesktopTTSService.TTSEngine.SIMULATION -> {

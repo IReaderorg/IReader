@@ -22,7 +22,7 @@ data class AITTSSettingsState(
 
     // Coqui TTS
     val useCoquiTTS: Boolean = false,
-    val coquiSpaceUrl: String = "https://kazemcodes-ireader.hf.space",
+    val coquiSpaceUrl: String = "https://x-ireader.hf.space",
     val coquiApiKey: String = "",
     val coquiSpeed: Float = 1.0f,
     val isCoquiAvailable: Boolean = false

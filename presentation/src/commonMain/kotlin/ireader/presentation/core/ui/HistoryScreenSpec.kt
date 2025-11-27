@@ -21,7 +21,6 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.component.reusable_composable.WarningAlert
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.history.HistoryScreen
@@ -144,6 +143,6 @@ object HistoryScreenSpec : Tab {
             )
 
         }
-        WarningAlert(data = vm.warningAlert)
+//        WarningAlert(data = vm.warningAlert)
     }
 }
