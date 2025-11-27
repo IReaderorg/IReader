@@ -5,6 +5,7 @@ import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Adapter that makes DesktopTTSService implement CommonTTSService
@@ -94,40 +95,47 @@ class DesktopTTSServiceAdapter(
  * Adapter that makes DesktopTTSState implement TTSServiceState
  * 
  * Converts mutable state properties to StateFlow for reactive UI updates.
+ * Uses coroutines to observe changes from the legacy state.
  */
 class DesktopTTSStateAdapter(
     private val desktopState: DesktopTTSState
 ) : TTSServiceState {
     
-    private val _isPlaying = MutableStateFlow(false)
-    override val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
+    private val scope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.Dispatchers.Default + kotlinx.coroutines.SupervisorJob()
+    )
     
-    private val _isLoading = MutableStateFlow(false)
-    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    // Delegate directly to the legacy state flows
+    override val isPlaying: StateFlow<Boolean>
+        get() = desktopState.isPlaying
     
-    private val _currentBook = MutableStateFlow<Book?>(null)
-    override val currentBook: StateFlow<Book?> = _currentBook.asStateFlow()
+    override val isLoading: StateFlow<Boolean>
+        get() = desktopState.isLoading
     
-    private val _currentChapter = MutableStateFlow<Chapter?>(null)
-    override val currentChapter: StateFlow<Chapter?> = _currentChapter.asStateFlow()
+    override val currentBook: StateFlow<Book?>
+        get() = desktopState.ttsBook
     
-    private val _currentParagraph = MutableStateFlow(0)
-    override val currentParagraph: StateFlow<Int> = _currentParagraph.asStateFlow()
+    override val currentChapter: StateFlow<Chapter?>
+        get() = desktopState.ttsChapter
     
+    override val currentParagraph: StateFlow<Int>
+        get() = desktopState.currentReadingParagraph
+    
+    // Derived state flows
     private val _totalParagraphs = MutableStateFlow(0)
     override val totalParagraphs: StateFlow<Int> = _totalParagraphs.asStateFlow()
     
     private val _currentContent = MutableStateFlow<List<String>>(emptyList())
     override val currentContent: StateFlow<List<String>> = _currentContent.asStateFlow()
     
-    private val _speechSpeed = MutableStateFlow(1.0f)
-    override val speechSpeed: StateFlow<Float> = _speechSpeed.asStateFlow()
+    override val speechSpeed: StateFlow<Float>
+        get() = desktopState.speechSpeed
     
-    private val _speechPitch = MutableStateFlow(1.0f)
-    override val speechPitch: StateFlow<Float> = _speechPitch.asStateFlow()
+    override val speechPitch: StateFlow<Float>
+        get() = desktopState.pitch
     
-    private val _autoNextChapter = MutableStateFlow(false)
-    override val autoNextChapter: StateFlow<Boolean> = _autoNextChapter.asStateFlow()
+    override val autoNextChapter: StateFlow<Boolean>
+        get() = desktopState.autoNextChapter
     
     private val _error = MutableStateFlow<String?>(null)
     override val error: StateFlow<String?> = _error.asStateFlow()
@@ -139,22 +147,13 @@ class DesktopTTSStateAdapter(
     override val loadingParagraphs: StateFlow<Set<Int>> = _loadingParagraphs.asStateFlow()
     
     init {
-        // Sync state from DesktopTTSState to StateFlows
-        // In a real implementation, this would use coroutines to observe changes
-        syncState()
-    }
-    
-    private fun syncState() {
-        _isPlaying.value = desktopState.isPlaying.value
-        _currentBook.value = desktopState.ttsBook.value
-        _currentChapter.value = desktopState.ttsChapter.value
-        _currentParagraph.value = desktopState.currentReadingParagraph.value
-        _currentContent.value = desktopState.ttsContent.value ?: emptyList()
-        _totalParagraphs.value = desktopState.ttsContent.value?.size ?: 0
-        _speechSpeed.value = desktopState.speechSpeed.value
-        _speechPitch.value = desktopState.pitch.value
-        _autoNextChapter.value = desktopState.autoNextChapter.value
-        _isLoading.value = desktopState.isLoading.value
+        // Observe ttsContent changes and update derived state
+        scope.launch {
+            desktopState.ttsContent.collect { content ->
+                _currentContent.value = content ?: emptyList()
+                _totalParagraphs.value = content?.size ?: 0
+            }
+        }
     }
     
     /**
@@ -162,7 +161,15 @@ class DesktopTTSStateAdapter(
      * Should be called periodically or on state changes
      */
     fun updateStateFlows() {
-        syncState()
+        _currentContent.value = desktopState.ttsContent.value ?: emptyList()
+        _totalParagraphs.value = desktopState.ttsContent.value?.size ?: 0
+    }
+    
+    /**
+     * Set error message
+     */
+    fun setError(message: String?) {
+        _error.value = message
     }
 }
 

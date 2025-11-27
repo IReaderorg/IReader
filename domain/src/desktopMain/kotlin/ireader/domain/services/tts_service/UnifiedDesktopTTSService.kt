@@ -42,18 +42,19 @@ class UnifiedDesktopTTSService(
 ) {
     
     // Delegate to existing DesktopTTSService for platform-specific features
-    private val legacyService = DesktopTTSService()
+    private val legacyService = DesktopTTSService().also {
+        // Initialize immediately so state is available
+        it.initialize()
+    }
     
     // State adapter to bridge legacy state to new state
-    private val stateAdapter = DesktopTTSStateAdapter(legacyService.state)
+    private val stateAdapter by lazy { DesktopTTSStateAdapter(legacyService.state) }
     
     override val state: TTSServiceState
         get() = stateAdapter
     
     override suspend fun initializePlatformComponents() {
-        // Initialize legacy service
-        legacyService.initialize()
-        
+        // Legacy service already initialized in constructor
         // Create TTS engine wrapper
         ttsEngine = DesktopTTSEngineAdapter(legacyService)
         
@@ -119,6 +120,12 @@ class UnifiedDesktopTTSService(
     
     override suspend fun previousParagraph() {
         legacyService.startService(DesktopTTSService.ACTION_PREV_PAR)
+        syncStateFromLegacy()
+    }
+    
+    override suspend fun jumpToParagraph(index: Int) {
+        // Set the paragraph index directly in the legacy state
+        legacyService.state.setCurrentReadingParagraph(index)
         syncStateFromLegacy()
     }
     

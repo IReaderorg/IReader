@@ -100,9 +100,9 @@ Licensed under [Apache 2.0 License](LICENSE)
 | -------- | ----- | --- |
 | ![settings](screenshots/settting-screen.jpg) | ![theme](screenshots/theme-screen.jpg) | ![tts](screenshots/tts-screen.jpg) |
 
-| Statistics | Leaderboard |
-| ---------- | ----------- |
-| ![statistics](screenshots/static-screen.jpg) | ![leaderboard](screenshots/leaderboard-screen.jpg) |
+| Statistics | Leaderboard | Translation |
+| ---------- | ----------- | ----------- |
+| ![statistics](screenshots/static-screen.jpg) | ![leaderboard](screenshots/leaderboard-screen.jpg) | ![translation](screenshots/translation.jpg) |
 
 
 

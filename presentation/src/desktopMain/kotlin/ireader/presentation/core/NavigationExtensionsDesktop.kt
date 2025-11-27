@@ -1,7 +1,6 @@
 package ireader.presentation.core
 
 import androidx.navigation.NavHostController
-import ireader.presentation.core.ui.TTSScreenSpec
 import ireader.presentation.core.ui.WebViewScreenSpec
 
 /**
@@ -22,6 +21,4 @@ actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
     }
 }
 
-actual fun NavHostController.navigateTo(spec: TTSScreenSpec) {
-    navigate("tts/${spec.bookId}/${spec.chapterId}/${spec.sourceId}/${spec.readingParagraph}")
-}
+// TTSScreenSpec navigation is now defined in common Navigator.kt

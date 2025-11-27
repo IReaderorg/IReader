@@ -44,7 +44,6 @@ import kotlin.time.ExperimentalTime
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toDomainColor
 import ireader.presentation.ui.core.ui.PreferenceMutableState
-import ireader.presentation.ui.reader.viewmodel.subviewmodels.ReaderChapterViewModel
 
 @OptIn(ExperimentalTextApi::class)
 
@@ -93,7 +92,6 @@ class ReaderScreenViewModel(
         // Platform services - Clean architecture
     private val systemInteractionService: ireader.domain.services.platform.SystemInteractionService,
         // NEW: Sub-ViewModels for better separation of concerns
-    val chapterViewModel: ReaderChapterViewModel,
     val settingsViewModel: ReaderSettingsViewModel,
     val translationViewModel: ReaderTranslationViewModel,
     val ttsViewModel: ReaderTTSViewModel,

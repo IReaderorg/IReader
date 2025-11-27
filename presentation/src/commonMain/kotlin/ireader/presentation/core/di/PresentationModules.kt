@@ -26,7 +26,6 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderStatisticsViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderTTSViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderTranslationViewModel
-import ireader.presentation.ui.reader.viewmodel.subviewmodels.ReaderSettingsViewModel
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.advance.AdvanceSettingViewModel
 import ireader.presentation.ui.settings.appearance.AppearanceViewModel
@@ -179,8 +178,6 @@ val PresentationModules = module {
     factory <ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }
 
     // Reader sub-viewmodels
-    factory { ireader.presentation.ui.reader.viewmodel.subviewmodels.ReaderChapterViewModel(get(), get(), get(), get(), get(), get()) }
-    factory { ReaderSettingsViewModel(get()) }
     factory { ReaderTranslationViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ReaderTTSViewModel(get(), get()) }
     factory { ReaderStatisticsViewModel(get(), get()) }
@@ -203,7 +200,7 @@ val PresentationModules = module {
         // Params
         params,
         // Platform services and sub-viewmodels
-        get(),get(),get(),get(),get(),get()
+        get(),get(),get(),get(),get(),
     ) }
 
     // New StateScreenModel implementations following Mihon's pattern

@@ -2,7 +2,6 @@ package ireader.presentation.di
 
 import ireader.presentation.ui.settings.statistics.StatsScreenModel
 import ireader.presentation.ui.reader.viewmodel.*
-import ireader.presentation.ui.reader.viewmodel.subviewmodels.ReaderChapterViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -59,19 +58,7 @@ val screenModelModule = module {
     
     // ==================== NEW: Reader Sub-ViewModels ====================
     
-    /**
-     * Reader chapter management ViewModel
-     * Handles chapter navigation, loading, and preloading
-     */
-    factory {
-        ReaderChapterViewModel(
-            getChapterUseCase = get(),
-            remoteUseCases = get(),
-            historyUseCase = get(),
-            preloadChapterUseCase = get(), bookMarkChapterUseCase = get(), insertUseCases = get()
-        )
-    }
-    
+
     /**
      * Reader settings ViewModel
      * Handles brightness, fonts, colors, and layout preferences

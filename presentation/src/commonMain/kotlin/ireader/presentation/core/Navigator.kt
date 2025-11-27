@@ -124,4 +124,8 @@ fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.BrowseSettin
 
 // Expect functions for platform-specific screen specs
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.WebViewScreenSpec)
-expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSScreenSpec)
+
+// TTSScreenSpec is now a common class, so we can define the navigation directly
+fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSScreenSpec) {
+    navigate("tts/${spec.bookId}/${spec.chapterId}/${spec.sourceId}/${spec.readingParagraph}")
+}

@@ -219,29 +219,31 @@ private class DesktopMayaTTSEngine(
 
 /**
  * Desktop Coqui TTS Engine (HTTP-based)
+ * Uses the common CoquiTTSEngine with Desktop-specific audio player
  */
 private class DesktopCoquiTTSEngine(
-    private val spaceUrl: String,
-    private val apiKey: String?
+    spaceUrl: String,
+    apiKey: String?
 ) : TTSEngine {
-    private var callback: TTSEngineCallback? = null
+    private val httpClient = io.ktor.client.HttpClient()
+    private val audioPlayer = DesktopCoquiAudioPlayer()
+    private val engine = CoquiTTSEngine(spaceUrl, apiKey, httpClient, audioPlayer)
     
-    override suspend fun speak(text: String, utteranceId: String) {
-        // TODO: Implement HTTP-based Coqui TTS
-        callback?.onStart(utteranceId)
-        // Make HTTP request to Coqui service...
-        callback?.onDone(utteranceId)
+    override suspend fun speak(text: String, utteranceId: String) = engine.speak(text, utteranceId)
+    override fun stop() = engine.stop()
+    override fun pause() = engine.pause()
+    override fun resume() = engine.resume()
+    override fun setSpeed(speed: Float) = engine.setSpeed(speed)
+    override fun setPitch(pitch: Float) = engine.setPitch(pitch)
+    override fun isReady() = engine.isReady()
+    override fun cleanup() {
+        engine.cleanup()
+        httpClient.close()
     }
+    override fun getEngineName() = engine.getEngineName()
+    override fun setCallback(callback: TTSEngineCallback) = engine.setCallback(callback)
     
-    override fun stop() {}
-    override fun pause() {}
-    override fun resume() {}
-    override fun setSpeed(speed: Float) {}
-    override fun setPitch(pitch: Float) {}
-    override fun isReady() = true
-    override fun cleanup() {}
-    override fun getEngineName() = "Coqui TTS (HTTP)"
-    override fun setCallback(callback: TTSEngineCallback) {
-        this.callback = callback
-    }
+    // Expose caching for pre-fetching
+    fun precacheParagraphs(paragraphs: List<Pair<String, String>>) = engine.precacheParagraphs(paragraphs)
+    fun getCacheStatus(utteranceId: String) = engine.getCacheStatus(utteranceId)
 }
