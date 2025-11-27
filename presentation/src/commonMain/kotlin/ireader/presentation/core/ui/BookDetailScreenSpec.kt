@@ -86,7 +86,7 @@ data class BookDetailScreenSpec constructor(
             initialFirstVisibleItemIndex = vm.savedScrollIndex,
             initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
         )
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val sheetState = rememberModalBottomSheetState()
         
         // Save scroll position when it changes
         androidx.compose.runtime.LaunchedEffect(scrollState.firstVisibleItemIndex, scrollState.firstVisibleItemScrollOffset) {

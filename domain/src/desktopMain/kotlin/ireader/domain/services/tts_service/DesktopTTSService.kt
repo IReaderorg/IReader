@@ -599,7 +599,7 @@ class DesktopTTSService : KoinComponent {
         val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().get()
         
         if (!useTTSWithTranslatedText) {
-            state.translatedTTSContent = null
+            state.setTranslatedTTSContent(null)
             return
         }
         
@@ -623,15 +623,15 @@ class DesktopTTSService : KoinComponent {
                     .filter { it.isNotBlank() }
                     .map { it.trim() }
                 
-                state.translatedTTSContent = translatedText
+                state.setTranslatedTTSContent(translatedText)
                 Log.info { "Loaded translated content for TTS: ${translatedText.size} paragraphs" }
             } else {
-                state.translatedTTSContent = null
+                state.setTranslatedTTSContent(null)
                 Log.info { "No translated content available for TTS, will use original text" }
             }
         } catch (e: Exception) {
             Log.error{ "Error loading translated content for TTS" }
-            state.translatedTTSContent = null
+            state.setTranslatedTTSContent(null)
         }
     }
 
@@ -785,8 +785,9 @@ class DesktopTTSService : KoinComponent {
 
     private fun nextParagraph() {
         // Use translated content if available, otherwise use original content
-        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
-            state.translatedTTSContent
+        val translatedContent = state.translatedTTSContent.value
+        val content = if (translatedContent != null && translatedContent.isNotEmpty()) {
+            translatedContent
         } else {
             state.ttsContent.value
         }
@@ -818,8 +819,9 @@ class DesktopTTSService : KoinComponent {
 
     private fun previousParagraph() {
         // Use translated content if available, otherwise use original content
-        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
-            state.translatedTTSContent
+        val translatedContent = state.translatedTTSContent.value
+        val content = if (translatedContent != null && translatedContent.isNotEmpty()) {
+            translatedContent
         } else {
             state.ttsContent.value
         }
@@ -851,8 +853,9 @@ class DesktopTTSService : KoinComponent {
 
     private suspend fun readText() {
         // Use translated content if available, otherwise use original content
-        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
-            state.translatedTTSContent
+        val translatedContent = state.translatedTTSContent.value
+        val content = if (translatedContent != null && translatedContent.isNotEmpty()) {
+            translatedContent
         } else {
             state.ttsContent.value
         }
@@ -1117,8 +1120,9 @@ class DesktopTTSService : KoinComponent {
     
     private suspend fun advanceToNextParagraph() {
         // Use translated content if available, otherwise use original content
-        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
-            state.translatedTTSContent
+        val translatedContent = state.translatedTTSContent.value
+        val content = if (translatedContent != null && translatedContent.isNotEmpty()) {
+            translatedContent
         } else {
             state.ttsContent.value
         } ?: return
@@ -1643,8 +1647,9 @@ class DesktopTTSService : KoinComponent {
      */
     suspend fun preGenerateParagraphs(count: Int = 5) {
         // Use translated content if available, otherwise use original content
-        val content = if (state.translatedTTSContent != null && state.translatedTTSContent!!.isNotEmpty()) {
-            state.translatedTTSContent
+        val translatedContent = state.translatedTTSContent.value
+        val content = if (translatedContent != null && translatedContent.isNotEmpty()) {
+            translatedContent
         } else {
             state.ttsContent.value
         } ?: return

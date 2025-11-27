@@ -214,7 +214,7 @@ data class ReaderScreenSpec(
         }
         val host = SnackBarListener(vm)
 
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val sheetState = rememberModalBottomSheetState()
         val drawerState =
             androidx.compose.material3.rememberDrawerState(androidx.compose.material3.DrawerValue.Closed)
         

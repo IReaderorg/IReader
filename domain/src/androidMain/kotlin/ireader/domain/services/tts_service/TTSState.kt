@@ -64,11 +64,11 @@ class TTSStateImpl() : AndroidTTSState {
     private val _ttsContent = kotlinx.coroutines.flow.MutableStateFlow<List<String>?>(null)
     override val ttsContent: kotlinx.coroutines.flow.StateFlow<List<String>?> = _ttsContent
     
+    private val _translatedTTSContent = kotlinx.coroutines.flow.MutableStateFlow<List<String>?>(null)
+    override val translatedTTSContent: kotlinx.coroutines.flow.StateFlow<List<String>?> = _translatedTTSContent
+    
     private val _autoNextChapter = kotlinx.coroutines.flow.MutableStateFlow(false)
     override val autoNextChapter: kotlinx.coroutines.flow.StateFlow<Boolean> = _autoNextChapter
-    
-    // Translated content for TTS (set externally when translation is available)
-    var translatedTTSContent by mutableStateOf<List<String>?>(null)
     
     private val _pitch = kotlinx.coroutines.flow.MutableStateFlow(0.8f)
     override val pitch: kotlinx.coroutines.flow.StateFlow<Float> = _pitch
@@ -129,6 +129,7 @@ class TTSStateImpl() : AndroidTTSState {
     // Setter implementations
     override fun setPlaying(value: Boolean) { _isPlaying.value = value }
     override fun setTtsContent(value: List<String>?) { _ttsContent.value = value }
+    override fun setTranslatedTTSContent(value: List<String>?) { _translatedTTSContent.value = value }
     override fun setCurrentReadingParagraph(value: Int) { _currentReadingParagraph.value = value }
     override fun setPreviousReadingParagraph(value: Int) { _previousReadingParagraph.value = value }
     override fun setAutoNextChapter(value: Boolean) { _autoNextChapter.value = value }

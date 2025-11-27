@@ -16,6 +16,7 @@ import kotlin.time.ExperimentalTime
 interface TTSState {
     val isPlaying: StateFlow<Boolean>
     val ttsContent: StateFlow<List<String>?>
+    val translatedTTSContent: StateFlow<List<String>?>
     val currentReadingParagraph: StateFlow<Int>
     val previousReadingParagraph: StateFlow<Int>
     val autoNextChapter: StateFlow<Boolean>
@@ -46,6 +47,7 @@ interface TTSState {
     // Setters for updating state
     fun setPlaying(value: Boolean)
     fun setTtsContent(value: List<String>?)
+    fun setTranslatedTTSContent(value: List<String>?)
     fun setCurrentReadingParagraph(value: Int)
     fun setPreviousReadingParagraph(value: Int)
     fun setAutoNextChapter(value: Boolean)

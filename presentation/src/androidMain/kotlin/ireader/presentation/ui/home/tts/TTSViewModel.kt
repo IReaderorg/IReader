@@ -40,6 +40,7 @@ class TTSViewModel(
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val platformUiPreferences: PlatformUiPreferences,
     private val aiTTSManager: ireader.domain.services.tts.AITTSManager,
+    private val getAllTranslationsForChapterUseCase: ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(),
     ireader.domain.services.tts_service.AndroidTTSState by ttsState {
     
@@ -67,6 +68,107 @@ class TTSViewModel(
     val useCoquiTTSState: androidx.compose.runtime.State<Boolean>
         get() = androidx.compose.runtime.derivedStateOf { useCoquiTTS }
     
+    // Translation State
+    var showTranslatedText by mutableStateOf(false)
+        private set
+    
+    var bilingualMode by mutableStateOf(false)
+        private set
+    
+    /**
+     * Toggle between showing original and translated text
+     * Also updates the TTS service to read the appropriate content
+     */
+    fun toggleTranslation() {
+        showTranslatedText = !showTranslatedText
+        // Save preference
+        scope.launch {
+            readerPreferences.useTTSWithTranslatedText().set(showTranslatedText)
+        }
+        // Update TTS service with new content
+        updateTTSContent()
+    }
+    
+    /**
+     * Toggle bilingual mode (show both original and translated)
+     */
+    fun toggleBilingualMode() {
+        bilingualMode = !bilingualMode
+    }
+    
+    /**
+     * Update the TTS service content based on translation toggle
+     */
+    private fun updateTTSContent() {
+        // The TTS service will use translatedTTSContent when showTranslatedText is true
+        // We need to restart the service to pick up the new content
+        if (ttsState.isPlaying.value) {
+            // Pause and resume to refresh content
+            controller?.transportControls?.pause()
+        }
+    }
+    
+    /**
+     * Set translated content for TTS
+     * This can be called from external translation services
+     */
+    fun setTranslatedContent(content: List<String>?) {
+        ttsState.setTranslatedTTSContent(content)
+    }
+    
+    /**
+     * Check if translation is available
+     */
+    fun hasTranslation(): Boolean {
+        val content = ttsState.translatedTTSContent.value
+        return content != null && content.isNotEmpty()
+    }
+    
+    /**
+     * Get the content to be read by TTS (respects translation toggle)
+     */
+    fun getContentForTTS(): List<String> {
+        val translatedContent = ttsState.translatedTTSContent.value
+        return if (showTranslatedText && translatedContent != null && translatedContent.isNotEmpty()) {
+            translatedContent
+        } else {
+            ttsState.ttsContent.value ?: emptyList()
+        }
+    }
+    
+    /**
+     * Load translated content for the current chapter
+     */
+    private fun loadTranslationForChapter(chapterId: Long) {
+        scope.launch {
+            try {
+                val translations = getAllTranslationsForChapterUseCase.execute(chapterId)
+                if (translations.isNotEmpty()) {
+                    // Use the most recent translation
+                    val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                    latestTranslation?.let { translation ->
+                        // Convert Page list to String list for TTS
+                        val translatedStrings = translation.translatedContent
+                            .filterIsInstance<ireader.core.source.model.Text>()
+                            .map { it.text }
+                            .filter { it.isNotBlank() }
+                        
+                        if (translatedStrings.isNotEmpty()) {
+                            ttsState.setTranslatedTTSContent(translatedStrings)
+                            ireader.core.log.Log.debug { "Loaded ${translatedStrings.size} translated paragraphs for TTS" }
+                        }
+                    }
+                } else {
+                    // No translation available, clear any existing
+                    ttsState.setTranslatedTTSContent(null)
+                }
+            } catch (e: Exception) {
+                ireader.core.log.Log.error { "Failed to load translation for TTS: ${e.message}" }
+                ttsState.setTranslatedTTSContent(null)
+            }
+        }
+    }
+    
     init {
         // Load Coqui TTS preference
         useCoquiTTS = androidUiPreferences.useCoquiTTS().get()
@@ -75,6 +177,9 @@ class TTSViewModel(
         if (useCoquiTTS) {
             configureCoquiTTS()
         }
+        
+        // Load translation preference
+        showTranslatedText = readerPreferences.useTTSWithTranslatedText().get()
     }
     
     private fun configureCoquiTTS() {
@@ -365,6 +470,8 @@ class TTSViewModel(
                 if (chapter.isEmpty()) {
                     ttsState.ttsSource.value?.let { getRemoteChapter(chapter) }
                 }
+                // Load translation for this chapter
+                loadTranslationForChapter(chapterId)
                 runTTSService(Player.PAUSE)
             }
         }

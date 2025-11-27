@@ -26,6 +26,7 @@ import ireader.domain.usecases.remote.GetRemoteBooksUseCase
 import ireader.domain.usecases.remote.GetRemoteChapters
 import ireader.domain.usecases.remote.GetRemoteReadingContent
 import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
@@ -48,6 +49,7 @@ val DomainServices = module {
 
     single { ireader.domain.preferences.prefs.PlayerPreferences(get()) }
     single { ireader.domain.preferences.prefs.DownloadPreferences(get()) }
+    single { GetAllTranslationsForChapterUseCase(get()) }
 
 
 

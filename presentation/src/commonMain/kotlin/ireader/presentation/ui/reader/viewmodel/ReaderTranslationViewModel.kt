@@ -91,6 +91,7 @@ class ReaderTranslationViewModel(
     
     /**
      * Translate current chapter
+     * Uses TranslateChapterWithStorageUseCase to translate AND save to database
      */
     suspend fun translateChapter(
         chapter: Chapter,
@@ -119,9 +120,9 @@ class ReaderTranslationViewModel(
             
             val preserveStyle = translatorPreserveStyle.value
             
-            // Extract text content
+            // Extract text content for progress tracking
             val content = chapter.content ?: emptyList()
-            val texts = content.filterIsInstance<ireader.core.source.model.Text>().map { it.text }
+            val texts = content.filterIsInstance<ireader.core.source.model.Text>()
             
             if (texts.isEmpty()) {
                 showSnackBar(UiText.MStringResource(Res.string.no_text_to_translate))
@@ -131,42 +132,40 @@ class ReaderTranslationViewModel(
             
             translationTotal = texts.size
             
-            // Get active translation engine
-            val engine = translationEnginesManager.get()
+            Log.debug("Starting translation with storage for chapter ${chapter.id}, ${texts.size} paragraphs")
             
-            Log.debug("Using translation engine: ${engine.engineName}")
-            
-            // Use translation engine manager
-            translationEnginesManager.translateWithContext(
-                texts = texts,
-                source = translatorOriginLanguage.value,
-                target = translatorTargetLanguage.value,
+            // Use TranslateChapterWithStorageUseCase which handles both translation AND saving
+            translateChapterWithStorageUseCase.execute(
+                chapter = chapter,
+                sourceLanguage = translatorOriginLanguage.value,
+                targetLanguage = translatorTargetLanguage.value,
                 contentType = contentType,
                 toneType = toneType,
                 preserveStyle = preserveStyle,
-                onProgress = { completed ->
-                    translationCompleted = completed
-                    translationProgress = completed.toFloat() / translationTotal.toFloat()
+                applyGlossary = applyGlossaryToTranslations.value,
+                forceRetranslate = forceRetranslate,
+                scope = scope,
+                onProgress = { progress ->
+                    // Progress is 0-100, clamp it to avoid > 100%
+                    val clampedProgress = progress.coerceIn(0, 100)
+                    translationCompleted = (clampedProgress * translationTotal) / 100
+                    translationProgress = clampedProgress / 100f
                 },
-                onSuccess = { translatedTexts ->
-                    // Update translation state
-                    translationState.translatedContent = translatedTexts.map { text ->
-                        ireader.core.source.model.Text(text)
-                    }
+                onSuccess = { translatedChapter ->
+                    // Update translation state with saved translation
+                    translationState.translatedContent = translatedChapter.translatedContent
                     translationState.hasTranslation = true
                     
-                    showSnackBar(UiText.DynamicString("Translation complete"))
+                    Log.debug("Translation saved successfully for chapter ${chapter.id}")
+                    showSnackBar(UiText.DynamicString("Translation complete and saved"))
                     translationProgress = 1f
                     isTranslating = false
-                    
-                    // Auto-save if enabled
-                    if (autoSaveTranslations.value) {
-                        saveTranslation(chapter.id, translatedTexts)
-                    }
                 },
                 onError = { errorMessage ->
+                    Log.error("Translation failed: $errorMessage")
                     showSnackBar(errorMessage)
                     isTranslating = false
+                    translationProgress = 0f
                 }
             )
             
@@ -226,21 +225,7 @@ class ReaderTranslationViewModel(
         }
     }
     
-    /**
-     * Save translation to storage
-     */
-    private fun saveTranslation(chapterId: Long, translatedTexts: List<String>) {
-        scope.launch {
-            try {
-                // Note: TranslateChapterWithStorageUseCase doesn't have a direct saveTranslation method
-                // The saving is handled internally by the use case during translation
-                // This is a placeholder for future implementation if needed
-                Log.debug("Translation auto-save is handled by TranslateChapterWithStorageUseCase")
-            } catch (e: Exception) {
-                Log.error("Failed to save translation", e)
-            }
-        }
-    }
+
     
     /**
      * Toggle translation display

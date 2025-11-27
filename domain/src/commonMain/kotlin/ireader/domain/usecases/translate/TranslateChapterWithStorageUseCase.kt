@@ -80,7 +80,10 @@ class TranslateChapterWithStorageUseCase(
                 contentType = contentType,
                 toneType = toneType,
                 preserveStyle = preserveStyle,
-                onProgress = onProgress,
+                onProgress = { progress ->
+                    // Clamp progress to 0-100 to prevent UI issues
+                    onProgress(progress.coerceIn(0, 100))
+                },
                 onSuccess = { translatedTexts ->
                     // Handle success in the same coroutine scope
                     scope.launch {

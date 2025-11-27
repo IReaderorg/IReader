@@ -51,7 +51,8 @@ actual val presentationPlatformModule = module  {
             androidUiPreferences = get(),
             insertUseCases = get(),
             platformUiPreferences = get(),
-            aiTTSManager = get()
+            aiTTSManager = get(),
+            getAllTranslationsForChapterUseCase = get()
         )
     }
 

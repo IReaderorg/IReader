@@ -40,6 +40,7 @@ import ireader.presentation.ui.core.ui.AsyncImage
 fun BadgeStoreScreen(
     viewModel: BadgeStoreViewModel,
     onNavigateBack: () -> Unit,
+    onOpenDonationLink: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
@@ -147,11 +148,14 @@ fun BadgeStoreScreen(
                 badge = state.selectedBadge!!,
                 onDismiss = { viewModel.onDismissPurchaseDialog() },
                 onSubmitProof = { proof -> viewModel.onSubmitPaymentProof(proof) },
-                isSubmitting = state.isSubmitting
+                isSubmitting = state.isSubmitting,
+                onOpenDonationLink = { onOpenDonationLink(DONATION_URL) }
             )
         }
     }
 }
+
+private const val DONATION_URL = "https://reymit.ir/kazemcodes"
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -308,12 +312,10 @@ fun BadgePurchaseDialog(
     onDismiss: () -> Unit,
     onSubmitProof: (PaymentProof) -> Unit,
     isSubmitting: Boolean,
+    onOpenDonationLink: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var transactionId by remember { mutableStateOf("") }
-    var paymentMethod by remember { mutableStateOf("Cryptocurrency") }
-    var expanded by remember { mutableStateOf(false) }
-    val paymentMethods = listOf("Cryptocurrency", "Direct Transfer", "Other")
     
     // Desktop optimization: Max width for dialog
     val dialogMaxWidth = 600.dp
@@ -423,7 +425,7 @@ fun BadgePurchaseDialog(
                 
                 // Payment Instructions
                 Text(
-                    text = "Payment Instructions:",
+                    text = "How to Purchase:",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -432,52 +434,45 @@ fun BadgePurchaseDialog(
                 
                 Column(modifier = Modifier.padding(start = 8.dp)) {
                     Text(
-                        text = "1. Send payment via crypto or direct bank transfer",
+                        text = "1. Click the button below to open the donation page",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = "2. Save your transaction ID",
+                        text = "2. Make your donation at reymit.ir/kazemcodes",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = "3. Submit proof below for verification",
+                        text = "3. Copy your transaction/tracking ID",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "4. Enter the ID below and submit for verification",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Payment Method Dropdown
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = paymentMethod,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Payment Method") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor()
+                // Donation Link Button
+                Button(
+                    onClick = onOpenDonationLink,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
                     )
-                    
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        paymentMethods.forEach { method ->
-                            DropdownMenuItem(
-                                text = { Text(method) },
-                                onClick = {
-                                    paymentMethod = method
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
+                ) {
+                    Text("Open Donation Page")
                 }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Show the URL for reference
+                Text(
+                    text = DONATION_URL,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
@@ -485,8 +480,8 @@ fun BadgePurchaseDialog(
                 OutlinedTextField(
                     value = transactionId,
                     onValueChange = { transactionId = it },
-                    label = { Text("Transaction ID *") },
-                    placeholder = { Text("Enter your transaction ID") },
+                    label = { Text("Transaction/Tracking ID *") },
+                    placeholder = { Text("Enter your donation transaction ID") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     enabled = !isSubmitting
@@ -494,9 +489,8 @@ fun BadgePurchaseDialog(
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // Optional: Proof Image Upload (placeholder for future implementation)
                 Text(
-                    text = "Optional: Upload proof image (coming soon)",
+                    text = "After verification, the badge will be added to your profile",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -510,7 +504,7 @@ fun BadgePurchaseDialog(
                         userId = "",  // Will be set by backend
                         badgeId = badge.id,
                         transactionId = transactionId,
-                        paymentMethod = paymentMethod,
+                        paymentMethod = "Reymit Donation",
                         proofImageUrl = null,
                         status = ireader.domain.models.remote.PaymentProofStatus.PENDING,
                         submittedAt = ""  // Will be set by backend

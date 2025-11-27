@@ -335,6 +335,16 @@ class ReaderPreferences constructor(
         return preferenceStore.getBoolean("paragraph_translation_enabled", false)
     }
     
+    // TTS with translated text
+    fun useTTSWithTranslatedText(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_tts_with_translated_text", false)
+    }
+    
+    // Auto-translate next chapter when TTS advances
+    fun autoTranslateNextChapter(): Preference<Boolean> {
+        return preferenceStore.getBoolean("auto_translate_next_chapter", false)
+    }
+    
     // Default reading mode for new books
     fun defaultReadingMode(): Preference<ReadingMode> {
         return preferenceStore.getEnum("default_reading_mode", ReadingMode.Page)
@@ -353,16 +363,7 @@ class ReaderPreferences constructor(
     fun lastReadingBreakPromptTime(): Preference<Long> {
         return preferenceStore.getLong("last_reading_break_prompt_time", 0L)
     }
-    
-    // TTS with translated text preference
-    fun useTTSWithTranslatedText(): Preference<Boolean> {
-        return preferenceStore.getBoolean("use_tts_with_translated_text", false)
-    }
-    
-    // Auto-translate next chapter preference
-    fun autoTranslateNextChapter(): Preference<Boolean> {
-        return preferenceStore.getBoolean("auto_translate_next_chapter", false)
-    }
+
 
     // ========== Advanced Reader System (Mihon-inspired) ==========
     // Requirements: 5.1, 5.2, 11.1, 11.2, 11.4, 11.5, 8.1, 8.2

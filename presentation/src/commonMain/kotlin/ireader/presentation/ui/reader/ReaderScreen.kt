@@ -378,7 +378,7 @@ private fun ReadingScreenContent(
                                 if (currentBook != null && currentChapter != null) {
                                     androidx.compose.material3.ModalBottomSheet(
                                         onDismissRequest = { showChapterReviews.value = false },
-                                        sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                                        sheetState = androidx.compose.material3.rememberModalBottomSheetState()
                                     ) {
                                         ireader.presentation.ui.reader.components.ChapterReviewsFullSheet(
                                             bookTitle = currentBook.title,

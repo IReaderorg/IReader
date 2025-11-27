@@ -61,7 +61,7 @@ data class ExploreScreenSpec(
         val headers = remember {
             mutableStateOf<Headers?>(null)
         }
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val sheetState = rememberModalBottomSheetState()
         val snackBarHostState = SnackBarListener(vm)
         IModalSheets(
                 sheetContent = {

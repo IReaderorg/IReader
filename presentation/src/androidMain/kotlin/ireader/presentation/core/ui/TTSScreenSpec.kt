@@ -105,7 +105,7 @@ actual class TTSScreenSpec actual constructor(
                 // Browser is private, disconnect handled internally
             }
         }
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val sheetState = rememberModalBottomSheetState()
         val drawerState = rememberDrawerState(DrawerValue.Closed)
         IModalDrawer(
             state = drawerState,
@@ -209,6 +209,59 @@ actual class TTSScreenSpec actual constructor(
                                 onCheckedChange = { vm.toggleTTSEngine() }
                             )
                         }
+                        
+                        // Translation Toggle (only show if translation available)
+                        if (vm.hasTranslation()) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    androidx.compose.material3.Text(
+                                        text = "Show Translation",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    androidx.compose.material3.Text(
+                                        text = if (vm.showTranslatedText) "Reading translated text" else "Reading original text",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                androidx.compose.material3.Switch(
+                                    checked = vm.showTranslatedText,
+                                    onCheckedChange = { vm.toggleTranslation() }
+                                )
+                            }
+                            
+                            // Bilingual Mode Toggle
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    androidx.compose.material3.Text(
+                                        text = "Bilingual Mode",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    androidx.compose.material3.Text(
+                                        text = "Show both original and translated text",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                androidx.compose.material3.Switch(
+                                    checked = vm.bilingualMode,
+                                    onCheckedChange = { vm.toggleBilingualMode() }
+                                )
+                            }
+                        }
+                        
                         SwitchPreference(
                             preference = vm.isTtsTrackerEnable,
                             title = localizeHelper.localize(Res.string.tracker)

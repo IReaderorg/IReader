@@ -128,4 +128,8 @@ class TestTTSState : TTSState {
     @OptIn(ExperimentalTime::class)
     override fun setStartTime(value: kotlin.time.Instant?) { _startTime.value = value }
     override fun setSleepMode(value: Boolean) { _sleepMode.value = value }
+
+    private val _translatedTTSContent = MutableStateFlow<List<String>?>(null)
+    override val translatedTTSContent: StateFlow<List<String>?> = _translatedTTSContent
+    override fun setTranslatedTTSContent(value: List<String>?) { _translatedTTSContent.value = value }
 }

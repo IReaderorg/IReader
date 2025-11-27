@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -26,6 +29,7 @@ import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -81,14 +86,22 @@ fun TTSScreen(
     val ttsBook by vm.ttsState.ttsBook.collectAsState()
     val ttsChapter by vm.ttsState.ttsChapter.collectAsState()
     
-    val content = ttsContent ?: emptyList()
+    // Get content based on translation mode
+    val originalContent = ttsContent ?: emptyList()
+    val translatedContentState by vm.ttsState.translatedTTSContent.collectAsState()
+    val translatedContent = translatedContentState
+    val showTranslation = vm.showTranslatedText
+    val hasTranslation = translatedContent != null && translatedContent.isNotEmpty()
+    
+    // Use translated content if available and enabled, otherwise use original
+    val displayContent = if (showTranslation && hasTranslation) translatedContent else originalContent
     
     val gradient = Brush.verticalGradient(
         colors = listOf(
             vm.theme.value.backgroundColor.toComposeColor().copy(alpha = .8f),
             vm.theme.value.backgroundColor.toComposeColor().copy(alpha = .8f)
         ),
-        startY = 1f,  // 1/3
+        startY = 1f,
         endY = 1f,
     )
     
@@ -104,60 +117,116 @@ fun TTSScreen(
         )
         LazyColumn(modifier = Modifier.matchParentSize(), state = lazyState, contentPadding = paddingValues) {
             items(
-                count = content.size
+                count = displayContent.size
             ) { index ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    androidx.compose.material.Text(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = vm.paragraphsIndent.value.dp)
-                            .clickableNoIndication(
-                                onClick = {
-                                    // Update previous before setting current
-                                    vm.ttsState.setPreviousReadingParagraph(currentReadingParagraph)
-                                    vm.ttsState.setCurrentReadingParagraph(index)
-                                },
-                                onLongClick = {
-                                    vm.fullScreenMode = !vm.fullScreenMode
-                                }
-                            ),
-                        text = if (content.isNotEmpty() && currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index].plus(
-                            "\n".repeat(vm.paragraphDistance.value)
-                        ) else "",
-                        fontSize = vm.fontSize.value.sp,
-                        fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
-                        textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
-                        color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = if (index == currentReadingParagraph) 1f else .6f),
-                        lineHeight = vm.lineHeight.value.sp,
-                        letterSpacing = vm.betweenLetterSpaces.value.sp,
-                        fontWeight = FontWeight(vm.textWeight.value),
-                    )
-                    
-                    // Cache indicator for Coqui TTS
-                    if (vm.useCoquiTTS && index > currentReadingParagraph) {
-                        when {
-                            vm.ttsState.loadingParagraphs.contains(index) -> {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .padding(end = 8.dp),
-                                    strokeWidth = 2.dp,
-                                    color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = 0.5f)
-                                )
+                // Get both original and translated text for bilingual display
+                val originalText = originalContent.getOrNull(index) ?: ""
+                val translatedText = translatedContent?.getOrNull(index)
+                
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickableNoIndication(
+                            onClick = {
+                                vm.ttsState.setPreviousReadingParagraph(currentReadingParagraph)
+                                vm.ttsState.setCurrentReadingParagraph(index)
+                            },
+                            onLongClick = {
+                                vm.fullScreenMode = !vm.fullScreenMode
                             }
-                            vm.ttsState.cachedParagraphs.contains(index) -> {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Cached",
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .padding(end = 8.dp),
-                                    tint = androidx.compose.ui.graphics.Color.Green.copy(alpha = 0.7f)
+                        )
+                ) {
+                    // Show bilingual text if enabled and translation available
+                    if (vm.bilingualMode && hasTranslation && translatedText != null) {
+                        // Original text
+                        androidx.compose.material.Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = vm.paragraphsIndent.value.dp),
+                            text = originalText,
+                            fontSize = vm.fontSize.value.sp,
+                            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                            textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
+                            color = vm.theme.value.onTextColor.toComposeColor().copy(
+                                alpha = if (index == currentReadingParagraph) 1f else .6f
+                            ),
+                            lineHeight = vm.lineHeight.value.sp,
+                            letterSpacing = vm.betweenLetterSpaces.value.sp,
+                            fontWeight = FontWeight(vm.textWeight.value),
+                        )
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        // Translated text with different styling
+                        androidx.compose.material.Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = vm.paragraphsIndent.value.dp)
+                                .background(
+                                    vm.theme.value.onTextColor.toComposeColor().copy(alpha = 0.05f)
                                 )
+                                .padding(4.dp),
+                            text = translatedText,
+                            fontSize = (vm.fontSize.value - 2).sp,
+                            fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                            textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
+                            color = vm.theme.value.onTextColor.toComposeColor().copy(
+                                alpha = if (index == currentReadingParagraph) 0.85f else .5f
+                            ),
+                            lineHeight = vm.lineHeight.value.sp,
+                            letterSpacing = vm.betweenLetterSpaces.value.sp,
+                            fontWeight = FontWeight(vm.textWeight.value - 100),
+                        )
+                        
+                        Spacer(modifier = Modifier.height(vm.paragraphDistance.value.dp))
+                    } else {
+                        // Single text display (original or translated based on toggle)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            androidx.compose.material.Text(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = vm.paragraphsIndent.value.dp),
+                                text = if (displayContent.isNotEmpty() && index <= displayContent.lastIndex) 
+                                    displayContent[index].plus("\n".repeat(vm.paragraphDistance.value)) 
+                                else "",
+                                fontSize = vm.fontSize.value.sp,
+                                fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                                textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
+                                color = vm.theme.value.onTextColor.toComposeColor().copy(
+                                    alpha = if (index == currentReadingParagraph) 1f else .6f
+                                ),
+                                lineHeight = vm.lineHeight.value.sp,
+                                letterSpacing = vm.betweenLetterSpaces.value.sp,
+                                fontWeight = FontWeight(vm.textWeight.value),
+                            )
+                            
+                            // Cache indicator for Coqui TTS
+                            if (vm.useCoquiTTS && index > currentReadingParagraph) {
+                                when {
+                                    vm.ttsState.loadingParagraphs.contains(index) -> {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .padding(end = 8.dp),
+                                            strokeWidth = 2.dp,
+                                            color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = 0.5f)
+                                        )
+                                    }
+                                    vm.ttsState.cachedParagraphs.contains(index) -> {
+                                        Icon(
+                                            imageVector = Icons.Default.CheckCircle,
+                                            contentDescription = "Cached",
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .padding(end = 8.dp),
+                                            tint = androidx.compose.ui.graphics.Color.Green.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -168,28 +237,63 @@ fun TTSScreen(
         Box(modifier = Modifier
             .padding(paddingValues)
             .fillMaxSize()) {
+            // Progress indicator at bottom center
             Row(
-                horizontalArrangement = Arrangement.Center, modifier = Modifier
+                horizontalArrangement = Arrangement.Center, 
+                modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
             ) {
                 SuperSmallTextComposable(
-                    text = "${currentReadingParagraph + 1}/${content.size}",
+                    text = "${currentReadingParagraph + 1}/${displayContent.size}",
                     color = vm.theme.value.onTextColor.toComposeColor(),
                 )
+                if (showTranslation && hasTranslation) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.Translate,
+                        contentDescription = "Translated",
+                        modifier = Modifier.size(12.dp),
+                        tint = vm.theme.value.onTextColor.toComposeColor()
+                    )
+                }
             }
+            
+            // Control buttons
             vm.ttsIconAlignments.value.mapAlignment()?.let { alignment ->
-                Row(modifier = Modifier
-                    .align(alignment.toComposeAlignment())) {
+                Row(modifier = Modifier.align(alignment.toComposeAlignment())) {
+                    // Translation toggle button (only show if translation available)
+                    if (hasTranslation) {
+                        SmallFloatingActionButton(
+                            onClick = { vm.toggleTranslation() },
+                            modifier = Modifier.size(40.dp),
+                            containerColor = if (showTranslation) 
+                                MaterialTheme.colorScheme.primary 
+                            else 
+                                vm.theme.value.backgroundColor.toComposeColor().copy(alpha = 0.7f),
+                            contentColor = if (showTranslation)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                vm.theme.value.onTextColor.toComposeColor()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Translate,
+                                contentDescription = if (showTranslation) "Show Original" else "Show Translation",
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
+                    
                     AppIconButton(
-                        modifier = Modifier.size(48.dp), // Minimum 48dp touch target
+                        modifier = Modifier.size(48.dp),
                         onClick = onPlay,
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         tint = vm.theme.value.onTextColor.toComposeColor(),
                         contentDescription = if (isPlaying) "Pause" else "Play"
                     )
                     AppIconButton(
-                        modifier = Modifier.size(48.dp), // Minimum 48dp touch target
+                        modifier = Modifier.size(48.dp),
                         onClick = { vm.fullScreenMode = !vm.fullScreenMode },
                         imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
                         tint = vm.theme.value.onTextColor.toComposeColor(),

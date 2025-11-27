@@ -727,7 +727,15 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     private fun getCurrentContent(): List<String>? {
-        return state.ttsContent.value
+        // Check if we should use translated content
+        val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().get()
+        val translatedContent = state.translatedTTSContent.value
+        
+        return if (useTTSWithTranslatedText && translatedContent != null && translatedContent.isNotEmpty()) {
+            translatedContent
+        } else {
+            state.ttsContent.value
+        }
     }
     
     private fun getChapterIndex(chapter: Chapter, chapters: List<Chapter>): Int {

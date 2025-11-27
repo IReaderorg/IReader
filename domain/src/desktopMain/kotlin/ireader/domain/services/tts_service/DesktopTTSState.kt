@@ -54,6 +54,9 @@ class DesktopTTSState : TTSState {
     private val _autoNextChapter = MutableStateFlow(false)
     override val autoNextChapter: StateFlow<Boolean> = _autoNextChapter.asStateFlow()
     
+    private val _translatedTTSContent = MutableStateFlow<List<String>?>(null)
+    override val translatedTTSContent: StateFlow<List<String>?> = _translatedTTSContent.asStateFlow()
+    
     private val _pitch = MutableStateFlow(0.8f)
     override val pitch: StateFlow<Float> = _pitch.asStateFlow()
     
@@ -104,9 +107,6 @@ class DesktopTTSState : TTSState {
     private val _isDrawerAsc = MutableStateFlow(false)
     override val isDrawerAsc: StateFlow<Boolean> = _isDrawerAsc.asStateFlow()
     
-    // Translated content for TTS (set externally when translation is available)
-    var translatedTTSContent by mutableStateOf<List<String>?>(null)
-    
     // Piper-specific properties
     /** Current word boundary for text highlighting during TTS playback */
     var currentWordBoundary by mutableStateOf<WordBoundary?>(null)
@@ -129,6 +129,7 @@ class DesktopTTSState : TTSState {
     // Setter implementations
     override fun setPlaying(value: Boolean) { _isPlaying.value = value }
     override fun setTtsContent(value: List<String>?) { _ttsContent.value = value }
+    override fun setTranslatedTTSContent(value: List<String>?) { _translatedTTSContent.value = value }
     override fun setCurrentReadingParagraph(value: Int) { _currentReadingParagraph.value = value }
     override fun setPreviousReadingParagraph(value: Int) { _previousReadingParagraph.value = value }
     override fun setAutoNextChapter(value: Boolean) { _autoNextChapter.value = value }

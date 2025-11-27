@@ -36,7 +36,7 @@ fun BookReviewsIntegration(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState()
     
     // Load reviews
     LaunchedEffect(bookTitle) {
