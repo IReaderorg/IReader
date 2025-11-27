@@ -18,8 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Pause
@@ -47,6 +45,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -170,8 +169,10 @@ fun DownloaderScreen(
             },
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
-                val isRunning = vm.isRunning
-                val isPaused = vm.isPaused
+                // Collect state reactively
+                val serviceState by vm.downloadServiceState.collectAsState()
+                val isRunning = serviceState == ireader.domain.services.common.ServiceState.RUNNING
+                val isPaused = serviceState == ireader.domain.services.common.ServiceState.PAUSED
                 val hasDownloads = downloads.isNotEmpty()
                 
                 if (hasDownloads && !vm.hasSelection) {
@@ -215,16 +216,22 @@ fun DownloaderScreen(
                 }
             },
     ) { padding ->
+        // Collect state reactively for the content area
+        val serviceState by vm.downloadServiceState.collectAsState()
+        val progressMap by vm.downloadServiceProgress.collectAsState()
+        val isRunning = serviceState == ireader.domain.services.common.ServiceState.RUNNING
+        val isPaused = serviceState == ireader.domain.services.common.ServiceState.PAUSED
+        
         Column(modifier = Modifier.padding(padding)) {
             // Download status header
-            if (vm.isRunning) {
+            if (isRunning || isPaused) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     tonalElevation = 4.dp,
                     shape = MaterialTheme.shapes.medium,
-                    color = if (vm.isPaused) {
+                    color = if (isPaused) {
                         MaterialTheme.colorScheme.secondaryContainer
                     } else {
                         MaterialTheme.colorScheme.primaryContainer
@@ -237,22 +244,22 @@ fun DownloaderScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val activeCount = vm.downloadServiceProgress.value.values
+                        val activeCount = progressMap.values
                             .count { it.status == ireader.domain.services.common.DownloadStatus.DOWNLOADING }
-                        val completedCount = vm.downloadServiceProgress.value.values
+                        val completedCount = progressMap.values
                             .count { it.status == ireader.domain.services.common.DownloadStatus.COMPLETED }
-                        val totalCount = vm.downloadServiceProgress.value.size
+                        val totalCount = progressMap.size
                         
                         Column {
                             Text(
-                                text = if (vm.isPaused) {
+                                text = if (isPaused) {
                                     localize(Res.string.resume)
                                 } else {
                                     localize(Res.string.downloading)
                                 },
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (vm.isPaused) {
+                                color = if (isPaused) {
                                     MaterialTheme.colorScheme.onSecondaryContainer
                                 } else {
                                     MaterialTheme.colorScheme.onPrimaryContainer
@@ -262,7 +269,7 @@ fun DownloaderScreen(
                             Text(
                                 text = "$completedCount/$totalCount completed",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = if (vm.isPaused) {
+                                color = if (isPaused) {
                                     MaterialTheme.colorScheme.onSecondaryContainer
                                 } else {
                                     MaterialTheme.colorScheme.onPrimaryContainer
@@ -270,7 +277,7 @@ fun DownloaderScreen(
                             )
                         }
                         
-                        if (!vm.isPaused && activeCount > 0) {
+                        if (!isPaused && activeCount > 0) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(32.dp),
                                 strokeWidth = 3.dp,
@@ -369,17 +376,9 @@ private fun ActiveDownloadsContent(
                                 onCancelDownload = { item ->
                                     vm.deleteSelectedDownloads(list = listOf(item))
                                 },
-                                onMovePriorityUp = { item ->
-                                    vm.moveDownloadUp(downloads[index])
-                                },
-                                onMovePriorityDown = { item ->
-                                    vm.moveDownloadDown(downloads[index])
-                                },
                                 onRetry = { item ->
                                     vm.retryFailedDownload(item.chapterId)
                                 },
-                                canMoveUp = index > 0,
-                                canMoveDown = index < downloads.size - 1,
                         )
                     }
                 }
@@ -399,11 +398,7 @@ fun DownloadScreenItem(
         downloadProgress: ireader.domain.services.common.DownloadProgress? = null,
         onCancelDownload: (SavedDownload) -> Unit,
         onCancelAllFromThisSeries: (SavedDownload) -> Unit,
-        onMovePriorityUp: ((SavedDownload) -> Unit)? = null,
-        onMovePriorityDown: ((SavedDownload) -> Unit)? = null,
         onRetry: ((SavedDownload) -> Unit)? = null,
-        canMoveUp: Boolean = false,
-        canMoveDown: Boolean = false,
 ) {
     val status = downloadProgress?.status ?: ireader.domain.services.common.DownloadStatus.QUEUED
     val isDownloading = status == ireader.domain.services.common.DownloadStatus.DOWNLOADING
@@ -543,42 +538,6 @@ fun DownloadScreenItem(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
             ) {
-                // Priority control buttons (only show when not downloading and not completed)
-                if (!isDownloading && !isCompleted && (onMovePriorityUp != null || onMovePriorityDown != null)) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(end = 4.dp)
-                    ) {
-                        // Move up button
-                        IconButton(
-                            onClick = { onMovePriorityUp?.invoke(item) },
-                            enabled = canMoveUp,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowUpward,
-                                contentDescription = "Move up in queue",
-                                tint = if (canMoveUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                        
-                        // Move down button
-                        IconButton(
-                            onClick = { onMovePriorityDown?.invoke(item) },
-                            enabled = canMoveDown,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowDownward,
-                                contentDescription = "Move down in queue",
-                                tint = if (canMoveDown) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
-                
                 // Status icon
                 when {
                     isCompleted -> {
@@ -612,10 +571,11 @@ fun DownloadScreenItem(
                                 modifier = Modifier.size(24.dp)
                         )
                     }
+                    // Queued - show queue icon (no action, just status)
                     else -> {
                         Icon(
                                 imageVector = Icons.Outlined.Download,
-                                contentDescription = localize(Res.string.loading),
+                                contentDescription = "Queued",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(24.dp)
                         )

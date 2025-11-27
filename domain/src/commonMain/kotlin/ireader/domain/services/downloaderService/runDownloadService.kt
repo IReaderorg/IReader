@@ -32,7 +32,7 @@ suspend fun runDownloadService(
     extensions: CatalogStore,
     insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     downloadUseCases: DownloadUseCases,
-    downloadServiceState: DownloadServiceStateImpl,
+    downloadServiceState: DownloadStateHolder,
     notificationManager: PlatformNotificationManager,
     updateProgress: (max: Int, current: Int, inProgress: Boolean) -> Unit,
     updateTitle: (String) -> Unit,
@@ -59,8 +59,17 @@ suspend fun runDownloadService(
                     }
                 }
                 inputtedDownloaderMode -> {
-                    // TODO: Migrate to new DownloadService interface
-                    emptyList()
+                    // Get pending downloads from database
+                    downloadUseCases.subscribeDownloadsUseCase().let { flow ->
+                        var result: List<Chapter> = emptyList()
+                        flow.collect { downloads ->
+                            result = downloads.mapNotNull { download ->
+                                chapterRepo.findChapterById(download.chapterId)
+                            }
+                            return@collect
+                        }
+                        result
+                    }
                 }
                 else -> {
                     throw Exception("No chapters specified for download")
@@ -105,20 +114,29 @@ suspend fun runDownloadService(
 
         // Initialize download state
         withContext(Dispatchers.Main) {
-            downloadServiceState.setDownloads(downloads)
+            // Only update if not already set (AndroidDownloadService may have already set these)
+            if (downloadServiceState.downloads.value.isEmpty()) {
+                downloadServiceState.setDownloads(downloads)
+            }
             downloadServiceState.setRunning(true)
             downloadServiceState.setPaused(false)
-            downloadServiceState.setDownloadProgress(downloads.associate {
-                it.chapterId to DownloadProgress(
+            
+            // Merge with existing progress instead of replacing
+            val existingProgress = downloadServiceState.downloadProgress.value
+            val newProgress = downloads.associate {
+                it.chapterId to (existingProgress[it.chapterId] ?: DownloadProgress(
                     chapterId = it.chapterId,
                     status = DownloadStatus.QUEUED
-                )
-            })
+                ))
+            }
+            downloadServiceState.setDownloadProgress(newProgress)
         }
 
-        // Insert downloads into database
-        // TODO: Migrate to new DownloadService interface
-        // downloadUseCases.insertDownloads(downloads.map { it.toDownload() })
+        // Insert downloads into database so they appear in the download screen
+        // This is safe to call even if already inserted (will update or ignore)
+        withContext(Dispatchers.IO) {
+            downloadUseCases.insertDownloads(downloads.map { it.toDownload() })
+        }
         updateProgress(downloads.size, 0, true)
         updateNotification(ID_DOWNLOAD_CHAPTER_PROGRESS)
 
@@ -226,13 +244,10 @@ suspend fun runDownloadService(
                         insertUseCases.insertChapter(chapter = finalChapter)
                     }
 
-                    // Mark as completed
-                    // TODO: Migrate to new DownloadService interface
-                    // withContext(Dispatchers.IO) {
-                    //     downloadUseCases.insertDownload(
-                    //         download.copy(priority = 1).toDownload()
-                    //     )
-                    // }
+                    // Mark as completed - remove from download queue
+                    withContext(Dispatchers.IO) {
+                        downloadUseCases.deleteSavedDownload(download.toDownload())
+                    }
 
                     // Update progress
                     completedCount++
@@ -288,12 +303,12 @@ suspend fun runDownloadService(
                         )))
                 }
 
-                // TODO: Migrate to new DownloadService interface
-                // withContext(Dispatchers.IO) {
-                //     downloadUseCases.insertDownload(
-                //         download.copy(priority = 0).toDownload()
-                //     )
-                // }
+                // Mark as failed in database
+                withContext(Dispatchers.IO) {
+                    downloadUseCases.insertDownload(
+                        download.copy(priority = 0).toDownload()
+                    )
+                }
 
                 ireader.core.log.Log.error { "Failed to download ${download.chapterName}: $errorMessage" }
             }

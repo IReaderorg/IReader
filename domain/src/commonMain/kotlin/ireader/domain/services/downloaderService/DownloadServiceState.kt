@@ -28,6 +28,16 @@ data class DownloadProgress(
 )
 
 /**
+ * Constants for download service WorkManager data keys
+ */
+object DownloadServiceConstants {
+    const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"
+    const val DOWNLOADER_CHAPTERS_IDS = "chapterIds"
+    const val DOWNLOADER_MODE = "downloader_mode"
+    const val DOWNLOADER_BOOKS_IDS = "booksIds"
+}
+
+/**
  * Manages the state of the download service using StateFlow
  */
 interface DownloadServiceState {
@@ -38,39 +48,16 @@ interface DownloadServiceState {
 }
 
 /**
- * @deprecated Use DownloadService.state instead
+ * Shared state holder for download service state management.
+ * This class is used by both Android (DownloaderService) and Desktop implementations
+ * to share download state across the application.
  * 
- * This class is deprecated and will be removed in a future release.
- * Use the DownloadService interface and observe its state property instead.
- * 
- * Migration example:
- * ```
- * // Before
- * val downloadServiceState: DownloadServiceStateImpl
- * val isPaused = downloadServiceState.isPaused
- * 
- * // After
- * val downloadService: DownloadService
- * val serviceState = downloadService.state.collectAsState()
- * val isPaused = serviceState.value == ServiceState.PAUSED
- * ```
+ * Usage:
+ * - Inject this as a singleton to share state between DownloadService and DownloaderService
+ * - Use the setter methods to update state from the download worker
+ * - Observe the StateFlow properties to react to state changes
  */
-@Deprecated(
-    message = "Use DownloadService.state instead. This will be removed in version 2.0",
-    replaceWith = ReplaceWith(
-        "downloadService.state",
-        "ireader.domain.services.common.DownloadService"
-    ),
-    level = DeprecationLevel.WARNING
-)
-class DownloadServiceStateImpl : DownloadServiceState {
-    companion object {
-        const val DOWNLOADER_SERVICE_NAME = "DOWNLOAD_SERVICE"
-        const val DOWNLOADER_Chapters_IDS = "chapterIds"
-        const val DOWNLOADER_MODE = "downloader_mode"
-        const val DOWNLOADER_BOOKS_IDS = "booksIds"
-    }
-
+class DownloadStateHolder : DownloadServiceState {
     private val _downloads = MutableStateFlow<List<SavedDownload>>(emptyList())
     override val downloads: StateFlow<List<SavedDownload>> = _downloads.asStateFlow()
     
@@ -83,7 +70,6 @@ class DownloadServiceStateImpl : DownloadServiceState {
     private val _downloadProgress = MutableStateFlow<Map<Long, DownloadProgress>>(emptyMap())
     override val downloadProgress: StateFlow<Map<Long, DownloadProgress>> = _downloadProgress.asStateFlow()
     
-    // Setters for backwards compatibility
     fun setDownloads(value: List<SavedDownload>) {
         _downloads.value = value
     }
@@ -98,5 +84,15 @@ class DownloadServiceStateImpl : DownloadServiceState {
     
     fun setDownloadProgress(value: Map<Long, DownloadProgress>) {
         _downloadProgress.value = value
+    }
+    
+    /**
+     * Reset all state to initial values
+     */
+    fun reset() {
+        _downloads.value = emptyList()
+        _isRunning.value = false
+        _isPaused.value = false
+        _downloadProgress.value = emptyMap()
     }
 }

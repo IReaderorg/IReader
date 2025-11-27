@@ -5,7 +5,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import ireader.domain.plugins.*
-import ireader.domain.services.downloaderService.DownloadServiceStateImpl
+import ireader.domain.services.downloaderService.DownloadStateHolder
 import ireader.domain.usecases.backup.CloudBackupManager
 import ireader.domain.usecases.backup.CloudProvider
 import ireader.domain.usecases.backup.CloudStorageProvider
@@ -44,7 +44,7 @@ val DomainServices = module {
         }
     }
 
-    single<DownloadServiceStateImpl> { ireader.domain.services.downloaderService.DownloadServiceStateImpl() }
+    single<DownloadStateHolder> { DownloadStateHolder() }
 
     single { ireader.domain.preferences.prefs.PlayerPreferences(get()) }
     single { ireader.domain.preferences.prefs.DownloadPreferences(get()) }

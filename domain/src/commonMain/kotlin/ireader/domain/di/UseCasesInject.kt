@@ -184,6 +184,10 @@ val UseCasesInject = module {
     single<UpdateDownloadPriority> { UpdateDownloadPriority(get()) }
     single<SubscribeDownloadsUseCase> { SubscribeDownloadsUseCase(get()) }
 
+    single<InsertDownload> { InsertDownload(get()) }
+    single<InsertDownloads> { InsertDownloads(get()) }
+    single<DeleteSavedDownload> { DeleteSavedDownload(get()) }
+    
     single<DownloadUseCases> {
         DownloadUseCases(
             downloadChapter = ireader.domain.usecases.download.DownloadChapterUseCase(get()),
@@ -194,6 +198,9 @@ val UseCasesInject = module {
             resumeDownload = ireader.domain.usecases.download.ResumeDownloadUseCase(get()),
             getDownloadStatus = ireader.domain.usecases.download.GetDownloadStatusUseCase(get()),
             subscribeDownloadsUseCase = get(),
+            insertDownload = get(),
+            insertDownloads = get(),
+            deleteSavedDownload = get(),
             deleteAllSavedDownload = get(),
             deleteSavedDownloads = get(),
             updateDownloadPriority = get()

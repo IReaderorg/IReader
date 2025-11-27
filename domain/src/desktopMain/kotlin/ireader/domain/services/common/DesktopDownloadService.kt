@@ -1,31 +1,99 @@
 package ireader.domain.services.common
 
 import ireader.domain.models.entities.SavedDownload
+import ireader.domain.services.downloaderService.DownloadStateHolder
+import ireader.domain.usecases.services.StartDownloadServicesUseCase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * Desktop implementation of DownloadService using coroutines
+ * 
+ * This service integrates with the existing StartDownloadServicesUseCase
+ * and DownloadStateHolder to provide a unified download management interface.
+ * 
+ * Key responsibilities:
+ * - Queue downloads via StartDownloadServicesUseCase
+ * - Observe and expose download state from DownloadStateHolder
+ * - Provide pause/resume/cancel functionality
  */
-class DesktopDownloadService : DownloadService {
+class DesktopDownloadService : DownloadService, KoinComponent {
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private var downloadJob: Job? = null
     
+    // Inject the shared download state
+    private val downloadServiceState: DownloadStateHolder by inject()
+    
+    // Inject the use case for starting downloads
+    private val startDownloadServicesUseCase: StartDownloadServicesUseCase by inject()
+    
+    // Map legacy state to new ServiceState
     private val _state = MutableStateFlow<ServiceState>(ServiceState.IDLE)
     override val state: StateFlow<ServiceState> = _state.asStateFlow()
     
-    private val _downloads = MutableStateFlow<List<SavedDownload>>(emptyList())
-    override val downloads: StateFlow<List<SavedDownload>> = _downloads.asStateFlow()
+    // Expose downloads from the shared state
+    override val downloads: StateFlow<List<SavedDownload>> = downloadServiceState.downloads
     
+    // Map legacy DownloadProgress to new DownloadProgress format
     private val _downloadProgress = MutableStateFlow<Map<Long, DownloadProgress>>(emptyMap())
     override val downloadProgress: StateFlow<Map<Long, DownloadProgress>> = _downloadProgress.asStateFlow()
     
     override suspend fun initialize() {
         _state.value = ServiceState.INITIALIZING
+        
+        // Observe legacy state and map to new state
+        scope.launch {
+            combine(
+                downloadServiceState.isRunning,
+                downloadServiceState.isPaused
+            ) { isRunning, isPaused ->
+                when {
+                    isPaused -> ServiceState.PAUSED
+                    isRunning -> ServiceState.RUNNING
+                    else -> ServiceState.IDLE
+                }
+            }.collect { newState ->
+                _state.value = newState
+            }
+        }
+        
+        // Observe legacy download progress and map to new format
+        scope.launch {
+            downloadServiceState.downloadProgress.collect { legacyProgress ->
+                _downloadProgress.value = legacyProgress.mapValues { (chapterId, legacy) ->
+                    DownloadProgress(
+                        chapterId = chapterId,
+                        chapterName = "",
+                        bookName = "",
+                        status = mapLegacyStatus(legacy.status),
+                        progress = legacy.progress,
+                        errorMessage = legacy.errorMessage,
+                        retryCount = legacy.retryCount,
+                        totalRetries = 3
+                    )
+                }
+            }
+        }
+        
         _state.value = ServiceState.IDLE
+    }
+    
+    /**
+     * Map legacy DownloadStatus to new DownloadStatus
+     */
+    private fun mapLegacyStatus(legacyStatus: ireader.domain.services.downloaderService.DownloadStatus): DownloadStatus {
+        return when (legacyStatus) {
+            ireader.domain.services.downloaderService.DownloadStatus.QUEUED -> DownloadStatus.QUEUED
+            ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING -> DownloadStatus.DOWNLOADING
+            ireader.domain.services.downloaderService.DownloadStatus.PAUSED -> DownloadStatus.PAUSED
+            ireader.domain.services.downloaderService.DownloadStatus.COMPLETED -> DownloadStatus.COMPLETED
+            ireader.domain.services.downloaderService.DownloadStatus.FAILED -> DownloadStatus.FAILED
+        }
     }
     
     override suspend fun start() {
@@ -34,39 +102,45 @@ class DesktopDownloadService : DownloadService {
     
     override suspend fun stop() {
         _state.value = ServiceState.STOPPED
-        downloadJob?.cancel()
-        downloadJob = null
+        startDownloadServicesUseCase.stop()
+        downloadServiceState.setRunning(false)
+        downloadServiceState.setPaused(false)
     }
     
     override fun isRunning(): Boolean {
-        return _state.value == ServiceState.RUNNING
+        return _state.value == ServiceState.RUNNING || downloadServiceState.isRunning.value
     }
     
     override suspend fun cleanup() {
         stop()
-        _downloads.value = emptyList()
-        _downloadProgress.value = emptyMap()
+        downloadServiceState.setDownloadProgress(emptyMap())
     }
     
     override suspend fun queueChapters(chapterIds: List<Long>): ServiceResult<Unit> {
+        if (chapterIds.isEmpty()) {
+            return ServiceResult.Error("No chapters to queue")
+        }
+        
         return try {
-            // Start download job
-            downloadJob = scope.launch {
-                _state.value = ServiceState.RUNNING
-                
-                // Initialize progress for each chapter
-                val progressMap = chapterIds.associateWith { chapterId ->
-                    DownloadProgress(
-                        chapterId = chapterId,
-                        status = DownloadStatus.QUEUED
-                    )
-                }
-                _downloadProgress.value = progressMap
-                
-                // Actual download logic would be delegated to existing implementation
-                // This is a placeholder
+            // Initialize progress for queued chapters
+            val initialProgress = chapterIds.associateWith { chapterId ->
+                ireader.domain.services.downloaderService.DownloadProgress(
+                    chapterId = chapterId,
+                    status = ireader.domain.services.downloaderService.DownloadStatus.QUEUED
+                )
             }
+            downloadServiceState.setDownloadProgress(
+                downloadServiceState.downloadProgress.value + initialProgress
+            )
             
+            // Start the download using the existing use case
+            startDownloadServicesUseCase.start(
+                bookIds = null,
+                chapterIds = chapterIds.toLongArray(),
+                downloadModes = false
+            )
+            
+            _state.value = ServiceState.RUNNING
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to queue chapters: ${e.message}", e)
@@ -74,11 +148,19 @@ class DesktopDownloadService : DownloadService {
     }
     
     override suspend fun queueBooks(bookIds: List<Long>): ServiceResult<Unit> {
+        if (bookIds.isEmpty()) {
+            return ServiceResult.Error("No books to queue")
+        }
+        
         return try {
-            downloadJob = scope.launch {
-                _state.value = ServiceState.RUNNING
-                // Actual download logic would be delegated
-            }
+            // Start the download using the existing use case
+            startDownloadServicesUseCase.start(
+                bookIds = bookIds.toLongArray(),
+                chapterIds = null,
+                downloadModes = false
+            )
+            
+            _state.value = ServiceState.RUNNING
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to queue books: ${e.message}", e)
@@ -86,18 +168,48 @@ class DesktopDownloadService : DownloadService {
     }
     
     override suspend fun pause() {
+        downloadServiceState.setPaused(true)
         _state.value = ServiceState.PAUSED
+        
+        // Update all downloading items to paused status
+        val currentProgress = downloadServiceState.downloadProgress.value
+        val updatedProgress = currentProgress.mapValues { (chapterId, progress) ->
+            if (progress.status == ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING) {
+                progress.copy(status = ireader.domain.services.downloaderService.DownloadStatus.PAUSED)
+            } else {
+                progress
+            }
+        }
+        downloadServiceState.setDownloadProgress(updatedProgress)
     }
     
     override suspend fun resume() {
+        downloadServiceState.setPaused(false)
         _state.value = ServiceState.RUNNING
+        
+        // Update all paused items back to downloading status
+        val currentProgress = downloadServiceState.downloadProgress.value
+        val updatedProgress = currentProgress.mapValues { (chapterId, progress) ->
+            if (progress.status == ireader.domain.services.downloaderService.DownloadStatus.PAUSED) {
+                progress.copy(status = ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING)
+            } else {
+                progress
+            }
+        }
+        downloadServiceState.setDownloadProgress(updatedProgress)
     }
     
     override suspend fun cancelDownload(chapterId: Long): ServiceResult<Unit> {
         return try {
-            _downloadProgress.value = _downloadProgress.value.toMutableMap().apply {
-                remove(chapterId)
-            }
+            // Update status to failed (cancelled) in progress map
+            val currentProgress = downloadServiceState.downloadProgress.value.toMutableMap()
+            currentProgress[chapterId] = ireader.domain.services.downloaderService.DownloadProgress(
+                chapterId = chapterId,
+                status = ireader.domain.services.downloaderService.DownloadStatus.FAILED,
+                errorMessage = "Cancelled by user"
+            )
+            downloadServiceState.setDownloadProgress(currentProgress)
+            
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to cancel download: ${e.message}", e)
@@ -106,9 +218,14 @@ class DesktopDownloadService : DownloadService {
     
     override suspend fun cancelAll(): ServiceResult<Unit> {
         return try {
-            downloadJob?.cancel()
-            downloadJob = null
-            _downloadProgress.value = emptyMap()
+            // Stop the download service
+            startDownloadServicesUseCase.stop()
+            
+            // Reset state
+            downloadServiceState.setRunning(false)
+            downloadServiceState.setPaused(false)
+            downloadServiceState.setDownloadProgress(emptyMap())
+            
             _state.value = ServiceState.IDLE
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
@@ -118,16 +235,24 @@ class DesktopDownloadService : DownloadService {
     
     override suspend fun retryDownload(chapterId: Long): ServiceResult<Unit> {
         return try {
-            val current = _downloadProgress.value[chapterId]
-            if (current != null) {
-                _downloadProgress.value = _downloadProgress.value.toMutableMap().apply {
-                    put(chapterId, current.copy(
-                        status = DownloadStatus.QUEUED,
-                        errorMessage = null,
-                        retryCount = 0
-                    ))
-                }
+            val current = downloadServiceState.downloadProgress.value[chapterId]
+            if (current == null) {
+                return ServiceResult.Error("Download not found")
             }
+            if (current.status != ireader.domain.services.downloaderService.DownloadStatus.FAILED) {
+                return ServiceResult.Error("Can only retry failed downloads")
+            }
+            
+            // Update status to queued with incremented retry count
+            val updatedProgress = downloadServiceState.downloadProgress.value.toMutableMap()
+            updatedProgress[chapterId] = current.copy(
+                status = ireader.domain.services.downloaderService.DownloadStatus.QUEUED,
+                errorMessage = null,
+                retryCount = current.retryCount + 1
+            )
+            downloadServiceState.setDownloadProgress(updatedProgress)
+            
+            // Re-queue the chapter
             queueChapters(listOf(chapterId))
         } catch (e: Exception) {
             ServiceResult.Error("Failed to retry download: ${e.message}", e)
@@ -135,6 +260,7 @@ class DesktopDownloadService : DownloadService {
     }
     
     override fun getDownloadStatus(chapterId: Long): DownloadStatus? {
-        return _downloadProgress.value[chapterId]?.status
+        val legacyStatus = downloadServiceState.downloadProgress.value[chapterId]?.status
+        return legacyStatus?.let { mapLegacyStatus(it) }
     }
 }

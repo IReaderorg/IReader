@@ -20,9 +20,8 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for managing downloads
  * 
- * ✅ CLEAN ARCHITECTURE: This ViewModel correctly uses DownloadService interface
- * instead of the deprecated DownloadServiceStateImpl. It observes service state
- * through StateFlow and uses ServiceResult for error handling.
+ * Uses DownloadService interface to observe service state through StateFlow
+ * and uses ServiceResult for error handling.
  */
 class DownloaderViewModel(
         private val downloadUseCases: DownloadUseCases,
@@ -44,12 +43,8 @@ class DownloaderViewModel(
         initialValue = emptyMap()
     )
     
-    // Computed properties for UI
-    val isRunning: Boolean
-        get() = downloadServiceState.value == ServiceState.RUNNING
-    
-    val isPaused: Boolean
-        get() = downloadServiceState.value == ServiceState.PAUSED
+    // Computed properties for UI - these are reactive through StateFlow collection
+    // Note: Use downloadServiceState.collectAsState() in Composables for reactivity
 
     init {
         subscribeDownloads()
@@ -73,30 +68,66 @@ class DownloaderViewModel(
      * Start or resume downloads
      */
     fun startDownloadService(chapterIds: List<Long>) {
-        if (downloads.isEmpty()) return
-        
         scope.launch {
-            if (downloadServiceState.value == ServiceState.PAUSED) {
-                resumeDownloads()
-            } else {
-                when (val result = downloadService.queueChapters(chapterIds)) {
-                    is ServiceResult.Success -> {
-                        notificationService.showNotification(
-                            id = 1001,
-                            title = "Downloads Started",
-                            message = "${chapterIds.size} chapter(s) queued",
-                            priority = NotificationPriority.DEFAULT
-                        )
+            when (downloadServiceState.value) {
+                ServiceState.PAUSED -> {
+                    // Resume paused downloads
+                    resumeDownloads()
+                }
+                ServiceState.RUNNING -> {
+                    // Already running, just add more chapters if provided
+                    if (chapterIds.isNotEmpty()) {
+                        when (val result = downloadService.queueChapters(chapterIds)) {
+                            is ServiceResult.Success -> {
+                                notificationService.showNotification(
+                                    id = 1001,
+                                    title = "Downloads Queued",
+                                    message = "${chapterIds.size} chapter(s) added to queue",
+                                    priority = NotificationPriority.DEFAULT
+                                )
+                            }
+                            is ServiceResult.Error -> {
+                                notificationService.showNotification(
+                                    id = 1002,
+                                    title = "Queue Failed",
+                                    message = result.message,
+                                    priority = NotificationPriority.HIGH
+                                )
+                            }
+                            else -> {}
+                        }
                     }
-                    is ServiceResult.Error -> {
-                        notificationService.showNotification(
-                            id = 1002,
-                            title = "Download Failed",
-                            message = result.message,
-                            priority = NotificationPriority.HIGH
-                        )
+                }
+                else -> {
+                    // Not running - start downloads
+                    val idsToDownload = if (chapterIds.isNotEmpty()) {
+                        chapterIds
+                    } else {
+                        // Use downloads from database if no specific chapters provided
+                        downloads.map { it.chapterId }
                     }
-                    else -> {}
+                    
+                    if (idsToDownload.isEmpty()) return@launch
+                    
+                    when (val result = downloadService.queueChapters(idsToDownload)) {
+                        is ServiceResult.Success -> {
+                            notificationService.showNotification(
+                                id = 1001,
+                                title = "Downloads Started",
+                                message = "${idsToDownload.size} chapter(s) queued",
+                                priority = NotificationPriority.DEFAULT
+                            )
+                        }
+                        is ServiceResult.Error -> {
+                            notificationService.showNotification(
+                                id = 1002,
+                                title = "Download Failed",
+                                message = result.message,
+                                priority = NotificationPriority.HIGH
+                            )
+                        }
+                        else -> {}
+                    }
                 }
             }
         }
@@ -158,45 +189,10 @@ class DownloaderViewModel(
     }
     
     /**
-     * Move a download up in priority (decrease priority number)
-     */
-    fun moveDownloadUp(download: SavedDownloadWithInfo) {
-        scope.launch(Dispatchers.IO) {
-            val currentIndex = downloads.indexOfFirst { it.chapterId == download.chapterId }
-            if (currentIndex > 0) {
-                // Swap priorities with the item above
-                val itemAbove = downloads[currentIndex - 1]
-                val currentPriority = download.priority
-                val abovePriority = itemAbove.priority
-                
-                // Update priorities in database
-                downloadUseCases.updateDownloadPriority(download.chapterId, abovePriority)
-                downloadUseCases.updateDownloadPriority(itemAbove.chapterId, currentPriority)
-            }
-        }
-    }
-    
-    /**
-     * Move a download down in priority (increase priority number)
-     */
-    fun moveDownloadDown(download: SavedDownloadWithInfo) {
-        scope.launch(Dispatchers.IO) {
-            val currentIndex = downloads.indexOfFirst { it.chapterId == download.chapterId }
-            if (currentIndex < downloads.size - 1) {
-                // Swap priorities with the item below
-                val itemBelow = downloads[currentIndex + 1]
-                val currentPriority = download.priority
-                val belowPriority = itemBelow.priority
-                
-                // Update priorities in database
-                downloadUseCases.updateDownloadPriority(download.chapterId, belowPriority)
-                downloadUseCases.updateDownloadPriority(itemBelow.chapterId, currentPriority)
-            }
-        }
-    }
-    
-    /**
-     * Reorder downloads by dragging (for future implementation with drag-drop library)
+     * Reorder downloads by index (for drag-and-drop reordering)
+     * Note: Swipe-to-reorder requires a drag-and-drop library like 
+     * org.burnoutcrew.reorderable or similar. This function is ready
+     * to be connected when such a library is added.
      */
     fun reorderDownloads(fromIndex: Int, toIndex: Int) {
         scope.launch(Dispatchers.IO) {

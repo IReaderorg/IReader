@@ -5,22 +5,18 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_BOOKS_IDS
-import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_Chapters_IDS
-import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_MODE
-import ireader.domain.services.downloaderService.DownloadServiceStateImpl.Companion.DOWNLOADER_SERVICE_NAME
+import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_BOOKS_IDS
+import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_CHAPTERS_IDS
+import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_MODE
+import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_SERVICE_NAME
 import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.utils.toast
 
 /**
  * Android implementation of StartDownloadServicesUseCase
  * 
- * ✅ CLEAN ARCHITECTURE: This use case correctly uses WorkManager to start
- * the download service. It only uses constants from DownloadServiceStateImpl
- * for backward compatibility with the WorkManager implementation.
- * 
- * Note: The constants (DOWNLOADER_BOOKS_IDS, etc.) are used for WorkManager
- * data passing and can be moved to a separate constants file in the future.
+ * Uses WorkManager to start the download service with proper constants
+ * from DownloadServiceConstants for WorkManager data passing.
  */
 actual class StartDownloadServicesUseCase( private val context: Context) {
     actual fun start(
@@ -44,7 +40,7 @@ actual class StartDownloadServicesUseCase( private val context: Context) {
                             putLongArray(DOWNLOADER_BOOKS_IDS, bookIds)
                         }
                         chapterIds?.let { chapterIds ->
-                            putLongArray(DOWNLOADER_Chapters_IDS, chapterIds)
+                            putLongArray(DOWNLOADER_CHAPTERS_IDS, chapterIds)
                         }
                         if (downloadModes) {
                             putBoolean(DOWNLOADER_MODE, true)

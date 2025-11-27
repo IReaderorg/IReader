@@ -89,6 +89,9 @@ val repositoryUseCaseModule = module {
     single { PauseDownloadUseCase(get()) }
     single { ResumeDownloadUseCase(get()) }
     single { GetDownloadStatusUseCase(get()) }
+    single { ireader.domain.usecases.download.insert.InsertDownload(get()) }
+    single { ireader.domain.usecases.download.insert.InsertDownloads(get()) }
+    single { ireader.domain.usecases.download.delete.DeleteSavedDownload(get()) }
     
     // Download Use Cases Aggregate
     single {
@@ -100,9 +103,12 @@ val repositoryUseCaseModule = module {
             pauseDownload = get(),
             resumeDownload = get(),
             getDownloadStatus = get(),
+            subscribeDownloadsUseCase = get(),
+            insertDownload = get(),
+            insertDownloads = get(),
+            deleteSavedDownload = get(),
             deleteAllSavedDownload = get(),
             deleteSavedDownloads = get(),
-            subscribeDownloadsUseCase = get(),
             updateDownloadPriority = get()
         )
     }

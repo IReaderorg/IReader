@@ -6,6 +6,7 @@ import ireader.domain.usecases.category.*
 import ireader.domain.usecases.download.*
 import ireader.domain.usecases.download.delete.*
 import ireader.domain.usecases.download.get.*
+import ireader.domain.usecases.download.insert.*
 import ireader.domain.usecases.download.update.*
 import ireader.domain.usecases.history.*
 import ireader.domain.usecases.migration.BookMatcher
@@ -124,6 +125,9 @@ val useCaseModule = module {
     singleOf(::ResumeDownloadUseCase)
     singleOf(::GetDownloadStatusUseCase)
     singleOf(::SubscribeDownloadsUseCase)
+    singleOf(::InsertDownload)
+    singleOf(::InsertDownloads)
+    singleOf(::DeleteSavedDownload)
     singleOf(::DeleteAllSavedDownload)
     singleOf(::DeleteSavedDownloads)
     singleOf(::UpdateDownloadPriority)
@@ -139,6 +143,9 @@ val useCaseModule = module {
             resumeDownload = get(),
             getDownloadStatus = get(),
             subscribeDownloadsUseCase = get(),
+            insertDownload = get(),
+            insertDownloads = get(),
+            deleteSavedDownload = get(),
             deleteAllSavedDownload = get(),
             deleteSavedDownloads = get(),
             updateDownloadPriority = get()

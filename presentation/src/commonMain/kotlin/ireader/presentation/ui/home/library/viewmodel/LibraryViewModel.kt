@@ -88,10 +88,12 @@ class LibraryViewModel(
         scope.launch {
             internalSelectionManager.selectedIds.collect { newSelection ->
                 // Update SnapshotStateList to match internal state
-                val toAdd = newSelection - selectedBooks.toSet()
-                val toRemove = selectedBooks.toSet() - newSelection
-                selectedBooks.removeAll(toRemove)
-                selectedBooks.addAll(toAdd)
+                // Clear and repopulate to avoid issues with single-element sets
+                val currentSet = selectedBooks.toSet()
+                if (currentSet != newSelection) {
+                    selectedBooks.clear()
+                    selectedBooks.addAll(newSelection)
+                }
             }
         }
         
@@ -290,13 +292,24 @@ fun downloadChapters() {
     scope.launch {
         // Use optimized selection manager - convert Set to List
         val selectedIds = internalSelectionManager.toSet().toList()
+        if (selectedIds.isEmpty()) {
+            showSnackBar(ireader.i18n.UiText.DynamicString("No books selected"))
+            return@launch
+        }
+        
         when (val result = downloadService.queueBooks(selectedIds)) {
             is ireader.domain.services.common.ServiceResult.Success -> {
-                showSnackBar(ireader.i18n.UiText.DynamicString("${selectedIds.size} books queued for download"))
+                showSnackBar(ireader.i18n.UiText.DynamicString("${selectedIds.size} book(s) queued for download"))
                 internalSelectionManager.clear()
             }
             is ireader.domain.services.common.ServiceResult.Error -> {
-                showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                // Show error but still clear selection if it's just "no chapters to download"
+                if (result.message.contains("already have content", ignoreCase = true)) {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("All chapters already downloaded"))
+                    internalSelectionManager.clear()
+                } else {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
+                }
             }
             else -> {}
         }

@@ -5,7 +5,7 @@ import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.SavedDownload
-import ireader.domain.services.downloaderService.DownloadServiceStateImpl
+import ireader.domain.services.downloaderService.DownloadStateHolder
 import ireader.domain.services.downloaderService.runDownloadService
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.remote.RemoteUseCases
@@ -18,16 +18,7 @@ import kotlinx.coroutines.Job
 /**
  * Desktop implementation of StartDownloadServicesUseCase
  * 
- * ⚠️ TODO: This use case still uses DownloadServiceStateImpl directly.
- * It should be migrated to use DownloadService interface instead.
- * 
- * Migration plan:
- * 1. Replace downloadServiceState parameter with downloadService: DownloadService
- * 2. Use downloadService.queueChapters() / queueBooks() instead of runDownloadService
- * 3. Observe downloadService.state and downloadService.downloadProgress
- * 4. Remove direct state manipulation
- * 
- * This is marked for Phase 3 cleanup.
+ * Uses DownloadStateHolder to share state with DownloadService implementations.
  */
 actual class StartDownloadServicesUseCase(
     private val bookRepo: BookRepository,
@@ -37,8 +28,7 @@ actual class StartDownloadServicesUseCase(
     private val extensions: CatalogStore,
     private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val downloadUseCases: DownloadUseCases,
-    @Deprecated("Use DownloadService interface instead")
-    private val downloadServiceState: DownloadServiceStateImpl,
+    private val downloadServiceState: DownloadStateHolder,
     private val notificationManager: PlatformNotificationManager,
     private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences
 ) {

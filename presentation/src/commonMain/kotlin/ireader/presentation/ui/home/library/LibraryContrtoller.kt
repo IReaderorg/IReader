@@ -120,9 +120,9 @@ fun LibraryController(
             with(vm) {
                 scope.launch(Dispatchers.IO) {
                     kotlin.runCatching {
-                        deleteUseCase.unFavoriteBook(selectedBooks)
+                        deleteUseCase.unFavoriteBook(selectedBooks.toList())
                     }
-                    selectedBooks.clear()
+                    unselectAll()
                 }
             }
         },
@@ -137,8 +137,8 @@ fun LibraryController(
             }
         },
         onLongBook = {
-            if (it.id in vm.selectedBooks) return@LibraryScreen
-            vm.selectedBooks.add(it.id)
+            // Use toggleSelection to properly manage selection state
+            vm.toggleSelection(it.id)
         },
         vm = vm,
         refreshUpdate = {
@@ -154,7 +154,7 @@ fun LibraryController(
         },
         editCategoryDismissDialog = {
             vm.showDialog = false
-            vm.selectedBooks.clear()
+            vm.unselectAll()
             vm.addQueues.clear()
             vm.deleteQueues.clear()
         },
@@ -170,7 +170,7 @@ fun LibraryController(
                 vm.getCategory.deleteBookCategory(vm.deleteQueues)
                 vm.deleteQueues.clear()
                 vm.addQueues.clear()
-                vm.selectedBooks.clear()
+                vm.unselectAll()
                 vm.addQueues.clear()
                 vm.deleteQueues.clear()
             }
