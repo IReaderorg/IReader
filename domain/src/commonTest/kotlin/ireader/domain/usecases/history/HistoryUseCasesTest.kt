@@ -3,7 +3,6 @@ package ireader.domain.usecases.history
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History
 import io.mockk.*
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
@@ -36,35 +35,33 @@ class HistoryUseCasesTest {
     fun `getHistory should return reading history`() = runTest {
         // Given
         val histories = listOf(
-            createTestHistory(1L, bookId = 1L),
-            createTestHistory(2L, bookId = 2L),
-            createTestHistory(3L, bookId = 3L)
+            createTestHistory(1L, chapterId = 1L),
+            createTestHistory(2L, chapterId = 2L),
+            createTestHistory(3L, chapterId = 3L)
         )
-        coEvery { historyRepository.findHistories() } returns flowOf(histories)
+        coEvery { historyRepository.findHistories() } returns histories
         
         // When
-        val result = mutableListOf<List<History>>()
-        getHistoryUseCase().collect { result.add(it) }
+        val result = getHistoryUseCase()
         
         // Then
-        assertEquals(1, result.size)
-        assertEquals(3, result.first().size)
+        assertEquals(3, result.size)
     }
     
     @Test
     fun `updateHistory should record reading progress`() = runTest {
         // Given
-        val bookId = 1L
         val chapterId = 5L
-        coEvery { historyRepository.upsert(any()) } just Runs
+        val history = createTestHistory(0L, chapterId = chapterId)
+        coEvery { historyRepository.insertHistory(any()) } just Runs
         
         // When
-        updateHistoryUseCase(bookId, chapterId)
+        updateHistoryUseCase(history)
         
         // Then
         coVerify {
-            historyRepository.upsert(match { history ->
-                history.bookId == bookId && history.chapterId == chapterId
+            historyRepository.insertHistory(match { h ->
+                h.chapterId == chapterId
             })
         }
     }
@@ -73,34 +70,34 @@ class HistoryUseCasesTest {
     fun `deleteHistory should remove specific history entry`() = runTest {
         // Given
         val historyId = 1L
-        coEvery { historyRepository.delete(historyId) } just Runs
+        coEvery { historyRepository.deleteHistory(historyId) } just Runs
         
         // When
         deleteHistoryUseCase(historyId)
         
         // Then
-        coVerify { historyRepository.delete(historyId) }
+        coVerify { historyRepository.deleteHistory(historyId) }
     }
     
     @Test
     fun `clearHistory should remove all history entries`() = runTest {
         // Given
-        coEvery { historyRepository.deleteAll() } just Runs
+        coEvery { historyRepository.deleteAllHistories() } just Runs
         
         // When
         clearHistoryUseCase()
         
         // Then
-        coVerify { historyRepository.deleteAll() }
+        coVerify { historyRepository.deleteAllHistories() }
     }
     
-    private fun createTestHistory(id: Long, bookId: Long): History {
+    private fun createTestHistory(id: Long, chapterId: Long): History {
         return History(
             id = id,
-            bookId = bookId,
-            chapterId = 1L,
+            chapterId = chapterId,
             readAt = System.currentTimeMillis(),
-            readDuration = 300000L
+            readDuration = 300000L,
+            progress = 0.5f
         )
     }
 }

@@ -6,8 +6,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.*
 
 /**
- * Unit tests for AddToLibrary use case
- * Tests the critical functionality of adding books to the library
+ * Comprehensive tests for AddToLibrary use case
  */
 class AddToLibraryTest {
     
@@ -26,7 +25,7 @@ class AddToLibraryTest {
     }
     
     @Test
-    fun `await should add book to library successfully`() = runTest {
+    fun `await should successfully add book to library`() = runTest {
         // Given
         val bookId = 1L
         coEvery { updateBook.await(any()) } returns true
@@ -71,7 +70,7 @@ class AddToLibraryTest {
     }
     
     @Test
-    fun `awaitAll should add multiple books to library`() = runTest {
+    fun `awaitAll should successfully add multiple books to library`() = runTest {
         // Given
         val bookIds = listOf(1L, 2L, 3L)
         coEvery { updateBook.awaitAll(any()) } returns true
@@ -90,6 +89,19 @@ class AddToLibraryTest {
     }
     
     @Test
+    fun `awaitAll should return false when update fails`() = runTest {
+        // Given
+        val bookIds = listOf(1L, 2L, 3L)
+        coEvery { updateBook.awaitAll(any()) } returns false
+        
+        // When
+        val result = addToLibrary.awaitAll(bookIds)
+        
+        // Then
+        assertFalse(result)
+    }
+    
+    @Test
     fun `awaitAll should handle empty list`() = runTest {
         // Given
         val bookIds = emptyList<Long>()
@@ -101,19 +113,6 @@ class AddToLibraryTest {
         // Then
         assertTrue(result)
         coVerify { updateBook.awaitAll(emptyList()) }
-    }
-    
-    @Test
-    fun `awaitAll should return false when batch update fails`() = runTest {
-        // Given
-        val bookIds = listOf(1L, 2L, 3L)
-        coEvery { updateBook.awaitAll(any()) } returns false
-        
-        // When
-        val result = addToLibrary.awaitAll(bookIds)
-        
-        // Then
-        assertFalse(result)
     }
     
     @Test
@@ -144,7 +143,7 @@ class AddToLibraryTest {
         
         // Then
         assertNotNull(capturedUpdates)
-        val timestamps = capturedUpdates!!.map { it.dateAdded }
-        assertTrue(timestamps.all { it == timestamps.first() })
+        val timestamps = capturedUpdates!!.mapNotNull { it.dateAdded }.distinct()
+        assertEquals(1, timestamps.size, "All books should have the same timestamp")
     }
 }

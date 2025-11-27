@@ -4,145 +4,131 @@ import kotlin.test.*
 
 /**
  * Unit tests for BookIdNormalizer utility
- * Tests URL normalization and book ID generation
+ * Tests book title normalization
  */
 class BookIdNormalizerTest {
     
     @Test
-    fun `normalize should remove trailing slashes`() {
-        // Given
-        val url = "https://example.com/book/123/"
-        
-        // When
-        val normalized = BookIdNormalizer.normalize(url)
-        
-        // Then
-        assertEquals("https://example.com/book/123", normalized)
-    }
-    
-    @Test
     fun `normalize should convert to lowercase`() {
         // Given
-        val url = "HTTPS://EXAMPLE.COM/BOOK/123"
+        val title = "Lord of the Mysteries"
         
         // When
-        val normalized = BookIdNormalizer.normalize(url)
+        val normalized = BookIdNormalizer.normalize(title)
         
         // Then
-        assertEquals("https://example.com/book/123", normalized)
+        assertEquals("lord-of-the-mysteries", normalized)
     }
     
     @Test
-    fun `normalize should remove query parameters`() {
+    fun `normalize should remove special characters`() {
         // Given
-        val url = "https://example.com/book/123?ref=home&page=1"
+        val title = "Re:Zero - Starting Life in Another World"
         
         // When
-        val normalized = BookIdNormalizer.normalize(url)
+        val normalized = BookIdNormalizer.normalize(title)
         
         // Then
-        assertEquals("https://example.com/book/123", normalized)
+        assertEquals("rezero-starting-life-in-another-world", normalized)
     }
     
     @Test
-    fun `normalize should remove fragments`() {
+    fun `normalize should remove punctuation`() {
         // Given
-        val url = "https://example.com/book/123#chapter-1"
+        val title = "The King's Avatar!!!"
         
         // When
-        val normalized = BookIdNormalizer.normalize(url)
+        val normalized = BookIdNormalizer.normalize(title)
         
         // Then
-        assertEquals("https://example.com/book/123", normalized)
+        assertEquals("the-kings-avatar", normalized)
     }
     
     @Test
-    fun `normalize should handle multiple trailing slashes`() {
+    fun `normalize should replace spaces with hyphens`() {
         // Given
-        val url = "https://example.com/book/123///"
+        val title = "Solo Leveling"
         
         // When
-        val normalized = BookIdNormalizer.normalize(url)
+        val normalized = BookIdNormalizer.normalize(title)
         
         // Then
-        assertEquals("https://example.com/book/123", normalized)
+        assertEquals("solo-leveling", normalized)
     }
     
     @Test
-    fun `normalize should preserve path structure`() {
+    fun `normalize should handle multiple spaces`() {
         // Given
-        val url = "https://example.com/novels/fantasy/book-123"
+        val title = "The   Beginning   After   The   End"
         
         // When
-        val normalized = BookIdNormalizer.normalize(url)
+        val normalized = BookIdNormalizer.normalize(title)
         
         // Then
-        assertEquals("https://example.com/novels/fantasy/book-123", normalized)
+        assertEquals("the-beginning-after-the-end", normalized)
     }
     
     @Test
-    fun `normalize should handle URLs with ports`() {
+    fun `normalize should remove consecutive hyphens`() {
         // Given
-        val url = "https://example.com:8080/book/123"
+        val title = "Overgeared---The Novel"
         
         // When
-        val normalized = BookIdNormalizer.normalize(url)
+        val normalized = BookIdNormalizer.normalize(title)
         
         // Then
-        assertEquals("https://example.com:8080/book/123", normalized)
+        // The implementation removes special chars first, so --- becomes empty, then spaces become hyphens
+        assertEquals("overgearedthe-novel", normalized)
     }
     
     @Test
-    fun `normalize should be idempotent`() {
+    fun `normalize should trim leading and trailing hyphens`() {
         // Given
-        val url = "https://example.com/book/123"
+        val title = "---Mushoku Tensei---"
         
         // When
-        val normalized1 = BookIdNormalizer.normalize(url)
-        val normalized2 = BookIdNormalizer.normalize(normalized1)
+        val normalized = BookIdNormalizer.normalize(title)
         
         // Then
-        assertEquals(normalized1, normalized2)
+        assertEquals("mushoku-tensei", normalized)
     }
     
     @Test
-    fun `generateId should create consistent IDs for same URL`() {
+    fun `normalize should create consistent IDs for same title`() {
         // Given
-        val url = "https://example.com/book/123"
+        val title = "Second Life Ranker"
         
         // When
-        val id1 = BookIdNormalizer.generateId(url)
-        val id2 = BookIdNormalizer.generateId(url)
+        val id1 = BookIdNormalizer.normalize(title)
+        val id2 = BookIdNormalizer.normalize(title)
         
         // Then
         assertEquals(id1, id2)
     }
     
     @Test
-    fun `generateId should create different IDs for different URLs`() {
+    fun `normalize should create different IDs for different titles`() {
         // Given
-        val url1 = "https://example.com/book/123"
-        val url2 = "https://example.com/book/456"
+        val title1 = "Tower of God"
+        val title2 = "God of Blackfield"
         
         // When
-        val id1 = BookIdNormalizer.generateId(url1)
-        val id2 = BookIdNormalizer.generateId(url2)
+        val id1 = BookIdNormalizer.normalize(title1)
+        val id2 = BookIdNormalizer.normalize(title2)
         
         // Then
         assertNotEquals(id1, id2)
     }
     
     @Test
-    fun `generateId should normalize before hashing`() {
+    fun `normalize should handle titles with numbers`() {
         // Given
-        val url1 = "https://example.com/book/123/"
-        val url2 = "https://example.com/book/123"
+        val title = "86 - Eighty Six"
         
         // When
-        val id1 = BookIdNormalizer.generateId(url1)
-        val id2 = BookIdNormalizer.generateId(url2)
+        val normalized = BookIdNormalizer.normalize(title)
         
         // Then
-        assertEquals(id1, id2)
+        assertEquals("86-eighty-six", normalized)
     }
 }

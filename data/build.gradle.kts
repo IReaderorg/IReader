@@ -59,6 +59,9 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.sqldelight.runtime)
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+                implementation(project(Modules.coreApi))
+                implementation(libs.napier)
             }
         }
         
@@ -76,6 +79,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.sqldelight.jvm)
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
             }
         }
 
