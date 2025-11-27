@@ -163,6 +163,9 @@ jobs:
           cp desktop/src/main/resources/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/ireader.png
           cp desktop/src/main/resources/icon.png AppDir/ireader.png
           
+          # Symlink desktop file to AppDir root (required by appimagetool)
+          ln -s usr/share/applications/ireader.desktop AppDir/ireader.desktop
+          
           # Create AppRun
           cat > AppDir/AppRun << 'EOF'
           #!/bin/bash
