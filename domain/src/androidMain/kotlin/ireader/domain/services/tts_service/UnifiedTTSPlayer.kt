@@ -194,8 +194,11 @@ class CoquiTTSPlayer(
                     callback?.onStart(utteranceId)
                 }
                 
+                Log.info { "Coqui TTS speaking: $utteranceId - ${text.take(50)}..." }
+                
                 // Check if audio is already cached
                 val audioData = audioCache[utteranceId] ?: run {
+                    Log.info { "Coqui TTS synthesizing (not cached): $utteranceId" }
                     val result = coquiService?.synthesize(
                         text = text,
                         voiceId = "default",
@@ -213,19 +216,51 @@ class CoquiTTSPlayer(
                 
                 // Remove from cache after use
                 audioCache.remove(utteranceId)
+                cacheStatus.remove(utteranceId)
                 
-                coquiService?.playAudio(audioData)
+                Log.info { "Coqui TTS audio: ${audioData.samples.size} bytes, duration: ${audioData.duration}" }
                 
-                // Wait for playback to complete
-                val duration = if (audioData.duration.inWholeMilliseconds > 0) {
-                    audioData.duration.inWholeMilliseconds
+                // Check if it's MP3 or PCM
+                val isMp3 = audioData.samples.size > 3 &&
+                           audioData.samples[0] == 0xFF.toByte() &&
+                           (audioData.samples[1].toInt() and 0xE0) == 0xE0
+                
+                if (isMp3) {
+                    // For MP3, use MediaPlayer with proper completion callback
+                    val completionSignal = kotlinx.coroutines.CompletableDeferred<Unit>()
+                    
+                    playMp3WithCompletion(audioData.samples) {
+                        completionSignal.complete(Unit)
+                    }
+                    
+                    // Wait for actual completion with timeout
+                    kotlinx.coroutines.withTimeoutOrNull(120000L) {
+                        completionSignal.await()
+                    }
                 } else {
-                    // Estimate: 150 words per minute
-                    val words = text.split(" ").size
-                    (words * 60000L / 150).coerceAtLeast(1000L)
+                    // For PCM, calculate actual duration from audio data
+                    val bytesPerSample = audioData.bitsPerSample / 8
+                    val totalSamples = if (bytesPerSample > 0) audioData.samples.size / bytesPerSample else 0
+                    val calculatedDurationMs = if (audioData.sampleRate > 0 && audioData.channels > 0) {
+                        (totalSamples * 1000L) / (audioData.sampleRate * audioData.channels)
+                    } else {
+                        audioData.duration.inWholeMilliseconds
+                    }
+                    
+                    // Use the longer of calculated or reported duration
+                    val duration = maxOf(calculatedDurationMs, audioData.duration.inWholeMilliseconds)
+                        .coerceAtLeast(500L)
+                    
+                    Log.info { "Coqui TTS PCM duration: calculated=${calculatedDurationMs}ms, reported=${audioData.duration.inWholeMilliseconds}ms, using=${duration}ms" }
+                    
+                    // Play audio
+                    coquiService?.playAudio(audioData)
+                    
+                    // Wait for actual duration plus buffer
+                    kotlinx.coroutines.delay(duration + 300L)
                 }
                 
-                kotlinx.coroutines.delay(duration)
+                Log.info { "Coqui TTS completed: $utteranceId" }
                 
                 mainScope.launch {
                     callback?.onDone(utteranceId)
@@ -236,6 +271,50 @@ class CoquiTTSPlayer(
                     callback?.onError(utteranceId, e.message ?: "Unknown error")
                 }
             }
+        }
+    }
+    
+    /**
+     * Play MP3 audio with completion callback
+     */
+    private fun playMp3WithCompletion(mp3Bytes: ByteArray, onComplete: () -> Unit) {
+        try {
+            val tempFile = java.io.File.createTempFile("coqui_tts_", ".mp3", context.cacheDir)
+            tempFile.writeBytes(mp3Bytes)
+            
+            val mediaPlayer = android.media.MediaPlayer()
+            mediaPlayer.setDataSource(tempFile.absolutePath)
+            mediaPlayer.setAudioAttributes(
+                android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build()
+            )
+            
+            mediaPlayer.setOnPreparedListener { mp ->
+                mp.start()
+                Log.info { "Coqui TTS MP3 playback started" }
+            }
+            
+            mediaPlayer.setOnCompletionListener { mp ->
+                mp.release()
+                tempFile.delete()
+                Log.info { "Coqui TTS MP3 playback completed" }
+                onComplete()
+            }
+            
+            mediaPlayer.setOnErrorListener { mp, what, extra ->
+                Log.error { "Coqui TTS MediaPlayer error: what=$what, extra=$extra" }
+                mp.release()
+                tempFile.delete()
+                onComplete()
+                true
+            }
+            
+            mediaPlayer.prepareAsync()
+        } catch (e: Exception) {
+            Log.error { "Failed to play MP3: ${e.message}" }
+            onComplete()
         }
     }
     

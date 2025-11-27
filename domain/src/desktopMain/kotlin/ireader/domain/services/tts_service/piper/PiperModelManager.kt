@@ -134,15 +134,55 @@ class PiperModelManager(
     
     /**
      * Load voice models from embedded JSON resource
+     * Falls back to PiperVoiceCatalog if resource file is not found
      */
     private fun loadModelsFromResource(): List<VoiceModel> {
+        // Try to load from resource file first
         val resourceStream = this::class.java.getResourceAsStream("/piper_models.json")
-            ?: return emptyList()
         
-        val jsonContent = resourceStream.bufferedReader().use { it.readText() }
-        val modelsData = json.decodeFromString<VoiceModelsData>(jsonContent)
+        if (resourceStream != null) {
+            try {
+                val jsonContent = resourceStream.bufferedReader().use { it.readText() }
+                val modelsData = json.decodeFromString<VoiceModelsData>(jsonContent)
+                if (modelsData.models.isNotEmpty()) {
+                    Log.info { "Loaded ${modelsData.models.size} voice models from resource file" }
+                    return modelsData.models
+                }
+            } catch (e: Exception) {
+                Log.error { "Failed to parse piper_models.json: ${e.message}" }
+            }
+        } else {
+            Log.warn { "piper_models.json resource not found, using PiperVoiceCatalog fallback" }
+        }
         
-        return modelsData.models
+        // Fallback to PiperVoiceCatalog
+        val catalogModels = ireader.domain.catalogs.PiperVoiceCatalog.getAllVoices()
+        Log.info { "Using PiperVoiceCatalog fallback with ${catalogModels.size} voices" }
+        
+        return catalogModels.map { catalogVoice ->
+            VoiceModel(
+                id = catalogVoice.id,
+                name = catalogVoice.name,
+                language = catalogVoice.locale,
+                quality = when (catalogVoice.quality) {
+                    ireader.domain.models.tts.VoiceQuality.LOW -> VoiceModel.Quality.LOW
+                    ireader.domain.models.tts.VoiceQuality.MEDIUM -> VoiceModel.Quality.MEDIUM
+                    ireader.domain.models.tts.VoiceQuality.HIGH -> VoiceModel.Quality.HIGH
+                    ireader.domain.models.tts.VoiceQuality.PREMIUM -> VoiceModel.Quality.HIGH
+                },
+                gender = when (catalogVoice.gender) {
+                    ireader.domain.models.tts.VoiceGender.MALE -> VoiceModel.Gender.MALE
+                    ireader.domain.models.tts.VoiceGender.FEMALE -> VoiceModel.Gender.FEMALE
+                    ireader.domain.models.tts.VoiceGender.NEUTRAL -> VoiceModel.Gender.NEUTRAL
+                },
+                sizeBytes = catalogVoice.modelSize,
+                modelUrl = catalogVoice.downloadUrl,
+                configUrl = catalogVoice.configUrl,
+                modelChecksum = catalogVoice.checksum.takeIf { it.isNotEmpty() && it != "sha256:placeholder" },
+                configChecksum = null,
+                isDownloaded = false
+            )
+        }
     }
     
     /**

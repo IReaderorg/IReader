@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 data class CommonTTSScreenState(
     val currentReadingParagraph: Int = 0,
+    val previousReadingParagraph: Int = 0,
     val isPlaying: Boolean = false,
     val isLoading: Boolean = false,
     val content: List<String> = emptyList(),
@@ -46,6 +47,12 @@ data class CommonTTSScreenState(
     val speechSpeed: Float = 1.0f,
     val autoNextChapter: Boolean = false,
     val fullScreenMode: Boolean = false,
+    // Cache status for Coqui TTS
+    val cachedParagraphs: Set<Int> = emptySet(),
+    val loadingParagraphs: Set<Int> = emptySet(),
+    // Sleep timer
+    val sleepTimeRemaining: Long = 0L,
+    val sleepModeEnabled: Boolean = false,
     // Desktop-specific features
     val hasDownloadFeature: Boolean = false,
     val isDownloading: Boolean = false,
@@ -141,14 +148,18 @@ fun TTSContentDisplay(
             ) {
                 items(displayContent.size) { index ->
                     val isCurrentParagraph = index == state.currentReadingParagraph
+                    val isPreviousParagraph = index == state.previousReadingParagraph && index != state.currentReadingParagraph
                     val originalText = state.content.getOrNull(index) ?: ""
                     val translatedText = state.translatedContent?.getOrNull(index)
+                    val isCached = state.cachedParagraphs.contains(index)
+                    val isLoadingCache = state.loadingParagraphs.contains(index)
                     
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { actions.onParagraphClick(index) }
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.Top
                     ) {
                         // Bilingual mode: show both original and translated
                         if (state.bilingualMode && hasTranslation && translatedText != null) {
@@ -201,34 +212,84 @@ fun TTSContentDisplay(
                                 fontWeight = if (isCurrentParagraph) FontWeight.Bold else FontWeight(fontWeight)
                             )
                         }
-                    }
+                        // Cache indicator (only show for upcoming paragraphs)
+                        if (index > state.currentReadingParagraph && index <= state.currentReadingParagraph + 3) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .padding(top = 6.dp)
+                            ) {
+                                when {
+                                    isCached -> {
+                                        // Green dot for cached
+                                        Box(
+                                            modifier = Modifier
+                                                .size(6.dp)
+                                                .background(
+                                                    Color(0xFF4CAF50),
+                                                    shape = CircleShape
+                                                )
+                                        )
+                                    }
+
+                                    isLoadingCache -> {
+                                        // Yellow dot for loading
+                                        Box(
+                                            modifier = Modifier
+                                                .size(6.dp)
+                                                .background(
+                                                    Color(0xFFFFC107),
+                                                    shape = CircleShape
+                                                )
+                                        )
+                                    }
+
+                                    else -> {
+                                        // Gray dot for not cached
+                                        Box(
+                                            modifier = Modifier
+                                                .size(6.dp)
+                                                .background(
+                                                    textColor.copy(alpha = 0.2f),
+                                                    shape = CircleShape
+                                                )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } // Close Row
                 }
             }
         }
         
         // Progress indicator at bottom
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "${state.currentReadingParagraph + 1}/${displayContent.size}",
-                style = MaterialTheme.typography.labelSmall,
-                color = textColor.copy(alpha = 0.7f)
-            )
-            
-            if (state.showTranslation && hasTranslation) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.Default.Translate,
-                    contentDescription = "Translated",
-                    modifier = Modifier.size(12.dp),
-                    tint = textColor.copy(alpha = 0.7f)
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${state.currentReadingParagraph + 1}/${displayContent.size}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = textColor.copy(alpha = 0.7f)
                 )
+                
+                if (state.showTranslation && hasTranslation) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.Translate,
+                        contentDescription = "Translated",
+                        modifier = Modifier.size(12.dp),
+                        tint = textColor.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
     }
@@ -272,12 +333,39 @@ fun TTSMediaControls(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         
-                        state.selectedVoiceModel?.let { model ->
-                            Text(
-                                text = model,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Sleep timer indicator
+                            if (state.sleepModeEnabled && state.sleepTimeRemaining > 0) {
+                                val minutes = state.sleepTimeRemaining / 60000
+                                val seconds = (state.sleepTimeRemaining % 60000) / 1000
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Schedule,
+                                        contentDescription = "Sleep Timer",
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.tertiary
+                                    )
+                                    Text(
+                                        text = "${minutes}:${seconds.toString().padStart(2, '0')}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.tertiary
+                                    )
+                                }
+                            }
+                            
+                            state.selectedVoiceModel?.let { model ->
+                                Text(
+                                    text = model,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                     
@@ -631,6 +719,8 @@ fun TTSSettingsPanelCommon(
     autoNextChapter: Boolean,
     useCoquiTTS: Boolean = false,
     currentEngineName: String = "System TTS",
+    readTranslatedText: Boolean = false,
+    hasTranslation: Boolean = false,
     onUseCustomColorsChange: (Boolean) -> Unit,
     onBackgroundColorChange: (Color) -> Unit,
     onTextColorChange: (Color) -> Unit,
@@ -641,6 +731,7 @@ fun TTSSettingsPanelCommon(
     onSpeedChange: (Float) -> Unit,
     onAutoNextChange: (Boolean) -> Unit,
     onCoquiTTSChange: (Boolean) -> Unit = {},
+    onReadTranslatedTextChange: (Boolean) -> Unit = {},
     onOpenEngineSettings: () -> Unit = {},
     onDismiss: () -> Unit,
     isTabletOrDesktop: Boolean = false,
@@ -778,26 +869,55 @@ fun TTSSettingsPanelCommon(
                 
                 // Auto-next Chapter
                 SettingSectionCommon(title = "Playback") {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Auto-next Chapter",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = "Automatically play next chapter when current ends",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Auto-next Chapter",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "Automatically play next chapter when current ends",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = autoNextChapter,
+                                onCheckedChange = onAutoNextChange
                             )
                         }
-                        Switch(
-                            checked = autoNextChapter,
-                            onCheckedChange = onAutoNextChange
-                        )
+                        
+                        
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Read Translated Text",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        text = if (readTranslatedText) "TTS will read translated content" else "TTS will read original content",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Switch(
+                                    checked = readTranslatedText,
+                                    onCheckedChange = onReadTranslatedTextChange
+                                )
+                            }
+
                     }
                 }
                 
@@ -1124,6 +1244,20 @@ fun DownloadProgressDialog(
  */
 @Composable
 expect fun TTSEngineSettingsScreen(
+    isDesktop: Boolean,
+    onDismiss: () -> Unit,
+    onNavigateToTTSManager: () -> Unit = {}
+)
+
+/**
+ * TTS Voice Selection Screen
+ * 
+ * Platform-specific behavior:
+ * - Android: Shows available system TTS voices
+ * - Desktop: Shows available Piper/Kokoro/Maya voices
+ */
+@Composable
+expect fun TTSVoiceSelectionScreen(
     isDesktop: Boolean,
     onDismiss: () -> Unit
 )

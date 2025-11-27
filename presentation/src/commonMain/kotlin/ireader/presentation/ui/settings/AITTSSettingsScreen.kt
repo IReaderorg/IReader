@@ -242,6 +242,76 @@ fun AITTSSettingsScreen(
                 }
             }
             
+            // Piper TTS Voices Section
+            item {
+                Card {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.RecordVoiceOver,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Piper TTS Voices",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        
+                        Text(
+                            text = "High-quality offline neural voices. Download and use with Sherpa TTS app.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        // Show available voices count
+                        val availableVoices = ireader.domain.catalogs.PiperVoiceCatalog.getAllVoices()
+                        val languages = ireader.domain.catalogs.PiperVoiceCatalog.getSupportedLanguages()
+                        
+                        Text(
+                            text = "${availableVoices.size} voices available in ${languages.size} languages",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+            
+            // Voice list header
+            item {
+                Text(
+                    text = "Available Voices",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+            
+            // Voice list
+            val voices = ireader.domain.catalogs.PiperVoiceCatalog.getAllVoices()
+            items(voices) { voice ->
+                VoiceCard(
+                    voice = voice,
+                    isSelected = state.selectedVoiceId == voice.id,
+                    isDownloading = state.downloadingVoice == voice.id,
+                    isDownloaded = state.downloadedVoices.contains(voice.id),
+                    downloadProgress = if (state.downloadingVoice == voice.id) state.downloadProgress else 0,
+                    onSelect = { viewModel.selectVoice(voice.id) },
+                    onPreview = { viewModel.previewVoice(voice.id) },
+                    onDownload = { viewModel.downloadVoice(voice) },
+                    onDelete = { viewModel.deleteVoice(voice.id) }
+                )
+            }
+            
             // Error message
             state.error?.let { error ->
                 item {

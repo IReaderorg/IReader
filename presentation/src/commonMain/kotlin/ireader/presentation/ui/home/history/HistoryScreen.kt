@@ -114,7 +114,7 @@ fun HistoryScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
-
+                .padding(padding)
         ) {
             when {
                 items.values.flatten().isEmpty() && vm.searchQuery.isNotEmpty() -> EmptyScreen(
@@ -131,18 +131,18 @@ fun HistoryScreen(
                     items = items,
                     listState = listState,
                     onClickItem = onHistory,
-                    onClickDelete = { history -> vm.deleteHistory(history,localizeHelper) },
+                    onClickDelete = { history -> vm.deleteHistory(history, localizeHelper) },
                     onClickPlay = onHistoryPlay,
                     onBookCover = onBookCover,
-                    onLongClickDelete = { history -> vm.deleteHistory(history,localizeHelper) },
+                    onLongClickDelete = { history -> vm.deleteHistory(history, localizeHelper) },
                     vm = vm
                 )
             }
-            
-            // Only show warning alert if enabled
-            if (vm.warningAlert.enable) {
-                WarningAlertDialog(data = vm.warningAlert)
-            }
+        }
+        
+        // Show warning alert dialog outside the Box to ensure it's on top
+        if (vm.warningAlert.enable) {
+            WarningAlertDialog(data = vm.warningAlert)
         }
     }
     
@@ -558,14 +558,9 @@ fun HistoryItem(
         confirmStateChange = {
             if (it == DismissValue.DismissedToStart && !alertShowing.value) {
                 alertShowing.value = true
-                // Reset the alertShowing state after a short delay to allow for another swipe
-                scope.launch {
-                    onHistoryDelete(history)
-                    // Allow some time for the alert to be shown and handled
-                    delay(300)
-                    alertShowing.value = false
-                }
-                // Don't confirm the state change yet - we'll wait for the alert dialog response
+                // Call delete handler immediately (not in coroutine) to show dialog
+                onHistoryDelete(history)
+                // Don't confirm the state change - we'll wait for the alert dialog response
                 false
             } else {
                 false
@@ -573,9 +568,20 @@ fun HistoryItem(
         }
     )
     
-    // Reset the dismiss state when the alert dialog is closed
+    // Reset the dismiss state and alertShowing when the dialog is closed
+    LaunchedEffect(key1 = vm.warningAlert.enable) {
+        if (!vm.warningAlert.enable && alertShowing.value) {
+            // Dialog was closed, reset states
+            alertShowing.value = false
+            dismissState.reset()
+        }
+    }
+    
+    // Also reset dismiss state if it's not in default position
     LaunchedEffect(key1 = dismissState.currentValue) {
         if (dismissState.currentValue != DismissValue.Default) {
+            // Small delay to allow the swipe animation to complete
+            delay(100)
             dismissState.reset()
         }
     }
@@ -601,15 +607,6 @@ fun HistoryItem(
     
     val scale by animatedProgress.asState()
     val alpha by animatedProgress.asState()
-    
-    // Observe refreshTrigger from ViewModel to reset alertShowing if needed
-    val refreshTrigger = vm.refreshTrigger
-    LaunchedEffect(refreshTrigger) {
-        if (!vm.warningAlert.enable) {
-            alertShowing.value = false
-            dismissState.reset()
-        }
-    }
     
     SwipeToDismiss(
         state = dismissState,

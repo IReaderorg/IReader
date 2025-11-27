@@ -128,6 +128,8 @@ kotlin {
                 implementation("io.mockk:mockk:1.13.8")
                 // Napier logging for tests
                 implementation("io.github.aakira:napier:2.7.1")
+                // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
+                implementation("io.ktor:ktor-client-mock:3.3.2")
             }
         }
          androidMain {

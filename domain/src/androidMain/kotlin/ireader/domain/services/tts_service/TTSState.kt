@@ -126,6 +126,14 @@ class TTSStateImpl() : AndroidTTSState {
     var cachedParagraphs by mutableStateOf<Set<Int>>(emptySet())
     var loadingParagraphs by mutableStateOf<Set<Int>>(emptySet())
     
+    // Coqui TTS flag
+    var useCoquiTTS by mutableStateOf(false)
+    
+    // Alias for speechSpeed (for compatibility)
+    val speechRate: kotlinx.coroutines.flow.StateFlow<Float> get() = _speechSpeed
+    
+    fun setSpeechRate(value: Float) { _speechSpeed.value = value }
+    
     // Setter implementations
     override fun setPlaying(value: Boolean) { _isPlaying.value = value }
     override fun setTtsContent(value: List<String>?) { _ttsContent.value = value }

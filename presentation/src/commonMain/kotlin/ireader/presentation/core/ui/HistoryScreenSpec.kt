@@ -82,8 +82,7 @@ object HistoryScreenSpec : Tab {
             snackbarHostState = host
         ) {scaffoldPadding ->
             HistoryScreen(
-                modifier = Modifier
-                    .padding(scaffoldPadding),
+                modifier = Modifier,
                 onHistory = { history ->
                     navController.navigateTo(
                         ReaderScreenSpec(

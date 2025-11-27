@@ -28,7 +28,8 @@ import org.koin.compose.koinInject
 @Composable
 actual fun TTSEngineSettingsScreen(
     isDesktop: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onNavigateToTTSManager: () -> Unit
 ) {
     val ttsService: DesktopTTSService = koinInject()
     val scope = rememberCoroutineScope()
@@ -163,14 +164,15 @@ actual fun TTSEngineSettingsScreen(
                         }
                     )
                     
-                    // Coqui TTS (Online)
+                    // Coqui TTS (Online) - Navigate to TTS Manager for configuration
                     EngineCard(
                         name = "Coqui TTS (Online)",
                         description = "High-quality neural TTS via HTTP server",
                         isAvailable = true, // Always available if server is configured
                         isCurrentEngine = false,
                         onSelect = {
-                            // TODO: Configure Coqui TTS server URL
+                            onNavigateToTTSManager()
+                            onDismiss()
                         }
                     )
                 }
@@ -251,6 +253,238 @@ private fun EngineCard(
                 AssistChip(
                     onClick = {},
                     label = { Text("Active") },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        labelColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+            }
+        }
+    }
+}
+
+
+/**
+ * Desktop implementation of TTS Voice Selection Screen
+ * 
+ * Shows available Piper/Kokoro/Maya voices based on current engine
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+actual fun TTSVoiceSelectionScreen(
+    isDesktop: Boolean,
+    onDismiss: () -> Unit
+) {
+    val ttsService: DesktopTTSService = koinInject()
+    val scope = rememberCoroutineScope()
+    
+    // Voice state
+    var availableVoices by remember { mutableStateOf<List<VoiceInfo>>(emptyList()) }
+    var selectedVoice by remember { mutableStateOf<String?>(null) }
+    var currentEngine by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(true) }
+    
+    // Load voices based on current engine
+    LaunchedEffect(Unit) {
+        currentEngine = ttsService.getCurrentEngine().name
+        selectedVoice = ttsService.state.selectedVoiceModel?.id
+        
+        // Get available voices based on engine
+        availableVoices = when (currentEngine) {
+            "PIPER" -> {
+                ttsService.state.availableVoiceModels
+                    .filter { it.isDownloaded }
+                    .map { VoiceInfo(it.id, it.name, it.language, true) }
+            }
+            "KOKORO" -> {
+                // Kokoro has predefined voices
+                listOf(
+                    VoiceInfo("af_bella", "Bella (Female)", "en-US", true),
+                    VoiceInfo("af_nicole", "Nicole (Female)", "en-US", true),
+                    VoiceInfo("af_sarah", "Sarah (Female)", "en-US", true),
+                    VoiceInfo("af_sky", "Sky (Female)", "en-US", true),
+                    VoiceInfo("am_adam", "Adam (Male)", "en-US", true),
+                    VoiceInfo("am_michael", "Michael (Male)", "en-US", true),
+                    VoiceInfo("bf_emma", "Emma (Female)", "en-GB", true),
+                    VoiceInfo("bm_george", "George (Male)", "en-GB", true)
+                )
+            }
+            "MAYA" -> {
+                // Maya supports multiple languages
+                listOf(
+                    VoiceInfo("en", "English", "en", true),
+                    VoiceInfo("es", "Spanish", "es", true),
+                    VoiceInfo("fr", "French", "fr", true),
+                    VoiceInfo("de", "German", "de", true),
+                    VoiceInfo("it", "Italian", "it", true),
+                    VoiceInfo("pt", "Portuguese", "pt", true),
+                    VoiceInfo("ru", "Russian", "ru", true),
+                    VoiceInfo("zh", "Chinese", "zh", true),
+                    VoiceInfo("ja", "Japanese", "ja", true),
+                    VoiceInfo("ko", "Korean", "ko", true)
+                )
+            }
+            else -> emptyList()
+        }
+        isLoading = false
+    }
+    
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .fillMaxHeight(0.8f),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Voice Selection",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        Text(
+                            text = "Engine: $currentEngine",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, "Close")
+                    }
+                }
+                
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else if (availableVoices.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Warning,
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "No voices available",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = "Please install voices from the TTS Engine Manager",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+                    // Voice list
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        availableVoices.forEach { voice ->
+                            VoiceCard(
+                                voice = voice,
+                                isSelected = voice.id == selectedVoice,
+                                onSelect = {
+                                    scope.launch {
+                                        when (currentEngine) {
+                                            "PIPER" -> {
+                                                ttsService.selectVoiceModel(voice.id)
+                                            }
+                                            // For Kokoro and Maya, voice selection is handled differently
+                                            // They use the voice ID directly during synthesis
+                                        }
+                                        selectedVoice = voice.id
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private data class VoiceInfo(
+    val id: String,
+    val name: String,
+    val language: String,
+    val isAvailable: Boolean
+)
+
+@Composable
+private fun VoiceCard(
+    voice: VoiceInfo,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    OutlinedCard(
+        onClick = onSelect,
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = if (isSelected) 
+                MaterialTheme.colorScheme.primaryContainer 
+            else 
+                MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                contentDescription = null,
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = voice.name,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = voice.language,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            if (isSelected) {
+                AssistChip(
+                    onClick = {},
+                    label = { Text("Selected") },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         labelColor = MaterialTheme.colorScheme.onPrimary

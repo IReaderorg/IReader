@@ -241,27 +241,48 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                     scope.launch {
                         // Only load book if provided and different from current
                         if (bookId != -1L && state.ttsBook.value?.id != bookId) {
-                            state.setTtsBook(bookRepo.findBookById(bookId)
-)
+                            state.setTtsBook(bookRepo.findBookById(bookId))
                         }
                         
-                        // Only load chapter if provided and different from current
-                        if (chapterId != -1L && state.ttsChapter.value?.id != chapterId) {
-                            val chapter = chapterRepo.findChapterById(chapterId)
-                            state.setTtsChapter(chapter
-)
-                            
-                            // Load chapters list
-                            state.ttsBook.value?.let { book ->
-                                state.setTtsChapters(chapterRepo.findChaptersByBookId(book.id)
-)
-                                state.setTtsCatalog(extensions.get(book.sourceId)
-)
+                        // Load chapters list and catalog
+                        state.ttsBook.value?.let { book ->
+                            if (state.ttsChapters.value.isEmpty()) {
+                                state.setTtsChapters(chapterRepo.findChaptersByBookId(book.id))
+                            }
+                            if (state.ttsCatalog.value == null) {
+                                state.setTtsCatalog(extensions.get(book.sourceId))
                             }
                         }
                         
-                        // Execute command AFTER data is loaded
-                        if (command != -1) {
+                        // Load chapter if provided and different from current
+                        if (chapterId != -1L && state.ttsChapter.value?.id != chapterId) {
+                            val source = state.ttsCatalog.value
+                            if (source != null) {
+                                // Use getRemoteChapter to properly load content (local or remote)
+                                getRemoteChapter(chapterId, source, state) {
+                                    // Reset paragraph to start of new chapter
+                                    state.setCurrentReadingParagraph(0)
+                                    state.setPreviousReadingParagraph(0)
+                                    updateNotification()
+                                    
+                                    // Execute command AFTER data is loaded
+                                    if (command != -1) {
+                                        startService(command)
+                                    }
+                                }
+                            } else {
+                                // Fallback: just load from local database
+                                val chapter = chapterRepo.findChapterById(chapterId)
+                                state.setTtsChapter(chapter)
+                                state.setCurrentReadingParagraph(0)
+                                state.setPreviousReadingParagraph(0)
+                                
+                                if (command != -1) {
+                                    startService(command)
+                                }
+                            }
+                        } else if (command != -1) {
+                            // Same chapter, just execute command
                             startService(command)
                         }
                     }

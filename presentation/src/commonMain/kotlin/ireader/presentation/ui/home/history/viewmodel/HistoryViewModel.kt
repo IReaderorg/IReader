@@ -118,31 +118,34 @@ class HistoryViewModel(
     /**
      * Delete a specific history item with confirmation
      */
-    fun deleteHistory(history: HistoryWithRelations,localizeHelper: LocalizeHelper) {
-        // Reset any existing alert dialog first
-        warningAlert = WarningAlertData()
-
-        // Now create a new alert dialog
-        warningAlert = WarningAlertData().copy(
-            enable = true,
-            title = localizeHelper.localize(Res.string.remove),
-            text = localizeHelper.localize(Res.string.dialog_remove_chapter_history_description),
-            onDismiss = {
-                // Just dismiss the alert without deleting when cancel is pressed
-                warningAlert = warningAlert.copy(enable = false)
-                // Trigger UI refresh to reset the swipe state
-                refreshTrigger++
-            },
-            onConfirm = {
-                // Close the alert and proceed with deletion when confirm is pressed
-                warningAlert = warningAlert.copy(enable = false)
-                scope.launch {
-                    historyUseCase.deleteHistory(history.chapterId)
-                    // Trigger UI refresh after deletion
+    fun deleteHistory(history: HistoryWithRelations, localizeHelper: LocalizeHelper) {
+        // Create the alert dialog with proper callbacks
+        val newAlert = WarningAlertData()
+        newAlert.enable = true
+        newAlert.title.value = localizeHelper.localize(Res.string.remove)
+        newAlert.text.value = localizeHelper.localize(Res.string.dialog_remove_chapter_history_description)
+        newAlert.onDismiss.value = {
+            // Just dismiss the alert without deleting when cancel is pressed
+            warningAlert.enable = false
+            // Trigger UI refresh to reset the swipe state
+            refreshTrigger++
+        }
+        newAlert.onConfirm.value = {
+            // Capture the chapterId before any state changes
+            val chapterIdToDelete = history.chapterId
+            // Proceed with deletion in a coroutine BEFORE closing the alert
+            // This ensures the deletion starts before any UI changes
+            scope.launch {
+                try {
+                    historyUseCase.deleteHistory(chapterIdToDelete)
+                } finally {
+                    // Close the alert and trigger UI refresh after deletion
+                    warningAlert.enable = false
                     refreshTrigger++
                 }
             }
-        )
+        }
+        warningAlert = newAlert
     }
 
 
@@ -150,33 +153,33 @@ class HistoryViewModel(
      * Delete all history entries with a confirmation dialog
      */
     fun deleteAllHistories(localizeHelper: LocalizeHelper) {
-        // Reset any existing alert dialog first
-        warningAlert = WarningAlertData()
-        
-        // Now create a new alert dialog
+        // Create the alert dialog with proper callbacks
         val warningMessage = localizeHelper.localize(Res.string.dialog_remove_chapter_books_description) + 
             " " + localizeHelper.localize(Res.string.action_cannot_be_undone)
         
-        warningAlert = WarningAlertData().copy(
-            enable = true,
-            title = localizeHelper.localize(Res.string.delete_all_histories),
-            text = warningMessage,
-            onDismiss = {
-                // Just dismiss the alert without deleting when cancel is pressed
-                warningAlert = warningAlert.copy(enable = false)
-                // Trigger UI refresh to ensure UI consistency
-                refreshTrigger++
-            },
-            onConfirm = {
-                // Close the alert and proceed with deletion when confirm is pressed
-                warningAlert = warningAlert.copy(enable = false)
-                scope.launch {
+        val newAlert = WarningAlertData()
+        newAlert.enable = true
+        newAlert.title.value = localizeHelper.localize(Res.string.delete_all_histories)
+        newAlert.text.value = warningMessage
+        newAlert.onDismiss.value = {
+            // Just dismiss the alert without deleting when cancel is pressed
+            warningAlert.enable = false
+            // Trigger UI refresh to ensure UI consistency
+            refreshTrigger++
+        }
+        newAlert.onConfirm.value = {
+            // Proceed with deletion in a coroutine BEFORE closing the alert
+            scope.launch {
+                try {
                     historyUseCase.deleteAllHistories()
-                    // Trigger UI refresh after deletion
+                } finally {
+                    // Close the alert and trigger UI refresh after deletion
+                    warningAlert.enable = false
                     refreshTrigger++
                 }
             }
-        )
+        }
+        warningAlert = newAlert
     }
 
 

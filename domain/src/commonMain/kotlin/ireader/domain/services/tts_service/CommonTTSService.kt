@@ -75,6 +75,12 @@ interface CommonTTSService {
     suspend fun jumpToParagraph(index: Int)
     
     /**
+     * Set custom content to read (e.g., translated content)
+     * If null, uses the original chapter content
+     */
+    fun setCustomContent(content: List<String>?)
+    
+    /**
      * Get available TTS engines for this platform
      */
     fun getAvailableEngines(): List<String>
@@ -93,6 +99,22 @@ interface CommonTTSService {
      * Cleanup resources
      */
     fun cleanup()
+    
+    /**
+     * Set sleep timer
+     * @param minutes Duration in minutes (0 to disable)
+     */
+    fun setSleepTimer(minutes: Int)
+    
+    /**
+     * Cancel sleep timer
+     */
+    fun cancelSleepTimer()
+    
+    /**
+     * Toggle auto-next chapter
+     */
+    fun setAutoNextChapter(enabled: Boolean)
 }
 
 /**
@@ -105,6 +127,7 @@ interface TTSServiceState {
     val currentBook: StateFlow<Book?>
     val currentChapter: StateFlow<Chapter?>
     val currentParagraph: StateFlow<Int>
+    val previousParagraph: StateFlow<Int>  // For UI highlighting
     val totalParagraphs: StateFlow<Int>
     val currentContent: StateFlow<List<String>>
     val speechSpeed: StateFlow<Float>
@@ -115,6 +138,13 @@ interface TTSServiceState {
     // Caching state (for Coqui TTS)
     val cachedParagraphs: StateFlow<Set<Int>>
     val loadingParagraphs: StateFlow<Set<Int>>
+    
+    // Sleep timer state
+    val sleepTimeRemaining: StateFlow<Long>  // Remaining time in milliseconds
+    val sleepModeEnabled: StateFlow<Boolean>
+    
+    // Audio focus state
+    val hasAudioFocus: StateFlow<Boolean>
 }
 
 /**

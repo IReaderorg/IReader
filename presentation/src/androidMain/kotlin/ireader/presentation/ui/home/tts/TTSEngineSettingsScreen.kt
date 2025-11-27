@@ -22,7 +22,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 actual fun TTSEngineSettingsScreen(
     isDesktop: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onNavigateToTTSManager: () -> Unit
 ) {
     val context = LocalContext.current
     
@@ -78,10 +79,10 @@ actual fun TTSEngineSettingsScreen(
                     }
                 }
                 
-                // Coqui TTS Settings (if configured)
+                // Coqui TTS Settings - Navigate to TTS Manager
                 OutlinedCard(
                     onClick = {
-                        // TODO: Navigate to Coqui TTS settings screen
+                        onNavigateToTTSManager()
                         onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -151,4 +152,77 @@ private fun openAndroidSystemTTSSettings(context: android.content.Context) {
             context.startActivity(settingsIntent)
         }
     }
+}
+
+
+/**
+ * Android implementation of TTS Voice Selection Screen
+ * 
+ * Shows available system TTS voices
+ */
+@Composable
+actual fun TTSVoiceSelectionScreen(
+    isDesktop: Boolean,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Voice Selection")
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Voice selection is managed through Android's TTS settings.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                OutlinedCard(
+                    onClick = {
+                        openAndroidSystemTTSSettings(context)
+                        onDismiss()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.RecordVoiceOver,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Open TTS Settings",
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                            Text(
+                                text = "Select voice, language, and speech rate",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
 }

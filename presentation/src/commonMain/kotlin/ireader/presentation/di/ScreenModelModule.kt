@@ -33,6 +33,13 @@ val screenModelModule = module {
         )
     }
     
+    // Donation Leaderboard screen model
+    factory {
+        ireader.presentation.ui.leaderboard.DonationLeaderboardViewModel(
+            donationLeaderboardUseCases = get()
+        )
+    }
+    
     // Browse settings view model
     factory {
         ireader.presentation.ui.home.sources.settings.BrowseSettingsViewModel(

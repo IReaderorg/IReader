@@ -35,7 +35,7 @@ class AITTSSettingsViewModel(
     
     init {
         loadSettings()
-        // Don't auto-configure - let user enable it first
+        loadVoices()
     }
     
     private fun loadSettings() {
@@ -84,13 +84,27 @@ class AITTSSettingsViewModel(
     }
     
     fun loadVoices() {
-        // Voice loading not supported on Android
-        // Users should configure voices in Android Settings or Sherpa TTS app
-        updateState { it.copy(
-            isLoading = false,
-            error = null,
-            availableVoices = emptyList()
-        ) }
+        scope.launch {
+            updateState { it.copy(isLoading = true) }
+            
+            try {
+                // Load voices from PiperVoiceCatalog
+                val voices = ireader.domain.catalogs.PiperVoiceCatalog.getAllVoices()
+                
+                updateState { it.copy(
+                    isLoading = false,
+                    error = null,
+                    availableVoices = voices
+                ) }
+            } catch (e: Exception) {
+                Log.error { "Failed to load voices: ${e.message}" }
+                updateState { it.copy(
+                    isLoading = false,
+                    error = "Failed to load voices: ${e.message}",
+                    availableVoices = emptyList()
+                ) }
+            }
+        }
     }
     
     fun selectVoice(voiceId: String) {

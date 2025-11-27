@@ -63,7 +63,7 @@ class CoquiTTSPlayerAdapter(
             
             // Notify start immediately
             callback?.onStart(utteranceId)
-            Log.info { "Coqui TTS speaking: $utteranceId" }
+            Log.info { "Coqui TTS speaking: $utteranceId - text: ${text.take(50)}..." }
             
             val result = coquiService?.synthesize(
                 text = text,
@@ -73,6 +73,7 @@ class CoquiTTSPlayerAdapter(
             )
             
             if (result == null) {
+                isSpeakingNow = false
                 callback?.onError(utteranceId, "Coqui service not available")
                 return Result.failure(Exception("Coqui service not available"))
             }
@@ -80,28 +81,60 @@ class CoquiTTSPlayerAdapter(
             // Wait for synthesis to complete
             val audioData = result.getOrElse { error ->
                 Log.error { "Coqui TTS synthesis failed: ${error.message}" }
+                isSpeakingNow = false
                 callback?.onError(utteranceId, error.message ?: "Unknown error")
                 return Result.failure(error)
             }
             
             Log.info { "Coqui TTS synthesized ${audioData.samples.size} bytes, duration: ${audioData.duration}" }
             
-            // Play audio (non-blocking)
-            coquiService?.playAudio(audioData)
-            
-            // Calculate duration
-            val duration = if (audioData.duration.inWholeMilliseconds > 0) {
-                audioData.duration.inWholeMilliseconds
-            } else {
-                // Estimate duration based on text length (rough estimate: 150 words per minute)
-                val words = text.split(" ").size
-                (words * 60000L / 150).coerceAtLeast(1000L)
+            // Use the blocking playback method from CoquiTTSService
+            // This will wait until audio playback is complete
+            try {
+                // Call the internal blocking playback
+                coquiService?.let { service ->
+                    // Use reflection or direct call to blocking method
+                    // For now, use playAudio and wait properly
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        // Create a completion signal
+                        val completionSignal = kotlinx.coroutines.CompletableDeferred<Unit>()
+                        
+                        // Check if it's MP3 or PCM
+                        val isMp3 = audioData.samples.size > 3 &&
+                                   audioData.samples[0] == 0xFF.toByte() &&
+                                   (audioData.samples[1].toInt() and 0xE0) == 0xE0
+                        
+                        if (isMp3) {
+                            // For MP3, use MediaPlayer with completion callback
+                            playMp3WithCompletion(audioData.samples) {
+                                completionSignal.complete(Unit)
+                            }
+                        } else {
+                            // For PCM, calculate actual duration from audio data
+                            val bytesPerSample = audioData.bitsPerSample / 8
+                            val totalSamples = audioData.samples.size / bytesPerSample
+                            val durationMs = (totalSamples * 1000L) / (audioData.sampleRate * audioData.channels)
+                            
+                            // Play audio
+                            service.playAudio(audioData)
+                            
+                            // Wait for actual duration plus buffer
+                            val waitTime = durationMs.coerceAtLeast(500L) + 200L
+                            Log.info { "Coqui TTS waiting ${waitTime}ms for PCM playback (calculated: ${durationMs}ms)" }
+                            kotlinx.coroutines.delay(waitTime)
+                            completionSignal.complete(Unit)
+                        }
+                        
+                        // Wait for completion with timeout
+                        kotlinx.coroutines.withTimeoutOrNull(120000L) {
+                            completionSignal.await()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.error { "Coqui TTS playback error: ${e.message}" }
             }
             
-            Log.info { "Coqui TTS will play for ${duration}ms" }
-            
-            // Wait for playback to complete, then notify
-            kotlinx.coroutines.delay(duration)
             Log.info { "Coqui TTS completed: $utteranceId" }
             
             isSpeakingNow = false
@@ -113,6 +146,50 @@ class CoquiTTSPlayerAdapter(
             isSpeakingNow = false
             callback?.onError(utteranceId, e.message ?: "Unknown error")
             Result.failure(e)
+        }
+    }
+    
+    /**
+     * Play MP3 audio with completion callback
+     */
+    private fun playMp3WithCompletion(mp3Bytes: ByteArray, onComplete: () -> Unit) {
+        try {
+            val tempFile = java.io.File.createTempFile("coqui_tts_", ".mp3", context.cacheDir)
+            tempFile.writeBytes(mp3Bytes)
+            
+            val mediaPlayer = android.media.MediaPlayer()
+            mediaPlayer.setDataSource(tempFile.absolutePath)
+            mediaPlayer.setAudioAttributes(
+                android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build()
+            )
+            
+            mediaPlayer.setOnPreparedListener { mp ->
+                mp.start()
+                Log.info { "Coqui TTS MP3 playback started" }
+            }
+            
+            mediaPlayer.setOnCompletionListener { mp ->
+                mp.release()
+                tempFile.delete()
+                Log.info { "Coqui TTS MP3 playback completed" }
+                onComplete()
+            }
+            
+            mediaPlayer.setOnErrorListener { mp, what, extra ->
+                Log.error { "Coqui TTS MediaPlayer error: what=$what, extra=$extra" }
+                mp.release()
+                tempFile.delete()
+                onComplete()
+                true
+            }
+            
+            mediaPlayer.prepareAsync()
+        } catch (e: Exception) {
+            Log.error { "Failed to play MP3: ${e.message}" }
+            onComplete()
         }
     }
     

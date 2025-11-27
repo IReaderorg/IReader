@@ -13,10 +13,13 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -41,6 +44,7 @@ abstract class BaseTTSService(
     private val _currentBook = MutableStateFlow<Book?>(null)
     private val _currentChapter = MutableStateFlow<Chapter?>(null)
     private val _currentParagraph = MutableStateFlow(0)
+    private val _previousParagraph = MutableStateFlow(0)
     private val _totalParagraphs = MutableStateFlow(0)
     private val _currentContent = MutableStateFlow<List<String>>(emptyList())
     private val _speechSpeed = MutableStateFlow(1.0f)
@@ -49,6 +53,14 @@ abstract class BaseTTSService(
     private val _error = MutableStateFlow<String?>(null)
     private val _cachedParagraphs = MutableStateFlow<Set<Int>>(emptySet())
     private val _loadingParagraphs = MutableStateFlow<Set<Int>>(emptySet())
+    
+    // Sleep timer state
+    private val _sleepTimeRemaining = MutableStateFlow(0L)
+    private val _sleepModeEnabled = MutableStateFlow(false)
+    private var sleepTimerJob: kotlinx.coroutines.Job? = null
+    
+    // Audio focus state
+    private val _hasAudioFocus = MutableStateFlow(false)
     
     // TTS Engine
     protected var ttsEngine: TTSEngine? = null
@@ -69,6 +81,7 @@ abstract class BaseTTSService(
         override val currentBook = _currentBook.asStateFlow()
         override val currentChapter = _currentChapter.asStateFlow()
         override val currentParagraph = _currentParagraph.asStateFlow()
+        override val previousParagraph = _previousParagraph.asStateFlow()
         override val totalParagraphs = _totalParagraphs.asStateFlow()
         override val currentContent = _currentContent.asStateFlow()
         override val speechSpeed = _speechSpeed.asStateFlow()
@@ -77,6 +90,9 @@ abstract class BaseTTSService(
         override val error = _error.asStateFlow()
         override val cachedParagraphs = _cachedParagraphs.asStateFlow()
         override val loadingParagraphs = _loadingParagraphs.asStateFlow()
+        override val sleepTimeRemaining = _sleepTimeRemaining.asStateFlow()
+        override val sleepModeEnabled = _sleepModeEnabled.asStateFlow()
+        override val hasAudioFocus = _hasAudioFocus.asStateFlow()
     }
     
     override fun initialize() {
@@ -299,6 +315,35 @@ abstract class BaseTTSService(
         }
     }
     
+    // Store original content for restoration
+    private var originalContent: List<String>? = null
+    
+    override fun setCustomContent(content: List<String>?) {
+        if (content != null && content.isNotEmpty()) {
+            // Save original content if not already saved
+            if (originalContent == null) {
+                originalContent = _currentContent.value
+            }
+            // Set custom content (e.g., translated content)
+            _currentContent.value = content
+            _totalParagraphs.value = content.size
+            // Reset paragraph if out of bounds
+            if (_currentParagraph.value >= content.size) {
+                _currentParagraph.value = 0
+            }
+        } else {
+            // Restore original content
+            originalContent?.let {
+                _currentContent.value = it
+                _totalParagraphs.value = it.size
+                if (_currentParagraph.value >= it.size) {
+                    _currentParagraph.value = 0
+                }
+            }
+            originalContent = null
+        }
+    }
+    
     override fun getAvailableEngines(): List<String> {
         return getPlatformAvailableEngines()
     }
@@ -318,12 +363,58 @@ abstract class BaseTTSService(
     protected abstract fun getPlatformAvailableEngines(): List<String>
     
     override fun cleanup() {
+        cancelSleepTimer()
         scope.launch {
             stop()
         }
         ttsEngine?.cleanup()
         ttsEngine = null
         ttsNotification = null
+    }
+    
+    override fun setSleepTimer(minutes: Int) {
+        cancelSleepTimer()
+        
+        if (minutes > 0) {
+            _sleepModeEnabled.value = true
+            val totalMs = minutes * 60 * 1000L
+            _sleepTimeRemaining.value = totalMs
+            
+            sleepTimerJob = scope.launch {
+                var remaining = totalMs
+                while (remaining > 0 && coroutineContext.isActive) {
+                    delay(1000)
+                    remaining -= 1000
+                    _sleepTimeRemaining.value = remaining.coerceAtLeast(0)
+                }
+                
+                if (remaining <= 0) {
+                    // Sleep timer expired - stop TTS
+                    stop()
+                    _sleepModeEnabled.value = false
+                    _sleepTimeRemaining.value = 0L
+                }
+            }
+        }
+    }
+    
+    override fun cancelSleepTimer() {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        _sleepModeEnabled.value = false
+        _sleepTimeRemaining.value = 0L
+    }
+    
+    override fun setAutoNextChapter(enabled: Boolean) {
+        _autoNextChapter.value = enabled
+        readerPreferences.readerAutoNext().set(enabled)
+    }
+    
+    /**
+     * Set audio focus state (called by platform implementations)
+     */
+    protected fun setAudioFocus(hasFocus: Boolean) {
+        _hasAudioFocus.value = hasFocus
     }
     
     // ========== Protected Helper Methods ==========
@@ -388,11 +479,14 @@ abstract class BaseTTSService(
         val isFinished = current >= content.lastIndex
         
         if (!isFinished && _isPlaying.value) {
+            // Track previous paragraph for UI highlighting
+            _previousParagraph.value = current
             _currentParagraph.value = current + 1
             readCurrentParagraph()
             updateNotification()
         } else if (isFinished && _isPlaying.value && _autoNextChapter.value) {
             // Auto-advance to next chapter
+            _previousParagraph.value = 0
             nextChapter()
         } else {
             _isPlaying.value = false

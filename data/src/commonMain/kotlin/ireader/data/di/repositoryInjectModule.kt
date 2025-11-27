@@ -230,4 +230,25 @@ val repositoryInjectModule = module {
             }
         }
     }
+    
+    // Donation leaderboard repository
+    single<ireader.domain.data.repository.DonationLeaderboardRepository> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            // No Supabase configured, use NoOp
+            ireader.data.repository.NoOpDonationLeaderboardRepository()
+        } else {
+            try {
+                // Get analytics client from multi-project provider
+                val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).analyticsClient
+                ireader.data.donationleaderboard.DonationLeaderboardRepositoryImpl(
+                    supabaseClient = supabaseClient,
+                    backendService = get()
+                )
+            } catch (e: Exception) {
+                // Fallback to NoOp if something goes wrong
+                ireader.data.repository.NoOpDonationLeaderboardRepository()
+            }
+        }
+    }
 }

@@ -394,4 +394,14 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun leaderboardRealtimeEnabled(): Preference<Boolean> {
         return preferenceStore.getBoolean("leaderboard_realtime_enabled", false)
     }
+    
+    /**
+     * Whether to enable realtime updates for the donation leaderboard.
+     * When enabled, donation leaderboard updates automatically via websocket connection.
+     * When disabled, donation leaderboard only updates on manual refresh.
+     * Default: false (manual refresh only)
+     */
+    fun donationLeaderboardRealtimeEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("donation_leaderboard_realtime_enabled", false)
+    }
 }

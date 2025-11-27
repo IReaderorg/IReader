@@ -1,6 +1,7 @@
 package ireader.domain.usecases.translate
 
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -13,9 +14,7 @@ import ireader.domain.data.engines.ToneType
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
-import ireader.i18n.asString
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import kotlinx.serialization.SerialName
@@ -111,117 +110,153 @@ class DeepSeekTranslateEngine(
         }
         
         val apiKey = readerPreferences.deepSeekApiKey().get()
+        println("DeepSeek: API key length: ${apiKey.length}, blank: ${apiKey.isBlank()}")
         
         if (apiKey.isBlank()) {
-            onError(UiText.MStringResource(Res.string.deepseek_api_key_not_set))
+            onError(UiText.DynamicString("DeepSeek API key is not set. Please configure it in Settings > Translation."))
             return
         }
         
         try {
             onProgress(0)
-            // Combine all paragraphs into a single request
-            val combinedText = texts.joinToString("\n---PARAGRAPH_BREAK---\n")
+            
             val sourceLanguage = if (source == "auto") "the source language" else getLanguageName(source)
             val targetLanguage = getLanguageName(target)
             
-            onProgress(20)
-            val prompt = buildPrompt(combinedText, sourceLanguage, targetLanguage, context)
+            // Chunk translation for better handling of large texts
+            val maxChunkSize = MAX_CHUNK_SIZE
+            val chunks = texts.chunked(maxChunkSize)
+            val allResults = mutableListOf<String>()
             
-            onProgress(40)
-            try {
-                val response = client.default.post("https://api.deepseek.com/v1/chat/completions") {
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer $apiKey")
-                    }
-                    contentType(ContentType.Application.Json)
-                    setBody(DeepSeekRequest(
-                        model = "deepseek-chat", // Use appropriate DeepSeek model
-                        messages = listOf(
-                            Message(role = "system", content = "You are a professional translator specializing in accurate and context-aware translations."),
-                            Message(role = "user", content = prompt)
-                        ),
-                        temperature = 0.2, // Low temperature for more accurate translations
-                        max_tokens = 4000
-                    ))
+            chunks.forEachIndexed { chunkIndex, chunk ->
+                val chunkProgress = 10 + (chunkIndex * 80 / chunks.size)
+                onProgress(chunkProgress)
+                
+                val combinedText = chunk.joinToString("\n---PARAGRAPH_BREAK---\n")
+                val prompt = buildPrompt(combinedText, sourceLanguage, targetLanguage, context)
+                
+                try {
+                    val translationResult = callDeepSeekApi(apiKey, prompt)
+                    val splitResults = splitResponse(translationResult, chunk.size)
+                    allResults.addAll(splitResults)
+                } catch (e: Exception) {
+                    println("DeepSeek API error for chunk $chunkIndex: ${e.message}")
+                    // Rethrow to handle at outer level
+                    throw e
                 }
-                
-                // Check the response status code
-                if (response.status.value == 402) {
-                    println("DeepSeek API error: HTTP 402 Payment Required - Subscription issue or account balance")
-                    onError(UiText.MStringResource(Res.string.deepseek_payment_required))
-                    return
-                }
-                
-                onProgress(80)
-                val result = response.body<DeepSeekResponse>()
-                
-                // Detailed debugging of response
-                println("DeepSeek API response received: ${result.id}")
-                println("DeepSeek choices is null: ${result.choices == null}")
-                println("DeepSeek choices is empty: ${result.choices?.isEmpty() ?: true}")
-                
-                // Add null checks for the choices collection
-                if (result.choices != null && result.choices.isNotEmpty()) {
-                    // Further null check on message content
-                    val choice = result.choices[0]
-                    val message = choice.message
-                    val messageContent = message?.content
-                    
-                    if (messageContent != null && messageContent.isNotEmpty()) {
-                        val translatedText = messageContent.trim()
-                        // Split response back into individual paragraphs
-                        val splitTexts = translatedText.split("\n---PARAGRAPH_BREAK---\n")
-                        
-                        // Ensure we have the right number of paragraphs to match input
-                        val finalTexts = if (splitTexts.size == texts.size) {
-                            splitTexts
-                        } else {
-                            // Adjust the paragraph count to match input
-                            adjustParagraphCount(splitTexts, texts)
-                        }
-                        
-                        onProgress(100)
-                        onSuccess(finalTexts)
-                    } else {
-                        println("DeepSeek API returned empty message content")
-                        onError(UiText.MStringResource(Res.string.empty_response))
-                    }
-                } else {
-                    println("DeepSeek API returned empty choices array")
-                    onError(UiText.MStringResource(Res.string.empty_response))
-                }
-            } catch (e: Exception) {
-                // Log the network error for debugging
-                println("DeepSeek API error: $e")
-                e.printStackTrace()
-                
-                // Determine if it's an authentication/API key issue or a different error
-                val errorMessage = when {
-                    e.message?.contains("401") == true || e.message?.contains("unauthorized") == true || 
-                    e.message?.contains("authentication") == true -> 
-                        UiText.MStringResource(Res.string.deepseek_api_key_invalid)
-                    
-                    e.message?.contains("402") == true ->
-                        UiText.MStringResource(Res.string.deepseek_api_key_invalid)
-                        
-                    e.message?.contains("429") == true || e.message?.contains("rate limit") == true ->
-                        UiText.MStringResource(Res.string.api_rate_limit_exceeded)
-                    
-                    e is NullPointerException && e.message?.contains("Collection.isEmpty()") == true ->
-                        UiText.MStringResource(Res.string.api_response_error)
-                        
-                    else -> UiText.ExceptionString(e)
-                }
-                
-                onProgress(0) // Reset progress indicator
-                onError(errorMessage)
             }
+            
+            // Ensure we have the right number of results
+            val finalResults = if (allResults.size == texts.size) {
+                allResults
+            } else {
+                adjustParagraphCount(allResults, texts)
+            }
+            
+            onProgress(100)
+            onSuccess(finalResults)
+            
         } catch (e: Exception) {
-            onProgress(0) // Reset progress indicator
-            println("DeepSeek translation error: $e")
+            onProgress(0)
+            println("DeepSeek translation error: ${e.message}")
             e.printStackTrace()
-            onError(UiText.ExceptionString(e))
+            
+            // Always show the actual error message for debugging
+            val errorMessage = UiText.DynamicString("DeepSeek Error: ${e.message ?: "Unknown error"}")
+            onError(errorMessage)
         }
+    }
+    
+    /**
+     * Call DeepSeek API with retry logic
+     */
+    private suspend fun callDeepSeekApi(apiKey: String, prompt: String): String {
+        println("DeepSeek: Calling API with key starting with: ${apiKey.take(10)}...")
+        
+        val response = client.default.post("https://api.deepseek.com/v1/chat/completions") {
+            headers {
+                append(HttpHeaders.Authorization, "Bearer $apiKey")
+            }
+            contentType(ContentType.Application.Json)
+            setBody(DeepSeekRequest(
+                model = "deepseek-chat",
+                messages = listOf(
+                    // Minimal system message to save tokens
+                    Message(role = "system", content = "Translator."),
+                    Message(role = "user", content = prompt)
+                ),
+                temperature = 0.1, // Lower temperature = more deterministic, fewer retries needed
+                max_tokens = 2000  // Reduced from 4000 to save costs
+            ))
+            timeout {
+                requestTimeoutMillis = 60000
+                connectTimeoutMillis = 15000
+                socketTimeoutMillis = 60000
+            }
+        }
+        
+        println("DeepSeek: Response status: ${response.status.value}")
+        
+        // Check the response status code
+        when (response.status.value) {
+            401 -> throw Exception("401 Unauthorized - Invalid API key")
+            402 -> throw Exception("402 Payment Required - Check your DeepSeek account balance")
+            403 -> throw Exception("403 Forbidden - API key doesn't have permission")
+            429 -> throw Exception("429 Rate limit exceeded")
+            in 500..599 -> throw Exception("${response.status.value} Server error - DeepSeek API is temporarily unavailable")
+        }
+        
+        if (response.status.value !in 200..299) {
+            throw Exception("HTTP ${response.status.value} - API request failed")
+        }
+        
+        val result = response.body<DeepSeekResponse>()
+        println("DeepSeek: Response id: ${result.id}, choices count: ${result.choices?.size ?: 0}")
+        
+        if (result.choices != null && result.choices.isNotEmpty()) {
+            val messageContent = result.choices[0].message?.content
+            if (!messageContent.isNullOrEmpty()) {
+                println("DeepSeek: Got translation with ${messageContent.length} chars")
+                return messageContent.trim()
+            }
+        }
+        
+        throw Exception("Empty response from DeepSeek API - no translation returned")
+    }
+    
+    /**
+     * Split response back into paragraphs
+     */
+    private fun splitResponse(response: String, expectedCount: Int): List<String> {
+        if (response.contains("---PARAGRAPH_BREAK---")) {
+            return response
+                .split("---PARAGRAPH_BREAK---")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+        }
+        
+        // If marker not found and we expect multiple paragraphs, try newlines
+        if (expectedCount > 1) {
+            val lines = response.lines()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+            
+            if (lines.size >= expectedCount) {
+                val result = mutableListOf<String>()
+                val linesPerParagraph = lines.size / expectedCount
+                
+                for (i in 0 until expectedCount) {
+                    val start = i * linesPerParagraph
+                    val end = if (i == expectedCount - 1) lines.size else (i + 1) * linesPerParagraph
+                    if (start < lines.size) {
+                        result.add(lines.subList(start, end.coerceAtMost(lines.size)).joinToString("\n"))
+                    }
+                }
+                return result
+            }
+        }
+        
+        return listOf(response.trim())
     }
     
     // Helper function to adjust paragraph count to match input
@@ -247,43 +282,48 @@ class DeepSeekTranslateEngine(
         targetLanguage: String,
         context: TranslationContext
     ): String {
+        // OPTIMIZED: Minimal prompt to reduce token usage and costs
+        // Each token costs money, so we use the shortest effective prompt
+        return "Translate $sourceLanguage to $targetLanguage. Keep ---PARAGRAPH_BREAK--- markers. Output only translation:\n\n$text"
+    }
+    
+    /**
+     * Build a detailed prompt for higher quality translations (uses more tokens)
+     * Use this when quality is more important than cost
+     */
+    private fun buildDetailedPrompt(
+        text: String,
+        sourceLanguage: String,
+        targetLanguage: String,
+        context: TranslationContext
+    ): String {
         val contentTypeInstruction = when (context.contentType) {
-            TranslationContentType.LITERARY -> "This is literary content. DeepSeek, please preserve the literary style, metaphors, and flow."
-            TranslationContentType.TECHNICAL -> "This is technical content. DeepSeek, please maintain precise terminology and clarity."
-            TranslationContentType.CONVERSATION -> "This is conversational content. DeepSeek, please keep it natural and flowing as spoken language."
-            TranslationContentType.POETRY -> "This is poetic content. DeepSeek, please preserve rhythm, rhyme if present, and poetic devices where possible."
-            TranslationContentType.ACADEMIC -> "This is academic content. DeepSeek, please maintain formal language and precise terminology."
-            else -> "DeepSeek, please translate accurately while maintaining the original meaning."
+            TranslationContentType.LITERARY -> "Literary text, preserve style."
+            TranslationContentType.TECHNICAL -> "Technical text, precise terms."
+            TranslationContentType.CONVERSATION -> "Conversational, natural flow."
+            TranslationContentType.POETRY -> "Poetry, preserve rhythm."
+            TranslationContentType.ACADEMIC -> "Academic, formal language."
+            else -> ""
         }
         
         val toneInstruction = when (context.toneType) {
-            ToneType.FORMAL -> "Use formal language appropriate for professional or academic contexts."
-            ToneType.CASUAL -> "Use casual, everyday language as if speaking to a friend."
-            ToneType.PROFESSIONAL -> "Use professional language suitable for business contexts."
-            ToneType.HUMOROUS -> "Maintain any humor or light tone in the original where appropriate."
-            else -> "Use a neutral tone that's appropriate for general reading."
+            ToneType.FORMAL -> "Formal tone."
+            ToneType.CASUAL -> "Casual tone."
+            ToneType.PROFESSIONAL -> "Professional tone."
+            ToneType.HUMOROUS -> "Keep humor."
+            else -> ""
         }
         
-        val stylePreservation = if (context.preserveStyle) {
-            "Carefully preserve the original style, voice, and narrative techniques."
+        val instructions = listOfNotNull(
+            contentTypeInstruction.takeIf { it.isNotEmpty() },
+            toneInstruction.takeIf { it.isNotEmpty() }
+        ).joinToString(" ")
+        
+        return if (instructions.isNotEmpty()) {
+            "Translate $sourceLanguage→$targetLanguage. $instructions Keep ---PARAGRAPH_BREAK---. Output only translation:\n\n$text"
         } else {
-            "Focus on accuracy of meaning rather than preserving the exact style."
+            "Translate $sourceLanguage→$targetLanguage. Keep ---PARAGRAPH_BREAK---. Output only translation:\n\n$text"
         }
-        
-        // DeepSeek's specific instruction for better results
-        return """
-            Translate the following text from $sourceLanguage to $targetLanguage:
-            
-            $contentTypeInstruction
-            $toneInstruction
-            $stylePreservation
-            
-            Important: Maintain the original paragraph breaks (marked by ---PARAGRAPH_BREAK---).
-            Only provide the translated text without explanations or additional commentary.
-            
-            TEXT TO TRANSLATE:
-            $text
-        """.trimIndent()
     }
     
     private fun getLanguageName(languageCode: String): String {
@@ -317,4 +357,9 @@ class DeepSeekTranslateEngine(
         @SerialName("finish_reason")
         val finishReason: String = ""
     )
+    
+    companion object {
+        /** Maximum paragraphs per chunk to avoid token limits */
+        const val MAX_CHUNK_SIZE = 20
+    }
 } 

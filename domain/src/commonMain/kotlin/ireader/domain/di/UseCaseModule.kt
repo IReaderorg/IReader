@@ -178,4 +178,13 @@ val useCaseModule = module {
             uiPreferences = get()
         )
     }
+    
+    // Donation Leaderboard use cases
+    single {
+        ireader.domain.usecases.leaderboard.DonationLeaderboardUseCases(
+            donationLeaderboardRepository = get(),
+            remoteRepository = get(),
+            uiPreferences = get()
+        )
+    }
 }

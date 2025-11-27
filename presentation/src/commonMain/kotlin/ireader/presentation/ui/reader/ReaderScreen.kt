@@ -401,16 +401,16 @@ private fun ReadingScreenContent(
                             )
                             
                             // Translation badge
-                            if (vm.showTranslatedContent.value) {
-                                TranslationBadge(
-                                    isTranslated = true,
-                                    textColor = vm.textColor.value.toComposeColor(),
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(paddingValues)
-
-                                )
-                            }
+//                            if (vm.showTranslatedContent.value) {
+//                                TranslationBadge(
+//                                    isTranslated = true,
+//                                    textColor = vm.textColor.value.toComposeColor(),
+//                                    modifier = Modifier
+//                                        .align(Alignment.TopEnd)
+//                                        .padding(paddingValues)
+//
+//                                )
+//                            }
                             
                             // Translation progress indicator
                             TranslationProgressIndicator(

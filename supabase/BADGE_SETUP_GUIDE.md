@@ -259,6 +259,33 @@ suspend fun onPaymentConfirmed(userId: String, badgeId: String) {
 7. ⬜ Set up achievement tracking
 8. ⬜ Test in release build
 
+## Donation Leaderboard
+
+The donation leaderboard shows users ranked by their total donation amount (sum of purchased badge prices).
+
+### Setup
+
+Run the migration file to add the donation leaderboard functions:
+
+```sql
+-- Run: supabase/migration_add_donation_leaderboard.sql
+```
+
+### Features
+
+- **Donation Rankings**: Users are ranked by total amount donated through badge purchases
+- **Badge Count**: Shows how many purchasable badges each user owns
+- **Highest Rarity**: Displays the highest rarity badge owned (Legendary > Epic > Rare > Common)
+- **Realtime Updates**: Optional realtime updates when badges are purchased
+
+### Functions
+
+| Function | Description |
+|----------|-------------|
+| `get_donation_leaderboard(limit, offset)` | Returns donation leaderboard with pagination |
+| `get_user_donation_rank(user_id)` | Returns a specific user's donation stats |
+| `get_user_donation_badges(user_id)` | Returns all purchasable badges owned by a user |
+
 ## Support
 
 For issues or questions:

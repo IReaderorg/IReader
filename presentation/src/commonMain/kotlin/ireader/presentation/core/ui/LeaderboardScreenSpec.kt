@@ -3,11 +3,12 @@ package ireader.presentation.core.ui
 import ireader.presentation.core.LocalNavigator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import ireader.presentation.ui.leaderboard.LeaderboardScreen
+import ireader.presentation.ui.leaderboard.CombinedLeaderboardScreen
+import ireader.presentation.ui.leaderboard.DonationLeaderboardViewModel
 import ireader.presentation.ui.leaderboard.LeaderboardViewModel
 
 /**
- * Screen specification for the Leaderboard
+ * Screen specification for the Leaderboard (Reading + Donations tabs)
  */
 class LeaderboardScreenSpec {
     
@@ -15,10 +16,12 @@ class LeaderboardScreenSpec {
     @Composable
     fun Content() {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
-        val viewModel: LeaderboardViewModel = getIViewModel()
+        val readingViewModel: LeaderboardViewModel = getIViewModel()
+        val donationViewModel: DonationLeaderboardViewModel = getIViewModel()
         
-        LeaderboardScreen(
-            vm = viewModel,
+        CombinedLeaderboardScreen(
+            readingVm = readingViewModel,
+            donationVm = donationViewModel,
             onBack = {
                 navController.popBackStack()
             }

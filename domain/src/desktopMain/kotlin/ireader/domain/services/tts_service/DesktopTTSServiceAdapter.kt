@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.ExperimentalTime
 
 /**
  * Adapter that makes DesktopTTSService implement CommonTTSService
@@ -86,6 +87,30 @@ class DesktopTTSServiceAdapter(
                service.mayaAvailable
     }
     
+    override fun setCustomContent(content: List<String>?) {
+        // Set custom content (e.g., translated text) to be read
+        // Uses the translatedTTSContent property which is designed for this purpose
+        service.state.setTranslatedTTSContent(content)
+    }
+    
+    @OptIn(ExperimentalTime::class)
+    override fun setSleepTimer(minutes: Int) {
+        service.state.setSleepTime(minutes.toLong())
+        service.state.setSleepMode(minutes > 0)
+        if (minutes > 0) {
+            service.state.setStartTime(kotlin.time.Clock.System.now())
+        }
+    }
+    
+    override fun cancelSleepTimer() {
+        service.state.setSleepMode(false)
+        service.state.setSleepTime(0)
+    }
+    
+    override fun setAutoNextChapter(enabled: Boolean) {
+        service.state.setAutoNextChapter(enabled)
+    }
+    
     override fun cleanup() {
         service.shutdown()
     }
@@ -97,6 +122,7 @@ class DesktopTTSServiceAdapter(
  * Converts mutable state properties to StateFlow for reactive UI updates.
  * Uses coroutines to observe changes from the legacy state.
  */
+@OptIn(ExperimentalTime::class)
 class DesktopTTSStateAdapter(
     private val desktopState: DesktopTTSState
 ) : TTSServiceState {
@@ -120,6 +146,9 @@ class DesktopTTSStateAdapter(
     
     override val currentParagraph: StateFlow<Int>
         get() = desktopState.currentReadingParagraph
+    
+    override val previousParagraph: StateFlow<Int>
+        get() = desktopState.previousReadingParagraph
     
     // Derived state flows
     private val _totalParagraphs = MutableStateFlow(0)
@@ -146,12 +175,43 @@ class DesktopTTSStateAdapter(
     private val _loadingParagraphs = MutableStateFlow<Set<Int>>(emptySet())
     override val loadingParagraphs: StateFlow<Set<Int>> = _loadingParagraphs.asStateFlow()
     
+    // Sleep timer state
+    private val _sleepTimeRemaining = MutableStateFlow(0L)
+    override val sleepTimeRemaining: StateFlow<Long> = _sleepTimeRemaining.asStateFlow()
+    
+    override val sleepModeEnabled: StateFlow<Boolean>
+        get() = desktopState.sleepMode
+    
+    // Audio focus state (always true on desktop)
+    private val _hasAudioFocus = MutableStateFlow(true)
+    override val hasAudioFocus: StateFlow<Boolean> = _hasAudioFocus.asStateFlow()
+    
     init {
         // Observe ttsContent changes and update derived state
         scope.launch {
             desktopState.ttsContent.collect { content ->
                 _currentContent.value = content ?: emptyList()
                 _totalParagraphs.value = content?.size ?: 0
+            }
+        }
+        
+        // Periodically update sleep timer remaining
+        scope.launch {
+            while (true) {
+                if (desktopState.sleepMode.value) {
+                    val startTime = desktopState.startTime.value
+                    val sleepMinutes = desktopState.sleepTime.value
+                    if (startTime != null && sleepMinutes > 0) {
+                        val now = kotlin.time.Clock.System.now()
+                        val elapsed = now - startTime
+                        val totalMs = sleepMinutes * 60 * 1000L
+                        val remaining = (totalMs - elapsed.inWholeMilliseconds).coerceAtLeast(0)
+                        _sleepTimeRemaining.value = remaining
+                    }
+                } else {
+                    _sleepTimeRemaining.value = 0L
+                }
+                kotlinx.coroutines.delay(1000)
             }
         }
     }

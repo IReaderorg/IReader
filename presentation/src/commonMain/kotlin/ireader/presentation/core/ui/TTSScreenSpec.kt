@@ -1,10 +1,17 @@
 package ireader.presentation.core.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -13,15 +20,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.CommonTTSService
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
+import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
+import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
+import ireader.presentation.ui.component.reusable_composable.AppIconButton
+import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.home.tts.*
+import ireader.i18n.localize
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -50,6 +70,8 @@ class TTSScreenSpec(
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val ttsService: CommonTTSService = koinInject()
         val readerPreferences: ReaderPreferences = koinInject()
+        val appPreferences: ireader.domain.preferences.prefs.AppPreferences = koinInject()
+        val chapterRepository: ChapterRepository = koinInject()
         val getAllTranslationsUseCase: GetAllTranslationsForChapterUseCase = koinInject()
         val scope = rememberCoroutineScope()
         val isTabletOrDesktop = isTableUi()
@@ -57,12 +79,18 @@ class TTSScreenSpec(
         // Translation state
         var translatedContent by remember { mutableStateOf<List<String>?>(null) }
         
+        // Chapter drawer state
+        val drawerState = rememberDrawerState(DrawerValue.Closed)
+        var chapters by remember { mutableStateOf<List<Chapter>>(emptyList()) }
+        var chaptersAscending by remember { mutableStateOf(true) }
+        
         // Local UI state
         var showTranslation by remember { mutableStateOf(false) }
         var bilingualMode by remember { mutableStateOf(false) }
         var fullScreenMode by remember { mutableStateOf(false) }
         var showSettings by remember { mutableStateOf(false) }
         var showEngineSettings by remember { mutableStateOf(false) }
+        var showVoiceSelection by remember { mutableStateOf(false) }
         
         // Settings state
         var useCustomColors by remember { mutableStateOf(false) }
@@ -72,6 +100,14 @@ class TTSScreenSpec(
         var textAlignment by remember { mutableStateOf(TextAlign.Start) }
         var sleepModeEnabled by remember { mutableStateOf(false) }
         var sleepTimeMinutes by remember { mutableStateOf(30) }
+        
+        // Load readTranslatedText preference
+        var readTranslatedText by remember { mutableStateOf(readerPreferences.useTTSWithTranslatedText().get()) }
+        
+        // Coqui TTS state
+        var useCoquiTTS by remember { mutableStateOf(appPreferences.useCoquiTTS().get()) }
+        val coquiSpaceUrl = remember { appPreferences.coquiSpaceUrl().get() }
+        val isCoquiConfigured = coquiSpaceUrl.isNotEmpty()
         
         // Collect state from service
         val isPlaying by ttsService.state.isPlaying.collectAsState()
@@ -89,11 +125,18 @@ class TTSScreenSpec(
         
         val lazyListState = rememberLazyListState()
         
-        // Initialize TTS with the chapter
+        // Initialize TTS with the chapter and load chapters list
         LaunchedEffect(bookId, chapterId) {
             ttsService.startReading(bookId, chapterId)
             if (readingParagraph > 0) {
                 ttsService.jumpToParagraph(readingParagraph)
+            }
+            
+            // Load chapters list for drawer
+            try {
+                chapters = chapterRepository.findChaptersByBookId(bookId)
+            } catch (e: Exception) {
+                // Failed to load chapters
             }
             
             // Load translation for this chapter
@@ -108,6 +151,11 @@ class TTSScreenSpec(
                             .filter { it.isNotBlank() }
                         if (translatedStrings.isNotEmpty()) {
                             translatedContent = translatedStrings
+                            // If readTranslatedText preference is enabled, set TTS to read translated content
+                            if (readTranslatedText) {
+                                showTranslation = true
+                                ttsService.setCustomContent(translatedStrings)
+                            }
                         }
                     }
                 }
@@ -130,9 +178,25 @@ class TTSScreenSpec(
             }
         }
         
+        // Collect cache status and sleep timer
+        val cachedParagraphs by ttsService.state.cachedParagraphs.collectAsState()
+        val loadingParagraphs by ttsService.state.loadingParagraphs.collectAsState()
+        val sleepTimeRemaining by ttsService.state.sleepTimeRemaining.collectAsState()
+        val sleepModeEnabledState by ttsService.state.sleepModeEnabled.collectAsState()
+        val previousParagraph by ttsService.state.previousParagraph.collectAsState()
+        
+        // Sync sleep mode UI with service state
+        LaunchedEffect(sleepModeEnabledState, sleepTimeRemaining) {
+            sleepModeEnabled = sleepModeEnabledState
+            if (sleepTimeRemaining > 0) {
+                sleepTimeMinutes = (sleepTimeRemaining / 60000).toInt().coerceAtLeast(1)
+            }
+        }
+        
         // Create state object for unified components
         val screenState = CommonTTSScreenState(
             currentReadingParagraph = currentParagraph,
+            previousReadingParagraph = previousParagraph,
             isPlaying = isPlaying,
             isLoading = isLoading,
             content = content,
@@ -144,6 +208,10 @@ class TTSScreenSpec(
             speechSpeed = speechSpeed,
             autoNextChapter = autoNextChapter,
             fullScreenMode = fullScreenMode,
+            cachedParagraphs = cachedParagraphs,
+            loadingParagraphs = loadingParagraphs,
+            sleepTimeRemaining = sleepTimeRemaining,
+            sleepModeEnabled = sleepModeEnabledState,
             hasDownloadFeature = false, // Platform-specific, can be enabled via expect/actual if needed
             currentEngine = ttsService.getCurrentEngineName(),
             availableEngines = ttsService.getAvailableEngines()
@@ -163,12 +231,82 @@ class TTSScreenSpec(
             override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
             override fun onSpeedChange(speed: Float) { ttsService.setSpeed(speed) }
             override fun onAutoNextChange(enabled: Boolean) { 
-                scope.launch { readerPreferences.readerAutoNext().set(enabled) }
+                ttsService.setAutoNextChapter(enabled)
             }
             override fun onOpenSettings() { showSettings = true }
+            override fun onSelectVoice() { showVoiceSelection = true }
+            override fun onSelectEngine(engine: String) { 
+                showEngineSettings = true 
+            }
         }
         
-        // Main UI
+        // Sorted chapters for drawer
+        val sortedChapters = remember(chapters, chaptersAscending) {
+            if (chaptersAscending) chapters else chapters.reversed()
+        }
+        
+        // Drawer scroll state
+        val drawerScrollState = rememberLazyListState()
+        
+        // Scroll to current chapter when drawer opens
+        LaunchedEffect(drawerState.targetValue) {
+            if (currentChapter != null && drawerState.targetValue == DrawerValue.Open && chapters.isNotEmpty()) {
+                val index = sortedChapters.indexOfFirst { it.id == currentChapter?.id }
+                if (index != -1) {
+                    scope.launch {
+                        drawerScrollState.scrollToItem(
+                            index,
+                            -drawerScrollState.layoutInfo.viewportEndOffset / 2
+                        )
+                    }
+                }
+            }
+        }
+        
+        // Main UI with Chapter Drawer (using IModalDrawer like ReaderScreenSpec)
+        IModalDrawer(
+            state = drawerState,
+            sheetContent = {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = slideInVertically(initialOffsetY = { -it }),
+                    exit = slideOutVertically(targetOffsetY = { -it })
+                ) {
+                    TTSScreenDrawer(
+                        onReverseIcon = {
+                            chaptersAscending = !chaptersAscending
+                        },
+                        onChapter = { ch ->
+                            scope.launch {
+                                drawerState.close()
+                                // Stop current playback first
+                                ttsService.pause()
+                                // Start reading the new chapter with autoPlay if was playing
+                                ttsService.startReading(bookId, ch.id, autoPlay = isPlaying)
+                            }
+                        },
+                        chapter = currentChapter,
+                        chapters = sortedChapters,
+                        drawerScrollState = drawerScrollState,
+                        onMap = { drawer ->
+                            scope.launch {
+                                try {
+                                    val index = sortedChapters.indexOfFirst { it.id == currentChapter?.id }
+                                    if (index != -1) {
+                                        drawer.scrollToItem(
+                                            index,
+                                            -drawer.layoutInfo.viewportEndOffset / 2
+                                        )
+                                    }
+                                } catch (e: Throwable) {
+                                    // Ignore scroll errors
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        ) {
         IScaffold(
             topBar = {
                 if (!fullScreenMode) {
@@ -192,6 +330,10 @@ class TTSScreenSpec(
                             TopAppBarBackButton(onClick = { navController.popBackStack() })
                         },
                         actions = {
+                            // Chapter drawer button
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.List, "Chapters")
+                            }
                             IconButton(onClick = { showSettings = true }) {
                                 Icon(Icons.Default.Settings, "Settings")
                             }
@@ -273,20 +415,52 @@ class TTSScreenSpec(
                             sleepTimeMinutes = sleepTimeMinutes,
                             speechSpeed = speechSpeed,
                             autoNextChapter = autoNextChapter,
-                            useCoquiTTS = false, // TODO: Add Coqui TTS preference when implemented
+                            useCoquiTTS = useCoquiTTS && isCoquiConfigured,
                             currentEngineName = ttsService.getCurrentEngineName(),
+                            readTranslatedText = readTranslatedText,
+                            hasTranslation = translatedContent != null && translatedContent!!.isNotEmpty(),
                             onUseCustomColorsChange = { useCustomColors = it },
                             onBackgroundColorChange = { customBackgroundColor = it },
                             onTextColorChange = { customTextColor = it },
                             onFontSizeChange = { fontSize = it },
                             onTextAlignmentChange = { textAlignment = it },
-                            onSleepModeChange = { sleepModeEnabled = it },
-                            onSleepTimeChange = { sleepTimeMinutes = it },
+                            onSleepModeChange = { enabled ->
+                                sleepModeEnabled = enabled
+                                if (enabled) {
+                                    ttsService.setSleepTimer(sleepTimeMinutes)
+                                } else {
+                                    ttsService.cancelSleepTimer()
+                                }
+                            },
+                            onSleepTimeChange = { minutes ->
+                                sleepTimeMinutes = minutes
+                                if (sleepModeEnabled) {
+                                    ttsService.setSleepTimer(minutes)
+                                }
+                            },
                             onSpeedChange = { ttsService.setSpeed(it) },
                             onAutoNextChange = { enabled -> 
-                                scope.launch { readerPreferences.readerAutoNext().set(enabled) }
+                                ttsService.setAutoNextChapter(enabled)
                             },
-                            onCoquiTTSChange = { /* TODO: Implement Coqui TTS toggle */ },
+                            onCoquiTTSChange = { enabled ->
+                                if (isCoquiConfigured) {
+                                    useCoquiTTS = enabled
+                                    scope.launch { appPreferences.useCoquiTTS().set(enabled) }
+                                }
+                            },
+                            onReadTranslatedTextChange = { enabled ->
+                                readTranslatedText = enabled
+                                // Also update the showTranslation state to sync with TTS
+                                showTranslation = enabled
+                                // Update TTS service to read translated or original content
+                                if (enabled && translatedContent != null && translatedContent!!.isNotEmpty()) {
+                                    ttsService.setCustomContent(translatedContent)
+                                } else {
+                                    ttsService.setCustomContent(null) // Restore original content
+                                }
+                                // Save preference
+                                scope.launch { readerPreferences.useTTSWithTranslatedText().set(enabled) }
+                            },
                             onOpenEngineSettings = {
                                 showEngineSettings = true
                                 showSettings = false
@@ -305,10 +479,98 @@ class TTSScreenSpec(
                 if (showEngineSettings) {
                     TTSEngineSettingsScreen(
                         isDesktop = isTabletOrDesktop,
-                        onDismiss = { showEngineSettings = false }
+                        onDismiss = { showEngineSettings = false },
+                        onNavigateToTTSManager = {
+                            // Navigate to TTS Manager screen
+                            showEngineSettings = false
+                            navController.navigate(NavigationRoutes.ttsEngineManager)
+                        }
+                    )
+                }
+                
+                // Voice Selection Screen (platform-specific)
+                if (showVoiceSelection) {
+                    TTSVoiceSelectionScreen(
+                        isDesktop = isTabletOrDesktop,
+                        onDismiss = { showVoiceSelection = false }
                     )
                 }
             }
+        }
+        } // Close IModalDrawer
+    }
+}
+
+/**
+ * TTS Screen Drawer - Chapter selection drawer similar to ReaderScreenDrawer
+ */
+@Composable
+private fun TTSScreenDrawer(
+    modifier: Modifier = Modifier,
+    chapter: Chapter?,
+    onChapter: (chapter: Chapter) -> Unit,
+    chapters: List<Chapter>,
+    onReverseIcon: () -> Unit,
+    drawerScrollState: LazyListState,
+    onMap: (LazyListState) -> Unit,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(0.9f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Spacer(modifier = Modifier.height(5.dp))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            BigSizeTextComposable(
+                text = localize(Res.string.content),
+                modifier = Modifier.align(Alignment.Center)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                AppIconButton(
+                    imageVector = Icons.Filled.Place,
+                    contentDescription = localize(Res.string.find_current_chapter),
+                    onClick = { onMap(drawerScrollState) }
+                )
+                AppIconButton(
+                    imageVector = Icons.Default.Sort,
+                    contentDescription = localize(Res.string.reverse),
+                    onClick = { onReverseIcon() }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
+        
+        IVerticalFastScroller(listState = drawerScrollState) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = drawerScrollState
+            ) {
+                items(count = chapters.size) { index ->
+                    ChapterRow(
+                        modifier = Modifier,
+                        chapter = chapters[index],
+                        onItemClick = { onChapter(chapters[index]) },
+                        isLastRead = chapter?.id == chapters[index].id,
+                    )
+                }
+            }
+        }
+        
+        if (chapters.isEmpty()) {
+            Text(
+                text = "No chapters available",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -351,7 +613,8 @@ private fun FloatingFullscreenControlsCommon(
             onClick = {
                 if (state.isPlaying) actions.onPause() else actions.onPlay()
             },
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+            shape = CircleShape
         ) {
             Icon(
                 imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,

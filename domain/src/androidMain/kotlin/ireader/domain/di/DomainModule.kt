@@ -271,23 +271,18 @@ actual val DomainModule = module {
         )
     }
     
-    // Unified Android TTS Service (new implementation)
-    single<ireader.domain.services.tts_service.AndroidTTSService> {
-        ireader.domain.services.tts_service.AndroidTTSService(
+    // Android TTS Service Adapter - bridges CommonTTSService with TTSService
+    single<ireader.domain.services.tts_service.AndroidTTSServiceAdapter> {
+        ireader.domain.services.tts_service.AndroidTTSServiceAdapter(
             context = androidContext(),
-            bookRepo = get(),
-            chapterRepo = get(),
-            extensions = get(),
-            remoteUseCases = get(),
-            readerPreferences = get(),
-            appPrefs = get()
+            sharedState = get()
         ).apply {
             initialize()
         }
     }
     
-    // Provide CommonTTSService interface using unified service
+    // Provide CommonTTSService interface using the adapter
     single<ireader.domain.services.tts_service.CommonTTSService> {
-        get<ireader.domain.services.tts_service.AndroidTTSService>()
+        get<ireader.domain.services.tts_service.AndroidTTSServiceAdapter>()
     }
 }
