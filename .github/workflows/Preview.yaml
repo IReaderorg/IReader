@@ -170,7 +170,7 @@ jobs:
           cp desktop/src/main/resources/icon.png AppDir/.DirIcon
           
           # Build AppImage (use --appimage-extract-and-run to avoid FUSE requirement in CI)
-          ./appimagetool --appimage-extract-and-run AppDir IReader-x86_64.AppImage
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir IReader-x86_64.AppImage
           
           # Move to expected location
           mkdir -p desktop/build/compose/binaries/main/appimage
