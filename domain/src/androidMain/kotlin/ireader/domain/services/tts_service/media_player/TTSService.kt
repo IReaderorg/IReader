@@ -497,11 +497,15 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         checkSleepTime()
         
         val content = getCurrentContent() ?: return
-        val isFinished = state.currentReadingParagraph.value >= content.lastIndex
+        val currentParagraph = state.currentReadingParagraph.value
+        val isFinished = currentParagraph >= content.lastIndex
         
         // Keep playing state true for auto-advance
-        if (!isFinished && state.currentReadingParagraph.value < content.size && state.isPlaying.value) {
-            state.setCurrentReadingParagraph(state.currentReadingParagraph.value + 1)
+        if (!isFinished && currentParagraph < content.size && state.isPlaying.value) {
+            // Update previous paragraph before advancing to current
+            state.setPreviousReadingParagraph(currentParagraph)
+            state.setCurrentReadingParagraph(currentParagraph + 1)
+            scope.launch { updateNotification() }
             readText(this, mediaSession)
             return
         }
@@ -515,10 +519,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
      * Handle chapter completion and auto-next chapter
      */
     private fun handleChapterFinished() {
-        state.setPlaying(false
-)
-        state.setCurrentReadingParagraph(0
-)
+        state.setPlaying(false)
+        // Reset paragraph tracking
+        state.setPreviousReadingParagraph(0)
+        state.setCurrentReadingParagraph(0)
         ttsEngine?.stop()
         
         if (state.autoNextChapter.value) {
@@ -531,8 +535,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 if (index != chapters.lastIndex) {
                     val nextChapterId = chapters[index + 1].id
                     getRemoteChapter(nextChapterId, source, state) {
-                        state.setCurrentReadingParagraph(0
-)
+                        // Reset paragraph tracking for new chapter
+                        state.setPreviousReadingParagraph(0)
+                        state.setCurrentReadingParagraph(0)
+                        state.setPlaying(true)
                         updateNotification()
                         readText(this@TTSService, mediaSession)
                     }
@@ -607,15 +613,20 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     private suspend fun handleSkipNext(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
+        val wasPlaying = state.isPlaying.value
         ttsEngine?.stop()
-        state.setPlaying(false
-)
+        state.setPlaying(false)
         
         val index = getChapterIndex(chapter, chapters)
         if (index != chapters.lastIndex) {
             val nextChapterId = chapters[index + 1].id
             getRemoteChapter(nextChapterId, source, state) {
-                if (state.isPlaying.value) {
+                // Reset paragraph tracking for new chapter
+                state.setPreviousReadingParagraph(0)
+                state.setCurrentReadingParagraph(0)
+                updateNotification()
+                if (wasPlaying) {
+                    state.setPlaying(true)
                     readText(this@TTSService, mediaSession)
                 }
             }
@@ -623,16 +634,20 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     private suspend fun handleSkipPrevious(chapter: Chapter, chapters: List<Chapter>, source: CatalogLocal) {
+        val wasPlaying = state.isPlaying.value
         ttsEngine?.stop()
-        state.setPlaying(false
-)
+        state.setPlaying(false)
         
         val index = getChapterIndex(chapter, chapters)
         if (index != 0) {
             val prevChapterId = chapters[index - 1].id
             getRemoteChapter(prevChapterId, source, state) {
+                // Reset paragraph tracking for new chapter
+                state.setPreviousReadingParagraph(0)
+                state.setCurrentReadingParagraph(0)
                 updateNotification()
-                if (state.isPlaying.value) {
+                if (wasPlaying) {
+                    state.setPlaying(true)
                     readText(this@TTSService, mediaSession)
                 }
             }
@@ -641,23 +656,29 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     
     private suspend fun handleSkipNextParagraph() {
         val content = getCurrentContent() ?: return
-        if (state.currentReadingParagraph.value < content.lastIndex) {
+        val currentParagraph = state.currentReadingParagraph.value
+        if (currentParagraph < content.lastIndex) {
             ttsEngine?.stop()
-            state.setCurrentReadingParagraph(state.currentReadingParagraph.value + 1)
+            // Update previous paragraph before advancing
+            state.setPreviousReadingParagraph(currentParagraph)
+            state.setCurrentReadingParagraph(currentParagraph + 1)
+            updateNotification()
             if (state.isPlaying.value) {
                 readText(this@TTSService, mediaSession)
-                updateNotification()
             }
         }
     }
     
     private suspend fun handleSkipPreviousParagraph() {
-        if (state.currentReadingParagraph.value > 0) {
+        val currentParagraph = state.currentReadingParagraph.value
+        if (currentParagraph > 0) {
             ttsEngine?.stop()
-            state.setCurrentReadingParagraph(state.currentReadingParagraph.value - 1)
+            // Update previous paragraph before going back
+            state.setPreviousReadingParagraph(currentParagraph)
+            state.setCurrentReadingParagraph(currentParagraph - 1)
+            updateNotification()
             if (state.isPlaying.value) {
                 readText(this@TTSService, mediaSession)
-                updateNotification()
             }
         }
     }

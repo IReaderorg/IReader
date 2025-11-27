@@ -34,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -72,6 +74,15 @@ fun TTSScreen(
         lazyState: LazyListState,
         paddingValues: PaddingValues
 ) {
+    // Collect StateFlows as State to trigger recomposition on changes
+    val currentReadingParagraph by vm.ttsState.currentReadingParagraph.collectAsState()
+    val ttsContent by vm.ttsState.ttsContent.collectAsState()
+    val isPlaying by vm.ttsState.isPlaying.collectAsState()
+    val ttsBook by vm.ttsState.ttsBook.collectAsState()
+    val ttsChapter by vm.ttsState.ttsChapter.collectAsState()
+    
+    val content = ttsContent ?: emptyList()
+    
     val gradient = Brush.verticalGradient(
         colors = listOf(
             vm.theme.value.backgroundColor.toComposeColor().copy(alpha = .8f),
@@ -80,114 +91,110 @@ fun TTSScreen(
         startY = 1f,  // 1/3
         endY = 1f,
     )
-    vm.ttsState.ttsBook.value.let { book ->
-        vm.ttsState.ttsChapter.value.let { chapter ->
-            (vm.ttsState.ttsContent.value ?: emptyList()).let { content ->
-                Box(
-                    modifier = modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
+    
+    Box(
+        modifier = modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(gradient)
+        )
+        LazyColumn(modifier = Modifier.matchParentSize(), state = lazyState, contentPadding = paddingValues) {
+            items(
+                count = content.size
+            ) { index ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Box(
+                    androidx.compose.material.Text(
                         modifier = Modifier
-                            .matchParentSize()
-                            .background(gradient)
-                    )
-                    LazyColumn(modifier = Modifier.matchParentSize(), state = lazyState, contentPadding = paddingValues) {
-                        items(
-                            count = content.size
-                        ) { index ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Top
-                            ) {
-                                androidx.compose.material.Text(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(horizontal = vm.paragraphsIndent.value.dp)
-                                        .clickableNoIndication(
-                                            onClick = {
-                                                vm.ttsState.setCurrentReadingParagraph(index)
-
-                                            },
-                                            onLongClick = {
-                                                vm.fullScreenMode = !vm.fullScreenMode
-                                            }
-                                        ),
-                                    text = if (content.isNotEmpty() && vm.ttsState.currentReadingParagraph.value <= content.lastIndex && index <= content.lastIndex) content[index].plus(
-                                        "\n".repeat(vm.paragraphDistance.value)
-                                    ) else "",
-                                    fontSize = vm.fontSize.value.sp,
-                                    fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
-                                    textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
-                                    color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = if (index == vm.ttsState.currentReadingParagraph.value) 1f else .6f),
-                                    lineHeight = vm.lineHeight.value.sp,
-                                    letterSpacing = vm.betweenLetterSpaces.value.sp,
-                                    fontWeight = FontWeight(vm.textWeight.value),
-                                )
-                                
-                                // Cache indicator for Coqui TTS
-                                if (vm.useCoquiTTS && index > vm.ttsState.currentReadingParagraph.value) {
-                                    when {
-                                        vm.ttsState.loadingParagraphs.contains(index) -> {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier
-                                                    .size(16.dp)
-                                                    .padding(end = 8.dp),
-                                                strokeWidth = 2.dp,
-                                                color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = 0.5f)
-                                            )
-                                        }
-                                        vm.ttsState.cachedParagraphs.contains(index) -> {
-                                            Icon(
-                                                imageVector = Icons.Default.CheckCircle,
-                                                contentDescription = "Cached",
-                                                modifier = Modifier
-                                                    .size(16.dp)
-                                                    .padding(end = 8.dp),
-                                                tint = androidx.compose.ui.graphics.Color.Green.copy(alpha = 0.7f)
-                                            )
-                                        }
-                                    }
+                            .weight(1f)
+                            .padding(horizontal = vm.paragraphsIndent.value.dp)
+                            .clickableNoIndication(
+                                onClick = {
+                                    // Update previous before setting current
+                                    vm.ttsState.setPreviousReadingParagraph(currentReadingParagraph)
+                                    vm.ttsState.setCurrentReadingParagraph(index)
+                                },
+                                onLongClick = {
+                                    vm.fullScreenMode = !vm.fullScreenMode
                                 }
+                            ),
+                        text = if (content.isNotEmpty() && currentReadingParagraph <= content.lastIndex && index <= content.lastIndex) content[index].plus(
+                            "\n".repeat(vm.paragraphDistance.value)
+                        ) else "",
+                        fontSize = vm.fontSize.value.sp,
+                        fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
+                        textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
+                        color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = if (index == currentReadingParagraph) 1f else .6f),
+                        lineHeight = vm.lineHeight.value.sp,
+                        letterSpacing = vm.betweenLetterSpaces.value.sp,
+                        fontWeight = FontWeight(vm.textWeight.value),
+                    )
+                    
+                    // Cache indicator for Coqui TTS
+                    if (vm.useCoquiTTS && index > currentReadingParagraph) {
+                        when {
+                            vm.ttsState.loadingParagraphs.contains(index) -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .padding(end = 8.dp),
+                                    strokeWidth = 2.dp,
+                                    color = vm.theme.value.onTextColor.toComposeColor().copy(alpha = 0.5f)
+                                )
+                            }
+                            vm.ttsState.cachedParagraphs.contains(index) -> {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = "Cached",
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .padding(end = 8.dp),
+                                    tint = androidx.compose.ui.graphics.Color.Green.copy(alpha = 0.7f)
+                                )
                             }
                         }
                     }
+                }
+            }
+        }
 
-                    Box(modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()) {
-                        Row(
-                            horizontalArrangement = Arrangement.Center, modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter)
-                        ) {
-                            SuperSmallTextComposable(
-                                text = "${vm.ttsState.currentReadingParagraph.value + 1}/${vm.ttsState.ttsContent.value?.size ?: 0}",
-                                color = vm.theme.value.onTextColor.toComposeColor(),
-                            )
-                        }
-                        vm.ttsIconAlignments.value.mapAlignment()?.let { alignment ->
-                            Row(modifier = Modifier
-                                .align(alignment.toComposeAlignment())) {
-                                AppIconButton(
-                                    modifier = Modifier.size(48.dp), // Minimum 48dp touch target
-                                    onClick = onPlay,
-                                    imageVector = if (vm.ttsState.isPlaying.value) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    tint = vm.theme.value.onTextColor.toComposeColor(),
-                                    contentDescription = if (vm.ttsState.isPlaying.value) "Pause" else "Play"
-                                )
-                                AppIconButton(
-                                    modifier = Modifier.size(48.dp), // Minimum 48dp touch target
-                                    onClick = { vm.fullScreenMode = !vm.fullScreenMode },
-                                    imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
-                                    tint = vm.theme.value.onTextColor.toComposeColor(),
-                                    contentDescription = if (vm.fullScreenMode) "Exit fullscreen" else "Enter fullscreen"
-                                )
-                            }
-                        }
-                    }
+        Box(modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()) {
+            Row(
+                horizontalArrangement = Arrangement.Center, modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+            ) {
+                SuperSmallTextComposable(
+                    text = "${currentReadingParagraph + 1}/${content.size}",
+                    color = vm.theme.value.onTextColor.toComposeColor(),
+                )
+            }
+            vm.ttsIconAlignments.value.mapAlignment()?.let { alignment ->
+                Row(modifier = Modifier
+                    .align(alignment.toComposeAlignment())) {
+                    AppIconButton(
+                        modifier = Modifier.size(48.dp), // Minimum 48dp touch target
+                        onClick = onPlay,
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        tint = vm.theme.value.onTextColor.toComposeColor(),
+                        contentDescription = if (isPlaying) "Pause" else "Play"
+                    )
+                    AppIconButton(
+                        modifier = Modifier.size(48.dp), // Minimum 48dp touch target
+                        onClick = { vm.fullScreenMode = !vm.fullScreenMode },
+                        imageVector = if (vm.fullScreenMode) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                        tint = vm.theme.value.onTextColor.toComposeColor(),
+                        contentDescription = if (vm.fullScreenMode) "Exit fullscreen" else "Enter fullscreen"
+                    )
                 }
             }
         }
@@ -202,6 +209,9 @@ fun TTLScreenPlay(
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
 ) {
+    // Collect StateFlow as State to trigger recomposition
+    val currentReadingParagraph by vm.currentReadingParagraph.collectAsState()
+    
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -212,7 +222,7 @@ fun TTLScreenPlay(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                value = if (content.isEmpty()) 0F else vm.currentReadingParagraph.value.toFloat(),
+                value = if (content.isEmpty()) 0F else currentReadingParagraph.toFloat(),
                 onValueChange = {
                     onValueChange(it)
                 },
@@ -247,6 +257,10 @@ fun MediaControllers(
     onNextPar: () -> Unit,
     onPrevPar: () -> Unit,
 ) {
+    // Collect StateFlows as State to trigger recomposition
+    val isLoading by vm.isLoading.collectAsState()
+    val isPlaying by vm.isPlaying.collectAsState()
+    
     Row(
         modifier = modifier
             .padding(top = 4.dp)
@@ -270,18 +284,18 @@ fun MediaControllers(
         )
         Box {
             when {
-                vm.isLoading.value -> {
+                isLoading -> {
                     Box(
                         modifier = Modifier.size(80.dp)
                     ) {
                         ShowLoading()
                     }
                 }
-                vm.isPlaying.value -> {
+                isPlaying -> {
                     AppIconButton(
                         modifier = Modifier.size(80.dp),
                         imageVector = Icons.Filled.PauseCircle,
-                        contentDescription = localize(Res.string.play),
+                        contentDescription = localize(Res.string.pause),
                         onClick = onPlay,
                         tint = MaterialTheme.colorScheme.onBackground
                     )
@@ -290,7 +304,7 @@ fun MediaControllers(
                     AppIconButton(
                         modifier = Modifier.size(80.dp),
                         imageVector = Icons.Filled.PlayCircle,
-                        contentDescription = localize(Res.string.pause),
+                        contentDescription = localize(Res.string.play),
                         onClick = onPlay,
                         tint = MaterialTheme.colorScheme.onBackground
                     )

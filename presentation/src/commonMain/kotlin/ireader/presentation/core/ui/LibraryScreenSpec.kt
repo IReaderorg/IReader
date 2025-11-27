@@ -68,7 +68,7 @@ object LibraryScreenSpec : Tab {
         LaunchedEffect(key1 = vm.selectionMode) {
             MainStarterScreen.showBottomNav(!vm.selectionMode)
         }
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val sheetState = rememberModalBottomSheetState()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scope = rememberCoroutineScope()
 

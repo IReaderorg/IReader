@@ -362,10 +362,16 @@ actual class TTSScreenSpec actual constructor(
                 }
             }
 
-            LaunchedEffect(key1 = vm.ttsState.currentReadingParagraph.collectAsState()) {
+            // Collect the current paragraph as state to trigger recomposition
+            val currentParagraphState = vm.ttsState.currentReadingParagraph.collectAsState()
+            val previousParagraphState = vm.ttsState.previousReadingParagraph.collectAsState()
+            val isPlayingState = vm.ttsState.isPlaying.collectAsState()
+            
+            // Use the actual value as the key so LaunchedEffect triggers on changes
+            LaunchedEffect(key1 = currentParagraphState.value, key2 = isPlayingState.value) {
                 try {
-                    val currentParagraph = vm.ttsState.currentReadingParagraph.value
-                    val previousParagraph = vm.ttsState.previousReadingParagraph.value
+                    val currentParagraph = currentParagraphState.value
+                    val previousParagraph = previousParagraphState.value
                     
                     if (currentParagraph != previousParagraph && currentParagraph < lazyState.layoutInfo.totalItemsCount) {
                         if (currentParagraph !in lazyState.layoutInfo.visibleItemsInfo.map { it.index }
@@ -373,12 +379,8 @@ actual class TTSScreenSpec actual constructor(
                             lazyState.scrollToItem(currentParagraph)
                         }
 
-                        if (vm.ttsState.isPlaying.value) {
-                            delay(100)
-                            vm.controller?.transportControls?.seekTo(currentParagraph.toLong())
-                        } else {
-                            vm.controller?.transportControls?.seekTo(currentParagraph.toLong())
-                        }
+                        // Update previous paragraph after handling the change
+                        vm.ttsState.setPreviousReadingParagraph(currentParagraph)
                     }
                 } catch (e: Throwable) {
                     Log.error(e, "")

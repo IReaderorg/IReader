@@ -311,14 +311,6 @@ private fun ActiveDownloadsContent(
     // Collect progress map reactively so items update when download status changes
     val progressMap by vm.downloadServiceProgress.collectAsState()
     
-    // Debug logging for progress updates
-    LaunchedEffect(progressMap) {
-        ireader.core.log.Log.debug { "DownloaderScreen: Progress map updated with ${progressMap.size} items" }
-        progressMap.forEach { (chapterId, progress) ->
-            ireader.core.log.Log.debug { "  Chapter $chapterId: ${progress.status}" }
-        }
-    }
-    
     if (downloads.isEmpty()) {
         // Empty state
         Box(
