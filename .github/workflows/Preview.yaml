@@ -274,7 +274,7 @@ jobs:
         with:
           artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk"
           allowUpdates: true
-          removeArtifacts: true
+          replacesArtifacts: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
           tag: r${{ env.COMMIT_COUNT }}
           repo: IReader-Preview
@@ -286,7 +286,7 @@ jobs:
         with:
           artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk"
           allowUpdates: true
-          removeArtifacts: true
+          replacesArtifacts: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
           tag: preview-r${{ env.COMMIT_COUNT }}
           repo: ireader

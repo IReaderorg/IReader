@@ -245,7 +245,7 @@ jobs:
           draft: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
           allowUpdates: true
-          removeArtifacts: true
+          replacesArtifacts: true
           tag: ${{ github.event.inputs.release-tag }}
           name: ${{ github.event.inputs.release-name }}
           body: |
