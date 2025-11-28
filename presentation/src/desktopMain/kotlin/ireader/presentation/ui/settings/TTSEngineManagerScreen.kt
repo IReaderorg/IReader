@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,11 +22,14 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -35,9 +39,11 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -957,6 +963,276 @@ fun TTSEngineManagerScreen(
                     }
                 }
             }
+            // Piper TTS Voices Section
+
+                Card {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.RecordVoiceOver,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Piper TTS Voices",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+
+                        Text(
+                            text = "High-quality offline neural voices. Download and use with Sherpa TTS app.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Show available voices count
+                        val availableVoices = ireader.domain.catalogs.PiperVoiceCatalog.getAllVoices()
+                        val languages = ireader.domain.catalogs.PiperVoiceCatalog.getSupportedLanguages()
+
+                        Text(
+                            text = "${availableVoices.size} voices available in ${languages.size} languages",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+
+            // Voice list header
+
+                Text(
+                    text = "Available Voices",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+
+
+            // Voice list state management - using PiperModelManager like TTSEngineSettingsScreen
+            val modelManager: ireader.domain.services.tts_service.piper.PiperModelManager = koinInject()
+            
+            var selectedVoiceId by remember { mutableStateOf<String?>(null) }
+            var downloadingVoice by remember { mutableStateOf<String?>(null) }
+            var downloadProgress by remember { mutableStateOf(0) }
+            var downloadedVoices by remember { mutableStateOf<Set<String>>(emptySet()) }
+            var piperVoiceModels by remember { mutableStateOf<List<ireader.domain.services.tts_service.piper.VoiceModel>>(emptyList()) }
+            
+            // Load installed voices on mount - using same logic as TTSEngineSettingsScreen
+            LaunchedEffect(Unit) {
+                try {
+                    // Get all available models from model manager
+                    val models = modelManager.getAvailableModels()
+                    
+                    // Get downloaded model IDs from preferences
+                    val downloadedIds = appPrefs.downloadedModels().get()
+                    
+                    // Check which models are actually downloaded (file exists)
+                    val modelsWithDownloadStatus = models.map { model ->
+                        val paths = modelManager.getModelPaths(model.id)
+                        val isActuallyDownloaded = paths != null || downloadedIds.contains(model.id)
+                        model.copy(isDownloaded = isActuallyDownloaded)
+                    }
+                    
+                    piperVoiceModels = modelsWithDownloadStatus
+                    downloadedVoices = modelsWithDownloadStatus.filter { it.isDownloaded }.map { it.id }.toSet()
+                    selectedVoiceId = appPrefs.selectedPiperModel().get().ifEmpty { null }
+                    
+                    Log.info { "Loaded ${models.size} Piper voice models, ${downloadedVoices.size} downloaded" }
+                } catch (e: Exception) {
+                    Log.error { "Failed to load voice models: ${e.message}" }
+                }
+            }
+            
+            // Voice list - using PiperVoiceCatalog for display but piperVoiceModels for download status
+            val voices = ireader.domain.catalogs.PiperVoiceCatalog.getAllVoices()
+            voices.forEachIndexed { index, voice ->
+                if (index > 0) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                
+                // Find the corresponding PiperModelManager model for this voice
+                val piperModel = piperVoiceModels.find { it.id == voice.id }
+                val isDownloaded = piperModel?.isDownloaded == true || downloadedVoices.contains(voice.id)
+                
+                VoiceCard(
+                    voice = voice,
+                    isSelected = selectedVoiceId == voice.id,
+                    isDownloading = downloadingVoice == voice.id,
+                    isDownloaded = isDownloaded,
+                    downloadProgress = if (downloadingVoice == voice.id) downloadProgress else 0,
+                    onSelect = {
+                        if (isDownloaded) {
+                            selectedVoiceId = voice.id
+                            scope.launch {
+                                appPrefs.selectedPiperModel().set(voice.id)
+                                // Also select the voice in the TTS service
+                                try {
+                                    ttsService.selectVoiceModel(voice.id)
+                                    installationLog += "✓ Selected voice: ${voice.name}\n"
+                                } catch (e: Exception) {
+                                    installationLog += "✗ Failed to select voice: ${e.message}\n"
+                                }
+                            }
+                        } else {
+                            installationLog += "⚠ Voice must be downloaded first: ${voice.name}\n"
+                        }
+                    },
+                    onPreview = {
+                        if (isDownloaded) {
+                            scope.launch {
+                                try {
+                                    installationLog += "Previewing voice: ${voice.name}...\n"
+                                    // First select the voice model
+                                    ttsService.selectVoiceModel(voice.id)
+                                    // Then synthesize to test the voice
+                                    val result = ttsService.synthesizer.synthesize(
+                                        "Hello, this is a preview of the ${voice.name} voice."
+                                    )
+                                    if (result.isSuccess) {
+                                        val audioData = result.getOrNull()
+                                        installationLog += "✓ Preview synthesis successful\n"
+                                        installationLog += "  Audio size: ${audioData?.samples?.size ?: 0} bytes\n"
+                                        installationLog += "  Sample rate: ${audioData?.sampleRate ?: 0} Hz\n"
+                                    } else {
+                                        installationLog += "✗ Preview failed: ${result.exceptionOrNull()?.message}\n"
+                                    }
+                                } catch (e: Exception) {
+                                    installationLog += "✗ Preview error: ${e.message}\n"
+                                }
+                            }
+                        } else {
+                            installationLog += "⚠ Voice must be downloaded first: ${voice.name}\n"
+                        }
+                    },
+                    onDownload = {
+                        scope.launch {
+                            downloadingVoice = voice.id
+                            downloadProgress = 0
+                            installationLog += "═══════════════════════════════════════\n"
+                            installationLog += "Downloading voice: ${voice.name}\n"
+                            installationLog += "═══════════════════════════════════════\n"
+                            installationLog += "Size: ${voice.modelSize / 1_000_000}MB\n"
+                            installationLog += "URL: ${voice.downloadUrl}\n\n"
+                            
+                            try {
+                                // Find the model from PiperModelManager
+                                val model = piperVoiceModels.find { it.id == voice.id }
+                                
+                                if (model != null) {
+                                    Log.info { "Starting download for ${model.name} from ${model.modelUrl}" }
+                                    modelManager.downloadModel(model).collect { progress ->
+                                        downloadProgress = (progress.progress * 100).toInt()
+                                        if (downloadProgress % 10 == 0) {
+                                            installationLog += "  Progress: $downloadProgress%\n"
+                                        }
+                                    }
+                                    
+                                    // Update downloaded status
+                                    downloadedVoices = downloadedVoices + voice.id
+                                    piperVoiceModels = piperVoiceModels.map { m ->
+                                        if (m.id == voice.id) m.copy(isDownloaded = true) else m
+                                    }
+                                    
+                                    // Save to preferences
+                                    val currentDownloaded = appPrefs.downloadedModels().get().toMutableSet()
+                                    currentDownloaded.add(voice.id)
+                                    appPrefs.downloadedModels().set(currentDownloaded)
+                                    
+                                    installationLog += "✓ Download complete!\n"
+                                    installationLog += "Voice ${voice.name} is now available.\n\n"
+                                } else {
+                                    // Model not found in PiperModelManager, try to create one from VoiceModel
+                                    Log.warn { "Voice ${voice.id} not found in PiperModelManager, creating from catalog" }
+                                    val newModel = ireader.domain.services.tts_service.piper.VoiceModel(
+                                        id = voice.id,
+                                        name = voice.name,
+                                        language = voice.language,
+                                        quality = when (voice.quality) {
+                                            ireader.domain.models.tts.VoiceQuality.LOW -> ireader.domain.services.tts_service.piper.VoiceModel.Quality.LOW
+                                            ireader.domain.models.tts.VoiceQuality.MEDIUM -> ireader.domain.services.tts_service.piper.VoiceModel.Quality.MEDIUM
+                                            ireader.domain.models.tts.VoiceQuality.HIGH -> ireader.domain.services.tts_service.piper.VoiceModel.Quality.HIGH
+                                            ireader.domain.models.tts.VoiceQuality.PREMIUM -> ireader.domain.services.tts_service.piper.VoiceModel.Quality.HIGH
+                                        },
+                                        gender = when (voice.gender) {
+                                            ireader.domain.models.tts.VoiceGender.MALE -> ireader.domain.services.tts_service.piper.VoiceModel.Gender.MALE
+                                            ireader.domain.models.tts.VoiceGender.FEMALE -> ireader.domain.services.tts_service.piper.VoiceModel.Gender.FEMALE
+                                            ireader.domain.models.tts.VoiceGender.NEUTRAL -> ireader.domain.services.tts_service.piper.VoiceModel.Gender.NEUTRAL
+                                        },
+                                        sizeBytes = voice.modelSize,
+                                        modelUrl = voice.downloadUrl,
+                                        configUrl = voice.configUrl,
+                                        isDownloaded = false
+                                    )
+                                    
+                                    modelManager.downloadModel(newModel).collect { progress ->
+                                        downloadProgress = (progress.progress * 100).toInt()
+                                        if (downloadProgress % 10 == 0) {
+                                            installationLog += "  Progress: $downloadProgress%\n"
+                                        }
+                                    }
+                                    
+                                    downloadedVoices = downloadedVoices + voice.id
+                                    
+                                    // Save to preferences
+                                    val currentDownloaded = appPrefs.downloadedModels().get().toMutableSet()
+                                    currentDownloaded.add(voice.id)
+                                    appPrefs.downloadedModels().set(currentDownloaded)
+                                    
+                                    installationLog += "✓ Download complete!\n"
+                                    installationLog += "Voice ${voice.name} is now available.\n\n"
+                                }
+                            } catch (e: Exception) {
+                                installationLog += "✗ Download error: ${e.message}\n\n"
+                                Log.error { "Voice download failed: ${e.message}" }
+                            } finally {
+                                downloadingVoice = null
+                                downloadProgress = 0
+                            }
+                        }
+                    },
+                    onDelete = {
+                        scope.launch {
+                            try {
+                                installationLog += "Deleting voice: ${voice.name}...\n"
+                                
+                                // Delete using model manager
+                                val result = modelManager.deleteModel(voice.id)
+                                
+                                result.onSuccess {
+                                    downloadedVoices = downloadedVoices - voice.id
+                                    piperVoiceModels = piperVoiceModels.map { m ->
+                                        if (m.id == voice.id) m.copy(isDownloaded = false) else m
+                                    }
+                                    
+                                    // Remove from preferences
+                                    val currentDownloaded = appPrefs.downloadedModels().get().toMutableSet()
+                                    currentDownloaded.remove(voice.id)
+                                    appPrefs.downloadedModels().set(currentDownloaded)
+                                    
+                                    if (selectedVoiceId == voice.id) {
+                                        selectedVoiceId = null
+                                        appPrefs.selectedPiperModel().set("")
+                                    }
+                                    installationLog += "✓ Voice deleted\n"
+                                }.onFailure { error ->
+                                    installationLog += "✗ Delete failed: ${error.message}\n"
+                                }
+                            } catch (e: Exception) {
+                                installationLog += "✗ Delete error: ${e.message}\n"
+                            }
+                        }
+                    }
+                )
+            }
 
             // Help section
             Card(
@@ -1385,3 +1661,96 @@ private suspend fun installMaya(
         onComplete(false, "Installation failed: ${e.message}")
     }
 }
+@Composable
+private fun VoiceCard(
+    voice: ireader.domain.models.tts.VoiceModel,
+    isSelected: Boolean,
+    isDownloading: Boolean,
+    isDownloaded: Boolean,
+    downloadProgress: Int,
+    onSelect: () -> Unit,
+    onPreview: () -> Unit,
+    onDownload: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.secondaryContainer
+            else
+                MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = voice.name,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        if (isDownloaded) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Downloaded",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                    Text(
+                        text = "${voice.locale} • ${voice.gender.name} • ${voice.quality.name}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (voice.modelSize > 0) {
+                        Text(
+                            text = "Size: ${voice.modelSize / 1_000_000}MB",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (isDownloaded) {
+                        IconButton(onClick = onDelete) {
+                            Icon(Icons.Default.Delete, "Delete")
+                        }
+                        IconButton(onClick = onPreview) {
+                            Icon(Icons.Default.PlayArrow, "Preview")
+                        }
+                    } else {
+                        IconButton(onClick = onDownload, enabled = !isDownloading) {
+                            Icon(Icons.Default.Download, "Download")
+                        }
+                    }
+
+                    RadioButton(
+                        selected = isSelected,
+                        onClick = onSelect,
+                        enabled = isDownloaded
+                    )
+                }
+            }
+
+            if (isDownloading) {
+                Spacer(modifier = Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = downloadProgress / 100f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = "Downloading... $downloadProgress%",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }}
