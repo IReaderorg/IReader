@@ -241,7 +241,7 @@ class TTSServiceTest {
 /**
  * Mock TTS Service for testing
  */
-class MockTTSService : CommonTTSService {
+open class MockTTSService : CommonTTSService {
     
     private val _isPlaying = MutableStateFlow(false)
     private val _isLoading = MutableStateFlow(false)

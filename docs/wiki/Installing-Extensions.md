@@ -1,19 +1,3 @@
-# Installing Extensions
-
-Extensions in IReader allow you to access books and documents from different sources. This guide explains how to find, install, and manage extensions.
-
-## Finding Extensions
-
-1. Open IReader
-2. Navigate to the **Browse** tab or **Sources** section
-3. Tap on the **Extensions** button
-4. Browse the available extensions by category or use the search function
-
-## Installing Extensions
-
-IReader offers two methods for installing extensions:
-
-### Method 1: Using Android Package Manager (Recommended)
 
 This is the standard way to install extensions:
 

@@ -6,7 +6,7 @@ import okhttp3.OkHttpClient
  * Platform-specific SSL/TLS configuration
  * Handles certificate pinning, custom trust managers, and TLS version control
  */
-expect class SSLConfiguration {
+expect class SSLConfiguration() {
     /**
      * Apply SSL/TLS configuration to OkHttpClient builder
      */

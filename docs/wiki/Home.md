@@ -13,10 +13,21 @@ Welcome to the IReader wiki! This guide will help you get started with the app a
 - [Troubleshooting](Troubleshooting.md)
 - [FAQ](FAQ.md)
 
+## Features & Guides
+
+- [AI Translation Guide](AI-Translation.md)
+- [Text-to-Speech (TTS) Guide](Text-to-Speech.md)
+
+## Development
+
+- [Architecture Guide](../ARCHITECTURE.md)
+- [JavaScript Plugin System](../js-plugin-system.md)
+- [Plugin Development Guide](../plugin-development/getting-started.md)
+
 ## About IReader
 
 IReader is a feature-rich eBook and document reader application that supports various sources for books and documents. It offers a customizable reading experience with features like theme selection, font customization, and organization tools.
 
 ## Need Help?
 
-If you encounter any issues not covered in this wiki, please visit our [GitHub Issues](https://github.com/IReaderorg/IReader/issues) page to search for existing issues or create a new one. 
+If you encounter any issues not covered in this wiki, please visit our [GitHub Issues](https://github.com/IReaderorg/IReader/issues) page to search for existing issues or create a new one.

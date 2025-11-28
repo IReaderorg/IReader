@@ -14,7 +14,7 @@ import ireader.domain.models.migration.MigrationProgress
 import ireader.domain.models.migration.MigrationRequest
 import ireader.domain.models.migration.MigrationResult
 import ireader.domain.models.migration.MigrationStatus
-import ireader.domain.use_cases.migration.MigrateNovelUseCase
+import ireader.domain.usecases.migration.MigrateNovelUseCase
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

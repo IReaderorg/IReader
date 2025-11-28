@@ -1,4 +1,4 @@
-package ireader.domain.use_cases.services
+package ireader.domain.usecases.services
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogStore
@@ -26,7 +26,7 @@ class LoadJSPluginsInBackgroundUseCase(
             val asyncLoader = catalogLoader as? ireader.domain.catalogs.service.AsyncPluginLoader
             
             if (asyncLoader == null) {
-                Log.warn("LoadJSPluginsInBackgroundUseCase: Async loading not supported on this platform")
+                Log.warn { "LoadJSPluginsInBackgroundUseCase: Async loading not supported on this platform" }
                 emit(PluginLoadProgress(0, 0, null, true))
                 return@flow
             }
@@ -57,10 +57,10 @@ class LoadJSPluginsInBackgroundUseCase(
             // Emit completion
             emit(PluginLoadProgress(loadedCount, totalCount, null, true))
             
-            Log.info("LoadJSPluginsInBackgroundUseCase: Completed loading $loadedCount plugins")
+            Log.info { "LoadJSPluginsInBackgroundUseCase: Completed loading $loadedCount plugins" }
             
         } catch (e: Exception) {
-            Log.error("LoadJSPluginsInBackgroundUseCase: Failed to load plugins", e)
+            Log.error { "LoadJSPluginsInBackgroundUseCase: Failed to load plugins" }
             emit(PluginLoadProgress(0, 0, null, true, e.message))
         }
     }

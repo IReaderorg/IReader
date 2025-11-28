@@ -34,36 +34,6 @@ This guide helps you solve common problems you might encounter while using IRead
 
 ### Extensions Not Loading
 
-**Problem**: Installed extensions don't show up or don't load content.
-
-**Solutions**:
-1. **Restart the App**:
-   - Force close IReader
-   - Reopen and check if extensions appear
-
-2. **Check Internet Connection**:
-   - Ensure you have a stable internet connection
-   - Try switching between Wi-Fi and mobile data
-
-3. **Update Extensions**:
-   - Go to **Extensions**
-   - Update all outdated extensions
-
-## Library Issues
-
-### Books Not Showing in Library
-
-**Problem**: Added books don't appear in your library.
-
-**Solutions**:
-1. **Check Category Filter**:
-   - You might be viewing a specific category
-   - Tap the category dropdown and select **All** or **Default**
-
-2. **Refresh Library**:
-   - Pull down to refresh your library
-   - Or go to **Settings > Advanced > Refresh library**
-
 3. **Check Source Status**:
    - The source might be down or changed
    - Try adding from a different source

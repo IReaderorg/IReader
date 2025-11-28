@@ -1,4 +1,4 @@
-package ireader.domain.use_cases.migration
+package ireader.domain.usecases.migration
 
 import ireader.core.log.Log
 import ireader.core.source.model.Filter

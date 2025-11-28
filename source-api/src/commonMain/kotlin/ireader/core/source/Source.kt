@@ -2,7 +2,7 @@
 
 package ireader.core.source
 
-import androidx.annotation.Keep
+import com.google.errorprone.annotations.Keep
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Command
 import ireader.core.source.model.MangaInfo

@@ -5,10 +5,7 @@ package ireader.domain.di
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.usecases.download.delete.DeleteAllSavedDownload
 import ireader.domain.usecases.download.delete.DeleteSavedDownload
-import ireader.domain.usecases.download.delete.DeleteSavedDownloadByBookId
 import ireader.domain.usecases.download.delete.DeleteSavedDownloads
-import ireader.domain.usecases.download.get.FindAllDownloadsUseCase
-import ireader.domain.usecases.download.get.FindDownloadsUseCase
 import ireader.domain.usecases.download.get.SubscribeDownloadsUseCase
 import ireader.domain.usecases.download.insert.InsertDownload
 import ireader.domain.usecases.download.insert.InsertDownloads
@@ -38,6 +35,7 @@ import ireader.domain.usecases.local.insert_usecases.InsertBooks
 import ireader.domain.usecases.local.insert_usecases.InsertChapter
 import ireader.domain.usecases.local.insert_usecases.InsertChapters
 import ireader.domain.usecases.local.insert_usecases.UpdateBook
+import ireader.domain.usecases.migration.MigrateNovelUseCase
 import ireader.domain.usecases.preferences.reader_preferences.AutoScrollMode
 import ireader.domain.usecases.preferences.reader_preferences.BackgroundColorUseCase
 import ireader.domain.usecases.preferences.reader_preferences.BrightnessStateUseCase
@@ -308,8 +306,8 @@ val UseCasesInject = module {
             bookMatcher = get()
         )
     }
-    single<ireader.domain.use_cases.migration.MigrateNovelUseCase> { 
-        ireader.domain.use_cases.migration.MigrateNovelUseCase(
+    single<MigrateNovelUseCase> { 
+      MigrateNovelUseCase(
             bookRepository = get(),
             chapterRepository = get(),
             catalogStore = get(),

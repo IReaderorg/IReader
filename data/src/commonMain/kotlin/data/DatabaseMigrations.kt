@@ -2,6 +2,7 @@ package data
 
 import app.cash.sqldelight.db.SqlDriver
 import data.DatabaseMigrations.CURRENT_VERSION
+import data.MigrationLogger as Logger
 
 /**
  * DatabaseMigrations class that manages schema migrations between different database versions.
@@ -109,7 +110,7 @@ object DatabaseMigrations {
      */
     private fun migrateV5toV6(driver: SqlDriver) {
         try {
-            println("Starting migration from version 5 to 6...")
+            Logger.logMigrationStart(5, 6)
             
             // Create book reviews table
             val createBookReviewSql = """
@@ -126,13 +127,13 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createBookReviewSql, 0)
-            println("Created bookReview table")
+            Logger.logTableCreated("bookReview")
             
             // Create indexes for book reviews
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_review_title ON bookReview(book_title);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_review_rating ON bookReview(rating DESC);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_book_review_synced ON bookReview(synced) WHERE synced = 0;", 0)
-            println("Created indexes for bookReview table")
+            Logger.logIndexCreated("bookReview indexes")
             
             // Create chapter reviews table
             val createChapterReviewSql = """
@@ -150,20 +151,19 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createChapterReviewSql, 0)
-            println("Created chapterReview table")
+            Logger.logTableCreated("chapterReview")
             
             // Create indexes for chapter reviews
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_chapter_review_book ON chapterReview(book_title);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_chapter_review_book_chapter ON chapterReview(book_title, chapter_name);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_chapter_review_rating ON chapterReview(rating DESC);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_chapter_review_synced ON chapterReview(synced) WHERE synced = 0;", 0)
-            println("Created indexes for chapterReview table")
+            Logger.logIndexCreated("chapterReview indexes")
             
-            println("Successfully migrated to version 6")
+            Logger.logMigrationSuccess(6)
             
         } catch (e: Exception) {
-            println("Error migrating to version 6: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(6, e)
             // Don't throw - allow the app to continue even if migration fails
         }
     }
@@ -174,7 +174,7 @@ object DatabaseMigrations {
      */
     private fun migrateV6toV7(driver: SqlDriver) {
         try {
-            println("Starting migration from version 6 to 7...")
+            Logger.logMigrationStart(6, 7)
             
             // Check if sync_queue table exists
             var syncQueueExists = false
@@ -191,7 +191,7 @@ object DatabaseMigrations {
             
             if (syncQueueExists) {
                 driver.execute(null, "DROP TABLE IF EXISTS sync_queue;", 0)
-                println("Dropped old sync_queue table")
+                Logger.logTableDropped("sync_queue")
             }
             
             // Create new sync_queue table with updated schema
@@ -210,17 +210,16 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createSyncQueueSql, 0)
-            println("Created new sync_queue table with updated schema")
+            Logger.logTableCreated("sync_queue")
             
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(status);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_created_at ON sync_queue(created_at);", 0)
-            println("Created indexes for sync_queue table")
+            Logger.logIndexCreated("sync_queue indexes")
             
-            println("Successfully migrated to version 7")
+            Logger.logMigrationSuccess(7)
             
         } catch (e: Exception) {
-            println("Error migrating to version 7: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(7, e)
         }
     }
     
@@ -230,7 +229,7 @@ object DatabaseMigrations {
      */
     private fun migrateV7toV8(driver: SqlDriver) {
         try {
-            println("Starting migration from version 7 to 8...")
+            Logger.logMigrationStart(7, 8)
             
             // Check if sync_queue table exists
             var syncQueueExists = false
@@ -247,7 +246,7 @@ object DatabaseMigrations {
             
             if (syncQueueExists) {
                 driver.execute(null, "DROP TABLE IF EXISTS sync_queue;", 0)
-                println("Dropped old sync_queue table")
+                Logger.logTableDropped("sync_queue")
             }
             
             // Create sync_queue table with final schema (matching sync_queue.sq)
@@ -262,17 +261,16 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createSyncQueueSql, 0)
-            println("Created sync_queue table with final schema")
+            Logger.logTableCreated("sync_queue")
             
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_timestamp ON sync_queue(timestamp ASC);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_book_id ON sync_queue(book_id);", 0)
-            println("Created indexes for sync_queue table")
+            Logger.logIndexCreated("sync_queue indexes")
             
-            println("Successfully migrated to version 8")
+            Logger.logMigrationSuccess(8)
             
         } catch (e: Exception) {
-            println("Error migrating to version 8: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(8, e)
         }
     }
     
@@ -282,11 +280,11 @@ object DatabaseMigrations {
      */
     private fun migrateV4toV5(driver: SqlDriver) {
         try {
-            println("Starting migration from version 4 to 5...")
+            Logger.logMigrationStart(4, 5)
             
             // Drop and recreate sync_queue table to ensure clean state
             driver.execute(null, "DROP TABLE IF EXISTS sync_queue;", 0)
-            println("Dropped old sync_queue table")
+            Logger.logTableDropped("sync_queue")
             
             // Create sync_queue table with proper schema
             val createSyncQueueSql = """
@@ -300,18 +298,17 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createSyncQueueSql, 0)
-            println("Created new sync_queue table")
+            Logger.logTableCreated("sync_queue")
             
             // Create indexes for better performance
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_timestamp ON sync_queue(timestamp ASC);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_book_id ON sync_queue(book_id);", 0)
-            println("Created indexes for sync_queue table")
+            Logger.logIndexCreated("sync_queue indexes")
             
-            println("Successfully migrated to version 5")
+            Logger.logMigrationSuccess(5)
             
         } catch (e: Exception) {
-            println("Error migrating to version 5: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(5, e)
             // Don't throw - allow the app to continue even if migration fails
         }
     }
@@ -322,7 +319,9 @@ object DatabaseMigrations {
      */
     private fun migrateV3toV4(driver: SqlDriver) {
         try {
-                        // Check if columns already exist
+            Logger.logMigrationStart(3, 4)
+            
+            // Check if columns already exist
             val columnsCheck = "PRAGMA table_info(book)"
             var hasPinnedColumn = false
             var hasPinnedOrderColumn = false
@@ -350,17 +349,17 @@ object DatabaseMigrations {
             // Add missing columns
             if (!hasPinnedColumn) {
                 driver.execute(null, "ALTER TABLE book ADD COLUMN is_pinned INTEGER NOT NULL DEFAULT 0;", 0)
-                println("Added is_pinned column to book table")
+                Logger.logColumnAdded("book", "is_pinned")
             }
             
             if (!hasPinnedOrderColumn) {
                 driver.execute(null, "ALTER TABLE book ADD COLUMN pinned_order INTEGER NOT NULL DEFAULT 0;", 0)
-                println("Added pinned_order column to book table")
+                Logger.logColumnAdded("book", "pinned_order")
             }
             
             if (!hasArchivedColumn) {
                 driver.execute(null, "ALTER TABLE book ADD COLUMN is_archived INTEGER NOT NULL DEFAULT 0;", 0)
-                println("Added is_archived column to book table")
+                Logger.logColumnAdded("book", "is_archived")
             }
 
             // Create reading_statistics table
@@ -377,7 +376,7 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createReadingStatisticsSql, 0)
-            println("Created reading_statistics table")
+            Logger.logTableCreated("reading_statistics")
             
             // Initialize with a single row
             val initializeStatisticsSql = """
@@ -386,13 +385,12 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, initializeStatisticsSql, 0)
-            println("Initialized reading_statistics table")
+            Logger.logDebug("Initialized reading_statistics table")
             
-            println("Successfully migrated to version 4")
+            Logger.logMigrationSuccess(4)
             
         } catch (e: Exception) {
-            println("Error migrating to version 4: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(4, e)
             // Don't throw - the table might already exist which is fine
         }
     }
@@ -404,6 +402,8 @@ object DatabaseMigrations {
      */
     private fun migrateV2toV3(driver: SqlDriver) {
         try {
+            Logger.logMigrationStart(2, 3)
+            
             // Create translated_chapter table
             val createTranslatedChapterSql = """
                 CREATE TABLE IF NOT EXISTS translated_chapter(
@@ -423,10 +423,12 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createTranslatedChapterSql, 0)
+            Logger.logTableCreated("translated_chapter")
             
             // Create indices for translated_chapter
             driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_chapter_id_index ON translated_chapter(chapter_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_book_id_index ON translated_chapter(book_id);", 0)
+            Logger.logIndexCreated("translated_chapter indexes")
             
             // Create glossary table
             val createGlossarySql = """
@@ -445,16 +447,17 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createGlossarySql, 0)
+            Logger.logTableCreated("glossary")
             
             // Create indices for glossary
             driver.execute(null, "CREATE INDEX IF NOT EXISTS glossary_book_id_index ON glossary(book_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS glossary_source_term_index ON glossary(source_term);", 0)
+            Logger.logIndexCreated("glossary indexes")
             
-            println("Successfully created translation tables")
+            Logger.logMigrationSuccess(3)
             
         } catch (e: Exception) {
-            println("Error creating translation tables: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(3, e)
             // Don't throw - the tables might already exist which is fine
         }
     }
@@ -476,7 +479,7 @@ object DatabaseMigrations {
             )
             
             if (!historyTableExists) {
-                println("History table not found, creating required tables...")
+                Logger.logInfo("History table not found, creating required tables...")
                 
                 // Ensure book table exists first (required by chapter foreign key)
                 val createBookTableSql = """
@@ -506,7 +509,7 @@ object DatabaseMigrations {
                 """.trimIndent()
                 
                 driver.execute(null, createBookTableSql, 0)
-                println("Created book table")
+                Logger.logTableCreated("book")
                 
                 // Create chapter table with complete schema including type column
                 val createChapterTableSql = """
@@ -530,7 +533,7 @@ object DatabaseMigrations {
                 """.trimIndent()
                 
                 driver.execute(null, createChapterTableSql, 0)
-                println("Created chapter table")
+                Logger.logTableCreated("chapter")
                 
                 // Create history table with progress column (post-migration schema)
                 val createHistoryTableSql = """
@@ -546,22 +549,21 @@ object DatabaseMigrations {
                 """.trimIndent()
                 
                 driver.execute(null, createHistoryTableSql, 0)
-                println("Created history table")
+                Logger.logTableCreated("history")
                 
                 // Create indexes for history table
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);", 0)
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read);", 0)
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_history_progress ON history(progress);", 0)
-                println("Created indexes for history table")
+                Logger.logIndexCreated("history indexes")
                 
                 // Create chapter indexes
                 driver.execute(null, "CREATE INDEX IF NOT EXISTS chapters_manga_id_index ON chapter(book_id);", 0)
-                println("Created indexes for chapter table")
+                Logger.logIndexCreated("chapter indexes")
             }
             
         } catch (e: Exception) {
-            println("Error verifying required tables: ${e.message}")
-            e.printStackTrace()
+            Logger.logError("Error verifying required tables: ${e.message}", e)
         }
     }
 
@@ -591,7 +593,7 @@ object DatabaseMigrations {
             
             val historyTableExists = checkTableExists(driver, "history")
             if (!historyTableExists) {
-                println("History table still doesn't exist after verification, cannot create views")
+                Logger.logWarning("History table still doesn't exist after verification, cannot create views")
                 return
             }
             
@@ -617,16 +619,16 @@ object DatabaseMigrations {
                 )
                 
                 if (!hasProgressColumn) {
-                    println("History table missing progress column, adding it...")
+                    Logger.logInfo("History table missing progress column, adding it...")
                     try {
                         driver.execute(null, "ALTER TABLE history ADD COLUMN progress REAL DEFAULT 0.0;", 0)
-                        println("Added progress column to history table")
+                        Logger.logColumnAdded("history", "progress")
                     } catch (e: Exception) {
-                        println("Could not add progress column: ${e.message}")
+                        Logger.logWarning("Could not add progress column: ${e.message}")
                     }
                 }
             } catch (e: Exception) {
-                println("Error checking history table schema: ${e.message}")
+                Logger.logError("Error checking history table schema: ${e.message}", e)
             }
             
             val categoryInitSql ="""
@@ -682,10 +684,9 @@ object DatabaseMigrations {
             
             try {
                 driver.execute(null, historyViewSql, 0)
-                println("Successfully created historyView")
+                Logger.logViewCreated("historyView")
             } catch (e: Exception) {
-                println("Error creating historyView: ${e.message}")
-                e.printStackTrace()
+                Logger.logViewError("historyView", e)
                 // Re-verify tables exist before giving up
                 verifyRequiredTables(driver)
             }
@@ -721,10 +722,9 @@ object DatabaseMigrations {
             
             try {
                 driver.execute(null, updatesViewSql, 0)
-                println("Successfully created updatesView")
+                Logger.logViewCreated("updatesView")
             } catch (e: Exception) {
-                println("Error creating updatesView: ${e.message}")
-                e.printStackTrace()
+                Logger.logViewError("updatesView", e)
             }
             
             driver.executeQuery(
@@ -776,7 +776,7 @@ object DatabaseMigrations {
      */
     private fun migrateV8toV9(driver: SqlDriver) {
         try {
-            println("Starting migration from version 8 to 9...")
+            Logger.logMigrationStart(8, 9)
             
             // Create plugin table
             val createPluginSql = """
@@ -797,12 +797,12 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createPluginSql, 0)
-            println("Created plugin table")
+            Logger.logTableCreated("plugin")
             
             // Create indexes for plugin table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_type ON plugin(type);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_status ON plugin(status);", 0)
-            println("Created indexes for plugin table")
+            Logger.logIndexCreated("plugin indexes")
             
             // Create plugin_purchase table
             val createPluginPurchaseSql = """
@@ -820,13 +820,13 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createPluginPurchaseSql, 0)
-            println("Created plugin_purchase table")
+            Logger.logTableCreated("plugin_purchase")
             
             // Create indexes for plugin_purchase table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_purchase_plugin_id ON plugin_purchase(plugin_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_purchase_user_id ON plugin_purchase(user_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_purchase_timestamp ON plugin_purchase(timestamp DESC);", 0)
-            println("Created indexes for plugin_purchase table")
+            Logger.logIndexCreated("plugin_purchase indexes")
             
             // Create plugin_review table
             val createPluginReviewSql = """
@@ -844,20 +844,19 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createPluginReviewSql, 0)
-            println("Created plugin_review table")
+            Logger.logTableCreated("plugin_review")
             
             // Create indexes for plugin_review table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_review_plugin_id ON plugin_review(plugin_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_review_user_id ON plugin_review(user_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_review_rating ON plugin_review(rating DESC);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_review_timestamp ON plugin_review(timestamp DESC);", 0)
-            println("Created indexes for plugin_review table")
+            Logger.logIndexCreated("plugin_review indexes")
             
-            println("Successfully migrated to version 9")
+            Logger.logMigrationSuccess(9)
             
         } catch (e: Exception) {
-            println("Error migrating to version 9: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(9, e)
         }
     }
     
@@ -867,7 +866,7 @@ object DatabaseMigrations {
      */
     private fun migrateV9toV10(driver: SqlDriver) {
         try {
-            println("Starting migration from version 9 to 10...")
+            Logger.logMigrationStart(9, 10)
             
             // Create plugin_trial table
             val createPluginTrialSql = """
@@ -883,19 +882,18 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createPluginTrialSql, 0)
-            println("Created plugin_trial table")
+            Logger.logTableCreated("plugin_trial")
             
             // Create indexes for plugin_trial table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_trial_plugin_id ON plugin_trial(plugin_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_trial_user_id ON plugin_trial(user_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_trial_active ON plugin_trial(is_active);", 0)
-            println("Created indexes for plugin_trial table")
+            Logger.logIndexCreated("plugin_trial indexes")
             
-            println("Successfully migrated to version 10")
+            Logger.logMigrationSuccess(10)
             
         } catch (e: Exception) {
-            println("Error migrating to version 10: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(10, e)
         }
     }
     
@@ -905,7 +903,7 @@ object DatabaseMigrations {
      */
     private fun migrateV10toV11(driver: SqlDriver) {
         try {
-            println("Starting migration from version 10 to 11...")
+            Logger.logMigrationStart(10, 11)
             
             // Check if repository_type column already exists
             val columnsCheck = "PRAGMA table_info(repository)"
@@ -931,14 +929,13 @@ object DatabaseMigrations {
             // Add repository_type column if it doesn't exist
             if (!hasRepositoryTypeColumn) {
                 driver.execute(null, "ALTER TABLE repository ADD COLUMN repository_type TEXT NOT NULL DEFAULT 'IREADER';", 0)
-                println("Added repository_type column to repository table")
+                Logger.logColumnAdded("repository", "repository_type")
             }
             
-            println("Successfully migrated to version 11")
+            Logger.logMigrationSuccess(11)
             
         } catch (e: Exception) {
-            println("Error migrating to version 11: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(11, e)
         }
     }
     
@@ -948,21 +945,20 @@ object DatabaseMigrations {
      */
     private fun migrateV11toV12(driver: SqlDriver) {
         try {
-            println("Starting migration from version 11 to 12...")
+            Logger.logMigrationStart(11, 12)
             
             // Drop the trigger that prevents deletion of system repository
             driver.execute(null, "DROP TRIGGER IF EXISTS system_repository_delete_trigger;", 0)
-            println("Dropped system_repository_delete_trigger")
+            Logger.logDebug("Dropped system_repository_delete_trigger")
             
             // Delete the default repository with id = -1 if it exists
             driver.execute(null, "DELETE FROM repository WHERE _id = -1;", 0)
-            println("Deleted default repository with id = -1")
+            Logger.logDebug("Deleted default repository with id = -1")
             
-            println("Successfully migrated to version 12")
+            Logger.logMigrationSuccess(12)
             
         } catch (e: Exception) {
-            println("Error migrating to version 12: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(12, e)
         }
     }
     
@@ -972,7 +968,7 @@ object DatabaseMigrations {
      */
     private fun migrateV12toV13(driver: SqlDriver) {
         try {
-            println("Starting migration from version 12 to 13...")
+            Logger.logMigrationStart(12, 13)
             
             // Check if repositoryType column already exists
             val columnsCheck = "PRAGMA table_info(catalog)"
@@ -998,18 +994,17 @@ object DatabaseMigrations {
             // Add repositoryType column if it doesn't exist
             if (!hasRepositoryTypeColumn) {
                 driver.execute(null, "ALTER TABLE catalog ADD COLUMN repositoryType TEXT NOT NULL DEFAULT 'IREADER';", 0)
-                println("Added repositoryType column to catalog table")
+                Logger.logColumnAdded("catalog", "repositoryType")
                 
                 // Update existing LNReader plugins based on their URL pattern
                 driver.execute(null, "UPDATE catalog SET repositoryType = 'LNREADER' WHERE pkgUrl LIKE '%.js';", 0)
-                println("Updated existing LNReader plugins in catalog table")
+                Logger.logDebug("Updated existing LNReader plugins in catalog table")
             }
             
-            println("Successfully migrated to version 13")
+            Logger.logMigrationSuccess(13)
             
         } catch (e: Exception) {
-            println("Error migrating to version 13: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(13, e)
         }
     }
 
@@ -1019,7 +1014,7 @@ object DatabaseMigrations {
      */
     private fun migrateV13toV14(driver: SqlDriver) {
         try {
-            println("Starting migration from version 13 to 14...")
+            Logger.logMigrationStart(13, 14)
             
             // Create update_history table
             val createUpdateHistorySql = """
@@ -1034,18 +1029,17 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createUpdateHistorySql, 0)
-            println("Created update_history table")
+            Logger.logTableCreated("update_history")
             
             // Create indexes for update_history table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS update_history_book_id_index ON update_history(book_id);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS update_history_timestamp_index ON update_history(timestamp);", 0)
-            println("Created indexes for update_history table")
+            Logger.logIndexCreated("update_history indexes")
             
-            println("Successfully migrated to version 14")
+            Logger.logMigrationSuccess(14)
             
         } catch (e: Exception) {
-            println("Error migrating to version 14: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(14, e)
         }
     }
     
@@ -1055,7 +1049,7 @@ object DatabaseMigrations {
      */
     private fun migrateV14toV15(driver: SqlDriver) {
         try {
-            println("Starting migration from version 14 to 15...")
+            Logger.logMigrationStart(14, 15)
             
             // Create sourceReport table
             val createSourceReportSql = """
@@ -1071,18 +1065,17 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createSourceReportSql, 0)
-            println("Created sourceReport table")
+            Logger.logTableCreated("sourceReport")
             
             // Create indexes for sourceReport table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS sourceReport_sourceId_index ON sourceReport(sourceId);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS sourceReport_status_index ON sourceReport(status);", 0)
-            println("Created indexes for sourceReport table")
+            Logger.logIndexCreated("sourceReport indexes")
             
-            println("Successfully migrated to version 15")
+            Logger.logMigrationSuccess(15)
             
         } catch (e: Exception) {
-            println("Error migrating to version 15: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(15, e)
         }
     }
     
@@ -1092,7 +1085,7 @@ object DatabaseMigrations {
      */
     private fun migrateV15toV16(driver: SqlDriver) {
         try {
-            println("Starting migration from version 15 to 16...")
+            Logger.logMigrationStart(15, 16)
             
             // Create sourceComparison table
             val createSourceComparisonSql = """
@@ -1109,18 +1102,17 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createSourceComparisonSql, 0)
-            println("Created sourceComparison table")
+            Logger.logTableCreated("sourceComparison")
             
             // Create indexes for sourceComparison table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS source_comparison_cached_at_index ON sourceComparison(cached_at);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS source_comparison_dismissed_until_index ON sourceComparison(dismissed_until);", 0)
-            println("Created indexes for sourceComparison table")
+            Logger.logIndexCreated("sourceComparison indexes")
             
-            println("Successfully migrated to version 16")
+            Logger.logMigrationSuccess(16)
             
         } catch (e: Exception) {
-            println("Error migrating to version 16: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(16, e)
         }
     }
     
@@ -1130,7 +1122,7 @@ object DatabaseMigrations {
      */
     private fun migrateV16toV17(driver: SqlDriver) {
         try {
-            println("Starting migration from version 16 to 17...")
+            Logger.logMigrationStart(16, 17)
             
             // Create nftWallets table
             val createNftWalletsSql = """
@@ -1145,13 +1137,12 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createNftWalletsSql, 0)
-            println("Created nftWallets table")
+            Logger.logTableCreated("nftWallets")
             
-            println("Successfully migrated to version 17")
+            Logger.logMigrationSuccess(17)
             
         } catch (e: Exception) {
-            println("Error migrating to version 17: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(17, e)
         }
     }
     
@@ -1161,7 +1152,7 @@ object DatabaseMigrations {
      */
     private fun migrateV17toV18(driver: SqlDriver) {
         try {
-            println("Starting migration from version 17 to 18...")
+            Logger.logMigrationStart(17, 18)
             
             // Create chapterHealth table
             val createChapterHealthSql = """
@@ -1179,17 +1170,16 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createChapterHealthSql, 0)
-            println("Created chapterHealth table")
+            Logger.logTableCreated("chapterHealth")
             
             // Create index for chapterHealth table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS chapter_health_checked_at_index ON chapterHealth(checked_at);", 0)
-            println("Created index for chapterHealth table")
+            Logger.logIndexCreated("chapterHealth index")
             
-            println("Successfully migrated to version 18")
+            Logger.logMigrationSuccess(18)
             
         } catch (e: Exception) {
-            println("Error migrating to version 18: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(18, e)
         }
     }
     
@@ -1199,7 +1189,7 @@ object DatabaseMigrations {
      */
     private fun migrateV18toV19(driver: SqlDriver) {
         try {
-            println("Starting migration from version 18 to 19...")
+            Logger.logMigrationStart(18, 19)
             
             // Create chapterReport table
             val createChapterReportSql = """
@@ -1217,19 +1207,18 @@ object DatabaseMigrations {
             """.trimIndent()
             
             driver.execute(null, createChapterReportSql, 0)
-            println("Created chapterReport table")
+            Logger.logTableCreated("chapterReport")
             
             // Create indexes for chapterReport table
             driver.execute(null, "CREATE INDEX IF NOT EXISTS chapterReport_chapterId_index ON chapterReport(chapterId);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS chapterReport_bookId_index ON chapterReport(bookId);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS chapterReport_resolved_index ON chapterReport(resolved);", 0)
-            println("Created indexes for chapterReport table")
+            Logger.logIndexCreated("chapterReport indexes")
             
-            println("Successfully migrated to version 19")
+            Logger.logMigrationSuccess(19)
             
         } catch (e: Exception) {
-            println("Error migrating to version 19: ${e.message}")
-            e.printStackTrace()
+            Logger.logMigrationError(19, e)
         }
     }
 

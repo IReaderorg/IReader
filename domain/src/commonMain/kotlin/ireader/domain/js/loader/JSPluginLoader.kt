@@ -10,7 +10,14 @@ import ireader.domain.js.bridge.LNReaderPlugin
 import ireader.domain.js.engine.PluginLoadException
 import ireader.domain.js.models.PluginMetadata
 import ireader.domain.models.entities.JSPluginCatalog
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import java.io.File
+import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Common interface for JS engines.
@@ -350,13 +357,17 @@ class JSPluginLoader(
     }
     
     /**
-     * Load plugins asynchronously with priority support.
-     * Priority plugins load first, then remaining plugins.
+     * Load plugins asynchronously with priority support and parallel execution.
+     * Priority plugins load first (sequentially for immediate availability),
+     * then remaining plugins load in parallel for maximum throughput.
+     * 
      * @param onPluginLoaded Callback when each plugin is loaded
+     * @param maxConcurrency Maximum number of plugins to load in parallel (default: 4)
      * @return List of all loaded catalogs
      */
     suspend fun loadPluginsAsync(
-        onPluginLoaded: (JSPluginCatalog) -> Unit = {}
+        onPluginLoaded: (JSPluginCatalog) -> Unit = {},
+        maxConcurrency: Int = 4
     ): List<JSPluginCatalog> {
         val startTime = System.currentTimeMillis()
         
@@ -370,6 +381,11 @@ class JSPluginLoader(
             file.extension == "js" && file.canRead()
         } ?: emptyArray()
         
+        if (pluginFiles.isEmpty()) {
+            Log.debug { "JSPluginLoader: No plugin files found" }
+            return emptyList()
+        }
+        
         // Get priority plugins
         val priorityPluginIds = stubManager.getPriorityPlugins()
         
@@ -378,9 +394,10 @@ class JSPluginLoader(
             file.nameWithoutExtension in priorityPluginIds
         }
         
-        val allCatalogs = mutableListOf<JSPluginCatalog>()
+        val allCatalogs = ConcurrentLinkedQueue<JSPluginCatalog>()
+        val semaphore = Semaphore(maxConcurrency)
         
-        // Load priority plugins first
+        // Load priority plugins first (sequentially for immediate availability)
         priorityFiles.forEach { file ->
             try {
                 val catalog = loadPlugin(file)
@@ -389,24 +406,106 @@ class JSPluginLoader(
                     onPluginLoaded(catalog)
                 }
             } catch (e: Exception) {
-                // Ignore errors
+                Log.warn { "JSPluginLoader: Failed to load priority plugin ${file.name}: ${e.message}" }
             }
         }
         
-        // Load remaining plugins
-        normalFiles.forEach { file ->
+        val priorityLoadTime = System.currentTimeMillis() - startTime
+        if (priorityFiles.isNotEmpty()) {
+            Log.debug { "JSPluginLoader: Loaded ${priorityFiles.size} priority plugins in ${priorityLoadTime}ms" }
+        }
+        
+        // Load remaining plugins in parallel with controlled concurrency
+        coroutineScope {
+            normalFiles.map { file ->
+                async(Dispatchers.IO) {
+                    semaphore.withPermit {
+                        try {
+                            val catalog = loadPlugin(file)
+                            if (catalog != null) {
+                                allCatalogs.add(catalog)
+                                onPluginLoaded(catalog)
+                            }
+                        } catch (e: Exception) {
+                            Log.warn { "JSPluginLoader: Failed to load plugin ${file.name}: ${e.message}" }
+                        }
+                    }
+                }
+            }.awaitAll()
+        }
+        
+        val totalLoadTime = System.currentTimeMillis() - startTime
+        Log.info { "JSPluginLoader: Loaded ${allCatalogs.size} plugins in ${totalLoadTime}ms (${priorityFiles.size} priority, ${normalFiles.size} normal)" }
+        
+        return allCatalogs.toList()
+    }
+    
+    /**
+     * Load plugins with streaming callback - plugins are delivered as they load.
+     * This provides the fastest time-to-first-plugin for UI responsiveness.
+     * 
+     * @param onPluginLoaded Callback when each plugin is loaded (called from IO dispatcher)
+     * @param maxConcurrency Maximum number of plugins to load in parallel
+     */
+    suspend fun loadPluginsStreaming(
+        onPluginLoaded: suspend (JSPluginCatalog) -> Unit,
+        maxConcurrency: Int = 4
+    ) {
+        val startTime = System.currentTimeMillis()
+        
+        if (!pluginsDirectory.exists()) {
+            pluginsDirectory.mkdirs()
+            return
+        }
+        
+        val pluginFiles = pluginsDirectory.listFiles { file ->
+            file.extension == "js" && file.canRead()
+        } ?: return
+        
+        if (pluginFiles.isEmpty()) return
+        
+        val priorityPluginIds = stubManager.getPriorityPlugins()
+        val (priorityFiles, normalFiles) = pluginFiles.partition { file ->
+            file.nameWithoutExtension in priorityPluginIds
+        }
+        
+        val semaphore = Semaphore(maxConcurrency)
+        var loadedCount = 0
+        
+        // Load priority plugins first
+        priorityFiles.forEach { file ->
             try {
                 val catalog = loadPlugin(file)
                 if (catalog != null) {
-                    allCatalogs.add(catalog)
+                    loadedCount++
                     onPluginLoaded(catalog)
                 }
             } catch (e: Exception) {
-                // Ignore errors
+                // Continue with next plugin
             }
         }
         
-        return allCatalogs
+        // Load remaining plugins in parallel
+        coroutineScope {
+            normalFiles.map { file ->
+                async(Dispatchers.IO) {
+                    semaphore.withPermit {
+                        try {
+                            val catalog = loadPlugin(file)
+                            if (catalog != null) {
+                                loadedCount++
+                                onPluginLoaded(catalog)
+                            }
+                        } catch (e: Exception) {
+                            // Continue with next plugin
+                        }
+                    }
+                }
+            }.awaitAll()
+        }
+        
+        val totalTime = System.currentTimeMillis() - startTime
+        Log.debug { "JSPluginLoader: Streaming load completed - $loadedCount plugins in ${totalTime}ms" }
     }
     
     /**

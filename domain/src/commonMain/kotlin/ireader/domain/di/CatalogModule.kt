@@ -11,6 +11,7 @@ import ireader.domain.catalogs.interactor.TogglePinnedCatalog
 import ireader.domain.catalogs.interactor.UpdateCatalog
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
+import ireader.domain.usecases.services.LoadJSPluginsInBackgroundUseCase
 import org.koin.dsl.module
 
 val CatalogModule = module {
@@ -42,8 +43,8 @@ val CatalogModule = module {
 
     single<TogglePinnedCatalog> { TogglePinnedCatalog(get()) }
     
-    single<ireader.domain.use_cases.services.LoadJSPluginsInBackgroundUseCase> { 
-        ireader.domain.use_cases.services.LoadJSPluginsInBackgroundUseCase(get(), get()) 
+    single<LoadJSPluginsInBackgroundUseCase> {
+        LoadJSPluginsInBackgroundUseCase(get(), get())
     }
 
 }

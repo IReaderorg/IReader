@@ -3,49 +3,194 @@ package ireader.domain.utils
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
-import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Thread-safe in-memory cookie jar with automatic cleanup to prevent unbounded growth.
+ * 
+ * Features:
+ * - Thread-safe using ConcurrentHashMap
+ * - Automatic removal of expired cookies on each request
+ * - Maximum cookie limit to prevent memory issues
+ * - Stale cookie cleanup for session cookies without explicit expiration
+ * - Domain-specific cookie clearing
+ */
 class MemoryCookieJar : CookieJar {
-    private val cache = mutableSetOf<WrappedCookie>()
+    
+    // Using ConcurrentHashMap for thread-safe operations
+    // Key is the cookie identifier (name+domain+path), value is the wrapped cookie
+    private val cache = ConcurrentHashMap<String, WrappedCookie>()
+    
+    companion object {
+        /**
+         * Maximum number of cookies to store.
+         * Prevents unbounded memory growth from malicious or misconfigured sites.
+         */
+        private const val MAX_COOKIES = 500
+        
+        /**
+         * Maximum age for session cookies without explicit expiration (24 hours).
+         */
+        private const val SESSION_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000L
+        
+        /**
+         * Cleanup threshold - trigger cleanup when cache exceeds this percentage of max
+         */
+        private const val CLEANUP_THRESHOLD = 0.8
+    }
 
-    @Synchronized
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
-        val cookiesToRemove = mutableSetOf<WrappedCookie>()
-        val validCookies = mutableSetOf<WrappedCookie>()
+        val now = System.currentTimeMillis()
+        val validCookies = mutableListOf<Cookie>()
+        val keysToRemove = mutableListOf<String>()
 
-        cache.forEach { cookie ->
-            if (cookie.isExpired()) {
-                cookiesToRemove.add(cookie)
-            } else if (cookie.matches(url)) {
-                validCookies.add(cookie)
+        cache.forEach { (key, wrappedCookie) ->
+            when {
+                wrappedCookie.isExpired(now) -> keysToRemove.add(key)
+                wrappedCookie.isStale(now) -> keysToRemove.add(key)
+                wrappedCookie.matches(url) -> validCookies.add(wrappedCookie.cookie)
             }
         }
 
-        cache.removeAll(cookiesToRemove)
+        // Remove expired/stale cookies
+        keysToRemove.forEach { cache.remove(it) }
 
-        return validCookies.toList().map(WrappedCookie::unwrap)
+        return validCookies
     }
 
-    @Synchronized
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        val cookiesToAdd = cookies.map { WrappedCookie.wrap(it) }
-
-        cache.removeAll(cookiesToAdd)
-        cache.addAll(cookiesToAdd)
+        val now = System.currentTimeMillis()
+        
+        cookies.forEach { cookie ->
+            val wrapped = WrappedCookie.wrap(cookie, now)
+            val key = wrapped.cacheKey
+            
+            // Only add non-expired cookies
+            if (!wrapped.isExpired(now)) {
+                cache[key] = wrapped
+            }
+        }
+        
+        // Enforce maximum cookie limit if needed
+        if (cache.size > (MAX_COOKIES * CLEANUP_THRESHOLD).toInt()) {
+            enforceMaxCookies()
+        }
     }
 
-    @Synchronized
+    /**
+     * Clear all cookies.
+     */
     fun clear() {
         cache.clear()
     }
+    
+    /**
+     * Remove all expired and stale cookies.
+     * Can be called periodically to clean up memory.
+     */
+    fun cleanup() {
+        val now = System.currentTimeMillis()
+        val keysToRemove = cache.entries
+            .filter { it.value.isExpired(now) || it.value.isStale(now) }
+            .map { it.key }
+        
+        keysToRemove.forEach { cache.remove(it) }
+    }
+    
+    /**
+     * Get the current number of stored cookies.
+     */
+    fun size(): Int = cache.size
+    
+    /**
+     * Remove cookies for a specific domain.
+     */
+    fun clearForDomain(domain: String) {
+        val keysToRemove = cache.entries
+            .filter { entry ->
+                val cookieDomain = entry.value.cookie.domain
+                cookieDomain == domain || cookieDomain.endsWith(".$domain")
+            }
+            .map { it.key }
+        
+        keysToRemove.forEach { cache.remove(it) }
+    }
+    
+    /**
+     * Get all cookies for a specific domain (for debugging/inspection).
+     */
+    fun getCookiesForDomain(domain: String): List<Cookie> {
+        return cache.values
+            .filter { wrapped ->
+                val cookieDomain = wrapped.cookie.domain
+                cookieDomain == domain || cookieDomain.endsWith(".$domain")
+            }
+            .map { it.cookie }
+    }
+    
+    /**
+     * Enforce maximum cookie limit by removing expired, stale, and oldest cookies.
+     */
+    private fun enforceMaxCookies() {
+        val now = System.currentTimeMillis()
+        
+        // First pass: remove expired and stale cookies
+        val keysToRemove = cache.entries
+            .filter { it.value.isExpired(now) || it.value.isStale(now) }
+            .map { it.key }
+        
+        keysToRemove.forEach { cache.remove(it) }
+        
+        // If still over limit, remove cookies expiring soonest
+        if (cache.size > MAX_COOKIES) {
+            val sortedEntries = cache.entries
+                .sortedBy { it.value.cookie.expiresAt }
+            
+            val countToRemove = cache.size - MAX_COOKIES
+            sortedEntries.take(countToRemove).forEach { entry ->
+                cache.remove(entry.key)
+            }
+        }
+    }
 }
 
-class WrappedCookie private constructor(val cookie: Cookie) {
-    fun unwrap() = cookie
+/**
+ * Wrapper for Cookie that tracks creation time and provides utility methods.
+ */
+class WrappedCookie private constructor(
+    val cookie: Cookie,
+    private val createdAt: Long
+) {
+    /**
+     * Unique key for this cookie in the cache.
+     */
+    val cacheKey: String
+        get() = "${cookie.name}|${cookie.domain}|${cookie.path}|${cookie.secure}|${cookie.hostOnly}"
 
-    fun isExpired() = cookie.expiresAt < Calendar.getInstance().timeInMillis
+    /**
+     * Check if cookie has expired based on its expiresAt value.
+     */
+    fun isExpired(now: Long = System.currentTimeMillis()): Boolean {
+        return cookie.expiresAt < now
+    }
+    
+    /**
+     * Check if cookie is stale (session cookie that's been around too long).
+     * Session cookies without explicit expiration are considered stale after 24 hours.
+     */
+    fun isStale(now: Long = System.currentTimeMillis()): Boolean {
+        // Cookies with explicit future expiration are not stale
+        if (cookie.expiresAt > now + 1000) return false
+        
+        // Session cookies (expiresAt at end of session) are stale after max age
+        val maxAge = 24 * 60 * 60 * 1000L
+        return (now - createdAt) > maxAge
+    }
 
-    fun matches(url: HttpUrl) = cookie.matches(url)
+    /**
+     * Check if this cookie matches the given URL.
+     */
+    fun matches(url: HttpUrl): Boolean = cookie.matches(url)
 
     override fun equals(other: Any?): Boolean {
         if (other !is WrappedCookie) return false
@@ -68,6 +213,10 @@ class WrappedCookie private constructor(val cookie: Cookie) {
     }
 
     companion object {
-        fun wrap(cookie: Cookie) = WrappedCookie(cookie)
+        /**
+         * Create a wrapped cookie with the current timestamp.
+         */
+        fun wrap(cookie: Cookie, createdAt: Long = System.currentTimeMillis()) = 
+            WrappedCookie(cookie, createdAt)
     }
 }

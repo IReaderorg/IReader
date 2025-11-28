@@ -1,4 +1,4 @@
-package ireader.domain.use_cases.library
+package ireader.domain.usecases.library
 
 import ireader.domain.data.repository.LibraryStatisticsRepository
 import ireader.domain.models.library.LibraryAnalytics

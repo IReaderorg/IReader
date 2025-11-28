@@ -1,6 +1,6 @@
 package ireader.core.source
 
-import androidx.annotation.Keep
+import com.google.errorprone.annotations.Keep
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.url

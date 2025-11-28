@@ -8,30 +8,6 @@ Welcome to IReader! This guide will help you get up and running with the app qui
    - [GitHub Releases](https://github.com/IReaderorg/IReader/releases) (official source)
    - F-Droid
    - Other trusted repositories
-
-2. Install the app:
-   - Tap the downloaded APK file
-   - If prompted about installing from unknown sources, allow installation
-   - Follow the on-screen prompts to complete installation
-
-## Initial Setup
-
-When you first open IReader, you'll need to:
-
-1. Grant necessary permissions:
-   - Storage access (for reading local files and saving settings)
-   - Internet access (for downloading books and updates)
-
-2. Choose your preferences:
-   - Theme (light, dark, or system default)
-   - Default reading mode
-   - Language
-
-## Adding Your First Extension
-
-IReader works with extensions that provide access to different book sources:
-
-1. Tap the **Browse** tab or **Sources** section
 2. Tap **Extensions**
 3. Browse the available extensions
 4. Tap **Install** on an extension you want to use

@@ -5,8 +5,11 @@ import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
+import android.os.Build
 import dalvik.system.DexClassLoader
+import dalvik.system.InMemoryDexClassLoader
 import dalvik.system.PathClassLoader
+import java.nio.ByteBuffer
 import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
@@ -277,23 +280,7 @@ class AndroidCatalogLoader(
         val data = validateMetadata(pkgName, pkgInfo) ?: return null
         
         try {
-            // Create a fresh copy to avoid any "writable dex file" issues
-            val secureApkFile = File(secureExtensionsDir, "${pkgName}.apk")
-            if (secureApkFile.exists()) {
-                secureApkFile.delete()
-            }
-            
-            // Copy the APK to the code cache directory which is allowed for DEX loading
-            file.copyTo(secureApkFile, overwrite = true)
-            
-            // Make sure the permissions are correct (readable but not writable)
-            secureApkFile.setReadOnly()
-            
-            // Use the code cache directory for dex output
-            val dexOutputDir = File(secureDexCacheDir, pkgName).apply { mkdirs() }.absolutePath
-            
-            // Now load from the secure location
-            val loader = DexClassLoader(secureApkFile.absolutePath, dexOutputDir, null, context.classLoader)
+            val loader = createClassLoader(file, pkgName)
             val source = loadSource(pkgName, loader, data) ?: return null
             
             return CatalogInstalled.Locally(
@@ -308,8 +295,68 @@ class AndroidCatalogLoader(
                 iconUrl = data.icon
             )
         } catch (e: Exception) {
+            Log.error("Failed to load local catalog $pkgName", e)
             return null
         }
+    }
+    
+    /**
+     * Creates the appropriate ClassLoader based on Android version.
+     * - Android 15+ (API 35+): Uses InMemoryDexClassLoader for better security
+     * - Android 14+ (API 34+): Uses DexClassLoader with secure codeCacheDir
+     * - Older versions: Uses DexClassLoader with standard approach
+     */
+    private fun createClassLoader(file: File, pkgName: String): ClassLoader {
+        // Android 15+ (API 35): Use InMemoryDexClassLoader for enhanced security
+        if (Build.VERSION.SDK_INT >= 35) {
+            return try {
+                createInMemoryClassLoader(file, pkgName)
+            } catch (e: Exception) {
+                Log.warn("InMemoryDexClassLoader failed, falling back to DexClassLoader", e)
+                createSecureDexClassLoader(file, pkgName)
+            }
+        }
+        
+        // Android 14+ (API 34): Use secure DexClassLoader
+        return createSecureDexClassLoader(file, pkgName)
+    }
+    
+    /**
+     * Creates an InMemoryDexClassLoader for Android 15+.
+     * This loads the DEX directly into memory without writing to disk,
+     * which is more secure and avoids file permission issues.
+     */
+    @Suppress("NewApi")
+    private fun createInMemoryClassLoader(file: File, pkgName: String): ClassLoader {
+        // Read the APK/DEX file into memory
+        val dexBytes = file.readBytes()
+        val buffer = ByteBuffer.wrap(dexBytes)
+        
+        return InMemoryDexClassLoader(buffer, context.classLoader)
+    }
+    
+    /**
+     * Creates a secure DexClassLoader for Android 14+.
+     * Copies the APK to codeCacheDir and sets read-only permissions.
+     */
+    private fun createSecureDexClassLoader(file: File, pkgName: String): ClassLoader {
+        // Create a fresh copy to avoid any "writable dex file" issues
+        val secureApkFile = File(secureExtensionsDir, "${pkgName}.apk")
+        if (secureApkFile.exists()) {
+            secureApkFile.delete()
+        }
+        
+        // Copy the APK to the code cache directory which is allowed for DEX loading
+        file.copyTo(secureApkFile, overwrite = true)
+        
+        // Make sure the permissions are correct (readable but not writable)
+        secureApkFile.setReadOnly()
+        
+        // Use the code cache directory for dex output
+        val dexOutputDir = File(secureDexCacheDir, pkgName).apply { mkdirs() }.absolutePath
+        
+        // Now load from the secure location
+        return DexClassLoader(secureApkFile.absolutePath, dexOutputDir, null, context.classLoader)
     }
 
     /**

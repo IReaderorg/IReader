@@ -156,5 +156,5 @@ buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig"
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 # Benchmark
 androidTest = { id = "com.android.test", version = "8.12.3" }
-baselineprofile = { id = "androidx.baselineprofile", version = "1.3.3" }
+baselineprofile = { id = "androidx.baselineprofile", version = "1.4.1" }
 # moko plugin removed - using Compose Multiplatform Resources instead
