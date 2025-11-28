@@ -26,11 +26,20 @@ if [ -f "$dmg" ]; then
   fi
 fi
 
-apk="$(find ./ -iname '*.apk' 2>/dev/null)"
-if [ -f "$apk" ]; then
-  dir="$(dirname "$apk")"
-
-  if [ "$(basename "$apk")" != "$name-android.apk" ]; then
-    mv "$apk" "$dir/$name-android.apk"
+# Rename all signed APKs to IReader-{arch}.apk format
+for apk in $(find ./ -iname '*-signed.apk' 2>/dev/null); do
+  if [ -f "$apk" ]; then
+    dir="$(dirname "$apk")"
+    filename="$(basename "$apk")"
+    
+    # Extract architecture from filename (e.g., android-standard-arm64-v8a-release-unsigned-signed.apk)
+    if [[ "$filename" =~ (arm64-v8a|armeabi-v7a|x86_64|x86) ]]; then
+      arch="${BASH_REMATCH[1]}"
+      new_name="$name-$arch.apk"
+      
+      if [ "$filename" != "$new_name" ]; then
+        mv "$apk" "$dir/$new_name"
+      fi
+    fi
   fi
-fi
+done

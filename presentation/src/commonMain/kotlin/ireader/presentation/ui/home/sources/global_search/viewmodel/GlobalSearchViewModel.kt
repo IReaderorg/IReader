@@ -109,6 +109,14 @@ class GlobalSearchViewModel(
                         globalResult.sourceResults.forEach { sourceResult ->
                             val source = catalogs.find { it.id == sourceResult.sourceId }
                             if (source != null) {
+                                // Check if this source is still loading - if so, keep it in inProgress
+                                if (sourceResult.isLoading) {
+                                    // Source is still loading, ensure it's in inProgress list
+                                    val searchItem = SearchItem(source = source, items = emptyList())
+                                    searchItem.handleSearchItems(loading = true)
+                                    return@forEach
+                                }
+                                
                                 try {
                                     // Convert SearchResultItem to Book
                                     val books = sourceResult.results.map { item ->
@@ -117,10 +125,10 @@ class GlobalSearchViewModel(
                                             sourceId = sourceResult.sourceId,
                                             title = item.title,
                                             key = item.key,
-                                            author = item.author ?: "",
-                                            description = item.description ?: "",
-                                            genres = item.genres ?: emptyList(),
-                                            cover = item.cover ?: "",
+                                            author = item.author,
+                                            description = item.description,
+                                            genres = item.genres,
+                                            cover = item.cover,
                                             favorite = item.inLibrary
                                         )
                                     }
@@ -146,11 +154,9 @@ class GlobalSearchViewModel(
                             }
                         }
                         
-                        // Mark any remaining in-progress sources as complete with no results
-                        val processedSourceIds = globalResult.sourceResults.map { it.sourceId }.toSet()
-                        inProgress.filter { it.source.id !in processedSourceIds }.forEach { item ->
-                            item.handleSearchItems(loading = false)
-                        }
+                        // Note: Don't mark remaining in-progress sources as complete here
+                        // The flow will emit results for each source as they complete
+                        // Sources that haven't returned yet should stay in inProgress
                     }
             } catch (e: CancellationException) {
                 Log.debug { "Global search cancelled" }

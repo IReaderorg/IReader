@@ -113,13 +113,19 @@ fun GlobalSearchScreenModern(
                     NoResultsState(query = vm.query)
                 }
                 
-                // Show results
-                else -> {
+                // Show results list when there are results, sources in progress, or sources with no results
+                // This ensures we show the loading cards for sources still searching
+                vm.query.isNotBlank() && (vm.withResult.isNotEmpty() || vm.inProgress.isNotEmpty() || vm.noResult.isNotEmpty()) -> {
                     SearchResultsList(
                         vm = vm,
                         onBook = onBook,
                         onGoToExplore = onGoToExplore
                     )
+                }
+                
+                // Fallback empty state
+                else -> {
+                    EmptySearchState()
                 }
             }
         }
