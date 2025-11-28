@@ -2,12 +2,10 @@ package ireader.presentation.core.ui
 
 import ireader.presentation.core.LocalNavigator
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.settings.AITTSSettingsScreen
+import ireader.presentation.ui.settings.AndroidTTSMManagerSettingsScreen
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 
 /**
@@ -23,7 +21,7 @@ actual class TTSEngineManagerScreenSpec {
         val viewModel: AITTSSettingsViewModel = getIViewModel()
         
         IScaffold { padding ->
-            AITTSSettingsScreen(
+            AndroidTTSMManagerSettingsScreen(
                 onBackPressed = {
                     navController.popBackStack()
                 },
