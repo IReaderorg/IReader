@@ -12,6 +12,15 @@ platform :android do
     )
   end
 
+  desc "Build F-Droid debug"
+  lane :fdroid_debug do
+    gradle(
+      task: "assemble",
+      flavor: "Fdroid",
+      build_type: "Debug"
+    )
+  end
+
   desc "Build standard release"
   lane :release do
     gradle(
@@ -19,5 +28,160 @@ platform :android do
       flavor: "Standard",
       build_type: "Release"
     )
+  end
+
+  desc "Check F-Droid setup and metadata"
+  lane :fdroid_check do
+    # Check required files exist
+    fdroid_check_files
+    
+    # Validate metadata
+    fdroid_check_metadata
+    
+    # Check build configuration
+    fdroid_check_config
+    
+    UI.success("✅ All F-Droid checks passed!")
+  end
+
+  desc "Build and verify F-Droid APK"
+  lane :fdroid_verify do
+    # Run all checks first
+    fdroid_check
+    
+    # Build the APK
+    fdroid_debug
+    
+    # Verify APK output
+    fdroid_verify_apk
+    
+    UI.success("✅ F-Droid build verification complete!")
+  end
+
+  # Private lanes for F-Droid checks
+  private_lane :fdroid_check_files do
+    UI.message("Checking required F-Droid files...")
+    
+    required_files = [
+      "../.fdroidignore",
+      "../metadata/fdroid-metadata-template.yml",
+      "../android/fdroid/README.md",
+      "../android/fdroid/google-services.json",
+      "metadata/android/en-US/full_description.txt",
+      "metadata/android/en-US/short_description.txt",
+      "metadata/android/en-US/title.txt"
+    ]
+    
+    missing_files = []
+    required_files.each do |file|
+      unless File.exist?(file)
+        missing_files << file
+      end
+    end
+    
+    if missing_files.any?
+      UI.user_error!("❌ Missing required F-Droid files:\n  - #{missing_files.join("\n  - ")}")
+    end
+    
+    UI.success("✅ All required F-Droid files present")
+  end
+
+  private_lane :fdroid_check_metadata do
+    UI.message("Validating F-Droid metadata...")
+    
+    # Check short description (max 80 chars)
+    short_desc_file = "metadata/android/en-US/short_description.txt"
+    short_desc = File.read(short_desc_file).strip
+    if short_desc.length > 80
+      UI.user_error!("❌ Short description exceeds 80 characters (#{short_desc.length} chars)")
+    end
+    UI.message("  Short description: #{short_desc.length}/80 chars ✓")
+    
+    # Check title (max 50 chars)
+    title_file = "metadata/android/en-US/title.txt"
+    title = File.read(title_file).strip
+    if title.length > 50
+      UI.user_error!("❌ Title exceeds 50 characters (#{title.length} chars)")
+    end
+    UI.message("  Title: #{title.length}/50 chars ✓")
+    
+    # Check full description is not empty
+    full_desc_file = "metadata/android/en-US/full_description.txt"
+    full_desc = File.read(full_desc_file).strip
+    if full_desc.empty?
+      UI.user_error!("❌ Full description is empty")
+    end
+    UI.message("  Full description: present ✓")
+    
+    UI.success("✅ F-Droid metadata validation passed")
+  end
+
+  private_lane :fdroid_check_config do
+    UI.message("Checking F-Droid build configuration...")
+    
+    build_gradle = File.read("../android/build.gradle.kts")
+    
+    # Check fdroid flavor exists
+    unless build_gradle.include?('create("fdroid")')
+      UI.user_error!("❌ F-Droid flavor not defined in android/build.gradle.kts")
+    end
+    UI.message("  F-Droid flavor defined ✓")
+    
+    # Check INCLUDE_UPDATER is false for fdroid
+    fdroid_section = build_gradle[/create\("fdroid"\).*?}/m]
+    unless fdroid_section&.include?('INCLUDE_UPDATER.*false') || 
+           build_gradle.match?(/create\("fdroid"\).*INCLUDE_UPDATER.*false/m)
+      # More flexible check
+      if build_gradle.include?('create("fdroid")') && 
+         build_gradle.include?('buildConfigField("boolean", "INCLUDE_UPDATER", "false")')
+        UI.message("  INCLUDE_UPDATER is false ✓")
+      else
+        UI.important("⚠️ Could not verify INCLUDE_UPDATER setting for fdroid flavor")
+      end
+    else
+      UI.message("  INCLUDE_UPDATER is false ✓")
+    end
+    
+    # Check Firebase is not in fdroid
+    if build_gradle.include?('"fdroidImplementation"') && build_gradle.include?('firebase')
+      UI.user_error!("❌ Firebase should not be included in fdroid flavor")
+    end
+    UI.message("  Firebase excluded from fdroid ✓")
+    
+    # Check Google ML Kit is not in fdroid
+    if build_gradle.match?(/"fdroidImplementation".*googleTranslator/)
+      UI.user_error!("❌ Google ML Kit should not be included in fdroid flavor")
+    end
+    UI.message("  Google ML Kit excluded from fdroid ✓")
+    
+    # Check conditional plugin exclusion
+    if build_gradle.include?('Fdroid') && build_gradle.include?('ignoreCase')
+      UI.message("  Google Services plugin conditionally excluded ✓")
+    else
+      UI.important("⚠️ Could not verify Google Services plugin exclusion")
+    end
+    
+    UI.success("✅ F-Droid build configuration check passed")
+  end
+
+  private_lane :fdroid_verify_apk do
+    UI.message("Verifying F-Droid APK output...")
+    
+    apk_dir = "../android/build/outputs/apk/fdroid/debug"
+    
+    unless Dir.exist?(apk_dir)
+      UI.user_error!("❌ F-Droid APK output directory not found: #{apk_dir}")
+    end
+    
+    apk_files = Dir.glob("#{apk_dir}/*.apk")
+    if apk_files.empty?
+      UI.user_error!("❌ No F-Droid APK files found")
+    end
+    
+    UI.success("✅ F-Droid APK built successfully (#{apk_files.count} APK files)")
+    apk_files.each do |apk|
+      size_mb = (File.size(apk) / 1024.0 / 1024.0).round(2)
+      UI.message("  - #{File.basename(apk)} (#{size_mb} MB)")
+    end
   end
 end

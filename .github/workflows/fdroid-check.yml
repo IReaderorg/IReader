@@ -1,0 +1,93 @@
+name: F-Droid Setup Check
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - 'android/**'
+      - 'metadata/**'
+      - 'fastlane/**'
+      - '.fdroidignore'
+      - 'build.gradle.kts'
+      - '.github/workflows/fdroid-check.yml'
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'metadata/**'
+      - 'fastlane/**'
+      - '.fdroidignore'
+      - 'build.gradle.kts'
+      - '.github/workflows/fdroid-check.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fdroid-check:
+    name: F-Droid Setup Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: fastlane
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Run F-Droid checks
+        run: fastlane android fdroid_check
+        working-directory: fastlane
+
+  fdroid-build:
+    name: Build & Verify F-Droid APK
+    runs-on: ubuntu-latest
+    needs: fdroid-check
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: fastlane
+
+      - name: Install Fastlane
+        run: gem install fastlane
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build and verify F-Droid APK
+        run: fastlane android fdroid_verify
+        working-directory: fastlane
+
+      - name: Upload F-Droid APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: fdroid-debug-apk
+          path: android/build/outputs/apk/fdroid/debug/*.apk
+          retention-days: 7

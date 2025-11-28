@@ -1,5 +1,27 @@
 ### Changelog
 
+## v2.0.0
+### New Features
+- **Advanced TTS**: Fully implemented advanced Text-to-Speech for desktop with word highlighter.
+- **New Screens**: Added Donation, Security, and Reading Statistics screens.
+- **Resume Book**: Added functionality to resume reading from the last position.
+
+### UI Improvements
+- **Source & Chapter**: Redesigned Source Detail and Chapter Report screens.
+- **Desktop TTS**: Improved UI for Text-to-Speech on desktop.
+- **Migration & Language**: Enhanced UI for Source Migration and Language selection.
+- **General**: Various design improvements across multiple screens.
+
+### Bug Fixes
+- **Theming**: Fixed theming issues and navigation to the extension screen.
+- **Workflow**: Fixed workflow build issues.
+- **Downloads**: Fixed bug where downloaded chapters were missing checkmarks.
+- **Sources**: Fixed issues with some sources not working.
+
+### Technical
+- **JS Engine**: Improved JavaScript engine performance.
+- **Plugin Loading**: Optimized plugin loading to speed up startup.
+
 ## v1.0.46 (Upcoming)
 ### New Features
 - **Leaderboard System**: Complete leaderboard implementation with Supabase integration
