@@ -1,26 +1,12 @@
 name: F-Droid Setup Check
 
 on:
-  push:
-    branches:
-      - master
-      - main
-    paths:
-      - 'android/**'
-      - 'metadata/**'
-      - 'fastlane/**'
-      - '.fdroidignore'
-      - 'build.gradle.kts'
-      - '.github/workflows/fdroid-check.yml'
-  pull_request:
-    paths:
-      - 'android/**'
-      - 'metadata/**'
-      - 'fastlane/**'
-      - '.fdroidignore'
-      - 'build.gradle.kts'
-      - '.github/workflows/fdroid-check.yml'
   workflow_dispatch:
+    inputs:
+      build-release:
+        description: 'Build release APK (requires signing secrets)'
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -85,9 +71,34 @@ jobs:
         run: fastlane android fdroid_verify
         working-directory: fastlane
 
-      - name: Upload F-Droid APK
+      - name: Build Release APK
+        if: ${{ github.event.inputs.build-release == 'true' }}
+        run: fastlane android fdroid
+        working-directory: fastlane
+
+      - name: Sign Release APK
+        if: ${{ github.event.inputs.build-release == 'true' }}
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/build/outputs/apk/fdroid/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Upload F-Droid Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: fdroid-debug-apk
           path: android/build/outputs/apk/fdroid/debug/*.apk
           retention-days: 7
+
+      - name: Upload F-Droid Release APK
+        if: ${{ github.event.inputs.build-release == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fdroid-release-apk
+          path: android/build/outputs/apk/fdroid/release/*-signed.apk
+          retention-days: 14

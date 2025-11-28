@@ -1,14 +1,17 @@
-name: CI
+name: Release
 
 on:
   workflow_dispatch:
     inputs:
       release-tag:
-        description: Tag
+        description: 'Release tag (e.g., v1.2.0)'
         required: true
       release-name:
-        description: The name for Release
+        description: 'Release name (e.g., IReader v1.2.0)'
         required: true
+      previous-tag:
+        description: 'Previous release tag for changelog (leave empty for auto-detect)'
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -249,6 +252,160 @@ jobs:
       - name: Fix filenames
         run: ./.github/scripts/NamingFix.sh
 
+      - name: Get previous release tag
+        id: prev_tag
+        run: |
+          if [ -n "${{ github.event.inputs.previous-tag }}" ]; then
+            echo "tag=${{ github.event.inputs.previous-tag }}" >> $GITHUB_OUTPUT
+          else
+            # Get the latest release tag (excluding pre-releases and drafts)
+            PREV_TAG=$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+' | head -1)
+            if [ -z "$PREV_TAG" ]; then
+              # Fallback to any tag
+              PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            fi
+            echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          CURRENT_SHA=$(git rev-parse --short HEAD)
+          echo "current_sha=$CURRENT_SHA" >> $GITHUB_OUTPUT
+          
+          PREV_TAG="${{ steps.prev_tag.outputs.tag }}"
+          
+          if [ -n "$PREV_TAG" ]; then
+            PREV_SHA=$(git rev-parse --short $PREV_TAG)
+            echo "prev_sha=$PREV_SHA" >> $GITHUB_OUTPUT
+            
+            # Generate commit logs
+            COMMIT_LOGS=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/compare/${PREV_TAG}...HEAD" \
+              | jq -r '[.commits[]|{message:(.commit.message | split("\n") | first), username:.author.login}] | .[] | "- \(.message) (@\(.username))"' 2>/dev/null || echo "")
+            
+            if [ -z "$COMMIT_LOGS" ]; then
+              COMMIT_LOGS="- Various improvements and bug fixes"
+            fi
+          else
+            PREV_SHA=""
+            COMMIT_LOGS="- Initial release"
+          fi
+          
+          # Save commit logs to file (handles multiline)
+          echo "$COMMIT_LOGS" > /tmp/commit_logs.txt
+          
+          # Count commits
+          if [ -n "$PREV_TAG" ]; then
+            COMMIT_COUNT=$(git rev-list --count ${PREV_TAG}..HEAD)
+          else
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+          fi
+          echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Create release notes
+        run: |
+          PREV_TAG="${{ steps.prev_tag.outputs.tag }}"
+          CURRENT_SHA="${{ steps.changelog.outputs.current_sha }}"
+          COMMIT_COUNT="${{ steps.changelog.outputs.commit_count }}"
+          
+          cat > release_notes.md << 'RELEASE_EOF'
+          ## 🎉 ${{ github.event.inputs.release-name }}
+          
+          ### 📦 What's New
+          
+          RELEASE_EOF
+          
+          # Append commit logs
+          cat /tmp/commit_logs.txt >> release_notes.md
+          
+          cat >> release_notes.md << RELEASE_EOF
+          
+          ### 📊 Release Stats
+          
+          - **Commits since last release**: ${COMMIT_COUNT}
+          - **Release tag**: \`${{ github.event.inputs.release-tag }}\`
+          
+          ### 📥 Downloads
+          
+          Choose the appropriate package for your platform:
+          
+          #### 🤖 Android
+          | Package | Description |
+          |---------|-------------|
+          | \`*-arm64-v8a-*.apk\` | Modern 64-bit ARM devices (recommended for most phones) |
+          | \`*-armeabi-v7a-*.apk\` | Older 32-bit ARM devices |
+          | \`*-x86_64-*.apk\` | 64-bit Intel/AMD (emulators, some tablets) |
+          | \`*-x86-*.apk\` | 32-bit Intel/AMD devices |
+          
+          #### 🖥️ Desktop
+          | Package | Platform |
+          |---------|----------|
+          | \`.msi\` | Windows 10/11 installer |
+          | \`.deb\` | Debian/Ubuntu Linux |
+          | \`.rpm\` | Fedora/RHEL Linux |
+          | \`.AppImage\` | Universal Linux (no install needed) |
+          | \`.jar\` | Cross-platform (requires Java 21+) |
+          
+          ### 🔗 Links
+          
+          RELEASE_EOF
+          
+          if [ -n "$PREV_TAG" ]; then
+            echo "- **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ github.event.inputs.release-tag }}" >> release_notes.md
+          fi
+          
+          cat >> release_notes.md << 'RELEASE_EOF'
+          - **Website**: https://ireaderorg.netlify.app/
+          - **Documentation**: https://github.com/ireaderorg/ireader/wiki
+          - **Report Issues**: https://github.com/ireaderorg/ireader/issues
+          
+          ### 📝 Installation Notes
+          
+          <details>
+          <summary>Android</summary>
+          
+          1. Download the APK matching your device architecture
+          2. Enable "Install from Unknown Sources" in Settings > Security
+          3. Open the downloaded APK to install
+          
+          </details>
+          
+          <details>
+          <summary>Windows</summary>
+          
+          1. Download the `.msi` installer
+          2. Run the installer (you may need to allow it through SmartScreen)
+          3. Follow the installation wizard
+          
+          </details>
+          
+          <details>
+          <summary>Linux</summary>
+          
+          ```bash
+          # Debian/Ubuntu
+          sudo dpkg -i ireader_*.deb
+          sudo apt-get install -f  # Install dependencies if needed
+          
+          # Fedora/RHEL
+          sudo rpm -i ireader-*.rpm
+          
+          # AppImage (any distro)
+          chmod +x IReader-*.AppImage
+          ./IReader-*.AppImage
+          ```
+          
+          </details>
+          
+          ---
+          
+          *Built from commit `CURRENT_SHA`*
+          RELEASE_EOF
+          
+          # Replace placeholder
+          sed -i "s/CURRENT_SHA/${CURRENT_SHA}/g" release_notes.md
+
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.AppImage"
@@ -258,5 +415,4 @@ jobs:
           replacesArtifacts: true
           tag: ${{ github.event.inputs.release-tag }}
           name: ${{ github.event.inputs.release-name }}
-          body: |
-            ### Changelog
+          bodyFile: release_notes.md

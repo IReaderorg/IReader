@@ -59,6 +59,17 @@ supabase.analytics.key=your-anon-key-here
 # ... and so on for all 7 projects
 
 # ============================================
+# SIGNING CONFIGURATION (For Release Builds)
+# ============================================
+# Required for installing release APKs (including F-Droid flavor)
+# Generate a keystore: keytool -genkey -v -keystore release.keystore -alias myalias -keyalg RSA -keysize 2048 -validity 10000
+
+# keystore.file=path/to/your/release.keystore
+# keystore.password=your-keystore-password
+# key.alias=your-key-alias
+# key.password=your-key-password
+
+# ============================================
 # NOTES
 # ============================================
 # 1. Never commit local.properties to git (it's in .gitignore)

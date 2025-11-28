@@ -171,6 +171,34 @@ android {
         includeInApk = false
     }
 
+    // Signing configuration for release builds
+    signingConfigs {
+        create("release") {
+            // For local development: use local.properties
+            // For CI: use environment variables
+            val keystorePath = getConfigProperty("KEYSTORE_FILE", "keystore.file")
+            val keystorePass = getConfigProperty("KEYSTORE_PASSWORD", "keystore.password")
+            val keyAliasName = getConfigProperty("KEY_ALIAS", "key.alias")
+            val keyPass = getConfigProperty("KEY_PASSWORD", "key.password")
+            
+            if (keystorePath.isNotEmpty() && File(keystorePath).exists()) {
+                storeFile = File(keystorePath)
+                storePassword = keystorePass
+                keyAlias = keyAliasName
+                keyPassword = keyPass
+            } else if (keystorePath.isNotEmpty()) {
+                // Try relative to project root
+                val relativeFile = rootProject.file(keystorePath)
+                if (relativeFile.exists()) {
+                    storeFile = relativeFile
+                    storePassword = keystorePass
+                    keyAlias = keyAliasName
+                    keyPassword = keyPass
+                }
+            }
+        }
+    }
+
     buildTypes {
         named("debug") {
             versionNameSuffix = "-${gitCommitCount.get()}"
@@ -183,6 +211,13 @@ android {
             isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
+            
+            // Use release signing config if available, otherwise fall back to debug for local testing
+            signingConfig = if (signingConfigs.getByName("release").storeFile != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             
             // Additional optimizations for size reduction
             ndk {

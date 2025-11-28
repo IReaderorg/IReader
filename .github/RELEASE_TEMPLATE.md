@@ -23,6 +23,7 @@ Choose the appropriate package for your platform:
 
 ### 🔗 Links
 
+- **Website**: https://ireaderorg.netlify.app/
 - **Full Changelog**: https://github.com/ireaderorg/ireader/compare/PREV_SHA...CURRENT_SHA
 - **Documentation**: https://github.com/ireaderorg/ireader/wiki
 - **Report Issues**: https://github.com/ireaderorg/ireader/issues
