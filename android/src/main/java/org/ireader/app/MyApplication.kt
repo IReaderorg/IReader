@@ -3,6 +3,7 @@ package org.ireader.app
 import android.app.Application
 import android.os.Build
 import android.os.Looper
+import android.os.Trace
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -56,17 +57,23 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
     val coil: CoilLoaderFactory get() = _coil
     
     override fun onCreate() {
+        // Add trace for baseline profile generation
+        Trace.beginSection("MyApplication.onCreate")
         super.onCreate()
         
         // Start profiling
         StartupProfiler.start()
         
         // Initialize crash handler first (fast, required)
+        Trace.beginSection("CrashHandler.init")
         CrashHandler.initialize(this)
+        Trace.endSection()
         StartupProfiler.mark("crash_handler")
         
         // Initialize Koin - all modules
+        Trace.beginSection("Koin.init")
         initializeKoin()
+        Trace.endSection()
         StartupProfiler.mark("koin_init")
         
         // Schedule background initialization (non-blocking)
@@ -76,6 +83,8 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         // Finish startup profiling - this is the time to first frame
         StartupProfiler.finish()
         StartupProfiler.printReport()
+        
+        Trace.endSection() // MyApplication.onCreate
         
         println("")
         println("=== APP READY FOR FIRST FRAME ===")

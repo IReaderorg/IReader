@@ -1,5 +1,6 @@
 object Modules {
     const val app = ":app"
+    const val benchmark = ":benchmark"
     const val data = ":data"
     const val domain = ":domain"
     const val coreApi = ":core"
@@ -7,6 +8,4 @@ object Modules {
     const val presentation = ":presentation"
     const val presentationCore = ":presentation-core"
     const val sourceApi = ":source-api"
-
-
 }

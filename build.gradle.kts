@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 buildscript {
     dependencies {
         classpath(libs.gradle.tools)
+        // Baseline Profile plugin for startup optimization
+        classpath("androidx.benchmark:benchmark-baseline-profile-gradle-plugin:1.3.3")
         // Firebase Crashlytics and Google Services - excluded for F-Droid builds
         // F-Droid policy prohibits proprietary crash reporting services
         // Only include for standard and dev flavors

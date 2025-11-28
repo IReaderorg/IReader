@@ -227,6 +227,8 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
     override fun onResume() {
         super.onResume()
+        // Trigger lazy initialization when app becomes visible
+        (application as? MyApplication)?.onAppVisible()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

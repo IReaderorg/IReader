@@ -83,6 +83,9 @@ fun AppearanceSettingScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val customizedColors = vm.getCustomizedColors()
+    // Get both light and dark color states so we can set colors on the correct one
+    val lightCustomColors = vm.lightColors
+    val darkCustomColors = vm.darkColors
     val systemTheme = isSystemInDarkTheme()
     val isLight = remember(vm.themeMode.value) {
         if (vm.themeMode.value == PreferenceValues.ThemeMode.System) {
@@ -210,9 +213,10 @@ fun AppearanceSettingScreen(
                             isSelected = vm.colorTheme.value == theme.id,
                             onClick = {
                                 vm.colorTheme.value = theme.id
-                                customizedColors.primaryState.value = theme.materialColors.primary
-                                customizedColors.secondaryState.value = theme.materialColors.secondary
-                                customizedColors.barsState.value = theme.extraColors.bars
+                                // Set colors on the LIGHT color state since this is a light theme
+                                lightCustomColors.primaryState.value = theme.materialColors.primary
+                                lightCustomColors.secondaryState.value = theme.materialColors.secondary
+                                lightCustomColors.barsState.value = theme.extraColors.bars
                                 vm.isSavable = false
                                 // Auto-switch to light mode
                                 vm.saveNightModePreferences(PreferenceValues.ThemeMode.Light)
@@ -263,9 +267,10 @@ fun AppearanceSettingScreen(
                             isSelected = vm.colorTheme.value == theme.id,
                             onClick = {
                                 vm.colorTheme.value = theme.id
-                                customizedColors.primaryState.value = theme.materialColors.primary
-                                customizedColors.secondaryState.value = theme.materialColors.secondary
-                                customizedColors.barsState.value = theme.extraColors.bars
+                                // Set colors on the DARK color state since this is a dark theme
+                                darkCustomColors.primaryState.value = theme.materialColors.primary
+                                darkCustomColors.secondaryState.value = theme.materialColors.secondary
+                                darkCustomColors.barsState.value = theme.extraColors.bars
                                 vm.isSavable = false
                                 // Auto-switch to dark mode
                                 vm.saveNightModePreferences(PreferenceValues.ThemeMode.Dark)

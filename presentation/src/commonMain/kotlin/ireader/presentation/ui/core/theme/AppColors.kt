@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import ireader.domain.models.theme.ExtraColors
 
 /**
@@ -76,6 +76,8 @@ fun AppColors(
     }
 }
 
-private val LocalAppColors = staticCompositionLocalOf<AppColors> {
+// Use compositionLocalOf instead of staticCompositionLocalOf to ensure
+// proper recomposition when theme changes (e.g., switching between light/dark mode)
+private val LocalAppColors = compositionLocalOf<AppColors> {
     error("The AppColors composable must be called before usage")
 }

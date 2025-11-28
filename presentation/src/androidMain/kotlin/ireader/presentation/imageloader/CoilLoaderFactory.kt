@@ -5,6 +5,7 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
 import coil3.request.crossfade
 import ireader.core.http.HttpClients
 import ireader.core.http.okhttp
@@ -24,10 +25,20 @@ class CoilLoaderFactory(
     private val catalogStore: CatalogStore,
     private val coverCache: CoverCache,
 ) : SingletonImageLoader.Factory {
+    
+    companion object {
+        // Disk cache: 50MB for cover images
+        private const val DISK_CACHE_SIZE = 50L * 1024 * 1024
+        
+        // Memory cache: 25% of available app memory
+        private const val MEMORY_CACHE_PERCENT = 0.25
+    }
+    
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         return ImageLoader.Builder(context).apply {
             val diskCacheInit = { CoilDiskCache.get(context) }
+            val memoryCacheInit = { CoilMemoryCache.get(context) }
             val callFactoryInit = { client.default.okhttp }
             
             // Note: Coil 3 uses default network fetcher for HTTP/HTTPS URLs
@@ -58,14 +69,40 @@ class CoilLoaderFactory(
                     )
                 )
             }
+            
+            // Memory cache for fast in-memory access
+            memoryCache(memoryCacheInit)
+            
+            // Disk cache for persistent storage
             diskCache(diskCacheInit)
-            crossfade((300).toInt())
+            
+            // Smooth crossfade animation
+            crossfade(300)
 
         }.build()
     }
 
     /**
+     * Memory cache for fast in-memory image access.
+     * Uses 25% of available app memory.
+     */
+    internal object CoilMemoryCache {
+        private var instance: MemoryCache? = null
+        
+        @Synchronized
+        fun get(context: Context): MemoryCache {
+            return instance ?: run {
+                MemoryCache.Builder()
+                    .maxSizePercent(context, MEMORY_CACHE_PERCENT)
+                    .build()
+                    .also { instance = it }
+            }
+        }
+    }
+
+    /**
      * Direct copy of Coil's internal SingletonDiskCache so that [BookCoverFetcher] can access it.
+     * Limited to 50MB to prevent excessive storage usage.
      */
     internal object CoilDiskCache {
 
@@ -76,14 +113,14 @@ class CoilLoaderFactory(
         fun get(context: Context): DiskCache {
             return instance ?: run {
                 val safeCacheDir = context.cacheDir.apply { mkdirs() }
-                // Create the singleton disk cache instance.
-                DiskCache.Builder().fileSystem(FileSystem.SYSTEM)
+                // Create the singleton disk cache instance with size limit
+                DiskCache.Builder()
+                    .fileSystem(FileSystem.SYSTEM)
                     .directory(safeCacheDir.resolve(FOLDER_NAME).toOkioPath())
-                    .build().also { instance = it }
-
+                    .maxSizeBytes(DISK_CACHE_SIZE)
+                    .build()
+                    .also { instance = it }
             }
         }
     }
-
-
 }

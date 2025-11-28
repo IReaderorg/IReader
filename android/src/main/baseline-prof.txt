@@ -1,0 +1,63 @@
+# Baseline Profile for IReader
+# This profile helps the Android Runtime (ART) pre-compile critical code paths
+# for faster app startup and smoother performance.
+#
+# Generated based on common usage patterns in the app.
+# For best results, generate this using Macrobenchmark tests.
+
+# ==================== Application Entry Points ====================
+HSPLorg/ireader/app/MyApplication;->onCreate()V
+HSPLorg/ireader/app/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLorg/ireader/app/MainActivity;->onResume()V
+
+# ==================== Koin Dependency Injection ====================
+HSPLorg/koin/core/context/GlobalContext;->get()Lorg/koin/core/Koin;
+HSPLorg/koin/core/Koin;->get(Lkotlin/reflect/KClass;Lorg/koin/core/qualifier/Qualifier;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+HSPLorg/koin/android/ext/android/**;->**(**)**
+
+# ==================== Database (SQLDelight) ====================
+HSPLireader/data/core/DatabaseHandler;->**(**)**
+HSPLireader/data/core/DatabaseOptimizations;->**(**)**
+HSPLapp/cash/sqldelight/**;->**(**)**
+
+# ==================== Compose UI ====================
+HSPLandroidx/compose/runtime/**;->**(**)**
+HSPLandroidx/compose/ui/**;->**(**)**
+HSPLandroidx/compose/foundation/**;->**(**)**
+HSPLandroidx/compose/material3/**;->**(**)**
+
+# ==================== Navigation ====================
+HSPLandroidx/navigation/compose/**;->**(**)**
+HSPLireader/presentation/core/**;->**(**)**
+
+# ==================== Image Loading (Coil) ====================
+HSPLcoil3/**;->**(**)**
+HSPLireader/presentation/imageloader/**;->**(**)**
+
+# ==================== Coroutines ====================
+HSPLkotlinx/coroutines/**;->**(**)**
+
+# ==================== OkHttp Networking ====================
+HSPLokhttp3/**;->**(**)**
+HSPLokio/**;->**(**)**
+
+# ==================== Kotlin Standard Library ====================
+HSPLkotlin/collections/**;->**(**)**
+HSPLkotlin/sequences/**;->**(**)**
+HSPLkotlin/text/**;->**(**)**
+
+# ==================== Domain Layer ====================
+HSPLireader/domain/usecases/**;->**(**)**
+HSPLireader/domain/models/**;->**(**)**
+
+# ==================== Data Layer ====================
+HSPLireader/data/repository/**;->**(**)**
+HSPLireader/data/catalog/**;->**(**)**
+
+# ==================== Presentation Layer ====================
+HSPLireader/presentation/ui/home/**;->**(**)**
+HSPLireader/presentation/ui/library/**;->**(**)**
+HSPLireader/presentation/ui/reader/**;->**(**)**
+
+# ==================== Serialization ====================
+HSPLkotlinx/serialization/**;->**(**)**

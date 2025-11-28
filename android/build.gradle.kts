@@ -13,6 +13,7 @@ plugins {
     id("com.google.devtools.ksp")
     alias(kotlinx.plugins.compose.compiler)
     alias(libs.plugins.jetbrainCompose)
+    id("androidx.baselineprofile")
 }
 
 // Remove x86 and x86_64 if you don't need emulator/tablet support
@@ -199,6 +200,17 @@ android {
             applicationIdSuffix = debugType.applicationIdSuffix
             matchingFallbacks.add("release")
         }
+        // Benchmark build type for baseline profile generation
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
+            // Keep minification for accurate profiling
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
+        }
     }
     flavorDimensions.add("default")
 
@@ -265,6 +277,7 @@ dependencies {
     implementation(androidx.media)
 
     implementation(libs.core.splashscreen)
+    implementation(libs.profileinstaller)
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     implementation(compose.material3)
 
@@ -316,7 +329,23 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.workManager)
     implementation(libs.napier)
+    
+    // Baseline profile from benchmark module
+    baselineProfile(project(":benchmark"))
 }
+
+// Baseline Profile configuration
+baselineProfile {
+    // Don't auto-generate during build - use manual generation
+    automaticGenerationDuringBuild = false
+    
+    // Save generated profiles in src/main for version control
+    saveInSrc = true
+    
+    // Warn if profile is missing but don't fail
+    dexLayoutOptimization = true
+}
+
 composeCompiler {
     // Strong skipping is enabled by default in newer versions
     enableStrongSkippingMode.set(true)

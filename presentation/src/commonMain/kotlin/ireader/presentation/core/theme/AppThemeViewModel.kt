@@ -6,11 +6,8 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.intl.Locale
 import ireader.core.prefs.Preference
 import ireader.domain.data.repository.ThemeRepository
@@ -30,8 +27,6 @@ import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeColorScheme
 import ireader.presentation.core.toDomainColor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -44,14 +39,17 @@ class AppThemeViewModel(
 ) {
     fun <T> Preference<T>.asState() = PreferenceMutableState(this, scope)
 
-    private val themeMode by uiPreferences.themeMode().asState()
-    private val colorTheme by uiPreferences.colorTheme().asState()
-    private val dynamicColorMode by uiPreferences.dynamicColorMode().asState()
-    private val useTrueBlack by uiPreferences.useTrueBlack().asState()
-    private val appUiFont by uiPreferences.appUiFont().asState()
-
-    private val baseThemeJob = SupervisorJob()
-    private val baseThemeScope = CoroutineScope(baseThemeJob)
+    // Keep state objects for preferences - these trigger recomposition when values change
+    private val themeModeState = uiPreferences.themeMode().asState()
+    private val colorThemeState = uiPreferences.colorTheme().asState()
+    private val dynamicColorModeState = uiPreferences.dynamicColorMode().asState()
+    private val useTrueBlackState = uiPreferences.useTrueBlack().asState()
+    private val appUiFontState = uiPreferences.appUiFont().asState()
+    
+    // Pre-create color states for both light and dark modes
+    // This ensures we always have reactive state objects ready
+    private val lightColorsState = uiPreferences.getLightColors().asState(scope)
+    private val darkColorsState = uiPreferences.getDarkColors().asState(scope)
 
     init {
         themeRepository.subscribe().onEach {
@@ -63,17 +61,21 @@ class AppThemeViewModel(
 
     @Composable
     fun getColors(): Pair<ColorScheme, ExtraColors> {
+        // Read state values inside composable to trigger recomposition when they change
+        val themeMode = themeModeState.value
+        val colorTheme = colorThemeState.value
+        val dynamicColorMode = dynamicColorModeState.value
+        val useTrueBlack = useTrueBlackState.value
+        
         val baseTheme = getBaseTheme(themeMode, colorTheme)
         val isLight = baseTheme.materialColors.toComposeColorScheme().isLight()
         
-        val colors = remember(isLight) {
-            baseThemeJob.cancelChildren()
-            if (isLight) {
-                uiPreferences.getLightColors().asState(baseThemeScope)
-            } else {
-                uiPreferences.getDarkColors().asState(baseThemeScope)
-            }
-        }
+        // Use the pre-created color states based on current theme mode
+        // Reading .value triggers recomposition when colors change
+        val colors = if (isLight) lightColorsState else darkColorsState
+        val customBarsColor = colors.bars.value.toComposeColor()
+        val customPrimaryColor = colors.primary.value.toComposeColor()
+        val customSecondaryColor = colors.secondary.value.toComposeColor()
 
         // Check if dynamic colors should be used
         val useDynamicColors = dynamicColorMode && dynamicColorScheme.isSupported()
@@ -94,8 +96,8 @@ class AppThemeViewModel(
         }
         
         // Step 2: Apply custom primary/secondary colors if specified
-        val customPrimary = colors.primary.value.toComposeColor().takeIf { it != Color.Unspecified }
-        val customSecondary = colors.secondary.value.toComposeColor().takeIf { it != Color.Unspecified }
+        val customPrimary = customPrimaryColor.takeIf { it != Color.Unspecified }
+        val customSecondary = customSecondaryColor.takeIf { it != Color.Unspecified }
         
         if (customPrimary != null || customSecondary != null) {
             materialColors = ThemeColorUtils.applyCustomColors(
@@ -114,11 +116,13 @@ class AppThemeViewModel(
         materialColors = ThemeColorUtils.ensureProperOnColors(materialColors)
         
         // Step 5: Create extra colors for bars
+        // Use base theme's bar color, but allow custom override
         val extraColors = createExtraColors(
-            baseTheme.extraColors,
-            colors.bars.value.toComposeColor(),
-            materialColors,
-            isLight
+            baseExtraColors = baseTheme.extraColors,
+            customBarsColor = customBarsColor,
+            materialColors = materialColors,
+            isLight = isLight,
+            useTrueBlack = useTrueBlack
         )
         
         return materialColors to extraColors
@@ -148,41 +152,38 @@ class AppThemeViewModel(
 
     /**
      * Creates ExtraColors with proper bar colors and onBar text colors.
+     * Note: No remember() used here to ensure immediate updates when theme changes.
      */
-    @Composable
     private fun createExtraColors(
         baseExtraColors: ExtraColors,
         customBarsColor: Color,
         materialColors: ColorScheme,
-        isLight: Boolean
+        isLight: Boolean,
+        useTrueBlack: Boolean
     ): ExtraColors {
-        // Read the bars color from baseExtraColors OUTSIDE remember to ensure proper snapshot context
         val baseBarsColor = baseExtraColors.bars.toComposeColor()
         
-        // Now use remember with the already-read value
-        return remember(baseBarsColor, customBarsColor, materialColors.surface, isLight, useTrueBlack) {
-            // Determine the bars color: custom > base > surface
-            val barsColor = when {
-                customBarsColor != Color.Unspecified -> customBarsColor
-                baseBarsColor != Color.Unspecified -> baseBarsColor
-                else -> materialColors.surface
-            }
-            
-            // Apply true black to bars if enabled for dark themes
-            val finalBarsColor = if (isLight.not() && useTrueBlack) {
-                Color.Black
-            } else {
-                barsColor
-            }
-            
-            // Calculate proper onBars color based on bars luminance
-            val onBarsColor = ThemeColorUtils.getOnColor(finalBarsColor)
-            
-            ExtraColors(
-                bars = finalBarsColor.toDomainColor(),
-                onBars = onBarsColor.toDomainColor()
-            )
+        // Determine the bars color: custom > base > surface
+        val barsColor = when {
+            customBarsColor != Color.Unspecified -> customBarsColor
+            baseBarsColor != Color.Unspecified -> baseBarsColor
+            else -> materialColors.surface
         }
+        
+        // Apply true black to bars if enabled for dark themes
+        val finalBarsColor = if (!isLight && useTrueBlack) {
+            Color.Black
+        } else {
+            barsColor
+        }
+        
+        // Calculate proper onBars color based on bars luminance
+        val onBarsColor = ThemeColorUtils.getOnColor(finalBarsColor)
+        
+        return ExtraColors(
+            bars = finalBarsColor.toDomainColor(),
+            onBars = onBarsColor.toDomainColor()
+        )
     }
 
 
@@ -191,6 +192,7 @@ class AppThemeViewModel(
 
     @Composable
     fun getTypography(): Typography {
+        val appUiFont = appUiFontState.value
         val fontFamily = getAppUiFontFamily(appUiFont)
         return Typography(
             displayLarge = AppTypography.displayLarge.copy(fontFamily = fontFamily),
