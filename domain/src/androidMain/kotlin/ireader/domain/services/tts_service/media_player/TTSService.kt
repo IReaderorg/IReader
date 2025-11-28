@@ -578,11 +578,15 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         readText(this@TTSService, mediaSession)
     }
     
-    private suspend fun handlePause() {
+    private suspend fun handlePause(dueToFocusLoss: Boolean = false) {
         setPlaybackState(PlaybackStateCompat.STATE_PAUSED)
-        state.setPlaying(false
-)
+        state.setPlaying(false)
         ttsEngine?.pause()
+        // Only allow auto-resume on focus gain if pause was due to focus loss
+        // Don't auto-resume when user manually pauses
+        if (!dueToFocusLoss) {
+            resumeOnFocus = false
+        }
         updateNotification()
     }
     
@@ -944,13 +948,20 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     override fun onAudioFocusChange(focusChange: Int) {
         when (focusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
-                if (resumeOnFocus && !state.isPlaying.value) {
+                // Only resume if:
+                // 1. resumeOnFocus is true (was playing before losing focus)
+                // 2. Not currently playing
+                // 3. Notification is in foreground (service is actively being used)
+                if (resumeOnFocus && !state.isPlaying.value && isNotificationForeground) {
                     scope.launch { handlePlay() }
                 }
             }
             AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 if (state.isPlaying.value) {
-                    scope.launch { handlePause() }
+                    // Set resumeOnFocus to true when pausing due to focus loss
+                    // This way we'll resume when focus is regained
+                    resumeOnFocus = true
+                    scope.launch { handlePause(dueToFocusLoss = true) }
                 }
             }
         }

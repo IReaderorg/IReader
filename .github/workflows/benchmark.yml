@@ -1,0 +1,38 @@
+name: Benchmark
+
+on:
+  # Run manually or on release tags
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    # Note: Actual device benchmarks require macOS with emulator or Firebase Test Lab
+    # This workflow just ensures the benchmark module compiles
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        
+      - name: Build Benchmark Module
+        run: ./gradlew :benchmark:assembleStandardBenchmark
+        
+      # For actual device testing, you'd use Firebase Test Lab:
+      # - name: Run Benchmarks on Firebase Test Lab
+      #   uses: google-github-actions/firebase-test-lab@v1
+      #   with:
+      #     projectId: your-project-id
+      #     testType: instrumentation
+      #     app: android/build/outputs/apk/standard/release/*.apk
+      #     test: benchmark/build/outputs/apk/standard/benchmark/*.apk

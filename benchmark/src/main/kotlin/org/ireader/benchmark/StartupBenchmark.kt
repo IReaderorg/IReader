@@ -15,16 +15,7 @@ import org.junit.runner.RunWith
 
 /**
  * Startup Benchmark for IReader.
- * 
- * Measures app startup time under different compilation modes:
- * - None: No AOT compilation (worst case, like first install)
- * - Partial: With baseline profile (typical case after profile installation)
- * - Full: Fully AOT compiled (best case, after background optimization)
- * 
- * To run benchmarks:
- * ./gradlew :benchmark:connectedBenchmarkAndroidTest
- * 
- * Results will be in: benchmark/build/outputs/connected_android_test_additional_output/
+ * Measures app startup time under different compilation modes.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -34,8 +25,7 @@ class StartupBenchmark {
     val rule = MacrobenchmarkRule()
 
     /**
-     * Measure cold startup time without any compilation.
-     * This represents the worst-case scenario (first install).
+     * Startup without any compilation - worst case scenario.
      */
     @Test
     fun startupNoCompilation() {
@@ -43,21 +33,20 @@ class StartupBenchmark {
     }
 
     /**
-     * Measure cold startup time with baseline profile.
-     * This represents the typical case after baseline profile installation.
-     */
-    @Test
-    fun startupWithBaselineProfile() {
-        measureStartup(CompilationMode.Partial())
-    }
-
-    /**
-     * Measure cold startup time with full AOT compilation.
-     * This represents the best-case scenario after background optimization.
+     * Startup with full AOT compilation - best case scenario.
      */
     @Test
     fun startupFullCompilation() {
         measureStartup(CompilationMode.Full())
+    }
+    
+    /**
+     * Startup with default compilation (whatever the device has).
+     * This is the most realistic test.
+     */
+    @Test
+    fun startupDefault() {
+        measureStartup(CompilationMode.DEFAULT)
     }
 
     private fun measureStartup(compilationMode: CompilationMode) {
@@ -66,52 +55,88 @@ class StartupBenchmark {
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,
-            iterations = 5,
+            iterations = 3,
             setupBlock = {
-                // Kill the app before each iteration
                 pressHome()
             },
             measureBlock = {
                 startActivityAndWait()
-                
-                // Wait for the main content to be visible
+                // Dismiss any permission dialogs
+                dismissPermissionDialogs()
                 device.wait(Until.hasObject(By.pkg(PACKAGE_NAME).depth(0)), TIMEOUT)
             }
         )
     }
 
-    /**
-     * Measure frame timing during library scrolling.
-     * This helps identify jank during common user interactions.
-     */
     @Test
     fun scrollPerformance() {
         rule.measureRepeated(
             packageName = PACKAGE_NAME,
             metrics = listOf(FrameTimingMetric()),
-            compilationMode = CompilationMode.Partial(),
+            compilationMode = CompilationMode.DEFAULT,
             startupMode = StartupMode.WARM,
-            iterations = 3,
+            iterations = 2,
             setupBlock = {
                 pressHome()
                 startActivityAndWait()
+                dismissPermissionDialogs()
                 device.wait(Until.hasObject(By.pkg(PACKAGE_NAME).depth(0)), TIMEOUT)
-                Thread.sleep(2000) // Wait for data to load
+                Thread.sleep(1500)
             },
             measureBlock = {
                 val scrollable = device.findObject(By.scrollable(true))
                 scrollable?.let {
-                    repeat(5) {
+                    repeat(3) {
                         scrollable.fling(androidx.test.uiautomator.Direction.DOWN)
-                        Thread.sleep(300)
+                        Thread.sleep(200)
                     }
                 }
             }
         )
     }
+    
+    /**
+     * Dismiss any dialogs (permissions, app dialogs, etc.)
+     */
+    private fun androidx.benchmark.macro.MacrobenchmarkScope.dismissPermissionDialogs() {
+        for (i in 0 until 5) {
+            // Common dismiss buttons - check all variations
+            val dismissButton = device.findObject(By.text("Not now"))
+                ?: device.findObject(By.text("NOT NOW"))
+                ?: device.findObject(By.text("Not Now"))
+                ?: device.findObject(By.text("Later"))
+                ?: device.findObject(By.text("LATER"))
+                ?: device.findObject(By.text("Skip"))
+                ?: device.findObject(By.text("SKIP"))
+                ?: device.findObject(By.text("Cancel"))
+                ?: device.findObject(By.text("CANCEL"))
+                ?: device.findObject(By.text("No thanks"))
+                ?: device.findObject(By.text("NO THANKS"))
+                ?: device.findObject(By.text("Dismiss"))
+                ?: device.findObject(By.text("Close"))
+                ?: device.findObject(By.text("OK"))
+                ?: device.findObject(By.text("Got it"))
+                // Permission dialogs
+                ?: device.findObject(By.text("Allow"))
+                ?: device.findObject(By.text("ALLOW"))
+                ?: device.findObject(By.text("While using the app"))
+                ?: device.findObject(By.text("Deny"))
+                ?: device.findObject(By.text("Don't allow"))
+                ?: device.findObject(By.res("com.android.permissioncontroller:id/permission_allow_button"))
+                ?: device.findObject(By.res("com.android.permissioncontroller:id/permission_deny_button"))
+            
+            if (dismissButton != null) {
+                dismissButton.click()
+                Thread.sleep(400)
+            } else {
+                // No more dialogs found
+                break
+            }
+        }
+    }
 
     companion object {
-        private const val PACKAGE_NAME = "org.ireader.app.debug"
-        private const val TIMEOUT = 10_000L
+        private const val PACKAGE_NAME = "ir.kazemcodes.infinityreader.debug"
+        private const val TIMEOUT = 15_000L
     }
 }

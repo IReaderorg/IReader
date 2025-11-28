@@ -79,7 +79,7 @@ kotlin {
             dependencies {
                 implementation(androidx.core)
                 implementation(androidx.dataStore)
-                implementation(libs.quickjs.android)
+//                implementation(libs.quickjs.android)
                 api(libs.ktor.okhttp)
                 compileOnly(libs.jsoup)
             }
@@ -87,7 +87,7 @@ kotlin {
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
-                implementation(libs.quickjs.jvm)
+//                implementation(libs.quickjs.jvm)
                 api(libs.ktor.okhttp)
                 compileOnly(libs.jsoup)
             }
