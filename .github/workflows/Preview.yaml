@@ -282,7 +282,7 @@ jobs:
       - name: Create Preview Release
         uses: ncipollo/release-action@v1.12.0
         with:
-          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk"
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.AppImage"
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
@@ -294,7 +294,7 @@ jobs:
       - name: Create Main Repository Pre-Release
         uses: ncipollo/release-action@v1.12.0
         with:
-          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk"
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.AppImage"
           allowUpdates: true
           replacesArtifacts: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}

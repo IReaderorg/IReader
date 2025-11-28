@@ -251,7 +251,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk"
+          artifacts: "*/binaries/main/*/*.*,*/jars/*.jar,**/*-signed.apk,**/*.AppImage"
           draft: true
           token: ${{ secrets.WINGET_PUBLISH_PAT }}
           allowUpdates: true
