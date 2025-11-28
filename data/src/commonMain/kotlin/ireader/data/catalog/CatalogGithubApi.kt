@@ -171,64 +171,159 @@ class CatalogGithubApi(
     private fun convertLanguageNameToCode(languageName: String?): String {
         if (languageName.isNullOrBlank()) return "en"
         
-        // Trim and normalize the input
-        val normalized = languageName.trim()
+        // Trim and normalize the input, removing invisible Unicode characters
+        // LRM (U+200E), RLM (U+200F), and other control characters that may be present
+        val normalized = languageName
+            .trim()
+            .replace("\u200E", "") // Left-to-Right Mark
+            .replace("\u200F", "") // Right-to-Left Mark
+            .replace("\u200B", "") // Zero Width Space
+            .replace("\u200C", "") // Zero Width Non-Joiner
+            .replace("\u200D", "") // Zero Width Joiner
+            .replace("\uFEFF", "") // Byte Order Mark
+            .trim()
+        
+        if (normalized.isBlank()) return "en"
         
         // If it's already a 2-letter code, return it lowercase
         if (normalized.length == 2 && normalized.all { it.isLetter() || it.isDigit() }) {
             return normalized.lowercase()
         }
         
-        // Map of language names to ISO 639-1 codes (case-insensitive)
-        return when (normalized.lowercase()) {
-            "english" -> "en"
-            "العربية", "arabic" -> "ar"
-            "中文", "chinese", "中文 (简体)", "中文 (繁體)" -> "zh"
-            "español", "spanish" -> "es"
-            "français", "french" -> "fr"
-            "bahasa indonesia", "indonesian" -> "id"
-            "日本語", "japanese" -> "ja"
-            "한국어", "korean" -> "ko"
-            "português", "portuguese" -> "pt"
-            "русский", "russian" -> "ru"
-            "ไทย", "thai" -> "th"
-            "türkçe", "turkish" -> "tr"
-            "tiếng việt", "vietnamese" -> "vi"
-            "deutsch", "german" -> "de"
-            "italiano", "italian" -> "it"
-            "polski", "polish" -> "pl"
-            "українська", "ukrainian" -> "uk"
-            "filipino", "tagalog" -> "tl"
-            "magyar", "hungarian" -> "hu"
-            "čeština", "czech" -> "cs"
-            "română", "romanian" -> "ro"
-            "nederlands", "dutch" -> "nl"
-            "svenska", "swedish" -> "sv"
-            "norsk", "norwegian" -> "no"
-            "dansk", "danish" -> "da"
-            "suomi", "finnish" -> "fi"
-            "ελληνικά", "greek" -> "el"
-            "עברית", "hebrew" -> "he"
-            "हिन्दी", "hindi" -> "hi"
-            "বাংলা", "bengali" -> "bn"
-            "မြန်မာဘာသာ", "burmese" -> "my"
-            "català", "catalan" -> "ca"
-            "galego", "galician" -> "gl"
-            "euskara", "basque" -> "eu"
-            "lietuvių", "lithuanian" -> "lt"
-            "latviešu", "latvian" -> "lv"
-            "eesti", "estonian" -> "et"
-            "slovenčina", "slovak" -> "sk"
-            "slovenščina", "slovene" -> "sl"
-            "hrvatski", "croatian" -> "hr"
-            "srpski", "serbian" -> "sr"
-            "български", "bulgarian" -> "bg"
-            "македонски", "macedonian" -> "mk"
+        // If it's already a 3-letter code (like "ara" for Arabic), convert it
+        if (normalized.length == 3 && normalized.all { it.isLetter() }) {
+            return convertIso639_2ToIso639_1(normalized.lowercase()) ?: normalized.lowercase()
+        }
+        
+        // Map of language names to ISO 639-1 codes
+        // Note: Non-Latin scripts don't have lowercase, so we check both original and lowercase
+        val lowercased = normalized.lowercase()
+        
+        return when {
+            // Arabic variants (different spellings with Arabic Yeh ي and Persian Yeh ی)
+            normalized == "العربية" || normalized == "العربیة" || normalized == "العربیه" || 
+            normalized == "عربي" || normalized == "عربی" || lowercased == "arabic" ||
+            normalized.contains("عرب") -> "ar"
+            
+            // Chinese variants
+            normalized == "中文" || normalized == "中文 (简体)" || normalized == "中文 (繁體)" ||
+            normalized == "简体中文" || normalized == "繁體中文" || lowercased == "chinese" ||
+            normalized == "中文, 汉语, 漢語" || normalized.contains("中文") -> "zh"
+            
+            // Other languages
+            lowercased == "english" -> "en"
+            lowercased == "español" || lowercased == "spanish" -> "es"
+            lowercased == "français" || lowercased == "french" -> "fr"
+            lowercased == "bahasa indonesia" || lowercased == "indonesian" -> "id"
+            normalized == "日本語" || lowercased == "japanese" || normalized.contains("日本") -> "ja"
+            // Korean variants (including "조선말, 한국어")
+            normalized == "한국어" || normalized == "조선말" || normalized == "조선말, 한국어" ||
+            normalized.contains("한국") || normalized.contains("조선") || lowercased == "korean" -> "ko"
+            lowercased == "português" || lowercased == "portuguese" -> "pt"
+            normalized == "русский" || lowercased == "russian" || normalized.contains("Русск") -> "ru"
+            normalized == "ไทย" || lowercased == "thai" -> "th"
+            lowercased == "türkçe" || lowercased == "turkish" -> "tr"
+            lowercased == "tiếng việt" || lowercased == "vietnamese" -> "vi"
+            lowercased == "deutsch" || lowercased == "german" -> "de"
+            lowercased == "italiano" || lowercased == "italian" -> "it"
+            lowercased == "polski" || lowercased == "polish" -> "pl"
+            normalized == "українська" || lowercased == "ukrainian" || normalized.contains("Україн") -> "uk"
+            lowercased == "filipino" || lowercased == "tagalog" -> "tl"
+            lowercased == "magyar" || lowercased == "hungarian" -> "hu"
+            lowercased == "čeština" || lowercased == "czech" -> "cs"
+            lowercased == "română" || lowercased == "romanian" -> "ro"
+            lowercased == "nederlands" || lowercased == "dutch" -> "nl"
+            lowercased == "svenska" || lowercased == "swedish" -> "sv"
+            lowercased == "norsk" || lowercased == "norwegian" -> "no"
+            lowercased == "dansk" || lowercased == "danish" -> "da"
+            lowercased == "suomi" || lowercased == "finnish" -> "fi"
+            normalized == "ελληνικά" || lowercased == "greek" -> "el"
+            normalized == "עברית" || lowercased == "hebrew" -> "he"
+            normalized == "हिन्दी" || lowercased == "hindi" -> "hi"
+            normalized == "বাংলা" || lowercased == "bengali" -> "bn"
+            normalized == "မြန်မာဘာသာ" || lowercased == "burmese" -> "my"
+            lowercased == "català" || lowercased == "catalan" -> "ca"
+            lowercased == "galego" || lowercased == "galician" -> "gl"
+            lowercased == "euskara" || lowercased == "basque" -> "eu"
+            lowercased == "lietuvių" || lowercased == "lithuanian" -> "lt"
+            lowercased == "latviešu" || lowercased == "latvian" -> "lv"
+            lowercased == "eesti" || lowercased == "estonian" -> "et"
+            lowercased == "slovenčina" || lowercased == "slovak" -> "sk"
+            lowercased == "slovenščina" || lowercased == "slovene" -> "sl"
+            lowercased == "hrvatski" || lowercased == "croatian" -> "hr"
+            lowercased == "srpski" || lowercased == "serbian" -> "sr"
+            normalized == "български" || lowercased == "bulgarian" -> "bg"
+            normalized == "македонски" || lowercased == "macedonian" -> "mk"
+            // Persian/Farsi variants
+            normalized == "فارسی" || normalized == "فارسي" || lowercased == "persian" || lowercased == "farsi" -> "fa"
+            // Urdu
+            normalized == "اردو" || lowercased == "urdu" -> "ur"
+            // Multi-language sources - treat as "all" or default to English
+            lowercased == "multi" || lowercased == "multilingual" -> "multi"
             else -> {
-                // If we can't map it, log a warning and default to English
-                ireader.core.log.Log.warn("Unknown language name: '$normalized', defaulting to 'en'")
-                "en"
+                // If we can't map it, log a warning and return the original (might be a valid code)
+                ireader.core.log.Log.warn("Unknown language name: '$normalized', returning as-is")
+                // Return the normalized value if it looks like a language code, otherwise default to "en"
+                if (normalized.length <= 5 && normalized.all { it.isLetter() || it == '-' }) {
+                    normalized.lowercase()
+                } else {
+                    "en"
+                }
             }
+        }
+    }
+    
+    /**
+     * Converts ISO 639-2 (3-letter) language codes to ISO 639-1 (2-letter) codes.
+     */
+    private fun convertIso639_2ToIso639_1(iso639_2: String): String? {
+        return when (iso639_2) {
+            "ara" -> "ar"
+            "chi", "zho" -> "zh"
+            "eng" -> "en"
+            "spa" -> "es"
+            "fra", "fre" -> "fr"
+            "ind" -> "id"
+            "jpn" -> "ja"
+            "kor" -> "ko"
+            "por" -> "pt"
+            "rus" -> "ru"
+            "tha" -> "th"
+            "tur" -> "tr"
+            "vie" -> "vi"
+            "deu", "ger" -> "de"
+            "ita" -> "it"
+            "pol" -> "pl"
+            "ukr" -> "uk"
+            "fil", "tgl" -> "tl"
+            "hun" -> "hu"
+            "ces", "cze" -> "cs"
+            "ron", "rum" -> "ro"
+            "nld", "dut" -> "nl"
+            "swe" -> "sv"
+            "nor" -> "no"
+            "dan" -> "da"
+            "fin" -> "fi"
+            "ell", "gre" -> "el"
+            "heb" -> "he"
+            "hin" -> "hi"
+            "ben" -> "bn"
+            "mya", "bur" -> "my"
+            "cat" -> "ca"
+            "glg" -> "gl"
+            "eus", "baq" -> "eu"
+            "lit" -> "lt"
+            "lav" -> "lv"
+            "est" -> "et"
+            "slk", "slo" -> "sk"
+            "slv" -> "sl"
+            "hrv" -> "hr"
+            "srp" -> "sr"
+            "bul" -> "bg"
+            "mkd", "mac" -> "mk"
+            "fas", "per" -> "fa"
+            "urd" -> "ur"
+            else -> null
         }
     }
     
