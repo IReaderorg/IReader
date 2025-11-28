@@ -188,6 +188,7 @@ jobs:
           BUILD_TOOLS_VERSION: "34.0.0"
       # Upload runner package tar.gz/zip as artifact
       - name: Publish Artifact
+        if: ${{ matrix.runtime != 'linux-appimage' }}
         uses: actions/upload-artifact@v4
         with:
           name: runner-package-${{ matrix.runtime }}
@@ -195,6 +196,15 @@ jobs:
             desktop/build/compose/binaries/main/*/
             desktop/build/compose/jars/
             !desktop/build/compose/binaries/main/app/
+
+      # Upload AppImage only (JAR already uploaded by linux-x64)
+      - name: Publish AppImage Artifact
+        if: ${{ matrix.runtime == 'linux-appimage' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-package-${{ matrix.runtime }}
+          path: |
+            desktop/build/compose/binaries/main/appimage/
 
       - name: Publish Android Artifact
         if: ${{ matrix.runtime == 'android' }}
