@@ -2,9 +2,6 @@ package ireader.data.book
 
 import ireader.data.core.DatabaseHandler
 import ireader.data.core.DatabaseOptimizations
-import ireader.data.core.DatabaseOptimizations.batchUpdate
-import ireader.data.core.DatabaseOptimizations.executeBatch
-import ireader.data.core.DatabaseOptimizations.subscribeWithMonitoring
 import ireader.data.util.BaseDao
 import ireader.data.util.toDB
 import ireader.domain.data.repository.BookCategoryRepository
@@ -22,7 +19,8 @@ import java.util.Locale
 
 class BookRepositoryImpl(
     private val handler: DatabaseHandler,
-    private val bookCategoryRepository: BookCategoryRepository
+    private val bookCategoryRepository: BookCategoryRepository,
+    private val dbOptimizations: DatabaseOptimizations? = null
 ) : BookRepository, BaseDao<Book>() {
     override suspend fun findAllBooks(): List<Book> {
         return PerformanceMonitor.measureDatabaseOperation("findAllBooks") {
@@ -55,16 +53,24 @@ class BookRepositoryImpl(
         isAsc: Boolean,
         unreadFilter: Boolean
     ): List<Book> {
-        return handler.awaitList {
+        // Use cached query for library books (frequently accessed)
+        val books = dbOptimizations?.awaitListCached(
+            cacheKey = "library_books_all",
+            ttl = DatabaseOptimizations.SHORT_CACHE_TTL
+        ) {
             bookQueries.findInLibraryBooks(booksMapper)
-        }.let { books ->
+        } ?: handler.awaitList {
+            bookQueries.findInLibraryBooks(booksMapper)
+        }
+        
+        return books.let { bookList ->
             // Apply sorting based on sortType
             val sorted = when (sortType.type) {
-                LibrarySort.Type.Title -> books.sortedBy { it.title }
-                LibrarySort.Type.LastRead -> books.sortedBy { it.lastUpdate }
-                LibrarySort.Type.LastUpdated -> books.sortedBy { it.lastUpdate }
-                LibrarySort.Type.DateAdded -> books.sortedBy { it.dateAdded }
-                else -> books
+                LibrarySort.Type.Title -> bookList.sortedBy { it.title }
+                LibrarySort.Type.LastRead -> bookList.sortedBy { it.lastUpdate }
+                LibrarySort.Type.LastUpdated -> bookList.sortedBy { it.lastUpdate }
+                LibrarySort.Type.DateAdded -> bookList.sortedBy { it.dateAdded }
+                else -> bookList
             }
             if (sortType.isAscending) sorted else sorted.reversed()
         }

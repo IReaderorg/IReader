@@ -110,6 +110,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         Napier.base(DebugAntilog())
         localeHelper.setLocaleLang()
         
+        // Trigger lazy initialization now that UI is about to be visible
+        (application as? MyApplication)?.onAppVisible()
+        
         // Defer heavy initialization to background
         lifecycleScope.launchIO {
             delay(2000) // Wait until app is fully loaded

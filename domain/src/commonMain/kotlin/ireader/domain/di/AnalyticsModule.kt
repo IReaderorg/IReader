@@ -7,23 +7,26 @@ import org.koin.dsl.module
  * Koin module for analytics components
  */
 val analyticsModule = module {
-    // Analytics Manager (singleton)
-    single {
+    // All analytics components are lazy-loaded since they're not needed at startup
+    // This reduces startup time and memory pressure
+    
+    // Analytics Manager
+    factory {
         AnalyticsManager(privacyMode = PrivacyMode.BALANCED)
     }
     
     // Network Analytics Interceptor
-    single {
+    factory {
         NetworkAnalyticsInterceptor(analyticsManager = get())
     }
     
     // Database Analytics Tracker
-    single {
+    factory {
         DatabaseAnalyticsTracker(analyticsManager = get())
     }
     
     // UI Performance Tracker
-    single {
+    factory {
         UIPerformanceTracker(analyticsManager = get())
     }
 }

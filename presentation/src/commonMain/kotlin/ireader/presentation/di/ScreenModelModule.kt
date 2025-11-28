@@ -15,8 +15,8 @@ val screenModelModule = module {
     // Statistics screen model
     factoryOf(::StatsScreenModel)
     
-    // Main settings screen - singleton to prevent recreation
-    single { 
+    // Main settings screen - changed to factory to reduce startup memory
+    factory { 
         ireader.presentation.ui.settings.MainSettingScreenViewModel(
             uiPreferences = get(),
             getCurrentUser = {

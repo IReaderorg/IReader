@@ -5,12 +5,21 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import ireader.core.log.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Android-specific database optimizations.
  * These settings significantly improve SQLite performance on Android.
  */
 object AndroidDatabaseOptimizations {
+    
+    private val maintenanceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var isMaintenanceScheduled = false
     
     /**
      * Apply optimal SQLite PRAGMA settings for Android.
@@ -113,6 +122,80 @@ object AndroidDatabaseOptimizations {
             Log.info("Incremental VACUUM completed in ${duration}ms", "AndroidDatabaseOptimizations")
         } catch (e: Exception) {
             Log.error("Incremental VACUUM failed", e, "AndroidDatabaseOptimizations")
+        }
+    }
+    
+    /**
+     * Checkpoint WAL to prevent unbounded WAL file growth.
+     * TRUNCATE mode checkpoints and truncates the WAL file.
+     */
+    fun checkpointWal(db: SupportSQLiteDatabase) {
+        try {
+            Log.debug("Running WAL checkpoint...", "AndroidDatabaseOptimizations")
+            val start = System.currentTimeMillis()
+            
+            // TRUNCATE: Checkpoint and truncate WAL file to zero bytes
+            db.execSQL("PRAGMA wal_checkpoint(TRUNCATE)")
+            
+            val duration = System.currentTimeMillis() - start
+            Log.debug("WAL checkpoint completed in ${duration}ms", "AndroidDatabaseOptimizations")
+        } catch (e: Exception) {
+            Log.error("WAL checkpoint failed", e, "AndroidDatabaseOptimizations")
+        }
+    }
+    
+    /**
+     * Schedule periodic maintenance tasks.
+     * - WAL checkpoint every 5 minutes
+     * - Incremental vacuum every 30 minutes
+     * - ANALYZE weekly (tracked via preferences)
+     */
+    fun schedulePeriodicMaintenance(db: SupportSQLiteDatabase) {
+        if (isMaintenanceScheduled) return
+        isMaintenanceScheduled = true
+        
+        maintenanceScope.launch {
+            var cycleCount = 0
+            while (isActive) {
+                delay(5 * 60 * 1000L) // 5 minutes
+                
+                try {
+                    // WAL checkpoint every cycle (5 min)
+                    checkpointWal(db)
+                    
+                    cycleCount++
+                    
+                    // Incremental vacuum every 6 cycles (30 min)
+                    if (cycleCount % 6 == 0) {
+                        runIncrementalVacuum(db, 50)
+                    }
+                    
+                    // ANALYZE every 288 cycles (~24 hours)
+                    if (cycleCount % 288 == 0) {
+                        runAnalyze(db)
+                        cycleCount = 0 // Reset to prevent overflow
+                    }
+                } catch (e: Exception) {
+                    Log.error("Periodic maintenance failed", e, "AndroidDatabaseOptimizations")
+                }
+            }
+        }
+        
+        Log.info("Periodic database maintenance scheduled", "AndroidDatabaseOptimizations")
+    }
+    
+    /**
+     * Run maintenance on app going to background.
+     * Lightweight operations only.
+     */
+    fun onAppBackground(db: SupportSQLiteDatabase) {
+        maintenanceScope.launch {
+            try {
+                checkpointWal(db)
+                runIncrementalVacuum(db, 20)
+            } catch (e: Exception) {
+                Log.error("Background maintenance failed", e, "AndroidDatabaseOptimizations")
+            }
         }
     }
     

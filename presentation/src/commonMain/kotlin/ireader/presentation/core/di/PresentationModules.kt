@@ -59,10 +59,11 @@ val PresentationModules = module {
     // BooksState should be a factory, not a singleton, to avoid state sharing between ViewModels
     // Each ViewModel instance should have its own BooksState to prevent data mixing when navigating quickly
     factory { BooksState() }
-    single<HistoryStateImpl> { HistoryStateImpl() }
-    single<LibraryStateImpl> { LibraryStateImpl() }
-    single<CatalogsStateImpl> { CatalogsStateImpl() }
-    single<UpdateStateImpl> { UpdateStateImpl() }
+    // Changed state objects from single to factory - each screen should have its own state
+    factory<HistoryStateImpl> { HistoryStateImpl() }
+    factory<LibraryStateImpl> { LibraryStateImpl() }
+    factory<CatalogsStateImpl> { CatalogsStateImpl() }
+    factory<UpdateStateImpl> { UpdateStateImpl() }
     factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
     factory <ExploreStateImpl> { ExploreStateImpl() }
@@ -75,9 +76,10 @@ val PresentationModules = module {
     single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
 
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
-    single  { HistoryViewModel(get(), get(), get(),get(),) }
-    single  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get(),get(),get(),get(),get(),get(),get(),get(),get()) }
-    single  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
+    // Changed from single to factory - these ViewModels are heavy and should be created on-demand
+    factory  { HistoryViewModel(get(), get(), get(),get(),) }
+    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     
     // Browse Settings ViewModel
@@ -87,10 +89,12 @@ val PresentationModules = module {
     factory { ireader.presentation.ui.home.sources.migration.MigrationViewModel(get(), get(), get()) }
 
 
-    single  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    // Changed from single to factory - created on-demand when user navigates to updates
+    factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
     factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get()) }
-    single  { 
+    // Changed from single to factory - settings screen is not always needed
+    factory  { 
         MainSettingScreenViewModel(
             uiPreferences = get(),
             getCurrentUser = {

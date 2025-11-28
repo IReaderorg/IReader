@@ -70,6 +70,10 @@ CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_i
 -- Additional performance indexes
 CREATE INDEX IF NOT EXISTS idx_history_chapter_last_read ON history(chapter_id, last_read DESC);
 CREATE INDEX IF NOT EXISTS idx_history_progress_last_read ON history(progress, last_read DESC);
+-- Index for recent history queries
+CREATE INDEX IF NOT EXISTS idx_history_last_read_active ON history(last_read DESC) WHERE last_read > 0;
+-- Index for time tracking
+CREATE INDEX IF NOT EXISTS idx_history_time_read ON history(time_read DESC);
 
 getHistoryByMangaId:
 SELECT

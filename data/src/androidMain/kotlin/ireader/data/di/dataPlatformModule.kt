@@ -14,6 +14,8 @@ import ireader.data.core.AndroidDatabaseHandler
 import ireader.data.core.AndroidTransaction
 import ireader.data.core.DatabaseDriverFactory
 import ireader.data.core.DatabaseHandler
+import ireader.data.core.DatabaseOptimizations
+import ireader.data.core.DatabasePreloader
 import ireader.data.monitoring.AndroidMemoryTracker
 import ireader.data.repository.NotificationRepositoryImpl
 import ireader.data.security.BiometricAuthenticator
@@ -36,6 +38,12 @@ actual val dataPlatformModule = module {
     }
     single<Transactions> { AndroidTransaction(get()) }
     single<DatabaseHandler> { get<AndroidDatabaseHandler>() }
+    
+    // Database optimizations - provides caching, batch operations, and performance monitoring
+    single<DatabaseOptimizations> { DatabaseOptimizations(get()) }
+    
+    // Database preloader - warms up cache during app startup
+    single<DatabasePreloader> { DatabasePreloader(get(), get()) }
     single<SqlDriver> { DatabaseDriverFactory(get()).create() }
     single<CatalogLoader> {
         ireader.data.catalog.impl.AndroidCatalogLoader(

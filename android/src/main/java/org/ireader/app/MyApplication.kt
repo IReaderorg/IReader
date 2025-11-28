@@ -7,7 +7,10 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import ireader.core.http.WebViewUtil
+import ireader.core.startup.LazyInitializer
+import ireader.core.startup.StartupProfiler
 import ireader.data.core.DatabaseHandler
+import ireader.data.core.DatabasePreloader
 import ireader.data.di.DataModule
 import ireader.data.di.dataPlatformModule
 import ireader.data.di.remoteModule
@@ -26,6 +29,9 @@ import ireader.domain.di.preferencesInjectModule
 import ireader.presentation.core.di.PresentationModules
 import ireader.presentation.core.di.presentationPlatformModule
 import ireader.presentation.imageloader.CoilLoaderFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.ireader.app.di.AppModule
 import org.koin.android.ext.android.inject
@@ -36,91 +42,154 @@ import org.ireader.app.crash.CrashHandler
 import org.koin.core.KoinApplication
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 
 class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent {
+    
+    private val backgroundScope = CoroutineScope(Dispatchers.IO)
+    
+    // Lazy coil to avoid initialization during startup
+    private val _coil: CoilLoaderFactory by lazy { 
+        val factory: CoilLoaderFactory by inject()
+        factory
+    }
+    val coil: CoilLoaderFactory get() = _coil
+    
     override fun onCreate() {
         super.onCreate()
         
-        // Initialize crash handler first
+        // Start profiling
+        StartupProfiler.start()
+        
+        // Initialize crash handler first (fast, required)
         CrashHandler.initialize(this)
+        StartupProfiler.mark("crash_handler")
+        
+        // Initialize Koin - all modules
+        initializeKoin()
+        StartupProfiler.mark("koin_init")
+        
+        // Schedule background initialization (non-blocking)
+        scheduleBackgroundInit()
+        StartupProfiler.mark("background_scheduled")
+        
+        // Finish startup profiling - this is the time to first frame
+        StartupProfiler.finish()
+        StartupProfiler.printReport()
+        
+        println("")
+        println("=== APP READY FOR FIRST FRAME ===")
+        println("")
+    }
+    
+    /**
+     * Initialize Koin with all modules.
+     */
+    private fun initializeKoin() {
+        val totalStart = System.currentTimeMillis()
+        
         startKoin {
-            // Log Koin into Android logger
-            androidLogger()
-            // Reference Android context
+            androidLogger(Level.NONE)
             androidContext(this@MyApplication)
-            // Load modules
             workManagerFactory()
             KoinApplication.init()
-            modules(dataPlatformModule)
-            modules(AppModule)
-            modules(CatalogModule)
-            modules(DataModule)
-            modules(localModule)
-            modules(preferencesInjectModule)
-            modules(repositoryInjectModule)
-            modules(remotePlatformModule)
-            modules(remoteModule)
-            modules(reviewModule)
-            modules(platformServiceModule)
-            modules(ireader.domain.di.ServiceModule)
-            modules(UseCasesInject)
-            modules(PresentationModules)
-            modules(DomainServices)
-            modules(DomainModule)
-            modules(PluginModule)
-            modules(presentationPlatformModule)
+            
+            // Load all modules at once (faster than one by one)
+            modules(
+                dataPlatformModule,
+                DataModule,
+                preferencesInjectModule,
+                localModule,
+                repositoryInjectModule,
+                remotePlatformModule,
+                remoteModule,
+                reviewModule,
+                platformServiceModule,
+                ireader.domain.di.ServiceModule,
+                UseCasesInject,
+                DomainServices,
+                DomainModule,
+                CatalogModule,
+                PluginModule,
+                PresentationModules,
+                presentationPlatformModule,
+                AppModule
+            )
         }
         
-        // Ensure database is initialized
+        println("=== Koin initialization: ${System.currentTimeMillis() - totalStart}ms ===")
+    }
+    
+    private fun scheduleBackgroundInit() {
+        // Database initialization in background
+        backgroundScope.launch {
+            initializeDatabaseAsync()
+        }
+        
+        // Register lazy tasks
+        registerLazyTasks()
+    }
+    
+    private suspend fun initializeDatabaseAsync() {
         try {
+            val start = System.currentTimeMillis()
+            delay(100) // Let UI thread breathe
+            
             val databaseHandler: DatabaseHandler by inject()
             databaseHandler.initialize()
-        } catch (e: Exception) {
-            println("Failed to initialize database: ${e.message}")
-            e.printStackTrace()
-        }
-        
-        // Initialize system fonts
-        try {
-            val systemFontsInitializer: ireader.domain.usecases.fonts.SystemFontsInitializer by inject()
-            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                systemFontsInitializer.initializeSystemFonts()
-                println("System fonts initialized successfully")
+            
+            println("Database initialization: ${System.currentTimeMillis() - start}ms")
+            
+            delay(500)
+            try {
+                val preloader: DatabasePreloader by inject()
+                preloader.preloadCriticalData()
+            } catch (e: Exception) {
+                println("Database preloader not available: ${e.message}")
             }
         } catch (e: Exception) {
-            println("Failed to initialize system fonts: ${e.message}")
-            e.printStackTrace()
-        }
-        
-        // Start auto-sync service if available
-        try {
-            val autoSyncService: AutoSyncService? by inject()
-            autoSyncService?.start()
-            println("Auto-sync service started successfully")
-        } catch (e: Exception) {
-            println("Auto-sync service not available or failed to start: ${e.message}")
+            println("Failed to initialize database: ${e.message}")
         }
     }
-
-    val coil: CoilLoaderFactory by inject()
+    
+    private fun registerLazyTasks() {
+        LazyInitializer.register("system_fonts", LazyInitializer.Priority.LOW) {
+            try {
+                delay(2000)
+                val systemFontsInitializer: ireader.domain.usecases.fonts.SystemFontsInitializer by inject()
+                systemFontsInitializer.initializeSystemFonts()
+                println("System fonts initialized")
+            } catch (e: Exception) {
+                println("System fonts failed: ${e.message}")
+            }
+        }
+        
+        LazyInitializer.register("auto_sync", LazyInitializer.Priority.LOW) {
+            try {
+                delay(5000)
+                val autoSyncService: AutoSyncService? by inject()
+                autoSyncService?.start()
+            } catch (e: Exception) {
+                // Silent - not critical
+            }
+        }
+    }
+    
+    fun onAppVisible() {
+        LazyInitializer.start()
+    }
 
     override fun getPackageName(): String {
-        // This causes freezes in Android 6/7 for some reason
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
-                // Override the value passed as X-Requested-With in WebView requests
                 val stackTrace = Looper.getMainLooper().thread.stackTrace
                 val chromiumElement = stackTrace.find {
-                    it.className.equals(
-                        "org.chromium.base.BuildInfo",
-                        ignoreCase = true,
-                    )
+                    it.className.equals("org.chromium.base.BuildInfo", ignoreCase = true)
                 }
                 if (chromiumElement?.methodName.equals("getAll", ignoreCase = true)) {
                     return WebViewUtil.SPOOF_PACKAGE_NAME
                 }
-            } catch (e: Exception) {
-            }
+            } catch (_: Exception) {}
         }
         return super.getPackageName()
     }

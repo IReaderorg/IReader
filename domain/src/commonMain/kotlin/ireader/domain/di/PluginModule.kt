@@ -14,14 +14,17 @@ import org.koin.dsl.module
  */
 val PluginModule = module {
     
+    // All plugin components are lazy-loaded (factory) since plugins are not needed at startup
+    // This significantly reduces startup time and memory pressure
+    
     // Plugin Preferences
-    single { PluginPreferences(get()) }
+    factory { PluginPreferences(get()) }
     
     // Plugin Registry
-    single { PluginRegistry(get()) }
+    factory { PluginRegistry(get()) }
     
     // Plugin Validator
-    single {
+    factory {
         PluginValidator(
             currentIReaderVersion = "1.0.0", // TODO: Get from BuildConfig
             currentPlatform = getPlatform()
@@ -31,7 +34,7 @@ val PluginModule = module {
     // Note: PluginClassLoader is registered in platform-specific DomainModule
     
     // Plugin Loader
-    single {
+    factory {
         PluginLoader(
             fileSystem = get(),
             validator = get(),
@@ -40,14 +43,14 @@ val PluginModule = module {
     }
     
     // Plugin Permission Manager
-    single {
+    factory {
         PluginPermissionManager(
             database = get()
         )
     }
     
     // Plugin Security Manager
-    single {
+    factory {
         PluginSecurityManager(
             permissionManager = get(),
             fileSystem = get()
@@ -55,7 +58,7 @@ val PluginModule = module {
     }
     
     // Monetization Service
-    single {
+    factory {
         MonetizationService(
             paymentProcessor = get(),
             purchaseRepository = get(),
@@ -68,7 +71,7 @@ val PluginModule = module {
     }
     
     // Plugin Manager
-    single {
+    factory {
         PluginManager(
             fileSystem = get(),
             loader = get(),
@@ -81,13 +84,13 @@ val PluginModule = module {
         )
     }
     
-    // TTS Plugin Integration
-    single { PluginTTSManager(get()) }
-    single { AudioStreamHandler() }
-    single { TTSErrorHandler() }
+    // TTS Plugin Integration - lazy loaded when TTS is used
+    factory { PluginTTSManager(get()) }
+    factory { AudioStreamHandler() }
+    factory { TTSErrorHandler() }
     
     // Performance Monitoring
-    single { PerformanceMetricsManager(get()) }
+    factory { PerformanceMetricsManager(get()) }
     
     // Note: PaymentProcessor, PurchaseRepository, TrialRepository, PluginDatabase, 
     // PluginClassLoader, MemoryTracker, and pluginsDir are provided by platform-specific modules

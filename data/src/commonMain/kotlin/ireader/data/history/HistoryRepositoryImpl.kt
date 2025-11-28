@@ -2,17 +2,24 @@ package ireader.data.history
 
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.core.DatabaseHandler
+import ireader.data.core.DatabaseOptimizations
 import ireader.data.util.toDB
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History
 import ireader.domain.models.entities.HistoryWithRelations
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlin.time.Duration.Companion.milliseconds
 
 
 // I may need to add bookId as Primary Key instead of using id
 
+@OptIn(FlowPreview::class)
 class HistoryRepositoryImpl constructor(
     private val handler: DatabaseHandler,
+    private val dbOptimizations: DatabaseOptimizations? = null
 ) : HistoryRepository {
     
     override suspend fun findHistory(id: Long): History? {
@@ -46,7 +53,9 @@ class HistoryRepositoryImpl constructor(
 
     override fun findHistoriesByFlow(query: String): Flow<List<HistoryWithRelations>> {
         return handler
-                .subscribeToList { historyViewQueries.historyWithQuery(query, historyWithRelationsMapper) }
+            .subscribeToList { historyViewQueries.historyWithQuery(query, historyWithRelationsMapper) }
+            .debounce(100.milliseconds) // Prevent rapid emissions
+            .distinctUntilChanged() // Skip duplicates
     }
 
     override suspend fun insertHistory(history: History) {

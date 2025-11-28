@@ -30,6 +30,12 @@ actual val dataPlatformModule: Module = module {
     single<DatabaseHandler> { JvmDatabaseHandler(get(),get(), preferencesHelper = get(),) }
     single<SqlDriver> { DatabaseDriverFactory().create() }
     single<Transactions> { DatabaseTransactions(get()) }
+    
+    // Database optimizations - provides caching, batch operations, and performance monitoring
+    single<ireader.data.core.DatabaseOptimizations> { ireader.data.core.DatabaseOptimizations(get()) }
+    
+    // Database preloader - warms up cache during app startup
+    single<ireader.data.core.DatabasePreloader> { ireader.data.core.DatabasePreloader(get(), get()) }
     single<CatalogLoader> { DesktopCatalogLoader(get(),get(),get()) }
     single<DesktopCatalogInstallationChanges> { DesktopCatalogInstallationChanges() }
     single<CatalogInstallationChanges> { DesktopCatalogInstallationChanges() }

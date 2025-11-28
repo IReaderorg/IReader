@@ -9,9 +9,15 @@ import kotlinx.coroutines.withContext
  * 
  * These operations should be run periodically (weekly/monthly) to maintain
  * optimal database performance.
+ * 
+ * Recommended schedule:
+ * - ANALYZE: Weekly or after major data changes
+ * - VACUUM: Monthly or when database is fragmented
+ * - Integrity check: On app update or when issues detected
  */
 class DatabaseMaintenance(
-    private val handler: DatabaseHandler
+    private val handler: DatabaseHandler,
+    private val dbOptimizations: DatabaseOptimizations? = null
 ) {
     
     /**
@@ -171,7 +177,7 @@ class DatabaseMaintenance(
     }
     
     /**
-     * Run full maintenance (analyze + cleanup)
+     * Run full maintenance (analyze + cleanup + cache clear)
      * This is safe to run regularly
      */
     suspend fun runMaintenance(): MaintenanceResult {
@@ -183,10 +189,16 @@ class DatabaseMaintenance(
         val orphanedCleaned = if (!integrityOk) cleanupOrphanedData() else 0
         analyze()
         
+        // Clear query cache after maintenance to ensure fresh data
+        dbOptimizations?.clearAllCache()
+        
         val stats = getDatabaseStats()
         val duration = System.currentTimeMillis() - start
         
         Log.info("Maintenance completed in ${duration}ms", "DatabaseMaintenance")
+        
+        // Log performance report
+        dbOptimizations?.logPerformanceReport()
         
         return MaintenanceResult(
             integrityOk = integrityOk,

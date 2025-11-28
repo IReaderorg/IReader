@@ -1,6 +1,7 @@
 package ireader.data.di
 
 import ireader.data.book.BookRepositoryImpl
+import ireader.data.core.DatabaseOptimizations
 import ireader.data.catalog.CatalogRemoteRepositoryImpl
 import ireader.data.category.BookCategoryRepositoryImpl
 import ireader.data.category.CategoryRepositoryImpl
@@ -73,15 +74,15 @@ val repositoryInjectModule = module {
     single<LibraryRepository> { LibraryRepositoryImpl(get()) }
     single<CategoryRepository> { CategoryRepositoryImpl(get()) }
     single<CatalogRemoteRepository> { CatalogRemoteRepositoryImpl(get()) }
-    single<ChapterRepository> { ChapterRepositoryImpl(get()) }
+    single<ChapterRepository> { ChapterRepositoryImpl(get(), getOrNull()) }
     single<ChapterHealthRepository> { ChapterHealthRepositoryImpl(get()) }
     single<SourceComparisonRepository> { SourceComparisonRepositoryImpl(get()) }
     single<BookCategoryRepository> { BookCategoryRepositoryImpl(get()) }
-    single<BookRepository> { BookRepositoryImpl(get(), get<BookCategoryRepository>()) }
+    single<BookRepository> { BookRepositoryImpl(get(), get<BookCategoryRepository>(), getOrNull()) }
     single<ireader.domain.data.repository.consolidated.BookRepository> { 
         ireader.data.repository.ConsolidatedBookRepositoryImpl(get<BookRepository>(), get<BookCategoryRepository>()) 
     }
-    single<HistoryRepository> { HistoryRepositoryImpl(get()) }
+    single<HistoryRepository> { HistoryRepositoryImpl(get(), getOrNull()) }
     single<ThemeRepository> { ThemeRepositoryImpl(get()) }
     single<ReaderThemeRepository> { ReaderThemeRepositoryImpl(get()) }
     

@@ -77,11 +77,12 @@ val DomainServices = module {
         )
     }
     
-    // Cloud Backup Providers
-    single { DropboxProvider() }
-    single { GoogleDriveProvider() }
+    // Cloud Backup Providers - lazy loaded when user accesses backup
+    factory { DropboxProvider() }
+    factory { GoogleDriveProvider() }
     
-    single {
+    // CloudBackupManager - lazy loaded
+    factory {
         CloudBackupManager(
             providers = mapOf(
                 CloudProvider.DROPBOX to get<DropboxProvider>(),
@@ -199,8 +200,8 @@ val DomainServices = module {
         )
     }
     
-    // Sync Manager
-    single { 
+    // Sync Manager - lazy loaded when sync is used
+    factory { 
         ireader.domain.services.SyncManager(
             remoteRepository = get(),
             supabasePreferences = get(),
@@ -209,18 +210,18 @@ val DomainServices = module {
         )
     }
 
-    // Filter State Manager
-    single { ireader.domain.filters.FilterStateManager(get()) }
+    // Filter State Manager - lazy loaded
+    factory { ireader.domain.filters.FilterStateManager(get()) }
     
-    // Plugin System
+    // Plugin System - all lazy loaded since plugins are not needed at startup
     // Plugin Preferences
-    single { PluginPreferences(get()) }
+    factory { PluginPreferences(get()) }
     
     // Plugin Registry
-    single { PluginRegistry(get()) }
+    factory { PluginRegistry(get()) }
     
     // Plugin Manager
-    single {
+    factory {
         PluginManager(
             fileSystem = get(),
             loader = get(),
@@ -235,7 +236,8 @@ val DomainServices = module {
     
     // Voice Management - Platform-specific implementation will be provided in platform modules
     
-    single {
+    // Voice downloader - lazy loaded when TTS is used
+    factory {
         ireader.domain.voice.VoiceDownloader(
             httpClient = get(),
             storage = get()
