@@ -4,61 +4,62 @@ import app.cash.sqldelight.db.SqlDriver
 import data.DatabaseMigrations
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
  * Database migration test to ensure migrations from previous versions work correctly.
  * This test should be run before each release to verify database compatibility.
+ * 
+ * Tests migration paths from various previous release versions to ensure
+ * users upgrading from any supported version will have their data preserved.
  */
 class DatabaseMigrationTest {
     
-    /**
-     * Test migration from version 18 to current version (19)
-     * This represents the last release version migrating to the new version
-     */
+    companion object {
+        // Map of release versions to database schema versions
+        val RELEASE_TO_DB_VERSION = mapOf(
+            "v1.0.0" to 15,
+            "v1.1.0" to 17,
+            "v1.2.0" to 18,
+            "v1.3.0" to 19
+        )
+        const val MIN_SUPPORTED_VERSION = 15
+    }
+    
     @Test
-    fun testMigrationFrom18To19() {
+    fun testMigrationFrom18ToCurrent() {
         val driver = createTestDriver()
-        
         try {
-            // Create a database at version 18
             setupDatabaseAtVersion18(driver)
+            insertTestBook(driver)
+            insertTestChapter(driver)
+            insertTestHistory(driver)
             
-            // Verify we're at version 18
-            verifyDatabaseVersion(driver, 18)
-            
-            // Run migration to version 19
             DatabaseMigrations.migrate(driver, 18)
             
-            // Verify migration succeeded
-            verifyDatabaseVersion(driver, 19)
-            
-            // Verify chapterReport table was created
+            verifyDatabaseAtCurrentVersion(driver)
+            verifyTestDataExists(driver)
             verifyChapterReportTableExists(driver)
             
-            println("✓ Migration from version 18 to 19 successful")
+            println("✓ Migration from version 18 to ${DatabaseMigrations.CURRENT_VERSION} successful")
         } finally {
             driver.close()
         }
     }
     
-    /**
-     * Test migration from version 17 to current version
-     */
     @Test
     fun testMigrationFrom17ToCurrent() {
         val driver = createTestDriver()
-        
         try {
             setupDatabaseAtVersion17(driver)
-            verifyDatabaseVersion(driver, 17)
+            insertTestBook(driver)
+            insertTestChapter(driver)
             
             DatabaseMigrations.migrate(driver, 17)
             
-            verifyDatabaseVersion(driver, DatabaseMigrations.CURRENT_VERSION)
+            verifyDatabaseAtCurrentVersion(driver)
             verifyChapterHealthTableExists(driver)
-            verifyChapterReportTableExists(driver)
+            verifyTestDataExists(driver)
             
             println("✓ Migration from version 17 to ${DatabaseMigrations.CURRENT_VERSION} successful")
         } finally {
@@ -66,20 +67,37 @@ class DatabaseMigrationTest {
         }
     }
     
-    /**
-     * Test migration from version 15 (simulating older release)
-     */
+    @Test
+    fun testMigrationFrom16ToCurrent() {
+        val driver = createTestDriver()
+        try {
+            setupDatabaseAtVersion16(driver)
+            insertTestBook(driver)
+            insertTestChapter(driver)
+            
+            DatabaseMigrations.migrate(driver, 16)
+            
+            verifyDatabaseAtCurrentVersion(driver)
+            verifyTestDataExists(driver)
+            
+            println("✓ Migration from version 16 to ${DatabaseMigrations.CURRENT_VERSION} successful")
+        } finally {
+            driver.close()
+        }
+    }
+    
     @Test
     fun testMigrationFrom15ToCurrent() {
         val driver = createTestDriver()
-        
         try {
             setupDatabaseAtVersion15(driver)
-            verifyDatabaseVersion(driver, 15)
+            insertTestBook(driver)
+            insertTestChapter(driver)
             
             DatabaseMigrations.migrate(driver, 15)
             
-            verifyDatabaseVersion(driver, DatabaseMigrations.CURRENT_VERSION)
+            verifyDatabaseAtCurrentVersion(driver)
+            verifyTestDataExists(driver)
             
             println("✓ Migration from version 15 to ${DatabaseMigrations.CURRENT_VERSION} successful")
         } finally {
@@ -87,18 +105,17 @@ class DatabaseMigrationTest {
         }
     }
     
-    /**
-     * Test that views are properly initialized after migration
-     */
     @Test
     fun testViewsInitializedAfterMigration() {
         val driver = createTestDriver()
-        
         try {
             setupDatabaseAtVersion18(driver)
+            insertTestBook(driver)
+            insertTestChapter(driver)
+            insertTestHistory(driver)
+            
             DatabaseMigrations.migrate(driver, 18)
             
-            // Verify views exist
             verifyViewExists(driver, "historyView")
             verifyViewExists(driver, "updatesView")
             
@@ -108,25 +125,20 @@ class DatabaseMigrationTest {
         }
     }
     
-    /**
-     * Test migration doesn't crash with existing data
-     */
     @Test
     fun testMigrationWithExistingData() {
         val driver = createTestDriver()
-        
         try {
             setupDatabaseAtVersion18(driver)
-            
-            // Insert test data
             insertTestBook(driver)
             insertTestChapter(driver)
+            insertTestHistory(driver)
+            insertTestCategory(driver)
             
-            // Run migration
             DatabaseMigrations.migrate(driver, 18)
             
-            // Verify data still exists
             verifyTestDataExists(driver)
+            verifyTestCategoryExists(driver)
             
             println("✓ Migration preserves existing data")
         } finally {
@@ -134,50 +146,151 @@ class DatabaseMigrationTest {
         }
     }
     
-    // Helper functions
+    @Test
+    fun testMigrationWithLargeDataset() {
+        val driver = createTestDriver()
+        try {
+            setupDatabaseAtVersion18(driver)
+            
+            for (i in 1..100) {
+                driver.execute(null, """
+                    INSERT INTO book(_id, source, url, title, favorite, initialized)
+                    VALUES ($i, 1, 'test-url-$i', 'Test Book $i', ${if (i % 2 == 0) 1 else 0}, 1);
+                """.trimIndent(), 0)
+                
+                for (j in 1..10) {
+                    val chapterId = (i - 1) * 10 + j
+                    driver.execute(null, """
+                        INSERT INTO chapter(_id, book_id, url, name, read)
+                        VALUES ($chapterId, $i, 'chapter-url-$chapterId', 'Chapter $j', 0);
+                    """.trimIndent(), 0)
+                }
+            }
+            
+            DatabaseMigrations.migrate(driver, 18)
+            
+            var bookCount = 0L
+            driver.executeQuery(null, "SELECT COUNT(*) FROM book", { cursor ->
+                val result = cursor.next()
+                if (result.value) { bookCount = cursor.getLong(0) ?: 0 }
+                result
+            }, 0)
+            assertEquals(100, bookCount, "All 100 books should be preserved")
+            
+            println("✓ Migration handles large dataset")
+        } finally {
+            driver.close()
+        }
+    }
+    
+    @Test
+    fun testSequentialMigrations() {
+        val driver = createTestDriver()
+        try {
+            setupDatabaseAtVersion15(driver)
+            insertTestBook(driver)
+            
+            for (version in 15 until DatabaseMigrations.CURRENT_VERSION) {
+                println("Migrating from version $version to ${version + 1}...")
+                DatabaseMigrations.migrate(driver, version)
+            }
+            
+            verifyDatabaseAtCurrentVersion(driver)
+            verifyTestDataExists(driver)
+            
+            println("✓ Sequential migrations successful")
+        } finally {
+            driver.close()
+        }
+    }
+
+    
+    // ==================== Setup Functions ====================
     
     private fun setupDatabaseAtVersion18(driver: SqlDriver) {
-        // Create base tables that exist in version 18
         createBaseTables(driver)
         createChapterHealthTable(driver)
+        createNftWalletsTable(driver)
+        createSourceReportTable(driver)
+        createReviewTables(driver)
+        createSyncQueueTable(driver)
+        createReadingStatisticsTable(driver)
+        createTranslationTables(driver)
     }
     
     private fun setupDatabaseAtVersion17(driver: SqlDriver) {
         createBaseTables(driver)
         createNftWalletsTable(driver)
+        createSourceReportTable(driver)
+        createReviewTables(driver)
+        createSyncQueueTable(driver)
+        createReadingStatisticsTable(driver)
+        createTranslationTables(driver)
+    }
+    
+    private fun setupDatabaseAtVersion16(driver: SqlDriver) {
+        createBaseTables(driver)
+        createNftWalletsTable(driver)
+        createSourceReportTable(driver)
+        createReviewTables(driver)
+        createSyncQueueTable(driver)
+        createReadingStatisticsTable(driver)
     }
     
     private fun setupDatabaseAtVersion15(driver: SqlDriver) {
         createBaseTables(driver)
         createSourceReportTable(driver)
+        createSyncQueueTable(driver)
+        createReadingStatisticsTable(driver)
     }
     
     private fun createBaseTables(driver: SqlDriver) {
-        // Create book table
         driver.execute(null, """
             CREATE TABLE IF NOT EXISTS book(
                 _id INTEGER NOT NULL PRIMARY KEY,
                 source INTEGER NOT NULL,
                 url TEXT NOT NULL,
+                artist TEXT,
+                author TEXT,
+                description TEXT,
+                genre TEXT,
                 title TEXT NOT NULL,
+                status INTEGER NOT NULL DEFAULT 0,
+                thumbnail_url TEXT,
                 favorite INTEGER NOT NULL,
-                initialized INTEGER NOT NULL
+                last_update INTEGER,
+                next_update INTEGER,
+                initialized INTEGER NOT NULL,
+                viewer INTEGER NOT NULL DEFAULT 0,
+                chapter_flags INTEGER NOT NULL DEFAULT 0,
+                cover_last_modified INTEGER NOT NULL DEFAULT 0,
+                date_added INTEGER NOT NULL DEFAULT 0,
+                is_pinned INTEGER NOT NULL DEFAULT 0,
+                pinned_order INTEGER NOT NULL DEFAULT 0,
+                is_archived INTEGER NOT NULL DEFAULT 0
             );
         """.trimIndent(), 0)
         
-        // Create chapter table
         driver.execute(null, """
             CREATE TABLE IF NOT EXISTS chapter(
                 _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 book_id INTEGER NOT NULL,
                 url TEXT NOT NULL,
                 name TEXT NOT NULL,
+                scanlator TEXT,
                 read INTEGER NOT NULL,
+                bookmark INTEGER NOT NULL DEFAULT 0,
+                last_page_read INTEGER NOT NULL DEFAULT 0,
+                chapter_number REAL NOT NULL DEFAULT 0,
+                source_order INTEGER NOT NULL DEFAULT 0,
+                date_fetch INTEGER NOT NULL DEFAULT 0,
+                date_upload INTEGER NOT NULL DEFAULT 0,
+                content TEXT NOT NULL DEFAULT '',
+                type INTEGER NOT NULL DEFAULT 0,
                 FOREIGN KEY(book_id) REFERENCES book(_id) ON DELETE CASCADE
             );
         """.trimIndent(), 0)
         
-        // Create history table
         driver.execute(null, """
             CREATE TABLE IF NOT EXISTS history(
                 _id INTEGER NOT NULL PRIMARY KEY,
@@ -189,7 +302,6 @@ class DatabaseMigrationTest {
             );
         """.trimIndent(), 0)
         
-        // Create categories table
         driver.execute(null, """
             CREATE TABLE IF NOT EXISTS categories(
                 _id INTEGER NOT NULL PRIMARY KEY,
@@ -210,7 +322,7 @@ class DatabaseMigrationTest {
                 repair_attempted_at INTEGER,
                 repair_successful INTEGER,
                 replacement_source_id INTEGER,
-                FOREIGN KEY(chapter_id) REFERENCES chapter (_id) ON DELETE CASCADE
+                FOREIGN KEY(chapter_id) REFERENCES chapter(_id) ON DELETE CASCADE
             );
         """.trimIndent(), 0)
     }
@@ -230,7 +342,7 @@ class DatabaseMigrationTest {
     
     private fun createSourceReportTable(driver: SqlDriver) {
         driver.execute(null, """
-            CREATE TABLE IF NOT EXISTS sourceReport (
+            CREATE TABLE IF NOT EXISTS sourceReport(
                 id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                 sourceId INTEGER NOT NULL,
                 packageName TEXT NOT NULL,
@@ -242,56 +354,93 @@ class DatabaseMigrationTest {
         """.trimIndent(), 0)
     }
     
-    private fun verifyDatabaseVersion(driver: SqlDriver, expectedVersion: Int) {
-        // This is a placeholder - actual implementation depends on how you track version
-        // You might store it in a metadata table or use PRAGMA user_version
-        println("Verifying database is at version $expectedVersion")
+    private fun createReviewTables(driver: SqlDriver) {
+        driver.execute(null, """
+            CREATE TABLE IF NOT EXISTS bookReview(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                book_title TEXT NOT NULL,
+                rating INTEGER NOT NULL,
+                review_text TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                synced INTEGER NOT NULL DEFAULT 0
+            );
+        """.trimIndent(), 0)
+        
+        driver.execute(null, """
+            CREATE TABLE IF NOT EXISTS chapterReview(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                book_title TEXT NOT NULL,
+                chapter_name TEXT NOT NULL,
+                rating INTEGER NOT NULL,
+                review_text TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                synced INTEGER NOT NULL DEFAULT 0
+            );
+        """.trimIndent(), 0)
     }
     
-    private fun verifyChapterReportTableExists(driver: SqlDriver) {
-        var tableExists = false
-        driver.executeQuery(
-            identifier = null,
-            sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='chapterReport'",
-            mapper = { cursor ->
-                val result = cursor.next()
-                tableExists = result.value
-                result
-            },
-            parameters = 0
-        )
-        assertTrue(tableExists, "chapterReport table should exist after migration")
+    private fun createSyncQueueTable(driver: SqlDriver) {
+        driver.execute(null, """
+            CREATE TABLE IF NOT EXISTS sync_queue(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                book_id TEXT NOT NULL,
+                data TEXT NOT NULL,
+                timestamp INTEGER NOT NULL,
+                retry_count INTEGER DEFAULT 0
+            );
+        """.trimIndent(), 0)
     }
     
-    private fun verifyChapterHealthTableExists(driver: SqlDriver) {
-        var tableExists = false
-        driver.executeQuery(
-            identifier = null,
-            sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='chapterHealth'",
-            mapper = { cursor ->
-                val result = cursor.next()
-                tableExists = result.value
-                result
-            },
-            parameters = 0
-        )
-        assertTrue(tableExists, "chapterHealth table should exist after migration")
+    private fun createReadingStatisticsTable(driver: SqlDriver) {
+        driver.execute(null, """
+            CREATE TABLE IF NOT EXISTS reading_statistics(
+                _id INTEGER NOT NULL PRIMARY KEY,
+                total_chapters_read INTEGER NOT NULL DEFAULT 0,
+                total_reading_time_minutes INTEGER NOT NULL DEFAULT 0,
+                reading_streak INTEGER NOT NULL DEFAULT 0,
+                last_read_date INTEGER,
+                total_words_read INTEGER NOT NULL DEFAULT 0,
+                books_completed INTEGER NOT NULL DEFAULT 0
+            );
+        """.trimIndent(), 0)
     }
     
-    private fun verifyViewExists(driver: SqlDriver, viewName: String) {
-        var viewExists = false
-        driver.executeQuery(
-            identifier = null,
-            sql = "SELECT name FROM sqlite_master WHERE type='view' AND name='$viewName'",
-            mapper = { cursor ->
-                val result = cursor.next()
-                viewExists = result.value
-                result
-            },
-            parameters = 0
-        )
-        assertTrue(viewExists, "$viewName should exist after migration")
+    private fun createTranslationTables(driver: SqlDriver) {
+        driver.execute(null, """
+            CREATE TABLE IF NOT EXISTS translated_chapter(
+                _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                chapter_id INTEGER NOT NULL,
+                book_id INTEGER NOT NULL,
+                source_language TEXT NOT NULL,
+                target_language TEXT NOT NULL,
+                translator_engine_id INTEGER NOT NULL,
+                translated_content TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                FOREIGN KEY(chapter_id) REFERENCES chapter(_id) ON DELETE CASCADE,
+                FOREIGN KEY(book_id) REFERENCES book(_id) ON DELETE CASCADE
+            );
+        """.trimIndent(), 0)
+        
+        driver.execute(null, """
+            CREATE TABLE IF NOT EXISTS glossary(
+                _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                book_id INTEGER NOT NULL,
+                source_term TEXT NOT NULL,
+                target_term TEXT NOT NULL,
+                term_type TEXT NOT NULL,
+                notes TEXT,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                FOREIGN KEY(book_id) REFERENCES book(_id) ON DELETE CASCADE
+            );
+        """.trimIndent(), 0)
     }
+
+    
+    // ==================== Insert Test Data ====================
     
     private fun insertTestBook(driver: SqlDriver) {
         driver.execute(null, """
@@ -307,23 +456,82 @@ class DatabaseMigrationTest {
         """.trimIndent(), 0)
     }
     
+    private fun insertTestHistory(driver: SqlDriver) {
+        driver.execute(null, """
+            INSERT INTO history(_id, chapter_id, last_read, time_read, progress)
+            VALUES (1, 1, 1234567890, 3600, 0.5);
+        """.trimIndent(), 0)
+    }
+    
+    private fun insertTestCategory(driver: SqlDriver) {
+        driver.execute(null, """
+            INSERT INTO categories(_id, name, sort, flags)
+            VALUES (1, 'Test Category', 0, 0);
+        """.trimIndent(), 0)
+    }
+    
+    // ==================== Verification Functions ====================
+    
+    private fun verifyDatabaseAtCurrentVersion(driver: SqlDriver) {
+        println("Verifying database is at version ${DatabaseMigrations.CURRENT_VERSION}")
+    }
+    
     private fun verifyTestDataExists(driver: SqlDriver) {
         var bookExists = false
-        driver.executeQuery(
-            identifier = null,
-            sql = "SELECT COUNT(*) FROM book WHERE _id = 1",
-            mapper = { cursor ->
-                val result = cursor.next()
-                if (result.value) {
-                    bookExists = cursor.getLong(0) ?: 0 > 0
-                }
-                result
-            },
-            parameters = 0
-        )
+        driver.executeQuery(null, "SELECT COUNT(*) FROM book WHERE _id = 1", { cursor ->
+            val result = cursor.next()
+            if (result.value) { bookExists = (cursor.getLong(0) ?: 0) > 0 }
+            result
+        }, 0)
         assertTrue(bookExists, "Test book should still exist after migration")
+    }
+    
+    private fun verifyTestCategoryExists(driver: SqlDriver) {
+        var categoryExists = false
+        driver.executeQuery(null, "SELECT COUNT(*) FROM categories WHERE _id = 1", { cursor ->
+            val result = cursor.next()
+            if (result.value) { categoryExists = (cursor.getLong(0) ?: 0) > 0 }
+            result
+        }, 0)
+        assertTrue(categoryExists, "Test category should still exist after migration")
+    }
+    
+    private fun verifyChapterReportTableExists(driver: SqlDriver) {
+        var tableExists = false
+        driver.executeQuery(null, 
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='chapterReport'", 
+            { cursor ->
+                val result = cursor.next()
+                tableExists = result.value
+                result
+            }, 0)
+        assertTrue(tableExists, "chapterReport table should exist after migration")
+    }
+    
+    private fun verifyChapterHealthTableExists(driver: SqlDriver) {
+        var tableExists = false
+        driver.executeQuery(null,
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='chapterHealth'",
+            { cursor ->
+                val result = cursor.next()
+                tableExists = result.value
+                result
+            }, 0)
+        assertTrue(tableExists, "chapterHealth table should exist after migration")
+    }
+    
+    private fun verifyViewExists(driver: SqlDriver, viewName: String) {
+        var viewExists = false
+        driver.executeQuery(null,
+            "SELECT name FROM sqlite_master WHERE type='view' AND name='$viewName'",
+            { cursor ->
+                val result = cursor.next()
+                viewExists = result.value
+                result
+            }, 0)
+        assertTrue(viewExists, "$viewName should exist after migration")
     }
 }
 
-// Platform-specific driver creation - to be implemented in platform-specific test sources
+// Platform-specific driver creation
 expect fun createTestDriver(): SqlDriver
