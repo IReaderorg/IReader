@@ -165,13 +165,61 @@ actual fun TTSEngineSettingsScreen(
                         }
                     )
                     
-                    // Coqui TTS (Online)
+                    // Gradio TTS (Online - Generic)
+                    var gradioAvailable by remember { mutableStateOf(ttsService.gradioAvailable) }
+                    var showGradioConfig by remember { mutableStateOf(false) }
+                    var activeGradioConfigName by remember { mutableStateOf(ttsService.activeGradioConfig?.name) }
+                    
+                    EngineCard(
+                        name = "Gradio TTS (Online)",
+                        description = if (activeGradioConfigName != null) 
+                            "Using: $activeGradioConfigName" 
+                        else 
+                            "Support for any Gradio-based TTS (Persian, Edge, XTTS, etc.)",
+                        isAvailable = gradioAvailable,
+                        isCurrentEngine = currentEngine == "GRADIO",
+                        onSelect = {
+                            if (gradioAvailable) {
+                                scope.launch {
+                                    ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.GRADIO)
+                                    currentEngine = "GRADIO"
+                                }
+                            } else {
+                                showGradioConfig = true
+                            }
+                        }
+                    )
+                    
+                    // Gradio Configuration Dialog
+                    if (showGradioConfig) {
+                        GradioConfigDialog(
+                            ttsService = ttsService,
+                            appPrefs = koinInject(),
+                            onDismiss = { showGradioConfig = false },
+                            onConfigured = {
+                                // Update availability state
+                                gradioAvailable = ttsService.gradioAvailable
+                                activeGradioConfigName = ttsService.activeGradioConfig?.name
+                                showGradioConfig = false
+                                
+                                // Automatically select the engine after configuration
+                                if (ttsService.gradioAvailable) {
+                                    scope.launch {
+                                        ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.GRADIO)
+                                        currentEngine = "GRADIO"
+                                    }
+                                }
+                            }
+                        )
+                    }
+                    
+                    // Coqui TTS (Online) - Legacy
                     var coquiAvailable by remember { mutableStateOf(ttsService.coquiAvailable) }
                     var showCoquiConfig by remember { mutableStateOf(false) }
                     
                     EngineCard(
-                        name = "Coqui TTS (Online)",
-                        description = "High-quality neural TTS via HuggingFace Space",
+                        name = "Coqui TTS (Legacy)",
+                        description = "Original Coqui TTS configuration",
                         isAvailable = coquiAvailable,
                         isCurrentEngine = currentEngine == "COQUI",
                         onSelect = {
@@ -195,6 +243,14 @@ actual fun TTSEngineSettingsScreen(
                             onConfigured = {
                                 coquiAvailable = ttsService.coquiAvailable
                                 showCoquiConfig = false
+                                
+                                // Automatically select the engine after configuration
+                                if (ttsService.coquiAvailable) {
+                                    scope.launch {
+                                        ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.COQUI)
+                                        currentEngine = "COQUI"
+                                    }
+                                }
                             }
                         )
                     }
@@ -916,6 +972,272 @@ private fun CoquiConfigDialog(
                             }
                         },
                         enabled = spaceUrl.isNotEmpty(),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Save")
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * Dialog for configuring Gradio TTS with preset selection
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GradioConfigDialog(
+    ttsService: DesktopTTSService,
+    appPrefs: ireader.domain.preferences.prefs.AppPreferences,
+    onDismiss: () -> Unit,
+    onConfigured: () -> Unit
+) {
+    val presets = remember { ireader.domain.services.tts_service.GradioTTSPresets.getAllPresets() }
+    var selectedPresetId by remember { mutableStateOf(appPrefs.activeGradioConfigId().get().ifEmpty { presets.firstOrNull()?.id ?: "" }) }
+    var customSpaceUrl by remember { mutableStateOf("") }
+    var customApiName by remember { mutableStateOf("/predict") }
+    var useCustom by remember { mutableStateOf(false) }
+    var isTesting by remember { mutableStateOf(false) }
+    var testResult by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.75f)
+                .fillMaxHeight(0.8f),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Header
+                Text(
+                    text = "Configure Gradio TTS",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                
+                Text(
+                    text = "Select a preset TTS engine or configure a custom Gradio space.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                HorizontalDivider()
+                
+                // Preset/Custom toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = !useCustom,
+                        onClick = { useCustom = false },
+                        label = { Text("Presets") }
+                    )
+                    FilterChip(
+                        selected = useCustom,
+                        onClick = { useCustom = true },
+                        label = { Text("Custom") }
+                    )
+                }
+                
+                if (!useCustom) {
+                    // Preset selection
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        presets.forEach { preset ->
+                            OutlinedCard(
+                                onClick = { selectedPresetId = preset.id },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.outlinedCardColors(
+                                    containerColor = if (selectedPresetId == preset.id)
+                                        MaterialTheme.colorScheme.secondaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.surface
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = selectedPresetId == preset.id,
+                                        onClick = { selectedPresetId = preset.id }
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = preset.name,
+                                            style = MaterialTheme.typography.titleSmall
+                                        )
+                                        Text(
+                                            text = preset.description,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = preset.spaceUrl,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Custom configuration
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = customSpaceUrl,
+                            onValueChange = { customSpaceUrl = it },
+                            label = { Text("Space URL") },
+                            placeholder = { Text("https://username-space.hf.space") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        
+                        OutlinedTextField(
+                            value = customApiName,
+                            onValueChange = { customApiName = it },
+                            label = { Text("API Name") },
+                            placeholder = { Text("/predict or /synthesize_speech") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        
+                        Text(
+                            text = "Tip: Check the API tab on the Hugging Face Space page to find the correct API name.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                // Test result
+                if (testResult != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (testResult!!.startsWith("✓"))
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            text = testResult!!,
+                            modifier = Modifier.padding(12.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+                
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Cancel")
+                    }
+                    
+                    OutlinedButton(
+                        onClick = {
+                            scope.launch {
+                                isTesting = true
+                                testResult = null
+                                try {
+                                    val config = if (useCustom) {
+                                        ireader.domain.services.tts_service.GradioTTSConfig(
+                                            id = "custom_${System.currentTimeMillis()}",
+                                            name = "Custom TTS",
+                                            spaceUrl = customSpaceUrl,
+                                            apiName = customApiName,
+                                            isCustom = true
+                                        )
+                                    } else {
+                                        ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(selectedPresetId)
+                                    }
+                                    
+                                    if (config != null) {
+                                        ttsService.configureGradio(config)
+                                        if (ttsService.gradioAvailable) {
+                                            testResult = "✓ Configuration successful!"
+                                        } else {
+                                            testResult = "✗ Failed to configure. Check settings."
+                                        }
+                                    } else {
+                                        testResult = "✗ Invalid configuration"
+                                    }
+                                } catch (e: Exception) {
+                                    testResult = "✗ Error: ${e.message}"
+                                } finally {
+                                    isTesting = false
+                                }
+                            }
+                        },
+                        enabled = (useCustom && customSpaceUrl.isNotEmpty()) || (!useCustom && selectedPresetId.isNotEmpty()),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        if (isTesting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Test")
+                        }
+                    }
+                    
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val config = if (useCustom) {
+                                    ireader.domain.services.tts_service.GradioTTSConfig(
+                                        id = "custom_${System.currentTimeMillis()}",
+                                        name = "Custom TTS",
+                                        spaceUrl = customSpaceUrl,
+                                        apiName = customApiName,
+                                        isCustom = true
+                                    )
+                                } else {
+                                    ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(selectedPresetId)
+                                }
+                                
+                                if (config != null) {
+                                    // Save settings
+                                    appPrefs.useGradioTTS().set(true)
+                                    appPrefs.activeGradioConfigId().set(config.id)
+                                    
+                                    // Configure engine
+                                    ttsService.configureGradio(config)
+                                    
+                                    onConfigured()
+                                }
+                            }
+                        },
+                        enabled = (useCustom && customSpaceUrl.isNotEmpty()) || (!useCustom && selectedPresetId.isNotEmpty()),
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Save")

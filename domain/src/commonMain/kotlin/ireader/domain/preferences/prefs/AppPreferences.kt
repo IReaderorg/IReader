@@ -239,4 +239,34 @@ class AppPreferences(
     fun coquiSpeed(): Preference<Float> {
         return preferenceStore.getFloat("coqui_speed", 1.0f)
     }
+    
+    // ==================== Gradio TTS Settings ====================
+    
+    /**
+     * Enable Gradio TTS (generic support for any Gradio-based TTS)
+     */
+    fun useGradioTTS(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_gradio_tts", false)
+    }
+    
+    /**
+     * Active Gradio TTS configuration ID
+     */
+    fun activeGradioConfigId(): Preference<String> {
+        return preferenceStore.getString("active_gradio_config_id", "")
+    }
+    
+    /**
+     * Gradio TTS configurations JSON (stores all preset and custom configs)
+     */
+    fun gradioTTSConfigs(): Preference<String> {
+        return preferenceStore.getString("gradio_tts_configs", "")
+    }
+    
+    /**
+     * Gradio TTS speech speed (global override)
+     */
+    fun gradioTTSSpeed(): Preference<Float> {
+        return preferenceStore.getFloat("gradio_tts_speed", 1.0f)
+    }
 }

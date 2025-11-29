@@ -1,0 +1,337 @@
+package ireader.presentation.ui.settings.components
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import ireader.domain.services.tts_service.GradioParam
+import ireader.domain.services.tts_service.GradioParamType
+import ireader.domain.services.tts_service.GradioTTSConfig
+import ireader.domain.services.tts_service.GradioTTSPresets
+
+/**
+ * Gradio TTS Section - Common UI component for both Android and Desktop
+ * Displays and manages Gradio TTS configurations
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GradioTTSSection(
+    useGradioTTS: Boolean,
+    onUseGradioTTSChange: (Boolean) -> Unit,
+    configs: List<GradioTTSConfig>,
+    activeConfigId: String?,
+    onSelectConfig: (String) -> Unit,
+    onTestConfig: (String) -> Unit,
+    onEditConfig: (GradioTTSConfig) -> Unit,
+    onDeleteConfig: (String) -> Unit,
+    onAddCustomConfig: () -> Unit,
+    globalSpeed: Float,
+    onGlobalSpeedChange: (Float) -> Unit,
+    isTesting: Boolean,
+    testingConfigId: String?,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Master toggle card
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = if (useGradioTTS)
+                    MaterialTheme.colorScheme.primaryContainer
+                else
+                    MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Cloud,
+                            contentDescription = null,
+                            tint = if (useGradioTTS)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Gradio TTS (Online)",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Text(
+                        text = "Use online TTS engines from Hugging Face Spaces",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = useGradioTTS,
+                    onCheckedChange = onUseGradioTTSChange
+                )
+            }
+        }
+        
+        // Show configuration options when enabled
+        if (useGradioTTS) {
+            // Global speed control
+            Card {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Global Speed: ${String.format("%.1f", globalSpeed)}x",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Slider(
+                        value = globalSpeed,
+                        onValueChange = onGlobalSpeedChange,
+                        valueRange = 0.5f..2.0f,
+                        steps = 15
+                    )
+                }
+            }
+            
+            // Preset engines section
+            Text(
+                text = "Available Engines",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            
+            // Show configs
+            configs.forEach { config ->
+                GradioConfigCard(
+                    config = config,
+                    isActive = activeConfigId == config.id,
+                    onSelect = { onSelectConfig(config.id) },
+                    onTest = { onTestConfig(config.id) },
+                    onEdit = { onEditConfig(config) },
+                    onDelete = if (config.isCustom) {{ onDeleteConfig(config.id) }} else null,
+                    isTesting = isTesting && testingConfigId == config.id
+                )
+            }
+            
+            // Add custom button
+            OutlinedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onAddCustomConfig() }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Add Custom TTS Engine",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            
+            // Info card
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = "About Gradio TTS",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                    Text(
+                        text = "Gradio TTS connects to Hugging Face Spaces for speech synthesis. Requires internet connection.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GradioConfigCard(
+    config: GradioTTSConfig,
+    isActive: Boolean,
+    onSelect: () -> Unit,
+    onTest: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: (() -> Unit)?,
+    isTesting: Boolean
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelect() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isActive)
+                MaterialTheme.colorScheme.secondaryContainer
+            else
+                MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    RadioButton(
+                        selected = isActive,
+                        onClick = onSelect
+                    )
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = config.name,
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                            if (config.isCustom) {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                                    shape = MaterialTheme.shapes.extraSmall
+                                ) {
+                                    Text(
+                                        text = "Custom",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    )
+                                }
+                            }
+                        }
+                        if (config.description.isNotEmpty()) {
+                            Text(
+                                text = config.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Action buttons row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = onTest,
+                    enabled = !isTesting,
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    if (isTesting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(14.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Test", style = MaterialTheme.typography.labelMedium)
+                }
+                
+                TextButton(
+                    onClick = onEdit,
+                    contentPadding = PaddingValues(horizontal = 8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Edit", style = MaterialTheme.typography.labelMedium)
+                }
+                
+                if (onDelete != null) {
+                    TextButton(
+                        onClick = onDelete,
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        ),
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

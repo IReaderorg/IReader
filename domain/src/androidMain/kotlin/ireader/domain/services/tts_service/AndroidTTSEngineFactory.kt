@@ -1,6 +1,7 @@
 package ireader.domain.services.tts_service
 
 import android.content.Context
+import io.ktor.client.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -9,6 +10,7 @@ import org.koin.core.component.inject
  */
 actual object TTSEngineFactory : KoinComponent {
     private val context: Context by inject()
+    private val httpClient: HttpClient by inject()
     
     actual fun createNativeEngine(): TTSEngine {
         return AndroidNativeTTSEngine(context)
@@ -22,9 +24,21 @@ actual object TTSEngineFactory : KoinComponent {
         }
     }
     
+    /**
+     * Create a generic Gradio TTS engine from configuration
+     */
+    actual fun createGradioEngine(config: GradioTTSConfig): TTSEngine? {
+        return if (config.spaceUrl.isNotEmpty() && config.enabled) {
+            AndroidGradioTTSEngine(context, httpClient, config)
+        } else {
+            null
+        }
+    }
+    
     actual fun getAvailableEngines(): List<String> {
         return buildList {
             add("Native Android TTS")
+            add("Gradio TTS (Online)")
             // Check if Coqui is configured
             // Could add more engines here
         }
@@ -96,4 +110,57 @@ class AndroidCoquiTTSEngine(
     }
     
     fun getCacheStatus(utteranceId: String) = player.getCacheStatus(utteranceId)
+}
+
+
+/**
+ * Android adapter for GenericGradioTTSEngine
+ * Wraps the common GenericGradioTTSEngine with Android-specific audio player
+ */
+class AndroidGradioTTSEngine(
+    context: Context,
+    httpClient: HttpClient,
+    config: GradioTTSConfig
+) : TTSEngine {
+    
+    private val audioPlayer = AndroidCoquiAudioPlayer(context)
+    private val engine = GenericGradioTTSEngine(
+        config = config,
+        httpClient = httpClient,
+        audioPlayer = audioPlayer
+    )
+    
+    override suspend fun speak(text: String, utteranceId: String) {
+        engine.speak(text, utteranceId)
+    }
+    
+    override fun stop() = engine.stop()
+    override fun pause() = engine.pause()
+    override fun resume() = engine.resume()
+    override fun setSpeed(speed: Float) = engine.setSpeed(speed)
+    override fun setPitch(pitch: Float) = engine.setPitch(pitch)
+    override fun isReady() = engine.isReady()
+    override fun cleanup() = engine.cleanup()
+    override fun getEngineName() = engine.getEngineName()
+    
+    override fun setCallback(callback: TTSEngineCallback) {
+        engine.setCallback(callback)
+    }
+    
+    /**
+     * Pre-cache paragraphs for smoother playback
+     */
+    fun precacheParagraphs(paragraphs: List<Pair<String, String>>) {
+        engine.precacheParagraphs(paragraphs)
+    }
+    
+    /**
+     * Get cache status for a paragraph
+     */
+    fun getCacheStatus(utteranceId: String) = engine.getCacheStatus(utteranceId)
+    
+    /**
+     * Get the underlying configuration
+     */
+    fun getConfig() = engine.getConfig()
 }

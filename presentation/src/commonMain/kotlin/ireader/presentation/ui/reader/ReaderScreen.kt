@@ -197,6 +197,8 @@ private fun ReadingScreenContent(
                     if (vm.isReaderModeEnable) {
                         isSyncing = true
                         vm.isReaderModeEnable = false
+                        // Wait for layout to stabilize before releasing sync lock
+                        kotlinx.coroutines.delay(300)
                         isSyncing = false
                     }
                 }
@@ -204,6 +206,8 @@ private fun ReadingScreenContent(
                     if (!vm.isReaderModeEnable) {
                         isSyncing = true
                         vm.isReaderModeEnable = true
+                        // Wait for layout to stabilize before releasing sync lock
+                        kotlinx.coroutines.delay(300)
                         isSyncing = false
                     }
                 }
@@ -220,28 +224,28 @@ private fun ReadingScreenContent(
                 false -> {
                     if (modalBottomSheetState.targetValue != ModalBottomSheetValue.Expanded) {
                         isSyncing = true
-                        scope.launch {
-                            try {
-                                modalBottomSheetState.show()
-                            } catch (e: Exception) {
-                                ireader.core.log.Log.error("Error showing modal sheet", e)
-                            } finally {
-                                isSyncing = false
-                            }
+                        try {
+                            modalBottomSheetState.show()
+                            // Wait for animation to complete
+                            kotlinx.coroutines.delay(300)
+                        } catch (e: Exception) {
+                            ireader.core.log.Log.error("Error showing modal sheet", e)
+                        } finally {
+                            isSyncing = false
                         }
                     }
                 }
                 true -> {
                     if (modalBottomSheetState.targetValue != ModalBottomSheetValue.Hidden) {
                         isSyncing = true
-                        scope.launch {
-                            try {
-                                modalBottomSheetState.hide()
-                            } catch (e: Exception) {
-                                ireader.core.log.Log.error("Error hiding modal sheet", e)
-                            } finally {
-                                isSyncing = false
-                            }
+                        try {
+                            modalBottomSheetState.hide()
+                            // Wait for animation to complete
+                            kotlinx.coroutines.delay(300)
+                        } catch (e: Exception) {
+                            ireader.core.log.Log.error("Error hiding modal sheet", e)
+                        } finally {
+                            isSyncing = false
                         }
                     }
                 }

@@ -58,6 +58,7 @@ fun VoiceSelectionDialog(
                             DesktopTTSService.TTSEngine.MAYA -> "Select Maya Language"
                             DesktopTTSService.TTSEngine.SIMULATION -> "Simulation Mode"
                             DesktopTTSService.TTSEngine.COQUI -> "Coqui Online Mode"
+                            DesktopTTSService.TTSEngine.GRADIO -> "Gradio Online Mode"
                         },
                         style = MaterialTheme.typography.headlineSmall
                     )
@@ -231,6 +232,14 @@ fun VoiceSelectionDialog(
                             DesktopTTSService.TTSEngine.SIMULATION -> {
                                 Text(
                                     text = "Simulation mode does not use real voices.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            DesktopTTSService.TTSEngine.GRADIO -> {
+                                Text(
+                                    text = "Gradio",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

@@ -31,8 +31,19 @@ actual object TTSEngineFactory : KoinComponent {
         }
     }
     
+    /**
+     * Create a generic Gradio TTS engine from configuration
+     */
+    actual fun createGradioEngine(config: GradioTTSConfig): TTSEngine? {
+        return if (config.spaceUrl.isNotEmpty() && config.enabled) {
+            DesktopGradioTTSEngine(config)
+        } else {
+            null
+        }
+    }
+    
     actual fun getAvailableEngines(): List<String> {
-        return listOf("Piper TTS", "Kokoro TTS", "Maya TTS", "Coqui TTS")
+        return listOf("Piper TTS", "Kokoro TTS", "Maya TTS", "Coqui TTS", "Gradio TTS (Online)")
     }
     
     /**
@@ -246,4 +257,35 @@ private class DesktopCoquiTTSEngine(
     // Expose caching for pre-fetching
     fun precacheParagraphs(paragraphs: List<Pair<String, String>>) = engine.precacheParagraphs(paragraphs)
     fun getCacheStatus(utteranceId: String) = engine.getCacheStatus(utteranceId)
+}
+
+/**
+ * Desktop Generic Gradio TTS Engine
+ * Uses the common GenericGradioTTSEngine with Desktop-specific audio player
+ */
+private class DesktopGradioTTSEngine(
+    config: GradioTTSConfig
+) : TTSEngine {
+    private val httpClient = io.ktor.client.HttpClient()
+    private val audioPlayer = DesktopCoquiAudioPlayer()
+    private val engine = GenericGradioTTSEngine(config, httpClient, audioPlayer)
+    
+    override suspend fun speak(text: String, utteranceId: String) = engine.speak(text, utteranceId)
+    override fun stop() = engine.stop()
+    override fun pause() = engine.pause()
+    override fun resume() = engine.resume()
+    override fun setSpeed(speed: Float) = engine.setSpeed(speed)
+    override fun setPitch(pitch: Float) = engine.setPitch(pitch)
+    override fun isReady() = engine.isReady()
+    override fun cleanup() {
+        engine.cleanup()
+        httpClient.close()
+    }
+    override fun getEngineName() = engine.getEngineName()
+    override fun setCallback(callback: TTSEngineCallback) = engine.setCallback(callback)
+    
+    // Expose caching for pre-fetching
+    fun precacheParagraphs(paragraphs: List<Pair<String, String>>) = engine.precacheParagraphs(paragraphs)
+    fun getCacheStatus(utteranceId: String) = engine.getCacheStatus(utteranceId)
+    fun getConfig() = engine.getConfig()
 }

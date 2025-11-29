@@ -37,7 +37,8 @@ class AndroidTTSService(
     
     enum class EngineType {
         NATIVE,
-        COQUI
+        COQUI,
+        GRADIO
     }
     
     override suspend fun initializePlatformComponents() {
@@ -46,6 +47,23 @@ class AndroidTTSService(
     }
     
     override fun createTTSEngine(): TTSEngine {
+        // Check for Gradio TTS first (new generic system)
+        val useGradioTTS = appPrefs.useGradioTTS().get()
+        val activeGradioConfigId = appPrefs.activeGradioConfigId().get()
+        
+        if (useGradioTTS && activeGradioConfigId.isNotEmpty()) {
+            // Try to load Gradio config
+            val gradioConfig = loadGradioConfig(activeGradioConfigId)
+            if (gradioConfig != null && gradioConfig.spaceUrl.isNotEmpty()) {
+                currentEngineType = EngineType.GRADIO
+                val engine = TTSEngineFactory.createGradioEngine(gradioConfig)
+                if (engine != null) {
+                    return engine
+                }
+            }
+        }
+        
+        // Fall back to legacy Coqui TTS
         val useCoquiTTS = appPrefs.useCoquiTTS().get()
         val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
         
@@ -61,6 +79,25 @@ class AndroidTTSService(
         } else {
             currentEngineType = EngineType.NATIVE
             TTSEngineFactory.createNativeEngine()
+        }
+    }
+    
+    /**
+     * Load Gradio TTS configuration from preferences
+     */
+    private fun loadGradioConfig(configId: String): GradioTTSConfig? {
+        return try {
+            val configsJson = appPrefs.gradioTTSConfigs().get()
+            if (configsJson.isEmpty()) {
+                // Return preset if available
+                GradioTTSPresets.getPresetById(configId)
+            } else {
+                val state = kotlinx.serialization.json.Json.decodeFromString<GradioTTSManagerState>(configsJson)
+                state.configs.find { it.id == configId } ?: GradioTTSPresets.getPresetById(configId)
+            }
+        } catch (e: Exception) {
+            ireader.core.log.Log.error { "Failed to load Gradio config: ${e.message}" }
+            GradioTTSPresets.getPresetById(configId)
         }
     }
     
@@ -101,10 +138,9 @@ class AndroidTTSService(
     }
     
     override suspend fun precacheNextParagraphs() {
-        // Only cache for Coqui TTS
-        if (currentEngineType != EngineType.COQUI) return
+        // Only cache for Coqui or Gradio TTS
+        if (currentEngineType == EngineType.NATIVE) return
         
-        val androidEngine = ttsEngine as? AndroidCoquiTTSEngine ?: return
         val content = state.currentContent.value
         val current = state.currentParagraph.value
         
@@ -120,41 +156,58 @@ class AndroidTTSService(
             }
         }
         
-        if (nextParagraphs.isNotEmpty()) {
-            // Update loading state
-            (state as? BaseTTSService)?.let { baseState ->
-                // Access protected state through reflection or make it internal
-                // For now, we'll use the public state flows
-            }
-            
-            androidEngine.precacheParagraphs(nextParagraphs)
-            
-            // Update cache status after a delay
-            scope.launch {
-                delay(500)
-                val cached = mutableSetOf<Int>()
-                val loading = mutableSetOf<Int>()
+        if (nextParagraphs.isEmpty()) return
+        
+        // Handle different engine types
+        when (currentEngineType) {
+            EngineType.COQUI -> {
+                val coquiEngine = ttsEngine as? AndroidCoquiTTSEngine ?: return
+                coquiEngine.precacheParagraphs(nextParagraphs)
                 
-                for (i in 1..3) {
-                    val nextIndex = current + i
-                    if (nextIndex < content.size) {
-                        when (androidEngine.getCacheStatus(nextIndex.toString())) {
-                            CoquiTTSPlayer.CacheStatus.CACHED -> cached.add(nextIndex)
-                            CoquiTTSPlayer.CacheStatus.LOADING -> loading.add(nextIndex)
-                            else -> {}
+                // Update cache status after a delay
+                scope.launch {
+                    delay(500)
+                    for (i in 1..3) {
+                        val nextIndex = current + i
+                        if (nextIndex < content.size) {
+                            coquiEngine.getCacheStatus(nextIndex.toString())
                         }
                     }
                 }
-                
-                // Update state through protected methods
-                // This would need to be exposed in BaseTTSService
             }
+            EngineType.GRADIO -> {
+                val gradioEngine = ttsEngine as? AndroidGradioTTSEngine ?: return
+                gradioEngine.precacheParagraphs(nextParagraphs)
+                
+                // Update cache status after a delay
+                scope.launch {
+                    delay(500)
+                    for (i in 1..3) {
+                        val nextIndex = current + i
+                        if (nextIndex < content.size) {
+                            gradioEngine.getCacheStatus(nextIndex.toString())
+                        }
+                    }
+                }
+            }
+            else -> {}
         }
     }
     
     override fun getPlatformAvailableEngines(): List<String> {
         val engines = mutableListOf("Native Android TTS")
         
+        // Check for Gradio TTS
+        val useGradioTTS = appPrefs.useGradioTTS().get()
+        val activeGradioConfigId = appPrefs.activeGradioConfigId().get()
+        if (useGradioTTS && activeGradioConfigId.isNotEmpty()) {
+            val config = loadGradioConfig(activeGradioConfigId)
+            if (config != null) {
+                engines.add("Gradio TTS (${config.name})")
+            }
+        }
+        
+        // Check for legacy Coqui TTS
         val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
         if (coquiSpaceUrl.isNotEmpty()) {
             engines.add("Coqui TTS")

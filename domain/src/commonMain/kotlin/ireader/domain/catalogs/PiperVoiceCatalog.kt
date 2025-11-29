@@ -1,31 +1,218 @@
 package ireader.domain.catalogs
 
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import ireader.core.log.Log
 import ireader.domain.models.tts.VoiceGender
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.models.tts.VoiceQuality
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
+import kotlinx.serialization.json.longOrNull
 
 /**
- * Comprehensive catalog of Piper TTS voices
- * Shared between Android and Desktop platforms
- * 
- * Based on official Piper voices from HuggingFace
+ * Dynamic catalog of Piper TTS voices fetched from official source.
+ * Voices are loaded from https://rhasspy.github.io/piper-samples/voices.json
  */
 object PiperVoiceCatalog {
     
-    fun getAllVoices(): List<VoiceModel> = piperVoices
+    private const val VOICES_JSON_URL = "https://rhasspy.github.io/piper-samples/voices.json"
+    private const val BASE_DOWNLOAD_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/main/"
     
-    fun getVoiceById(id: String): VoiceModel? = piperVoices.find { it.id == id }
+    private val json = Json { 
+        ignoreUnknownKeys = true 
+        isLenient = true
+    }
+    
+    private var cachedVoices: List<VoiceModel>? = null
+    private val mutex = Mutex()
+    private var lastFetchTime: Long = 0
+    private const val CACHE_DURATION_MS = 24 * 60 * 60 * 1000L // 24 hours
+    
+    /**
+     * Get all available voices. Returns cached voices or fallback if not yet loaded.
+     */
+    fun getAllVoices(): List<VoiceModel> = cachedVoices ?: fallbackVoices
+    
+    /**
+     * Fetch voices from remote source. Call this on app startup or when refreshing.
+     */
+    suspend fun fetchVoices(httpClient: HttpClient): Result<List<VoiceModel>> {
+        return mutex.withLock {
+            // Return cached if still valid
+            val now = System.currentTimeMillis()
+            if (cachedVoices != null && (now - lastFetchTime) < CACHE_DURATION_MS) {
+                return@withLock Result.success(cachedVoices!!)
+            }
+            
+            try {
+                Log.info { "[PiperVoiceCatalog] Fetching voices from $VOICES_JSON_URL" }
+                val response = httpClient.get(VOICES_JSON_URL)
+                val jsonText = response.bodyAsText()
+                
+                val voices = parseVoicesJson(jsonText)
+                cachedVoices = voices
+                lastFetchTime = now
+                
+                Log.info { "[PiperVoiceCatalog] Loaded ${voices.size} voices" }
+                Result.success(voices)
+            } catch (e: Exception) {
+                Log.error { "[PiperVoiceCatalog] Failed to fetch voices: ${e.message}" }
+                // Return fallback on error
+                if (cachedVoices == null) {
+                    cachedVoices = fallbackVoices
+                }
+                Result.failure(e)
+            }
+        }
+    }
+    
+    /**
+     * Force refresh voices from remote source.
+     */
+    suspend fun refreshVoices(httpClient: HttpClient): Result<List<VoiceModel>> {
+        lastFetchTime = 0 // Reset cache
+        return fetchVoices(httpClient)
+    }
+    
+    private fun parseVoicesJson(jsonText: String): List<VoiceModel> {
+        val voices = mutableListOf<VoiceModel>()
+        
+        try {
+            val rootObject = json.parseToJsonElement(jsonText).jsonObject
+            
+            for ((key, value) in rootObject) {
+                try {
+                    val voiceObj = value.jsonObject
+                    val voice = parseVoiceEntry(key, voiceObj)
+                    if (voice != null) {
+                        voices.add(voice)
+                    }
+                } catch (e: Exception) {
+                    Log.warn { "[PiperVoiceCatalog] Failed to parse voice $key: ${e.message}" }
+                }
+            }
+        } catch (e: Exception) {
+            Log.error { "[PiperVoiceCatalog] Failed to parse voices JSON" }
+        }
+        
+        return voices.sortedBy { it.language + it.name }
+    }
+    
+    private fun parseVoiceEntry(key: String, obj: JsonObject): VoiceModel? {
+        val name = obj["name"]?.jsonPrimitive?.contentOrNull ?: return null
+        val qualityStr = obj["quality"]?.jsonPrimitive?.contentOrNull ?: "medium"
+        val numSpeakers = obj["num_speakers"]?.jsonPrimitive?.intOrNull ?: 1
+        
+        val langObj = obj["language"]?.jsonObject ?: return null
+        val langCode = langObj["code"]?.jsonPrimitive?.contentOrNull ?: return null
+        val langFamily = langObj["family"]?.jsonPrimitive?.contentOrNull ?: langCode.substringBefore("_")
+        val langRegion = langObj["region"]?.jsonPrimitive?.contentOrNull ?: ""
+        val langEnglish = langObj["name_english"]?.jsonPrimitive?.contentOrNull ?: langFamily
+        val country = langObj["country_english"]?.jsonPrimitive?.contentOrNull ?: ""
+        
+        // Find ONNX file info
+        val filesObj = obj["files"]?.jsonObject ?: return null
+        var onnxPath: String? = null
+        var onnxSize: Long = 0
+        
+        for ((filePath, fileInfo) in filesObj) {
+            if (filePath.endsWith(".onnx") && !filePath.endsWith(".onnx.json")) {
+                onnxPath = filePath
+                onnxSize = fileInfo.jsonObject["size_bytes"]?.jsonPrimitive?.longOrNull ?: 0
+                break
+            }
+        }
+        
+        if (onnxPath == null) return null
+        
+        val quality = when (qualityStr) {
+            "x_low" -> VoiceQuality.LOW
+            "low" -> VoiceQuality.LOW
+            "medium" -> VoiceQuality.MEDIUM
+            "high" -> VoiceQuality.HIGH
+            else -> VoiceQuality.MEDIUM
+        }
+        
+        // Infer gender from name (heuristic)
+        val gender = inferGender(name)
+        
+        val locale = langCode.replace("_", "-")
+        val displayName = "$langEnglish ($country) - ${name.replaceFirstChar { it.uppercase() }} - ${qualityStr.replaceFirstChar { it.uppercase() }}"
+        
+        val downloadUrl = BASE_DOWNLOAD_URL + onnxPath
+        val configUrl = "$downloadUrl.json"
+        
+        val tags = mutableListOf(langEnglish.lowercase(), country.lowercase())
+        if (numSpeakers > 1) tags.add("multi-speaker")
+        
+        return VoiceModel(
+            id = key,
+            name = displayName,
+            language = langFamily,
+            locale = locale,
+            gender = gender,
+            quality = quality,
+            sampleRate = 22050,
+            modelSize = onnxSize,
+            downloadUrl = downloadUrl,
+            configUrl = configUrl,
+            checksum = "",
+            license = "MIT",
+            description = "$langEnglish voice from $country" + if (numSpeakers > 1) " ($numSpeakers speakers)" else "",
+            tags = tags
+        )
+    }
+    
+    private fun inferGender(name: String): VoiceGender {
+        val femaleName = listOf(
+            "amy", "alba", "jenny", "cori", "kathleen", "kristin", "lessac", "ljspeech",
+            "eva", "kerstin", "ramona", "siwis", "rapunzelina", "carla", "daniela",
+            "anna", "berta", "paola", "irina", "lada", "lisa", "nathalie", "gosia",
+            "maya", "meera", "priyamvada", "padmavathi", "lili", "salka", "ugla",
+            "natia", "raya", "marylux", "ona", "huayan"
+        )
+        val maleName = listOf(
+            "alan", "ryan", "joe", "john", "danny", "bryce", "norman", "sam", "kusal",
+            "thorsten", "karlsson", "pavoque", "gilles", "tom", "riccardo", "faber",
+            "dmitri", "ruslan", "denis", "kareem", "amir", "harri", "imre", "mihai",
+            "artur", "darkman", "fettah", "fahrettin", "aivars", "arjun", "venkatesh",
+            "rohan", "pratham", "bui", "steinn", "pim", "ronnie", "cadu", "jeff"
+        )
+        
+        val lowerName = name.lowercase()
+        return when {
+            femaleName.any { lowerName.contains(it) } -> VoiceGender.FEMALE
+            maleName.any { lowerName.contains(it) } -> VoiceGender.MALE
+            lowerName.contains("female") -> VoiceGender.FEMALE
+            lowerName.contains("male") -> VoiceGender.MALE
+            else -> VoiceGender.NEUTRAL
+        }
+    }
+    
+    fun getVoiceById(id: String): VoiceModel? = getAllVoices().find { it.id == id }
     
     fun getVoicesByLanguage(language: String): List<VoiceModel> {
-        return piperVoices.filter { it.language == language }
+        return getAllVoices().filter { it.language == language }
     }
     
     fun getSupportedLanguages(): List<String> {
-        return piperVoices.map { it.language }.distinct().sorted()
+        return getAllVoices().map { it.language }.distinct().sorted()
     }
+
     
-    private val piperVoices = listOf(
-        // English (US) voices
+    // Fallback voices for offline use or when fetch fails
+    private val fallbackVoices = listOf(
         VoiceModel(
             id = "en_US-lessac-medium",
             name = "English (US) - Lessac - Medium",
@@ -34,29 +221,13 @@ object PiperVoiceCatalog {
             gender = VoiceGender.MALE,
             quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json",
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}en/en_US/lessac/medium/en_US-lessac-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}en/en_US/lessac/medium/en_US-lessac-medium.onnx.json",
             checksum = "",
             license = "MIT",
-            description = "Professional US English male voice with excellent clarity",
-            tags = listOf("english", "us", "male", "professional")
-        ),
-        VoiceModel(
-            id = "en_US-lessac-high",
-            name = "English (US) - Lessac - High",
-            language = "en",
-            locale = "en-US",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.HIGH,
-            sampleRate = 22050,
-            modelSize = 94_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/high/en_US-lessac-high.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/high/en_US-lessac-high.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "High-quality US English male voice",
-            tags = listOf("english", "us", "male", "high-quality")
+            description = "Professional US English voice",
+            tags = listOf("english", "us", "male")
         ),
         VoiceModel(
             id = "en_US-amy-medium",
@@ -66,48 +237,14 @@ object PiperVoiceCatalog {
             gender = VoiceGender.FEMALE,
             quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/amy/medium/en_US-amy-medium.onnx.json",
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}en/en_US/amy/medium/en_US-amy-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}en/en_US/amy/medium/en_US-amy-medium.onnx.json",
             checksum = "",
             license = "MIT",
             description = "Natural US English female voice",
-            tags = listOf("english", "us", "female", "natural")
+            tags = listOf("english", "us", "female")
         ),
-        VoiceModel(
-            id = "en_US-libritts-high",
-            name = "English (US) - LibriTTS - High",
-            language = "en",
-            locale = "en-US",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.HIGH,
-            sampleRate = 22050,
-            modelSize = 94_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/libritts/high/en_US-libritts-high.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/libritts/high/en_US-libritts-high.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "High-quality US English female voice from LibriTTS",
-            tags = listOf("english", "us", "female", "high-quality")
-        ),
-        VoiceModel(
-            id = "en_US-ryan-high",
-            name = "English (US) - Ryan - High",
-            language = "en",
-            locale = "en-US",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.HIGH,
-            sampleRate = 22050,
-            modelSize = 94_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Premium US English male voice",
-            tags = listOf("english", "us", "male", "premium")
-        ),
-        
-        // English (GB) voices
         VoiceModel(
             id = "en_GB-alan-medium",
             name = "English (GB) - Alan - Medium",
@@ -116,184 +253,78 @@ object PiperVoiceCatalog {
             gender = VoiceGender.MALE,
             quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alan/medium/en_GB-alan-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alan/medium/en_GB-alan-medium.onnx.json",
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}en/en_GB/alan/medium/en_GB-alan-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}en/en_GB/alan/medium/en_GB-alan-medium.onnx.json",
             checksum = "",
             license = "MIT",
-            description = "Refined British English male voice",
-            tags = listOf("english", "british", "uk", "male")
+            description = "British English male voice",
+            tags = listOf("english", "british", "male")
         ),
         VoiceModel(
-            id = "en_GB-alba-medium",
-            name = "English (GB) - Alba - Medium",
-            language = "en",
-            locale = "en-GB",
+            id = "de_DE-thorsten-medium",
+            name = "German - Thorsten - Medium",
+            language = "de",
+            locale = "de-DE",
+            gender = VoiceGender.MALE,
+            quality = VoiceQuality.MEDIUM,
+            sampleRate = 22050,
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx.json",
+            checksum = "",
+            license = "MIT",
+            description = "German male voice",
+            tags = listOf("german", "germany", "male")
+        ),
+        VoiceModel(
+            id = "fr_FR-siwis-medium",
+            name = "French - Siwis - Medium",
+            language = "fr",
+            locale = "fr-FR",
             gender = VoiceGender.FEMALE,
             quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/alba/medium/en_GB-alba-medium.onnx.json",
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx.json",
             checksum = "",
             license = "MIT",
-            description = "Natural British English female voice",
-            tags = listOf("english", "british", "uk", "female")
+            description = "French female voice",
+            tags = listOf("french", "france", "female")
         ),
-        
-        // Spanish voices
         VoiceModel(
-            id = "es_ES-mls_10246-low",
-            name = "Spanish (Spain) - MLS 10246 - Low",
+            id = "es_ES-davefx-medium",
+            name = "Spanish (Spain) - Davefx - Medium",
             language = "es",
             locale = "es-ES",
             gender = VoiceGender.MALE,
-            quality = VoiceQuality.LOW,
+            quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 18_874_368L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_10246/low/es_ES-mls_10246-low.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_10246/low/es_ES-mls_10246-low.onnx.json",
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}es/es_ES/davefx/medium/es_ES-davefx-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}es/es_ES/davefx/medium/es_ES-davefx-medium.onnx.json",
             checksum = "",
             license = "MIT",
             description = "Spanish male voice",
             tags = listOf("spanish", "spain", "male")
         ),
         VoiceModel(
-            id = "es_ES-mls_9972-low",
-            name = "Spanish (Spain) - MLS 9972 - Low",
-            language = "es",
-            locale = "es-ES",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.LOW,
-            sampleRate = 22050,
-            modelSize = 18_874_368L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_9972/low/es_ES-mls_9972-low.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/mls_9972/low/es_ES-mls_9972-low.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Spanish female voice",
-            tags = listOf("spanish", "spain", "female")
-        ),
-        VoiceModel(
-            id = "es_MX-ald-medium",
-            name = "Spanish (Mexico) - Ald - Medium",
-            language = "es",
-            locale = "es-MX",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/medium/es_MX-ald-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/medium/es_MX-ald-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Mexican Spanish male voice",
-            tags = listOf("spanish", "mexican", "male")
-        ),
-        
-        // French voices
-        VoiceModel(
-            id = "fr_FR-siwis-medium",
-            name = "French (France) - Siwis - Medium",
-            language = "fr",
-            locale = "fr-FR",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/siwis/medium/fr_FR-siwis-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Elegant French female voice",
-            tags = listOf("french", "france", "female")
-        ),
-        VoiceModel(
-            id = "fr_FR-upmc-medium",
-            name = "French (France) - UPMC - Medium",
-            language = "fr",
-            locale = "fr-FR",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/upmc/medium/fr_FR-upmc-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/upmc/medium/fr_FR-upmc-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural French male voice",
-            tags = listOf("french", "france", "male")
-        ),
-        
-        // German voices
-        VoiceModel(
-            id = "de_DE-thorsten-medium",
-            name = "German (Germany) - Thorsten - Medium",
-            language = "de",
-            locale = "de-DE",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/medium/de_DE-thorsten-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Professional German male voice",
-            tags = listOf("german", "germany", "male")
-        ),
-        VoiceModel(
-            id = "de_DE-thorsten-high",
-            name = "German (Germany) - Thorsten - High",
-            language = "de",
-            locale = "de-DE",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.HIGH,
-            sampleRate = 22050,
-            modelSize = 94_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "High-quality German male voice",
-            tags = listOf("german", "germany", "male", "high-quality")
-        ),
-        VoiceModel(
-            id = "de_DE-eva_k-medium",
-            name = "German (Germany) - Eva K - Medium",
-            language = "de",
-            locale = "de-DE",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/eva_k/medium/de_DE-eva_k-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/eva_k/medium/de_DE-eva_k-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Clear German female voice",
-            tags = listOf("german", "germany", "female")
-        ),
-        
-        // Italian voices
-        VoiceModel(
-            id = "it_IT-riccardo-medium",
-            name = "Italian (Italy) - Riccardo - Medium",
+            id = "it_IT-paola-medium",
+            name = "Italian - Paola - Medium",
             language = "it",
             locale = "it-IT",
-            gender = VoiceGender.MALE,
+            gender = VoiceGender.FEMALE,
             quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/riccardo/x_low/it_IT-riccardo-x_low.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/riccardo/x_low/it_IT-riccardo-x_low.onnx.json",
+            modelSize = 63511038L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}it/it_IT/paola/medium/it_IT-paola-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}it/it_IT/paola/medium/it_IT-paola-medium.onnx.json",
             checksum = "",
             license = "MIT",
-            description = "Expressive Italian male voice",
-            tags = listOf("italian", "italy", "male")
+            description = "Italian female voice",
+            tags = listOf("italian", "italy", "female")
         ),
-        
-        // Portuguese voices
         VoiceModel(
             id = "pt_BR-faber-medium",
             name = "Portuguese (Brazil) - Faber - Medium",
@@ -302,86 +333,14 @@ object PiperVoiceCatalog {
             gender = VoiceGender.MALE,
             quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx.json",
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx.json",
             checksum = "",
             license = "MIT",
-            description = "Natural Brazilian Portuguese male voice",
-            tags = listOf("portuguese", "brazilian", "brazil", "male")
+            description = "Brazilian Portuguese male voice",
+            tags = listOf("portuguese", "brazil", "male")
         ),
-        VoiceModel(
-            id = "pt_PT-tugao-medium",
-            name = "Portuguese (Portugal) - Tugão - Medium",
-            language = "pt",
-            locale = "pt-PT",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tugao/medium/pt_PT-tugao-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tugao/medium/pt_PT-tugao-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "European Portuguese male voice",
-            tags = listOf("portuguese", "portugal", "male")
-        ),
-        
-        // Chinese voices
-        VoiceModel(
-            id = "zh_CN-huayan-medium",
-            name = "Chinese (Mandarin) - Huayan - Medium",
-            language = "zh",
-            locale = "zh-CN",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural Mandarin Chinese female voice",
-            tags = listOf("chinese", "mandarin", "female")
-        ),
-        
-        // Japanese voices
-        VoiceModel(
-            id = "ja_JP-natsumivoice-medium",
-            name = "Japanese - Natsumi - Medium",
-            language = "ja",
-            locale = "ja-JP",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/natsumivoice/medium/ja_JP-natsumivoice-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/natsumivoice/medium/ja_JP-natsumivoice-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Clear Japanese female voice",
-            tags = listOf("japanese", "japan", "female")
-        ),
-        
-        // Korean voices
-        VoiceModel(
-            id = "ko_KR-kss-medium",
-            name = "Korean - KSS - Medium",
-            language = "ko",
-            locale = "ko-KR",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ko/ko_KR/kss/medium/ko_KR-kss-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ko/ko_KR/kss/medium/ko_KR-kss-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural Korean female voice",
-            tags = listOf("korean", "korea", "female")
-        ),
-        
-        // Russian voices
         VoiceModel(
             id = "ru_RU-dmitri-medium",
             name = "Russian - Dmitri - Medium",
@@ -390,155 +349,29 @@ object PiperVoiceCatalog {
             gender = VoiceGender.MALE,
             quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx.json",
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}ru/ru_RU/dmitri/medium/ru_RU-dmitri-medium.onnx.json",
             checksum = "",
             license = "MIT",
-            description = "Clear Russian male voice",
+            description = "Russian male voice",
             tags = listOf("russian", "russia", "male")
         ),
         VoiceModel(
-            id = "ru_RU-irina-medium",
-            name = "Russian - Irina - Medium",
-            language = "ru",
-            locale = "ru-RU",
+            id = "zh_CN-huayan-medium",
+            name = "Chinese (Mandarin) - Huayan - Medium",
+            language = "zh",
+            locale = "zh-CN",
             gender = VoiceGender.FEMALE,
             quality = VoiceQuality.MEDIUM,
             sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium/ru_RU-irina-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium/ru_RU-irina-medium.onnx.json",
+            modelSize = 63201294L,
+            downloadUrl = "${BASE_DOWNLOAD_URL}zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx",
+            configUrl = "${BASE_DOWNLOAD_URL}zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx.json",
             checksum = "",
             license = "MIT",
-            description = "Natural Russian female voice",
-            tags = listOf("russian", "russia", "female")
-        ),
-        
-        // Arabic voices
-        VoiceModel(
-            id = "ar_JO-kareem-medium",
-            name = "Arabic (Jordan) - Kareem - Medium",
-            language = "ar",
-            locale = "ar-JO",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ar/ar_JO/kareem/medium/ar_JO-kareem-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural Arabic male voice",
-            tags = listOf("arabic", "jordan", "male")
-        ),
-        
-        // Dutch voices
-        VoiceModel(
-            id = "nl_NL-mls-medium",
-            name = "Dutch (Netherlands) - MLS - Medium",
-            language = "nl",
-            locale = "nl-NL",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/nl_NL-mls-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural Dutch male voice",
-            tags = listOf("dutch", "netherlands", "male")
-        ),
-        
-        // Polish voices
-        VoiceModel(
-            id = "pl_PL-mls_6892-low",
-            name = "Polish - MLS 6892 - Low",
-            language = "pl",
-            locale = "pl-PL",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.LOW,
-            sampleRate = 22050,
-            modelSize = 18_874_368L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/mls_6892/low/pl_PL-mls_6892-low.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/mls_6892/low/pl_PL-mls_6892-low.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Polish male voice",
-            tags = listOf("polish", "poland", "male")
-        ),
-        
-        // Turkish voices
-        VoiceModel(
-            id = "tr_TR-dfki-medium",
-            name = "Turkish - DFKI - Medium",
-            language = "tr",
-            locale = "tr-TR",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/tr/tr_TR/dfki/medium/tr_TR-dfki-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/tr/tr_TR/dfki/medium/tr_TR-dfki-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural Turkish male voice",
-            tags = listOf("turkish", "turkey", "male")
-        ),
-        
-        // Ukrainian voices
-        VoiceModel(
-            id = "uk_UA-lada-medium",
-            name = "Ukrainian - Lada - Medium",
-            language = "uk",
-            locale = "uk-UA",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/lada/medium/uk_UA-lada-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/lada/medium/uk_UA-lada-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural Ukrainian female voice",
-            tags = listOf("ukrainian", "ukraine", "female")
-        ),
-        
-        // Vietnamese voices
-        VoiceModel(
-            id = "vi_VN-vais1000-medium",
-            name = "Vietnamese - VAIS1000 - Medium",
-            language = "vi",
-            locale = "vi-VN",
-            gender = VoiceGender.MALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/vi/vi_VN/vais1000/medium/vi_VN-vais1000-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/vi/vi_VN/vais1000/medium/vi_VN-vais1000-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural Vietnamese male voice",
-            tags = listOf("vietnamese", "vietnam", "male")
-        ),
-        
-        // Hindi voices
-        VoiceModel(
-            id = "hi_IN-coqui-medium",
-            name = "Hindi (India) - Coqui - Medium",
-            language = "hi",
-            locale = "hi-IN",
-            gender = VoiceGender.FEMALE,
-            quality = VoiceQuality.MEDIUM,
-            sampleRate = 22050,
-            modelSize = 63_201_308L,
-            downloadUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/coqui/medium/hi_IN-coqui-medium.onnx",
-            configUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/coqui/medium/hi_IN-coqui-medium.onnx.json",
-            checksum = "",
-            license = "MIT",
-            description = "Natural Hindi female voice",
-            tags = listOf("hindi", "india", "female")
+            description = "Mandarin Chinese female voice",
+            tags = listOf("chinese", "mandarin", "female")
         )
     )
 }

@@ -9,16 +9,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.domain.services.tts_service.GradioTTSConfig
+import ireader.domain.services.tts_service.GradioTTSPresets
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
+import ireader.presentation.ui.settings.components.GradioConfigEditDialog
+import ireader.presentation.ui.settings.components.GradioTTSSection
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
+import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AndroidTTSMManagerSettingsScreen(
     onBackPressed: () -> Unit,
-    viewModel: AITTSSettingsViewModel
+    viewModel: AITTSSettingsViewModel,
+    gradioViewModel: GradioTTSSettingsViewModel? = null
 ) {
     val state by viewModel.state.collectAsState()
+    val gradioState = gradioViewModel?.state?.collectAsState()?.value
     
     Scaffold(
         topBar = {
@@ -212,8 +219,39 @@ fun AndroidTTSMManagerSettingsScreen(
                 }
             }
             
+            // Gradio TTS Section (Generic support for any Gradio TTS)
+            if (gradioViewModel != null && gradioState != null) {
+                item {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    Text(
+                        text = "Online TTS Engines",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                item {
+                    GradioTTSSection(
+                        useGradioTTS = gradioState.useGradioTTS,
+                        onUseGradioTTSChange = { gradioViewModel.setUseGradioTTS(it) },
+                        configs = gradioState.configs,
+                        activeConfigId = gradioState.activeConfigId,
+                        onSelectConfig = { gradioViewModel.setActiveConfig(it) },
+                        onTestConfig = { gradioViewModel.testConfig(it) },
+                        onEditConfig = { gradioViewModel.openEditDialog(it) },
+                        onDeleteConfig = { gradioViewModel.deleteConfig(it) },
+                        onAddCustomConfig = { gradioViewModel.createNewCustomConfig() },
+                        globalSpeed = gradioState.globalSpeed,
+                        onGlobalSpeedChange = { gradioViewModel.setGlobalSpeed(it) },
+                        isTesting = gradioState.isTesting,
+                        testingConfigId = gradioState.activeConfigId
+                    )
+                }
+            }
+            
             // Native TTS Info
             item {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 Card {
                     Column(
                         modifier = Modifier
@@ -272,6 +310,14 @@ fun AndroidTTSMManagerSettingsScreen(
         }
     }
     
+    // Edit dialog for Gradio config
+    if (gradioViewModel != null && gradioState != null && gradioState.isEditDialogOpen && gradioState.editingConfig != null) {
+        GradioConfigEditDialog(
+            config = gradioState.editingConfig,
+            onDismiss = { gradioViewModel.closeEditDialog() },
+            onSave = { gradioViewModel.saveEditingConfig(it) }
+        )
+    }
 }
 
 

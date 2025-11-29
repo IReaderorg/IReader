@@ -218,6 +218,21 @@ class DesktopTTSService : KoinComponent {
             } catch (e: Exception) {
                 Log.error { "Failed to load Coqui preferences: ${e.message}" }
             }
+            
+            // Load Gradio TTS configuration from preferences
+            try {
+                val useGradio = appPrefs.useGradioTTS().get()
+                val activeConfigId = appPrefs.activeGradioConfigId().get()
+                
+                Log.info { "Loading Gradio prefs: enabled=$useGradio, configId=$activeConfigId" }
+                
+                if (useGradio && activeConfigId.isNotEmpty()) {
+                    configureGradioFromPreferences()
+                    Log.info { "Gradio TTS configured from saved preferences: ${activeGradioConfig?.name}" }
+                }
+            } catch (e: Exception) {
+                Log.error { "Failed to load Gradio preferences: ${e.message}" }
+            }
         }
     }
     
@@ -226,12 +241,18 @@ class DesktopTTSService : KoinComponent {
         KOKORO,
         MAYA,
         COQUI,
+        GRADIO,
         SIMULATION
     }
     
     // Coqui TTS components
     private var coquiEngine: DesktopCoquiTTSEngine? = null
     var coquiAvailable = false
+    
+    // Generic Gradio TTS components
+    private var gradioEngine: DesktopGenericGradioTTSEngine? = null
+    var gradioAvailable = false
+    var activeGradioConfig: GradioTTSConfig? = null
     
     /**
      * Desktop Coqui TTS Engine wrapper
@@ -265,6 +286,32 @@ class DesktopTTSService : KoinComponent {
             httpClient.close()
         }
         fun setCallback(callback: TTSEngineCallback) = engine.setCallback(callback)
+    }
+    
+    /**
+     * Desktop Generic Gradio TTS Engine wrapper
+     * Supports any Gradio-based TTS space with configurable parameters
+     */
+    private inner class DesktopGenericGradioTTSEngine(
+        private val config: GradioTTSConfig
+    ) {
+        private val httpClient = io.ktor.client.HttpClient()
+        private val audioPlayer = DesktopCoquiAudioPlayer()
+        private val engine = GenericGradioTTSEngine(config, httpClient, audioPlayer)
+        
+        suspend fun speak(text: String, utteranceId: String) = engine.speak(text, utteranceId)
+        fun stop() = engine.stop()
+        fun pause() = engine.pause()
+        fun resume() = engine.resume()
+        fun setSpeed(speed: Float) = engine.setSpeed(speed)
+        fun isReady() = engine.isReady()
+        fun cleanup() {
+            engine.cleanup()
+            httpClient.close()
+        }
+        fun setCallback(callback: TTSEngineCallback) = engine.setCallback(callback)
+        fun getConfig() = config
+        fun precacheParagraphs(paragraphs: List<Pair<String, String>>) = engine.precacheParagraphs(paragraphs)
     }
     
     private suspend fun loadAvailableModels() {
@@ -963,6 +1010,7 @@ class DesktopTTSService : KoinComponent {
                     TTSEngine.KOKORO -> readTextWithKokoro(text)
                     TTSEngine.MAYA -> readTextWithMaya(text)
                     TTSEngine.COQUI -> readTextWithCoqui(text)
+                    TTSEngine.GRADIO -> readTextWithGradio(text)
                     TTSEngine.SIMULATION -> readTextSimulation(text)
                 }
             } catch (e: CancellationException) {
@@ -1238,6 +1286,84 @@ class DesktopTTSService : KoinComponent {
             }
         } catch (e: Exception) {
             Log.error { "Coqui error: ${e.message}" }
+            advanceToNextParagraph()
+        }
+    }
+    
+    /**
+     * Read text using Generic Gradio TTS engine
+     * Supports any Gradio-based TTS space (Persian TTS, Edge TTS, etc.)
+     */
+    private suspend fun readTextWithGradio(text: String) {
+        val engine = gradioEngine
+        if (engine == null) {
+            Log.error { "Gradio engine not configured" }
+            // Try to configure from preferences
+            configureGradioFromPreferences()
+            if (gradioEngine == null) {
+                Log.error { "Failed to configure Gradio engine, falling back to simulation" }
+                readTextSimulation(text)
+                return
+            }
+        }
+        
+        val activeEngine = gradioEngine ?: run {
+            advanceToNextParagraph()
+            return
+        }
+        
+        try {
+            val configName = activeGradioConfig?.name ?: "Unknown"
+            Log.debug { "Synthesizing with Gradio ($configName): text length=${text.length}" }
+            
+            // Create a callback to handle completion
+            var completed = false
+            var hasError = false
+            
+            activeEngine.setCallback(object : TTSEngineCallback {
+                override fun onStart(utteranceId: String) {
+                    Log.debug { "Gradio started: $utteranceId" }
+                }
+                
+                override fun onDone(utteranceId: String) {
+                    Log.debug { "Gradio done: $utteranceId" }
+                    completed = true
+                }
+                
+                override fun onError(utteranceId: String, error: String) {
+                    Log.error { "Gradio error: $error" }
+                    hasError = true
+                    completed = true
+                }
+            })
+            
+            // Apply speed from preferences
+            val speed = appPrefs.gradioTTSSpeed().get()
+            activeEngine.setSpeed(speed)
+            
+            // Speak the text
+            activeEngine.speak(text, "gradio_${System.currentTimeMillis()}")
+            
+            // Wait for completion (with timeout)
+            val startTime = System.currentTimeMillis()
+            val timeout = 120000L // 120 second timeout (online TTS can be slow)
+            while (!completed && (System.currentTimeMillis() - startTime) < timeout) {
+                kotlinx.coroutines.delay(100)
+            }
+            
+            if (!completed) {
+                Log.warn { "Gradio TTS timed out after ${timeout/1000} seconds" }
+            }
+            
+            // Check sleep time
+            checkSleepTime()
+            
+            // Move to next paragraph if still playing
+            if (state.isPlaying.value) {
+                advanceToNextParagraph()
+            }
+        } catch (e: Exception) {
+            Log.error { "Gradio error: ${e.message}" }
             advanceToNextParagraph()
         }
     }
@@ -1716,6 +1842,21 @@ class DesktopTTSService : KoinComponent {
                     Log.warn { "Coqui not available. Please configure in TTS Settings." }
                 }
             }
+            TTSEngine.GRADIO -> {
+                // Try to configure from preferences if not already available
+                if (!gradioAvailable || gradioEngine == null) {
+                    Log.info { "Gradio not available, trying to configure from preferences..." }
+                    configureGradioFromPreferences()
+                }
+                
+                if (gradioAvailable && gradioEngine != null) {
+                    currentEngine = TTSEngine.GRADIO
+                    isSimulationMode = false
+                    Log.info { "Switched to Gradio TTS: ${activeGradioConfig?.name}" }
+                } else {
+                    Log.warn { "Gradio TTS not available. Please configure in TTS Settings." }
+                }
+            }
             TTSEngine.SIMULATION -> {
                 currentEngine = TTSEngine.SIMULATION
                 isSimulationMode = true
@@ -1742,6 +1883,58 @@ class DesktopTTSService : KoinComponent {
     }
     
     /**
+     * Configure Generic Gradio TTS with a configuration
+     */
+    fun configureGradio(config: GradioTTSConfig?) {
+        if (config != null && config.spaceUrl.isNotEmpty() && config.enabled) {
+            gradioEngine?.cleanup()
+            gradioEngine = DesktopGenericGradioTTSEngine(config)
+            activeGradioConfig = config
+            gradioAvailable = true
+            Log.info { "Gradio TTS configured: ${config.name} (${config.spaceUrl})" }
+        } else {
+            gradioEngine?.cleanup()
+            gradioEngine = null
+            activeGradioConfig = null
+            gradioAvailable = false
+            Log.info { "Gradio TTS disabled" }
+        }
+    }
+    
+    /**
+     * Configure Gradio TTS from preferences
+     */
+    fun configureGradioFromPreferences() {
+        val useGradioTTS = appPrefs.useGradioTTS().get()
+        val activeConfigId = appPrefs.activeGradioConfigId().get()
+        
+        if (useGradioTTS && activeConfigId.isNotEmpty()) {
+            val config = loadGradioConfig(activeConfigId)
+            configureGradio(config)
+        } else {
+            configureGradio(null)
+        }
+    }
+    
+    /**
+     * Load Gradio TTS configuration from preferences
+     */
+    private fun loadGradioConfig(configId: String): GradioTTSConfig? {
+        return try {
+            val configsJson = appPrefs.gradioTTSConfigs().get()
+            if (configsJson.isEmpty()) {
+                GradioTTSPresets.getPresetById(configId)
+            } else {
+                val state = kotlinx.serialization.json.Json.decodeFromString<GradioTTSManagerState>(configsJson)
+                state.configs.find { it.id == configId } ?: GradioTTSPresets.getPresetById(configId)
+            }
+        } catch (e: Exception) {
+            Log.error { "Failed to load Gradio config: ${e.message}" }
+            GradioTTSPresets.getPresetById(configId)
+        }
+    }
+    
+    /**
      * Get list of available engines
      */
     fun getAvailableEngines(): List<TTSEngine> {
@@ -1750,6 +1943,7 @@ class DesktopTTSService : KoinComponent {
             if (kokoroAvailable) add(TTSEngine.KOKORO)
             if (mayaAvailable) add(TTSEngine.MAYA)
             if (coquiAvailable) add(TTSEngine.COQUI)
+            if (gradioAvailable) add(TTSEngine.GRADIO)
             add(TTSEngine.SIMULATION)
         }
     }
@@ -1922,6 +2116,11 @@ class DesktopTTSService : KoinComponent {
                     return Result.failure(Exception("Coqui TTS not available. Please configure it first."))
                 }
             }
+            TTSEngine.GRADIO -> {
+                if (!gradioAvailable || gradioEngine == null) {
+                    return Result.failure(Exception("Gradio TTS not available. Please configure it first."))
+                }
+            }
             TTSEngine.SIMULATION -> {
                 return Result.failure(Exception("Cannot download in simulation mode"))
             }
@@ -1944,11 +2143,15 @@ class DesktopTTSService : KoinComponent {
                         // Coqui doesn't support direct synthesis to AudioData for chapter download
                         Result.failure(Exception("Coqui TTS doesn't support chapter download"))
                     }
+                    TTSEngine.GRADIO -> {
+                        // Gradio TTS doesn't support direct synthesis to AudioData for chapter download
+                        Result.failure(Exception("Gradio TTS doesn't support chapter download"))
+                    }
                     TTSEngine.SIMULATION -> Result.failure(Exception("Cannot download in simulation mode"))
                 }
             } catch (e: Exception) {
                 Log.error { "Synthesis error during chapter download: ${e.message}" }
-                Result.failure(e)
+                Result.failure<ireader.domain.services.tts_service.piper.AudioData>(e)
             }
         }
         

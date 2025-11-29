@@ -79,7 +79,7 @@ actual fun TTSEngineSettingsScreen(
                     }
                 }
                 
-                // Coqui TTS Settings - Navigate to TTS Manager
+                // Gradio TTS Settings (New - supports multiple online TTS engines)
                 OutlinedCard(
                     onClick = {
                         onNavigateToTTSManager()
@@ -97,15 +97,53 @@ actual fun TTSEngineSettingsScreen(
                         Icon(
                             Icons.Default.Cloud,
                             contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Online TTS Engines",
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                            Text(
+                                text = "Configure Gradio-based TTS (Coqui, Edge TTS, Persian TTS, etc.)",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = null
+                        )
+                    }
+                }
+                
+                // Legacy Coqui TTS Settings (for backward compatibility)
+                OutlinedCard(
+                    onClick = {
+                        onNavigateToTTSManager()
+                        onDismiss()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondary
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Coqui TTS Settings",
+                                text = "Legacy Coqui TTS",
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
-                                text = "Configure online neural TTS server",
+                                text = "Original Coqui TTS configuration",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

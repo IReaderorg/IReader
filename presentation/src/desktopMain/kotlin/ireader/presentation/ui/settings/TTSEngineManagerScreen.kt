@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
@@ -62,7 +63,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.core.log.Log
+import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.DesktopTTSService
+import ireader.domain.services.tts_service.GradioTTSConfig
+import ireader.domain.services.tts_service.GradioTTSPresets
+import ireader.presentation.ui.settings.components.GradioConfigEditDialog
+import ireader.presentation.ui.settings.components.GradioTTSSection
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -963,6 +970,14 @@ fun TTSEngineManagerScreen(
                     }
                 }
             }
+            
+            // Gradio TTS Section (Generic support for any Gradio-based TTS)
+            GradioTTSSectionDesktop(
+                ttsService = ttsService,
+                appPrefs = appPrefs,
+                scope = scope
+            )
+            
             // Piper TTS Voices Section
 
                 Card {
@@ -1754,3 +1769,341 @@ private fun VoiceCard(
             }
         }
     }}
+
+
+/**
+ * Gradio TTS Section for Desktop
+ * Provides UI for configuring generic Gradio-based TTS engines
+ */
+@Composable
+private fun GradioTTSSectionDesktop(
+    ttsService: DesktopTTSService,
+    appPrefs: AppPreferences,
+    scope: CoroutineScope
+) {
+    var useGradioTTS by remember { mutableStateOf(false) }
+    var activeConfigId by remember { mutableStateOf<String?>(null) }
+    var globalSpeed by remember { mutableStateOf(1.0f) }
+    var configs by remember { mutableStateOf(GradioTTSPresets.getAllPresets()) }
+    var isTesting by remember { mutableStateOf(false) }
+    var testingConfigId by remember { mutableStateOf<String?>(null) }
+    var editingConfig by remember { mutableStateOf<GradioTTSConfig?>(null) }
+    var isEditDialogOpen by remember { mutableStateOf(false) }
+    
+    // Load preferences on mount
+    LaunchedEffect(Unit) {
+        useGradioTTS = appPrefs.useGradioTTS().get()
+        activeConfigId = appPrefs.activeGradioConfigId().get().ifEmpty { null }
+        globalSpeed = appPrefs.gradioTTSSpeed().get()
+        
+        // Load saved configs
+        val savedConfigsJson = appPrefs.gradioTTSConfigs().get()
+        if (savedConfigsJson.isNotEmpty()) {
+            try {
+                val state = kotlinx.serialization.json.Json.decodeFromString<ireader.domain.services.tts_service.GradioTTSManagerState>(savedConfigsJson)
+                configs = state.configs
+            } catch (e: Exception) {
+                Log.error { "Failed to load Gradio configs: ${e.message}" }
+            }
+        }
+        
+        // Configure Gradio if enabled
+        if (useGradioTTS && activeConfigId != null) {
+            val config = configs.find { it.id == activeConfigId }
+            if (config != null) {
+                ttsService.configureGradio(config)
+            }
+        }
+    }
+    
+    // Save configs helper
+    fun saveConfigs() {
+        scope.launch {
+            try {
+                val state = ireader.domain.services.tts_service.GradioTTSManagerState(configs, activeConfigId)
+                val json = kotlinx.serialization.json.Json.encodeToString(
+                    ireader.domain.services.tts_service.GradioTTSManagerState.serializer(),
+                    state
+                )
+                appPrefs.gradioTTSConfigs().set(json)
+            } catch (e: Exception) {
+                Log.error { "Failed to save Gradio configs: ${e.message}" }
+            }
+        }
+    }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header with toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Cloud,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = if (useGradioTTS)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Column {
+                            Text(
+                                text = "Gradio TTS (Online)",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Support for any Gradio-based TTS engine",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                
+                Switch(
+                    checked = useGradioTTS,
+                    onCheckedChange = { enabled ->
+                        useGradioTTS = enabled
+                        scope.launch {
+                            appPrefs.useGradioTTS().set(enabled)
+                            if (!enabled) {
+                                ttsService.configureGradio(null)
+                            } else if (activeConfigId != null) {
+                                val config = configs.find { it.id == activeConfigId }
+                                if (config != null) {
+                                    ttsService.configureGradio(config)
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+            
+            if (useGradioTTS) {
+                Divider()
+                
+                // Global speed control
+                Text(
+                    text = "Global Speed: ${String.format("%.1f", globalSpeed)}x",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Slider(
+                    value = globalSpeed,
+                    onValueChange = { speed ->
+                        globalSpeed = speed
+                        scope.launch {
+                            appPrefs.gradioTTSSpeed().set(speed)
+                        }
+                    },
+                    valueRange = 0.5f..2.0f,
+                    steps = 15
+                )
+                
+                Divider()
+                
+                Text(
+                    text = "Available Engines",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                
+                // Config list
+                configs.forEach { config ->
+                    GradioConfigCardDesktop(
+                        config = config,
+                        isActive = activeConfigId == config.id,
+                        onSelect = {
+                            activeConfigId = config.id
+                            scope.launch {
+                                appPrefs.activeGradioConfigId().set(config.id)
+                                ttsService.configureGradio(config)
+                            }
+                            saveConfigs()
+                        },
+                        onTest = {
+                            testingConfigId = config.id
+                            isTesting = true
+                            scope.launch {
+                                try {
+                                    ttsService.configureGradio(config)
+                                    kotlinx.coroutines.delay(2000)
+                                } finally {
+                                    isTesting = false
+                                    testingConfigId = null
+                                }
+                            }
+                        },
+                        onEdit = {
+                            editingConfig = config
+                            isEditDialogOpen = true
+                        },
+                        onDelete = if (config.isCustom) {{
+                            configs = configs.filter { it.id != config.id }
+                            if (activeConfigId == config.id) {
+                                activeConfigId = null
+                                scope.launch {
+                                    appPrefs.activeGradioConfigId().set("")
+                                    ttsService.configureGradio(null)
+                                }
+                            }
+                            saveConfigs()
+                        }} else null,
+                        isTesting = isTesting && testingConfigId == config.id
+                    )
+                }
+                
+                // Add custom button
+                OutlinedButton(
+                    onClick = {
+                        editingConfig = GradioTTSPresets.createCustomTemplate()
+                        isEditDialogOpen = true
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Add Custom TTS Engine")
+                }
+            }
+        }
+    }
+    
+    // Edit dialog
+    if (isEditDialogOpen && editingConfig != null) {
+        GradioConfigEditDialog(
+            config = editingConfig!!,
+            onDismiss = {
+                isEditDialogOpen = false
+                editingConfig = null
+            },
+            onSave = { savedConfig ->
+                val existingIndex = configs.indexOfFirst { it.id == savedConfig.id }
+                configs = if (existingIndex >= 0) {
+                    configs.toMutableList().apply { set(existingIndex, savedConfig) }
+                } else {
+                    configs + savedConfig
+                }
+                saveConfigs()
+                isEditDialogOpen = false
+                editingConfig = null
+            }
+        )
+    }
+}
+
+@Composable
+private fun GradioConfigCardDesktop(
+    config: GradioTTSConfig,
+    isActive: Boolean,
+    onSelect: () -> Unit,
+    onTest: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: (() -> Unit)?,
+    isTesting: Boolean
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = if (isActive)
+            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+        else
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        shape = MaterialTheme.shapes.small
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                RadioButton(
+                    selected = isActive,
+                    onClick = onSelect
+                )
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = config.name,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        if (config.isCustom) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                shape = MaterialTheme.shapes.extraSmall
+                            ) {
+                                Text(
+                                    text = "Custom",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            }
+                        }
+                    }
+                    if (config.description.isNotEmpty()) {
+                        Text(
+                            text = config.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                IconButton(onClick = onTest, enabled = !isTesting) {
+                    if (isTesting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Default.PlayArrow, "Test", modifier = Modifier.size(20.dp))
+                    }
+                }
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.ContentCopy, "Edit", modifier = Modifier.size(20.dp))
+                }
+                if (onDelete != null) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            Icons.Default.Delete,
+                            "Delete",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

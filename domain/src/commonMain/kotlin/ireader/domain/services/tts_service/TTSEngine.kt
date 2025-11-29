@@ -86,8 +86,14 @@ expect object TTSEngineFactory {
     
     /**
      * Create Coqui TTS engine if available
+     * @deprecated Use createGradioEngine with GradioTTSConfig instead
      */
     fun createCoquiEngine(spaceUrl: String, apiKey: String? = null): TTSEngine?
+    
+    /**
+     * Create a generic Gradio TTS engine from configuration
+     */
+    fun createGradioEngine(config: GradioTTSConfig): TTSEngine?
     
     /**
      * Get list of available engines on this platform
