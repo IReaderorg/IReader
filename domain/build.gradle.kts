@@ -124,12 +124,12 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-                implementation("io.mockk:mockk:1.13.8")
+                implementation(libs.coroutines.test)
+                implementation(libs.mock)
                 // Napier logging for tests
-                implementation("io.github.aakira:napier:2.7.1")
+                implementation(libs.napier)
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
-                implementation("io.ktor:ktor-client-mock:3.3.2")
+                implementation(libs.ktor.client.mock)
             }
         }
          androidMain {

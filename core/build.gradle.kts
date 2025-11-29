@@ -74,6 +74,17 @@ kotlin {
                 api(libs.kermit)
             }
         }
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.coroutines.test)
+                implementation(libs.mock)
+                // Napier logging for tests
+                implementation(libs.napier)
+                // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
+                implementation(libs.ktor.client.mock)
+            }
+        }
          androidMain {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {

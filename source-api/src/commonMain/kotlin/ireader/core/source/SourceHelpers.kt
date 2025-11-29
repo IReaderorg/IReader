@@ -118,17 +118,12 @@ object SourceHelpers {
             return "https:$path"
         }
         
-        // If baseUrl is empty or invalid, return path as-is
-        // This handles cases where plugins don't have a valid site property
-        if (baseUrl.isBlank() || (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://"))) {
-            // If path looks like it should be absolute but isn't, try to fix it
-            if (path.startsWith("/") && !path.startsWith("//")) {
-                // Can't construct absolute URL without a valid base
-                return path
-            }
+        // If baseUrl is empty, return path as-is
+        if (baseUrl.isBlank()) {
             return path
         }
         
+        // Normalize the base URL (this will add https:// if missing)
         val normalizedBase = normalizeUrl(baseUrl)
         
         // If path starts with /, append directly to base

@@ -318,11 +318,11 @@ open class MockTTSService : CommonTTSService {
     }
     
     override fun setSpeed(speed: Float) {
-        _speechSpeed.value = speed
+        _speechSpeed.value = speed.coerceIn(0.5f, 2.0f)
     }
     
     override fun setPitch(pitch: Float) {
-        _speechPitch.value = pitch
+        _speechPitch.value = pitch.coerceIn(0.5f, 2.0f)
     }
     
     override suspend fun jumpToParagraph(index: Int) {

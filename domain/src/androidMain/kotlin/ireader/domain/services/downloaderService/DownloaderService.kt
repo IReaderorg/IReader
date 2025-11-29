@@ -202,7 +202,6 @@ class DownloaderService constructor(
                 }
             },
             downloadDelayMs = downloadPreferences.downloadDelayMs().get(),
-            concurrentLimit = 1, // Sequential downloads for simplicity
             checkCancellation = { 
                 if (isStopped && !isCancelled) {
                     ireader.core.log.Log.info { "DownloaderService: Cancellation detected in checkCancellation" }
