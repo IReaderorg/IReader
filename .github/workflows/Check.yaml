@@ -214,34 +214,34 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
-          script: |
+          script: |-
             const allTests = '${{ needs.all-tests.result }}';
             const lint = '${{ needs.lint.result }}';
             const build = '${{ needs.BuildBinaries.result }}';
-            
-            const getEmoji = (result) => result === 'success' ? '✅' : result === 'failure' ? '❌' : '⚠️';
-            
-            const body = `## Check Results Summary
-            
-| Check | Status |
-|-------|--------|
-| All Module Tests | ${getEmoji(allTests)} ${allTests} |
-| Android Lint | ${getEmoji(lint)} ${lint} |
-| Build | ${getEmoji(build)} ${build} |
 
-### Tests Include:
-- All domain module tests
-- All data module tests  
-- All presentation module tests
-- Database migration tests
-- Chapter cache and persistence tests
-- Download service tests
-- Reading timer tests
-`;
-            
+            const getEmoji = (result) => result === 'success' ? '✅' : result === 'failure' ? '❌' : '⚠️';
+
+            const body = `## Check Results Summary
+
+            | Check | Status |
+            |-------|--------|
+            | All Module Tests | ${getEmoji(allTests)} ${allTests} |
+            | Android Lint | ${getEmoji(lint)} ${lint} |
+            | Build | ${getEmoji(build)} ${build} |
+
+            ### Tests Include:
+            - All domain module tests
+            - All data module tests
+            - All presentation module tests
+            - Database migration tests
+            - Chapter cache and persistence tests
+            - Download service tests
+            - Reading timer tests
+            `;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: body
-            })
+            });
