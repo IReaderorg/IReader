@@ -1,0 +1,246 @@
+{
+  "icons": [
+    {
+      "id": "donor_bronze",
+      "name": "Bronze Supporter",
+      "description": "Donated $5 or more",
+      "emoji": "🥉",
+      "category": "donor",
+      "rarity": "common",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/bronze-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "donor_silver",
+      "name": "Silver Supporter",
+      "description": "Donated $10 or more",
+      "emoji": "🥈",
+      "category": "donor",
+      "rarity": "rare",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/silver-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "donor_gold",
+      "name": "Gold Supporter",
+      "description": "Donated $25 or more",
+      "emoji": "🥇",
+      "category": "donor",
+      "rarity": "epic",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/gold-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "donor_platinum",
+      "name": "Platinum Supporter",
+      "description": "Donated $50 or more",
+      "emoji": "💎",
+      "category": "donor",
+      "rarity": "legendary",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/platinum-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "contributor_translator",
+      "name": "Translator",
+      "description": "Contributed translations",
+      "emoji": "🌐",
+      "category": "contributor",
+      "rarity": "rare",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/translator-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "contributor_developer",
+      "name": "Developer",
+      "description": "Contributed code",
+      "emoji": "💻",
+      "category": "contributor",
+      "rarity": "epic",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/developer-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "contributor_designer",
+      "name": "Designer",
+      "description": "Contributed designs",
+      "emoji": "🎨",
+      "category": "contributor",
+      "rarity": "rare",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/designer-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "novice_reader",
+      "name": "Novice Reader",
+      "description": "Read your first 10 chapters",
+      "emoji": "📖",
+      "category": "reader",
+      "rarity": "common",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/novice-reader-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "avid_reader",
+      "name": "Avid Reader",
+      "description": "Read 100 chapters",
+      "emoji": "📚",
+      "category": "reader",
+      "rarity": "rare",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/avid-reader-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "bookworm",
+      "name": "Bookworm",
+      "description": "Read 500 chapters",
+      "emoji": "🐛",
+      "category": "reader",
+      "rarity": "epic",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/bookworm-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "master_reader",
+      "name": "Master Reader",
+      "description": "Read 1000 chapters",
+      "emoji": "🎓",
+      "category": "reader",
+      "rarity": "legendary",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/master-reader-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "first_critic",
+      "name": "First Critic",
+      "description": "Write your first review",
+      "emoji": "✍️",
+      "category": "reviewer",
+      "rarity": "common",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/first-critic-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "thoughtful_critic",
+      "name": "Thoughtful Critic",
+      "description": "Write 10 reviews",
+      "emoji": "💭",
+      "category": "reviewer",
+      "rarity": "rare",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/thoughtful-critic-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "master_critic",
+      "name": "Master Critic",
+      "description": "Write 50 reviews",
+      "emoji": "🎭",
+      "category": "reviewer",
+      "rarity": "epic",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/master-critic-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "week_warrior",
+      "name": "Week Warrior",
+      "description": "Read for 7 consecutive days",
+      "emoji": "🔥",
+      "category": "reader",
+      "rarity": "rare",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/week-warrior-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "month_master",
+      "name": "Month Master",
+      "description": "Read for 30 consecutive days",
+      "emoji": "⚡",
+      "category": "reader",
+      "rarity": "epic",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/month-master-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "year_legend",
+      "name": "Year Legend",
+      "description": "Read for 365 consecutive days",
+      "emoji": "🌟",
+      "category": "reader",
+      "rarity": "legendary",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/year-legend-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "night_owl",
+      "name": "Night Owl",
+      "description": "Read 100 chapters between 10 PM and 6 AM",
+      "emoji": "🦉",
+      "category": "special",
+      "rarity": "rare",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/night-owl-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "early_bird",
+      "name": "Early Bird",
+      "description": "Read 100 chapters between 5 AM and 9 AM",
+      "emoji": "🐦",
+      "category": "special",
+      "rarity": "rare",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/early-bird-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "speed_reader",
+      "name": "Speed Reader",
+      "description": "Read 50 chapters in a single day",
+      "emoji": "⚡",
+      "category": "reader",
+      "rarity": "epic",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/speed-reader-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "special_early_adopter",
+      "name": "Early Adopter",
+      "description": "Joined during beta",
+      "emoji": "🚀",
+      "category": "special",
+      "rarity": "legendary",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/early-adopter-min.png",
+      "source": "remote"
+    },
+    {
+      "id": "special_bug_hunter",
+      "name": "Bug Hunter",
+      "description": "Reported critical bugs",
+      "emoji": "🐛",
+      "category": "special",
+      "rarity": "epic",
+      "type": "ACHIEVEMENT",
+      "icon_url": "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/bug-hunter-min.png",
+      "source": "remote"
+    }
+  ]
+}

@@ -102,16 +102,21 @@ jobs:
       - name: Build
         uses: gradle/gradle-build-action@v2
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_BOOKS_URL: ${{ secrets.SUPABASE_BOOKS_URL }}
-          SUPABASE_BOOKS_KEY: ${{ secrets.SUPABASE_BOOKS_KEY }}
-          SUPABASE_PROGRESS_URL: ${{ secrets.SUPABASE_PROGRESS_URL }}
-          SUPABASE_PROGRESS_KEY: ${{ secrets.SUPABASE_PROGRESS_KEY }}
-          SUPABASE_REVIEWS_URL: ${{ secrets.SUPABASE_REVIEWS_URL }}
-          SUPABASE_REVIEWS_KEY: ${{ secrets.SUPABASE_REVIEWS_KEY }}
-          SUPABASE_COMMUNITY_URL: ${{ secrets.SUPABASE_COMMUNITY_URL }}
-          SUPABASE_COMMUNITY_KEY: ${{ secrets.SUPABASE_COMMUNITY_KEY }}
+          # 7-Project Supabase Configuration
+          SUPABASE_AUTH_URL: ${{ secrets.SUPABASE_AUTH_URL }}
+          SUPABASE_AUTH_KEY: ${{ secrets.SUPABASE_AUTH_KEY }}
+          SUPABASE_READING_URL: ${{ secrets.SUPABASE_READING_URL }}
+          SUPABASE_READING_KEY: ${{ secrets.SUPABASE_READING_KEY }}
+          SUPABASE_LIBRARY_URL: ${{ secrets.SUPABASE_LIBRARY_URL }}
+          SUPABASE_LIBRARY_KEY: ${{ secrets.SUPABASE_LIBRARY_KEY }}
+          SUPABASE_BOOK_REVIEWS_URL: ${{ secrets.SUPABASE_BOOK_REVIEWS_URL }}
+          SUPABASE_BOOK_REVIEWS_KEY: ${{ secrets.SUPABASE_BOOK_REVIEWS_KEY }}
+          SUPABASE_CHAPTER_REVIEWS_URL: ${{ secrets.SUPABASE_CHAPTER_REVIEWS_URL }}
+          SUPABASE_CHAPTER_REVIEWS_KEY: ${{ secrets.SUPABASE_CHAPTER_REVIEWS_KEY }}
+          SUPABASE_BADGES_URL: ${{ secrets.SUPABASE_BADGES_URL }}
+          SUPABASE_BADGES_KEY: ${{ secrets.SUPABASE_BADGES_KEY }}
+          SUPABASE_ANALYTICS_URL: ${{ secrets.SUPABASE_ANALYTICS_URL }}
+          SUPABASE_ANALYTICS_KEY: ${{ secrets.SUPABASE_ANALYTICS_KEY }}
         with:
           arguments: >
             ${{ matrix.build }}
