@@ -44,3 +44,18 @@ class FindChaptersByBookId(private val chapterRepository: ChapterRepository) {
         return chapterRepository.findChaptersByBookId(bookId = bookId)
     }
 }
+
+/**
+ * Get all chapters for a book WITH their full text content.
+ * Use this for EPUB export or when you need the actual chapter text.
+ * 
+ * WARNING: This can cause OOM errors for books with many large chapters.
+ * Use FindChaptersByBookId for listing chapters without content.
+ */
+class FindChaptersByBookIdWithContent(private val chapterRepository: ChapterRepository) {
+    suspend operator fun invoke(
+        bookId: Long,
+    ): List<Chapter> {
+        return chapterRepository.findChaptersByBookIdWithContent(bookId = bookId)
+    }
+}

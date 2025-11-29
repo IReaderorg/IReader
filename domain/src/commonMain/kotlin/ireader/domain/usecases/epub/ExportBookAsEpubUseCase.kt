@@ -45,10 +45,11 @@ class ExportBookAsEpubUseCase(
             val book = findBookById(bookId)
                 ?: return Result.failure(Exception("Book not found"))
             
-            onProgress("Loading chapters...")
+            onProgress("Loading chapters with content...")
             
-            // Get all chapters
-            val allChapters = chapterRepository.findChaptersByBookId(bookId)
+            // Get all chapters WITH their text content
+            // The regular findChaptersByBookId uses a lightweight query without content
+            val allChapters = chapterRepository.findChaptersByBookIdWithContent(bookId)
             
             if (allChapters.isEmpty()) {
                 return Result.failure(Exception("No chapters found for this book"))

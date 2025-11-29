@@ -22,8 +22,10 @@ actual class EpubCreator(
     actual suspend operator fun invoke(book: Book, uri: Uri, currentEvent: (String) -> Unit) {
         withContext(Dispatchers.IO) {
             try {
-                currentEvent("Loading chapters...")
-                val chapters = chapterRepository.findChaptersByBookId(book.id)
+                currentEvent("Loading chapters with content...")
+                // Use findChaptersByBookIdWithContent to get chapters WITH their text content
+                // The regular findChaptersByBookId uses a lightweight query without content
+                val chapters = chapterRepository.findChaptersByBookIdWithContent(book.id)
                 
                 if (chapters.isEmpty()) {
                     throw Exception("No chapters found for this book")

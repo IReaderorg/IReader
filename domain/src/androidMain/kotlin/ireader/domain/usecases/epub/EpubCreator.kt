@@ -33,8 +33,10 @@ actual class EpubCreator(
             try {
                 android.util.Log.d("EpubCreator", "Starting EPUB export for book: ${book.title}")
                 android.util.Log.d("EpubCreator", "Output URI: ${uri.androidUri}")
-                currentEvent("Loading chapters...")
-                val chapters = chapterRepository.findChaptersByBookId(book.id)
+                currentEvent("Loading chapters with content...")
+                // Use findChaptersByBookIdWithContent to get chapters WITH their text content
+                // The regular findChaptersByBookId uses a lightweight query without content
+                val chapters = chapterRepository.findChaptersByBookIdWithContent(book.id)
                 android.util.Log.d("EpubCreator", "Found ${chapters.size} chapters")
                 
                 if (chapters.isEmpty()) {
