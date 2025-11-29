@@ -637,6 +637,29 @@ class ReaderPreferences constructor(
     fun ttsSkipEmptyLines(): Preference<Boolean> {
         return preferenceStore.getBoolean("tts_skip_empty_lines", true)
     }
+    
+    // TTS Screen Display Preferences
+    fun ttsUseCustomColors(): Preference<Boolean> {
+        return preferenceStore.getBoolean("tts_use_custom_colors", false)
+    }
+    
+    fun ttsBackgroundColor(): Preference<Long> {
+        // Default: Dark color 0xFF1E1E1E
+        return preferenceStore.getLong("tts_background_color", 0xFF1E1E1E)
+    }
+    
+    fun ttsTextColor(): Preference<Long> {
+        // Default: White 0xFFFFFFFF
+        return preferenceStore.getLong("tts_text_color", 0xFFFFFFFF)
+    }
+    
+    fun ttsFontSize(): Preference<Int> {
+        return preferenceStore.getInt("tts_font_size", 18)
+    }
+    
+    fun ttsTextAlignment(): Preference<PreferenceValues.PreferenceTextAlignment> {
+        return preferenceStore.getEnum("tts_text_alignment", PreferenceValues.PreferenceTextAlignment.Left)
+    }
 }
 
 enum class ReadingMode {

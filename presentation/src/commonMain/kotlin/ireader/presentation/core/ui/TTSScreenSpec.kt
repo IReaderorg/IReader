@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -92,14 +93,33 @@ class TTSScreenSpec(
         var showEngineSettings by remember { mutableStateOf(false) }
         var showVoiceSelection by remember { mutableStateOf(false) }
         
-        // Settings state
-        var useCustomColors by remember { mutableStateOf(false) }
-        var customBackgroundColor by remember { mutableStateOf(Color(0xFF1E1E1E)) }
-        var customTextColor by remember { mutableStateOf(Color.White) }
-        var fontSize by remember { mutableStateOf(18) }
-        var textAlignment by remember { mutableStateOf(TextAlign.Start) }
-        var sleepModeEnabled by remember { mutableStateOf(false) }
-        var sleepTimeMinutes by remember { mutableStateOf(30) }
+        // Settings state - load from TTS-specific preferences
+        var useCustomColors by remember { mutableStateOf(readerPreferences.ttsUseCustomColors().get()) }
+        var customBackgroundColor by remember { 
+            val savedColor = readerPreferences.ttsBackgroundColor().get()
+            // Use Color(Int) which expects ARGB format in sRGB color space
+            mutableStateOf(Color(savedColor.toInt()))
+        }
+        var customTextColor by remember { 
+            val savedColor = readerPreferences.ttsTextColor().get()
+            // Use Color(Int) which expects ARGB format in sRGB color space
+            mutableStateOf(Color(savedColor.toInt()))
+        }
+        var fontSize by remember { mutableStateOf(readerPreferences.ttsFontSize().get()) }
+        var textAlignment by remember { 
+            val savedAlignment = readerPreferences.ttsTextAlignment().get()
+            mutableStateOf(
+                when (savedAlignment) {
+                    ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left -> TextAlign.Start
+                    ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Center -> TextAlign.Center
+                    ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Right -> TextAlign.End
+                    ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Justify -> TextAlign.Justify
+                    else -> TextAlign.Start
+                }
+            )
+        }
+        var sleepModeEnabled by remember { mutableStateOf(readerPreferences.sleepMode().get()) }
+        var sleepTimeMinutes by remember { mutableStateOf(readerPreferences.sleepTime().get().toInt()) }
         
         // Load readTranslatedText preference
         var readTranslatedText by remember { mutableStateOf(readerPreferences.useTTSWithTranslatedText().get()) }
@@ -419,13 +439,38 @@ class TTSScreenSpec(
                             currentEngineName = ttsService.getCurrentEngineName(),
                             readTranslatedText = readTranslatedText,
                             hasTranslation = translatedContent != null && translatedContent!!.isNotEmpty(),
-                            onUseCustomColorsChange = { useCustomColors = it },
-                            onBackgroundColorChange = { customBackgroundColor = it },
-                            onTextColorChange = { customTextColor = it },
-                            onFontSizeChange = { fontSize = it },
-                            onTextAlignmentChange = { textAlignment = it },
+                            onUseCustomColorsChange = { 
+                                useCustomColors = it
+                                scope.launch { readerPreferences.ttsUseCustomColors().set(it) }
+                            },
+                            onBackgroundColorChange = { color ->
+                                customBackgroundColor = color
+                                // Use toArgb() to get proper ARGB Int value for storage
+                                scope.launch { readerPreferences.ttsBackgroundColor().set(color.toArgb().toLong()) }
+                            },
+                            onTextColorChange = { color ->
+                                customTextColor = color
+                                // Use toArgb() to get proper ARGB Int value for storage
+                                scope.launch { readerPreferences.ttsTextColor().set(color.toArgb().toLong()) }
+                            },
+                            onFontSizeChange = { 
+                                fontSize = it
+                                scope.launch { readerPreferences.ttsFontSize().set(it) }
+                            },
+                            onTextAlignmentChange = { alignment ->
+                                textAlignment = alignment
+                                val prefAlignment = when (alignment) {
+                                    TextAlign.Start -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left
+                                    TextAlign.Center -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Center
+                                    TextAlign.End -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Right
+                                    TextAlign.Justify -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Justify
+                                    else -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left
+                                }
+                                scope.launch { readerPreferences.ttsTextAlignment().set(prefAlignment) }
+                            },
                             onSleepModeChange = { enabled ->
                                 sleepModeEnabled = enabled
+                                scope.launch { readerPreferences.sleepMode().set(enabled) }
                                 if (enabled) {
                                     ttsService.setSleepTimer(sleepTimeMinutes)
                                 } else {
@@ -434,6 +479,7 @@ class TTSScreenSpec(
                             },
                             onSleepTimeChange = { minutes ->
                                 sleepTimeMinutes = minutes
+                                scope.launch { readerPreferences.sleepTime().set(minutes.toLong()) }
                                 if (sleepModeEnabled) {
                                     ttsService.setSleepTimer(minutes)
                                 }

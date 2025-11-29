@@ -556,20 +556,29 @@ abstract class BaseTTSService(
         
         return try {
             var loadedChapter: Chapter? = null
+            var loadError: String? = null
             
             remoteUseCases.getRemoteReadingContent(
                 chapter = chapter,
                 catalog = source,
                 onSuccess = { remoteChapter ->
-                    scope.launch {
-                        chapterRepo.insertChapter(remoteChapter)
-                        loadedChapter = remoteChapter
-                    }
+                    loadedChapter = remoteChapter
                 },
                 onError = { error ->
                     Log.error { "Failed to load chapter: $error" }
+                    loadError = error.toString()
                 }
             )
+            
+            // Save the chapter to repository after loading (outside the callback)
+            loadedChapter?.let { remoteChapter ->
+                try {
+                    chapterRepo.insertChapter(remoteChapter)
+                    Log.debug { "Chapter content saved to repository: ${remoteChapter.id}" }
+                } catch (e: Exception) {
+                    Log.error { "Failed to save chapter to repository: ${e.message}" }
+                }
+            }
             
             loadedChapter
         } catch (e: Exception) {
