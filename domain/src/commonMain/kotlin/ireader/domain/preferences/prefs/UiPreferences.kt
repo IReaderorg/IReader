@@ -341,16 +341,8 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun jsPluginDebugMode(): Preference<Boolean> {
         return preferenceStore.getBoolean("js_plugin_debug_mode", false)
     }
-    
-    /**
-     * Maximum number of concurrent plugin executions.
-     * Range: 1-10
-     * Default: 5
-     */
-    fun jsPluginMaxConcurrent(): Preference<Int> {
-        return preferenceStore.getInt("js_plugin_max_concurrent", 5)
-    }
-    
+
+
     /**
      * Timeout for plugin method execution in seconds.
      * Range: 10-60 seconds

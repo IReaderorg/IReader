@@ -20,8 +20,7 @@ class SettingsDownloadViewModel(
     
     // Download behavior preferences
     val downloadOnlyOverWifi: StateFlow<Boolean> = preferenceStore.getBoolean("download_only_over_wifi", true).stateIn(scope)
-    val maxConcurrentDownloads: StateFlow<Int> = preferenceStore.getInt("max_concurrent_downloads", 3).stateIn(scope)
-    
+
     // Automatic download preferences
     val downloadNewChapters: StateFlow<Boolean> = preferenceStore.getBoolean("download_new_chapters", false).stateIn(scope)
     val downloadNewChaptersCategories: StateFlow<Set<String>> = preferenceStore.getStringSet("download_new_chapters_categories", emptySet()).stateIn(scope)
@@ -39,8 +38,7 @@ class SettingsDownloadViewModel(
     // Dialog states
     var showDownloadLocationDialog by mutableStateOf(false)
         private set
-    var showMaxConcurrentDialog by mutableStateOf(false)
-        private set
+
     var showDownloadCategoriesDialog by mutableStateOf(false)
         private set
     var showRemoveExcludeCategoriesDialog by mutableStateOf(false)
@@ -71,19 +69,8 @@ class SettingsDownloadViewModel(
     fun setDownloadOnlyOverWifi(enabled: Boolean) {
         preferenceStore.getBoolean("download_only_over_wifi", true).set(enabled)
     }
-    
-    fun showMaxConcurrentDialog() {
-        showMaxConcurrentDialog = true
-    }
-    
-    fun dismissMaxConcurrentDialog() {
-        showMaxConcurrentDialog = false
-    }
-    
-    fun setMaxConcurrentDownloads(count: Int) {
-        preferenceStore.getInt("max_concurrent_downloads", 3).set(count)
-    }
-    
+
+
     // Automatic download functions
     fun setDownloadNewChapters(enabled: Boolean) {
         preferenceStore.getBoolean("download_new_chapters", false).set(enabled)

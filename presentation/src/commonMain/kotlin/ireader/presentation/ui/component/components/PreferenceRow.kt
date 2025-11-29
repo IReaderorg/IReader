@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
@@ -349,6 +350,8 @@ fun SliderPreference(
         valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
         onValueChangeFinished: ((Float) -> Unit)? = null,
         steps: Int = 0,
+        style: TextStyle = MaterialTheme.typography.labelMedium,
+        color: Color = MaterialTheme.colorScheme.primary,
         isEnable: Boolean = true
 ) {
     // Calculate minimum height based on subtitle presence (ensure 48dp minimum for accessibility)
@@ -426,7 +429,7 @@ fun SliderPreference(
                     text = title,
                     overflow = Ellipsis,
                     maxLines = 1,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = style,
                     color = if (isEnable) {
                         MaterialTheme.colorScheme.onSurface
                     } else {
@@ -439,7 +442,7 @@ fun SliderPreference(
                         text = subtitle,
                         overflow = Ellipsis,
                         maxLines = 2,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = style,
                         color = if (isEnable) {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         } else {

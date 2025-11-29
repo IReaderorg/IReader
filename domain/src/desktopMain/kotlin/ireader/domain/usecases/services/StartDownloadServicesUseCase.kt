@@ -94,7 +94,6 @@ actual class StartDownloadServicesUseCase(
 
                 }, updateNotification = {},
                 downloadDelayMs = downloadPreferences.downloadDelayMs().get(),
-                concurrentLimit = downloadPreferences.concurrentDownloadsLimit().get()
             )
         }
         

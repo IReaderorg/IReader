@@ -18,12 +18,4 @@ class DownloadPreferences(
     fun downloadDelayMs(): Preference<Long> {
         return preferenceStore.getLong(DOWNLOAD_DELAY_MS, 1000L)
     }
-
-    /**
-     * Maximum number of concurrent downloads
-     * Default: 3
-     */
-    fun concurrentDownloadsLimit(): Preference<Int> {
-        return preferenceStore.getInt(CONCURRENT_DOWNLOADS_LIMIT, 3)
-    }
 }

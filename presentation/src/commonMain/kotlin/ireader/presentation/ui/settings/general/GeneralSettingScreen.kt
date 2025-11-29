@@ -219,18 +219,7 @@ fun GeneralSettingScreen(
                     steps = 19,
                     trailingFormatter = { value -> vm.formatDownloadDelay(value.toLong()) }
                 ),
-                Components.Slider(
-                    preferenceAsInt = vm.concurrentDownloads,
-                    title = "Concurrent Downloads",
-                    subtitle = "Maximum number of simultaneous downloads",
-                    icon = Icons.Filled.Download,
-                    valueRange = 1f..10f,
-                    steps = 8,
-                    trailingFormatter = { value -> 
-                        val count = value.toInt()
-                        "$count ${if (count == 1) "download" else "downloads"}"
-                    }
-                ),
+
                 
                 Components.Space,
                 
@@ -493,7 +482,6 @@ class GeneralSettingScreenViewModel(
     
     // Download preferences
     val downloadDelayMs = downloadPreferences.downloadDelayMs().asStateIn(scope)
-    val concurrentDownloads = downloadPreferences.concurrentDownloadsLimit().asStateIn(scope)
     
     // New General Settings Enhancements
     // Library preferences

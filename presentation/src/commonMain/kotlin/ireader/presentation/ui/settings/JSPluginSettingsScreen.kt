@@ -57,18 +57,6 @@ fun JSPluginSettingsScreen(
         }
 
         
-        // Max Concurrent Executions
-        item {
-            SliderPreferenceItem(
-                title = "Max Concurrent Executions",
-                subtitle = "Maximum number of parallel plugin operations",
-                preference = uiPreferences.jsPluginMaxConcurrent(),
-                valueRange = 1f..10f,
-                steps = 8,
-                valueLabel = { "${it.toInt()}" }
-            )
-        }
-        
         // Execution Timeout
         item {
             SliderPreferenceItem(

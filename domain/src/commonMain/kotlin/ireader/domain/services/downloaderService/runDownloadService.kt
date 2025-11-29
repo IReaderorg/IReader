@@ -41,7 +41,6 @@ suspend fun runDownloadService(
     onSuccess: () -> Unit,
     updateNotification: (Int) -> Unit,
     downloadDelayMs: Long = 1000L,
-    concurrentLimit: Int = 1, // Sequential downloads for simplicity
     checkCancellation: () -> Boolean = { false }
 ): Boolean {
     try {

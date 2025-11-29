@@ -3,7 +3,6 @@ package ireader.presentation.ui.settings.downloads
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -11,8 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ireader.i18n.localize
-import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
@@ -48,7 +45,6 @@ fun SettingsDownloadScreen(
     val removeExcludeCategories by viewModel.removeExcludeCategories.collectAsState()
     val saveChaptersAsCBZ by viewModel.saveChaptersAsCBZ.collectAsState()
     val splitTallImages by viewModel.splitTallImages.collectAsState()
-    val maxConcurrentDownloads by viewModel.maxConcurrentDownloads.collectAsState()
 
     IScaffold(
         modifier = modifier,
@@ -117,22 +113,6 @@ fun SettingsDownloadScreen(
                     onCheckedChange = viewModel::setDownloadOnlyOverWifi
                 )
             }
-            
-            item {
-                SettingsItemWithTrailing(
-                    title = "Max Concurrent Downloads",
-                    description = "Number of simultaneous downloads",
-                    icon = Icons.Outlined.Speed,
-                    onClick = { viewModel.showMaxConcurrentDialog() }
-                ) {
-                    Text(
-                        text = maxConcurrentDownloads.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-            
             // Automatic Downloads Section
             item {
                 SettingsSectionHeader(
@@ -300,44 +280,7 @@ fun SettingsDownloadScreen(
             }
         )
     }
-    
-    // Max Concurrent Downloads Dialog
-    if (viewModel.showMaxConcurrentDialog) {
-        AlertDialog(
-            onDismissRequest = { viewModel.dismissMaxConcurrentDialog() },
-            title = { Text("Max Concurrent Downloads") },
-            text = {
-                Column {
-                    val options = listOf(1, 2, 3, 4, 5, 6, 8, 10)
-                    options.forEach { count ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                        ) {
-                            RadioButton(
-                                selected = maxConcurrentDownloads == count,
-                                onClick = { 
-                                    viewModel.setMaxConcurrentDownloads(count)
-                                    viewModel.dismissMaxConcurrentDialog()
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = count.toString(),
-                                modifier = Modifier.align(androidx.compose.ui.Alignment.CenterVertically)
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { viewModel.dismissMaxConcurrentDialog() }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
+
     
     // Clear Cache Confirmation Dialog
     if (viewModel.showClearCacheDialog) {
