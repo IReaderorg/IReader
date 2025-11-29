@@ -449,6 +449,11 @@ class ReaderScreenViewModel(
             catalog,
             onSuccess = { result ->
                 state.stateChapter = result
+                // Save the chapter content to database to persist it
+                // Use the original chapter ID to update, not insert new
+                scope.launch {
+                    insertUseCases.insertChapter(result)
+                }
             },
             onError = { message ->
                 if (message != null) {

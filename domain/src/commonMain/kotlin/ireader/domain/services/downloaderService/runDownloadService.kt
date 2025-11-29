@@ -225,21 +225,26 @@ suspend fun runDownloadService(
 
                     // Check result
                     if (downloadError != null) {
-                        throw downloadError!!
+                        throw downloadError
                     }
 
                     if (downloadedChapter == null) {
                         throw Exception("No content received from source")
                     }
 
-                    val finalChapter = downloadedChapter!!
-                    val downloadedContent = finalChapter.content.joinToString("")
+                    val downloadedContent = downloadedChapter?.content?.joinToString("") ?: ""
                     
                     if (downloadedContent.isEmpty() || downloadedContent.length < 50) {
                         throw Exception("Downloaded content is too short or empty")
                     }
 
-                    // Save chapter
+                    // Preserve original chapter ID and metadata, only update content
+                    // This prevents creating duplicate chapters with wrong order
+                    val finalChapter = chapter.copy(
+                        content = downloadedChapter?.content ?: emptyList()
+                    )
+
+                    // Save chapter with preserved ID
                     withContext(Dispatchers.IO) {
                         insertUseCases.insertChapter(chapter = finalChapter)
                     }

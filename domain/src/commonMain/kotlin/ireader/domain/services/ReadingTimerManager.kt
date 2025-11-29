@@ -30,22 +30,7 @@ class ReadingTimerManager(
         }
         
         startTime = System.currentTimeMillis()
-        
-        timerJob = scope.launch {
-            while (isActive) {
-                delay(1000) // Check every second
-                
-                val currentTime = System.currentTimeMillis()
-                val elapsedMinutes = ((currentTime - startTime + accumulatedTime) / 60000).toInt()
-                
-                if (elapsedMinutes >= intervalMinutes) {
-                    onIntervalReached()
-                    // Reset timer after reminder
-                    resetTimer()
-                    startTime = System.currentTimeMillis()
-                }
-            }
-        }
+        launchTimerJob()
     }
     
     /**
@@ -66,22 +51,7 @@ class ReadingTimerManager(
     fun resumeTimer() {
         if (timerJob?.isActive != true && intervalMinutes > 0) {
             startTime = System.currentTimeMillis()
-            
-            timerJob = scope.launch {
-                while (isActive) {
-                    delay(1000) // Check every second
-                    
-                    val currentTime = System.currentTimeMillis()
-                    val elapsedMinutes = ((currentTime - startTime + accumulatedTime) / 60000).toInt()
-                    
-                    if (elapsedMinutes >= intervalMinutes) {
-                        onIntervalReached()
-                        // Reset timer after reminder
-                        resetTimer()
-                        startTime = System.currentTimeMillis()
-                    }
-                }
-            }
+            launchTimerJob()
         }
     }
     
@@ -107,7 +77,7 @@ class ReadingTimerManager(
      */
     fun getTotalReadingTimeMinutes(): Int {
         if (timerJob?.isActive != true) {
-            return 0
+            return (accumulatedTime / 60000).toInt()
         }
         val currentTime = System.currentTimeMillis()
         return ((currentTime - startTime + accumulatedTime) / 60000).toInt()
@@ -144,6 +114,28 @@ class ReadingTimerManager(
         // Resume the timer if it was running
         if (intervalMinutes > 0) {
             resumeTimer()
+        }
+    }
+    
+    /**
+     * Internal method to launch the timer coroutine job
+     * Extracted to eliminate code duplication between startTimer and resumeTimer
+     */
+    private fun launchTimerJob() {
+        timerJob = scope.launch {
+            while (isActive) {
+                delay(1000) // Check every second
+                
+                val currentTime = System.currentTimeMillis()
+                val elapsedMinutes = ((currentTime - startTime + accumulatedTime) / 60000).toInt()
+                
+                if (elapsedMinutes >= intervalMinutes) {
+                    onIntervalReached()
+                    // Reset timer after reminder
+                    resetTimer()
+                    startTime = System.currentTimeMillis()
+                }
+            }
         }
     }
 }

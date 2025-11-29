@@ -289,13 +289,13 @@ class CoquiTTSEngine(
         
         // Download audio
         val downloadUrl = when {
-            !audioUrl.isNullOrEmpty() -> if (audioUrl!!.startsWith("http")) audioUrl else "$baseUrl$audioUrl"
+            !audioUrl.isNullOrEmpty() -> if (audioUrl.startsWith("http")) audioUrl else "$baseUrl$audioUrl"
             !audioPath.isNullOrEmpty() -> "$baseUrl/file=$audioPath"
             else -> return null
         }
         
         Log.info { "$TAG: Downloading audio from: $downloadUrl" }
-        return downloadAudio(downloadUrl!!)
+        return downloadAudio(downloadUrl)
     }
     
     private suspend fun tryLegacyGradioApi(text: String): ByteArray? {

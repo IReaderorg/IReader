@@ -48,21 +48,24 @@ FROM chapter
 WHERE _id = :id;
 
 findAll:
-SELECT * FROM chapter;
+SELECT * FROM chapter
+ORDER BY book_id, source_order ASC;
 
 -- Lightweight query without content field to prevent OOM
 findAllLight:
 SELECT chapter._id, chapter.book_id, chapter.url, chapter.name, chapter.scanlator, chapter.read, chapter.bookmark, 
        chapter.last_page_read, chapter.chapter_number, chapter.source_order, chapter.date_fetch, 
        chapter.date_upload, chapter.type, CASE WHEN LENGTH(chapter.content) > 10 THEN 1 ELSE 0 END AS is_downloaded
-FROM chapter;
+FROM chapter
+ORDER BY book_id, source_order ASC;
 
 findInLibrary:
 SELECT chapter._id,book_id,chapter.url,name,scanlator,read,bookmark, last_page_read,chapter_number,source_order,date_fetch,date_upload,content,type
         FROM chapter
                LEFT JOIN book ON book._id == chapter.book_id
         GROUP BY chapter._id
-        HAVING book.favorite = 1;
+        HAVING book.favorite = 1
+        ORDER BY chapter.book_id, chapter.source_order ASC;
 
 -- Lightweight query without content field to prevent OOM
 findInLibraryLight:
@@ -72,11 +75,13 @@ SELECT chapter._id, chapter.book_id, chapter.url, chapter.name, chapter.scanlato
 FROM chapter
 LEFT JOIN book ON book._id == chapter.book_id
 GROUP BY chapter._id
-HAVING book.favorite = 1;
+HAVING book.favorite = 1
+ORDER BY chapter.book_id, chapter.source_order ASC;
 getChaptersByMangaId:
 SELECT *
 FROM chapter
-WHERE book_id = :mangaId;
+WHERE book_id = :mangaId
+ORDER BY source_order ASC;
 
 -- Lightweight query without content field to prevent OOM
 getChaptersByMangaIdLight:
@@ -84,7 +89,8 @@ SELECT chapter._id, chapter.book_id, chapter.url, chapter.name, chapter.scanlato
        chapter.last_page_read, chapter.chapter_number, chapter.source_order, chapter.date_fetch, 
        chapter.date_upload, chapter.type, CASE WHEN LENGTH(chapter.content) > 10 THEN 1 ELSE 0 END AS is_downloaded
 FROM chapter
-WHERE chapter.book_id = :mangaId;
+WHERE chapter.book_id = :mangaId
+ORDER BY source_order ASC;
 
 getChapterByUrl:
 SELECT *

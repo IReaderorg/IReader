@@ -53,21 +53,10 @@ class SyncManager(
             return
         }
         
-        autoSyncJob?.cancel()
-        autoSyncJob = scope.launch {
-            while (true) {
-                delay(60_000) // Sync every 1 minute (reduced from 5 minutes)
-                
-                try {
-                    val user = remoteRepository.getCurrentUser().getOrNull()
-                    if (user != null) {
-                        // Auto sync will be triggered by individual operations
-                    }
-                } catch (e: Exception) {
-                    // Silently fail
-                }
-            }
-        }
+        // The previous loop was empty and didn't do anything.
+        // Auto sync is triggered by individual operations.
+        // Keeping this method as it might be used to initialize things in the future
+        // or we can remove it if unused. For now, removing the dead loop.
     }
     
     /**
@@ -100,6 +89,7 @@ class SyncManager(
             debounceSyncJob?.cancel()
             debounceSyncJob = scope.launch {
                 delay(minSyncIntervalMs)
+                lastSyncRequestTime = System.currentTimeMillis() // Update time for the delayed run
                 performSyncReadingProgress(userId, bookId, sourceId, chapterSlug, scrollPosition)
             }
             return Result.success(Unit)
@@ -174,7 +164,8 @@ class SyncManager(
         _isSyncing.value = true
         return try {
             // Sync all books (only essential metadata)
-            syncBooks(userId, books).getOrThrow()
+            // Call use case directly to avoid resetting _isSyncing prematurely
+            syncBooksUseCase(userId, books).getOrThrow()
             
             updateLastSyncTime()
             Result.success(Unit)

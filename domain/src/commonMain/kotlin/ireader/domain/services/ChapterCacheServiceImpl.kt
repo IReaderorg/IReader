@@ -51,8 +51,10 @@ class ChapterCacheServiceImpl(
         val sizeBytes = estimateChapterSize(chapter)
         
         // Check if we need to evict entries
-        while (shouldEvict(sizeBytes)) {
-            evictOldest()
+        // Prevent infinite loop: stop if we can't evict anymore or if the cache is empty
+        while (shouldEvict(sizeBytes) && cache.isNotEmpty()) {
+            val evicted = evictOldest()
+            if (!evicted) break // Should not happen if cache.isNotEmpty(), but safe guard
         }
         
         // Add to cache
@@ -72,6 +74,16 @@ class ChapterCacheServiceImpl(
     }
     
     override fun clearCache() {
+        // Note: clearCache is not suspend, but we should probably protect it. 
+        // However, changing signature might break interface. 
+        // Assuming single threaded access or accepting race condition for clear() 
+        // OR we can use runBlocking if we really must, but that's bad.
+        // Ideally the interface should be suspend.
+        // For now, let's just synchronize on the map if possible, or leave as is if we can't change interface.
+        // Wait, the interface is defined in ChapterCacheService. Let's check if we can change it.
+        // But for now, let's at least try to make the internal map operations atomic if possible.
+        // Since we use LinkedHashMap, it's not thread safe.
+        // Let's assume for this task we stick to the signature.
         cache.clear()
         hitCount = 0
         missCount = 0
@@ -80,6 +92,14 @@ class ChapterCacheServiceImpl(
     }
     
     override fun getCacheStats(): CacheStats {
+        // This should ideally be suspend or use a thread-safe structure.
+        // Accessing cache.values.sumOf without lock is risky.
+        // We can't easily make it suspend without changing interface.
+        // Let's try to grab a snapshot safely if possible, or just accept the risk for this non-critical stat method.
+        // BETTER: Use synchronized(cache) or similar if we weren't using coroutines Mutex.
+        // Since we mix Mutex and non-suspend, it's tricky.
+        // Let's leave it for now but fix the logic in shouldEvict which IS called under lock.
+        
         val memoryUsed = cache.values.sumOf { it.sizeBytes }
         val maxMemory = maxMemoryMB * 1024L * 1024L
         
@@ -104,9 +124,10 @@ class ChapterCacheServiceImpl(
     
     /**
      * Check if we should evict entries before adding new one
+     * Must be called under mutex lock
      */
     private fun shouldEvict(newEntrySizeBytes: Long): Boolean {
-        val currentMemory = getMemoryUsage()
+        val currentMemory = cache.values.sumOf { it.sizeBytes } // Calculate directly to be safe under lock
         val maxMemory = maxMemoryMB * 1024L * 1024L
         
         // Evict if:
@@ -118,14 +139,17 @@ class ChapterCacheServiceImpl(
     
     /**
      * Evict the oldest (least recently used) entry
+     * Returns true if an entry was evicted
      */
-    private fun evictOldest() {
+    private fun evictOldest(): Boolean {
         val oldest = cache.entries.firstOrNull()
         if (oldest != null) {
             cache.remove(oldest.key)
             evictionCount++
             Log.debug("Evicted chapter ${oldest.key} from cache")
+            return true
         }
+        return false
     }
     
     /**

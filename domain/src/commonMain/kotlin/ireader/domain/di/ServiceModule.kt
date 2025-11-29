@@ -3,6 +3,8 @@ package ireader.domain.di
 import ireader.domain.services.common.*
 import ireader.domain.services.ChapterCacheService
 import ireader.domain.services.ChapterCacheServiceImpl
+import ireader.domain.services.SourceHealthChecker
+import ireader.domain.services.SourceHealthCheckerImpl
 import ireader.domain.services.platform.*
 import org.koin.dsl.module
 
@@ -60,6 +62,13 @@ val ServiceModule = module {
         ChapterCacheServiceImpl(
             maxCapacity = 5,
             maxMemoryMB = 50
+        )
+    }
+    
+    // NEW: Source Health Checker
+    single<SourceHealthChecker> {
+        SourceHealthCheckerImpl(
+            catalogStore = get()
         )
     }
     

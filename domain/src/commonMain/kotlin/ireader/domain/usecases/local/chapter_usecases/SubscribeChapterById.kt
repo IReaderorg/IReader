@@ -6,7 +6,9 @@ import ireader.i18n.LAST_CHAPTER
 import kotlinx.coroutines.flow.emptyFlow
 
 
-class FindChapterById(private val chapterRepository: ChapterRepository) {
+class FindChapterById(
+    private val chapterRepository: ChapterRepository
+) {
     suspend operator fun invoke(
         chapterId: Long?,
         bookId: Long? = null,
