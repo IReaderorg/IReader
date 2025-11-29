@@ -9,10 +9,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 /**
- * Adapter for Coqui TTS Service to implement TTSPlayer interface
+ * Adapter for Gradio TTS Service to implement TTSPlayer interface
  * 
- * This adapter wraps CoquiTTSService to provide a consistent interface
- * with Native TTS, allowing them to be used interchangeably.
+ * This adapter wraps the Gradio-based TTS service (including Coqui TTS)
+ * to provide a consistent interface with Native TTS, allowing them to be
+ * used interchangeably.
+ * 
+ * Note: The class is named CoquiTTSPlayerAdapter for backward compatibility,
+ * but it's aliased as GradioTTSPlayerAdapter for new code.
  */
 class CoquiTTSPlayerAdapter(
     private val context: Context,
@@ -38,14 +42,14 @@ class CoquiTTSPlayerAdapter(
             
             if (available) {
                 isInitialized = true
-                Log.info { "Coqui TTS initialized successfully" }
+                Log.info { "Gradio TTS initialized successfully" }
                 Result.success(Unit)
             } else {
-                Log.error { "Coqui TTS service not available" }
-                Result.failure(Exception("Coqui TTS service not available"))
+                Log.error { "Gradio TTS service not available" }
+                Result.failure(Exception("Gradio TTS service not available"))
             }
         } catch (e: Exception) {
-            Log.error { "Failed to initialize Coqui TTS: ${e.message}" }
+            Log.error { "Failed to initialize Gradio TTS: ${e.message}" }
             Result.failure(e)
         }
     }
@@ -55,15 +59,15 @@ class CoquiTTSPlayerAdapter(
     override suspend fun speak(text: String, utteranceId: String): Result<Unit> {
         return try {
             if (!isReady()) {
-                callback?.onError(utteranceId, "Coqui TTS not initialized")
-                return Result.failure(Exception("Coqui TTS not initialized"))
+                callback?.onError(utteranceId, "Gradio TTS not initialized")
+                return Result.failure(Exception("Gradio TTS not initialized"))
             }
             
             isSpeakingNow = true
             
             // Notify start immediately
             callback?.onStart(utteranceId)
-            Log.info { "Coqui TTS speaking: $utteranceId - text: ${text.take(50)}..." }
+            Log.info { "Gradio TTS speaking: $utteranceId - text: ${text.take(50)}..." }
             
             val result = coquiService?.synthesize(
                 text = text,
@@ -74,21 +78,21 @@ class CoquiTTSPlayerAdapter(
             
             if (result == null) {
                 isSpeakingNow = false
-                callback?.onError(utteranceId, "Coqui service not available")
-                return Result.failure(Exception("Coqui service not available"))
+                callback?.onError(utteranceId, "Gradio service not available")
+                return Result.failure(Exception("Gradio service not available"))
             }
             
             // Wait for synthesis to complete
             val audioData = result.getOrElse { error ->
-                Log.error { "Coqui TTS synthesis failed: ${error.message}" }
+                Log.error { "Gradio TTS synthesis failed: ${error.message}" }
                 isSpeakingNow = false
                 callback?.onError(utteranceId, error.message ?: "Unknown error")
                 return Result.failure(error)
             }
             
-            Log.info { "Coqui TTS synthesized ${audioData.samples.size} bytes, duration: ${audioData.duration}" }
+            Log.info { "Gradio TTS synthesized ${audioData.samples.size} bytes, duration: ${audioData.duration}" }
             
-            // Use the blocking playback method from CoquiTTSService
+            // Use the blocking playback method from the TTS service
             // This will wait until audio playback is complete
             try {
                 // Call the internal blocking playback
@@ -120,7 +124,7 @@ class CoquiTTSPlayerAdapter(
                             
                             // Wait for actual duration plus buffer
                             val waitTime = durationMs.coerceAtLeast(500L) + 200L
-                            Log.info { "Coqui TTS waiting ${waitTime}ms for PCM playback (calculated: ${durationMs}ms)" }
+                            Log.info { "Gradio TTS waiting ${waitTime}ms for PCM playback (calculated: ${durationMs}ms)" }
                             kotlinx.coroutines.delay(waitTime)
                             completionSignal.complete(Unit)
                         }
@@ -132,17 +136,17 @@ class CoquiTTSPlayerAdapter(
                     }
                 }
             } catch (e: Exception) {
-                Log.error { "Coqui TTS playback error: ${e.message}" }
+                Log.error { "Gradio TTS playback error: ${e.message}" }
             }
             
-            Log.info { "Coqui TTS completed: $utteranceId" }
+            Log.info { "Gradio TTS completed: $utteranceId" }
             
             isSpeakingNow = false
             callback?.onDone(utteranceId)
             
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.error { "Failed to speak with Coqui TTS: ${e.message}" }
+            Log.error { "Failed to speak with Gradio TTS: ${e.message}" }
             isSpeakingNow = false
             callback?.onError(utteranceId, e.message ?: "Unknown error")
             Result.failure(e)
@@ -154,7 +158,7 @@ class CoquiTTSPlayerAdapter(
      */
     private fun playMp3WithCompletion(mp3Bytes: ByteArray, onComplete: () -> Unit) {
         try {
-            val tempFile = java.io.File.createTempFile("coqui_tts_", ".mp3", context.cacheDir)
+            val tempFile = java.io.File.createTempFile("gradio_tts_", ".mp3", context.cacheDir)
             tempFile.writeBytes(mp3Bytes)
             
             val mediaPlayer = android.media.MediaPlayer()
@@ -168,18 +172,18 @@ class CoquiTTSPlayerAdapter(
             
             mediaPlayer.setOnPreparedListener { mp ->
                 mp.start()
-                Log.info { "Coqui TTS MP3 playback started" }
+                Log.info { "Gradio TTS MP3 playback started" }
             }
             
             mediaPlayer.setOnCompletionListener { mp ->
                 mp.release()
                 tempFile.delete()
-                Log.info { "Coqui TTS MP3 playback completed" }
+                Log.info { "Gradio TTS MP3 playback completed" }
                 onComplete()
             }
             
             mediaPlayer.setOnErrorListener { mp, what, extra ->
-                Log.error { "Coqui TTS MediaPlayer error: what=$what, extra=$extra" }
+                Log.error { "Gradio TTS MediaPlayer error: what=$what, extra=$extra" }
                 mp.release()
                 tempFile.delete()
                 onComplete()
@@ -211,7 +215,7 @@ class CoquiTTSPlayerAdapter(
     
     override fun isSpeaking(): Boolean {
         val speaking = isSpeakingNow || (coquiService?.isCurrentlyPlaying() ?: false)
-        Log.debug { "Coqui TTS isSpeaking: $speaking (flag=$isSpeakingNow, service=${coquiService?.isCurrentlyPlaying()})" }
+        Log.debug { "Gradio TTS isSpeaking: $speaking (flag=$isSpeakingNow, service=${coquiService?.isCurrentlyPlaying()})" }
         return speaking
     }
     
@@ -232,17 +236,30 @@ class CoquiTTSPlayerAdapter(
         this.callback = callback
     }
     
-    override fun getProviderName(): String = "Coqui TTS"
+    override fun getProviderName(): String = "Gradio TTS"
     
     override fun shutdown() {
         coquiService?.cleanup()
         coquiService = null
         isInitialized = false
-        Log.info { "Coqui TTS shut down" }
+        Log.info { "Gradio TTS shut down" }
     }
     
     /**
-     * Get the underlying Coqui service for advanced features
+     * Get the underlying Gradio service for advanced features
+     * (Uses CoquiTTSService which is now aliased as GradioTTSService)
      */
+    fun getGradioService(): CoquiTTSService? = coquiService
+    
+    /**
+     * Legacy method - use getGradioService() instead
+     */
+    @Deprecated("Use getGradioService() instead", ReplaceWith("getGradioService()"))
     fun getCoquiService(): CoquiTTSService? = coquiService
 }
+
+/**
+ * Type alias for backward compatibility
+ * GradioTTSPlayerAdapter is the new name for the Gradio-based TTS player adapter
+ */
+typealias GradioTTSPlayerAdapter = CoquiTTSPlayerAdapter

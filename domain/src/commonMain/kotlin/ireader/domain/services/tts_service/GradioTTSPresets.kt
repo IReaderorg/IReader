@@ -9,18 +9,21 @@ object GradioTTSPresets {
     /**
      * Coqui TTS - High quality multilingual TTS
      * Default IReader Hugging Face Space
+     * Uses gr.Interface with text_to_speech function
+     * API: /gradio_api/call/text_to_speech (Gradio 4.x with SSE)
      */
     val COQUI_IREADER = GradioTTSConfig(
         id = "coqui_ireader",
         name = "Coqui TTS (IReader)",
-        spaceUrl = "https://x-ireader.hf.space",
-        apiName = "/text_to_speech",
+        spaceUrl = "https://kazemcodes-ireader.hf.space",
+        apiName = "/text_to_speech",  // Function name for /gradio_api/call/{fn_name}
         parameters = listOf(
             GradioParam.textParam("text"),
             GradioParam.speedParam("speed", 1.0f, 0.5f, 2.0f)
         ),
         audioOutputIndex = 0,
-        description = "High-quality multilingual TTS powered by Coqui"
+        description = "High-quality English TTS powered by Coqui (fast_pitch model)",
+        apiType = GradioApiType.GRADIO_API_CALL  // Use /gradio_api/call/ endpoint
     )
     
     /**

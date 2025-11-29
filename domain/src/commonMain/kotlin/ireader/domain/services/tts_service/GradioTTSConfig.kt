@@ -3,6 +3,25 @@ package ireader.domain.services.tts_service
 import kotlinx.serialization.Serializable
 
 /**
+ * API type for Gradio spaces - determines which endpoint pattern to use
+ */
+@Serializable
+enum class GradioApiType {
+    /** Auto-detect: try all endpoints until one works */
+    AUTO,
+    /** Modern Gradio 4.x: /gradio_api/call/{fn_name} with SSE streaming */
+    GRADIO_API_CALL,
+    /** Older Gradio 4.x: /call/{fn_name} with SSE streaming */
+    CALL,
+    /** Legacy Gradio 3.x: /api/predict with fn_index */
+    API_PREDICT,
+    /** Run endpoint: /run/{fn_name} */
+    RUN,
+    /** Queue-based: /queue/join for long-running tasks */
+    QUEUE
+}
+
+/**
  * Configuration for a Gradio-based TTS engine.
  * Supports any Gradio TTS space with customizable API parameters.
  */
@@ -29,7 +48,9 @@ data class GradioTTSConfig(
     /** Speech speed multiplier (if supported) */
     val defaultSpeed: Float = 1.0f,
     /** Description of the TTS engine */
-    val description: String = ""
+    val description: String = "",
+    /** API type to use - AUTO will try all endpoints */
+    val apiType: GradioApiType = GradioApiType.AUTO
 )
 
 /**

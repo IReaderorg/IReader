@@ -707,3 +707,11 @@ class CoquiTTSService(
      */
     override fun getCurrentParagraphIndex(): Int = currentParagraphIndex
 }
+
+
+/**
+ * Type alias for backward compatibility
+ * GradioTTSService is the new name for the generic Gradio-based TTS service
+ * which includes Coqui TTS and other Hugging Face Space TTS engines
+ */
+typealias GradioTTSService = CoquiTTSService

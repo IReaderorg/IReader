@@ -717,7 +717,7 @@ fun TTSSettingsPanelCommon(
     sleepTimeMinutes: Int,
     speechSpeed: Float,
     autoNextChapter: Boolean,
-    useCoquiTTS: Boolean = false,
+    useGradioTTS: Boolean = false,
     currentEngineName: String = "System TTS",
     readTranslatedText: Boolean = false,
     hasTranslation: Boolean = false,
@@ -843,13 +843,13 @@ fun TTSSettingsPanelCommon(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
-                                    text = if (useCoquiTTS) "High-quality neural TTS (requires server)" else "System TTS engine",
+                                    text = if (useGradioTTS) "High-quality neural TTS (requires server)" else "System TTS engine",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Switch(
-                                checked = useCoquiTTS,
+                                checked = useGradioTTS,
                                 onCheckedChange = onCoquiTTSChange
                             )
                         }

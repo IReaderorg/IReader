@@ -38,7 +38,7 @@ class AndroidTTSCore(
     
     // TTS Players
     private var nativePlayer: NativeTTSPlayer? = null
-    private var coquiPlayer: CoquiTTSPlayerAdapter? = null
+    private var gradioPlayer: GradioTTSPlayerAdapter? = null
     private var currentPlayer: TTSPlayer? = null
     
     // Notification Manager
@@ -69,16 +69,17 @@ class AndroidTTSCore(
             nativePlayer = NativeTTSPlayer(context)
             nativePlayer?.initialize()
             
-            // Initialize Coqui player if enabled
-            if (appPreferences.useCoquiTTS().get()) {
-                val spaceUrl = appPreferences.coquiSpaceUrl().get()
-                if (spaceUrl.isNotEmpty()) {
-                    coquiPlayer = CoquiTTSPlayerAdapter(
+            // Initialize Gradio player if enabled
+            if (appPreferences.useGradioTTS().get()) {
+                val configId = appPreferences.activeGradioConfigId().get()
+                val config = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(configId)
+                if (config != null && config.spaceUrl.isNotEmpty()) {
+                    gradioPlayer = GradioTTSPlayerAdapter(
                         context = context,
-                        spaceUrl = spaceUrl,
-                        apiKey = appPreferences.coquiApiKey().get()
+                        spaceUrl = config.spaceUrl,
+                        apiKey = config.apiKey ?: ""
                     )
-                    coquiPlayer?.initialize()
+                    gradioPlayer?.initialize()
                 }
             }
             
@@ -160,12 +161,12 @@ class AndroidTTSCore(
      * Preload next paragraphs for smooth playback
      */
     private fun preloadNextParagraphs(currentIndex: Int) {
-        if (currentPlayer?.getProviderName() != "Coqui TTS") {
+        if (currentPlayer?.getProviderName() != "Gradio TTS") {
             return
         }
         
-        val coquiAdapter = currentPlayer as? CoquiTTSPlayerAdapter ?: return
-        val coquiService = coquiAdapter.getCoquiService() ?: return
+        val gradioAdapter = currentPlayer as? GradioTTSPlayerAdapter ?: return
+        val gradioService = gradioAdapter.getGradioService() ?: return
         
         // Preload next 3 paragraphs
         scope.launch(Dispatchers.IO) {
@@ -173,7 +174,7 @@ class AndroidTTSCore(
                 val nextIndex = currentIndex + i
                 if (nextIndex < currentParagraphs.size && isPlaying) {
                     try {
-                        val result = coquiService.synthesize(
+                        val result = gradioService.synthesize(
                             text = currentParagraphs[nextIndex],
                             voiceId = "default",
                             speed = currentPlayer?.getSpeechRate() ?: 1.0f,
@@ -266,7 +267,7 @@ class AndroidTTSCore(
     /**
      * Switch TTS provider
      */
-    fun switchProvider(useCoqui: Boolean) {
+    fun switchProvider(useGradio: Boolean) {
         val wasPlaying = isPlaying
         val currentIndex = currentParagraphIndex
         
@@ -274,8 +275,8 @@ class AndroidTTSCore(
         currentPlayer?.stop()
         
         // Switch player
-        currentPlayer = if (useCoqui && coquiPlayer?.isReady() == true) {
-            coquiPlayer
+        currentPlayer = if (useGradio && gradioPlayer?.isReady() == true) {
+            gradioPlayer
         } else {
             nativePlayer
         }
@@ -313,7 +314,7 @@ class AndroidTTSCore(
     fun shutdown() {
         stop()
         nativePlayer?.shutdown()
-        coquiPlayer?.shutdown()
+        gradioPlayer?.shutdown()
         manageTTSNotification.cleanup()
         Log.info { "AndroidTTSCore shut down" }
     }
@@ -321,9 +322,9 @@ class AndroidTTSCore(
     // Private helper methods
     
     private fun switchToPreferredPlayer() {
-        val useCoqui = appPreferences.useCoquiTTS().get()
-        currentPlayer = if (useCoqui && coquiPlayer?.isReady() == true) {
-            coquiPlayer
+        val useGradio = appPreferences.useGradioTTS().get()
+        currentPlayer = if (useGradio && gradioPlayer?.isReady() == true) {
+            gradioPlayer
         } else {
             nativePlayer
         }

@@ -2,7 +2,6 @@ package ireader.presentation.ui.home.tts
 
 import android.content.ComponentName
 import android.content.Context
-import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -61,12 +60,12 @@ class TTSViewModel(
     val sleepModeUi = readerPreferences.sleepMode().asState()
     val sleepTimeUi = readerPreferences.sleepTime().asState()
     
-    // Coqui TTS State
-    var useCoquiTTS by mutableStateOf(false)
+    // Gradio TTS State
+    var useGradioTTS by mutableStateOf(false)
         private set
     
-    val useCoquiTTSState: androidx.compose.runtime.State<Boolean>
-        get() = androidx.compose.runtime.derivedStateOf { useCoquiTTS }
+    val useGradioTTSState: androidx.compose.runtime.State<Boolean>
+        get() = androidx.compose.runtime.derivedStateOf { useGradioTTS }
     
     // Translation State
     var showTranslatedText by mutableStateOf(false)
@@ -170,37 +169,37 @@ class TTSViewModel(
     }
     
     init {
-        // Load Coqui TTS preference
-        useCoquiTTS = androidUiPreferences.useCoquiTTS().get()
+        // Load Gradio TTS preference
+        useGradioTTS = androidUiPreferences.useGradioTTS().get()
         
-        // Configure Coqui TTS if enabled
-        if (useCoquiTTS) {
-            configureCoquiTTS()
+        // Configure Gradio TTS if enabled
+        if (useGradioTTS) {
+            configurGradioTTS()
         }
         
         // Load translation preference
         showTranslatedText = readerPreferences.useTTSWithTranslatedText().get()
     }
     
-    private fun configureCoquiTTS() {
+    private fun configurGradioTTS() {
         scope.launch {
             try {
-                val spaceUrl = androidUiPreferences.coquiSpaceUrl().get()
+                val spaceUrl = androidUiPreferences.activeGradioConfigId().get()
                 if (spaceUrl.isNotEmpty()) {
-                    aiTTSManager.configureCoqui(spaceUrl)
+                    aiTTSManager.configureGradio(spaceUrl)
                 }
             } catch (e: Exception) {
-                ireader.core.log.Log.error { "Failed to configure Coqui TTS: ${e.message}" }
+                ireader.core.log.Log.error { "Failed to configure Gradio TTS: ${e.message}" }
             }
         }
     }
     
     fun toggleTTSEngine() {
-        useCoquiTTS = !useCoquiTTS
-        androidUiPreferences.useCoquiTTS().set(useCoquiTTS)
+        useGradioTTS = !useGradioTTS
+        androidUiPreferences.useGradioTTS().set(useGradioTTS)
         
-        if (useCoquiTTS) {
-            configureCoquiTTS()
+        if (useGradioTTS) {
+            configurGradioTTS()
         }
     }
 

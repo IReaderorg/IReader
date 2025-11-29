@@ -5,10 +5,11 @@ import ireader.core.log.Log
 import ireader.domain.models.tts.AudioData
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.services.tts_service.GradioTTSPresets
 
 /**
  * Manager for AI TTS services
- * Android implementation supports Hugging Face TTS and native Android TTS
+ * Android implementation supports Gradio TTS (including Gradio), Hugging Face TTS and native Android TTS
  */
 actual class AITTSManager(
     private val context: Context,
@@ -16,32 +17,34 @@ actual class AITTSManager(
 ) {
     
     private val providers = mutableMapOf<AITTSProvider, AITTSService>()
-    private var coquiService: CoquiTTSService? = null
+    private var gradioService: GradioTTSService? = null
     
     init {
-        Log.info { "AITTSManager initialized - supports Coqui TTS, Kokoro TTS, Hugging Face TTS and native Android TTS" }
+        Log.info { "AITTSManager initialized - supports Gradio TTS, Hugging Face TTS and native Android TTS" }
         
-        // Auto-configure Coqui TTS if enabled
-        if (appPreferences.useCoquiTTS().get()) {
-            val spaceUrl = appPreferences.coquiSpaceUrl().get()
-            val apiKey = appPreferences.coquiApiKey().get()
-            if (spaceUrl.isNotEmpty()) {
-                configureCoqui(spaceUrl, apiKey.ifEmpty { null })
-                Log.info { "Auto-configured Coqui TTS: $spaceUrl" }
+        // Auto-configure Gradio TTS if enabled
+        if (appPreferences.useGradioTTS().get()) {
+            val configId = appPreferences.activeGradioConfigId().get()
+            if (configId.isNotEmpty()) {
+                val config = GradioTTSPresets.getPresetById(configId)
+                if (config != null && config.spaceUrl.isNotEmpty()) {
+                    configureGradio(config.spaceUrl, config.apiKey)
+                    Log.info { "Auto-configured Gradio TTS: ${config.name}" }
+                }
             }
         }
     }
     
     /**
-     * Configure Coqui TTS service
-     * High-quality open-source TTS with Gradio API
-     * @param spaceUrl Your Hugging Face Space URL (e.g., "https://username-coqui-tts.hf.space")
+     * Configure Gradio TTS service
+     * Supports any Gradio-based TTS including Gradio
+     * @param spaceUrl Your Hugging Face Space URL (e.g., "https://username-tts.hf.space")
      * @param apiKey Optional API key for private spaces
      */
-    actual fun configureCoqui(spaceUrl: String, apiKey: String?) {
-        coquiService = CoquiTTSService(context, spaceUrl, apiKey)
-        providers[AITTSProvider.COQUI_TTS] = coquiService!!
-        Log.info { "Coqui TTS configured with space: $spaceUrl" }
+    actual fun configureGradio(spaceUrl: String, apiKey: String?) {
+        gradioService = GradioTTSService(context, spaceUrl, apiKey)
+        providers[AITTSProvider.GRADIO_TTS] = gradioService!!
+        Log.info { "Gradio TTS configured with space: $spaceUrl" }
     }
 
     
@@ -98,7 +101,7 @@ actual class AITTSManager(
     ): Result<Unit> {
         return synthesize(text, provider, voiceId, speed, pitch).mapCatching { audioData ->
             when (provider) {
-                AITTSProvider.COQUI_TTS -> coquiService?.playAudio(audioData)
+                AITTSProvider.GRADIO_TTS -> gradioService?.playAudio(audioData)
                 else -> { /* No playback for other providers */ }
             }
         }
@@ -108,14 +111,14 @@ actual class AITTSManager(
      * Stop audio playback
      */
     fun stopPlayback() {
-        coquiService?.stopAudio()
+        gradioService?.stopAudio()
     }
     
     /**
-     * Get Coqui TTS service instance
+     * Get Gradio TTS service instance
      */
-    fun getCoquiService(): CoquiTTSService? {
-        return coquiService
+    fun getGradioService(): GradioTTSService? {
+        return gradioService
     }
     
     /**
@@ -181,7 +184,7 @@ actual class AITTSManager(
      * Clean up resources
      */
     fun cleanup() {
-        coquiService?.cleanup()
+        gradioService?.cleanup()
         providers.clear()
     }
 }

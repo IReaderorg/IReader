@@ -122,12 +122,12 @@ class TTSStateImpl() : AndroidTTSState {
     private val _isDrawerAsc = kotlinx.coroutines.flow.MutableStateFlow(false)
     override val isDrawerAsc: kotlinx.coroutines.flow.StateFlow<Boolean> = _isDrawerAsc
     
-    // Cache status for Coqui TTS paragraphs
+    // Cache status for Gradio TTS paragraphs
     var cachedParagraphs by mutableStateOf<Set<Int>>(emptySet())
     var loadingParagraphs by mutableStateOf<Set<Int>>(emptySet())
     
-    // Coqui TTS flag
-    var useCoquiTTS by mutableStateOf(false)
+    // Gradio TTS flag (for online TTS engines)
+    var useGradioTTS by mutableStateOf(false)
     
     // Alias for speechSpeed (for compatibility)
     val speechRate: kotlinx.coroutines.flow.StateFlow<Float> get() = _speechSpeed

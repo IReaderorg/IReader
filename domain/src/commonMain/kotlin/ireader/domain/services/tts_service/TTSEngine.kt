@@ -85,13 +85,16 @@ expect object TTSEngineFactory {
     fun createNativeEngine(): TTSEngine
     
     /**
-     * Create Coqui TTS engine if available
-     * @deprecated Use createGradioEngine with GradioTTSConfig instead
-     */
-    fun createCoquiEngine(spaceUrl: String, apiKey: String? = null): TTSEngine?
-    
-    /**
-     * Create a generic Gradio TTS engine from configuration
+     * Create a Gradio TTS engine from configuration.
+     * 
+     * Use GradioTTSPresets for pre-configured engines:
+     * - GradioTTSPresets.COQUI_IREADER - Coqui TTS (IReader Space)
+     * - GradioTTSPresets.EDGE_TTS - Microsoft Edge TTS
+     * - GradioTTSPresets.XTTS_V2 - Coqui XTTS v2
+     * - etc.
+     * 
+     * @param config The Gradio TTS configuration
+     * @return TTSEngine instance or null if creation fails
      */
     fun createGradioEngine(config: GradioTTSConfig): TTSEngine?
     
@@ -110,3 +113,10 @@ expect object DesktopTTSEngines {
     fun createKokoroEngine(): TTSEngine?
     fun createMayaEngine(): TTSEngine?
 }
+
+/**
+ * Platform-specific base64 decoding
+ * 
+ * Each platform (Android, Desktop) provides its own implementation.
+ */
+expect fun base64DecodeToBytes(base64: String): ByteArray

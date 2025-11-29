@@ -157,11 +157,11 @@ class AndroidTTSServiceAdapter(
     }
     
     override fun getAvailableEngines(): List<String> {
-        return listOf("Native Android TTS", "Coqui TTS")
+        return listOf("Native Android TTS", "Gradio TTS (Online)")
     }
     
     override fun getCurrentEngineName(): String {
-        return if (sharedState.useCoquiTTS) "Coqui TTS" else "Native Android TTS"
+        return if (sharedState.useGradioTTS) "Gradio TTS" else "Native Android TTS"
     }
     
     override fun isReady(): Boolean {

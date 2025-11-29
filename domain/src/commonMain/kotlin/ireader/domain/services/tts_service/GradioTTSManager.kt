@@ -5,7 +5,6 @@ import ireader.core.log.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /**
@@ -14,7 +13,7 @@ import kotlinx.serialization.json.Json
  */
 class GradioTTSManager(
     private val httpClient: HttpClient,
-    private val audioPlayerFactory: () -> CoquiAudioPlayer,
+    private val audioPlayerFactory: () -> GradioAudioPlayer,
     private val saveConfigs: (String) -> Unit,
     private val loadConfigs: () -> String?
 ) {

@@ -23,7 +23,7 @@ import org.koin.compose.koinInject
  * - View installed engines (Piper, Kokoro, Maya)
  * - Install/uninstall engines
  * - Test engines
- * - Configure Coqui TTS server
+ * - Configure Gradio TTS server
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -201,54 +201,12 @@ actual fun TTSEngineSettingsScreen(
                                 gradioAvailable = ttsService.gradioAvailable
                                 activeGradioConfigName = ttsService.activeGradioConfig?.name
                                 showGradioConfig = false
-                                
+
                                 // Automatically select the engine after configuration
                                 if (ttsService.gradioAvailable) {
                                     scope.launch {
                                         ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.GRADIO)
                                         currentEngine = "GRADIO"
-                                    }
-                                }
-                            }
-                        )
-                    }
-                    
-                    // Coqui TTS (Online) - Legacy
-                    var coquiAvailable by remember { mutableStateOf(ttsService.coquiAvailable) }
-                    var showCoquiConfig by remember { mutableStateOf(false) }
-                    
-                    EngineCard(
-                        name = "Coqui TTS (Legacy)",
-                        description = "Original Coqui TTS configuration",
-                        isAvailable = coquiAvailable,
-                        isCurrentEngine = currentEngine == "COQUI",
-                        onSelect = {
-                            if (coquiAvailable) {
-                                scope.launch {
-                                    ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.COQUI)
-                                    currentEngine = "COQUI"
-                                }
-                            } else {
-                                showCoquiConfig = true
-                            }
-                        }
-                    )
-                    
-                    // Coqui Configuration Dialog
-                    if (showCoquiConfig) {
-                        CoquiConfigDialog(
-                            ttsService = ttsService,
-                            appPrefs = koinInject(),
-                            onDismiss = { showCoquiConfig = false },
-                            onConfigured = {
-                                coquiAvailable = ttsService.coquiAvailable
-                                showCoquiConfig = false
-                                
-                                // Automatically select the engine after configuration
-                                if (ttsService.coquiAvailable) {
-                                    scope.launch {
-                                        ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.COQUI)
-                                        currentEngine = "COQUI"
                                     }
                                 }
                             }
@@ -830,7 +788,7 @@ private fun PiperVoiceCard(
 
 
 /**
- * Dialog for configuring Coqui TTS
+ * Dialog for configuring Gradio TTS
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -840,8 +798,8 @@ private fun CoquiConfigDialog(
     onDismiss: () -> Unit,
     onConfigured: () -> Unit
 ) {
-    var spaceUrl by remember { mutableStateOf(appPrefs.coquiSpaceUrl().get()) }
-    var apiKey by remember { mutableStateOf(appPrefs.coquiApiKey().get()) }
+    var spaceUrl by remember { mutableStateOf(appPrefs.activeGradioConfigId().get()) }
+    var apiKey by remember { mutableStateOf(appPrefs.gradioTTSConfigs().get()) }
     var isTesting by remember { mutableStateOf(false) }
     var testResult by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -862,12 +820,12 @@ private fun CoquiConfigDialog(
             ) {
                 // Header
                 Text(
-                    text = "Configure Coqui TTS",
+                    text = "Configure Gradio TTS",
                     style = MaterialTheme.typography.headlineSmall
                 )
                 
                 Text(
-                    text = "Coqui TTS uses a HuggingFace Space to synthesize speech. You can use the default space or deploy your own.",
+                    text = "Gradio TTS uses a HuggingFace Space to synthesize speech. You can use the default space or deploy your own.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -932,8 +890,8 @@ private fun CoquiConfigDialog(
                                 testResult = null
                                 try {
                                     // Configure and test
-                                    ttsService.configureCoqui(spaceUrl, apiKey.ifEmpty { null })
-                                    if (ttsService.coquiAvailable) {
+                                    ttsService.configureGradioFromPreferences()
+                                    if (ttsService.gradioAvailable) {
                                         testResult = "✓ Connection successful!"
                                     } else {
                                         testResult = "✗ Failed to connect. Check URL."
@@ -962,11 +920,11 @@ private fun CoquiConfigDialog(
                         onClick = {
                             scope.launch {
                                 // Save settings
-                                appPrefs.coquiSpaceUrl().set(spaceUrl)
-                                appPrefs.coquiApiKey().set(apiKey)
+                                appPrefs.activeGradioConfigId().set(spaceUrl)
+                                appPrefs.gradioTTSConfigs().set(apiKey)
                                 
                                 // Configure engine
-                                ttsService.configureCoqui(spaceUrl, apiKey.ifEmpty { null })
+                                ttsService.configureGradioFromPreferences()
                                 
                                 onConfigured()
                             }

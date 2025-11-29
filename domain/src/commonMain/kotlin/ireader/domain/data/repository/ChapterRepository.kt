@@ -128,4 +128,17 @@ interface ChapterRepository {
      * @return Flow emitting list of chapters when they change
      */
     fun subscribeChaptersByBookId(bookId: Long): Flow<List<Chapter>>
+    
+    /**
+     * Retrieves all chapters for a specific book WITH their full content.
+     * This is a heavier query that includes chapter text content.
+     * Use this for EPUB export or when you need the actual chapter text.
+     * 
+     * WARNING: This can cause OOM errors for books with many large chapters.
+     * Use findChaptersByBookId() for listing chapters without content.
+     * 
+     * @param bookId The unique identifier of the book
+     * @return List of chapters with their full content
+     */
+    suspend fun findChaptersByBookIdWithContent(bookId: Long): List<Chapter>
 }

@@ -9,8 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ireader.domain.services.tts_service.GradioTTSConfig
-import ireader.domain.services.tts_service.GradioTTSPresets
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.settings.components.GradioConfigEditDialog
 import ireader.presentation.ui.settings.components.GradioTTSSection
@@ -101,125 +99,7 @@ fun AndroidTTSMManagerSettingsScreen(
             }
             
 
-            // Coqui TTS (gTTS) - Your Custom Space
-            item {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (state.useCoquiTTS) 
-                            MaterialTheme.colorScheme.secondaryContainer 
-                        else 
-                            MaterialTheme.colorScheme.surface
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Cloud,
-                                        contentDescription = null,
-                                        tint = if (state.useCoquiTTS) 
-                                            MaterialTheme.colorScheme.primary 
-                                        else 
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        text = "Coqui TTS (Your Space)",
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                }
-                                Text(
-                                    text = "Your custom TTS from Hugging Face",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Switch(
-                                checked = state.useCoquiTTS,
-                                onCheckedChange = { viewModel.setUseCoquiTTS(it) }
-                            )
-                        }
-                        
-                        if (state.useCoquiTTS) {
-                            Divider(modifier = Modifier.padding(vertical = 8.dp))
-                            
-                            // Space URL
-                            Text(
-                                text = "Space URL",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            OutlinedTextField(
-                                value = state.coquiSpaceUrl,
-                                onValueChange = { viewModel.setCoquiSpaceUrl(it) },
-                                modifier = Modifier.fillMaxWidth(),
-                                placeholder = { Text("https://your-username-tts.hf.space") },
-                                singleLine = true
-                            )
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            // Speed control
-                            Text(
-                                text = "Speed: ${String.format("%.1f", state.coquiSpeed)}x",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Slider(
-                                value = state.coquiSpeed,
-                                onValueChange = { viewModel.setCoquiSpeed(it) },
-                                valueRange = 0.5f..2.0f,
-                                steps = 15
-                            )
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            // Test button
-                            Button(
-                                onClick = { viewModel.testCoquiTTS() },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Test Coqui TTS")
-                            }
-                            
-                            Spacer(modifier = Modifier.height(4.dp))
-                            
-                            Text(
-                                text = "✓ Your custom Space • ✓ Free forever • ✓ Good quality",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            
-                            if (!state.isCoquiAvailable) {
-                                Text(
-                                    text = "⚠️ Space may not be available. Check URL and internet connection.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // Gradio TTS Section (Generic support for any Gradio TTS)
+            // Gradio TTS Section (Online TTS engines including Gradio)
             if (gradioViewModel != null && gradioState != null) {
                 item {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

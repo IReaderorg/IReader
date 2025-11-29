@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Unified TTS Player Interface
- * Abstracts Native TTS and Coqui TTS behind a single interface
+ * Abstracts Native TTS and Gradio TTS behind a single interface
  */
 interface UnifiedTTSPlayer {
     fun speak(text: String, utteranceId: String)
@@ -140,7 +140,7 @@ class NativeTTSPlayer(
 }
 
 /**
- * Coqui TTS implementation
+ * Gradio TTS implementation
  */
 class CoquiTTSPlayer(
     private val context: Context,
@@ -172,10 +172,10 @@ class CoquiTTSPlayer(
                 if (coquiService?.isAvailable() == true) {
                     isInitialized = true
                 } else {
-                    Log.error { "Coqui TTS not available" }
+                    Log.error { "Gradio TTS not available" }
                 }
             } catch (e: Exception) {
-                Log.error { "Coqui TTS initialization failed: ${e.message}" }
+                Log.error { "Gradio TTS initialization failed: ${e.message}" }
             }
         }
     }
@@ -183,7 +183,7 @@ class CoquiTTSPlayer(
     override fun speak(text: String, utteranceId: String) {
         if (!isReady()) {
             mainScope.launch {
-                callback?.onError(utteranceId, "Coqui TTS not initialized")
+                callback?.onError(utteranceId, "Gradio TTS not initialized")
             }
             return
         }
@@ -194,11 +194,11 @@ class CoquiTTSPlayer(
                     callback?.onStart(utteranceId)
                 }
                 
-                Log.info { "Coqui TTS speaking: $utteranceId - ${text.take(50)}..." }
+                Log.info { "Gradio TTS speaking: $utteranceId - ${text.take(50)}..." }
                 
                 // Check if audio is already cached
                 val audioData = audioCache[utteranceId] ?: run {
-                    Log.info { "Coqui TTS synthesizing (not cached): $utteranceId" }
+                    Log.info { "Gradio TTS synthesizing (not cached): $utteranceId" }
                     val result = coquiService?.synthesize(
                         text = text,
                         voiceId = "default",
@@ -218,7 +218,7 @@ class CoquiTTSPlayer(
                 audioCache.remove(utteranceId)
                 cacheStatus.remove(utteranceId)
                 
-                Log.info { "Coqui TTS audio: ${audioData.samples.size} bytes, duration: ${audioData.duration}" }
+                Log.info { "Gradio TTS audio: ${audioData.samples.size} bytes, duration: ${audioData.duration}" }
                 
                 // Check if it's MP3 or PCM
                 val isMp3 = audioData.samples.size > 3 &&
@@ -251,7 +251,7 @@ class CoquiTTSPlayer(
                     val duration = maxOf(calculatedDurationMs, audioData.duration.inWholeMilliseconds)
                         .coerceAtLeast(500L)
                     
-                    Log.info { "Coqui TTS PCM duration: calculated=${calculatedDurationMs}ms, reported=${audioData.duration.inWholeMilliseconds}ms, using=${duration}ms" }
+                    Log.info { "Gradio TTS PCM duration: calculated=${calculatedDurationMs}ms, reported=${audioData.duration.inWholeMilliseconds}ms, using=${duration}ms" }
                     
                     // Play audio
                     coquiService?.playAudio(audioData)
@@ -260,13 +260,13 @@ class CoquiTTSPlayer(
                     kotlinx.coroutines.delay(duration + 300L)
                 }
                 
-                Log.info { "Coqui TTS completed: $utteranceId" }
+                Log.info { "Gradio TTS completed: $utteranceId" }
                 
                 mainScope.launch {
                     callback?.onDone(utteranceId)
                 }
             } catch (e: Exception) {
-                Log.error { "Coqui TTS error: ${e.message}" }
+                Log.error { "Gradio TTS error: ${e.message}" }
                 mainScope.launch {
                     callback?.onError(utteranceId, e.message ?: "Unknown error")
                 }
@@ -293,18 +293,18 @@ class CoquiTTSPlayer(
             
             mediaPlayer.setOnPreparedListener { mp ->
                 mp.start()
-                Log.info { "Coqui TTS MP3 playback started" }
+                Log.info { "Gradio TTS MP3 playback started" }
             }
             
             mediaPlayer.setOnCompletionListener { mp ->
                 mp.release()
                 tempFile.delete()
-                Log.info { "Coqui TTS MP3 playback completed" }
+                Log.info { "Gradio TTS MP3 playback completed" }
                 onComplete()
             }
             
             mediaPlayer.setOnErrorListener { mp, what, extra ->
-                Log.error { "Coqui TTS MediaPlayer error: what=$what, extra=$extra" }
+                Log.error { "Gradio TTS MediaPlayer error: what=$what, extra=$extra" }
                 mp.release()
                 tempFile.delete()
                 onComplete()
@@ -346,11 +346,11 @@ class CoquiTTSPlayer(
                         cacheStatus[utteranceId] = CacheStatus.CACHED
                     }?.onFailure { error ->
                         cacheStatus[utteranceId] = CacheStatus.FAILED
-                        Log.error { "Coqui TTS cache failed: ${error.message}" }
+                        Log.error { "Gradio TTS cache failed: ${error.message}" }
                     }
                 } catch (e: Exception) {
                     cacheStatus[utteranceId] = CacheStatus.FAILED
-                    Log.error { "Coqui TTS cache error: ${e.message}" }
+                    Log.error { "Gradio TTS cache error: ${e.message}" }
                 }
             }
         }
@@ -375,7 +375,7 @@ class CoquiTTSPlayer(
     }
     
     override fun resume() {
-        // Coqui doesn't support resume, caller should re-speak
+        // Gradio doesn't support resume, caller should re-speak
     }
     
     override fun setSpeed(speed: Float) {

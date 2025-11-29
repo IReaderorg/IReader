@@ -33,7 +33,7 @@ actual class AITTSManager {
         return Result.failure(Exception("AI TTS not supported on desktop"))
     }
     
-    actual fun configureCoqui(spaceUrl: String, apiKey: String?) {
+    actual fun configureGradio(spaceUrl: String, apiKey: String?) {
         // No-op on desktop
     }
     

@@ -7,33 +7,56 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import ireader.core.log.Log
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+/**
+ * Speech request for the queue
+ */
+private data class SpeechRequest(
+    val text: String,
+    val utteranceId: String
+)
 
 /**
  * Generic Gradio TTS Engine that works with any Gradio-based TTS space.
  * 
- * Supports multiple Gradio API versions:
- * - Gradio 3.x: /api/predict with fn_index
- * - Gradio 4.x: /call/{api_name} with event streaming
- * - Queue-based: /queue/join for long-running tasks
+ * Features:
+ * - Queue-based speech processing (one at a time, in order)
+ * - Audio caching for pre-fetched paragraphs
+ * - Automatic API endpoint detection and caching
+ * - Support for multiple Gradio API versions
  */
 class GenericGradioTTSEngine(
     private val config: GradioTTSConfig,
     private val httpClient: HttpClient,
-    private val audioPlayer: CoquiAudioPlayer
+    private val audioPlayer: GradioAudioPlayer
 ) : TTSEngine {
     
     private var callback: TTSEngineCallback? = null
-    private var currentJob: Job? = null
     private var speed: Float = config.defaultSpeed
     private var pitch: Float = 1.0f
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     
+    // Speech queue - processes one request at a time
+    private val speechQueue = Channel<SpeechRequest>(Channel.UNLIMITED)
+    private var queueProcessorJob: Job? = null
+    private var currentSpeechJob: Job? = null
+    private var isPaused = false
+    private val pauseMutex = Mutex()
+    
     // Audio cache for pre-fetching
     private val audioCache = mutableMapOf<String, ByteArray>()
     private val loadingParagraphs = mutableSetOf<String>()
+    private val cacheMutex = Mutex()
+    
+    // Pre-fetch job management
+    private val prefetchJobs = mutableMapOf<String, Job>()
+    private val prefetchMutex = Mutex()
     
     private val _cachedParagraphs = MutableStateFlow<Set<Int>>(emptySet())
     val cachedParagraphs: StateFlow<Set<Int>> = _cachedParagraphs.asStateFlow()
@@ -41,105 +64,224 @@ class GenericGradioTTSEngine(
     private val _loadingParagraphsFlow = MutableStateFlow<Set<Int>>(emptySet())
     val loadingParagraphsFlow: StateFlow<Set<Int>> = _loadingParagraphsFlow.asStateFlow()
     
+    private val _isPlaying = MutableStateFlow(false)
+    val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
+    
+    init {
+        // Start the queue processor
+        startQueueProcessor()
+    }
+    
     companion object {
         private const val TAG = "GenericGradioTTS"
-        private const val MAX_CACHE_SIZE = 10
+        private const val MAX_CACHE_SIZE = 20
         private const val MAX_TEXT_LENGTH = 5000
+        private const val MAX_PREFETCH_CONCURRENT = 2
         
-        // Base64 decoding characters
-        private const val BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        // Cache of working API types per space URL - persists across engine instances
+        private val workingApiCache = mutableMapOf<String, GradioApiType>()
         
         /**
-         * Decode base64 string to byte array
+         * Get cached working API type for a space URL
          */
-        fun base64DecodeToBytes(base64: String): ByteArray {
-            val cleanBase64 = base64.replace("\\s".toRegex(), "")
-            val padding = when {
-                cleanBase64.endsWith("==") -> 2
-                cleanBase64.endsWith("=") -> 1
-                else -> 0
-            }
-            val noPadding = cleanBase64.trimEnd('=')
-            val outputLength = (noPadding.length * 3) / 4
-            val output = ByteArray(outputLength)
-            
-            var outputIndex = 0
-            var i = 0
-            while (i < noPadding.length) {
-                val b0 = BASE64_CHARS.indexOf(noPadding[i])
-                val b1 = if (i + 1 < noPadding.length) BASE64_CHARS.indexOf(noPadding[i + 1]) else 0
-                val b2 = if (i + 2 < noPadding.length) BASE64_CHARS.indexOf(noPadding[i + 2]) else 0
-                val b3 = if (i + 3 < noPadding.length) BASE64_CHARS.indexOf(noPadding[i + 3]) else 0
-                
-                if (outputIndex < output.size) output[outputIndex++] = ((b0 shl 2) or (b1 shr 4)).toByte()
-                if (outputIndex < output.size) output[outputIndex++] = (((b1 and 0x0F) shl 4) or (b2 shr 2)).toByte()
-                if (outputIndex < output.size) output[outputIndex++] = (((b2 and 0x03) shl 6) or b3).toByte()
-                
-                i += 4
-            }
-            
-            return output.copyOf(outputLength - padding)
+        fun getCachedApiType(spaceUrl: String): GradioApiType? = workingApiCache[spaceUrl]
+        
+        /**
+         * Cache a working API type for a space URL
+         */
+        fun cacheWorkingApiType(spaceUrl: String, apiType: GradioApiType) {
+            workingApiCache[spaceUrl] = apiType
+            Log.info { "$TAG: Cached working API type $apiType for $spaceUrl" }
+        }
+        
+        /**
+         * Clear the API type cache (useful if an endpoint stops working)
+         */
+        fun clearApiCache() {
+            workingApiCache.clear()
+            Log.info { "$TAG: Cleared API type cache" }
         }
     }
     
-    override suspend fun speak(text: String, utteranceId: String) {
-        currentJob?.cancel()
-        
-        currentJob = scope.launch {
-            try {
-                callback?.onStart(utteranceId)
-                
-                // Check cache first
-                val cachedAudio = audioCache[utteranceId]
-                if (cachedAudio != null) {
-                    Log.info { "$TAG: Playing cached audio for $utteranceId" }
-                    playAudio(cachedAudio, utteranceId)
-                    return@launch
+    /**
+     * Start the queue processor that handles speech requests one at a time
+     */
+    private fun startQueueProcessor() {
+        queueProcessorJob?.cancel()
+        queueProcessorJob = scope.launch {
+            for (request in speechQueue) {
+                // Wait if paused
+                while (isPaused) {
+                    delay(100)
                 }
                 
-                // Generate audio from server
-                val audioData = generateSpeech(text)
-                if (audioData != null) {
-                    cacheAudio(utteranceId, audioData)
-                    playAudio(audioData, utteranceId)
-                } else {
-                    callback?.onError(utteranceId, "Failed to generate speech")
+                try {
+                    processSpeechRequest(request)
+                } catch (e: CancellationException) {
+                    Log.info { "$TAG: Queue processor cancelled" }
+                    break
+                } catch (e: Exception) {
+                    Log.error { "$TAG: Error processing speech request: ${e.message}" }
+                    callback?.onError(request.utteranceId, e.message ?: "Unknown error")
                 }
-            } catch (e: CancellationException) {
-                Log.info { "$TAG: Speech cancelled for $utteranceId" }
-            } catch (e: Exception) {
-                Log.error { "$TAG: Error speaking: ${e.message}" }
-                callback?.onError(utteranceId, e.message ?: "Unknown error")
             }
         }
     }
     
     /**
+     * Process a single speech request
+     */
+    private suspend fun processSpeechRequest(request: SpeechRequest) {
+        val (text, utteranceId) = request
+        
+        _isPlaying.value = true
+        callback?.onStart(utteranceId)
+        
+        try {
+            // Check cache first
+            val cachedAudio = cacheMutex.withLock { audioCache[utteranceId] }
+            
+            val audioData = if (cachedAudio != null) {
+                Log.info { "$TAG: Playing cached audio for $utteranceId" }
+                cachedAudio
+            } else {
+                // Generate audio from server
+                Log.info { "$TAG: Generating audio for $utteranceId" }
+                generateSpeech(text)
+            }
+            
+            if (audioData != null) {
+                // Cache the audio if not already cached
+                if (cachedAudio == null) {
+                    cacheAudio(utteranceId, audioData)
+                }
+                
+                // Play the audio and wait for completion
+                playAudioAndWait(audioData, utteranceId)
+            } else {
+                callback?.onError(utteranceId, "Failed to generate speech")
+            }
+        } catch (e: CancellationException) {
+            Log.info { "$TAG: Speech cancelled for $utteranceId" }
+            throw e
+        } catch (e: Exception) {
+            Log.error { "$TAG: Error speaking $utteranceId: ${e.message}" }
+            callback?.onError(utteranceId, e.message ?: "Unknown error")
+        } finally {
+            _isPlaying.value = false
+        }
+    }
+    
+    override suspend fun speak(text: String, utteranceId: String) {
+        // Add to queue instead of processing immediately
+        Log.info { "$TAG: Queueing speech request: $utteranceId" }
+        speechQueue.send(SpeechRequest(text, utteranceId))
+    }
+    
+    /**
+     * Clear the speech queue and stop current playback
+     */
+    fun clearQueue() {
+        Log.info { "$TAG: Clearing speech queue" }
+        
+        // Cancel current speech
+        currentSpeechJob?.cancel()
+        
+        // Drain the queue
+        while (speechQueue.tryReceive().isSuccess) {
+            // Keep draining
+        }
+        
+        audioPlayer.stop()
+        _isPlaying.value = false
+    }
+    
+    /**
      * Pre-cache paragraphs for smoother playback
+     * Limits concurrent prefetch to avoid overwhelming the server
      */
     fun precacheParagraphs(paragraphs: List<Pair<String, String>>) {
-        paragraphs.forEach { (utteranceId, text) ->
-            if (!audioCache.containsKey(utteranceId) && !loadingParagraphs.contains(utteranceId)) {
-                loadingParagraphs.add(utteranceId)
-                updateLoadingState()
-                
-                scope.launch {
-                    try {
-                        val audioData = generateSpeech(text)
-                        if (audioData != null) {
-                            cacheAudio(utteranceId, audioData)
+        scope.launch {
+            // Filter out already cached or loading paragraphs
+            val toFetch = paragraphs.filter { (utteranceId, _) ->
+                cacheMutex.withLock {
+                    !audioCache.containsKey(utteranceId) && !loadingParagraphs.contains(utteranceId)
+                }
+            }.take(MAX_PREFETCH_CONCURRENT) // Limit concurrent prefetch
+            
+            toFetch.forEach { (utteranceId, text) ->
+                prefetchMutex.withLock {
+                    if (prefetchJobs.containsKey(utteranceId)) return@forEach
+                    
+                    loadingParagraphs.add(utteranceId)
+                    updateLoadingState()
+                    
+                    val job = scope.launch {
+                        try {
+                            val audioData = generateSpeech(text)
+                            if (audioData != null) {
+                                cacheAudio(utteranceId, audioData)
+                                Log.info { "$TAG: Pre-cached audio for $utteranceId" }
+                            }
+                        } catch (e: CancellationException) {
+                            Log.debug { "$TAG: Prefetch cancelled for $utteranceId" }
+                        } catch (e: Exception) {
+                            Log.warn { "$TAG: Error pre-caching $utteranceId: ${e.message}" }
+                        } finally {
+                            cacheMutex.withLock {
+                                loadingParagraphs.remove(utteranceId)
+                            }
+                            prefetchMutex.withLock {
+                                prefetchJobs.remove(utteranceId)
+                            }
+                            updateLoadingState()
                         }
-                    } catch (e: Exception) {
-                        Log.error { "$TAG: Error pre-caching $utteranceId: ${e.message}" }
-                    } finally {
-                        loadingParagraphs.remove(utteranceId)
-                        updateLoadingState()
                     }
+                    prefetchJobs[utteranceId] = job
                 }
             }
         }
     }
-
+    
+    /**
+     * Cancel all prefetch jobs
+     */
+    fun cancelPrefetch() {
+        scope.launch {
+            prefetchMutex.withLock {
+                prefetchJobs.values.forEach { it.cancel() }
+                prefetchJobs.clear()
+            }
+            cacheMutex.withLock {
+                loadingParagraphs.clear()
+            }
+            updateLoadingState()
+        }
+    }
+    
+    /**
+     * Play audio and wait for completion
+     */
+    private suspend fun playAudioAndWait(audioData: ByteArray, utteranceId: String) {
+        val completionDeferred = CompletableDeferred<Unit>()
+        
+        try {
+            audioPlayer.play(audioData) {
+                // Playback completed
+                callback?.onDone(utteranceId)
+                completionDeferred.complete(Unit)
+            }
+            
+            // Wait for playback to complete
+            completionDeferred.await()
+        } catch (e: CancellationException) {
+            audioPlayer.stop()
+            throw e
+        } catch (e: Exception) {
+            Log.error { "$TAG: Error playing audio: ${e.message}" }
+            callback?.onError(utteranceId, e.message ?: "Playback error")
+        }
+    }
     
     private suspend fun generateSpeech(text: String): ByteArray? {
         val truncatedText = if (text.length > MAX_TEXT_LENGTH) {
@@ -149,36 +291,244 @@ class GenericGradioTTSEngine(
         }
         
         Log.info { "$TAG: Generating speech for ${truncatedText.length} chars using ${config.name}" }
-        Log.info { "$TAG: Space URL: ${config.spaceUrl}, API: ${config.apiName}" }
+        Log.info { "$TAG: Space URL: ${config.spaceUrl}, API: ${config.apiName}, ApiType: ${config.apiType}" }
         
         // Build request body based on config parameters
         val requestBody = buildRequestBody(truncatedText)
         
-        // Try different Gradio API versions
-        var audioData: ByteArray? = null
-        
-        // Try Gradio 4.x call API first (most modern)
-        audioData = tryGradio4CallApi(requestBody)
-        
-        // Try legacy /api/predict (Gradio 3.x)
-        if (audioData == null) {
-            Log.info { "$TAG: Trying legacy Gradio API..." }
-            audioData = tryLegacyGradioApi(requestBody)
+        // Determine which API type to use
+        val apiTypeToUse = when {
+            // If config specifies a specific API type (not AUTO), use it
+            config.apiType != GradioApiType.AUTO -> config.apiType
+            // Check if we have a cached working API type for this space
+            else -> getCachedApiType(config.spaceUrl)
         }
         
-        // Try /run/{api_name} endpoint
-        if (audioData == null) {
-            Log.info { "$TAG: Trying Gradio run API..." }
-            audioData = tryGradioRunApi(requestBody)
+        // If we know which API works, use it directly
+        if (apiTypeToUse != null && apiTypeToUse != GradioApiType.AUTO) {
+            Log.info { "$TAG: Using known working API type: $apiTypeToUse" }
+            val result = trySpecificApi(apiTypeToUse, requestBody)
+            if (result != null) return result
+            
+            // If the cached API failed, clear cache and try all
+            Log.warn { "$TAG: Cached API type $apiTypeToUse failed, trying all endpoints..." }
+            workingApiCache.remove(config.spaceUrl)
         }
         
-        // Try queue-based API
-        if (audioData == null) {
-            Log.info { "$TAG: Trying Gradio queue API..." }
-            audioData = tryGradioQueueApi(requestBody)
+        // Try all API types and cache the one that works
+        return tryAllApisAndCache(requestBody)
+    }
+    
+    /**
+     * Try a specific API type
+     */
+    private suspend fun trySpecificApi(apiType: GradioApiType, requestBody: String): ByteArray? {
+        return when (apiType) {
+            GradioApiType.GRADIO_API_CALL -> tryGradioApiCall(requestBody)
+            GradioApiType.CALL -> tryCallApi(requestBody)
+            GradioApiType.API_PREDICT -> tryApiPredict(requestBody)
+            GradioApiType.RUN -> tryRunApi(requestBody)
+            GradioApiType.QUEUE -> tryQueueApi(requestBody)
+            GradioApiType.AUTO -> tryAllApisAndCache(requestBody)
+        }
+    }
+    
+    /**
+     * Try all API types in order and cache the first one that works
+     */
+    private suspend fun tryAllApisAndCache(requestBody: String): ByteArray? {
+        // Order of APIs to try
+        val apiTypes = listOf(
+            GradioApiType.GRADIO_API_CALL,
+            GradioApiType.CALL,
+            GradioApiType.API_PREDICT,
+            GradioApiType.RUN,
+            GradioApiType.QUEUE
+        )
+        
+        for (apiType in apiTypes) {
+            Log.info { "$TAG: Trying API type: $apiType" }
+            val result = trySpecificApi(apiType, requestBody)
+            if (result != null) {
+                // Cache this working API type
+                cacheWorkingApiType(config.spaceUrl, apiType)
+                return result
+            }
         }
         
-        return audioData
+        Log.error { "$TAG: All API types failed for ${config.spaceUrl}" }
+        return null
+    }
+    
+    /**
+     * Try /gradio_api/call/{fn_name} endpoint (modern Gradio 4.x)
+     */
+    private suspend fun tryGradioApiCall(requestBody: String): ByteArray? {
+        val baseUrl = config.spaceUrl.trimEnd('/')
+        val apiName = config.apiName.trimStart('/')
+        val apiUrl = "$baseUrl/gradio_api/call/$apiName"
+        return tryCallEndpoint(apiUrl, requestBody)
+    }
+    
+    /**
+     * Try /call/{fn_name} endpoint (older Gradio 4.x)
+     */
+    private suspend fun tryCallApi(requestBody: String): ByteArray? {
+        val baseUrl = config.spaceUrl.trimEnd('/')
+        val apiName = config.apiName.trimStart('/')
+        val apiUrl = "$baseUrl/call/$apiName"
+        return tryCallEndpoint(apiUrl, requestBody)
+    }
+    
+    /**
+     * Try /api/predict endpoint (legacy Gradio 3.x)
+     */
+    private suspend fun tryApiPredict(requestBody: String): ByteArray? {
+        val baseUrl = config.spaceUrl.trimEnd('/')
+        val legacyBody = requestBody.dropLast(1) + """, "fn_index": 0}"""
+        
+        // Try both /api/predict and /gradio_api/predict
+        for (apiUrl in listOf("$baseUrl/api/predict", "$baseUrl/gradio_api/predict")) {
+            try {
+                Log.info { "$TAG: Trying predict API: $apiUrl" }
+                
+                val response = httpClient.post(apiUrl) {
+                    contentType(ContentType.Application.Json)
+                    config.apiKey?.let { header("Authorization", "Bearer $it") }
+                    setBody(legacyBody)
+                }
+                
+                if (response.status.isSuccess()) {
+                    val responseText = response.bodyAsText()
+                    Log.debug { "$TAG: Predict response: ${responseText.take(300)}..." }
+                    val result = parseGradioResponse(responseText)
+                    if (result != null) return result
+                }
+            } catch (e: Exception) {
+                Log.warn { "$TAG: Predict API error at $apiUrl: ${e.message}" }
+            }
+        }
+        return null
+    }
+    
+    /**
+     * Try /run/{fn_name} endpoint
+     */
+    private suspend fun tryRunApi(requestBody: String): ByteArray? {
+        val baseUrl = config.spaceUrl.trimEnd('/')
+        val apiName = config.apiName.trimStart('/').replace("/", "_")
+        
+        for (apiUrl in listOf("$baseUrl/run/$apiName", "$baseUrl/gradio_api/run/$apiName")) {
+            try {
+                Log.info { "$TAG: Trying run API: $apiUrl" }
+                
+                val response = httpClient.post(apiUrl) {
+                    contentType(ContentType.Application.Json)
+                    config.apiKey?.let { header("Authorization", "Bearer $it") }
+                    setBody(requestBody)
+                }
+                
+                if (response.status.isSuccess()) {
+                    val result = parseGradioResponse(response.bodyAsText())
+                    if (result != null) return result
+                }
+            } catch (e: Exception) {
+                Log.warn { "$TAG: Run API error at $apiUrl: ${e.message}" }
+            }
+        }
+        return null
+    }
+    
+    /**
+     * Try queue-based API for long-running tasks
+     */
+    private suspend fun tryQueueApi(requestBody: String): ByteArray? {
+        val baseUrl = config.spaceUrl.trimEnd('/')
+        val sessionHash = System.currentTimeMillis().toString()
+        val queueBody = requestBody.dropLast(1) + """, "fn_index": 0, "session_hash": "$sessionHash"}"""
+        
+        for (queuePrefix in listOf("$baseUrl/queue", "$baseUrl/gradio_api/queue")) {
+            try {
+                val queueUrl = "$queuePrefix/join"
+                Log.info { "$TAG: Trying queue API: $queueUrl" }
+                
+                val response = httpClient.post(queueUrl) {
+                    contentType(ContentType.Application.Json)
+                    config.apiKey?.let { header("Authorization", "Bearer $it") }
+                    setBody(queueBody)
+                }
+                
+                if (!response.status.isSuccess()) continue
+                
+                // Poll for result
+                val dataUrl = "$queuePrefix/data?session_hash=$sessionHash"
+                repeat(30) {
+                    delay(1000)
+                    val dataResponse = httpClient.get(dataUrl) {
+                        config.apiKey?.let { header("Authorization", "Bearer $it") }
+                    }
+                    if (dataResponse.status.isSuccess()) {
+                        val result = parseGradioResponse(dataResponse.bodyAsText())
+                        if (result != null) return result
+                    }
+                }
+            } catch (e: Exception) {
+                Log.warn { "$TAG: Queue API error at $queuePrefix: ${e.message}" }
+            }
+        }
+        return null
+    }
+    
+    /**
+     * Common logic for /call/ and /gradio_api/call/ endpoints with SSE streaming
+     */
+    private suspend fun tryCallEndpoint(apiUrl: String, requestBody: String): ByteArray? {
+        return try {
+            Log.info { "$TAG: Trying call API: $apiUrl" }
+            Log.debug { "$TAG: Request body: $requestBody" }
+            
+            val response = httpClient.post(apiUrl) {
+                contentType(ContentType.Application.Json)
+                config.apiKey?.let { header("Authorization", "Bearer $it") }
+                setBody(requestBody)
+            }
+            
+            if (!response.status.isSuccess()) {
+                Log.warn { "$TAG: Call API returned ${response.status} at $apiUrl" }
+                return null
+            }
+            
+            val responseText = response.bodyAsText()
+            Log.debug { "$TAG: Call response: $responseText" }
+            
+            // Extract event_id for SSE streaming
+            val eventIdRegex = """"event_id":\s*"([^"]+)"""".toRegex()
+            val eventId = eventIdRegex.find(responseText)?.groupValues?.getOrNull(1)
+            
+            if (eventId.isNullOrEmpty()) {
+                // Maybe direct response without streaming
+                return parseGradioResponse(responseText)
+            }
+            
+            Log.info { "$TAG: Got event_id: $eventId" }
+            
+            // Get result using event_id
+            val resultUrl = "$apiUrl/$eventId"
+            val resultResponse = httpClient.get(resultUrl) {
+                config.apiKey?.let { header("Authorization", "Bearer $it") }
+                header("Accept", "text/event-stream")
+            }
+            
+            if (!resultResponse.status.isSuccess()) {
+                Log.warn { "$TAG: Result request failed: ${resultResponse.status}" }
+                return null
+            }
+            
+            parseSSEResponse(resultResponse.bodyAsText())
+        } catch (e: Exception) {
+            Log.warn { "$TAG: Call API error at $apiUrl: ${e.message}" }
+            null
+        }
     }
     
     /**
@@ -222,174 +572,6 @@ class GenericGradioTTSEngine(
             .replace("\t", "\\t")
     }
     
-    /**
-     * Try Gradio 4.x /call/{api_name} endpoint
-     */
-    private suspend fun tryGradio4CallApi(requestBody: String): ByteArray? {
-        return try {
-            val baseUrl = config.spaceUrl.trimEnd('/')
-            val apiName = config.apiName.trimStart('/')
-            val apiUrl = "$baseUrl/call/$apiName"
-            
-            Log.info { "$TAG: Trying Gradio 4.x API: $apiUrl" }
-            Log.debug { "$TAG: Request body: $requestBody" }
-            
-            val response = httpClient.post(apiUrl) {
-                contentType(ContentType.Application.Json)
-                config.apiKey?.let { header("Authorization", "Bearer $it") }
-                setBody(requestBody)
-            }
-            
-            if (!response.status.isSuccess()) {
-                Log.warn { "$TAG: Gradio 4.x API returned ${response.status}" }
-                return null
-            }
-            
-            val responseText = response.bodyAsText()
-            Log.debug { "$TAG: Call response: $responseText" }
-            
-            // Extract event_id for SSE streaming
-            val eventIdRegex = """"event_id":\s*"([^"]+)"""".toRegex()
-            val eventId = eventIdRegex.find(responseText)?.groupValues?.getOrNull(1)
-            
-            if (eventId.isNullOrEmpty()) {
-                // Maybe direct response without streaming
-                return parseGradioResponse(responseText)
-            }
-            
-            Log.info { "$TAG: Got event_id: $eventId" }
-            
-            // Get result using event_id
-            val resultUrl = "$apiUrl/$eventId"
-            val resultResponse = httpClient.get(resultUrl) {
-                config.apiKey?.let { header("Authorization", "Bearer $it") }
-                header("Accept", "text/event-stream")
-            }
-            
-            if (!resultResponse.status.isSuccess()) {
-                Log.warn { "$TAG: Result request failed: ${resultResponse.status}" }
-                return null
-            }
-            
-            parseSSEResponse(resultResponse.bodyAsText())
-        } catch (e: Exception) {
-            Log.warn { "$TAG: Gradio 4.x API error: ${e.message}" }
-            null
-        }
-    }
-    
-    /**
-     * Try legacy Gradio 3.x /api/predict endpoint
-     */
-    private suspend fun tryLegacyGradioApi(requestBody: String): ByteArray? {
-        return try {
-            val baseUrl = config.spaceUrl.trimEnd('/')
-            val apiUrl = "$baseUrl/api/predict"
-            
-            // Add fn_index for legacy API
-            val legacyBody = requestBody.dropLast(1) + """, "fn_index": 0}"""
-            
-            Log.info { "$TAG: Trying legacy API: $apiUrl" }
-            
-            val response = httpClient.post(apiUrl) {
-                contentType(ContentType.Application.Json)
-                config.apiKey?.let { header("Authorization", "Bearer $it") }
-                setBody(legacyBody)
-            }
-            
-            if (response.status.isSuccess()) {
-                parseGradioResponse(response.bodyAsText())
-            } else {
-                Log.warn { "$TAG: Legacy API returned ${response.status}" }
-                null
-            }
-        } catch (e: Exception) {
-            Log.warn { "$TAG: Legacy API error: ${e.message}" }
-            null
-        }
-    }
-    
-    /**
-     * Try Gradio /run/{api_name} endpoint
-     */
-    private suspend fun tryGradioRunApi(requestBody: String): ByteArray? {
-        return try {
-            val baseUrl = config.spaceUrl.trimEnd('/')
-            val apiName = config.apiName.trimStart('/').replace("/", "_")
-            val apiUrl = "$baseUrl/run/$apiName"
-            
-            Log.info { "$TAG: Trying run API: $apiUrl" }
-            
-            val response = httpClient.post(apiUrl) {
-                contentType(ContentType.Application.Json)
-                config.apiKey?.let { header("Authorization", "Bearer $it") }
-                setBody(requestBody)
-            }
-            
-            if (response.status.isSuccess()) {
-                parseGradioResponse(response.bodyAsText())
-            } else {
-                Log.warn { "$TAG: Run API returned ${response.status}" }
-                null
-            }
-        } catch (e: Exception) {
-            Log.warn { "$TAG: Run API error: ${e.message}" }
-            null
-        }
-    }
-    
-    /**
-     * Try Gradio queue-based API for long-running tasks
-     */
-    private suspend fun tryGradioQueueApi(requestBody: String): ByteArray? {
-        return try {
-            val baseUrl = config.spaceUrl.trimEnd('/')
-            val queueUrl = "$baseUrl/queue/join"
-            val sessionHash = System.currentTimeMillis().toString()
-            
-            // Add session_hash and fn_index
-            val queueBody = requestBody.dropLast(1) + """, "fn_index": 0, "session_hash": "$sessionHash"}"""
-            
-            Log.info { "$TAG: Trying queue API: $queueUrl" }
-            
-            val response = httpClient.post(queueUrl) {
-                contentType(ContentType.Application.Json)
-                config.apiKey?.let { header("Authorization", "Bearer $it") }
-                setBody(queueBody)
-            }
-            
-            if (!response.status.isSuccess()) {
-                Log.warn { "$TAG: Queue submit failed: ${response.status}" }
-                return null
-            }
-            
-            // Poll for result
-            val dataUrl = "$baseUrl/queue/data?session_hash=$sessionHash"
-            var attempts = 0
-            val maxAttempts = 30
-            
-            while (attempts < maxAttempts) {
-                delay(1000)
-                attempts++
-                
-                val dataResponse = httpClient.get(dataUrl) {
-                    config.apiKey?.let { header("Authorization", "Bearer $it") }
-                }
-                
-                if (dataResponse.status.isSuccess()) {
-                    val result = parseGradioResponse(dataResponse.bodyAsText())
-                    if (result != null) return result
-                }
-            }
-            
-            Log.warn { "$TAG: Queue polling timed out" }
-            null
-        } catch (e: Exception) {
-            Log.warn { "$TAG: Queue API error: ${e.message}" }
-            null
-        }
-    }
-
     
     /**
      * Parse SSE (Server-Sent Events) response to extract audio
@@ -470,13 +652,16 @@ class GenericGradioTTSEngine(
     private fun extractAudioUrl(responseJson: String): String? {
         val baseUrl = config.spaceUrl.trimEnd('/')
         
+        Log.debug { "$TAG: Extracting audio URL from response (${responseJson.length} chars)" }
+        
         // Try different URL patterns
         val patterns = listOf(
             """"url":\s*"([^"]+)"""",           // Gradio 4.x format
-            """"path":\s*"([^"]+)"""",          // Path format
+            """"path":\s*"([^"]+)"""",          // Path format  
             """"data":\s*"file=([^"]+)"""",     // File= format
             """"data":\s*\[\s*"(/[^"]+)"""",    // Simple path in data array
-            """"name":\s*"([^"]+\.(?:wav|mp3|ogg|flac))"""" // Audio file name
+            """"name":\s*"([^"]+\.(?:wav|mp3|ogg|flac))"""", // Audio file name
+            """"orig_name":\s*"([^"]+\.(?:wav|mp3|ogg|flac))"""" // Original file name
         )
         
         for (pattern in patterns) {
@@ -484,8 +669,10 @@ class GenericGradioTTSEngine(
             val match = regex.find(responseJson)
             if (match != null) {
                 val value = match.groupValues[1]
+                Log.info { "$TAG: Pattern '$pattern' matched: $value" }
                 return when {
                     value.startsWith("http") -> value
+                    value.startsWith("/file=") -> "$baseUrl$value"
                     value.startsWith("/") -> "$baseUrl/file=$value"
                     else -> "$baseUrl/file=$value"
                 }
@@ -497,21 +684,45 @@ class GenericGradioTTSEngine(
         val dataMatch = dataArrayRegex.find(responseJson)
         if (dataMatch != null) {
             val dataContent = dataMatch.groupValues[1]
+            Log.debug { "$TAG: Found data array: ${dataContent.take(200)}..." }
+            
             // Split by comma but respect nested structures
             val items = splitDataArray(dataContent)
+            Log.debug { "$TAG: Data array has ${items.size} items, looking for index ${config.audioOutputIndex}" }
+            
             if (items.size > config.audioOutputIndex) {
                 val audioItem = items[config.audioOutputIndex].trim()
-                // Check if it's a path or URL
+                Log.debug { "$TAG: Audio item at index ${config.audioOutputIndex}: ${audioItem.take(200)}" }
+                
+                // Try to extract path from nested object
+                val pathInObject = """"path":\s*"([^"]+)"""".toRegex().find(audioItem)
+                if (pathInObject != null) {
+                    val path = pathInObject.groupValues[1]
+                    Log.info { "$TAG: Found path in object: $path" }
+                    return if (path.startsWith("http")) path else "$baseUrl/file=$path"
+                }
+                
+                // Try to extract URL from nested object
+                val urlInObject = """"url":\s*"([^"]+)"""".toRegex().find(audioItem)
+                if (urlInObject != null) {
+                    val url = urlInObject.groupValues[1]
+                    Log.info { "$TAG: Found URL in object: $url" }
+                    return if (url.startsWith("http")) url else "$baseUrl$url"
+                }
+                
+                // Check if it's a simple path string
                 val pathMatch = """"([^"]+)"""".toRegex().find(audioItem)
                 if (pathMatch != null) {
                     val path = pathMatch.groupValues[1]
                     if (path.contains(".wav") || path.contains(".mp3") || path.contains(".ogg") || path.contains(".flac")) {
+                        Log.info { "$TAG: Found audio file path: $path" }
                         return if (path.startsWith("http")) path else "$baseUrl/file=$path"
                     }
                 }
             }
         }
         
+        Log.warn { "$TAG: Could not extract audio URL from response" }
         return null
     }
     
@@ -587,46 +798,51 @@ class GenericGradioTTSEngine(
         }
     }
     
-    private suspend fun playAudio(audioData: ByteArray, utteranceId: String) {
-        try {
-            audioPlayer.play(audioData) {
-                callback?.onDone(utteranceId)
+    private suspend fun cacheAudio(utteranceId: String, audioData: ByteArray) {
+        cacheMutex.withLock {
+            // Remove oldest entries if cache is full
+            while (audioCache.size >= MAX_CACHE_SIZE) {
+                val oldestKey = audioCache.keys.firstOrNull()
+                oldestKey?.let { audioCache.remove(it) }
             }
-        } catch (e: Exception) {
-            Log.error { "$TAG: Error playing audio: ${e.message}" }
-            callback?.onError(utteranceId, e.message ?: "Playback error")
+            audioCache[utteranceId] = audioData
         }
-    }
-    
-    private fun cacheAudio(utteranceId: String, audioData: ByteArray) {
-        if (audioCache.size >= MAX_CACHE_SIZE) {
-            val oldestKey = audioCache.keys.firstOrNull()
-            oldestKey?.let { audioCache.remove(it) }
-        }
-        audioCache[utteranceId] = audioData
         updateCacheState()
     }
     
     private fun updateCacheState() {
-        _cachedParagraphs.value = audioCache.keys.mapNotNull { it.toIntOrNull() }.toSet()
+        scope.launch {
+            cacheMutex.withLock {
+                _cachedParagraphs.value = audioCache.keys.mapNotNull { it.toIntOrNull() }.toSet()
+            }
+        }
     }
     
     private fun updateLoadingState() {
-        _loadingParagraphsFlow.value = loadingParagraphs.mapNotNull { it.toIntOrNull() }.toSet()
+        scope.launch {
+            cacheMutex.withLock {
+                _loadingParagraphsFlow.value = loadingParagraphs.mapNotNull { it.toIntOrNull() }.toSet()
+            }
+        }
     }
     
     // TTSEngine interface implementation
     
     override fun stop() {
-        currentJob?.cancel()
-        audioPlayer.stop()
+        Log.info { "$TAG: Stopping TTS" }
+        clearQueue()
+        cancelPrefetch()
     }
     
     override fun pause() {
+        Log.info { "$TAG: Pausing TTS" }
+        isPaused = true
         audioPlayer.pause()
     }
     
     override fun resume() {
+        Log.info { "$TAG: Resuming TTS" }
+        isPaused = false
         audioPlayer.resume()
     }
     
@@ -647,10 +863,25 @@ class GenericGradioTTSEngine(
     }
     
     override fun cleanup() {
+        Log.info { "$TAG: Cleaning up TTS engine" }
+        
+        // Stop everything
+        clearQueue()
+        cancelPrefetch()
+        
+        // Cancel all coroutines
+        queueProcessorJob?.cancel()
         scope.cancel()
-        currentJob?.cancel()
-        audioCache.clear()
-        loadingParagraphs.clear()
+        
+        // Clear caches
+        runBlocking {
+            cacheMutex.withLock {
+                audioCache.clear()
+                loadingParagraphs.clear()
+            }
+        }
+        
+        // Release audio player
         audioPlayer.release()
     }
     
@@ -685,4 +916,40 @@ class GenericGradioTTSEngine(
         LOADING,
         CACHED
     }
+}
+
+
+/**
+ * Platform-specific audio player interface for Gradio-based TTS engines.
+ * 
+ * Each platform (Android, Desktop) provides its own implementation
+ * to play audio data received from the TTS server.
+ */
+interface GradioAudioPlayer {
+    /**
+     * Play audio data
+     * @param audioData Raw audio bytes (WAV, MP3, OGG, FLAC, etc.)
+     * @param onComplete Callback when playback completes
+     */
+    suspend fun play(audioData: ByteArray, onComplete: () -> Unit)
+    
+    /**
+     * Stop playback immediately
+     */
+    fun stop()
+    
+    /**
+     * Pause playback
+     */
+    fun pause()
+    
+    /**
+     * Resume paused playback
+     */
+    fun resume()
+    
+    /**
+     * Release all resources
+     */
+    fun release()
 }

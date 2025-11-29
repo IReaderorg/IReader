@@ -124,10 +124,10 @@ class TTSScreenSpec(
         // Load readTranslatedText preference
         var readTranslatedText by remember { mutableStateOf(readerPreferences.useTTSWithTranslatedText().get()) }
         
-        // Coqui TTS state
-        var useCoquiTTS by remember { mutableStateOf(appPreferences.useCoquiTTS().get()) }
-        val coquiSpaceUrl = remember { appPreferences.coquiSpaceUrl().get() }
-        val isCoquiConfigured = coquiSpaceUrl.isNotEmpty()
+        // Gradio TTS state
+        var useGradioTTS by remember { mutableStateOf(appPreferences.useGradioTTS().get()) }
+        val activeGradioConfigId = remember { appPreferences.activeGradioConfigId().get() }
+        val isGradioConfigured = activeGradioConfigId.isNotEmpty()
         
         // Collect state from service
         val isPlaying by ttsService.state.isPlaying.collectAsState()
@@ -191,10 +191,13 @@ class TTSScreenSpec(
             }
         }
         
-        // Cleanup on dispose
+        // Cleanup on dispose - stop TTS when leaving screen
         DisposableEffect(Unit) {
             onDispose {
-                scope.launch { ttsService.pause() }
+                // Use runBlocking to ensure stop completes before screen is destroyed
+                kotlinx.coroutines.runBlocking {
+                    ttsService.stop()
+                }
             }
         }
         
@@ -435,7 +438,7 @@ class TTSScreenSpec(
                             sleepTimeMinutes = sleepTimeMinutes,
                             speechSpeed = speechSpeed,
                             autoNextChapter = autoNextChapter,
-                            useCoquiTTS = useCoquiTTS && isCoquiConfigured,
+                            useGradioTTS = useGradioTTS,
                             currentEngineName = ttsService.getCurrentEngineName(),
                             readTranslatedText = readTranslatedText,
                             hasTranslation = translatedContent != null && translatedContent!!.isNotEmpty(),
@@ -489,9 +492,9 @@ class TTSScreenSpec(
                                 ttsService.setAutoNextChapter(enabled)
                             },
                             onCoquiTTSChange = { enabled ->
-                                if (isCoquiConfigured) {
-                                    useCoquiTTS = enabled
-                                    scope.launch { appPreferences.useCoquiTTS().set(enabled) }
+                                if (isGradioConfigured) {
+                                    useGradioTTS = enabled
+                                    scope.launch { appPreferences.useGradioTTS().set(enabled) }
                                 }
                             },
                             onReadTranslatedTextChange = { enabled ->

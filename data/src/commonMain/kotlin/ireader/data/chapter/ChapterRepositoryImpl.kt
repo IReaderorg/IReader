@@ -172,4 +172,11 @@ class ChapterRepositoryImpl(
         }
     }
 
+    override suspend fun findChaptersByBookIdWithContent(bookId: Long): List<Chapter> {
+        // Use full query with content for EPUB export
+        // WARNING: This can cause OOM for books with many large chapters
+        return handler.awaitList {
+            chapterQueries.getChaptersByMangaId(bookId, chapterMapper)
+        }
+    }
 }

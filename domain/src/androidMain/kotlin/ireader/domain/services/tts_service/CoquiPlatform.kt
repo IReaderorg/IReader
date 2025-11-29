@@ -2,9 +2,6 @@ package ireader.domain.services.tts_service
 
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.AudioFormat
-import android.media.AudioManager
-import android.media.AudioTrack
 import android.media.MediaPlayer
 import android.util.Base64
 import ireader.core.log.Log
@@ -23,7 +20,7 @@ actual fun base64DecodeToBytes(base64: String): ByteArray {
 /**
  * Android implementation of CoquiAudioPlayer
  */
-class AndroidCoquiAudioPlayer(private val context: Context) : CoquiAudioPlayer {
+class AndroidGradioAudioPlayer(private val context: Context) : GradioAudioPlayer {
     
     private var mediaPlayer: MediaPlayer? = null
     private var tempFile: File? = null

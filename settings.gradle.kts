@@ -45,9 +45,5 @@ dependencyResolutionManagement {
         create("accompanist") {
             from(files("gradle/accompanist.versions.toml"))
         }
-        create("test") {
-            from(files("gradle/testing.versions.toml"))
-        }
-
     }
 }

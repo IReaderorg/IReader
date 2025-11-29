@@ -16,16 +16,10 @@ actual object TTSEngineFactory : KoinComponent {
         return AndroidNativeTTSEngine(context)
     }
     
-    actual fun createCoquiEngine(spaceUrl: String, apiKey: String?): TTSEngine? {
-        return if (spaceUrl.isNotEmpty()) {
-            AndroidCoquiTTSEngine(context, spaceUrl, apiKey)
-        } else {
-            null
-        }
-    }
-    
     /**
-     * Create a generic Gradio TTS engine from configuration
+     * Create a Gradio TTS engine from configuration.
+     * 
+     * For Coqui TTS, use: GradioTTSPresets.COQUI_IREADER
      */
     actual fun createGradioEngine(config: GradioTTSConfig): TTSEngine? {
         return if (config.spaceUrl.isNotEmpty() && config.enabled) {
@@ -36,12 +30,10 @@ actual object TTSEngineFactory : KoinComponent {
     }
     
     actual fun getAvailableEngines(): List<String> {
-        return buildList {
-            add("Native Android TTS")
-            add("Gradio TTS (Online)")
-            // Check if Coqui is configured
-            // Could add more engines here
-        }
+        return listOf(
+            "Native Android TTS",
+            "Gradio TTS (Online)"
+        )
     }
 }
 
@@ -74,46 +66,6 @@ class AndroidNativeTTSEngine(context: Context) : TTSEngine {
 }
 
 /**
- * Adapter to wrap CoquiTTSPlayer as TTSEngine with caching support
- */
-class AndroidCoquiTTSEngine(
-    context: Context,
-    spaceUrl: String,
-    apiKey: String?
-) : TTSEngine {
-    private val player = CoquiTTSPlayer(context, spaceUrl, apiKey)
-    
-    override suspend fun speak(text: String, utteranceId: String) {
-        player.speak(text, utteranceId)
-    }
-    
-    override fun stop() = player.stop()
-    override fun pause() = player.pause()
-    override fun resume() = player.resume()
-    override fun setSpeed(speed: Float) = player.setSpeed(speed)
-    override fun setPitch(pitch: Float) = player.setPitch(pitch)
-    override fun isReady() = player.isReady()
-    override fun cleanup() = player.cleanup()
-    override fun getEngineName() = "Coqui TTS"
-    
-    override fun setCallback(callback: TTSEngineCallback) {
-        player.setCallback(object : TTSCallback {
-            override fun onStart(utteranceId: String) = callback.onStart(utteranceId)
-            override fun onDone(utteranceId: String) = callback.onDone(utteranceId)
-            override fun onError(utteranceId: String, error: String) = callback.onError(utteranceId, error)
-        })
-    }
-    
-    // Expose caching for Coqui
-    fun precacheParagraphs(paragraphs: List<Pair<String, String>>) {
-        player.precacheParagraphs(paragraphs)
-    }
-    
-    fun getCacheStatus(utteranceId: String) = player.getCacheStatus(utteranceId)
-}
-
-
-/**
  * Android adapter for GenericGradioTTSEngine
  * Wraps the common GenericGradioTTSEngine with Android-specific audio player
  */
@@ -123,7 +75,7 @@ class AndroidGradioTTSEngine(
     config: GradioTTSConfig
 ) : TTSEngine {
     
-    private val audioPlayer = AndroidCoquiAudioPlayer(context)
+    private val audioPlayer = AndroidGradioAudioPlayer(context)
     private val engine = GenericGradioTTSEngine(
         config = config,
         httpClient = httpClient,

@@ -204,8 +204,8 @@ fun TTSScreen(
                                 fontWeight = FontWeight(vm.textWeight.value),
                             )
                             
-                            // Cache indicator for Coqui TTS
-                            if (vm.useCoquiTTS && index > currentReadingParagraph) {
+                            // Cache indicator for Gradio TTS
+                            if (vm.useGradioTTS && index > currentReadingParagraph) {
                                 when {
                                     vm.ttsState.loadingParagraphs.contains(index) -> {
                                         CircularProgressIndicator(

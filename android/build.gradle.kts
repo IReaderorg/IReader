@@ -352,6 +352,11 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.workManager)
     implementation(libs.napier)
+
+    androidTestImplementation(libs.test.extJunit)
+    androidTestImplementation(libs.test.espresso)
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.5")
 }
 
 composeCompiler {

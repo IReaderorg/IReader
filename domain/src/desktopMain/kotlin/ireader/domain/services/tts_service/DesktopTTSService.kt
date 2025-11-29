@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -94,6 +95,10 @@ class DesktopTTSService : KoinComponent {
     // Process tracker for managing child processes
     private val processTracker = ProcessTracker()
     private var cleanupJob: Job? = null
+    
+    // Track the paragraph index when speechJob started to detect manual navigation
+    @Volatile
+    private var speechJobStartParagraph: Int = -1
 
     companion object {
         const val TTS_SERVICE_NAME = "DESKTOP_TTS_SERVICE"
@@ -203,23 +208,7 @@ class DesktopTTSService : KoinComponent {
                 enableSimulationMode("Piper TTS not available. Please download a voice model or install Kokoro/Maya from TTS Manager.")
             }
             
-            // Load Coqui TTS configuration from preferences
-            try {
-                val useCoqui = appPrefs.useCoquiTTS().get()
-                val coquiUrl = appPrefs.coquiSpaceUrl().get()
-                val coquiApiKey = appPrefs.coquiApiKey().get()
-                
-                Log.info { "Loading Coqui prefs: enabled=$useCoqui, url=$coquiUrl" }
-                
-                if (useCoqui && coquiUrl.isNotEmpty()) {
-                    configureCoqui(coquiUrl, coquiApiKey.ifEmpty { null })
-                    Log.info { "Coqui TTS configured from saved preferences" }
-                }
-            } catch (e: Exception) {
-                Log.error { "Failed to load Coqui preferences: ${e.message}" }
-            }
-            
-            // Load Gradio TTS configuration from preferences
+            // Load Gradio TTS configuration from preferences (unified online TTS)
             try {
                 val useGradio = appPrefs.useGradioTTS().get()
                 val activeConfigId = appPrefs.activeGradioConfigId().get()
@@ -240,79 +229,17 @@ class DesktopTTSService : KoinComponent {
         PIPER,
         KOKORO,
         MAYA,
-        COQUI,
         GRADIO,
         SIMULATION
     }
     
-    // Coqui TTS components
-    private var coquiEngine: DesktopCoquiTTSEngine? = null
-    var coquiAvailable = false
-    
-    // Generic Gradio TTS components
-    private var gradioEngine: DesktopGenericGradioTTSEngine? = null
+    // Gradio TTS components - using the new GradioTTSPlayer system
+    private var gradioPlayer: ireader.domain.services.tts_service.player.GradioTTSPlayer? = null
+    private var gradioHttpClient: io.ktor.client.HttpClient? = null
+    private var gradioAudioPlayer: DesktopGradioAudioPlayer? = null
+    private var gradioAdapter: GradioTTSEngineAdapter? = null  // Shared adapter for caching
     var gradioAvailable = false
     var activeGradioConfig: GradioTTSConfig? = null
-    
-    /**
-     * Desktop Coqui TTS Engine wrapper
-     */
-    private inner class DesktopCoquiTTSEngine(
-        private val spaceUrl: String,
-        private val apiKey: String?
-    ) {
-        private val httpClient = io.ktor.client.HttpClient()
-        private val audioPlayer = DesktopCoquiAudioPlayer()
-        private val engine = CoquiTTSEngine(spaceUrl, apiKey, httpClient, audioPlayer)
-        
-        suspend fun synthesize(text: String): Result<ireader.domain.services.tts_service.piper.AudioData> {
-            return try {
-                // Use the engine's speak method and capture audio
-                // For now, return a placeholder - the actual implementation uses callbacks
-                Result.failure(Exception("Use speak() method instead"))
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
-        
-        suspend fun speak(text: String, utteranceId: String) = engine.speak(text, utteranceId)
-        fun stop() = engine.stop()
-        fun pause() = engine.pause()
-        fun resume() = engine.resume()
-        fun setSpeed(speed: Float) = engine.setSpeed(speed)
-        fun isReady() = engine.isReady()
-        fun cleanup() {
-            engine.cleanup()
-            httpClient.close()
-        }
-        fun setCallback(callback: TTSEngineCallback) = engine.setCallback(callback)
-    }
-    
-    /**
-     * Desktop Generic Gradio TTS Engine wrapper
-     * Supports any Gradio-based TTS space with configurable parameters
-     */
-    private inner class DesktopGenericGradioTTSEngine(
-        private val config: GradioTTSConfig
-    ) {
-        private val httpClient = io.ktor.client.HttpClient()
-        private val audioPlayer = DesktopCoquiAudioPlayer()
-        private val engine = GenericGradioTTSEngine(config, httpClient, audioPlayer)
-        
-        suspend fun speak(text: String, utteranceId: String) = engine.speak(text, utteranceId)
-        fun stop() = engine.stop()
-        fun pause() = engine.pause()
-        fun resume() = engine.resume()
-        fun setSpeed(speed: Float) = engine.setSpeed(speed)
-        fun isReady() = engine.isReady()
-        fun cleanup() {
-            engine.cleanup()
-            httpClient.close()
-        }
-        fun setCallback(callback: TTSEngineCallback) = engine.setCallback(callback)
-        fun getConfig() = config
-        fun precacheParagraphs(paragraphs: List<Pair<String, String>>) = engine.precacheParagraphs(paragraphs)
-    }
     
     private suspend fun loadAvailableModels() {
         Log.info { "DesktopTTSService.loadAvailableModels() - START" }
@@ -800,6 +727,10 @@ class DesktopTTSService : KoinComponent {
             audioEngine.pause()
         }
         
+        // Pause Gradio audio if active - this will also complete the playAndWait coroutine
+        gradioAdapter?.pause()
+        gradioAudioPlayer?.pause()
+        
         // Cancel speech and word boundary jobs
         speechJob?.cancel()
         wordBoundaryJob?.cancel()
@@ -816,6 +747,13 @@ class DesktopTTSService : KoinComponent {
             audioEngine.stop()
         }
         
+        // Stop Gradio audio if active
+        gradioAdapter?.stop()
+        gradioAudioPlayer?.stop()
+        
+        // Clear Gradio audio cache
+        clearGradioAudioCache()
+        
         // Cancel all jobs
         speechJob?.cancel()
         wordBoundaryJob?.cancel()
@@ -829,6 +767,7 @@ class DesktopTTSService : KoinComponent {
         // Reset state
         state.setCurrentReadingParagraph(0)
         state.currentWordBoundary = null
+        speechJobStartParagraph = -1
     }
 
     private suspend fun skipToNextChapter() {
@@ -841,12 +780,20 @@ class DesktopTTSService : KoinComponent {
             audioEngine.stop()
         }
         
+        // Stop Gradio audio if active
+        gradioAdapter?.stop()
+        gradioAudioPlayer?.stop()
+        
+        // Clear Gradio audio cache for new chapter
+        clearGradioAudioCache()
+        
         // Cancel ongoing jobs
         speechJob?.cancel()
         wordBoundaryJob?.cancel()
         
         // Clear word boundary state
         state.currentWordBoundary = null
+        speechJobStartParagraph = -1
         
         if (index < chapters.lastIndex) {
             val nextChapter = chapters[index + 1]
@@ -876,12 +823,20 @@ class DesktopTTSService : KoinComponent {
             audioEngine.stop()
         }
         
+        // Stop Gradio audio if active
+        gradioAdapter?.stop()
+        gradioAudioPlayer?.stop()
+        
+        // Clear Gradio audio cache for new chapter
+        clearGradioAudioCache()
+        
         // Cancel ongoing jobs
         speechJob?.cancel()
         wordBoundaryJob?.cancel()
         
         // Clear word boundary state
         state.currentWordBoundary = null
+        speechJobStartParagraph = -1
         
         if (index > 0) {
             val prevChapter = chapters[index - 1]
@@ -912,24 +867,40 @@ class DesktopTTSService : KoinComponent {
         
         content?.let { paragraphs ->
             if (state.currentReadingParagraph.value < paragraphs.lastIndex) {
+                val wasPlaying = state.isPlaying.value
+                val oldParagraph = state.currentReadingParagraph.value
+                
+                // Cancel ongoing jobs FIRST to prevent race conditions
+                val oldSpeechJob = speechJob
+                speechJob = null
+                oldSpeechJob?.cancel()
+                wordBoundaryJob?.cancel()
+                
                 // Stop current audio playback
                 if (!isSimulationMode) {
                     audioEngine.stop()
                 }
                 
-                // Cancel ongoing jobs
-                speechJob?.cancel()
-                wordBoundaryJob?.cancel()
+                // Stop Gradio audio if active
+                gradioAdapter?.stop()
+                gradioAudioPlayer?.stop()
                 
                 // Clear word boundary state
                 state.currentWordBoundary = null
                 
                 // Move to next paragraph
-                state.setCurrentReadingParagraph(state.currentReadingParagraph.value + 1)
+                val newParagraph = oldParagraph + 1
+                state.setCurrentReadingParagraph(newParagraph)
                 
-                // Start reading if playing (responds within 500ms as per requirements)
-                if (state.isPlaying.value) {
-                    serviceScope.launch { readText() }
+                Log.debug { "nextParagraph: moved from $oldParagraph to $newParagraph, wasPlaying=$wasPlaying" }
+                
+                // Start reading if was playing (responds within 500ms as per requirements)
+                if (wasPlaying) {
+                    serviceScope.launch {
+                        // Wait a bit for the old job to fully cancel
+                        oldSpeechJob?.join()
+                        readText()
+                    }
                 }
             }
         }
@@ -946,24 +917,40 @@ class DesktopTTSService : KoinComponent {
         
         content?.let { paragraphs ->
             if (state.currentReadingParagraph.value > 0) {
+                val wasPlaying = state.isPlaying.value
+                val oldParagraph = state.currentReadingParagraph.value
+                
+                // Cancel ongoing jobs FIRST to prevent race conditions
+                val oldSpeechJob = speechJob
+                speechJob = null
+                oldSpeechJob?.cancel()
+                wordBoundaryJob?.cancel()
+                
                 // Stop current audio playback
                 if (!isSimulationMode) {
                     audioEngine.stop()
                 }
                 
-                // Cancel ongoing jobs
-                speechJob?.cancel()
-                wordBoundaryJob?.cancel()
+                // Stop Gradio audio if active
+                gradioAdapter?.stop()
+                gradioAudioPlayer?.stop()
                 
                 // Clear word boundary state
                 state.currentWordBoundary = null
                 
                 // Move to previous paragraph
-                state.setCurrentReadingParagraph(state.currentReadingParagraph.value - 1)
+                val newParagraph = oldParagraph - 1
+                state.setCurrentReadingParagraph(newParagraph)
                 
-                // Start reading if playing (responds within 500ms as per requirements)
-                if (state.isPlaying.value) {
-                    serviceScope.launch { readText() }
+                Log.debug { "previousParagraph: moved from $oldParagraph to $newParagraph, wasPlaying=$wasPlaying" }
+                
+                // Start reading if was playing (responds within 500ms as per requirements)
+                if (wasPlaying) {
+                    serviceScope.launch {
+                        // Wait a bit for the old job to fully cancel
+                        oldSpeechJob?.join()
+                        readText()
+                    }
                 }
             }
         }
@@ -979,25 +966,41 @@ class DesktopTTSService : KoinComponent {
         }
         
         if (content == null || content.isEmpty()) {
+            Log.debug { "readText: No content available" }
             return
         }
         
-        if (state.currentReadingParagraph.value >= content.size) {
+        val currentParagraph = state.currentReadingParagraph.value
+        
+        Log.debug { "readText: Starting for paragraph $currentParagraph, engine=$currentEngine, isPlaying=${state.isPlaying.value}" }
+        
+        if (currentParagraph >= content.size) {
             handleEndOfChapter()
             return
         }
 
-        val text = content[state.currentReadingParagraph.value]
+        val text = content[currentParagraph]
         
         if (text.isBlank()) {
             advanceToNextParagraph()
             return
         }
         
-        state.setUtteranceId(state.currentReadingParagraph.value.toString())
+        state.setUtteranceId(currentParagraph.toString())
+        
+        // Track the paragraph index when this speechJob starts
+        // This is used to detect manual navigation (user tapping next/prev)
+        speechJobStartParagraph = currentParagraph
+        
+        // Pre-generate upcoming paragraphs for Gradio (speeds up playback)
+        if (currentEngine == TTSEngine.GRADIO) {
+            serviceScope.launch {
+                prefetchGradioAudio(currentParagraph, content)
+            }
+        }
         
         // Pre-generate upcoming paragraphs for Kokoro (speeds up playback)
-        if (currentEngine == TTSEngine.KOKORO && state.currentReadingParagraph.value % 3 == 0) {
+        if (currentEngine == TTSEngine.KOKORO && currentParagraph % 3 == 0) {
             serviceScope.launch {
                 preGenerateParagraphs(5)
             }
@@ -1005,15 +1008,16 @@ class DesktopTTSService : KoinComponent {
 
         speechJob = serviceScope.launch {
             try {
+                Log.debug { "readText: speechJob started for paragraph $currentParagraph" }
                 when (currentEngine) {
                     TTSEngine.PIPER -> readTextWithPiper(text)
                     TTSEngine.KOKORO -> readTextWithKokoro(text)
                     TTSEngine.MAYA -> readTextWithMaya(text)
-                    TTSEngine.COQUI -> readTextWithCoqui(text)
                     TTSEngine.GRADIO -> readTextWithGradio(text)
                     TTSEngine.SIMULATION -> readTextSimulation(text)
                 }
             } catch (e: CancellationException) {
+                Log.debug { "readText: speechJob cancelled for paragraph $currentParagraph" }
                 audioEngine.stop()
             } catch (e: Exception) {
                 Log.error { "Error during speech: ${e.message}" }
@@ -1238,137 +1242,98 @@ class DesktopTTSService : KoinComponent {
         }
     }
     
-    private suspend fun readTextWithCoqui(text: String) {
-        val engine = coquiEngine
-        if (engine == null) {
-            Log.error { "Coqui engine not configured" }
-            advanceToNextParagraph()
-            return
-        }
-        
-        try {
-            Log.debug { "Synthesizing with Coqui: text length=${text.length}" }
-            
-            // Create a callback to handle completion
-            var completed = false
-            engine.setCallback(object : TTSEngineCallback {
-                override fun onStart(utteranceId: String) {
-                    Log.debug { "Coqui started: $utteranceId" }
-                }
-                
-                override fun onDone(utteranceId: String) {
-                    Log.debug { "Coqui done: $utteranceId" }
-                    completed = true
-                }
-                
-                override fun onError(utteranceId: String, error: String) {
-                    Log.error { "Coqui error: $error" }
-                    completed = true
-                }
-            })
-            
-            // Speak the text
-            engine.speak(text, "coqui_${System.currentTimeMillis()}")
-            
-            // Wait for completion (with timeout)
-            val startTime = System.currentTimeMillis()
-            val timeout = 60000L // 60 second timeout
-            while (!completed && (System.currentTimeMillis() - startTime) < timeout) {
-                kotlinx.coroutines.delay(100)
-            }
-            
-            // Check sleep time
-            checkSleepTime()
-            
-            // Move to next paragraph if still playing
-            if (state.isPlaying.value) {
-                advanceToNextParagraph()
-            }
-        } catch (e: Exception) {
-            Log.error { "Coqui error: ${e.message}" }
-            advanceToNextParagraph()
-        }
-    }
-    
     /**
-     * Read text using Generic Gradio TTS engine
-     * Supports any Gradio-based TTS space (Persian TTS, Edge TTS, etc.)
+     * Read text using the new GradioTTSPlayer system
+     * Supports any Gradio-based TTS space with caching and prefetching
      */
     private suspend fun readTextWithGradio(text: String) {
-        val engine = gradioEngine
-        if (engine == null) {
-            Log.error { "Gradio engine not configured" }
+        val adapter = gradioAdapter
+        if (adapter == null) {
             // Try to configure from preferences
             configureGradioFromPreferences()
-            if (gradioEngine == null) {
-                Log.error { "Failed to configure Gradio engine, falling back to simulation" }
+            if (gradioAdapter == null) {
+                Log.debug { "readTextWithGradio: No Gradio adapter, falling back to simulation" }
                 readTextSimulation(text)
                 return
             }
         }
         
-        val activeEngine = gradioEngine ?: run {
-            advanceToNextParagraph()
-            return
-        }
+        val activeAdapter = gradioAdapter ?: return
+        val currentParagraph = state.currentReadingParagraph.value
+        
+        Log.debug { "readTextWithGradio: Starting for paragraph $currentParagraph, isPlaying=${state.isPlaying.value}" }
         
         try {
-            val configName = activeGradioConfig?.name ?: "Unknown"
-            Log.debug { "Synthesizing with Gradio ($configName): text length=${text.length}" }
-            
-            // Create a callback to handle completion
-            var completed = false
-            var hasError = false
-            
-            activeEngine.setCallback(object : TTSEngineCallback {
-                override fun onStart(utteranceId: String) {
-                    Log.debug { "Gradio started: $utteranceId" }
-                }
-                
-                override fun onDone(utteranceId: String) {
-                    Log.debug { "Gradio done: $utteranceId" }
-                    completed = true
-                }
-                
-                override fun onError(utteranceId: String, error: String) {
-                    Log.error { "Gradio error: $error" }
-                    hasError = true
-                    completed = true
-                }
-            })
+            // Check if cancelled or not playing before starting
+            if (!kotlinx.coroutines.currentCoroutineContext().isActive || !state.isPlaying.value) {
+                Log.debug { "readTextWithGradio: Early return - not active or not playing" }
+                return
+            }
             
             // Apply speed from preferences
             val speed = appPrefs.gradioTTSSpeed().get()
-            activeEngine.setSpeed(speed)
+            activeAdapter.setSpeed(speed)
             
-            // Speak the text
-            activeEngine.speak(text, "gradio_${System.currentTimeMillis()}")
+            // Try to get cached audio first
+            var audioData = getCachedGradioAudio(currentParagraph)
             
-            // Wait for completion (with timeout)
-            val startTime = System.currentTimeMillis()
-            val timeout = 120000L // 120 second timeout (online TTS can be slow)
-            while (!completed && (System.currentTimeMillis() - startTime) < timeout) {
-                kotlinx.coroutines.delay(100)
+            if (audioData != null) {
+                Log.debug { "Using cached audio for paragraph $currentParagraph" }
+                // Remove from cache after use
+                gradioAudioCache.remove(currentParagraph)
+            } else {
+                // Generate audio (the adapter handles API calls)
+                audioData = activeAdapter.generateAudio(text)
             }
             
-            if (!completed) {
-                Log.warn { "Gradio TTS timed out after ${timeout/1000} seconds" }
+            // Check if cancelled or paused after generation
+            if (!kotlinx.coroutines.currentCoroutineContext().isActive || !state.isPlaying.value) return
+            
+            if (audioData == null) {
+                Log.error { "Failed to generate audio for paragraph $currentParagraph" }
+                // Only advance if still playing and not cancelled
+                if (state.isPlaying.value && kotlinx.coroutines.currentCoroutineContext().isActive) {
+                    advanceToNextParagraph()
+                }
+                return
             }
+            
+            // Play and wait for completion
+            val success = activeAdapter.playAndWait(audioData)
+            
+            // Check if cancelled, paused, or playback was interrupted after playback
+            // success=false means playback was interrupted (pause/stop)
+            if (!kotlinx.coroutines.currentCoroutineContext().isActive || !state.isPlaying.value || !success) return
             
             // Check sleep time
             checkSleepTime()
             
-            // Move to next paragraph if still playing
-            if (state.isPlaying.value) {
+            // Move to next paragraph ONLY if still playing and not cancelled
+            if (state.isPlaying.value && kotlinx.coroutines.currentCoroutineContext().isActive) {
                 advanceToNextParagraph()
             }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            // Coroutine was cancelled, don't advance
+            throw e
         } catch (e: Exception) {
-            Log.error { "Gradio error: ${e.message}" }
-            advanceToNextParagraph()
+            Log.error { "Gradio TTS error: ${e.message}" }
+            // Only advance on error if still playing
+            if (state.isPlaying.value && kotlinx.coroutines.currentCoroutineContext().isActive) {
+                advanceToNextParagraph()
+            }
         }
     }
     
     private suspend fun advanceToNextParagraph() {
+        // Check if the paragraph was manually changed by user (next/prev button)
+        // If so, don't auto-advance because the user already navigated
+        val currentParagraph = state.currentReadingParagraph.value
+        if (speechJobStartParagraph != -1 && currentParagraph != speechJobStartParagraph) {
+            // Paragraph was changed externally (manual navigation), don't advance
+            Log.debug { "Skipping auto-advance: paragraph changed from $speechJobStartParagraph to $currentParagraph" }
+            return
+        }
+        
         // Use translated content if available, otherwise use original content
         val translatedContent = state.translatedTTSContent.value
         val content = if (translatedContent != null && translatedContent.isNotEmpty()) {
@@ -1377,8 +1342,8 @@ class DesktopTTSService : KoinComponent {
             state.ttsContent.value
         } ?: return
         
-        if (state.currentReadingParagraph.value < content.lastIndex) {
-            state.setCurrentReadingParagraph(state.currentReadingParagraph.value + 1)
+        if (currentParagraph < content.lastIndex) {
+            state.setCurrentReadingParagraph(currentParagraph + 1)
             readText()
         } else {
             handleEndOfChapter()
@@ -1401,6 +1366,74 @@ class DesktopTTSService : KoinComponent {
         if (lastCheckPref != null && now - lastCheckPref > currentSleepTime && state.sleepMode.value) {
             stopReading()
         }
+    }
+    
+    // Cache for pre-generated Gradio audio (thread-safe)
+    private val gradioAudioCache = java.util.concurrent.ConcurrentHashMap<Int, ByteArray>()
+    // Track paragraphs currently being prefetched to avoid duplicate requests
+    private val prefetchingParagraphs = java.util.concurrent.ConcurrentHashMap.newKeySet<Int>()
+    
+    /**
+     * Prefetch audio for the next paragraphs to reduce latency
+     * This runs in the background while the current paragraph is playing
+     */
+    private suspend fun prefetchGradioAudio(currentParagraph: Int, content: List<String>) {
+        val adapter = gradioAdapter ?: return
+        val prefetchCount = 3 // Prefetch next 3 paragraphs
+        
+        for (i in 1..prefetchCount) {
+            val nextParagraph = currentParagraph + i
+            if (nextParagraph >= content.size) break
+            
+            // Skip if already cached or currently being prefetched
+            if (gradioAudioCache.containsKey(nextParagraph)) continue
+            if (!prefetchingParagraphs.add(nextParagraph)) continue // Already being prefetched
+            
+            val text = content[nextParagraph]
+            if (text.isBlank()) {
+                prefetchingParagraphs.remove(nextParagraph)
+                continue
+            }
+            
+            try {
+                // Check if still playing and not cancelled
+                if (!state.isPlaying.value || !kotlinx.coroutines.currentCoroutineContext().isActive) {
+                    prefetchingParagraphs.remove(nextParagraph)
+                    break
+                }
+                
+                Log.debug { "Prefetching audio for paragraph $nextParagraph" }
+                val audioData = adapter.generateAudio(text)
+                
+                if (audioData != null) {
+                    gradioAudioCache[nextParagraph] = audioData
+                    Log.debug { "Cached audio for paragraph $nextParagraph (${audioData.size} bytes)" }
+                }
+            } catch (e: Exception) {
+                Log.debug { "Prefetch failed for paragraph $nextParagraph: ${e.message}" }
+            } finally {
+                prefetchingParagraphs.remove(nextParagraph)
+            }
+        }
+        
+        // Clean up old cache entries (keep only nearby paragraphs)
+        val keysToRemove = gradioAudioCache.keys().toList().filter { it < currentParagraph - 1 || it > currentParagraph + prefetchCount + 1 }
+        keysToRemove.forEach { gradioAudioCache.remove(it) }
+    }
+    
+    /**
+     * Get cached audio for a paragraph, or null if not cached
+     */
+    fun getCachedGradioAudio(paragraph: Int): ByteArray? {
+        return gradioAudioCache[paragraph]
+    }
+    
+    /**
+     * Clear the Gradio audio cache
+     */
+    fun clearGradioAudioCache() {
+        gradioAudioCache.clear()
+        prefetchingParagraphs.clear()
     }
 
     private suspend fun loadChapter(chapterId: Long) {
@@ -1833,23 +1866,14 @@ class DesktopTTSService : KoinComponent {
                     Log.warn { "Maya not available. Please install from TTS Manager." }
                 }
             }
-            TTSEngine.COQUI -> {
-                if (coquiAvailable && coquiEngine != null) {
-                    currentEngine = TTSEngine.COQUI
-                    isSimulationMode = false
-                    Log.info { "Switched to Coqui TTS" }
-                } else {
-                    Log.warn { "Coqui not available. Please configure in TTS Settings." }
-                }
-            }
             TTSEngine.GRADIO -> {
                 // Try to configure from preferences if not already available
-                if (!gradioAvailable || gradioEngine == null) {
+                if (!gradioAvailable || gradioPlayer == null) {
                     Log.info { "Gradio not available, trying to configure from preferences..." }
                     configureGradioFromPreferences()
                 }
                 
-                if (gradioAvailable && gradioEngine != null) {
+                if (gradioAvailable && gradioPlayer != null) {
                     currentEngine = TTSEngine.GRADIO
                     isSimulationMode = false
                     Log.info { "Switched to Gradio TTS: ${activeGradioConfig?.name}" }
@@ -1866,35 +1890,48 @@ class DesktopTTSService : KoinComponent {
     }
     
     /**
-     * Configure Coqui TTS with HuggingFace Space URL
-     */
-    fun configureCoqui(spaceUrl: String, apiKey: String? = null) {
-        if (spaceUrl.isNotEmpty()) {
-            coquiEngine?.cleanup()
-            coquiEngine = DesktopCoquiTTSEngine(spaceUrl, apiKey)
-            coquiAvailable = true
-            Log.info { "Coqui TTS configured with URL: $spaceUrl" }
-        } else {
-            coquiEngine?.cleanup()
-            coquiEngine = null
-            coquiAvailable = false
-            Log.info { "Coqui TTS disabled" }
-        }
-    }
-    
-    /**
-     * Configure Generic Gradio TTS with a configuration
+     * Configure Generic Gradio TTS with a configuration using the new GradioTTSPlayer
      */
     fun configureGradio(config: GradioTTSConfig?) {
         if (config != null && config.spaceUrl.isNotEmpty() && config.enabled) {
-            gradioEngine?.cleanup()
-            gradioEngine = DesktopGenericGradioTTSEngine(config)
+            // Cleanup old player
+            gradioPlayer?.release()
+            gradioHttpClient?.close()
+            gradioAudioPlayer?.release()
+            
+            // Create new components
+            gradioHttpClient = io.ktor.client.HttpClient()
+            gradioAudioPlayer = DesktopGradioAudioPlayer()
+            
+            // Create the adapter that implements both GradioAudioGenerator and GradioAudioPlayback
+            // Store it so we can reuse it for caching
+            gradioAdapter = GradioTTSEngineAdapter(
+                config = config,
+                httpClient = gradioHttpClient!!,
+                audioPlayer = gradioAudioPlayer!!
+            )
+            
+            // Create the player
+            gradioPlayer = ireader.domain.services.tts_service.player.GradioTTSPlayer(
+                audioGenerator = gradioAdapter!!,
+                audioPlayer = gradioAdapter!!,
+                config = config,
+                prefetchCount = 3
+            )
+            
             activeGradioConfig = config
             gradioAvailable = true
-            Log.info { "Gradio TTS configured: ${config.name} (${config.spaceUrl})" }
+            Log.info { "Gradio TTS configured with new player: ${config.name} (${config.spaceUrl})" }
         } else {
-            gradioEngine?.cleanup()
-            gradioEngine = null
+            // Cleanup all Gradio components
+            gradioPlayer?.release()
+            gradioAdapter?.release()
+            gradioHttpClient?.close()
+            gradioAudioPlayer?.release()
+            gradioPlayer = null
+            gradioAdapter = null
+            gradioHttpClient = null
+            gradioAudioPlayer = null
             activeGradioConfig = null
             gradioAvailable = false
             Log.info { "Gradio TTS disabled" }
@@ -1942,7 +1979,6 @@ class DesktopTTSService : KoinComponent {
             if (synthesizer.isInitialized()) add(TTSEngine.PIPER)
             if (kokoroAvailable) add(TTSEngine.KOKORO)
             if (mayaAvailable) add(TTSEngine.MAYA)
-            if (coquiAvailable) add(TTSEngine.COQUI)
             if (gradioAvailable) add(TTSEngine.GRADIO)
             add(TTSEngine.SIMULATION)
         }
@@ -2111,13 +2147,8 @@ class DesktopTTSService : KoinComponent {
                     return Result.failure(Exception("Maya TTS not available. Please initialize it first."))
                 }
             }
-            TTSEngine.COQUI -> {
-                if (!coquiAvailable || coquiEngine == null) {
-                    return Result.failure(Exception("Coqui TTS not available. Please configure it first."))
-                }
-            }
             TTSEngine.GRADIO -> {
-                if (!gradioAvailable || gradioEngine == null) {
+                if (!gradioAvailable || gradioPlayer == null) {
                     return Result.failure(Exception("Gradio TTS not available. Please configure it first."))
                 }
             }
@@ -2138,10 +2169,6 @@ class DesktopTTSService : KoinComponent {
                     TTSEngine.MAYA -> {
                         val language = "en"
                         mayaAdapter.synthesize(text, language, state.speechSpeed.value)
-                    }
-                    TTSEngine.COQUI -> {
-                        // Coqui doesn't support direct synthesis to AudioData for chapter download
-                        Result.failure(Exception("Coqui TTS doesn't support chapter download"))
                     }
                     TTSEngine.GRADIO -> {
                         // Gradio TTS doesn't support direct synthesis to AudioData for chapter download
@@ -2267,6 +2294,25 @@ class DesktopTTSService : KoinComponent {
                 Log.info { "Maya TTS shutdown successfully" }
             } catch (e: Exception) {
                 Log.error { "Error shutting down Maya: ${e.message}" }
+            }
+        }
+        
+        // Shutdown Gradio TTS components
+        if (gradioAvailable) {
+            try {
+                Log.info { "Shutting down Gradio TTS..." }
+                gradioPlayer?.release()
+                gradioAdapter?.release()
+                gradioHttpClient?.close()
+                gradioAudioPlayer?.release()
+                gradioPlayer = null
+                gradioAdapter = null
+                gradioHttpClient = null
+                gradioAudioPlayer = null
+                gradioAvailable = false
+                Log.info { "Gradio TTS shutdown successfully" }
+            } catch (e: Exception) {
+                Log.error { "Error shutting down Gradio: ${e.message}" }
             }
         }
         

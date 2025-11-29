@@ -35,7 +35,7 @@ class DesktopTTSServiceImpl(
         PIPER,
         KOKORO,
         MAYA,
-        COQUI
+        GRADIO
     }
     
     override suspend fun initializePlatformComponents() {
@@ -57,11 +57,11 @@ class DesktopTTSServiceImpl(
                 currentEngineType = EngineType.MAYA
                 DesktopTTSEngines.createMayaEngine() ?: createFallbackEngine()
             }
-            "coqui" -> {
-                currentEngineType = EngineType.COQUI
-                val spaceUrl = appPrefs.coquiSpaceUrl().get()
-                val apiKey = appPrefs.coquiApiKey().get().takeIf { it.isNotEmpty() }
-                TTSEngineFactory.createCoquiEngine(spaceUrl, apiKey) ?: createFallbackEngine()
+            "gradio" -> {
+                currentEngineType = EngineType.GRADIO
+                val activeConfigId = appPrefs.activeGradioConfigId().get()
+                val config = GradioTTSPresets.getPresetById(activeConfigId) ?: GradioTTSPresets.COQUI_IREADER
+                TTSEngineFactory.createGradioEngine(config) ?: createFallbackEngine()
             }
             else -> {
                 currentEngineType = EngineType.PIPER
@@ -123,11 +123,8 @@ class DesktopTTSServiceImpl(
         // Check if Maya is available
         engines.add("Maya TTS (optional)")
         
-        // Coqui TTS via HTTP
-        val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
-        if (coquiSpaceUrl.isNotEmpty()) {
-            engines.add("Coqui TTS")
-        }
+        // Gradio TTS (Online) - includes Coqui and other Hugging Face Spaces
+        engines.add("Gradio TTS (Online)")
         
         return engines
     }

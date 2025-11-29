@@ -37,9 +37,9 @@ expect class AITTSManager {
     ): Result<Unit>
     
     /**
-     * Configure Coqui TTS service
+     * Configure Gradio TTS service
      */
-    fun configureCoqui(spaceUrl: String, apiKey: String? = null)
+    fun configureGradio(spaceUrl: String, apiKey: String? = null)
     
     /**
      * Download a Piper voice model

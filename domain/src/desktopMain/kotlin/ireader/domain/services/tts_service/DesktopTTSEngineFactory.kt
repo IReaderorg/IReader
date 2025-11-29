@@ -22,17 +22,10 @@ actual object TTSEngineFactory : KoinComponent {
         return DesktopPiperTTSEngine(piperSynthesizer)
     }
     
-    actual fun createCoquiEngine(spaceUrl: String, apiKey: String?): TTSEngine? {
-        // Desktop can also use Coqui TTS via HTTP
-        return if (spaceUrl.isNotEmpty()) {
-            DesktopCoquiTTSEngine(spaceUrl, apiKey)
-        } else {
-            null
-        }
-    }
-    
     /**
-     * Create a generic Gradio TTS engine from configuration
+     * Create a Gradio TTS engine from configuration.
+     * 
+     * For Coqui TTS, use: GradioTTSPresets.COQUI_IREADER
      */
     actual fun createGradioEngine(config: GradioTTSConfig): TTSEngine? {
         return if (config.spaceUrl.isNotEmpty() && config.enabled) {
@@ -43,7 +36,7 @@ actual object TTSEngineFactory : KoinComponent {
     }
     
     actual fun getAvailableEngines(): List<String> {
-        return listOf("Piper TTS", "Kokoro TTS", "Maya TTS", "Coqui TTS", "Gradio TTS (Online)")
+        return listOf("Piper TTS", "Kokoro TTS", "Maya TTS", "Gradio TTS (Online)")
     }
     
     /**
@@ -229,45 +222,14 @@ private class DesktopMayaTTSEngine(
 }
 
 /**
- * Desktop Coqui TTS Engine (HTTP-based)
- * Uses the common CoquiTTSEngine with Desktop-specific audio player
- */
-private class DesktopCoquiTTSEngine(
-    spaceUrl: String,
-    apiKey: String?
-) : TTSEngine {
-    private val httpClient = io.ktor.client.HttpClient()
-    private val audioPlayer = DesktopCoquiAudioPlayer()
-    private val engine = CoquiTTSEngine(spaceUrl, apiKey, httpClient, audioPlayer)
-    
-    override suspend fun speak(text: String, utteranceId: String) = engine.speak(text, utteranceId)
-    override fun stop() = engine.stop()
-    override fun pause() = engine.pause()
-    override fun resume() = engine.resume()
-    override fun setSpeed(speed: Float) = engine.setSpeed(speed)
-    override fun setPitch(pitch: Float) = engine.setPitch(pitch)
-    override fun isReady() = engine.isReady()
-    override fun cleanup() {
-        engine.cleanup()
-        httpClient.close()
-    }
-    override fun getEngineName() = engine.getEngineName()
-    override fun setCallback(callback: TTSEngineCallback) = engine.setCallback(callback)
-    
-    // Expose caching for pre-fetching
-    fun precacheParagraphs(paragraphs: List<Pair<String, String>>) = engine.precacheParagraphs(paragraphs)
-    fun getCacheStatus(utteranceId: String) = engine.getCacheStatus(utteranceId)
-}
-
-/**
- * Desktop Generic Gradio TTS Engine
+ * Desktop Gradio TTS Engine (HTTP-based)
  * Uses the common GenericGradioTTSEngine with Desktop-specific audio player
  */
 private class DesktopGradioTTSEngine(
     config: GradioTTSConfig
 ) : TTSEngine {
     private val httpClient = io.ktor.client.HttpClient()
-    private val audioPlayer = DesktopCoquiAudioPlayer()
+    private val audioPlayer = DesktopGradioAudioPlayer()
     private val engine = GenericGradioTTSEngine(config, httpClient, audioPlayer)
     
     override suspend fun speak(text: String, utteranceId: String) = engine.speak(text, utteranceId)

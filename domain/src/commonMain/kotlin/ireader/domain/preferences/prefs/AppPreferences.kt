@@ -204,42 +204,6 @@ class AppPreferences(
     fun selectedAIVoiceId(): Preference<String> {
         return preferenceStore.getString("selected_ai_voice_id", "en_US-amy-low")
     }
-    
-    /**
-     * Enable Coqui TTS (high-quality open-source TTS)
-     */
-    fun useCoquiTTS(): Preference<Boolean> {
-        return preferenceStore.getBoolean("use_coqui_tts", false)
-    }
-    
-    /**
-     * Coqui TTS Space URL
-     */
-    fun coquiSpaceUrl(): Preference<String> {
-        return preferenceStore.getString("coqui_space_url", "")
-    }
-    
-    /**
-     * Coqui TTS API Key (for private spaces)
-     */
-    fun coquiApiKey(): Preference<String> {
-        return preferenceStore.getString("coqui_api_key", "")
-    }
-    
-    /**
-     * Coqui TTS voice ID
-     */
-    fun coquiVoiceId(): Preference<String> {
-        return preferenceStore.getString("coqui_voice_id", "default")
-    }
-    
-    /**
-     * Coqui TTS speech speed
-     */
-    fun coquiSpeed(): Preference<Float> {
-        return preferenceStore.getFloat("coqui_speed", 1.0f)
-    }
-    
     // ==================== Gradio TTS Settings ====================
     
     /**
@@ -268,5 +232,19 @@ class AppPreferences(
      */
     fun gradioTTSSpeed(): Preference<Float> {
         return preferenceStore.getFloat("gradio_tts_speed", 1.0f)
+    }
+    
+    /**
+     * Gradio TTS Space URL (direct URL input)
+     */
+    fun activeGradioSpaceUrl(): Preference<String> {
+        return preferenceStore.getString("active_gradio_space_url", "")
+    }
+    
+    /**
+     * Gradio TTS API Key (for private spaces)
+     */
+    fun activeGradioApiKey(): Preference<String> {
+        return preferenceStore.getString("active_gradio_api_key", "")
     }
 }

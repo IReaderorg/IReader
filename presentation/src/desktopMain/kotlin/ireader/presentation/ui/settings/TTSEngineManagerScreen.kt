@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.RecordVoiceOver
@@ -102,7 +103,14 @@ fun TTSEngineManagerScreen(
     var isInstallingKokoro by remember { mutableStateOf(false) }
     var isInstallingMaya by remember { mutableStateOf(false) }
     var installationLog by remember { mutableStateOf("") }
-    var useCoquiTTS by remember { mutableStateOf(false) }
+    var useGradioTTS by remember { mutableStateOf(false) }
+    
+    // Gradio TTS state
+    var activeGradioSpaceUrl by remember { mutableStateOf("") }
+    var activeGradioSpeed by remember { mutableStateOf(1.0f) }
+    var activeGradioApiKey by remember { mutableStateOf("") }
+    var gradioTestStatus by remember { mutableStateOf<String?>(null) }
+    var isTestingGradio by remember { mutableStateOf(false) }
 
     // Check engine status on mount - only when screen opens
     LaunchedEffect(Unit) {
@@ -626,351 +634,38 @@ fun TTSEngineManagerScreen(
                 }
             }
             
-            // Coqui TTS (Online) - Your Custom HuggingFace Space
+            // Gradio TTS (Online) - Your Custom HuggingFace Space
             val appPrefs: ireader.domain.preferences.prefs.AppPreferences = koinInject()
-            var coquiSpaceUrl by remember { mutableStateOf("") }
-            var coquiSpeed by remember { mutableStateOf(1.0f) }
-            var coquiApiKey by remember { mutableStateOf("") }
-            var isCoquiTesting by remember { mutableStateOf(false) }
-            var coquiTestResult by remember { mutableStateOf<String?>(null) }
+
             
-            // Load Coqui preferences on mount
+            // Load Gradio preferences on mount
             LaunchedEffect(Unit) {
-                useCoquiTTS = appPrefs.useCoquiTTS().get()
-                coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
-                coquiSpeed = appPrefs.coquiSpeed().get()
-                coquiApiKey = appPrefs.coquiApiKey().get()
+                useGradioTTS = appPrefs.useGradioTTS().get()
+                activeGradioSpeed = appPrefs.gradioTTSSpeed().get()
                 
-                Log.info { "Loaded Coqui prefs: enabled=$useCoquiTTS, url=$coquiSpaceUrl, speed=$coquiSpeed" }
+                // Load URL from saved preference first, fallback to preset
+                val savedUrl = appPrefs.activeGradioSpaceUrl().get()
+                val savedApiKey = appPrefs.activeGradioApiKey().get()
+                val configId = appPrefs.activeGradioConfigId().get()
                 
-                // Configure Coqui if enabled
-                if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
-                    ttsService.configureCoqui(coquiSpaceUrl, coquiApiKey.ifEmpty { null })
+                if (savedUrl.isNotEmpty()) {
+                    activeGradioSpaceUrl = savedUrl
+                    activeGradioApiKey = savedApiKey
+                } else {
+                    // Fallback to preset URL
+                    val preset = GradioTTSPresets.getPresetById(configId)
+                    activeGradioSpaceUrl = preset?.spaceUrl ?: ""
+                    activeGradioApiKey = preset?.apiKey ?: ""
+                }
+                
+                Log.info { "Loaded Gradio prefs: enabled=$useGradioTTS, url=$activeGradioSpaceUrl, speed=$activeGradioSpeed" }
+                
+                // Configure Gradio if enabled
+                if (useGradioTTS && activeGradioSpaceUrl.isNotEmpty()) {
+                    ttsService.configureGradioFromPreferences()
                 }
             }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Cloud,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(32.dp),
-                                    tint = if (useCoquiTTS)
-                                        MaterialTheme.colorScheme.primary
-                                    else
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Column {
-                                    Text(
-                                        text = "Coqui TTS (Online)",
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "High-quality neural TTS via HuggingFace Space",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-                        
-                        // Status badge
-                        if (useCoquiTTS && ttsService.coquiAvailable) {
-                            Surface(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                shape = MaterialTheme.shapes.small,
-                                modifier = Modifier.padding(end = 12.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.CheckCircle,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = "Ready",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                        }
-                        
-                        Switch(
-                            checked = useCoquiTTS,
-                            onCheckedChange = { enabled ->
-                                useCoquiTTS = enabled
-                                scope.launch {
-                                    appPrefs.useCoquiTTS().set(enabled)
-                                    Log.info { "Saved useCoquiTTS: $enabled" }
-                                    if (enabled && coquiSpaceUrl.isNotEmpty()) {
-                                        ttsService.configureCoqui(coquiSpaceUrl, coquiApiKey.ifEmpty { null })
-                                    } else if (!enabled) {
-                                        ttsService.configureCoqui("", null)
-                                    }
-                                }
-                            }
-                        )
-                    }
-
-                    // Features list (always visible)
-                    Column(
-                        modifier = Modifier.padding(top = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf(
-                            "High-quality neural voices",
-                            "No local installation required",
-                            "Works via internet connection",
-                            "Custom HuggingFace Space support"
-                        ).forEach { feature ->
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    Icons.Default.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = feature,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-
-                    if (useCoquiTTS) {
-                        Divider(modifier = Modifier.padding(vertical = 12.dp))
-
-                        // Space URL
-                        Text(
-                            text = "HuggingFace Space URL",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = coquiSpaceUrl,
-                            onValueChange = { url ->
-                                coquiSpaceUrl = url
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("https://x-ireader.hf.space") },
-                            singleLine = true,
-                            label = { Text("Space URL") }
-                        )
-                        
-                        Text(
-                            text = "Example: https://x-ireader.hf.space",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        // API Key (optional)
-                        Text(
-                            text = "API Key (Optional)",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        OutlinedTextField(
-                            value = coquiApiKey,
-                            onValueChange = { key ->
-                                coquiApiKey = key
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("For private spaces only") },
-                            singleLine = true,
-                            label = { Text("API Key") }
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Speed control
-                        Text(
-                            text = "Speech Speed: ${"%.1f".format(coquiSpeed)}x",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Slider(
-                            value = coquiSpeed,
-                            onValueChange = { speed ->
-                                coquiSpeed = speed
-                            },
-                            valueRange = 0.5f..2.0f,
-                            steps = 15,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("0.5x", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("2.0x", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        // Save button
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    // Save all preferences
-                                    appPrefs.coquiSpaceUrl().set(coquiSpaceUrl)
-                                    appPrefs.coquiApiKey().set(coquiApiKey)
-                                    appPrefs.coquiSpeed().set(coquiSpeed)
-                                    
-                                    Log.info { "Saved Coqui prefs: url=$coquiSpaceUrl, speed=$coquiSpeed" }
-                                    
-                                    // Configure the service
-                                    if (coquiSpaceUrl.isNotEmpty()) {
-                                        ttsService.configureCoqui(coquiSpaceUrl, coquiApiKey.ifEmpty { null })
-                                    }
-                                    
-                                    coquiTestResult = "✓ Settings saved successfully!"
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Save Settings")
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        
-                        // Test result
-                        if (coquiTestResult != null) {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = if (coquiTestResult!!.startsWith("✓"))
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.errorContainer
-                                )
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = if (coquiTestResult!!.startsWith("✓")) 
-                                            Icons.Default.CheckCircle 
-                                        else 
-                                            Icons.Default.Error,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp),
-                                        tint = if (coquiTestResult!!.startsWith("✓"))
-                                            MaterialTheme.colorScheme.primary
-                                        else
-                                            MaterialTheme.colorScheme.error
-                                    )
-                                    Text(
-                                        text = coquiTestResult!!,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        // Test button
-                        OutlinedButton(
-                            onClick = {
-                                scope.launch {
-                                    isCoquiTesting = true
-                                    coquiTestResult = null
-                                    installationLog += "Testing Coqui TTS...\n"
-                                    installationLog += "URL: $coquiSpaceUrl\n"
-                                    
-                                    try {
-                                        // Save settings first
-                                        appPrefs.coquiSpaceUrl().set(coquiSpaceUrl)
-                                        appPrefs.coquiApiKey().set(coquiApiKey)
-                                        appPrefs.coquiSpeed().set(coquiSpeed)
-                                        
-                                        // Configure
-                                        ttsService.configureCoqui(coquiSpaceUrl, coquiApiKey.ifEmpty { null })
-                                        
-                                        if (ttsService.coquiAvailable) {
-                                            installationLog += "✓ Coqui TTS configured successfully\n"
-                                            coquiTestResult = "✓ Connection successful! Coqui TTS is ready."
-                                        } else {
-                                            installationLog += "✗ Failed to configure Coqui TTS\n"
-                                            coquiTestResult = "✗ Failed to connect. Check URL and internet connection."
-                                        }
-                                    } catch (e: Exception) {
-                                        installationLog += "✗ Test error: ${e.message}\n"
-                                        coquiTestResult = "✗ Error: ${e.message}"
-                                    } finally {
-                                        isCoquiTesting = false
-                                    }
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = coquiSpaceUrl.isNotEmpty() && !isCoquiTesting
-                        ) {
-                            if (isCoquiTesting) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    strokeWidth = 2.dp
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                            }
-                            Text(if (isCoquiTesting) "Testing..." else "Test Connection")
-                        }
-                    }
-                }
-            }
-            
             // Gradio TTS Section (Generic support for any Gradio-based TTS)
             GradioTTSSectionDesktop(
                 ttsService = ttsService,
@@ -1811,7 +1506,7 @@ private fun GradioTTSSectionDesktop(
         if (useGradioTTS && activeConfigId != null) {
             val config = configs.find { it.id == activeConfigId }
             if (config != null) {
-                ttsService.configureGradio(config)
+                ttsService.configureGradioFromPreferences()
             }
         }
     }
@@ -1887,11 +1582,11 @@ private fun GradioTTSSectionDesktop(
                         scope.launch {
                             appPrefs.useGradioTTS().set(enabled)
                             if (!enabled) {
-                                ttsService.configureGradio(null)
+                                ttsService.configureGradioFromPreferences()
                             } else if (activeConfigId != null) {
                                 val config = configs.find { it.id == activeConfigId }
                                 if (config != null) {
-                                    ttsService.configureGradio(config)
+                                    ttsService.configureGradioFromPreferences()
                                 }
                             }
                         }
@@ -1937,7 +1632,10 @@ private fun GradioTTSSectionDesktop(
                             activeConfigId = config.id
                             scope.launch {
                                 appPrefs.activeGradioConfigId().set(config.id)
-                                ttsService.configureGradio(config)
+                                // Also update the direct URL preferences for compatibility
+                                appPrefs.activeGradioSpaceUrl().set(config.spaceUrl)
+                                appPrefs.activeGradioApiKey().set(config.apiKey ?: "")
+                                ttsService.configureGradioFromPreferences()
                             }
                             saveConfigs()
                         },
@@ -1946,7 +1644,7 @@ private fun GradioTTSSectionDesktop(
                             isTesting = true
                             scope.launch {
                                 try {
-                                    ttsService.configureGradio(config)
+                                    ttsService.configureGradioFromPreferences()
                                     kotlinx.coroutines.delay(2000)
                                 } finally {
                                     isTesting = false
@@ -1964,7 +1662,7 @@ private fun GradioTTSSectionDesktop(
                                 activeConfigId = null
                                 scope.launch {
                                     appPrefs.activeGradioConfigId().set("")
-                                    ttsService.configureGradio(null)
+                                    ttsService.configureGradioFromPreferences()
                                 }
                             }
                             saveConfigs()
@@ -2005,6 +1703,16 @@ private fun GradioTTSSectionDesktop(
                     configs + savedConfig
                 }
                 saveConfigs()
+                
+                // If this is the active config, update the URL preferences
+                if (activeConfigId == savedConfig.id) {
+                    scope.launch {
+                        appPrefs.activeGradioSpaceUrl().set(savedConfig.spaceUrl)
+                        appPrefs.activeGradioApiKey().set(savedConfig.apiKey ?: "")
+                        ttsService.configureGradioFromPreferences()
+                    }
+                }
+                
                 isEditDialogOpen = false
                 editingConfig = null
             }
@@ -2091,7 +1799,7 @@ private fun GradioConfigCardDesktop(
                     }
                 }
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.ContentCopy, "Edit", modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(20.dp))
                 }
                 if (onDelete != null) {
                     IconButton(onClick = onDelete) {

@@ -37,7 +37,6 @@ class AndroidTTSService(
     
     enum class EngineType {
         NATIVE,
-        COQUI,
         GRADIO
     }
     
@@ -47,7 +46,7 @@ class AndroidTTSService(
     }
     
     override fun createTTSEngine(): TTSEngine {
-        // Check for Gradio TTS first (new generic system)
+        // Check for Gradio TTS (unified online TTS system)
         val useGradioTTS = appPrefs.useGradioTTS().get()
         val activeGradioConfigId = appPrefs.activeGradioConfigId().get()
         
@@ -63,23 +62,9 @@ class AndroidTTSService(
             }
         }
         
-        // Fall back to legacy Coqui TTS
-        val useCoquiTTS = appPrefs.useCoquiTTS().get()
-        val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
-        
-        return if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
-            currentEngineType = EngineType.COQUI
-            TTSEngineFactory.createCoquiEngine(
-                spaceUrl = coquiSpaceUrl,
-                apiKey = appPrefs.coquiApiKey().get().takeIf { it.isNotEmpty() }
-            ) ?: run {
-                currentEngineType = EngineType.NATIVE
-                TTSEngineFactory.createNativeEngine()
-            }
-        } else {
-            currentEngineType = EngineType.NATIVE
-            TTSEngineFactory.createNativeEngine()
-        }
+        // Fall back to native TTS
+        currentEngineType = EngineType.NATIVE
+        return TTSEngineFactory.createNativeEngine()
     }
     
     /**
@@ -138,59 +123,37 @@ class AndroidTTSService(
     }
     
     override suspend fun precacheNextParagraphs() {
-        // Only cache for Coqui or Gradio TTS
+        // Only cache for Gradio TTS
         if (currentEngineType == EngineType.NATIVE) return
         
         val content = state.currentContent.value
         val current = state.currentParagraph.value
         
         val nextParagraphs = mutableListOf<Pair<String, String>>()
-        val loadingSet = mutableSetOf<Int>()
         
         // Cache next 3 paragraphs
         for (i in 1..3) {
             val nextIndex = current + i
             if (nextIndex < content.size) {
                 nextParagraphs.add(nextIndex.toString() to content[nextIndex])
-                loadingSet.add(nextIndex)
             }
         }
         
         if (nextParagraphs.isEmpty()) return
         
-        // Handle different engine types
-        when (currentEngineType) {
-            EngineType.COQUI -> {
-                val coquiEngine = ttsEngine as? AndroidCoquiTTSEngine ?: return
-                coquiEngine.precacheParagraphs(nextParagraphs)
-                
-                // Update cache status after a delay
-                scope.launch {
-                    delay(500)
-                    for (i in 1..3) {
-                        val nextIndex = current + i
-                        if (nextIndex < content.size) {
-                            coquiEngine.getCacheStatus(nextIndex.toString())
-                        }
-                    }
+        // Handle Gradio engine
+        val gradioEngine = ttsEngine as? AndroidGradioTTSEngine ?: return
+        gradioEngine.precacheParagraphs(nextParagraphs)
+        
+        // Update cache status after a delay
+        scope.launch {
+            delay(500)
+            for (i in 1..3) {
+                val nextIndex = current + i
+                if (nextIndex < content.size) {
+                    gradioEngine.getCacheStatus(nextIndex.toString())
                 }
             }
-            EngineType.GRADIO -> {
-                val gradioEngine = ttsEngine as? AndroidGradioTTSEngine ?: return
-                gradioEngine.precacheParagraphs(nextParagraphs)
-                
-                // Update cache status after a delay
-                scope.launch {
-                    delay(500)
-                    for (i in 1..3) {
-                        val nextIndex = current + i
-                        if (nextIndex < content.size) {
-                            gradioEngine.getCacheStatus(nextIndex.toString())
-                        }
-                    }
-                }
-            }
-            else -> {}
         }
     }
     
@@ -205,12 +168,6 @@ class AndroidTTSService(
             if (config != null) {
                 engines.add("Gradio TTS (${config.name})")
             }
-        }
-        
-        // Check for legacy Coqui TTS
-        val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
-        if (coquiSpaceUrl.isNotEmpty()) {
-            engines.add("Coqui TTS")
         }
         
         return engines

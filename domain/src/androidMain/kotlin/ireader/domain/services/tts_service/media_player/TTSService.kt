@@ -36,7 +36,7 @@ import kotlin.time.ExperimentalTime
 /**
  * Clean TTS Service with Unified Player Architecture
  * 
- * Only ONE TTS engine runs at a time (Native OR Coqui)
+ * Only ONE TTS engine runs at a time (Native OR Gradio)
  * All legacy code removed and moved to appropriate classes
  */
 class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener {
@@ -58,7 +58,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     
     enum class TTSEngineType {
         NATIVE,
-        COQUI
+        GRADIO
     }
     
     // Service components
@@ -359,11 +359,11 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
      * Only ONE engine is active at a time
      */
     private fun initializeTTSEngine() {
-        val useCoquiTTS = appPrefs.useCoquiTTS().get()
-        val coquiSpaceUrl = appPrefs.coquiSpaceUrl().get()
+        val useGradioTTS = appPrefs.useGradioTTS().get()
+        val activeConfigId = appPrefs.activeGradioConfigId().get()
         
-        val desiredEngine = if (useCoquiTTS && coquiSpaceUrl.isNotEmpty()) {
-            TTSEngineType.COQUI
+        val desiredEngine = if (useGradioTTS && activeConfigId.isNotEmpty()) {
+            TTSEngineType.GRADIO
         } else {
             TTSEngineType.NATIVE
         }
@@ -374,11 +374,13 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             ttsEngine = null
             
             ttsEngine = when (desiredEngine) {
-                TTSEngineType.COQUI -> {
-                    TTSEngineFactory.createCoquiEngine(
-                        spaceUrl = coquiSpaceUrl,
-                        apiKey = appPrefs.coquiApiKey().get().takeIf { it.isNotEmpty() }
-                    )
+                TTSEngineType.GRADIO -> {
+                    val config = GradioTTSPresets.getPresetById(activeConfigId)
+                    if (config != null) {
+                        TTSEngineFactory.createGradioEngine(config)
+                    } else {
+                        TTSEngineFactory.createNativeEngine()
+                    }
                 }
                 TTSEngineType.NATIVE -> {
                     TTSEngineFactory.createNativeEngine()
@@ -444,10 +446,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             val text = content[state.currentReadingParagraph.value]
             val utteranceId = state.currentReadingParagraph.value.toString()
             
-            // Pre-cache next 3 paragraphs for Coqui TTS
-            if (currentEngineType == TTSEngineType.COQUI) {
-                // Get the underlying Coqui player for caching
-                val androidEngine = ttsEngine as? AndroidCoquiTTSEngine
+            // Pre-cache next 3 paragraphs for Gradio TTS
+            if (currentEngineType == TTSEngineType.GRADIO) {
+                // Get the underlying Gradio player for caching
+                val androidEngine = ttsEngine as? AndroidGradioTTSEngine
                 androidEngine?.let { engine ->
                     val nextParagraphs = mutableListOf<Pair<String, String>>()
                     val loadingSet = mutableSetOf<Int>()
@@ -474,8 +476,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                                 val nextIndex = state.currentReadingParagraph.value + i
                                 if (nextIndex < content.size) {
                                     when (engine.getCacheStatus(nextIndex.toString())) {
-                                        CoquiTTSPlayer.CacheStatus.CACHED -> cached.add(nextIndex)
-                                        CoquiTTSPlayer.CacheStatus.LOADING -> loading.add(nextIndex)
+                                        GenericGradioTTSEngine.CacheStatus.CACHED -> cached.add(nextIndex)
+                                        GenericGradioTTSEngine.CacheStatus.LOADING -> loading.add(nextIndex)
                                         else -> {}
                                     }
                                 }
