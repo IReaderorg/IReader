@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.first
 
 /**
  * Main download service function with proper pause/resume support
@@ -59,15 +60,9 @@ suspend fun runDownloadService(
                 }
                 inputtedDownloaderMode -> {
                     // Get pending downloads from database
-                    downloadUseCases.subscribeDownloadsUseCase().let { flow ->
-                        var result: List<Chapter> = emptyList()
-                        flow.collect { downloads ->
-                            result = downloads.mapNotNull { download ->
-                                chapterRepo.findChapterById(download.chapterId)
-                            }
-                            return@collect
-                        }
-                        result
+                    val downloads = downloadUseCases.subscribeDownloadsUseCase().first()
+                    downloads.mapNotNull { download ->
+                        chapterRepo.findChapterById(download.chapterId)
                     }
                 }
                 else -> {
