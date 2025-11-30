@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -79,9 +80,6 @@ private object ReaderScreenModifiers {
         .width(40.dp)
         .height(4.dp)
         .clip(RoundedCornerShape(2.dp))
-    val bottomSheetColumn = Modifier
-        .height(140.dp)
-        .padding(horizontal = 16.dp)
 }
 
 @ExperimentalAnimationApi
@@ -331,19 +329,20 @@ private fun ReadingScreenContent(
                 }
                 else -> {
                     ModalBottomSheetLayout(
-                        modifier = Modifier
-                            .padding(if (vm.immersiveMode.value) PaddingValues() else paddingValues)
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxSize(),
                         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                         // Removed transparency hack - performance is now optimized via debounced preferences
                         sheetBackgroundColor = MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
                         sheetContentColor = MaterialTheme.colorScheme.onSurface,
                         scrimColor = Color.Black.copy(alpha = 0.32f),
-                        sheetElevation = 8.dp,
+                        sheetElevation = 16.dp,
                         sheetState = modalBottomSheetState,
                         sheetContent = {
                             Column(
-                                modifier = ReaderScreenModifiers.bottomSheetColumn
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .navigationBarsPadding()
+                                    .padding(horizontal = 16.dp)
                             ) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Box(
@@ -372,7 +371,11 @@ private fun ReadingScreenContent(
                             }
                         },
                     ) {
-                        Box(modifier = ReaderScreenModifiers.fillMaxSize) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(if (vm.immersiveMode.value) PaddingValues() else paddingValues)
+                        ) {
                             ReaderText(
                                 vm = readerScreenPreferencesState,
                                 onNext = onNextWithoutReset,
