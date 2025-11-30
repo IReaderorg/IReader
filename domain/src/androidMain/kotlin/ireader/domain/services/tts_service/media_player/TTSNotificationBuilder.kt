@@ -150,11 +150,13 @@ class TTSNotificationBuilder constructor(
         }
 
         // Build actions list first to avoid concurrent modification
+        // Order: rewind (0), play/pause (1), fast-forward (2), close (3), skip-next (4)
+        // Compact view shows indices 0, 1, 2 = rewind, play/pause, fast-forward
         val actions = buildList {
-            add(skipPrevActionButton)
             add(rewindAction)
             add(if (playbackState?.isPlaying == true) pauseAction else play)
             add(next)
+            add(close)
             add(skipNext)
         }
 
@@ -166,7 +168,7 @@ class TTSNotificationBuilder constructor(
         val mediaStyle = androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle()
             .setCancelButtonIntent(cancelMediaPlayer())
             .setMediaSession(sessionToken)
-            .setShowActionsInCompactView(2, 3, 4)
+            .setShowActionsInCompactView(0, 1, 2)
             .setShowCancelButton(true)
 
         return builder.setContentIntent(controller.sessionActivity)
