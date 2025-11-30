@@ -320,12 +320,11 @@ dependencies {
 
     /** Firebase - Excluded from F-Droid builds (fdroid flavor) **/
     "standardImplementation"(platform(libs.firebase.bom))
+    // CLEANED: Removed duplicate firebase.analytic (analyticKtx includes it)
     "standardImplementation"(libs.firebase.analyticKtx)
-    "standardImplementation"(libs.firebase.analytic)
     "standardImplementation"(libs.firebase.crashlytics)
     "devImplementation"(platform(libs.firebase.bom))
     "devImplementation"(libs.firebase.analyticKtx)
-    "devImplementation"(libs.firebase.analytic)
     "devImplementation"(libs.firebase.crashlytics)
     
     /** Google ML Kit - Excluded from F-Droid builds (fdroid flavor) **/
@@ -341,9 +340,7 @@ dependencies {
     /** Coroutine **/
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.coroutines.android)
-    "standardImplementation"(libs.firebase.analytic)
-    "devImplementation"(libs.firebase.analytic)
-
+    // REMOVED: Duplicate firebase.analytic declarations (already included above)
 
     implementation(libs.jsoup)
     testImplementation(libs.ktor.core.cio)
@@ -351,7 +348,8 @@ dependencies {
     implementation(libs.koin.androidCompose)
     implementation(libs.koin.android)
     implementation(libs.koin.workManager)
-    implementation(libs.napier)
+    // REMOVED: napier - not used, using custom Log implementation
+    implementation(libs.kermit)
 
     androidTestImplementation(libs.test.extJunit)
     androidTestImplementation(libs.test.espresso)

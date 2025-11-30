@@ -20,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import ireader.presentation.core.ui.IReaderLoadingScreen
 import ireader.presentation.core.ui.getIViewModel
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
@@ -37,11 +36,11 @@ import ireader.i18n.resources.Res
  */
 data class BookDetailScreenNew(
     private val bookId: Long
-) : Screen {
+) {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
+    fun Content() {
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val vm: BookDetailViewModel = getIViewModel(parameters = { parametersOf(BookDetailViewModel.Param(bookId)) })
         val book = vm.booksState.book

@@ -1,24 +1,17 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
-import ireader.presentation.core.NavigationRoutes
-
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import cafe.adriel.voyager.navigator.tab.Tab
-import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.domain.utils.extensions.launchIO
-import ireader.i18n.UiText
 import ireader.i18n.localize
-
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -28,33 +21,27 @@ import ireader.presentation.ui.home.history.HistoryTopAppBar
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import kotlinx.coroutines.launch
 
-object HistoryScreenSpec : Tab {
+/**
+ * History screen specification - provides tab metadata and content
+ */
+object HistoryScreenSpec {
 
-    override val options: TabOptions
-        @Composable
-        get()  {
-            val title = localize(Res.string.history_screen_label)
-            val icon = rememberVectorPainter(Icons.Filled.History)
-            return remember {
-                TabOptions(
-                    index = 2u,
-                    title = title,
-                    icon = icon,
-                )
-            }
+    @Composable
+    fun getTitle(): String = localize(Res.string.history_screen_label)
 
-        }
+    @Composable
+    fun getIcon(): Painter = rememberVectorPainter(Icons.Filled.History)
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    override fun Content() {
+    fun TabContent() {
         val vm: HistoryViewModel = getIViewModel()
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         val host = SnackBarListener(vm)
         IScaffold(
-            topBar = { scrollBehavior->
+            topBar = { scrollBehavior ->
                 HistoryTopAppBar(
                     vm = vm,
                     onDeleteAll = {
@@ -74,12 +61,11 @@ object HistoryScreenSpec : Tab {
                             }
                         }
                     },
-                    scrollBehavior =scrollBehavior,
-
-                    )
+                    scrollBehavior = scrollBehavior,
+                )
             },
             snackbarHostState = host
-        ) {scaffoldPadding ->
+        ) { scaffoldPadding ->
             HistoryScreen(
                 modifier = Modifier,
                 onHistory = { history ->
@@ -141,8 +127,6 @@ object HistoryScreenSpec : Tab {
                     }
                 }
             )
-
         }
-//        WarningAlert(data = vm.warningAlert)
     }
 }

@@ -283,10 +283,246 @@ data class ReaderScreenSpec(
                 }
             }
         ) {
+            CustomSystemColor(
+                enable = false,
+                statusBar = customColor.status,
+                navigationBar = customColor.navigation
+            ) {
+                IScaffold(
+                    topBar = {
+                        val catalog = vm.catalog
+                        val book = vm.book
+                        val readerScrollState = vm.readerScrollState
+
+                        if (readerScrollState != null) {
+                            ReaderScreenTopBar(
+                                modifier = Modifier,
+                                isReaderModeEnable = vm.isReaderModeEnable,
+                                isLoaded = vm.isChapterLoaded.value,
+                                modalBottomSheetValue = sheetState.targetValue,
+                                onRefresh = {
+                                    scope.launch {
+                                        vm.getLocalChapter(
+                                            chapter?.id,
+                                            force = true
+                                        )
+                                    }
+                                },
+                                chapter = chapter,
+                                onWebView = {
+                                    try {
+                                        catalog?.let { catalog ->
+                                            val absoluteUrl = chapter?.key?.let { url ->
+                                                ensureAbsoluteUrlForWebView(url, catalog.source)
+                                            }
+                                            navController.navigateTo(
+                                                WebViewScreenSpec(
+                                                    url = absoluteUrl,
+                                                    sourceId = catalog.sourceId,
+                                                    chapterId = chapter?.id,
+                                                    bookId = book?.id,
+                                                    enableChapterFetch = true,
+                                                    enableChaptersFetch = false,
+                                                    enableBookFetch = false
+                                                )
+                                            )
+                                        }
+                                    } catch (e: Throwable) {
+                                        scope.launch {
+                                            vm.showSnackBar(
+                                                UiText.ExceptionString(
+                                                    e
+                                                )
+                                            )
+                                        }
+                                    }
+                                },
+                                vm = vm,
+                                state = vm,
+                                onBookMark = {
+                                    vm.bookmarkChapter()
+                                },
+                                onPopBackStack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                    }
+                ) { padding ->
+
+                    ReadingScreen(
+                        drawerState = drawerState,
+                        vm = vm,
+                        scrollState = scrollState,
+                        onNext = { rest ->
+                            if (currentIndex < chapters.lastIndex) {
+                                try {
+                                    vm.apply {
+                                        val nextChapter = vm.nextChapter()
+                                        scope.launch {
+                                            vm.getLocalChapter(
+                                                nextChapter.id,
+                                            )
+                                        }
+                                        scope.launch {
+                                            if (rest) {
+                                                vm.clearChapterShell(scrollState)
+                                            }
+                                        }
+                                        when (readingMode.value) {
+                                            ReadingMode.Continues -> {}
+                                            ReadingMode.Page -> {
+                                                scope.launch {
+                                                    scrollState.scrollTo(0)
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (e: Throwable) {
+                                    Log.error(e, "Reader Spec failed to go next chapter")
+                                }
+                            } else {
+                                scope.launch {
+                                    vm.showSnackBar(
+                                        UiText.MStringResource(
+                                            Res.string.this_is_last_chapter
+                                        )
+                                    )
+                                }
+                            }
+                        },
+                        onPrev = { reset ->
+                            try {
+                                if (currentIndex > 0) {
+                                    val prevChapter = vm.prevChapter()
+
+                                    scope.launch {
+                                        if (reset) {
+                                            vm.clearChapterShell(scrollState)
+                                        }
+
+                                        vm.getLocalChapter(
+                                            prevChapter.id,
+                                            false
+                                        )
+
+                                        if (vm.readingMode.value == ReadingMode.Page && !reset) {
+                                            scrollState.scrollTo(scrollState.maxValue)
+                                        }
+                                        if (vm.readingMode.value == ReadingMode.Continues) {
+                                            lazyListState.scrollToItem(1)
+                                        }
+                                    }
+                                } else {
+                                    scope.launch {
+                                        vm.showSnackBar(
+                                            UiText.MStringResource(
+                                                Res.string.this_is_first_chapter
+                                            )
+                                        )
+                                    }
+                                }
+                            } catch (e: Throwable) {
+                                Log.error(e, "Reader Spec failed to go previous chapter")
+                            }
+                        },
+                        toggleReaderMode = {
+                            vm.apply {
+                                vm.prefFunc.apply {
+                                    vm.toggleReaderMode(!vm.isReaderModeEnable)
+                                }
+                            }
+                        },
+                        readerScreenPreferencesState = vm,
+                        onBackgroundColorAndTextColorApply = { bgColor, txtColor ->
+                            try {
+                                if (bgColor.isNotBlank()) {
+                                    vm.setReaderBackgroundColor(vm.backgroundColor.value.toComposeColor())
+                                }
+                            } catch (e: Throwable) {
+                            }
+
+                            try {
+                                if (txtColor.isNotBlank()) {
+                                    vm.prefFunc.apply {
+                                        vm.setReaderTextColor(vm.textColor.value.toComposeColor())
+                                    }
+                                }
+                            } catch (e: Throwable) {
+                            }
+                        },
+
+                        snackBarHostState = host,
+                        swipeState = swipeState,
+                        onSliderFinished = {
+                            scope.launch {
+                                vm.showSnackBar(
+                                    UiText.DynamicString(
+                                        chapters[vm.currentChapterIndex].name
+                                    )
+                                )
+                            }
+                            vm.currentChapterIndex = currentIndex
+                            scope.launch {
+                                vm.getLocalChapter(
+                                    chapters[vm.currentChapterIndex].id,
+                                )
+                            }
+
+                            scope.launch {
+                                scrollState.animateScrollTo(0)
+                            }
+                        },
+                        onSliderChange = {
+                            vm.currentChapterIndex = it.toInt()
+                        },
+                        onReaderPlay = {
+                            vm.book?.let { book ->
+                                vm.stateChapter?.let { chapter ->
+                                    navController.navigateTo(
+                                        TTSScreenSpec(
+                                            bookId = book.id,
+                                            sourceId = book.sourceId,
+                                            chapterId = chapter.id,
+                                            readingParagraph = 0
+                                        )
+                                    )
+                                }
+                            }
+                        },
+                        onReaderBottomOnSetting = {
+                            scope.launch {
+                                sheetState.show()
+                            }
+                        },
+                        lazyListState = lazyListState,
+                        onChapterShown = { chapter ->
+                            if (chapter.id != vm.stateChapter?.id) {
+                                kotlin.runCatching {
+                                    vm.stateChapter = chapter
+                                    val index =
+                                        vm.stateChapters.indexOfFirst { it.id == chapter.id }
+                                    if (index != -1) {
+                                        vm.currentChapterIndex = index
+                                    }
+                                }
+                            }
+                        },
+                        paddingValues = padding,
+                        onNavigateToTranslationSettings = {
+                            navController.navigate(NavigationRoutes.translationSettings)
+                        }
+                    )
+                }
+            }
+        }
+        
+        // Modal sheet rendered OUTSIDE the scaffold hierarchy to ensure it appears above navbar
+        if (sheetState.isVisible) {
             IModalSheets(
-                    bottomSheetState = sheetState,
-                backgroundColor = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.background,
-                contentColor = if(vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground,
+                bottomSheetState = sheetState,
+                backgroundColor = if (vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.background,
+                contentColor = if (vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground,
                 sheetContent = { modifier ->
                     Column(
                         modifier
@@ -334,243 +570,7 @@ data class ReaderScreenSpec(
                     }
                 }
             ) {
-                CustomSystemColor(
-
-                    enable = false,
-                    statusBar = customColor.status,
-                    navigationBar = customColor.navigation
-                ) {
-                    IScaffold(
-                        //  modifier = scaffoldModifier.value,
-                        topBar = {
-                            val catalog = vm.catalog
-                            val book = vm.book
-                            val readerScrollState = vm.readerScrollState
-
-                            if (readerScrollState != null) {
-                                ReaderScreenTopBar(
-                                    // modifier = Modifier.padding(controller.scaffoldPadding),
-                                    modifier = Modifier,
-                                    isReaderModeEnable = vm.isReaderModeEnable,
-                                    isLoaded = vm.isChapterLoaded.value,
-                                    modalBottomSheetValue = sheetState.targetValue,
-                                    onRefresh = {
-                                        scope.launch {
-                                            vm.getLocalChapter(
-                                                chapter?.id,
-                                                force = true
-                                            )
-                                        }
-                                    },
-                                    chapter = chapter,
-                                    onWebView = {
-                                        try {
-                                            catalog?.let { catalog ->
-                                                // Ensure URL is absolute before passing to WebView
-                                                val absoluteUrl = chapter?.key?.let { url ->
-                                                    ensureAbsoluteUrlForWebView(url, catalog.source)
-                                                }
-                                                navController.navigateTo(
-                                                    WebViewScreenSpec(
-                                                        url = absoluteUrl,
-                                                        sourceId = catalog.sourceId,
-                                                        chapterId = chapter?.id,
-                                                        bookId = book?.id,
-                                                        enableChapterFetch = true,
-                                                        enableChaptersFetch = false,
-                                                        enableBookFetch = false
-                                                    )
-                                                )
-                                            }
-                                        } catch (e: Throwable) {
-                                            scope.launch {
-                                                vm.showSnackBar(
-                                                    UiText.ExceptionString(
-                                                        e
-                                                    )
-                                                )
-                                            }
-                                        }
-                                    },
-                                    vm = vm,
-                                    state = vm,
-                                    onBookMark = {
-                                        vm.bookmarkChapter()
-                                    },
-                                    onPopBackStack = {
-                                        navController.popBackStack()
-                                    }
-                                )
-                            }
-                        }
-                    ) {padding ->
-
-                        ReadingScreen(
-                            drawerState = drawerState,
-                            vm = vm,
-                            scrollState = scrollState,
-                            onNext = { rest ->
-                                if (currentIndex < chapters.lastIndex) {
-                                    try {
-                                        vm.apply {
-                                            val nextChapter = vm.nextChapter()
-                                            scope.launch {
-                                                vm.getLocalChapter(
-                                                    nextChapter.id,
-                                                )
-                                            }
-                                            scope.launch {
-                                                if (rest) {
-                                                    vm.clearChapterShell(scrollState)
-                                                }
-                                            }
-                                            when (readingMode.value) {
-                                                ReadingMode.Continues -> {}
-                                                ReadingMode.Page -> {
-                                                    scope.launch {
-                                                        scrollState.scrollTo(0)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } catch (e: Throwable) {
-                                        Log.error(e, "Reader Spec failed to go next chapter")
-                                    }
-                                } else {
-                                    scope.launch {
-                                        vm.showSnackBar(
-                                            UiText.MStringResource(
-                                                Res.string.this_is_last_chapter
-                                            )
-                                        )
-                                    }
-                                }
-                            },
-                            onPrev = { reset ->
-                                try {
-                                    if (currentIndex > 0) {
-                                        val prevChapter = vm.prevChapter()
-
-                                        scope.launch {
-                                            if (reset) {
-                                                vm.clearChapterShell(scrollState)
-                                            }
-
-                                            vm.getLocalChapter(
-                                                prevChapter.id,
-                                                false
-                                            )
-
-                                            if (vm.readingMode.value == ReadingMode.Page && !reset) {
-                                                scrollState.scrollTo(scrollState.maxValue)
-                                            }
-                                            if (vm.readingMode.value == ReadingMode.Continues) {
-                                                lazyListState.scrollToItem(1)
-                                            }
-                                        }
-                                    } else {
-                                        scope.launch {
-                                            vm.showSnackBar(
-                                                UiText.MStringResource(
-                                                    Res.string.this_is_first_chapter
-                                                )
-                                            )
-                                        }
-                                    }
-                                } catch (e: Throwable) {
-                                    Log.error(e, "Reader Spec failed to go previous chapter")
-                                }
-                            },
-                            toggleReaderMode = {
-                                vm.apply {
-                                    vm.prefFunc.apply {
-                                        vm.toggleReaderMode(!vm.isReaderModeEnable)
-                                    }
-                                }
-                            },
-                            readerScreenPreferencesState = vm,
-                            onBackgroundColorAndTextColorApply = { bgColor, txtColor ->
-                                try {
-                                    if (bgColor.isNotBlank()) {
-                                        vm.setReaderBackgroundColor(vm.backgroundColor.value.toComposeColor())
-                                    }
-                                } catch (e: Throwable) {
-                                }
-
-                                try {
-                                    if (txtColor.isNotBlank()) {
-                                        vm.prefFunc.apply {
-                                            vm.setReaderTextColor(vm.textColor.value.toComposeColor())
-                                        }
-                                    }
-                                } catch (e: Throwable) {
-                                }
-                            },
-
-                            snackBarHostState = host,
-                            swipeState = swipeState,
-                            onSliderFinished = {
-                                scope.launch {
-                                    vm.showSnackBar(
-                                        UiText.DynamicString(
-                                            chapters[vm.currentChapterIndex].name
-                                        )
-                                    )
-                                }
-                                vm.currentChapterIndex = currentIndex
-                                scope.launch {
-                                    vm.getLocalChapter(
-                                        chapters[vm.currentChapterIndex].id,
-                                    )
-                                }
-
-                                scope.launch {
-                                    scrollState.animateScrollTo(0)
-                                }
-                            },
-                            onSliderChange = {
-                                vm.currentChapterIndex = it.toInt()
-                            },
-                            onReaderPlay = {
-                                vm.book?.let { book ->
-                                    vm.stateChapter?.let { chapter ->
-                                        navController.navigateTo(
-                                            TTSScreenSpec(
-                                                bookId = book.id,
-                                                sourceId = book.sourceId,
-                                                chapterId = chapter.id,
-                                                readingParagraph = 0
-                                            )
-                                        )
-                                    }
-                                }
-                            },
-                            onReaderBottomOnSetting = {
-                                scope.launch {
-                                    sheetState.show()
-                                }
-                            },
-                            lazyListState = lazyListState,
-                            onChapterShown = { chapter ->
-                                if (chapter.id != vm.stateChapter?.id) {
-                                    kotlin.runCatching {
-                                        vm.stateChapter = chapter
-                                        val index =
-                                            vm.stateChapters.indexOfFirst { it.id == chapter.id }
-                                        if (index != -1) {
-                                            vm.currentChapterIndex = index
-                                        }
-                                    }
-                                }
-                            },
-                            paddingValues = padding,
-                            onNavigateToTranslationSettings = {
-                                navController.navigate(NavigationRoutes.translationSettings)
-                            }
-                        )
-                    }
-
-                }
+                // Empty content - the actual content is rendered above
             }
         }
     }

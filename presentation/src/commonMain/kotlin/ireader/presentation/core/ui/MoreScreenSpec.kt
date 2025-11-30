@@ -1,52 +1,43 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
-import ireader.presentation.core.NavigationRoutes
-
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalUriHandler
-import cafe.adriel.voyager.navigator.tab.Tab
-import cafe.adriel.voyager.navigator.tab.TabOptions
 import ireader.i18n.discord
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.MoreScreen
 
-object MoreScreenSpec : Tab {
+/**
+ * More screen specification - provides tab metadata and content
+ */
+object MoreScreenSpec {
 
-    override val options: TabOptions
-        @Composable
-        get()  {
-            val title = localize(Res.string.more)
-            val icon = rememberVectorPainter(Icons.Filled.MoreHoriz)
-            return remember {
-                TabOptions(
-                    index = 4u,
-                    title = title,
-                    icon = icon,
-                )
-            }
-
-        }
-    @OptIn(
-        ExperimentalMaterial3Api::class
-    )
     @Composable
-    override fun Content() {
+    fun getTitle(): String = localize(Res.string.more)
+
+    @Composable
+    fun getIcon(): Painter = rememberVectorPainter(Icons.Filled.MoreHoriz)
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun TabContent() {
         val uriHandler = LocalUriHandler.current
         val vm: MainSettingScreenViewModel = getIViewModel()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
@@ -80,7 +71,6 @@ object MoreScreenSpec : Tab {
                 onDonation = {
                     navController.navigate(NavigationRoutes.donation)
                 },
-
                 onWeb3Profile = {
                     navController.navigate(NavigationRoutes.profile)
                 },
@@ -107,6 +97,5 @@ object MoreScreenSpec : Tab {
                 },
             )
         }
-
     }
 }

@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
+import ireader.presentation.core.LocalNavigator
 import ireader.domain.models.entities.*
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import org.koin.core.component.KoinComponent
@@ -41,7 +41,7 @@ class EnhancedStatisticsScreen : KoinComponent {
                 TopAppBar(
                     title = { Text(localizeHelper.localize(Res.string.statistics_and_analytics)) },
                     navigationIcon = {
-                        TopAppBarBackButton(onClick = { navigator?.pop() })
+                        TopAppBarBackButton(onClick = { navigator?.popBackStack() })
                     },
                     actions = {
                         IconButton(onClick = { screenModel.refresh() }) {

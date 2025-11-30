@@ -139,15 +139,16 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         mediaSession = MediaSessionCompat(this, TTS_SERVICE_NAME)
         sessionToken = mediaSession.sessionToken
         
-        // Only include FAST_FORWARD and REWIND for paragraph navigation in compact view
-        // Exclude SKIP_TO_NEXT/SKIP_TO_PREVIOUS to prevent Android from showing skip icons
-        // instead of rewind/fast-forward icons in the compact notification
+        // Include all transport actions - both SKIP and FAST_FORWARD/REWIND do paragraph navigation
+        // This ensures the notification shows controls regardless of which icons Android chooses to display
         stateBuilder = PlaybackStateCompat.Builder()
             .setActions(
                 PlaybackStateCompat.ACTION_PLAY or
                 PlaybackStateCompat.ACTION_STOP or
                 PlaybackStateCompat.ACTION_PAUSE or
                 PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
                 PlaybackStateCompat.ACTION_FAST_FORWARD or
                 PlaybackStateCompat.ACTION_REWIND
             )
@@ -1075,24 +1076,22 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             scope.launch { handleCancel() }
         }
         
+        // SKIP_TO_NEXT now does paragraph navigation (for devices that show skip icons)
         override fun onSkipToNext() {
-            val chapter = state.ttsChapter.value ?: return
-            val chapters = state.ttsChapters.value
-            val source = state.ttsCatalog.value ?: return
-            scope.launch { handleSkipNext(chapter, chapters, source) }
+            scope.launch { handleSkipNextParagraph() }
         }
         
+        // SKIP_TO_PREVIOUS now does paragraph navigation (for devices that show skip icons)
         override fun onSkipToPrevious() {
-            val chapter = state.ttsChapter.value ?: return
-            val chapters = state.ttsChapters.value
-            val source = state.ttsCatalog.value ?: return
-            scope.launch { handleSkipPrevious(chapter, chapters, source) }
+            scope.launch { handleSkipPreviousParagraph() }
         }
         
+        // FAST_FORWARD also does paragraph navigation (for devices that show these icons)
         override fun onFastForward() {
             scope.launch { handleSkipNextParagraph() }
         }
         
+        // REWIND also does paragraph navigation (for devices that show these icons)
         override fun onRewind() {
             scope.launch { handleSkipPreviousParagraph() }
         }

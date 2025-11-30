@@ -5,9 +5,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.tab.Tab
+import ireader.presentation.core.ui.AppTab
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
@@ -138,26 +137,23 @@ fun RowScope.AdaptiveNavigationItem(
 }
 
 /**
- * Helper composable for Tab-based navigation with style selection
+ * Helper composable for AppTab-based navigation with style selection
  */
 @Composable
 fun RowScope.AdaptiveTabNavigationItem(
-    tab: Tab,
+    tab: AppTab,
     style: NavigationStyle,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val icon = tab.options.icon
-    if (icon != null) {
-        AdaptiveNavigationItem(
-            style = style,
-            selected = isSelected,
-            onClick = onClick,
-            icon = icon,
-            label = tab.options.title,
-            alwaysShowLabel = true
-        )
-    }
+    AdaptiveNavigationItem(
+        style = style,
+        selected = isSelected,
+        onClick = onClick,
+        icon = tab.icon,
+        label = tab.title,
+        alwaysShowLabel = true
+    )
 }
 
 /**

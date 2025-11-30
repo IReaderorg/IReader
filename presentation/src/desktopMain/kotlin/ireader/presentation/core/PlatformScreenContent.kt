@@ -1,10 +1,8 @@
 package ireader.presentation.core
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
@@ -21,7 +19,7 @@ import kotlinx.coroutines.launch
 actual fun PlatformModalSheets(
     modifier: Modifier,
     state: Any,
-    backgroundColor: Color ,
+    backgroundColor: Color,
     contentColor: Color,
     sheetContent: @Composable (modifier: Modifier) -> Unit,
     content: @Composable () -> Unit
@@ -29,24 +27,26 @@ actual fun PlatformModalSheets(
     val sheetState = state as SheetState
     val scope = rememberCoroutineScope()
     
-    Box {
-        content()
-        
-        if (sheetState.isVisible) {
-            ModalBottomSheet(
-                modifier = if (sheetState.currentValue == SheetValue.Expanded) Modifier.statusBarsPadding() else Modifier,
-                onDismissRequest = {
-                    scope.launch {
-                        sheetState.hide()
-                    }
-                },
-                sheetState = sheetState,
-                containerColor = backgroundColor,
-                contentColor = contentColor
-            ) {
-                Box(modifier.defaultMinSize(minHeight = 1.dp)) {
-                    sheetContent(modifier)
+    // Render content first
+    content()
+    
+    // ModalBottomSheet creates its own popup/dialog layer internally,
+    // so it will render above all other content including the navbar
+    if (sheetState.isVisible) {
+        ModalBottomSheet(
+            modifier = if (sheetState.currentValue == SheetValue.Expanded) Modifier.statusBarsPadding() else Modifier,
+            onDismissRequest = {
+                scope.launch {
+                    sheetState.hide()
                 }
+            },
+            sheetState = sheetState,
+            containerColor = backgroundColor,
+            contentColor = contentColor,
+            scrimColor = Color.Black.copy(alpha = 0.32f)
+        ) {
+            Box(modifier.defaultMinSize(minHeight = 1.dp)) {
+                sheetContent(modifier)
             }
         }
     }

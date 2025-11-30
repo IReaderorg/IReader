@@ -46,8 +46,6 @@ import androidx.navigation.compose.rememberNavController
 import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import ireader.core.http.toast
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.UiPreferences
@@ -107,7 +105,8 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         getSimpleStorage.provideActivity(this, null)
         
         // Fast initialization on main thread
-        Napier.base(DebugAntilog())
+        // Kermit logging is auto-configured with platform defaults
+        // For debug builds, logs go to Logcat automatically
         localeHelper.setLocaleLang()
         
         // Trigger lazy initialization now that UI is about to be visible

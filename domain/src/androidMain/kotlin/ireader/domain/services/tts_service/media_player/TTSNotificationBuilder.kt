@@ -42,28 +42,25 @@ class TTSNotificationBuilder constructor(
     private val pendingIntentFlags =
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 
-    val skipPrevActionButton = NotificationCompat.Action(
+    // Previous paragraph action using SKIP_TO_PREVIOUS (shows skip icon on most devices)
+    val prevParagraphAction = NotificationCompat.Action(
         R.drawable.ic_baseline_skip_previous,
-        localizeHelper.localize(Res.string.previous_chapter),
+        localizeHelper.localize(Res.string.previous_paragraph),
         MediaButtonReceiver.buildMediaButtonPendingIntent(
             context,
             PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
         )
     )
-    // Use custom PendingIntent for rewind to ensure Android doesn't override with skip icons
-    val rewindAction: NotificationCompat.Action
-        get() = NotificationCompat.Action(
-            R.drawable.ic_baseline_fast_rewind,
-            localizeHelper.localize(Res.string.previous_paragraph),
-            PendingIntent.getService(
-                context,
-                Player.PREV_PAR,
-                Intent(context, TTSService::class.java).apply {
-                    action = TTSService.ACTION_PREVIOUS_PARAGRAPH
-                },
-                pendingIntentFlags
-            )
+    
+    // Alternative previous paragraph using REWIND (shows rewind icon on some devices)
+    val rewindAction = NotificationCompat.Action(
+        R.drawable.ic_baseline_fast_rewind,
+        localizeHelper.localize(Res.string.previous_paragraph),
+        MediaButtonReceiver.buildMediaButtonPendingIntent(
+            context,
+            PlaybackStateCompat.ACTION_REWIND
         )
+    )
 
     val pauseAction = NotificationCompat.Action(
         R.drawable.ic_baseline_pause,
@@ -77,30 +74,25 @@ class TTSNotificationBuilder constructor(
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY)
     )
 
-    // Use custom PendingIntent for fast-forward to ensure Android doesn't override with skip icons
-    val next: NotificationCompat.Action
-        get() = NotificationCompat.Action(
-            R.drawable.ic_baseline_fast_forward,
-            localizeHelper.localize(Res.string.next_paragraph),
-            PendingIntent.getService(
-                context,
-                Player.NEXT_PAR,
-                Intent(context, TTSService::class.java).apply {
-                    action = TTSService.ACTION_NEXT_PARAGRAPH
-                },
-                pendingIntentFlags
-            )
+    // Next paragraph action using FAST_FORWARD (shows fast-forward icon on some devices)
+    val nextParagraphFastForward = NotificationCompat.Action(
+        R.drawable.ic_baseline_fast_forward,
+        localizeHelper.localize(Res.string.next_paragraph),
+        MediaButtonReceiver.buildMediaButtonPendingIntent(
+            context,
+            PlaybackStateCompat.ACTION_FAST_FORWARD
         )
+    )
 
-    val skipNext =
-        NotificationCompat.Action(
-            R.drawable.ic_baseline_skip_next,
-            localizeHelper.localize(Res.string.next_chapter),
-            MediaButtonReceiver.buildMediaButtonPendingIntent(
-                context,
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-            )
+    // Next paragraph action using SKIP_TO_NEXT (shows skip icon on most devices)
+    val nextParagraphAction = NotificationCompat.Action(
+        R.drawable.ic_baseline_skip_next,
+        localizeHelper.localize(Res.string.next_paragraph),
+        MediaButtonReceiver.buildMediaButtonPendingIntent(
+            context,
+            PlaybackStateCompat.ACTION_SKIP_TO_NEXT
         )
+    )
 
     fun openTTSScreen(
         bookId: Long,
@@ -162,14 +154,14 @@ class TTSNotificationBuilder constructor(
         }
 
         // Build actions list first to avoid concurrent modification
-        // Order: rewind (0), play/pause (1), fast-forward (2), close (3), skip-next (4)
-        // Compact view shows indices 0, 1, 2 = rewind, play/pause, fast-forward
+        // Order: prev paragraph (0), play/pause (1), next paragraph (2), close (3)
+        // Compact view shows indices 0, 1, 2 = prev paragraph, play/pause, next paragraph
+        // Using SKIP actions since Android prefers to show these on most devices
         val actions = buildList {
-            add(rewindAction)
+            add(prevParagraphAction)  // SKIP_TO_PREVIOUS (does paragraph nav)
             add(if (playbackState?.isPlaying == true) pauseAction else play)
-            add(next)
+            add(nextParagraphAction)  // SKIP_TO_NEXT (does paragraph nav)
             add(close)
-            add(skipNext)
         }
 
         val builder = NotificationCompat.Builder(context, CHANNEL_TTS)
@@ -248,19 +240,18 @@ class TTSNotificationBuilder constructor(
                 else -> "Paragraph ${progress + 1} of ${lastPar + 1}"
             }
         
-        // Build actions list first to avoid concurrent modification
-        val actions = buildList {
-            add(rewindAction)
-            add(if (playbackState?.isPlaying == true) pauseAction else play)
-            add(next)
-            add(close)
-            add(openTTSScreen(bookId, sourceId, chapterId))
-        }
+        val builder = NotificationCompat.Builder(context, NotificationsIds.CHANNEL_TTS)
         
-        return NotificationCompat.Builder(
-            context,
-            NotificationsIds.CHANNEL_TTS
-        ).apply {
+        // Add actions in order: prev paragraph (0), play/pause (1), next paragraph (2), close (3), open (4)
+        // Compact view will show indices 0, 1, 2
+        // Using SKIP actions since Android prefers to show these on most devices
+        builder.addAction(prevParagraphAction)  // index 0 - SKIP_TO_PREVIOUS (does paragraph nav)
+        builder.addAction(if (playbackState?.isPlaying == true) pauseAction else play)  // index 1
+        builder.addAction(nextParagraphAction)  // index 2 - SKIP_TO_NEXT (does paragraph nav)
+        builder.addAction(close)  // index 3
+        builder.addAction(openTTSScreen(bookId, sourceId, chapterId))  // index 4
+        
+        return builder.apply {
             setContentTitle(contentText)
             setContentText(chapterTitle)
             setSmallIcon(R.drawable.ic_infinity)
@@ -284,16 +275,14 @@ class TTSNotificationBuilder constructor(
             )
             setDeleteIntent(cancelMediaPlayer())
             
-            // Add all actions at once to avoid concurrent modification
-            actions.forEach { action -> addAction(action) }
-            
+            // MediaStyle with explicit compact view actions
+            // Actions 0, 1, 2 = rewind, play/pause, fast-forward
             setStyle(
                 androidx.media.app.NotificationCompat.MediaStyle()
                     .setMediaSession(mediaSessionCompat.sessionToken)
                     .setShowCancelButton(true)
                     .setCancelButtonIntent(cancelMediaPlayer())
                     .setShowActionsInCompactView(0, 1, 2)
-
             )
             setAutoCancel(false)
             setColorized(true)

@@ -70,8 +70,8 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.androidx.datastore.core)
                 api(libs.androidx.datastore.preferences.core)
-                // Performance monitoring and logging
-                api(libs.kermit)
+                // Kermit logging - available transitively from source-api
+                // Explicitly included here for direct usage in core module
             }
         }
         commonTest {
@@ -79,8 +79,7 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.coroutines.test)
                 implementation(libs.mock)
-                // Napier logging for tests
-                implementation(libs.napier)
+                // REMOVED: napier - not used in tests
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
                 implementation(libs.ktor.client.mock)
             }

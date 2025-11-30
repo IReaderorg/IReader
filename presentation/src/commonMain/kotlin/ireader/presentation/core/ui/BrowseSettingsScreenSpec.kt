@@ -2,7 +2,6 @@ package ireader.presentation.core.ui
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
-import cafe.adriel.voyager.core.screen.Screen
 import ireader.presentation.ui.home.sources.settings.BrowseSettingsScreen
 import ireader.presentation.ui.home.sources.settings.BrowseSettingsViewModel
 import org.koin.compose.koinInject
@@ -13,10 +12,10 @@ import org.koin.compose.koinInject
  * - Shows only languages with available sources
  * - Persists selections to BrowsePreferences
  */
-class BrowseSettingsScreenSpec : Screen {
+class BrowseSettingsScreenSpec {
     
     @Composable
-    override fun Content() {
+    fun Content() {
         val vm: BrowseSettingsViewModel = koinInject()
         val navigator = ireader.presentation.core.LocalNavigator.current
         val snackbarHostState = remember { SnackbarHostState() }

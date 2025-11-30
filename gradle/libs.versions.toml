@@ -8,11 +8,11 @@ firebaseAnalytics = "23.0.0"
 junitVintageEngine = "6.0.1"
 kotlinxCoroutinesSwing = "1.10.2"
 navigation = "2.9.1"
-voyager = "1.0.0"
+# voyager removed - using pure Compose Navigation
 zxing = "3.5.3"
-# AI TTS (Free alternatives)
-piperTts = "1.2.0-a0f09cd"
-espeakNg = "1.51"
+# AI TTS (Free alternatives) - Desktop only
+# piperTts = "1.2.0-a0f09cd"  # UNUSED - Remove if not planning desktop TTS
+# espeakNg = "1.51"  # UNUSED
 # Android
 proguard = "7.2.2"
 # Dependency Injection
@@ -22,8 +22,6 @@ koinAndroidCompose = "4.1.1"
 koinCompose = "4.1.1"
 # Network
 ktor = "3.3.2"
-# Logging
-napier = "2.7.1"
 # Storage
 sqldelight = "2.0.2"
 datastore = "1.1.1"
@@ -68,14 +66,14 @@ gson = "com.google.code.gson:gson:2.13.2"
 kermit = "co.touchlab:kermit:2.0.8"
 googleTranslator = "com.google.mlkit:translate:17.0.3"
 
-# Free AI TTS Libraries
-piper-tts-android = { module = "io.github.givimad:piper-jni", version.ref = "piperTts" }
+# Free AI TTS Libraries - UNUSED, remove if not needed
+# piper-tts-android = { module = "io.github.givimad:piper-jni", version.ref = "piperTts" }
 
 junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junitVintageEngine" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxCoroutinesSwing" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
 navigation-runtime = { module = "org.jetbrains.androidx.navigation:navigation-runtime", version.ref = "navigation" }
-voyager-tab-navigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
+# voyager-tab-navigator removed - using pure Compose Navigation
 
 storage = { module = "com.anggrayudi:storage", version = "2.2.0" }
 documentfile = { module = "androidx.documentfile:documentfile", version = "1.1.0" }
@@ -104,9 +102,6 @@ firebase-analytic = { module = "com.google.firebase:firebase-analytics" }
 
 okio = "com.squareup.okio:okio:3.16.2"
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
-
-
-napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 
 # Inject
@@ -153,7 +148,8 @@ test-robolectric = "org.robolectric:robolectric:4.8"
 
 [bundles]
 simplestorage = ["storage", "documentfile"]
-ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-gson","ktor-contentNegotiation-kotlinx","ktor-contentNegotiation-jackson","ktor-core-android"]
+# Removed unused serialization: gson, jackson (only kotlinx is used)
+ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-kotlinx","ktor-core-android"]
 supabase = ["supabase-postgrest", "supabase-auth", "supabase-realtime", "supabase-functions"]
 
 [plugins]

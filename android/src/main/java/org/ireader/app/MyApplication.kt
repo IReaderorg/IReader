@@ -70,6 +70,11 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
         Trace.endSection()
         StartupProfiler.mark("crash_handler")
         
+        // Configure Kermit logging
+        // Debug: logs to Logcat (default behavior)
+        // Release: could add CrashlyticsLogWriter for Firebase integration
+        // Kermit auto-configures with sensible defaults, no explicit init needed
+        
         // Initialize Koin - all modules
         Trace.beginSection("Koin.init")
         initializeKoin()

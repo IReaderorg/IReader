@@ -61,7 +61,7 @@ kotlin {
                 implementation(libs.sqldelight.runtime)
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
                 implementation(project(Modules.coreApi))
-                implementation(libs.napier)
+                // REMOVED: napier - not used in tests
             }
         }
         

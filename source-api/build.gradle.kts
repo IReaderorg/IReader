@@ -62,7 +62,8 @@ kotlin {
                 api(libs.ktor.contentNegotiation)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 compileOnly(libs.jsoup)
-                compileOnly(libs.napier)
+                // Kermit logging - exposed as API for consumers
+                api(libs.kermit)
             }
         }
          androidMain {
@@ -86,8 +87,7 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
                 implementation("io.mockk:mockk:1.13.8")
-                // Napier logging for tests
-                implementation(libs.napier)
+                // Kermit is already available from commonMain via api()
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
                 implementation("io.ktor:ktor-client-mock:3.3.2")
             }

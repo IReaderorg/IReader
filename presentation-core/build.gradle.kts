@@ -62,7 +62,7 @@ kotlin {
                 api(libs.coil.network.ktor)
 
                 // Logging
-                implementation(libs.napier)
+                implementation(libs.kermit)
             }
         }
         androidMain {

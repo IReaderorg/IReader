@@ -1,16 +1,12 @@
 package ireader.presentation.core
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -31,23 +27,25 @@ actual fun PlatformModalSheets(
     val sheetState = state as SheetState
     val scope = rememberCoroutineScope()
     
-    Box {
-        content()
-        
-        if (sheetState.isVisible) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    scope.launch {
-                        sheetState.hide()
-                    }
-                },
-                sheetState = sheetState,
-                containerColor = backgroundColor,
-                contentColor = contentColor
-            ) {
-                Box(modifier.defaultMinSize(minHeight = 1.dp)) {
-                    sheetContent(modifier.fillMaxWidth().fillMaxHeight(.9f))
+    // Render content first
+    content()
+    
+    // ModalBottomSheet creates its own popup/dialog layer internally,
+    // so it will render above all other content including the navbar
+    if (sheetState.isVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                scope.launch {
+                    sheetState.hide()
                 }
+            },
+            sheetState = sheetState,
+            containerColor = backgroundColor,
+            contentColor = contentColor,
+            scrimColor = Color.Black.copy(alpha = 0.32f)
+        ) {
+            Box(modifier.defaultMinSize(minHeight = 1.dp)) {
+                sheetContent(modifier.fillMaxWidth().fillMaxHeight(.9f))
             }
         }
     }

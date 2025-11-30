@@ -126,15 +126,15 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.coroutines.test)
                 implementation(libs.mock)
-                // Napier logging for tests
-                implementation(libs.napier)
+                // REMOVED: napier - not used in tests
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
                 implementation(libs.ktor.client.mock)
             }
         }
          androidMain {
             dependencies {
-                implementation("org.slf4j:slf4j-android:1.7.25")
+                // REMOVED: slf4j-android - not used
+                // implementation("org.slf4j:slf4j-android:1.7.25")
                 implementation(libs.bundles.simplestorage)
                 implementation(androidx.biometric)
                 implementation(androidx.security.crypto)
@@ -146,7 +146,8 @@ kotlin {
                 // ML Kit excluded for F-Droid builds - provided by app module for standard/dev flavors only
                 compileOnly(libs.googleTranslator)
                 
-                implementation(libs.gson)
+                // REMOVED: gson - not used, using kotlinx.serialization
+                // implementation(libs.gson)
                 implementation(androidx.work.runtime)
                 /** Coroutine **/
 
@@ -163,7 +164,8 @@ kotlin {
                 implementation(kotlinx.serialization.json)
                 implementation(kotlinx.reflect)
                 implementation(libs.coil.core)
-                implementation(libs.coil.gif)
+                // REMOVED: coil-gif - not used (no GIF support needed)
+                // implementation(libs.coil.gif)
                 /** LifeCycle **/
                 implementation(androidx.lifecycle.runtime)
                 implementation(kotlinx.stdlib)

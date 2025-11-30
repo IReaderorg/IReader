@@ -13,8 +13,6 @@ import coil3.compose.LocalPlatformContext
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import coil3.request.crossfade
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import ireader.core.http.HttpClients
 import ireader.core.http.okhttp
 import ireader.data.di.DataModule
@@ -165,7 +163,6 @@ fun main() {
 
         //Dispatchers.setMain(StandardTestDispatcher())
         application {
-            Napier.base(DebugAntilog())
             val state = rememberWindowState()
 
             Window(

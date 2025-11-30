@@ -1,12 +1,14 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
-import ireader.presentation.core.NavigationRoutes
-
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,83 +18,68 @@ import androidx.compose.material.icons.filled.Source
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalFocusManager
-import cafe.adriel.voyager.navigator.tab.Tab
-import cafe.adriel.voyager.navigator.tab.TabOptions
+import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.CatalogLocal
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.home.sources.extension.CleanExtensionScreen
 import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.ui.unit.dp
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
-object ExtensionScreenSpec : Tab {
+/**
+ * Extension screen specification - provides tab metadata and content
+ */
+object ExtensionScreenSpec {
 
-    override val options: TabOptions
-        @Composable
-        get() {
-            val title = localize(Res.string.explore_screen_label)
-            val icon = rememberVectorPainter(Icons.Filled.Source)
-            return remember {
-                TabOptions(
-                        index = 3u,
-                        title = title,
-                        icon = icon,
-                )
-            }
+    @Composable
+    fun getTitle(): String = localize(Res.string.explore_screen_label)
 
-        }
+    @Composable
+    fun getIcon(): Painter = rememberVectorPainter(Icons.Filled.Source)
 
     @OptIn(
-            ExperimentalAnimationApi::class,
-            ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+        ExperimentalAnimationApi::class,
+        ExperimentalMaterialApi::class,
+        ExperimentalMaterial3Api::class
     )
     @Composable
-    override fun Content(
-
-    ) {
-        val vm: ExtensionViewModel =
-                getIViewModel()
-        var searchMode by remember {
-            mutableStateOf(false)
-        }
-        var showMigrationSourceDialog by remember {
-            mutableStateOf(false)
-        }
-        var showAddRepositoryDialog by remember {
-            mutableStateOf(false)
-        }
+    fun TabContent() {
+        val vm: ExtensionViewModel = getIViewModel()
+        var searchMode by remember { mutableStateOf(false) }
+        var showMigrationSourceDialog by remember { mutableStateOf(false) }
         val focusManager = LocalFocusManager.current
         val snackBarHostState = SnackBarListener(vm)
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val swipeState = rememberPullRefreshState(vm.isRefreshing, onRefresh = {
             vm.refreshCatalogs()
         })
+
         // Migration source selection dialog
         if (showMigrationSourceDialog) {
             MigrationSourceSelectionDialog(
@@ -104,20 +91,16 @@ object ExtensionScreenSpec : Tab {
                 onDismiss = { showMigrationSourceDialog = false }
             )
         }
-        
+
         Box(modifier = Modifier.fillMaxSize()) {
             IScaffold(
-                    modifier = Modifier.fillMaxSize().pullRefresh(swipeState, vm.currentPagerPage == 1), topBar = { scrollBehavior ->
-
-                ExtensionScreenTopAppBar(
+                modifier = Modifier.fillMaxSize().pullRefresh(swipeState, vm.currentPagerPage == 1),
+                topBar = { scrollBehavior ->
+                    ExtensionScreenTopAppBar(
                         searchMode = searchMode,
                         query = vm.searchQuery ?: "",
-                        onValueChange = {
-                            vm.searchQuery = it
-                        },
-                        onConfirm = {
-                            focusManager.clearFocus()
-                        },
+                        onValueChange = { vm.searchQuery = it },
+                        onConfirm = { focusManager.clearFocus() },
                         currentPage = vm.currentPagerPage,
                         onClose = {
                             searchMode = false
@@ -127,20 +110,12 @@ object ExtensionScreenSpec : Tab {
                             searchMode = false
                             vm.searchQuery = ""
                         },
-                        onRefresh = {
-                            vm.refreshCatalogs()
-                        },
-                        onSearchEnable = {
-                            searchMode = true
-                        },
+                        onRefresh = { vm.refreshCatalogs() },
+                        onSearchEnable = { searchMode = true },
                         onSearchNavigate = {
-                            navController.navigateTo(
-                                    GlobalSearchScreenSpec()
-                            )
+                            navController.navigateTo(GlobalSearchScreenSpec())
                         },
-                        onMigrate = {
-                            showMigrationSourceDialog = true
-                        },
+                        onMigrate = { showMigrationSourceDialog = true },
                         onBrowseSettings = {
                             navController.navigateTo(BrowseSettingsScreenSpec())
                         },
@@ -149,47 +124,45 @@ object ExtensionScreenSpec : Tab {
                         onAddRepository = {
                             navController.navigateTo(RepositoryAddScreenSpec())
                         }
-                )
-            }) { scaffoldPadding ->
-
-
+                    )
+                }
+            ) { scaffoldPadding ->
                 CleanExtensionScreen(
-                        modifier = Modifier.padding(scaffoldPadding),
-                        vm = vm,
-                        onClickCatalog = {
-                            if (!vm.incognito.value) {
-                                vm.lastUsedSource.value = it.sourceId
-                            }
-                            navController.navigateTo(
-                                    ExploreScreenSpec(
-                                            sourceId = it.sourceId,
-                                            query = ""
-                                    )
+                    modifier = Modifier.padding(scaffoldPadding),
+                    vm = vm,
+                    onClickCatalog = {
+                        if (!vm.incognito.value) {
+                            vm.lastUsedSource.value = it.sourceId
+                        }
+                        navController.navigateTo(
+                            ExploreScreenSpec(
+                                sourceId = it.sourceId,
+                                query = ""
                             )
-                        },
-                        onClickInstall = { vm.installCatalog(it) },
-                        onClickTogglePinned = { vm.togglePinnedCatalog(it) },
-                        onClickUninstall = { vm.uninstallCatalog(it) },
-                        snackBarHostState = snackBarHostState,
-                        onCancelInstaller = { vm.cancelCatalogJob(it) },
-                        onShowDetails = { catalog ->
-                            navController.navigateTo(SourceDetailScreen(catalog))
-                        },
-                        onMigrateFromSource = { sourceId ->
-                            navController.navigateTo(SourceMigrationScreenSpec(sourceId))
-                        },
+                        )
+                    },
+                    onClickInstall = { vm.installCatalog(it) },
+                    onClickTogglePinned = { vm.togglePinnedCatalog(it) },
+                    onClickUninstall = { vm.uninstallCatalog(it) },
+                    snackBarHostState = snackBarHostState,
+                    onCancelInstaller = { vm.cancelCatalogJob(it) },
+                    onShowDetails = { catalog ->
+                        navController.navigateTo(SourceDetailScreen(catalog))
+                    },
+                    onMigrateFromSource = { sourceId ->
+                        navController.navigateTo(SourceMigrationScreenSpec(sourceId))
+                    },
                     scaffoldPadding = scaffoldPadding,
                 )
             }
             PullRefreshIndicator(
-                    vm.isRefreshing,
-                    swipeState,
-                    Modifier.align(Alignment.TopCenter)
+                vm.isRefreshing,
+                swipeState,
+                Modifier.align(Alignment.TopCenter)
             )
         }
     }
 }
-
 
 @Composable
 private fun MigrationSourceSelectionDialog(
@@ -200,11 +173,11 @@ private fun MigrationSourceSelectionDialog(
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { 
+        title = {
             Text(
                 text = localize(Res.string.migrate),
                 style = MaterialTheme.typography.titleLarge
-            ) 
+            )
         },
         text = {
             Column {
@@ -213,7 +186,7 @@ private fun MigrationSourceSelectionDialog(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                
+
                 if (sources.isEmpty()) {
                     Text(
                         text = localizeHelper.localize(Res.string.no_sources_available_for_migration),
@@ -221,17 +194,13 @@ private fun MigrationSourceSelectionDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
                         items(sources, key = { it.sourceId }) { source ->
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
-                                    .clickable {
-                                        onSourceSelected(source.sourceId)
-                                    },
+                                    .clickable { onSourceSelected(source.sourceId) },
                                 colors = CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                                 )
@@ -277,28 +246,25 @@ private fun AddRepositoryDialog(
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var url by remember { mutableStateOf("") }
     var isValidUrl by remember { mutableStateOf(false) }
-    
-    // Validate URL
+
     LaunchedEffect(url) {
-        isValidUrl = url.isNotBlank() && 
-                (url.startsWith("http://") || url.startsWith("https://")) &&
-                (url.contains(".json") || url.contains("index.min.json") || url.contains("v3.json"))
+        isValidUrl = url.isNotBlank() &&
+            (url.startsWith("http://") || url.startsWith("https://")) &&
+            (url.contains(".json") || url.contains("index.min.json") || url.contains("v3.json"))
     }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(localizeHelper.localize(Res.string.add_repository))
-        },
+        title = { Text(localizeHelper.localize(Res.string.add_repository)) },
         text = {
             Column {
                 Text(
                     text = localizeHelper.localize(Res.string.enter_the_repository_url),
                     style = MaterialTheme.typography.bodyMedium
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
@@ -308,7 +274,7 @@ private fun AddRepositoryDialog(
                     singleLine = true,
                     isError = url.isNotBlank() && !isValidUrl
                 )
-                
+
                 if (url.isNotBlank() && !isValidUrl) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -317,9 +283,9 @@ private fun AddRepositoryDialog(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Text(
                     text = localizeHelper.localize(Res.string.examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader),
                     style = MaterialTheme.typography.bodySmall,

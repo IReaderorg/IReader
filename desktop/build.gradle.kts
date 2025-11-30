@@ -58,7 +58,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     // Removed duplicate compose dependencies - already provided by presentation module
     // Only keeping desktop-specific dependencies
-    implementation(libs.napier)
+    implementation(libs.kermit)
 }
 
 kotlin {

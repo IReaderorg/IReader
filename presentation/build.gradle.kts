@@ -62,7 +62,7 @@ kotlin {
 
 
                 implementation(libs.navigation.compose)
-                implementation(libs.voyager.tab.navigator)
+                // Voyager tab navigator removed - using pure Compose Navigation
                 api(libs.koin.core)
                 api(libs.koin.compose)
 

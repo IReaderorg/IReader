@@ -203,10 +203,8 @@
 -keep class ireader.domain.usecases.translate.WebscrapingTranslateEngine$GeminiModelInfo { *; }
 
 ##---------------End: proguard configuration for kotlinx.serialization  ----------
--keep class cafe.adriel.voyager.*
--keepclassmembers class cafe.adriel.voyager.** {
+# Voyager rules removed - using pure Compose Navigation
 
-}
 -keep class com.oracle.svm.core.annotate.*
 -keepclassmembers class com.oracle.svm.core.annotate.** {
     <methods>;
