@@ -67,10 +67,11 @@ IReader now supports LNReader sources! Follow these steps:
 
 ## 📖 Documentation
 
-- [Getting Started](docs/wiki/Getting-Started.md)
-- [Installing Extensions](docs/wiki/Installing-Extensions.md)
-- [JavaScript Plugin System](docs/js-plugin-system.md)
-- [Architecture Guide](docs/ARCHITECTURE.md)
+- **[📚 Full Documentation Index](docs/README.md)** - Start here for all guides
+- [Text-to-Speech Guide](docs/guides/tts.md)
+- [Sources & Extensions](docs/guides/sources.md)
+- [Sync & Backup](docs/guides/sync_backup.md)
+- [Developer Documentation](docs/developer/README.md)
 
 ## 🌍 Contributing
 

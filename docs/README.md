@@ -1,260 +1,47 @@
-# IReader Documentation
-
-Welcome to the IReader documentation! This directory contains comprehensive guides for developers working on the IReader project.
-
-## 📚 Documentation Index
-
-### Architecture & Design
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Complete architecture guide
-  - Clean Architecture principles
-  - Module structure and responsibilities
-  - Layer boundaries and dependency rules
-  - Development guidelines and best practices
-  - Code organization patterns
-  - Testing strategies
-
-- **[MODULE_DEPENDENCIES.md](MODULE_DEPENDENCIES.md)** - Module dependency documentation
-  - Detailed dependency graph
-  - Module overview and responsibilities
-  - Allowed and forbidden dependencies
-  - External dependency categories
-  - Troubleshooting dependency issues
-
-### Build & Configuration
-
-- **[BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md)** - Build configuration guide
-  - Version catalog structure
-  - Dependency management
-  - Build performance optimizations
-  - Common build configurations
-  - Troubleshooting build issues
-
-### Feature Guides
-
-- **[TTS_Setup_Guide.md](TTS_Setup_Guide.md)** - Text-to-Speech setup
-- **[TTS_Troubleshooting_Guide.md](TTS_Troubleshooting_Guide.md)** - TTS troubleshooting
-- **[AI_Translation_Guide.md](AI_Translation_Guide.md)** - Translation features
-- **[UI_Improvements_Guide.md](UI_Improvements_Guide.md)** - UI enhancement guide
-
-### Code Quality
-
-- **[CODE_CONSOLIDATION_GUIDE.md](CODE_CONSOLIDATION_GUIDE.md)** - Code consolidation patterns
-- **[QUICK_REFERENCE_CONSOLIDATED_COMPONENTS.md](QUICK_REFERENCE_CONSOLIDATED_COMPONENTS.md)** - Component reference
-
-## 🚀 Quick Start
-
-### For New Developers
-
-1. Start with **[ARCHITECTURE.md](ARCHITECTURE.md)** to understand the project structure
-2. Review **[MODULE_DEPENDENCIES.md](MODULE_DEPENDENCIES.md)** to understand module relationships
-3. Check **[BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md)** for build setup
-
-### For Feature Development
-
-1. Review the architecture guide for layer responsibilities
-2. Follow the "Adding a New Feature" section in ARCHITECTURE.md
-3. Ensure your code follows clean architecture principles
-4. Add tests for your feature
-5. Document public APIs with KDoc
-
-### For Build Issues
-
-1. Check **[BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md)** troubleshooting section
-2. Review **[MODULE_DEPENDENCIES.md](MODULE_DEPENDENCIES.md)** for dependency conflicts
-3. Use Gradle commands to analyze dependencies
-
-## 📖 Key Concepts
-
-### Clean Architecture
-
-IReader follows Clean Architecture with three main layers:
-
-```
-Presentation → Domain → Data
-```
-
-- **Domain**: Business logic, use cases, repository interfaces
-- **Data**: Repository implementations, database, network
-- **Presentation**: UI, ViewModels, Compose screens
-
-### Module Structure
-
-```
-:android, :desktop     # Platform entry points
-:presentation          # UI layer
-:domain                # Business logic
-:data                  # Data access
-:core                  # Shared utilities
-:source-api            # Extension API
-:i18n                  # Localization
-```
-
-### Dependency Rules
-
-✅ **Allowed**: Presentation → Domain, Data → Domain
-❌ **Forbidden**: Domain → Presentation, Domain → Data
-
-## 🛠️ Development Workflow
-
-### 1. Understanding the Codebase
-
-```bash
-# View module structure
-ls -la
-
-# Check dependencies
-./gradlew :domain:dependencies
-
-# Run tests
-./gradlew test
-```
-
-### 2. Making Changes
-
-1. Identify the appropriate layer (domain/data/presentation)
-2. Follow existing patterns in that layer
-3. Write tests for your changes
-4. Document public APIs with KDoc
-5. Ensure clean architecture principles are followed
-
-### 3. Testing
-
-```bash
-# Run all tests
-./gradlew test
-
-# Run specific module tests
-./gradlew :domain:test
-
-# Run with coverage
-./gradlew testDebugUnitTest jacocoTestReport
-```
-
-### 4. Building
-
-```bash
-# Clean build
-./gradlew clean build
-
-# Build specific variant
-./gradlew assembleDebug
-
-# Build desktop
-./gradlew :desktop:packageDistributionForCurrentOS
-```
-
-## 📝 Documentation Standards
-
-### KDoc Comments
-
-All public APIs in the domain layer should have KDoc comments:
-
-```kotlin
-/**
- * Brief description of the class or function.
- * 
- * Detailed explanation if needed.
- * 
- * @param paramName Description of parameter
- * @return Description of return value
- * @throws ExceptionType When this exception is thrown
- */
-```
-
-### Code Comments
-
-- Use comments to explain "why", not "what"
-- Keep comments up-to-date with code changes
-- Remove commented-out code
-- Use TODO comments for future improvements
-
-### Documentation Updates
-
-When making significant changes:
-
-1. Update relevant documentation files
-2. Add examples if introducing new patterns
-3. Update architecture diagrams if structure changes
-4. Keep documentation in sync with code
-
-## 🔍 Finding Information
-
-### By Topic
-
-- **Architecture**: ARCHITECTURE.md
-- **Dependencies**: MODULE_DEPENDENCIES.md
-- **Build**: BUILD_OPTIMIZATION.md
-- **Features**: Feature-specific guides
-
-### By Module
-
-Each module's responsibilities are documented in:
-- ARCHITECTURE.md (Module Structure section)
-- MODULE_DEPENDENCIES.md (Module Overview section)
-
-### By Layer
-
-Layer-specific guidelines are in:
-- ARCHITECTURE.md (Layer Responsibilities section)
-
-## 🤝 Contributing
-
-### Documentation Contributions
-
-- Keep documentation clear and concise
-- Use examples to illustrate concepts
-- Update documentation with code changes
-- Follow existing documentation style
-
-### Code Contributions
-
-1. Follow clean architecture principles
-2. Write tests for new features
-3. Document public APIs
-4. Update relevant documentation
-5. Follow Kotlin coding conventions
-
-## 📞 Getting Help
-
-### Common Questions
-
-1. **Where should my code go?**
-   - See ARCHITECTURE.md "Layer Responsibilities"
-
-2. **How do I add a dependency?**
-   - See BUILD_OPTIMIZATION.md "Adding New Dependencies"
-
-3. **Why is my build failing?**
-   - See BUILD_OPTIMIZATION.md "Troubleshooting"
-
-4. **How do I test my feature?**
-   - See ARCHITECTURE.md "Testing Strategy"
-
-### Resources
-
-- [Kotlin Documentation](https://kotlinlang.org/docs/home.html)
-- [Jetpack Compose](https://developer.android.com/jetpack/compose)
-- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html)
-
-## 📅 Maintenance
-
-### Regular Updates
-
-- Review and update documentation quarterly
-- Keep examples current with latest code
-- Update metrics and benchmarks
-- Add new patterns as they emerge
-
-### Version History
-
-- **1.0** (2025-11-13): Initial comprehensive documentation
-  - Architecture guide
-  - Module dependencies
-  - Build optimization
-  - Developer guides
+# IReader User Guide
+
+Welcome to the IReader User Guide! Here you will find everything you need to know about using IReader.
+
+## 📚 Guides
+
+### 🎧 [Text-to-Speech (TTS)](guides/tts.md)
+Learn how to listen to your novels using various TTS engines.
+*   **[Piper TTS](guides/tts.md#piper-tts-setup)**: Fast, offline, and lightweight.
+*   **[Kokoro TTS](guides/tts.md#kokoro-tts-setup)**: High-quality, natural-sounding offline voice.
+*   **[Gradio TTS](guides/tts.md#gradio-tts-online)**: Connect to powerful online AI models.
+
+### 📚 [Sources & Extensions](guides/sources.md)
+Manage where you get your novels from.
+*   **[Installing Extensions](guides/sources.md#installing-extensions)**: How to add new sources.
+*   **[Local vs Package](guides/sources.md#local-vs-package-installer)**: Understanding installation methods.
+*   **[LNReader Plugins](guides/sources.md#lnreader-sources)**: Using compatible plugins.
+
+### 🌐 [WebView & Fetch](guides/webview.md)
+Bypass protections and read from any site.
+*   **[Using Fetch](guides/webview.md#how-to-use-fetch)**: Grab content directly from the browser.
+*   **[Cloudflare Bypass](guides/webview.md#what-is-fetch)**: How to handle "Verify you are human".
+
+### 🔄 [Sync & Backup](guides/sync_backup.md)
+Keep your library safe and synchronized.
+*   **[Supabase Sync](guides/sync_backup.md#supabase-sync)**: Sync across devices.
+*   **[Custom Config](guides/sync_backup.md#custom-supabase-configuration)**: Host your own backend.
+*   **[Backup/Restore](guides/sync_backup.md#backup--restore)**: Create local backups.
+
+### ✨ [Features](guides/features.md)
+Explore advanced features.
+*   **[AI Translation](guides/features.md#ai-translation)**: Translate novels using Gemini, OpenAI, or DeepSeek.
+*   **[Glossary](guides/glossary_guide.md)**: Customize translations with your own terms.
+*   **[Reviews](guides/features.md#reviews)**: Write and read reviews.
+*   **[Badges](guides/features.md#badges)**: Earn achievements.
+*   **[Fonts](guides/features.md#custom-fonts)**: Customize your reading experience.
+
+### ℹ️ [General](guides/general.md)
+Support the project and more.
+*   **[Donation](guides/general.md#donation)**: How to support development.
+*   **[NFTs](guides/general.md#ireader-nft--badges)**: Get exclusive badges.
 
 ---
 
-**Questions or suggestions?** Open an issue or submit a PR to improve this documentation!
+## 👨‍💻 For Developers
+
+If you are a developer looking to contribute or understand the code, please visit the **[Developer Documentation](developer/README.md)**.
