@@ -406,9 +406,17 @@ class ReaderScreenViewModel(
         // Track chapter open
         onChapterOpened()
         
-        // Check chapter health after loading
+        // Check chapter health after loading - only if chapter has content
+        // This prevents false positives when content is still loading
         stateChapter?.let { ch ->
-            checkChapterHealth(ch, chapterHealthChecker, chapterHealthRepository)
+            if (ch.content.isNotEmpty()) {
+                checkChapterHealth(ch, chapterHealthChecker, chapterHealthRepository)
+            } else {
+                // Reset broken chapter state if content is empty (might be loading)
+                prefState.isChapterBroken = false
+                prefState.chapterBreakReason = null
+                prefState.showRepairBanner = false
+            }
         }
         
         // Clear old preloaded chapters to prevent memory buildup
@@ -618,10 +626,24 @@ class ReaderScreenViewModel(
     
     fun getCurrentChapterContent(): List<ireader.core.source.model.Page> {
         return try {
-            if (showTranslatedContent.value && translationViewModel.translationState.translatedContent.isNotEmpty()) {
-                translationViewModel.translationState.translatedContent
+            // Always prioritize original content if translation is not available or loading
+            val originalContent = stateChapter?.content ?: emptyList()
+            
+            // Only show translated content if:
+            // 1. User wants to see translated content
+            // 2. Translation is available (hasTranslation is true)
+            // 3. Translated content is not empty
+            // 4. Not currently translating (to avoid showing partial results)
+            val translationState = translationViewModel.translationState
+            val shouldShowTranslation = showTranslatedContent.value &&
+                translationState.hasTranslation &&
+                translationState.translatedContent.isNotEmpty() &&
+                !translationViewModel.isTranslating
+            
+            if (shouldShowTranslation) {
+                translationState.translatedContent
             } else {
-                stateChapter?.content ?: emptyList()
+                originalContent
             }
         } catch (e: Exception) {
             stateChapter?.content ?: emptyList()
@@ -933,11 +955,19 @@ class ReaderScreenViewModel(
      * Returns null if no translation is available for that paragraph
      */
     fun getTranslationForParagraph(index: Int): String? {
-        if (!translationViewModel.translationState.hasTranslation) {
+        val translationState = translationViewModel.translationState
+        
+        // Don't return translation if:
+        // 1. No translation available
+        // 2. Currently translating (to avoid showing partial results)
+        // 3. Translation content is empty
+        if (!translationState.hasTranslation || 
+            translationViewModel.isTranslating ||
+            translationState.translatedContent.isEmpty()) {
             return null
         }
         
-        val translatedContent = translationViewModel.translationState.translatedContent
+        val translatedContent = translationState.translatedContent
         
         // Make sure the index is within bounds
         if (index < 0 || index >= translatedContent.size) {

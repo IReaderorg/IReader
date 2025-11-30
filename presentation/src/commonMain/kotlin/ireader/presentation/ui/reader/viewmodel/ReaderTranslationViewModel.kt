@@ -155,8 +155,9 @@ class ReaderTranslationViewModel(
                     // Update translation state with saved translation
                     translationState.translatedContent = translatedChapter.translatedContent
                     translationState.hasTranslation = true
+                    translationState.translationError = null
                     
-                    Log.debug("Translation saved successfully for chapter ${chapter.id}")
+                    Log.debug("Translation saved successfully for chapter ${chapter.id} with ${translatedChapter.translatedContent.size} paragraphs")
                     showSnackBar(UiText.DynamicString("Translation complete and saved"))
                     translationProgress = 1f
                     isTranslating = false
@@ -164,6 +165,7 @@ class ReaderTranslationViewModel(
                 onError = { errorMessage ->
                     Log.error("Translation failed: $errorMessage")
                     showSnackBar(errorMessage)
+                    translationState.translationError = errorMessage.toString()
                     isTranslating = false
                     translationProgress = 0f
                 }
@@ -211,17 +213,25 @@ class ReaderTranslationViewModel(
                 engineId = engineId
             )
             
-            if (translated != null) {
+            if (translated != null && translated.translatedContent.isNotEmpty()) {
                 translationState.translatedContent = translated.translatedContent
                 translationState.hasTranslation = true
-                Log.debug("Loaded saved translation for chapter $chapterId")
+                translationState.translationError = null
+                Log.debug("Loaded saved translation for chapter $chapterId with ${translated.translatedContent.size} paragraphs")
             } else {
-                translationState.reset()
+                // Don't reset completely - just mark as no translation available
+                translationState.hasTranslation = false
+                translationState.translatedContent = emptyList()
+                translationState.translationError = null
+                Log.debug("No saved translation found for chapter $chapterId")
             }
             
         } catch (e: Exception) {
             Log.error("Failed to load translation", e)
-            translationState.reset()
+            // Don't reset completely on error - just mark as no translation
+            translationState.hasTranslation = false
+            translationState.translatedContent = emptyList()
+            translationState.translationError = e.message
         }
     }
     
