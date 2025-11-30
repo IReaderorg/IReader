@@ -74,66 +74,29 @@ class DownloaderViewModel(
      */
     fun startDownloadService(chapterIds: List<Long>) {
         scope.launch {
-            when (downloadServiceState.value) {
-                ServiceState.PAUSED -> {
-                    // Resume paused downloads
-                    resumeDownloads()
+            val idsToDownload = if (chapterIds.isNotEmpty()) {
+                chapterIds
+            } else {
+                // Use downloads from database if no specific chapters provided
+                downloads.map { it.chapterId }
+            }
+            
+            if (idsToDownload.isEmpty()) return@launch
+            
+            // Always queue chapters - the service will handle deduplication
+            when (val result = downloadService.queueChapters(idsToDownload)) {
+                is ServiceResult.Success -> {
+                    // Don't show notification - the download service will show progress
                 }
-                ServiceState.RUNNING -> {
-                    // Already running, just add more chapters if provided
-                    if (chapterIds.isNotEmpty()) {
-                        when (val result = downloadService.queueChapters(chapterIds)) {
-                            is ServiceResult.Success -> {
-                                notificationService.showNotification(
-                                    id = 1001,
-                                    title = localizeHelper.localize(Res.string.downloads_queued),
-                                    message = "${chapterIds.size} chapter(s) added to queue",
-                                    priority = NotificationPriority.DEFAULT
-                                )
-                            }
-                            is ServiceResult.Error -> {
-                                notificationService.showNotification(
-                                    id = 1002,
-                                    title = localizeHelper.localize(Res.string.queue_failed),
-                                    message = result.message,
-                                    priority = NotificationPriority.HIGH
-                                )
-                            }
-                            else -> {}
-                        }
-                    }
+                is ServiceResult.Error -> {
+                    notificationService.showNotification(
+                        id = 1002,
+                        title = localizeHelper.localize(Res.string.download_failed_title),
+                        message = result.message,
+                        priority = NotificationPriority.HIGH
+                    )
                 }
-                else -> {
-                    // Not running - start downloads
-                    val idsToDownload = if (chapterIds.isNotEmpty()) {
-                        chapterIds
-                    } else {
-                        // Use downloads from database if no specific chapters provided
-                        downloads.map { it.chapterId }
-                    }
-                    
-                    if (idsToDownload.isEmpty()) return@launch
-                    
-                    when (val result = downloadService.queueChapters(idsToDownload)) {
-                        is ServiceResult.Success -> {
-                            notificationService.showNotification(
-                                id = 1001,
-                                title = localizeHelper.localize(Res.string.downloads_started),
-                                message = "${idsToDownload.size} chapter(s) queued",
-                                priority = NotificationPriority.DEFAULT
-                            )
-                        }
-                        is ServiceResult.Error -> {
-                            notificationService.showNotification(
-                                id = 1002,
-                                title = localizeHelper.localize(Res.string.download_failed_title),
-                                message = result.message,
-                                priority = NotificationPriority.HIGH
-                            )
-                        }
-                        else -> {}
-                    }
-                }
+                else -> {}
             }
         }
     }

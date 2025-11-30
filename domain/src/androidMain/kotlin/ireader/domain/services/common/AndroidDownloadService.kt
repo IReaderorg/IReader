@@ -130,7 +130,22 @@ class AndroidDownloadService(
                 }
             }
             
-            if (chaptersToDownload.isEmpty()) return ServiceResult.Error("No chapters need downloading - all chapters already have content")
+            if (chaptersToDownload.isEmpty()) {
+                // All chapters already downloaded - clean up the download queue
+                withContext(Dispatchers.IO) {
+                    chapterIds.forEach { chapterId ->
+                        val chapter = chapterRepository.findChapterById(chapterId)
+                        if (chapter != null) {
+                            val book = bookRepository.findBookById(chapter.bookId)
+                            if (book != null) {
+                                val savedDownload = buildSavedDownload(book, chapter)
+                                downloadUseCases.deleteSavedDownload(savedDownload.toDownload())
+                            }
+                        }
+                    }
+                }
+                return ServiceResult.Success(Unit)
+            }
             
             withContext(Dispatchers.IO) {
                 downloadUseCases.insertDownloads(chaptersToDownload.map { it.toDownload() })
@@ -148,18 +163,28 @@ class AndroidDownloadService(
             // Use only the filtered chapter IDs that actually need downloading
             val filteredChapterIds = chaptersToDownload.map { it.chapterId }.toLongArray()
             
-            val workName = "${DOWNLOADER_SERVICE_NAME}_chapters_${filteredChapterIds.contentHashCode()}_${System.currentTimeMillis()}"
-            val workData = Data.Builder().putLongArray(DOWNLOADER_CHAPTERS_IDS, filteredChapterIds).build()
+            // Use downloader mode (reads from database) to avoid WorkManager data size limit
+            val workData = Data.Builder()
+                .putBoolean(ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_MODE, true)
+                .build()
+            
             val workRequest = OneTimeWorkRequestBuilder<DownloaderService>()
                 .setInputData(workData)
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .addTag(DOWNLOADER_SERVICE_NAME)
                 .build()
             
-            if (isRunning()) workManager.enqueue(workRequest)
-            else workManager.enqueueUniqueWork(workName, ExistingWorkPolicy.KEEP, workRequest)
+            // Set running state so pause/resume buttons work correctly
+            downloadServiceState.setRunning(true)
+            downloadServiceState.setPaused(false)
             
-            _state.value = ServiceState.RUNNING
+            // Use unique work with REPLACE to ensure only one download worker runs at a time
+            workManager.enqueueUniqueWork(
+                DOWNLOADER_SERVICE_NAME,
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
+            
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to queue chapters: ${e.message}", e)
@@ -194,18 +219,28 @@ class AndroidDownloadService(
             downloadServiceState.setDownloadProgress(downloadServiceState.downloadProgress.value + initialProgress)
             downloadServiceState.setDownloads(chaptersToDownload)
             
-            val workName = "${DOWNLOADER_SERVICE_NAME}_books_${bookIds.hashCode()}_${System.currentTimeMillis()}"
-            val workData = Data.Builder().putLongArray(DOWNLOADER_BOOKS_IDS, bookIds.toLongArray()).build()
+            // Use downloader mode (reads from database) to avoid WorkManager data size limit
+            val workData = Data.Builder()
+                .putBoolean(ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_MODE, true)
+                .build()
+            
             val workRequest = OneTimeWorkRequestBuilder<DownloaderService>()
                 .setInputData(workData)
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .addTag(DOWNLOADER_SERVICE_NAME)
                 .build()
             
-            if (isRunning()) workManager.enqueue(workRequest)
-            else workManager.enqueueUniqueWork(workName, ExistingWorkPolicy.KEEP, workRequest)
+            // Set running state so pause/resume buttons work correctly
+            downloadServiceState.setRunning(true)
+            downloadServiceState.setPaused(false)
             
-            _state.value = ServiceState.RUNNING
+            // Use unique work with REPLACE to ensure only one download worker runs at a time
+            workManager.enqueueUniqueWork(
+                DOWNLOADER_SERVICE_NAME,
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
+            
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to queue books: ${e.message}", e)
@@ -213,8 +248,10 @@ class AndroidDownloadService(
     }
 
     override suspend fun pause() {
+        // Set paused state - the init collector will update _state automatically
         downloadServiceState.setPaused(true)
-        _state.value = ServiceState.PAUSED
+        // Keep isRunning true so we know downloads are still in progress (just paused)
+        downloadServiceState.setRunning(true)
         val currentProgress = downloadServiceState.downloadProgress.value
         val updatedProgress = currentProgress.mapValues { (_, progress) ->
             if (progress.status == ireader.domain.services.downloaderService.DownloadStatus.DOWNLOADING) {
@@ -225,8 +262,9 @@ class AndroidDownloadService(
     }
     
     override suspend fun resume() {
+        // Clear paused state - the init collector will update _state automatically
         downloadServiceState.setPaused(false)
-        _state.value = ServiceState.RUNNING
+        downloadServiceState.setRunning(true)
         val currentProgress = downloadServiceState.downloadProgress.value
         val updatedProgress = currentProgress.mapValues { (_, progress) ->
             if (progress.status == ireader.domain.services.downloaderService.DownloadStatus.PAUSED) {
@@ -234,6 +272,31 @@ class AndroidDownloadService(
             } else progress
         }
         downloadServiceState.setDownloadProgress(updatedProgress)
+        
+        // Check if there are pending downloads that need to be restarted
+        val pendingChapterIds = currentProgress
+            .filter { it.value.status == ireader.domain.services.downloaderService.DownloadStatus.PAUSED ||
+                     it.value.status == ireader.domain.services.downloaderService.DownloadStatus.QUEUED }
+            .keys.toList()
+        
+        if (pendingChapterIds.isNotEmpty()) {
+            // Restart the download worker using downloader mode (reads from database)
+            val workData = Data.Builder()
+                .putBoolean(ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_MODE, true)
+                .build()
+            val workRequest = OneTimeWorkRequestBuilder<DownloaderService>()
+                .setInputData(workData)
+                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                .addTag(DOWNLOADER_SERVICE_NAME)
+                .build()
+            
+            // Use unique work with REPLACE to ensure only one download worker runs at a time
+            workManager.enqueueUniqueWork(
+                DOWNLOADER_SERVICE_NAME,
+                ExistingWorkPolicy.REPLACE,
+                workRequest
+            )
+        }
     }
     
     override suspend fun cancelDownload(chapterId: Long): ServiceResult<Unit> {

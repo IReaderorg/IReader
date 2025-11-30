@@ -140,7 +140,8 @@ class DesktopDownloadService : DownloadService, KoinComponent {
             }
             
             if (filteredChapterIds.isEmpty()) {
-                return ServiceResult.Error("No chapters need downloading - all chapters already have content")
+                // All chapters already downloaded - just return success
+                return ServiceResult.Success(Unit)
             }
             
             // Initialize progress for queued chapters
@@ -161,7 +162,9 @@ class DesktopDownloadService : DownloadService, KoinComponent {
                 downloadModes = false
             )
             
-            _state.value = ServiceState.RUNNING
+            // Set running state so pause/resume buttons work correctly
+            downloadServiceState.setRunning(true)
+            downloadServiceState.setPaused(false)
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to queue chapters: ${e.message}", e)
@@ -181,7 +184,9 @@ class DesktopDownloadService : DownloadService, KoinComponent {
                 downloadModes = false
             )
             
-            _state.value = ServiceState.RUNNING
+            // Set running state so pause/resume buttons work correctly
+            downloadServiceState.setRunning(true)
+            downloadServiceState.setPaused(false)
             ServiceResult.Success(Unit)
         } catch (e: Exception) {
             ServiceResult.Error("Failed to queue books: ${e.message}", e)
@@ -189,8 +194,9 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     }
     
     override suspend fun pause() {
+        // Set paused state - the init collector will update _state automatically
         downloadServiceState.setPaused(true)
-        _state.value = ServiceState.PAUSED
+        downloadServiceState.setRunning(true)
         
         // Update all downloading items to paused status
         val currentProgress = downloadServiceState.downloadProgress.value
@@ -205,8 +211,9 @@ class DesktopDownloadService : DownloadService, KoinComponent {
     }
     
     override suspend fun resume() {
+        // Clear paused state - the init collector will update _state automatically
         downloadServiceState.setPaused(false)
-        _state.value = ServiceState.RUNNING
+        downloadServiceState.setRunning(true)
         
         // Update all paused items back to downloading status
         val currentProgress = downloadServiceState.downloadProgress.value
@@ -218,6 +225,21 @@ class DesktopDownloadService : DownloadService, KoinComponent {
             }
         }
         downloadServiceState.setDownloadProgress(updatedProgress)
+        
+        // Check if there are pending downloads that need to be restarted
+        val pendingChapterIds = currentProgress
+            .filter { it.value.status == ireader.domain.services.downloaderService.DownloadStatus.PAUSED ||
+                     it.value.status == ireader.domain.services.downloaderService.DownloadStatus.QUEUED }
+            .keys.toList()
+        
+        if (pendingChapterIds.isNotEmpty()) {
+            // Restart the download using downloader mode (reads from database)
+            startDownloadServicesUseCase.start(
+                bookIds = null,
+                chapterIds = null,
+                downloadModes = true
+            )
+        }
     }
     
     override suspend fun cancelDownload(chapterId: Long): ServiceResult<Unit> {
