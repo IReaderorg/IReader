@@ -17,6 +17,7 @@ import ireader.i18n.asString
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.coroutines.flow.collectLatest
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +78,7 @@ fun BrowseSettingsScreen(
             item {
                 SectionHeader(
                     icon = Icons.Default.Speed,
-                    title = "Search Performance"
+                    title = localizeHelper.localize(Res.string.search_performance)
                 )
             }
 
@@ -93,7 +94,7 @@ fun BrowseSettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 SectionHeader(
                     icon = Icons.Default.Language,
-                    title = "Language Preferences"
+                    title = localizeHelper.localize(Res.string.language_preferences)
                 )
             }
 
@@ -120,13 +121,13 @@ fun BrowseSettingsScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
-                                text = "Choose Your Languages",
+                                text = localizeHelper.localize(Res.string.choose_your_languages),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
                             )
                         }
                         Text(
-                            text = "Select the languages you want to see when browsing and searching for content. You can select multiple languages.",
+                            text = localizeHelper.localize(Res.string.select_the_languages_you_want),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -146,7 +147,7 @@ fun BrowseSettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 SectionHeader(
                     icon = Icons.Default.Settings,
-                    title = "Advanced"
+                    title = localizeHelper.localize(Res.string.advanced)
                 )
             }
 
@@ -197,6 +198,7 @@ private fun ConcurrentSearchesControl(
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -204,7 +206,7 @@ private fun ConcurrentSearchesControl(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Concurrent Searches",
+                text = localizeHelper.localize(Res.string.concurrent_searches),
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
@@ -223,7 +225,7 @@ private fun ConcurrentSearchesControl(
         )
         
         Text(
-            text = "Number of sources to search simultaneously. Higher values are faster but use more resources.",
+            text = localizeHelper.localize(Res.string.number_of_sources_to_search),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -236,6 +238,7 @@ private fun SearchTimeoutControl(
     onValueChange: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -243,7 +246,7 @@ private fun SearchTimeoutControl(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Search Timeout",
+                text = localizeHelper.localize(Res.string.search_timeout),
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
@@ -262,7 +265,7 @@ private fun SearchTimeoutControl(
         )
         
         Text(
-            text = "Maximum time to wait for search results from each source",
+            text = localizeHelper.localize(Res.string.maximum_time_to_wait_for),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -275,6 +278,7 @@ private fun MaxResultsControl(
     onValueChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -282,7 +286,7 @@ private fun MaxResultsControl(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Max Results Per Source",
+                text = localizeHelper.localize(Res.string.max_results_per_source),
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
@@ -301,7 +305,7 @@ private fun MaxResultsControl(
         )
         
         Text(
-            text = "Maximum number of results to display from each source",
+            text = localizeHelper.localize(Res.string.maximum_number_of_results_to),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

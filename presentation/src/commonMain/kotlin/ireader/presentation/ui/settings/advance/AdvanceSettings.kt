@@ -56,12 +56,12 @@ fun AdvanceSettings(
         listOf<Components>(
             // Cache Management Section (Safe operations)
             Components.Header(
-                text = "Cache Management",
+                text = localizeHelper.localize(Res.string.cache_management),
                 icon = Icons.Default.Storage
             ),
             Components.Row(
                 title = "${localizeHelper.localize(Res.string.clear_all_cache)} (${vm.cacheManager.getCacheSize()})",
-                subtitle = "Clear all cached data to free up storage space",
+                subtitle = localizeHelper.localize(Res.string.clear_all_cached_data_to_free_up_storage_space),
                 icon = Icons.Default.FolderDelete,
                 onClick = {
                     showClearCache = true
@@ -69,7 +69,7 @@ fun AdvanceSettings(
             ),
             Components.Row(
                 title = "${localizeHelper.localize(Res.string.clear_all_cover_cache)} (${vm.getCoverCacheSize()})",
-                subtitle = "Clear cached book cover images to free up storage",
+                subtitle = localizeHelper.localize(Res.string.clear_cached_book_cover_images_to_free_up_storage),
                 icon = Icons.Default.Image,
                 onClick = {
                     showClearCoverCache = true
@@ -85,7 +85,7 @@ fun AdvanceSettings(
             ),
             Components.Row(
                 title = localizeHelper.localize(Res.string.import_epub),
-                subtitle = "Import EPUB files into your library",
+                subtitle = localizeHelper.localize(Res.string.import_epub_files_into_your_library),
                 icon = Icons.Default.Upload,
                 onClick = {
                     showImport.value = true
@@ -96,12 +96,12 @@ fun AdvanceSettings(
             
             // Database Maintenance Section (Safe operations)
             Components.Header(
-                text = "Database Maintenance",
+                text = localizeHelper.localize(Res.string.database_maintenance),
                 icon = Icons.Default.DataObject
             ),
             Components.Row(
                 title = localizeHelper.localize(Res.string.repair_database),
-                subtitle = "Fix database structure and integrity issues",
+                subtitle = localizeHelper.localize(Res.string.fix_database_structure_and_integrity_issues),
                 icon = Icons.Default.Build,
                 onClick = {
                     vm.repairDatabase()
@@ -109,7 +109,7 @@ fun AdvanceSettings(
             ),
             Components.Row(
                 title = localizeHelper.localize(Res.string.repair_categories),
-                subtitle = "Fix book category assignments",
+                subtitle = localizeHelper.localize(Res.string.fix_book_category_assignments),
                 icon = Icons.Default.Construction,
                 onClick = {
                     vm.repairBookCategories()
@@ -282,6 +282,7 @@ private fun ConfirmationDialog(
     onDismiss: () -> Unit,
     isDestructive: Boolean = false
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     IAlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -329,7 +330,7 @@ private fun ConfirmationDialog(
                 onClick = onDismiss
             ) {
                 androidx.compose.material3.Text(
-                    text = "Cancel",
+                    text = localizeHelper.localize(Res.string.cancel),
                     style = androidx.compose.material3.MaterialTheme.typography.labelLarge
                 )
             }
@@ -357,6 +358,7 @@ private fun DestructiveActionDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var inputText by remember { mutableStateOf("") }
     val isConfirmEnabled = inputText.trim().equals(confirmationWord, ignoreCase = true)
     
@@ -389,7 +391,7 @@ private fun DestructiveActionDialog(
                 )
                 
                 Text(
-                    text = "Type \"$confirmationWord\" to confirm:",
+                    text = "${localizeHelper.localize(Res.string.type_1)}$confirmationWord\" to confirm:",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -414,7 +416,7 @@ private fun DestructiveActionDialog(
                 
                 if (inputText.isNotEmpty() && !isConfirmEnabled) {
                     Text(
-                        text = "Text does not match",
+                        text = localizeHelper.localize(Res.string.text_does_not_match),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(top = 4.dp)
@@ -437,7 +439,7 @@ private fun DestructiveActionDialog(
                 )
             ) {
                 Text(
-                    text = "Confirm",
+                    text = localizeHelper.localize(Res.string.confirm),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -450,7 +452,7 @@ private fun DestructiveActionDialog(
                 }
             ) {
                 Text(
-                    text = "Cancel",
+                    text = localizeHelper.localize(Res.string.cancel),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -510,14 +512,14 @@ fun DangerZoneSection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Danger Zone",
+                    text = localizeHelper.localize(Res.string.danger_zone),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.error
                 )
             }
             
             Text(
-                text = "These actions are destructive and cannot be undone. Proceed with caution.",
+                text = localizeHelper.localize(Res.string.these_actions_are_destructive_and),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -526,37 +528,37 @@ fun DangerZoneSection(
             // Dangerous Actions
             DangerButton(
                 text = localizeHelper.localize(Res.string.clear_all_database),
-                subtitle = "Remove all books and chapters",
+                subtitle = localizeHelper.localize(Res.string.remove_all_books_and_chapters),
                 onClick = onClearAllDatabase
             )
             
             DangerButton(
                 text = localizeHelper.localize(Res.string.clear_not_in_library_books),
-                subtitle = "Remove books not in library",
+                subtitle = localizeHelper.localize(Res.string.remove_books_not_in_library),
                 onClick = onClearNotInLibrary
             )
             
             DangerButton(
                 text = localizeHelper.localize(Res.string.clear_all_chapters),
-                subtitle = "Remove all downloaded chapters",
+                subtitle = localizeHelper.localize(Res.string.remove_all_downloaded_chapters),
                 onClick = onClearAllChapters
             )
             
             DangerButton(
                 text = localizeHelper.localize(Res.string.reset_reader_screen_settings),
-                subtitle = "Restore default reader settings",
+                subtitle = localizeHelper.localize(Res.string.restore_default_reader_settings),
                 onClick = onResetReaderSettings
             )
             
             DangerButton(
                 text = localizeHelper.localize(Res.string.reset_themes),
-                subtitle = "Remove all custom themes",
+                subtitle = localizeHelper.localize(Res.string.remove_all_custom_themes),
                 onClick = onResetThemes
             )
             
             DangerButton(
                 text = localizeHelper.localize(Res.string.reset_categories),
-                subtitle = "Restore default categories",
+                subtitle = localizeHelper.localize(Res.string.restore_default_categories),
                 onClick = onResetCategories
             )
             
@@ -568,7 +570,7 @@ fun DangerZoneSection(
             
             DangerButton(
                 text = localizeHelper.localize(Res.string.delete_all_database),
-                subtitle = "⚠️ Permanently delete entire database",
+                subtitle = localizeHelper.localize(Res.string.permanently_delete_entire_database),
                 onClick = onDeleteAllDatabase,
                 isHighRisk = true
             )

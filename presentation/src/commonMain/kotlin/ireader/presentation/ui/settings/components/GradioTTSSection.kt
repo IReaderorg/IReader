@@ -19,6 +19,9 @@ import ireader.domain.services.tts_service.GradioParamType
 import ireader.domain.services.tts_service.GradioTTSConfig
 import ireader.domain.services.tts_service.GradioTTSPresets
 import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Gradio TTS Section - Common UI component for both Android and Desktop
@@ -42,6 +45,7 @@ fun GradioTTSSection(
     testingConfigId: String?,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -76,12 +80,12 @@ fun GradioTTSSection(
                                 MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Gradio TTS (Online)",
+                            text = localizeHelper.localize(Res.string.gradio_tts_online),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
                     Text(
-                        text = "Use online TTS engines from Hugging Face Spaces",
+                        text = localizeHelper.localize(Res.string.use_online_tts_engines_from_hugging_face_spaces),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -118,7 +122,7 @@ fun GradioTTSSection(
             
             // Preset engines section
             Text(
-                text = "Available Engines",
+                text = localizeHelper.localize(Res.string.available_engines),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 8.dp)
@@ -157,7 +161,7 @@ fun GradioTTSSection(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Add Custom TTS Engine",
+                        text = localizeHelper.localize(Res.string.add_custom_tts_engine),
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -186,12 +190,12 @@ fun GradioTTSSection(
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = "About Gradio TTS",
+                            text = localizeHelper.localize(Res.string.about_gradio_tts),
                             style = MaterialTheme.typography.labelMedium
                         )
                     }
                     Text(
-                        text = "Gradio TTS connects to Hugging Face Spaces for speech synthesis. Requires internet connection.",
+                        text = localizeHelper.localize(Res.string.gradio_tts_connects_to_hugging),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -211,6 +215,7 @@ private fun GradioConfigCard(
     onDelete: (() -> Unit)?,
     isTesting: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -256,7 +261,7 @@ private fun GradioConfigCard(
                                     shape = MaterialTheme.shapes.extraSmall
                                 ) {
                                     Text(
-                                        text = "Custom",
+                                        text = localizeHelper.localize(Res.string.custom),
                                         style = MaterialTheme.typography.labelSmall,
                                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
                                         color = MaterialTheme.colorScheme.onTertiaryContainer

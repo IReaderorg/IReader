@@ -12,9 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 enum class LeaderboardTab(val title: String, val icon: @Composable () -> Unit) {
     READING(

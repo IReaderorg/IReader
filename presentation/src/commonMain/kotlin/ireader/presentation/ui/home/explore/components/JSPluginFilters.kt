@@ -11,6 +11,9 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import ireader.domain.js.models.FilterDefinition
 import ireader.domain.js.models.FilterOption
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Composable for rendering JavaScript plugin filters.
@@ -217,6 +220,7 @@ fun JSPluginFilterExcludableCheckboxGroup(
     onValuesChanged: (List<String>, List<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,
@@ -277,14 +281,14 @@ fun JSPluginFilterExcludableCheckboxGroup(
                     when (state) {
                         ToggleableState.On -> {
                             Text(
-                                text = " (included)",
+                                text = localizeHelper.localize(Res.string.included),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
                         ToggleableState.Indeterminate -> {
                             Text(
-                                text = " (excluded)",
+                                text = localizeHelper.localize(Res.string.excluded),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )

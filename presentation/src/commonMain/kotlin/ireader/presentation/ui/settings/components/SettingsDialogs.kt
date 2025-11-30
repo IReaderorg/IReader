@@ -21,6 +21,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.components.IAlertDialog
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
+import ireader.presentation.ui.core.theme.currentOrThrow
 
 /**
  * Unified settings dialog components with consistent Material3 styling.
@@ -299,6 +303,7 @@ fun <T> SettingsSingleChoiceDialog(
     onOptionSelected: (Int, T) -> Unit,
     onDismiss: () -> Unit
 ) {
+
     IAlertDialog(
         modifier = Modifier.heightIn(max = 400.dp, min = 200.dp),
         onDismissRequest = onDismiss,
@@ -371,7 +376,7 @@ fun <T> SettingsMultiChoiceDialog(
     onDismiss: () -> Unit
 ) {
     var currentSelection by remember { mutableStateOf(selectedIndices) }
-    
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     IAlertDialog(
         modifier = Modifier.heightIn(max = 400.dp, min = 200.dp),
         onDismissRequest = onDismiss,
@@ -436,7 +441,7 @@ fun <T> SettingsMultiChoiceDialog(
                 )
             ) {
                 Text(
-                    text = "Confirm",
+                    text = localizeHelper.localize(Res.string.confirm),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -447,7 +452,7 @@ fun <T> SettingsMultiChoiceDialog(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "Cancel",
+                    text = localizeHelper.localize(Res.string.cancel),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

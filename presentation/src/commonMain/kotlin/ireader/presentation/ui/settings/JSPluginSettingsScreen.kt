@@ -15,6 +15,7 @@ import ireader.domain.js.models.JSPluginRepository
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Settings screen for JavaScript plugin configuration.
@@ -24,6 +25,7 @@ fun JSPluginSettingsScreen(
     uiPreferences: UiPreferences,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showAddRepositoryDialog by remember { mutableStateOf(false) }
     
     LazyColumn(
@@ -34,8 +36,8 @@ fun JSPluginSettingsScreen(
         // Enable/Disable JS Plugins
         item {
             SwitchPreferenceItem(
-                title = "Enable JavaScript Plugins",
-                subtitle = "Allow loading LNReader-compatible JavaScript plugins",
+                title = localizeHelper.localize(Res.string.enable_javascript_plugins),
+                subtitle = localizeHelper.localize(Res.string.allow_loading_lnreader_compatible_javascript),
                 preference = uiPreferences.enableJSPlugins()
             )
         }
@@ -43,8 +45,8 @@ fun JSPluginSettingsScreen(
         // Auto Update
         item {
             SwitchPreferenceItem(
-                title = "Auto Update Plugins",
-                subtitle = "Automatically check for and install plugin updates",
+                title = localizeHelper.localize(Res.string.auto_update_plugins),
+                subtitle = localizeHelper.localize(Res.string.automatically_check_for_and_install_plugin_updates),
                 preference = uiPreferences.autoUpdateJSPlugins()
             )
         }
@@ -52,8 +54,8 @@ fun JSPluginSettingsScreen(
         // Debug Mode
         item {
             SwitchPreferenceItem(
-                title = "Debug Mode",
-                subtitle = "Enable detailed logging for troubleshooting",
+                title = localizeHelper.localize(Res.string.debug_mode),
+                subtitle = localizeHelper.localize(Res.string.enable_detailed_logging_for_troubleshooting),
                 preference = uiPreferences.jsPluginDebugMode()
             )
         }
@@ -62,8 +64,8 @@ fun JSPluginSettingsScreen(
         // Execution Timeout
         item {
             SliderPreferenceItem(
-                title = "Execution Timeout",
-                subtitle = "Maximum time for plugin operations (seconds)",
+                title = localizeHelper.localize(Res.string.execution_timeout),
+                subtitle = localizeHelper.localize(Res.string.maximum_time_for_plugin_operations_seconds),
                 preference = uiPreferences.jsPluginTimeout(),
                 valueRange = 10f..60f,
                 steps = 9,
@@ -74,8 +76,8 @@ fun JSPluginSettingsScreen(
         // Memory Limit
         item {
             SliderPreferenceItem(
-                title = "Memory Limit",
-                subtitle = "Maximum memory per plugin (MB)",
+                title = localizeHelper.localize(Res.string.memory_limit),
+                subtitle = localizeHelper.localize(Res.string.maximum_memory_per_plugin_mb),
                 preference = uiPreferences.jsPluginMemoryLimit(),
                 valueRange = 32f..256f,
                 steps = 6,
@@ -87,7 +89,7 @@ fun JSPluginSettingsScreen(
         item {
             Divider(modifier = Modifier.padding(vertical = 8.dp))
             Text(
-                text = "Plugin Repositories",
+                text = localizeHelper.localize(Res.string.plugin_repositories),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp)
             )

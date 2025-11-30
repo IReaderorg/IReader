@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog showing extension usage statistics
@@ -44,13 +45,13 @@ fun ExtensionStatisticsDialog(
             ) {
                 StatisticItem(
                     icon = Icons.Default.CalendarToday,
-                    label = "Installed",
+                    label = localizeHelper.localize(Res.string.installed),
                     value = formatDate(statistics.installDate)
                 )
                 
                 StatisticItem(
                     icon = Icons.Default.AccessTime,
-                    label = "Last Used",
+                    label = localizeHelper.localize(Res.string.last_used_source),
                     value = if (statistics.lastUsed > 0) {
                         formatDate(statistics.lastUsed)
                     } else {
@@ -60,32 +61,32 @@ fun ExtensionStatisticsDialog(
                 
                 StatisticItem(
                     icon = Icons.Default.TouchApp,
-                    label = "Usage Count",
+                    label = localizeHelper.localize(Res.string.usage_count),
                     value = statistics.usageCount.toString()
                 )
                 
                 StatisticItem(
                     icon = Icons.Default.Error,
-                    label = "Errors",
+                    label = localizeHelper.localize(Res.string.channel_errors),
                     value = statistics.errorCount.toString()
                 )
                 
                 StatisticItem(
                     icon = Icons.Default.Speed,
-                    label = "Avg Response Time",
+                    label = localizeHelper.localize(Res.string.avg_response_time),
                     value = "${statistics.averageResponseTime}ms"
                 )
                 
                 StatisticItem(
                     icon = Icons.Default.DataUsage,
-                    label = "Data Transferred",
+                    label = localizeHelper.localize(Res.string.data_transferred),
                     value = formatBytes(statistics.totalDataTransferred)
                 )
                 
                 if (statistics.crashCount > 0) {
                     StatisticItem(
                         icon = Icons.Default.BugReport,
-                        label = "Crashes",
+                        label = localizeHelper.localize(Res.string.crashes),
                         value = statistics.crashCount.toString(),
                         isError = true
                     )

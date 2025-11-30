@@ -526,7 +526,7 @@ fun GeneralScreenTab(
                     vm.loadGlossary()
                     vm.translationViewModel.translationState.showGlossaryDialog = true
                 },
-                title = "Manage Glossary"
+                title = localizeHelper.localize(Res.string.manage_glossary)
             )
         }
         
@@ -558,7 +558,7 @@ fun GeneralScreenTab(
                 onValueChange = {
                     vm.readerPreferences.defaultReadingMode().set(ReadingMode.valueOf(it))
                 },
-                title = "Default Reading Mode for New Books"
+                title = localizeHelper.localize(Res.string.default_reading_mode_for_new_books)
             )
         }
         item {
@@ -625,8 +625,8 @@ fun GeneralScreenTab(
             item {
                 SwitchPreference(
                     preference = vm.webViewBackgroundMode,
-                    title = "Background WebView Mode",
-                    subtitle = "Bypass bot detection invisibly without showing WebView"
+                    title = localizeHelper.localize(Res.string.background_webview_mode),
+                    subtitle = localizeHelper.localize(Res.string.bypass_bot_detection_invisibly_without)
                 )
             }
         }
@@ -651,7 +651,7 @@ fun GeneralScreenTab(
         item {
             SwitchPreference(
                 preference = vm.showReadingTime,
-                title = "Show Reading Time",
+                title = localizeHelper.localize(Res.string.show_reading_time),
                 onValueChange = { vm.showReadingTime = it }
             )
         }
@@ -664,7 +664,7 @@ fun GeneralScreenTab(
         item {
             SwitchPreference(
                 preference = vm.paragraphTranslationEnabled,
-                title = "Paragraph Translation Menu",
+                title = localizeHelper.localize(Res.string.paragraph_translation_menu),
             )
         }
         item {
@@ -675,8 +675,8 @@ fun GeneralScreenTab(
         item {
             SwitchPreference(
                 preference = vm.useTTSWithTranslatedText,
-                title = "TTS with Translated Text",
-                subtitle = "Use translated text for text-to-speech when available"
+                title = localizeHelper.localize(Res.string.tts_with_translated_text),
+                subtitle = localizeHelper.localize(Res.string.use_translated_text_for_text)
             )
         }
         item {
@@ -687,7 +687,7 @@ fun GeneralScreenTab(
         item {
             SwitchPreference(
                 preference = vm.bilingualModeEnabled,
-                title = "Enable Bilingual Mode"
+                title = localizeHelper.localize(Res.string.enable_bilingual_mode)
             )
         }
         item {
@@ -700,7 +700,7 @@ fun GeneralScreenTab(
                 onValueChange = {
                     vm.switchBilingualLayout()
                 },
-                title = "Bilingual Layout"
+                title = localizeHelper.localize(Res.string.bilingual_layout)
             )
         }
         item {

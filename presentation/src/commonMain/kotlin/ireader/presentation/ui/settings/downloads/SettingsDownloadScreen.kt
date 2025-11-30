@@ -53,7 +53,7 @@ fun SettingsDownloadScreen(
         modifier = modifier,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Downloads",
+                title = localizeHelper.localize(Res.string.downloads),
                 popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
@@ -70,14 +70,14 @@ fun SettingsDownloadScreen(
             // Storage Section
             item {
                 SettingsSectionHeader(
-                    title = "Storage",
+                    title = localizeHelper.localize(Res.string.storage),
                     icon = Icons.Outlined.Storage
                 )
             }
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Download Location",
+                    title = localizeHelper.localize(Res.string.download_location),
                     description = "Where downloaded chapters are stored",
                     icon = Icons.Outlined.Folder,
                     onClick = { viewModel.showDownloadLocationDialog() }
@@ -92,7 +92,7 @@ fun SettingsDownloadScreen(
             
             item {
                 SettingsItem(
-                    title = "Storage Usage",
+                    title = localizeHelper.localize(Res.string.storage_usage),
                     description = "View and manage downloaded content",
                     icon = Icons.Outlined.PieChart,
                     onClick = { viewModel.navigateToStorageUsage() }
@@ -102,14 +102,14 @@ fun SettingsDownloadScreen(
             // Download Behavior Section
             item {
                 SettingsSectionHeader(
-                    title = "Download Behavior",
+                    title = localizeHelper.localize(Res.string.download_behavior),
                     icon = Icons.Outlined.Download
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Download Only Over WiFi",
+                    title = localizeHelper.localize(Res.string.download_only_over_wifi),
                     description = "Restrict downloads to WiFi connections only",
                     icon = Icons.Outlined.Wifi,
                     checked = downloadOnlyOverWifi,
@@ -119,14 +119,14 @@ fun SettingsDownloadScreen(
             // Automatic Downloads Section
             item {
                 SettingsSectionHeader(
-                    title = "Automatic Downloads",
+                    title = localizeHelper.localize(Res.string.automatic_downloads),
                     icon = Icons.Outlined.AutoMode
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Download New Chapters",
+                    title = localizeHelper.localize(Res.string.download_new_chapters),
                     description = "Automatically download newly detected chapters",
                     icon = Icons.Outlined.NewReleases,
                     checked = downloadNewChapters,
@@ -136,7 +136,7 @@ fun SettingsDownloadScreen(
             
             item {
                 SettingsItem(
-                    title = "Download Categories",
+                    title = localizeHelper.localize(Res.string.download_categories),
                     description = "Select which categories to auto-download",
                     icon = Icons.Outlined.Category,
                     onClick = { viewModel.showDownloadCategoriesDialog() },
@@ -147,14 +147,14 @@ fun SettingsDownloadScreen(
             // Auto Delete Section
             item {
                 SettingsSectionHeader(
-                    title = "Auto Delete",
+                    title = localizeHelper.localize(Res.string.auto_delete),
                     icon = Icons.Outlined.DeleteSweep
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Auto Delete Chapters",
+                    title = localizeHelper.localize(Res.string.auto_delete_chapters),
                     description = "Automatically remove downloaded chapters",
                     icon = Icons.Outlined.DeleteSweep,
                     checked = autoDeleteChapters,
@@ -164,7 +164,7 @@ fun SettingsDownloadScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Remove After Reading",
+                    title = localizeHelper.localize(Res.string.remove_after_reading),
                     description = "Delete chapters after reading them",
                     icon = Icons.Outlined.RemoveRedEye,
                     checked = removeAfterReading,
@@ -175,7 +175,7 @@ fun SettingsDownloadScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Remove After Marked as Read",
+                    title = localizeHelper.localize(Res.string.remove_after_marked_as_read),
                     description = "Delete chapters when marked as read",
                     icon = Icons.Outlined.DoneAll,
                     checked = removeAfterMarkedAsRead,
@@ -186,7 +186,7 @@ fun SettingsDownloadScreen(
             
             item {
                 SettingsItem(
-                    title = "Exclude Categories",
+                    title = localizeHelper.localize(Res.string.exclude_categories),
                     description = "Categories to exclude from auto-deletion",
                     icon = Icons.Outlined.Block,
                     onClick = { viewModel.showRemoveExcludeCategoriesDialog() },
@@ -197,14 +197,14 @@ fun SettingsDownloadScreen(
             // File Format Section
             item {
                 SettingsSectionHeader(
-                    title = "File Format",
+                    title = localizeHelper.localize(Res.string.file_format),
                     icon = Icons.Outlined.Archive
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Save Chapters as CBZ",
+                    title = localizeHelper.localize(Res.string.save_chapters_as_cbz),
                     description = "Save downloaded chapters in CBZ format",
                     icon = Icons.Outlined.Archive,
                     checked = saveChaptersAsCBZ,
@@ -214,7 +214,7 @@ fun SettingsDownloadScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Split Tall Images",
+                    title = localizeHelper.localize(Res.string.split_tall_images),
                     description = "Split very tall images into multiple pages",
                     icon = Icons.Outlined.CallSplit,
                     checked = splitTallImages,
@@ -225,14 +225,14 @@ fun SettingsDownloadScreen(
             // Advanced Section
             item {
                 SettingsSectionHeader(
-                    title = "Advanced",
+                    title = localizeHelper.localize(Res.string.advanced),
                     icon = Icons.Outlined.Tune
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Download Queue",
+                    title = localizeHelper.localize(Res.string.download_queue),
                     description = "Manage current download queue",
                     icon = Icons.Outlined.Queue,
                     onClick = { viewModel.navigateToDownloadQueue() }
@@ -241,7 +241,7 @@ fun SettingsDownloadScreen(
             
             item {
                 SettingsItem(
-                    title = "Clear Download Cache",
+                    title = localizeHelper.localize(Res.string.clear_download_cache),
                     description = "Remove temporary download files",
                     icon = Icons.Outlined.ClearAll,
                     onClick = { viewModel.showClearCacheDialog() }
@@ -258,7 +258,7 @@ fun SettingsDownloadScreen(
             text = {
                 Column {
                     Text(
-                        text = "Current location:",
+                        text = localizeHelper.localize(Res.string.current_location),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(

@@ -35,6 +35,7 @@ import ireader.presentation.ui.home.sources.extension.Language
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Browse Settings Screen - Modern UI
@@ -81,7 +82,7 @@ fun BrowseSettingsScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        text = "Language Preferences",
+                        text = localizeHelper.localize(Res.string.language_preferences),
                         fontWeight = FontWeight.SemiBold
                     ) 
                 },
@@ -127,13 +128,13 @@ fun BrowseSettingsScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
-                                text = "Choose Your Languages",
+                                text = localizeHelper.localize(Res.string.choose_your_languages),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
                         Text(
-                            text = "Select the languages you want to see when browsing sources. Only languages with available sources are shown.",
+                            text = localizeHelper.localize(Res.string.select_the_languages_you_want_1),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -226,7 +227,7 @@ private fun LanguageSelectionHeader(
     ) {
         Column {
             Text(
-                text = "Selected Languages",
+                text = localizeHelper.localize(Res.string.selected_languages),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -381,6 +382,7 @@ private fun ModernLanguageCard(
 
 @Composable
 private fun EmptySearchState(modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -394,13 +396,13 @@ private fun EmptySearchState(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "No languages found",
+            text = localizeHelper.localize(Res.string.no_languages_found),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Try a different search term",
+            text = localizeHelper.localize(Res.string.try_a_different_search_term),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -410,6 +412,7 @@ private fun EmptySearchState(modifier: Modifier = Modifier) {
 
 @Composable
 private fun EmptyLanguagesState(modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -423,13 +426,13 @@ private fun EmptyLanguagesState(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "No sources available",
+            text = localizeHelper.localize(Res.string.no_sources_available),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Install extensions to add sources",
+            text = localizeHelper.localize(Res.string.install_extensions_to_add_sources),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center

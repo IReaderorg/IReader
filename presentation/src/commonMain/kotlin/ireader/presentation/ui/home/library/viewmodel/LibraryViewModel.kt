@@ -28,6 +28,7 @@ import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
 import ireader.domain.usecases.local.book_usecases.MarkResult
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import ireader.domain.usecases.services.ServiceUseCases
+import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +45,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -76,6 +80,7 @@ class LibraryViewModel(
         private val clipboardService: ireader.domain.services.platform.ClipboardService,
         private val shareService: ireader.domain.services.platform.ShareService,
         private val fileSystemService: ireader.domain.services.platform.FileSystemService,
+    private val localizeHelper: LocalizeHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), LibraryState by state {
 
     // ==================== Performance Optimizations ====================
@@ -1176,7 +1181,7 @@ fun performBatchOperation(operation: ireader.presentation.ui.home.library.compon
         scope.launch {
             when (val result = fileSystemService.pickMultipleFiles(
                 fileTypes = listOf("epub"),
-                title = "Select EPUB files to import"
+                title = localizeHelper.localize(Res.string.select_epub_files_to_import)
             )) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
                     val uris = result.data.map { it.toString() }
@@ -1208,7 +1213,7 @@ fun performBatchOperation(operation: ireader.presentation.ui.home.library.compon
                 when (val result = fileSystemService.saveFile(
                     defaultFileName = "${book.title}.epub",
                     fileExtension = "epub",
-                    title = "Save EPUB"
+                    title = localizeHelper.localize(Res.string.save_epub)
                 )) {
                     is ireader.domain.services.common.ServiceResult.Success -> {
                         // Export to the selected location

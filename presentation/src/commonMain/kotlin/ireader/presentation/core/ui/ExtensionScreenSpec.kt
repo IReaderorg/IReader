@@ -197,6 +197,7 @@ private fun MigrationSourceSelectionDialog(
     onSourceSelected: (Long) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { 
@@ -208,14 +209,14 @@ private fun MigrationSourceSelectionDialog(
         text = {
             Column {
                 Text(
-                    text = "Select a source to migrate books from:",
+                    text = localizeHelper.localize(Res.string.select_a_source_to_migrate_books_from),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 
                 if (sources.isEmpty()) {
                     Text(
-                        text = "No sources available for migration",
+                        text = localizeHelper.localize(Res.string.no_sources_available_for_migration),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -292,7 +293,7 @@ private fun AddRepositoryDialog(
         text = {
             Column {
                 Text(
-                    text = "Enter the repository URL:",
+                    text = localizeHelper.localize(Res.string.enter_the_repository_url),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -311,7 +312,7 @@ private fun AddRepositoryDialog(
                 if (url.isNotBlank() && !isValidUrl) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Please enter a valid repository URL ending with .json",
+                        text = localizeHelper.localize(Res.string.please_enter_a_valid_repository),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -320,7 +321,7 @@ private fun AddRepositoryDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = "Examples:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json",
+                    text = localizeHelper.localize(Res.string.examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

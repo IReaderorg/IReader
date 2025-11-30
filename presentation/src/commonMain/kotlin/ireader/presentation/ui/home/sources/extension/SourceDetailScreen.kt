@@ -141,7 +141,7 @@ private fun SourceDetailContent(
             else -> "No description available"
         }
         DetailItem(
-            label = "Description",
+            label = localizeHelper.localize(Res.string.description),
             value = description
         )
 
@@ -157,7 +157,7 @@ private fun SourceDetailContent(
         // Package Name (for installed sources)
         if (catalog is CatalogInstalled) {
             DetailItem(
-                label = "Package Name",
+                label = localizeHelper.localize(Res.string.package_name),
                 value = catalog.pkgName
             )
         }
@@ -194,14 +194,14 @@ private fun SourceDetailContent(
         if (catalog is CatalogInstalled) {
             HorizontalDivider()
             Text(
-                text = "Statistics",
+                text = localizeHelper.localize(Res.string.statistics),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
 
             // You can add more statistics here as needed
             DetailItem(
-                label = "Version Code",
+                label = localizeHelper.localize(Res.string.version_code),
                 value = catalog.versionCode.toString()
             )
         }
@@ -286,7 +286,7 @@ private fun ReportSourceDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Report Source as Broken",
+                text = localizeHelper.localize(Res.string.report_source_as_broken),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -296,12 +296,12 @@ private fun ReportSourceDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "You are about to report \"$sourceName\" as broken or not working properly.",
+                    text = "$localizeHelper.localize(Res.string.you_are_about_to_report)+ \"$sourceName\" as broken or not working properly.",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
                 Text(
-                    text = "Please describe the issue:",
+                    text = localizeHelper.localize(Res.string.please_describe_the_issue),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -316,7 +316,7 @@ private fun ReportSourceDialog(
                 )
                 
                 Text(
-                    text = "Your report will be stored locally for review.",
+                    text = localizeHelper.localize(Res.string.your_report_will_be_stored_locally_for_review),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

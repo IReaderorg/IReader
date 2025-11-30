@@ -81,7 +81,7 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
             }
         },
         title = {
-            MidSizeTextComposable(text = "Edit Info")
+            MidSizeTextComposable(text = localizeHelper.localize(Res.string.edit_info))
         },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -107,7 +107,7 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                 )
                 if (!isTitleValid) {
                     Text(
-                        text = "Title cannot be empty",
+                        text = localizeHelper.localize(Res.string.title_cannot_be_empty),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(start = 16.dp, top = 4.dp)
@@ -138,7 +138,7 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                 )
                 if (!isCoverUrlValid) {
                     Text(
-                        text = "Cover URL must start with http://, https://, or file://",
+                        text = localizeHelper.localize(Res.string.cover_url_must_start_with_http_https_or_file),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(start = 16.dp, top = 4.dp)

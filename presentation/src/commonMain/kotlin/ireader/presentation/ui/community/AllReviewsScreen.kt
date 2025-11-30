@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -180,6 +181,7 @@ private fun ModernTabRow(
     chapterCount: Int,
     onTabSelected: (ReviewTab) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
@@ -195,7 +197,7 @@ private fun ModernTabRow(
                 selected = selectedTab == ReviewTab.BOOKS,
                 onClick = { onTabSelected(ReviewTab.BOOKS) },
                 icon = Icons.Default.MenuBook,
-                label = "Books",
+                label = localizeHelper.localize(Res.string.books),
                 count = bookCount,
                 modifier = Modifier.weight(1f)
             )
@@ -204,7 +206,7 @@ private fun ModernTabRow(
                 selected = selectedTab == ReviewTab.CHAPTERS,
                 onClick = { onTabSelected(ReviewTab.CHAPTERS) },
                 icon = Icons.Default.Article,
-                label = "Chapters",
+                label = localizeHelper.localize(Res.string.chapters),
                 count = chapterCount,
                 modifier = Modifier.weight(1f)
             )
@@ -282,6 +284,7 @@ private fun BookReviewsList(
     isRateLimited: Boolean,
     hasMore: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
@@ -292,8 +295,8 @@ private fun BookReviewsList(
         item {
             ReviewsHeader(
                 icon = Icons.Default.MenuBook,
-                title = "Book Reviews",
-                subtitle = "What readers think about these books",
+                title = localizeHelper.localize(Res.string.book_reviews),
+                subtitle = localizeHelper.localize(Res.string.what_readers_think_about_these_books),
                 count = reviews.size
             )
         }
@@ -324,6 +327,7 @@ private fun ChapterReviewsList(
     isRateLimited: Boolean,
     hasMore: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
@@ -334,8 +338,8 @@ private fun ChapterReviewsList(
         item {
             ReviewsHeader(
                 icon = Icons.Default.Article,
-                title = "Chapter Reviews",
-                subtitle = "Detailed chapter-by-chapter feedback",
+                title = localizeHelper.localize(Res.string.chapter_reviews),
+                subtitle = localizeHelper.localize(Res.string.detailed_chapter_by_chapter_feedback),
                 count = reviews.size
             )
         }
@@ -680,6 +684,7 @@ private fun RatingStars(rating: Int) {
 
 @Composable
 private fun LoadingMoreIndicator() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -695,7 +700,7 @@ private fun LoadingMoreIndicator() {
                 strokeWidth = 2.dp
             )
             Text(
-                text = "Loading more reviews...",
+                text = localizeHelper.localize(Res.string.loading_more_reviews),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -705,6 +710,7 @@ private fun LoadingMoreIndicator() {
 
 @Composable
 private fun RateLimitMessage() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -723,7 +729,7 @@ private fun RateLimitMessage() {
                 tint = MaterialTheme.colorScheme.onTertiaryContainer
             )
             Text(
-                text = "Please wait a moment before loading more...",
+                text = localizeHelper.localize(Res.string.please_wait_a_moment_before_loading_more),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onTertiaryContainer
             )
@@ -733,6 +739,7 @@ private fun RateLimitMessage() {
 
 @Composable
 private fun EndOfListMessage() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -750,13 +757,13 @@ private fun EndOfListMessage() {
                 modifier = Modifier.size(32.dp)
             )
             Text(
-                text = "You've reached the end!",
+                text = localizeHelper.localize(Res.string.youve_reached_the_end),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "These are all the reviews",
+                text = localizeHelper.localize(Res.string.these_are_all_the_reviews),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -766,6 +773,7 @@ private fun EndOfListMessage() {
 
 @Composable
 private fun LoadingView() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -776,7 +784,7 @@ private fun LoadingView() {
         ) {
             CircularProgressIndicator()
             Text(
-                text = "Loading reviews...",
+                text = localizeHelper.localize(Res.string.loading_reviews),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -806,7 +814,7 @@ private fun ErrorView(
                 modifier = Modifier.size(64.dp)
             )
             Text(
-                text = "Error Occurred",
+                text = localizeHelper.localize(Res.string.error_occurred),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -826,6 +834,7 @@ private fun ErrorView(
 
 @Composable
 private fun EmptyView(message: String) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -847,7 +856,7 @@ private fun EmptyView(message: String) {
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Be the first to share your thoughts",
+                text = localizeHelper.localize(Res.string.be_the_first_to_share_your_thoughts),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

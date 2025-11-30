@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Reviews section header with average rating and write review button
@@ -41,7 +42,7 @@ fun ReviewsSectionHeader(
         ) {
             Column {
                 Text(
-                    text = "Reviews",
+                    text = localizeHelper.localize(Res.string.reviews),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -195,6 +196,7 @@ private fun RatingStars(
  */
 @Composable
 fun EmptyReviewsState(modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -202,7 +204,7 @@ fun EmptyReviewsState(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "No reviews yet. Be the first to review!",
+            text = localizeHelper.localize(Res.string.no_reviews_yet_be_the_first_to_review),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

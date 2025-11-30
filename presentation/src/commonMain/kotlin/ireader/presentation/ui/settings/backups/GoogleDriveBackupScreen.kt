@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -149,7 +150,7 @@ fun GoogleDriveBackupScreen(
                                     strokeWidth = 2.dp
                                 )
                                 Text(
-                                    text = "Creating backup...",
+                                    text = localizeHelper.localize(Res.string.creating_backup_1),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
@@ -180,7 +181,7 @@ fun GoogleDriveBackupScreen(
                                     strokeWidth = 2.dp
                                 )
                                 Text(
-                                    text = "Restoring backup...",
+                                    text = localizeHelper.localize(Res.string.restoring_backup_1),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
@@ -194,7 +195,7 @@ fun GoogleDriveBackupScreen(
                     if (backups.isNotEmpty()) {
                         item {
                             Text(
-                                text = "Available Backups",
+                                text = localizeHelper.localize(Res.string.available_backups),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -331,7 +332,7 @@ private fun ConnectionStatusCard(
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Google Drive",
+                        text = localizeHelper.localize(Res.string.google_drive),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -390,6 +391,7 @@ private fun ConnectionStatusCard(
 
 @Composable
 private fun InfoCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -410,14 +412,14 @@ private fun InfoCard() {
             )
             Column {
                 Text(
-                    text = "About Google Drive Backup",
+                    text = localizeHelper.localize(Res.string.about_google_drive_backup),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Note: Google Drive backup integration requires API credentials and OAuth2 setup. " +
+                    text = localizeHelper.localize(Res.string.note_google_drive_backup_integration) +
                             "This feature is currently in development. The UI is functional, but actual " +
                             "Google Drive operations require additional configuration.",
                     style = MaterialTheme.typography.bodySmall,
@@ -487,6 +489,7 @@ private fun BackupItem(
 
 @Composable
 private fun EmptyBackupsCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp)
@@ -505,13 +508,13 @@ private fun EmptyBackupsCard() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "No backups found",
+                text = localizeHelper.localize(Res.string.no_backups_found),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Create your first backup using the button below",
+                text = localizeHelper.localize(Res.string.create_your_first_backup_using_the_button_below),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )

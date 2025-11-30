@@ -45,6 +45,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IBackHandler
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Bottom sheet for library filtering and sorting options
@@ -148,6 +149,7 @@ private fun GeneralSection(
     onResumeReadingCardToggle: (Boolean) -> Unit,
     onArchivedBooksToggle: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Text(
         text = localize(Res.string.general),
         style = MaterialTheme.typography.titleMedium,
@@ -163,7 +165,7 @@ private fun GeneralSection(
             onClick = { onResumeReadingCardToggle(!showResumeReadingCard) },
             label = {
                 Text(
-                    text = "Show Continue Reading Bar",
+                    text = localizeHelper.localize(Res.string.show_continue_reading_bar),
                     style = MaterialTheme.typography.bodyLarge
                 )
             },
@@ -184,7 +186,7 @@ private fun GeneralSection(
             onClick = { onArchivedBooksToggle(!showArchivedBooks) },
             label = {
                 Text(
-                    text = "Show Archived Books",
+                    text = localizeHelper.localize(Res.string.show_archived_books),
                     style = MaterialTheme.typography.bodyLarge
                 )
             },
@@ -332,6 +334,7 @@ private fun DisplaySection(
     onColumnCountChange: (Int) -> Unit,
     onDisplayModeChange: (ireader.domain.models.DisplayMode) -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val haptic = LocalHapticFeedback.current
     
     // Use derivedStateOf for immediate updates
@@ -375,7 +378,7 @@ private fun DisplaySection(
                     },
                     label = {
                         Text(
-                            text = "Grid",
+                            text = localizeHelper.localize(Res.string.grid),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
@@ -390,7 +393,7 @@ private fun DisplaySection(
                     },
                     label = {
                         Text(
-                            text = "List",
+                            text = localizeHelper.localize(Res.string.list),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },

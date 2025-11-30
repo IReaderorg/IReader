@@ -150,47 +150,47 @@ fun AboutSettingScreen(
                     when {
                         BuildKonfig.DEBUG -> {
                             VersionInfoRow(
-                                label = "Build Type",
+                                label = localizeHelper.localize(Res.string.build_type),
                                 value = "Debug"
                             )
                             VersionInfoRow(
-                                label = "Commit",
+                                label = localizeHelper.localize(Res.string.commit),
                                 value = BuildKonfig.COMMIT_SHA
                             )
                             VersionInfoRow(
-                                label = "Build Time",
+                                label = localizeHelper.localize(Res.string.build_time),
                                 value = getFormattedBuildTime()
                             )
                         }
                         BuildKonfig.PREVIEW -> {
                             VersionInfoRow(
-                                label = "Build Type",
+                                label = localizeHelper.localize(Res.string.build_type),
                                 value = "Preview"
                             )
                             VersionInfoRow(
-                                label = "Release",
+                                label = localizeHelper.localize(Res.string.release),
                                 value = "r${BuildKonfig.COMMIT_COUNT}"
                             )
                             VersionInfoRow(
-                                label = "Commit",
+                                label = localizeHelper.localize(Res.string.commit),
                                 value = BuildKonfig.COMMIT_SHA
                             )
                             VersionInfoRow(
-                                label = "Build Time",
+                                label = localizeHelper.localize(Res.string.build_time),
                                 value = getFormattedBuildTime()
                             )
                         }
                         else -> {
                             VersionInfoRow(
-                                label = "Build Type",
+                                label = localizeHelper.localize(Res.string.build_type),
                                 value = "Stable"
                             )
                             VersionInfoRow(
-                                label = "Version",
+                                label = localizeHelper.localize(Res.string.version),
                                 value = BuildKonfig.VERSION_NAME
                             )
                             VersionInfoRow(
-                                label = "Build Time",
+                                label = localizeHelper.localize(Res.string.build_time),
                                 value = getFormattedBuildTime()
                             )
                         }
@@ -265,7 +265,7 @@ fun AboutSettingScreen(
         item {
             PreferenceRow(
                 title = localize(Res.string.whats_new),
-                subtitle = "View version history and new features",
+                subtitle = localizeHelper.localize(Res.string.view_version_history_and_new_features),
                 icon = Icons.Outlined.History,
                 onClick = onNavigateToChangelog
             )
@@ -279,7 +279,7 @@ fun AboutSettingScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Connect with us",
+                    text = localizeHelper.localize(Res.string.connect_with_us),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -295,12 +295,12 @@ fun AboutSettingScreen(
                         url = "https://github.com/kazemcodes/IReader",
                     )
                     LinkIcon(
-                        label = "Discord",
+                        label = localizeHelper.localize(Res.string.discord),
                         icon = discord(),
                         url = "https://discord.gg/HBU6zD8c5v",
                     )
                     LinkIcon(
-                        label = "GitHub",
+                        label = localizeHelper.localize(Res.string.github_1),
                         icon = github(),
                         url = "https://github.com/kazemcodes/IReader",
                     )
@@ -316,15 +316,15 @@ fun AboutSettingScreen(
                     .padding(vertical = 8.dp, horizontal = 16.dp)
             ) {
                 Text(
-                    text = "Support Development",
+                    text = localizeHelper.localize(Res.string.support_development),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 
                 PreferenceRow(
-                    title = "Donate via Card",
-                    subtitle = "Support the project with a donation",
+                    title = localizeHelper.localize(Res.string.donate_via_card),
+                    subtitle = localizeHelper.localize(Res.string.support_the_project_with_a_donation),
                     onClick = {
                         uriHandler.openUri("https://reymit.ir/kazemcodes")
                     }

@@ -18,6 +18,7 @@ import ireader.domain.usecases.backup.CloudBackupFile
 import ireader.domain.usecases.backup.CloudProvider
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,7 +97,7 @@ fun CloudBackupScreen(
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "Cloud Storage Provider",
+                            text = localizeHelper.localize(Res.string.cloud_storage_provider),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -138,7 +139,7 @@ fun CloudBackupScreen(
                                         modifier = Modifier.size(20.dp)
                                     )
                                     Text(
-                                        text = "Connected",
+                                        text = localizeHelper.localize(Res.string.connected),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -187,14 +188,14 @@ fun CloudBackupScreen(
                         )
                         Column {
                             Text(
-                                text = "Cloud Backup Setup",
+                                text = localizeHelper.localize(Res.string.cloud_backup_setup),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Note: Cloud backup integration requires API credentials. " +
+                                text = localizeHelper.localize(Res.string.note_cloud_backup_integration_requires) +
                                         "This feature is currently in development and will be fully " +
                                         "functional in a future update.",
                                 style = MaterialTheme.typography.bodySmall,
@@ -209,7 +210,7 @@ fun CloudBackupScreen(
             if (isAuthenticated && cloudBackups.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Available Backups",
+                        text = localizeHelper.localize(Res.string.available_backups),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -242,13 +243,13 @@ fun CloudBackupScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "No cloud backups found",
+                                text = localizeHelper.localize(Res.string.no_cloud_backups_found),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Upload your first backup using the button below",
+                                text = localizeHelper.localize(Res.string.upload_your_first_backup_using_the_button_below),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
@@ -410,14 +411,14 @@ private fun GoogleDriveCard(
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Google Drive",
+                    text = localizeHelper.localize(Res.string.google_drive),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Backup and restore your library to Google Drive",
+                    text = localizeHelper.localize(Res.string.backup_and_restore_your_library_to_google_drive),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )

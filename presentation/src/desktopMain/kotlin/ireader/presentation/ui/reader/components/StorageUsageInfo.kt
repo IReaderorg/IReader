@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.services.tts_service.piper.VoiceModel
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Display storage usage information for voice models
@@ -46,7 +47,7 @@ fun StorageUsageInfo(
                 
                 Column {
                     Text(
-                        text = "Storage Used",
+                        text = localizeHelper.localize(Res.string.storage_used),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

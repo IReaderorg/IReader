@@ -64,6 +64,7 @@ import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 class SupabaseConfigScreen  {
     
@@ -257,6 +258,7 @@ private fun CustomConfigToggleCard(
     useCustom: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (!hasDefaultConfig) {
         // No toggle needed if there's no default config
         return
@@ -275,13 +277,13 @@ private fun CustomConfigToggleCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Use Custom Supabase",
+                    text = localizeHelper.localize(Res.string.use_custom_supabase),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Enable to use your own Supabase instance instead of the default backend",
+                    text = localizeHelper.localize(Res.string.enable_to_use_your_own),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -304,6 +306,7 @@ private fun SyncSettingsCard(
     onAutoSyncChanged: (Boolean) -> Unit,
     onWifiOnlyChanged: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -314,7 +317,7 @@ private fun SyncSettingsCard(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Sync Settings",
+                text = localizeHelper.localize(Res.string.sync_settings),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -328,11 +331,11 @@ private fun SyncSettingsCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Auto Sync",
+                        text = localizeHelper.localize(Res.string.auto_sync),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Automatically sync reading progress",
+                        text = localizeHelper.localize(Res.string.automatically_sync_reading_progress),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -353,11 +356,11 @@ private fun SyncSettingsCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "WiFi Only",
+                        text = localizeHelper.localize(Res.string.wifi_only),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Sync only when connected to WiFi",
+                        text = localizeHelper.localize(Res.string.sync_only_when_connected_to_wifi),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -396,7 +399,7 @@ private fun LastSyncCard(
             ) {
                 Column {
                     Text(
-                        text = "Last Sync",
+                        text = localizeHelper.localize(Res.string.last_sync),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -431,6 +434,7 @@ private fun LastSyncCard(
 
 @Composable
 private fun DatabaseSchemaCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     
     Card(
@@ -451,7 +455,7 @@ private fun DatabaseSchemaCard() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Database Schema",
+                    text = localizeHelper.localize(Res.string.database_schema),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -470,7 +474,7 @@ private fun DatabaseSchemaCard() {
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "Required Tables:",
+                    text = localizeHelper.localize(Res.string.required_tables),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -611,14 +615,14 @@ private fun MultiEndpointCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Multi-Endpoint Configuration",
+                        text = localizeHelper.localize(Res.string.multi_endpoint_configuration),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Use separate Supabase projects for better scalability",
+                        text = localizeHelper.localize(Res.string.use_separate_supabase_projects_for),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -637,7 +641,7 @@ private fun MultiEndpointCard(
                 
                 // Books Endpoint
                 EndpointSection(
-                    title = "Books Endpoint",
+                    title = localizeHelper.localize(Res.string.books_endpoint),
                     description = "Separate project for book sync data",
                     icon = Icons.Default.Book,
                     url = booksUrl,
@@ -650,7 +654,7 @@ private fun MultiEndpointCard(
                 
                 // Progress Endpoint
                 EndpointSection(
-                    title = "Progress Endpoint",
+                    title = localizeHelper.localize(Res.string.progress_endpoint),
                     description = "Separate project for reading progress",
                     icon = Icons.Default.TrendingUp,
                     url = progressUrl,
@@ -663,7 +667,7 @@ private fun MultiEndpointCard(
                 
                 // Reviews Endpoint (Future)
                 EndpointSection(
-                    title = "Reviews Endpoint",
+                    title = localizeHelper.localize(Res.string.reviews_endpoint),
                     description = "Coming soon - Reviews and ratings",
                     icon = Icons.Default.Star,
                     url = reviewsUrl,
@@ -678,7 +682,7 @@ private fun MultiEndpointCard(
                 
                 // Community Endpoint (Future)
                 EndpointSection(
-                    title = "Community Endpoint",
+                    title = localizeHelper.localize(Res.string.community_endpoint),
                     description = "Coming soon - Social features",
                     icon = Icons.Default.People,
                     url = communityUrl,
@@ -859,14 +863,14 @@ private fun MultiProjectCard(
         ) {
             Column {
                 Text(
-                    text = "Supabase Configuration",
+                    text = localizeHelper.localize(Res.string.supabase_configuration),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "3.5GB total storage (7 × 500MB) - Configure each project or use same URL for all",
+                    text = localizeHelper.localize(Res.string.gb_total_storage_7_500mb),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )
@@ -887,7 +891,7 @@ private fun MultiProjectCard(
                         .padding(12.dp)
                 ) {
                     Text(
-                        text = "Quick Fill (Same URL for all projects)",
+                        text = localizeHelper.localize(Res.string.quick_fill_same_url_for_all_projects),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Medium
                     )
@@ -936,7 +940,7 @@ private fun MultiProjectCard(
                 
                 // Project 1 - Auth
                 EndpointSection(
-                    title = "Project 1 - Auth",
+                    title = localizeHelper.localize(Res.string.project_1_auth),
                     description = "User authentication and profiles (500MB)",
                     icon = Icons.Default.People,
                     url = authUrl,
@@ -949,7 +953,7 @@ private fun MultiProjectCard(
                 
                 // Project 2 - Reading
                 EndpointSection(
-                    title = "Project 2 - Reading",
+                    title = localizeHelper.localize(Res.string.project_2_reading),
                     description = "Reading progress tracking (500MB)",
                     icon = Icons.Default.TrendingUp,
                     url = readingUrl,
@@ -962,7 +966,7 @@ private fun MultiProjectCard(
                 
                 // Project 3 - Library
                 EndpointSection(
-                    title = "Project 3 - Library",
+                    title = localizeHelper.localize(Res.string.project_3_library),
                     description = "Synced books library (500MB)",
                     icon = Icons.Default.Book,
                     url = libraryUrl,
@@ -975,7 +979,7 @@ private fun MultiProjectCard(
                 
                 // Project 4 - Book Reviews
                 EndpointSection(
-                    title = "Project 4 - Book Reviews",
+                    title = localizeHelper.localize(Res.string.project_4_book_reviews),
                     description = "Book reviews and ratings (500MB)",
                     icon = Icons.Default.Star,
                     url = bookReviewsUrl,
@@ -988,7 +992,7 @@ private fun MultiProjectCard(
                 
                 // Project 5 - Chapter Reviews
                 EndpointSection(
-                    title = "Project 5 - Chapter Reviews",
+                    title = localizeHelper.localize(Res.string.project_5_chapter_reviews),
                     description = "Chapter reviews and ratings (500MB)",
                     icon = Icons.Default.Star,
                     url = chapterReviewsUrl,
@@ -1001,7 +1005,7 @@ private fun MultiProjectCard(
                 
                 // Project 6 - Badges
                 EndpointSection(
-                    title = "Project 6 - Badges",
+                    title = localizeHelper.localize(Res.string.project_6_badges),
                     description = "Badge system and NFT integration (500MB)",
                     icon = Icons.Default.Star,
                     url = badgesUrl,
@@ -1014,7 +1018,7 @@ private fun MultiProjectCard(
                 
                 // Project 7 - Analytics
                 EndpointSection(
-                    title = "Project 7 - Analytics",
+                    title = localizeHelper.localize(Res.string.project_7_analytics),
                     description = "Leaderboard and statistics (500MB)",
                     icon = Icons.Default.TrendingUp,
                     url = analyticsUrl,

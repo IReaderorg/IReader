@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun TTSSettingsPanel(
@@ -64,7 +65,7 @@ fun TTSSettingsPanel(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "TTS Settings",
+                        text = localizeHelper.localize(Res.string.tts_settings),
                         style = MaterialTheme.typography.headlineSmall
                     )
                     IconButton(onClick = onDismiss) {
@@ -82,7 +83,7 @@ fun TTSSettingsPanel(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     // Custom Colors Toggle
-                    SettingSection(title = "Color Theme") {
+                    SettingSection(title = localizeHelper.localize(Res.string.color_theme)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -90,7 +91,7 @@ fun TTSSettingsPanel(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Use Custom Colors",
+                                    text = localizeHelper.localize(Res.string.use_custom_colors),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
@@ -108,7 +109,7 @@ fun TTSSettingsPanel(
                     
                     // Background Color (only if custom colors enabled)
                     if (useCustomColors) {
-                        SettingSection(title = "Background Color") {
+                        SettingSection(title = localizeHelper.localize(Res.string.background_color)) {
                             ColorPicker(
                                 selectedColor = customBackgroundColor,
                                 onColorSelected = onBackgroundColorChange,
@@ -126,7 +127,7 @@ fun TTSSettingsPanel(
                         }
                         
                         // Text Color
-                        SettingSection(title = "Text Color") {
+                        SettingSection(title = localizeHelper.localize(Res.string.text_color_1)) {
                             ColorPicker(
                                 selectedColor = customTextColor,
                                 onColorSelected = onTextColorChange,
@@ -156,32 +157,32 @@ fun TTSSettingsPanel(
                     }
                     
                     // Text Alignment
-                    SettingSection(title = "Text Alignment") {
+                    SettingSection(title = localizeHelper.localize(Res.string.text_alignment)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             AlignmentButton(
                                 icon = Icons.Default.FormatAlignLeft,
-                                label = "Left",
+                                label = localizeHelper.localize(Res.string.left),
                                 isSelected = textAlignment == TextAlign.Start,
                                 onClick = { onTextAlignmentChange(TextAlign.Start) }
                             )
                             AlignmentButton(
                                 icon = Icons.Default.FormatAlignCenter,
-                                label = "Center",
+                                label = localizeHelper.localize(Res.string.center),
                                 isSelected = textAlignment == TextAlign.Center,
                                 onClick = { onTextAlignmentChange(TextAlign.Center) }
                             )
                             AlignmentButton(
                                 icon = Icons.Default.FormatAlignRight,
-                                label = "Right",
+                                label = localizeHelper.localize(Res.string.right),
                                 isSelected = textAlignment == TextAlign.End,
                                 onClick = { onTextAlignmentChange(TextAlign.End) }
                             )
                             AlignmentButton(
                                 icon = Icons.Default.FormatAlignJustify,
-                                label = "Justify",
+                                label = localizeHelper.localize(Res.string.justify),
                                 isSelected = textAlignment == TextAlign.Justify,
                                 onClick = { onTextAlignmentChange(TextAlign.Justify) }
                             )
@@ -189,7 +190,7 @@ fun TTSSettingsPanel(
                     }
                     
                     // Sleep Mode
-                    SettingSection(title = "Sleep Mode") {
+                    SettingSection(title = localizeHelper.localize(Res.string.enable_sleep_timer)) {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {

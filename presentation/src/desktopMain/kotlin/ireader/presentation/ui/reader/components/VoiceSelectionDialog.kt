@@ -16,6 +16,9 @@ import ireader.core.log.Log
 import ireader.domain.services.tts_service.DesktopTTSService
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Voice Selection Dialog
@@ -27,6 +30,7 @@ fun VoiceSelectionDialog(
     ttsService: DesktopTTSService,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val currentEngine = ttsService.getCurrentEngine()
     val scope = rememberCoroutineScope()
     val voicePreferences: ireader.domain.preferences.VoicePreferences = koinInject()
@@ -95,7 +99,7 @@ fun VoiceSelectionDialog(
                             DesktopTTSService.TTSEngine.KOKORO -> {
                                 // Show Kokoro voices
                                 Text(
-                                    text = "Available Kokoro voices:",
+                                    text = localizeHelper.localize(Res.string.available_kokoro_voices),
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 
@@ -152,7 +156,7 @@ fun VoiceSelectionDialog(
                             DesktopTTSService.TTSEngine.MAYA -> {
                                 // Show Maya languages
                                 Text(
-                                    text = "Available languages:",
+                                    text = localizeHelper.localize(Res.string.available_languages),
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 
@@ -213,7 +217,7 @@ fun VoiceSelectionDialog(
                             
                             DesktopTTSService.TTSEngine.SIMULATION -> {
                                 Text(
-                                    text = "Simulation mode does not use real voices.",
+                                    text = localizeHelper.localize(Res.string.simulation_mode_does_not_use_real_voices),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -221,7 +225,7 @@ fun VoiceSelectionDialog(
 
                             DesktopTTSService.TTSEngine.GRADIO -> {
                                 Text(
-                                    text = "Gradio",
+                                    text = localizeHelper.localize(Res.string.gradio),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

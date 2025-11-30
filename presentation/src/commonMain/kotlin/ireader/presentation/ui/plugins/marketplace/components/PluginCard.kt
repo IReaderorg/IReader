@@ -17,6 +17,9 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginMonetization
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Card displaying plugin information in the marketplace
@@ -138,6 +141,7 @@ private fun PriceBadge(
     monetization: PluginMonetization?,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     when (monetization) {
         is PluginMonetization.Premium -> {
             Surface(
@@ -161,7 +165,7 @@ private fun PriceBadge(
                 color = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Text(
-                    text = "Freemium",
+                    text = localizeHelper.localize(Res.string.freemium),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -176,7 +180,7 @@ private fun PriceBadge(
                 color = MaterialTheme.colorScheme.tertiaryContainer
             ) {
                 Text(
-                    text = "Free",
+                    text = localizeHelper.localize(Res.string.free),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onTertiaryContainer,

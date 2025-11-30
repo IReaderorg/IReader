@@ -13,6 +13,7 @@ import ireader.core.error.GlobalExceptionHandler
 import ireader.core.log.IReaderLog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Error boundary component for graceful error handling in Compose UI
@@ -94,7 +95,7 @@ fun DefaultErrorFallback(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Something went wrong",
+                text = localizeHelper.localize(Res.string.something_went_wrong),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
@@ -159,7 +160,7 @@ fun CompactErrorDisplay(
             
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Error",
+                    text = localizeHelper.localize(Res.string.download_notifier_title_error),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )

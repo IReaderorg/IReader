@@ -13,6 +13,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.domain.models.donation.DonationPromptMessage
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog that prompts users to donate at key moments of satisfaction
@@ -29,6 +32,7 @@ fun DonationPromptDialog(
     onMaybeLater: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Dialog(onDismissRequest = onMaybeLater) {
         Card(
             modifier = modifier
@@ -89,7 +93,7 @@ fun DonationPromptDialog(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "Donate Now",
+                            text = localizeHelper.localize(Res.string.donate_now),
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
@@ -102,7 +106,7 @@ fun DonationPromptDialog(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
-                            text = "Maybe Later",
+                            text = localizeHelper.localize(Res.string.maybe_later),
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
@@ -111,7 +115,7 @@ fun DonationPromptDialog(
                 
                 // Subtle note about cooldown
                 Text(
-                    text = "We'll remind you again in 30 days",
+                    text = localizeHelper.localize(Res.string.well_remind_you_again_in_30_days),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     textAlign = TextAlign.Center

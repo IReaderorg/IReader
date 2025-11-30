@@ -202,7 +202,7 @@ fun RegularChapterDetailTopAppBar(
                             )
                         }
                         IDropdownMenuItem(
-                            text = { Text(text = "Download") },
+                            text = { Text(text = localizeHelper.localize(Res.string.download)) },
                             onClick = {
                                 onDownload()
                                 setDropDownState(false)

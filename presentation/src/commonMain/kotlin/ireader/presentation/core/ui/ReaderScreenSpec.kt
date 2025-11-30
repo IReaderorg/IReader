@@ -58,6 +58,7 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
+import ireader.i18n.resources.Res
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)

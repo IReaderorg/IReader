@@ -179,7 +179,7 @@ fun LeaderboardScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "All Rankings",
+                                text = localizeHelper.localize(Res.string.all_rankings),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -271,13 +271,13 @@ private fun EmptyLeaderboardState(
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "No Rankings Yet",
+                text = localizeHelper.localize(Res.string.no_rankings_yet),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Be the first to sync your reading stats!",
+                text = localizeHelper.localize(Res.string.be_the_first_to_sync_your_reading_stats),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -310,6 +310,7 @@ private fun EnhancedUserRankCard(
     isSyncing: Boolean,
     totalUsers: Int
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -338,7 +339,7 @@ private fun EnhancedUserRankCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Your Rank",
+                        text = localizeHelper.localize(Res.string.your_rank),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -360,7 +361,7 @@ private fun EnhancedUserRankCard(
                 ) {
                     EnhancedStatItem(
                         icon = Icons.Default.Timer,
-                        label = "Reading Time",
+                        label = localizeHelper.localize(Res.string.reading_time),
                         value = formatReadingTime(userRank.totalReadingTimeMinutes),
                         modifier = Modifier.weight(1f)
                     )
@@ -369,7 +370,7 @@ private fun EnhancedUserRankCard(
                     
                     EnhancedStatItem(
                         icon = Icons.Default.TrendingUp,
-                        label = "Percentile",
+                        label = localizeHelper.localize(Res.string.percentile),
                         value = if (totalUsers > 0) {
                             val percentile = ((totalUsers - userRank.rank + 1).toFloat() / totalUsers * 100).roundToInt()
                             "Top $percentile%"
@@ -416,7 +417,7 @@ private fun EnhancedUserRankCard(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "Sync your stats to appear on the leaderboard",
+                        text = localizeHelper.localize(Res.string.sync_your_stats_to_appear_on_the_leaderboard),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         textAlign = TextAlign.Center
@@ -453,6 +454,7 @@ private fun CompactRealtimeToggle(
     isEnabled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -498,7 +500,7 @@ private fun CompactRealtimeToggle(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "Realtime Updates",
+                        text = localizeHelper.localize(Res.string.realtime_updates),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = if (isEnabled)
@@ -531,6 +533,7 @@ private fun CompactRealtimeToggle(
 
 @Composable
 private fun EnhancedTopThreePodium(entries: List<LeaderboardEntry>) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -555,7 +558,7 @@ private fun EnhancedTopThreePodium(entries: List<LeaderboardEntry>) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Top Readers",
+                    text = localizeHelper.localize(Res.string.top_readers),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -672,6 +675,7 @@ private fun LeaderboardEntryCard(
     entry: LeaderboardEntry,
     isCurrentUser: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val backgroundColor = if (isCurrentUser) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
@@ -713,7 +717,7 @@ private fun LeaderboardEntryCard(
                     if (isCurrentUser) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "(You)",
+                            text = localizeHelper.localize(Res.string.you),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
@@ -1006,6 +1010,7 @@ private fun EnhancedLeaderboardEntryCard(
     isCurrentUser: Boolean,
     animationDelay: Int = 0
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val backgroundColor = if (isCurrentUser) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
@@ -1083,7 +1088,7 @@ private fun EnhancedLeaderboardEntryCard(
                                 color = MaterialTheme.colorScheme.secondary
                             ) {
                                 Text(
-                                    text = "YOU",
+                                    text = localizeHelper.localize(Res.string.you_1),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSecondary,
                                     fontWeight = FontWeight.Bold,

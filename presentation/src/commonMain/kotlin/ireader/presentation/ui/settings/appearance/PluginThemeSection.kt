@@ -20,6 +20,7 @@ import ireader.presentation.ui.core.theme.*
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Section for displaying plugin themes in appearance settings
@@ -68,7 +69,7 @@ fun PluginThemeSection(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Plugin Themes",
+                        text = localizeHelper.localize(Res.string.plugin_themes),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -116,7 +117,7 @@ fun PluginThemeSection(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Theme Plugin Errors",
+                                text = localizeHelper.localize(Res.string.theme_plugin_errors),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
@@ -141,7 +142,7 @@ fun PluginThemeSection(
             if (lightPluginThemes.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Light Plugin Themes",
+                    text = localizeHelper.localize(Res.string.light_plugin_themes),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -166,7 +167,7 @@ fun PluginThemeSection(
             if (darkPluginThemes.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Dark Plugin Themes",
+                    text = localizeHelper.localize(Res.string.dark_plugin_themes),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -243,6 +244,7 @@ private fun PluginThemeCard(
     gridMinSize: androidx.compose.ui.unit.Dp,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -288,7 +290,7 @@ private fun PluginThemeCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Preview",
+                        text = localizeHelper.localize(Res.string.preview),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

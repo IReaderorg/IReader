@@ -90,7 +90,7 @@ fun MigrationSourceDialog(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = "Select a source to migrate to:",
+                            text = localizeHelper.localize(Res.string.select_a_source_to_migrate_to),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -113,7 +113,7 @@ fun MigrationSourceDialog(
                                         modifier = Modifier.size(48.dp)
                                     )
                                     Text(
-                                        text = "No alternative sources available",
+                                        text = localizeHelper.localize(Res.string.no_alternative_sources_available_1),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.error
                                     )
@@ -170,12 +170,12 @@ fun MigrationSourceDialog(
                     ) {
                         item {
                             Text(
-                                text = "Migration Options",
+                                text = localizeHelper.localize(Res.string.migration_options),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = "Select what data to transfer",
+                                text = localizeHelper.localize(Res.string.select_what_data_to_transfer),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -220,7 +220,7 @@ fun MigrationSourceDialog(
                         item {
                             MigrationOptionItem(
                                 icon = Icons.Default.List,
-                                title = "Chapters",
+                                title = localizeHelper.localize(Res.string.chapters),
                                 description = "Transfer chapter list and reading progress",
                                 checked = migrationFlags.chapters,
                                 onCheckedChange = { migrationFlags = migrationFlags.copy(chapters = it) }
@@ -230,7 +230,7 @@ fun MigrationSourceDialog(
                         item {
                             MigrationOptionItem(
                                 icon = Icons.Default.Bookmark,
-                                title = "Bookmarks",
+                                title = localizeHelper.localize(Res.string.bookmarks),
                                 description = "Transfer bookmarked chapters",
                                 checked = migrationFlags.bookmarks,
                                 onCheckedChange = { migrationFlags = migrationFlags.copy(bookmarks = it) }
@@ -240,7 +240,7 @@ fun MigrationSourceDialog(
                         item {
                             MigrationOptionItem(
                                 icon = Icons.Default.Category,
-                                title = "Categories",
+                                title = localizeHelper.localize(Res.string.category),
                                 description = "Transfer book categories",
                                 checked = migrationFlags.categories,
                                 onCheckedChange = { migrationFlags = migrationFlags.copy(categories = it) }
@@ -250,7 +250,7 @@ fun MigrationSourceDialog(
                         item {
                             MigrationOptionItem(
                                 icon = Icons.Default.Image,
-                                title = "Custom Cover",
+                                title = localizeHelper.localize(Res.string.custom_cover),
                                 description = "Transfer custom cover image",
                                 checked = migrationFlags.customCover,
                                 onCheckedChange = { migrationFlags = migrationFlags.copy(customCover = it) }
@@ -260,7 +260,7 @@ fun MigrationSourceDialog(
                         item {
                             MigrationOptionItem(
                                 icon = Icons.Default.MenuBook,
-                                title = "Reading Progress",
+                                title = localizeHelper.localize(Res.string.reading_progress),
                                 description = "Transfer current reading position",
                                 checked = migrationFlags.readingProgress,
                                 onCheckedChange = { migrationFlags = migrationFlags.copy(readingProgress = it) }

@@ -44,6 +44,7 @@ import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.updates.component.UpdatesContent
 import ireader.presentation.ui.home.updates.viewmodel.UpdateState
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @Composable
@@ -157,6 +158,7 @@ private fun UpdateProgressIndicator(
     progress: ireader.presentation.ui.home.updates.viewmodel.UpdateProgress?,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     androidx.compose.material3.Surface(
         modifier = modifier
             .padding(32.dp),
@@ -174,7 +176,7 @@ private fun UpdateProgressIndicator(
             if (progress != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Checking for updates...",
+                    text = localizeHelper.localize(Res.string.checking_for_updates_1),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -202,7 +204,7 @@ private fun UpdateProgressIndicator(
             } else {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Checking for updates...",
+                    text = localizeHelper.localize(Res.string.checking_for_updates_1),
                     style = MaterialTheme.typography.titleMedium
                 )
             }

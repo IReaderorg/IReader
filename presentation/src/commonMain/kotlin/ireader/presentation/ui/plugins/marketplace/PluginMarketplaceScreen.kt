@@ -20,6 +20,7 @@ import ireader.presentation.ui.plugins.marketplace.components.PluginCard
 import ireader.presentation.ui.plugins.marketplace.components.PluginCategoryTabs
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Plugin Marketplace screen for discovering and installing plugins
@@ -127,6 +128,7 @@ private fun PluginMarketplaceContent(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize()
@@ -169,7 +171,7 @@ private fun PluginMarketplaceContent(
                 // Section header for all plugins
                 item {
                     Text(
-                        text = "All Plugins",
+                        text = localizeHelper.localize(Res.string.all_plugins),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -250,6 +252,7 @@ private fun SearchTopBar(
  */
 @Composable
 private fun LoadingState(modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -261,7 +264,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Loading plugins...",
+                text = localizeHelper.localize(Res.string.loading_plugins),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -289,7 +292,7 @@ private fun ErrorState(
             modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = "Error",
+                text = localizeHelper.localize(Res.string.download_notifier_title_error),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.error

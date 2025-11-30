@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.security.AuthMethod
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun SetupAuthDialog(
@@ -66,7 +67,7 @@ fun SetupAuthDialog(
                 when (authType) {
                     is AuthMethod.PIN -> {
                         Text(
-                            text = "Enter a 4-6 digit PIN to secure your app",
+                            text = localizeHelper.localize(Res.string.enter_a_4_6_digit_pin_to_secure_your_app),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -109,7 +110,7 @@ fun SetupAuthDialog(
                     }
                     is AuthMethod.Password -> {
                         Text(
-                            text = "Enter a password to secure your app (minimum 4 characters)",
+                            text = localizeHelper.localize(Res.string.enter_a_password_to_secure),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -152,7 +153,7 @@ fun SetupAuthDialog(
                     }
                     is AuthMethod.Biometric -> {
                         Text(
-                            text = "Use your fingerprint or face to unlock the app. You can still use your device PIN as a fallback.",
+                            text = localizeHelper.localize(Res.string.use_your_fingerprint_or_face),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

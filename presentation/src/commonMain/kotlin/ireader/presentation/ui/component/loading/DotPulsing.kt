@@ -13,6 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 val dotSize = 8.dp // made it bigger for demo
 val delayUnit = 300 // you can change delay to change animation speed
@@ -286,11 +289,12 @@ fun DotsCollision() {
 
 @Composable
 fun DotsPreview() = MaterialTheme {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = Modifier.padding(4.dp)) {
         val spaceSize = 16.dp
 
         Text(
-            text = "Dots pulsing",
+            text = localizeHelper.localize(Res.string.dots_pulsing),
             style = MaterialTheme.typography.bodyMedium
         )
         DotsPulsing()
@@ -298,7 +302,7 @@ fun DotsPreview() = MaterialTheme {
         Spacer(Modifier.height(spaceSize))
 
         Text(
-            text = "Dots elastic",
+            text = localizeHelper.localize(Res.string.dots_elastic),
             style = MaterialTheme.typography.bodyMedium
         )
         DotsElastic()
@@ -306,7 +310,7 @@ fun DotsPreview() = MaterialTheme {
         Spacer(Modifier.height(spaceSize))
 
         Text(
-            text = "Dots flashing",
+            text = localizeHelper.localize(Res.string.dots_flashing),
             style = MaterialTheme.typography.bodyMedium
         )
         DotsFlashing(true)
@@ -314,7 +318,7 @@ fun DotsPreview() = MaterialTheme {
         Spacer(Modifier.height(spaceSize))
 
         Text(
-            text = "Dots typing",
+            text = localizeHelper.localize(Res.string.dots_typing),
             style = MaterialTheme.typography.bodyMedium
         )
         DotsTyping()
@@ -322,7 +326,7 @@ fun DotsPreview() = MaterialTheme {
         Spacer(Modifier.height(spaceSize))
 
         Text(
-            text = "Dots collision",
+            text = localizeHelper.localize(Res.string.dots_collision),
             style = MaterialTheme.typography.bodyMedium
         )
         DotsCollision()

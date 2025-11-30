@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 class BrowseSettingsViewModel(
     private val browsePreferences: BrowsePreferences,

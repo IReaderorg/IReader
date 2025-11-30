@@ -54,7 +54,7 @@ fun SettingsSecurityScreen(
         modifier = modifier,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Security & Privacy",
+                title = localizeHelper.localize(Res.string.security_privacy),
                 popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
@@ -71,14 +71,14 @@ fun SettingsSecurityScreen(
             // App Lock Section
             item {
                 SettingsSectionHeader(
-                    title = "App Lock",
+                    title = localizeHelper.localize(Res.string.app_lock),
                     icon = Icons.Outlined.Lock
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Enable App Lock",
+                    title = localizeHelper.localize(Res.string.enable_app_lock),
                     description = "Require authentication to open the app",
                     icon = Icons.Outlined.Lock,
                     checked = appLockEnabled,
@@ -88,7 +88,7 @@ fun SettingsSecurityScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Lock Method",
+                    title = localizeHelper.localize(Res.string.lock_method),
                     description = "Choose authentication method",
                     icon = Icons.Outlined.Security,
                     onClick = { viewModel.showLockMethodDialog() },
@@ -114,7 +114,7 @@ fun SettingsSecurityScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Biometric Authentication",
+                    title = localizeHelper.localize(Res.string.biometric_authentication),
                     description = "Use fingerprint or face unlock when available",
                     icon = Icons.Outlined.Fingerprint,
                     checked = biometricEnabled,
@@ -125,7 +125,7 @@ fun SettingsSecurityScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Lock After Inactivity",
+                    title = localizeHelper.localize(Res.string.lock_after_inactivity),
                     description = "Automatically lock app after period of inactivity",
                     icon = Icons.Outlined.Timer,
                     onClick = { viewModel.showLockAfterInactivityDialog() },
@@ -157,14 +157,14 @@ fun SettingsSecurityScreen(
             // Screen Security Section
             item {
                 SettingsSectionHeader(
-                    title = "Screen Security",
+                    title = localizeHelper.localize(Res.string.screen_security),
                     icon = Icons.Outlined.ScreenLockPortrait
                 )
             }
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Secure Screen",
+                    title = localizeHelper.localize(Res.string.secure_screen),
                     description = "Hide app content in recent apps and prevent screenshots",
                     icon = Icons.Outlined.ScreenLockPortrait,
                     onClick = { viewModel.showSecureScreenModeDialog() }
@@ -184,14 +184,14 @@ fun SettingsSecurityScreen(
             // Privacy Section
             item {
                 SettingsSectionHeader(
-                    title = "Privacy",
+                    title = localizeHelper.localize(Res.string.privacy),
                     icon = Icons.Outlined.VisibilityOff
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Hide Notification Content",
+                    title = localizeHelper.localize(Res.string.hide_notification_content),
                     description = "Hide book titles and chapter names in notifications",
                     icon = Icons.Outlined.NotificationsOff,
                     checked = hideNotificationContent,
@@ -201,7 +201,7 @@ fun SettingsSecurityScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Incognito Mode",
+                    title = localizeHelper.localize(Res.string.incognito_mode),
                     description = "Pause reading history and hide from recent apps",
                     icon = Icons.Outlined.VisibilityOff,
                     checked = incognitoMode,
@@ -212,14 +212,14 @@ fun SettingsSecurityScreen(
             // Content Restrictions Section
             item {
                 SettingsSectionHeader(
-                    title = "Content Restrictions",
+                    title = localizeHelper.localize(Res.string.content_restrictions),
                     icon = Icons.Outlined.Block
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Adult Content Lock",
+                    title = localizeHelper.localize(Res.string.adult_content_lock),
                     description = "Require authentication to access adult content sources",
                     icon = Icons.Outlined.Block,
                     checked = adultContentLock,
@@ -230,14 +230,14 @@ fun SettingsSecurityScreen(
             // Advanced Security Section
             item {
                 SettingsSectionHeader(
-                    title = "Advanced Security",
+                    title = localizeHelper.localize(Res.string.advanced_security),
                     icon = Icons.Outlined.AdminPanelSettings
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Clear Authentication Data",
+                    title = localizeHelper.localize(Res.string.clear_authentication_data),
                     description = "Remove all saved authentication tokens and sessions",
                     icon = Icons.Outlined.ClearAll,
                     onClick = { viewModel.showClearAuthDataDialog() }
@@ -246,7 +246,7 @@ fun SettingsSecurityScreen(
             
             item {
                 SettingsItem(
-                    title = "Security Audit",
+                    title = localizeHelper.localize(Res.string.security_audit),
                     description = "Review security settings and recommendations",
                     icon = Icons.Outlined.Security,
                     onClick = { viewModel.navigateToSecurityAudit() }

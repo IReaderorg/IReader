@@ -18,6 +18,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import ireader.domain.plugins.PluginInfo
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Horizontal scrolling section displaying featured/popular plugins
@@ -29,11 +32,12 @@ fun FeaturedPluginsSection(
     onPluginClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (plugins.isEmpty()) return
     
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Featured Plugins",
+            text = localizeHelper.localize(Res.string.featured_plugins),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)

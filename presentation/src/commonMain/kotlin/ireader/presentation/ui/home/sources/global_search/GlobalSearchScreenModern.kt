@@ -36,6 +36,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.list.layouts.BookImage
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import ireader.presentation.ui.home.sources.global_search.viewmodel.SearchItem
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Modern Global Search Screen with Material Design 3
@@ -515,6 +516,7 @@ private fun BooksRow(
 
 @Composable
 private fun LoadingContent() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val infiniteTransition = rememberInfiniteTransition()
     val shimmerTranslate by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -522,7 +524,7 @@ private fun LoadingContent() {
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 1500, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
-        ), label = "shimmer"
+        ), label = localizeHelper.localize(Res.string.shimmer)
     )
     
     val shimmerColors = listOf(
@@ -556,6 +558,7 @@ private fun LoadingContent() {
 private fun ErrorContent(
     onRetry: () -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -564,7 +567,7 @@ private fun ErrorContent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Failed to search",
+            text = localizeHelper.localize(Res.string.failed_to_search),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.error
         )
@@ -583,6 +586,7 @@ private fun ErrorContent(
 
 @Composable
 private fun InitialLoadingState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -599,14 +603,14 @@ private fun InitialLoadingState() {
             )
             
             Text(
-                text = "Searching...",
+                text = localizeHelper.localize(Res.string.searching_1),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             
             Text(
-                text = "Loading sources",
+                text = localizeHelper.localize(Res.string.loading_sources),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -616,6 +620,7 @@ private fun InitialLoadingState() {
 
 @Composable
 private fun EmptySearchState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -650,7 +655,7 @@ private fun EmptySearchState() {
             )
             
             Text(
-                text = "Enter a query to search across all your sources",
+                text = localizeHelper.localize(Res.string.enter_a_query_to_search_across_all_your_sources),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -663,6 +668,7 @@ private fun EmptySearchState() {
 private fun NoResultsState(
     query: String,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -690,14 +696,14 @@ private fun NoResultsState(
             }
             
             Text(
-                text = "No results found",
+                text = localizeHelper.localize(Res.string.no_results_found_1),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             
             Text(
-                text = "No results for \"$query\" in any source",
+                text = localizeHelper.localize(Res.string.no_results_for) + "$query\" in any source",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center

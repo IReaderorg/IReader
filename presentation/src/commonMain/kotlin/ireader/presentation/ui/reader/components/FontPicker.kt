@@ -113,7 +113,7 @@ fun FontPicker(
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Loading fonts...",
+                        text = localizeHelper.localize(Res.string.loading_fonts),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -136,7 +136,7 @@ fun FontPicker(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Popular Fonts",
+                                text = localizeHelper.localize(Res.string.popular_fonts),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -169,7 +169,7 @@ fun FontPicker(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "All Google Fonts",
+                                text = localizeHelper.localize(Res.string.all_google_fonts),
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
@@ -201,7 +201,7 @@ fun FontPicker(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Custom Fonts",
+                                text = localizeHelper.localize(Res.string.custom_fonts),
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
@@ -296,7 +296,7 @@ private fun FontItem(
                 
                 // Font preview
                 Text(
-                    text = "The quick brown fox jumps over the lazy dog",
+                    text = localizeHelper.localize(Res.string.the_quick_brown_fox_jumps_over_the_lazy_dog),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isSelected) {
                         MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)

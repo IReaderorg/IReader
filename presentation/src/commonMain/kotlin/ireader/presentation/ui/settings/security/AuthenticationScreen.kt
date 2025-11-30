@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.security.AuthMethod
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun AuthenticationScreen(
@@ -52,7 +53,7 @@ fun AuthenticationScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "Unlock IReader",
+                text = localizeHelper.localize(Res.string.unlock_ireader),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )

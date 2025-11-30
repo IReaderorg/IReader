@@ -11,6 +11,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun BiometricAuthScreen(
@@ -43,7 +44,7 @@ fun BiometricAuthScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "Biometric Authentication",
+                text = localizeHelper.localize(Res.string.biometric_authentication),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -51,7 +52,7 @@ fun BiometricAuthScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Touch the fingerprint sensor or use face recognition to unlock",
+                text = localizeHelper.localize(Res.string.touch_the_fingerprint_sensor_or),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

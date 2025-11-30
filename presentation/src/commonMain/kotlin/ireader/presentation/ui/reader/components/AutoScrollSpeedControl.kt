@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Autoscroll speed control overlay for the reader
@@ -98,7 +99,7 @@ fun AutoScrollSpeedControl(
                     modifier = Modifier.width(80.dp)
                 ) {
                     Text(
-                        text = "Speed",
+                        text = localizeHelper.localize(Res.string.speed),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -109,7 +110,7 @@ fun AutoScrollSpeedControl(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "px/s",
+                        text = localizeHelper.localize(Res.string.pxs),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )

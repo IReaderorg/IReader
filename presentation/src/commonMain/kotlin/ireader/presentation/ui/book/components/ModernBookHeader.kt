@@ -23,6 +23,9 @@ import ireader.domain.models.BookCover
 import ireader.domain.models.entities.Book
 import ireader.presentation.ui.component.components.BookImageCover
 import ireader.presentation.ui.core.modifier.clickableNoIndication
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun ModernBookHeader(
@@ -32,6 +35,7 @@ fun ModernBookHeader(
     onCopyTitle: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -194,7 +198,7 @@ fun ModernBookHeader(
                             tint = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                         Text(
-                            text = "Archived",
+                            text = localizeHelper.localize(Res.string.archived),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onTertiaryContainer,

@@ -136,7 +136,7 @@ fun MoreScreen(
             ) {
                 // App Name
                 Text(
-                    text = "IReader",
+                    text = localizeHelper.localize(Res.string.website),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -146,7 +146,7 @@ fun MoreScreen(
                 
                 // App Description
                 Text(
-                    text = "Your personal book reading companion",
+                    text = localizeHelper.localize(Res.string.your_personal_book_reading_companion),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -216,14 +216,14 @@ fun MoreScreen(
         // Profile Section
         item {
             SettingsSectionHeader(
-                title = "Account",
+                title = localizeHelper.localize(Res.string.account),
                 icon = Icons.Filled.AccountCircle
             )
         }
         
         item {
             SettingsItem(
-                title = "Profile & Sync",
+                title = localizeHelper.localize(Res.string.profile_sync),
                 description = "Manage your account and sync reading progress",
                 icon = Icons.Outlined.AccountCircle,
                 onClick = onWeb3Profile
@@ -232,14 +232,14 @@ fun MoreScreen(
         // Badges & Customization Section
         item {
             SettingsSectionHeader(
-                title = "Badges & Customization",
+                title = localizeHelper.localize(Res.string.badges_customization),
                 icon = Icons.Filled.Star
             )
         }
         
         item {
             SettingsItem(
-                title = "Badge Store",
+                title = localizeHelper.localize(Res.string.badge_store),
                 description = "Purchase unique badges to customize your profile",
                 icon = Icons.Outlined.AccountBalanceWallet,
                 onClick = onBadgeStore
@@ -248,7 +248,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = "NFT Badge",
+                title = localizeHelper.localize(Res.string.nft_badge),
                 description = "Verify NFT ownership to unlock exclusive badge",
                 icon = Icons.Filled.Star,
                 onClick = onNFTBadge
@@ -257,7 +257,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = "Manage Badges",
+                title = localizeHelper.localize(Res.string.manage_badges),
                 description = "Customize which badges appear on your profile and reviews",
                 icon = Icons.Outlined.Settings,
                 onClick = onBadgeManagement
@@ -268,14 +268,14 @@ fun MoreScreen(
         if (vm.isAdmin.value) {
             item {
                 SettingsSectionHeader(
-                    title = "Admin",
+                    title = localizeHelper.localize(Res.string.admin),
                     icon = Icons.Filled.AdminPanelSettings
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Badge Verification",
+                    title = localizeHelper.localize(Res.string.badge_verification),
                     description = "Review and approve badge purchase requests",
                     icon = Icons.Outlined.VerifiedUser,
                     onClick = onAdminBadgeVerification
@@ -286,14 +286,14 @@ fun MoreScreen(
         // Community Section
         item {
             SettingsSectionHeader(
-                title = "Community",
+                title = localizeHelper.localize(Res.string.community),
                 icon = Icons.Filled.People
             )
         }
         
         item {
             SettingsItem(
-                title = "Leaderboard",
+                title = localizeHelper.localize(Res.string.leaderboard),
                 description = "Compete with other readers based on reading time",
                 icon = Icons.Filled.EmojiEvents,
                 onClick = onLeaderboard
@@ -302,7 +302,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = "Popular Books",
+                title = localizeHelper.localize(Res.string.popular_books),
                 description = "Discover what the community is reading",
                 icon = Icons.Filled.TrendingUp,
                 onClick = onPopularBooks
@@ -311,7 +311,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = "Community Reviews",
+                title = localizeHelper.localize(Res.string.community_reviews),
                 description = "Read reviews from other readers",
                 icon = Icons.Filled.RateReview,
                 onClick = onAllReviews
@@ -321,7 +321,7 @@ fun MoreScreen(
         // Library Management Section
         item {
             SettingsSectionHeader(
-                title = "Library Management",
+                title = localizeHelper.localize(Res.string.library_management),
                 icon = Icons.Filled.MenuBook
             )
         }
@@ -356,7 +356,7 @@ fun MoreScreen(
         // Appearance & Settings Section
         item {
             SettingsSectionHeader(
-                title = "Appearance & Settings",
+                title = localizeHelper.localize(Res.string.appearance_settings),
                 icon = Icons.Filled.Palette
             )
         }
@@ -417,7 +417,7 @@ fun MoreScreen(
         // Information & Support Section
         item {
             SettingsSectionHeader(
-                title = "Information & Support",
+                title = localizeHelper.localize(Res.string.information_support),
                 icon = Icons.Filled.Info
             )
         }
@@ -442,7 +442,7 @@ fun MoreScreen(
         
         item {
             SettingsItem(
-                title = "Support Development",
+                title = localizeHelper.localize(Res.string.support_development),
                 description = "Help keep IReader free and ad-free",
                 icon = Icons.Outlined.Favorite,
                 onClick = onDonation

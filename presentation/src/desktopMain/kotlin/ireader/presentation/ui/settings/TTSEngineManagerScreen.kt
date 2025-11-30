@@ -79,6 +79,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * TTS Engine Manager Screen
@@ -210,13 +211,13 @@ fun TTSEngineManagerScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Manage TTS Engines",
+                        text = localizeHelper.localize(Res.string.manage_tts_engines),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     
                     Text(
-                        text = "Install and configure text-to-speech engines for offline reading",
+                        text = localizeHelper.localize(Res.string.install_and_configure_text_to),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -405,7 +406,7 @@ fun TTSEngineManagerScreen(
                             installationLog += "This may take 5-10 minutes...\n\n"
                             
                             val result = ttsService.kokoroAdapter.synthesize(
-                                text = "Hello, this is a test.",
+                                text = localizeHelper.localize(Res.string.hello_this_is_a_test),
                                 voice = "af_bella",
                                 speed = 1.0f
                             )
@@ -509,7 +510,7 @@ fun TTSEngineManagerScreen(
                         try {
                             installationLog += "Testing Maya TTS...\n"
                             val result = ttsService.mayaAdapter.synthesize(
-                                text = "Hello, this is a test.",
+                                text = localizeHelper.localize(Res.string.hello_this_is_a_test),
                                 language = "en",
                                 speed = 1.0f
                             )
@@ -565,7 +566,7 @@ fun TTSEngineManagerScreen(
                                     )
                                 }
                                 Text(
-                                    text = "Installation Log",
+                                    text = localizeHelper.localize(Res.string.installation_log),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -634,7 +635,7 @@ fun TTSEngineManagerScreen(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    text = "Installation in progress... This may take several minutes.",
+                                    text = localizeHelper.localize(Res.string.installation_in_progress_this_may),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -705,13 +706,13 @@ fun TTSEngineManagerScreen(
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "Piper TTS Voices",
+                            text = localizeHelper.localize(Res.string.piper_tts_voices),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
 
                     Text(
-                        text = "High-quality offline neural voices. Browse, download, and manage 100+ voices in 30+ languages.",
+                        text = localizeHelper.localize(Res.string.high_quality_offline_neural_voices),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -781,14 +782,14 @@ fun TTSEngineManagerScreen(
                     )
                     Column {
                         Text(
-                            text = "Need Help?",
+                            text = localizeHelper.localize(Res.string.need_help),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "• Piper requires native libraries (provided in releases)\n" +
+                            text = localizeHelper.localize(Res.string.piper_requires_native_libraries_provided) +
                                    "• Kokoro requires Python 3.8-3.12 and Git\n" +
                                    "• Maya requires Python 3.8-3.12 (16+ languages)\n" +
                                    "• All engines work offline after installation\n" +
@@ -1405,12 +1406,12 @@ private fun GradioTTSSectionDesktop(
                         )
                         Column {
                             Text(
-                                text = "Gradio TTS (Online)",
+                                text = localizeHelper.localize(Res.string.gradio_tts_online),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Support for any Gradio-based TTS engine",
+                                text = localizeHelper.localize(Res.string.support_for_any_gradio_based_tts_engine),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1461,7 +1462,7 @@ private fun GradioTTSSectionDesktop(
                 Divider()
                 
                 Text(
-                    text = "Available Engines",
+                    text = localizeHelper.localize(Res.string.available_engines),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -1573,6 +1574,7 @@ private fun GradioConfigCardDesktop(
     onDelete: (() -> Unit)?,
     isTesting: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = if (isActive)
@@ -1612,7 +1614,7 @@ private fun GradioConfigCardDesktop(
                                 shape = MaterialTheme.shapes.extraSmall
                             ) {
                                 Text(
-                                    text = "Custom",
+                                    text = localizeHelper.localize(Res.string.custom),
                                     style = MaterialTheme.typography.labelSmall,
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
                                     color = MaterialTheme.colorScheme.onTertiaryContainer

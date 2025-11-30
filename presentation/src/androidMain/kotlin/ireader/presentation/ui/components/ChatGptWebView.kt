@@ -100,7 +100,7 @@ fun ChatGptWebView(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 Text(
-                    text = "WebView is not available on this device.",
+                    text = localizeHelper.localize(Res.string.webview_is_not_available_on_this_device),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.error
                 )

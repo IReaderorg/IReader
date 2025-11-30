@@ -21,6 +21,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.modifier.clickableNoIndication
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 private val whitespaceLineRegex = Regex("[\\r\\n]{2,}", setOf(RegexOption.MULTILINE))
 
@@ -32,6 +33,7 @@ fun ModernBookSummary(
     onCopy: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -47,7 +49,7 @@ fun ModernBookSummary(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Synopsis",
+                text = localizeHelper.localize(Res.string.synopsis),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -106,7 +108,7 @@ fun ModernBookSummary(
             Spacer(modifier = Modifier.height(12.dp))
             
             Text(
-                text = "Genres",
+                text = localizeHelper.localize(Res.string.genres),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,

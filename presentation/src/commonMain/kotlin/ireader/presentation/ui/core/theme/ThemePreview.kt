@@ -19,6 +19,7 @@ import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeColorScheme
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Preview composable for theme options
@@ -61,7 +62,7 @@ fun ThemePreview(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Preview",
+                            text = localizeHelper.localize(Res.string.preview),
                             style = MaterialTheme.typography.titleLarge,
                             color = theme.extraColors.onBars.toComposeColor()
                         )
@@ -111,12 +112,12 @@ fun ThemePreview(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "Card Title",
+                                text = localizeHelper.localize(Res.string.card_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = theme.materialColors.onSurface.toComposeColor()
                             )
                             Text(
-                                text = "This is a preview of how text will look in cards with this theme.",
+                                text = localizeHelper.localize(Res.string.this_is_a_preview_of),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = theme.materialColors.onSurfaceVariant.toComposeColor()
                             )
@@ -140,7 +141,7 @@ fun ThemePreview(
                                 tint = theme.materialColors.primary.toComposeColor()
                             )
                             Text(
-                                text = "Surface Variant",
+                                text = localizeHelper.localize(Res.string.surface_variant),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = theme.materialColors.onSurfaceVariant.toComposeColor()
                             )

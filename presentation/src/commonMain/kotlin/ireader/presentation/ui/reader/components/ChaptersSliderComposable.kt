@@ -20,6 +20,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun ChaptersSliderComposable(

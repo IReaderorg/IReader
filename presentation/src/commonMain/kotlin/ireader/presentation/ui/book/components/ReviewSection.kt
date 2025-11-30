@@ -27,6 +27,9 @@ import ireader.domain.models.remote.UserBadge
 import ireader.presentation.ui.component.RatingStars
 import ireader.presentation.ui.component.ReviewCard
 import ireader.presentation.ui.component.WriteReviewDialog
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun ReviewSection(
@@ -36,6 +39,7 @@ fun ReviewSection(
     modifier: Modifier = Modifier,
     userBadgesMap: Map<String, List<UserBadge>> = emptyMap()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showWriteDialog by remember { mutableStateOf(false) }
     
     Column(
@@ -50,7 +54,7 @@ fun ReviewSection(
         ) {
             Column {
                 Text(
-                    text = "Reviews",
+                    text = localizeHelper.localize(Res.string.reviews),
                     style = MaterialTheme.typography.titleLarge
                 )
                 if (reviews.isNotEmpty()) {
@@ -78,7 +82,7 @@ fun ReviewSection(
         
         if (reviews.isEmpty()) {
             Text(
-                text = "No reviews yet. Be the first to review!",
+                text = localizeHelper.localize(Res.string.no_reviews_yet_be_the_first_to_review),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

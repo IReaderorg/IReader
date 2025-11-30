@@ -59,7 +59,7 @@ fun SettingsReaderScreen(
         modifier = modifier,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Reader",
+                title = localizeHelper.localize(Res.string.reader),
                 popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
@@ -76,14 +76,14 @@ fun SettingsReaderScreen(
             // Reading Mode Section
             item {
                 SettingsSectionHeader(
-                    title = "Reading Mode",
+                    title = localizeHelper.localize(Res.string.reading_mode),
                     icon = Icons.Outlined.ChromeReaderMode
                 )
             }
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Default Reading Mode",
+                    title = localizeHelper.localize(Res.string.default_reading_mode),
                     description = "Choose between pager and webtoon modes",
                     icon = Icons.Outlined.ViewColumn,
                     onClick = { viewModel.showReadingModeDialog() }
@@ -103,7 +103,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Page Transitions",
+                    title = localizeHelper.localize(Res.string.page_transitions),
                     description = "Animation style for page changes",
                     icon = Icons.Outlined.Animation,
                     onClick = { viewModel.showPageTransitionsDialog() }
@@ -124,14 +124,14 @@ fun SettingsReaderScreen(
             // Display Settings Section
             item {
                 SettingsSectionHeader(
-                    title = "Display Settings",
+                    title = localizeHelper.localize(Res.string.display_settings),
                     icon = Icons.Outlined.DisplaySettings
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Double Tap to Zoom",
+                    title = localizeHelper.localize(Res.string.double_tap_to_zoom),
                     description = "Enable double tap gesture to zoom in/out",
                     icon = Icons.Outlined.ZoomIn,
                     checked = doubleTapZoom,
@@ -141,7 +141,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Show Page Number",
+                    title = localizeHelper.localize(Res.string.show_page_number),
                     description = "Display current page number in reader",
                     icon = Icons.Outlined.Numbers,
                     checked = showPageNumber,
@@ -151,7 +151,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Fullscreen",
+                    title = localizeHelper.localize(Res.string.fullscreen),
                     description = "Hide system UI for immersive reading",
                     icon = Icons.Outlined.Fullscreen,
                     checked = fullscreen,
@@ -161,7 +161,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Keep Screen On",
+                    title = localizeHelper.localize(Res.string.keep_screen_on),
                     description = "Prevent screen from turning off while reading",
                     icon = Icons.Outlined.ScreenLockPortrait,
                     checked = keepScreenOn,
@@ -171,7 +171,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Show Status Bar",
+                    title = localizeHelper.localize(Res.string.show_status_bar),
                     description = "Display status bar in reader",
                     icon = Icons.Outlined.ViewHeadline,
                     checked = showStatusBar,
@@ -182,7 +182,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Show Navigation Bar",
+                    title = localizeHelper.localize(Res.string.show_navigation_bar),
                     description = "Display navigation bar in reader",
                     icon = Icons.Outlined.ViewCarousel,
                     checked = showNavigationBar,
@@ -194,14 +194,14 @@ fun SettingsReaderScreen(
             // Orientation & Layout Section
             item {
                 SettingsSectionHeader(
-                    title = "Orientation & Layout",
+                    title = localizeHelper.localize(Res.string.orientation_layout),
                     icon = Icons.Outlined.ScreenRotation
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Cutout Area Behavior",
+                    title = localizeHelper.localize(Res.string.cutout_area_behavior),
                     description = "Show content behind display cutout in landscape",
                     icon = Icons.Outlined.CropFree,
                     checked = cutoutShort,
@@ -211,7 +211,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Landscape Zoom",
+                    title = localizeHelper.localize(Res.string.landscape_zoom),
                     description = "Enable zoom controls in landscape mode",
                     icon = Icons.Outlined.ZoomOutMap,
                     checked = landscapeZoom,
@@ -222,14 +222,14 @@ fun SettingsReaderScreen(
             // Navigation Controls Section
             item {
                 SettingsSectionHeader(
-                    title = "Navigation Controls",
+                    title = localizeHelper.localize(Res.string.navigation_controls),
                     icon = Icons.Outlined.TouchApp
                 )
             }
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Navigation Mode",
+                    title = localizeHelper.localize(Res.string.navigation_mode),
                     description = "Choose how to navigate between pages",
                     icon = Icons.Outlined.TouchApp,
                     onClick = { viewModel.showNavigationModeDialog() }
@@ -249,7 +249,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Volume Key Navigation",
+                    title = localizeHelper.localize(Res.string.volume_key_navigation),
                     description = "Use volume keys to navigate pages",
                     icon = Icons.Outlined.VolumeUp,
                     checked = volumeKeysEnabled,
@@ -259,7 +259,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Invert Tapping",
+                    title = localizeHelper.localize(Res.string.invert_tapping),
                     description = "Reverse left/right tap zones",
                     icon = Icons.Outlined.SwapHoriz,
                     checked = invertTapping,
@@ -270,14 +270,14 @@ fun SettingsReaderScreen(
             // Visual Effects Section
             item {
                 SettingsSectionHeader(
-                    title = "Visual Effects",
+                    title = localizeHelper.localize(Res.string.visual_effects),
                     icon = Icons.Outlined.AutoAwesome
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Flash on Page Change",
+                    title = localizeHelper.localize(Res.string.flash_on_page_change),
                     description = "Brief flash effect when changing pages",
                     icon = Icons.Outlined.FlashOn,
                     checked = flashOnPageChange,
@@ -288,14 +288,14 @@ fun SettingsReaderScreen(
             // Advanced Reader Settings Section
             item {
                 SettingsSectionHeader(
-                    title = "Advanced Settings",
+                    title = localizeHelper.localize(Res.string.advanced_settings),
                     icon = Icons.Outlined.Tune
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Color Filters",
+                    title = localizeHelper.localize(Res.string.color_filters),
                     description = "Brightness, contrast, and color adjustments",
                     icon = Icons.Outlined.FilterBAndW,
                     onClick = { viewModel.navigateToColorFilters() }
@@ -304,7 +304,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsItem(
-                    title = "Image Scaling",
+                    title = localizeHelper.localize(Res.string.image_scaling),
                     description = "Fit modes, crop borders, and scaling options",
                     icon = Icons.Outlined.AspectRatio,
                     onClick = { viewModel.navigateToImageScaling() }
@@ -313,7 +313,7 @@ fun SettingsReaderScreen(
             
             item {
                 SettingsItem(
-                    title = "Tap Zones",
+                    title = localizeHelper.localize(Res.string.tap_zones),
                     description = "Customize tap zone layout and sensitivity",
                     icon = Icons.Outlined.GridOn,
                     onClick = { viewModel.navigateToTapZones() }

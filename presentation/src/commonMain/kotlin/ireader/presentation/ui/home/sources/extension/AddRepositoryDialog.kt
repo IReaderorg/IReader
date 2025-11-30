@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog for adding a custom extension repository
@@ -70,7 +71,7 @@ fun AddRepositoryDialog(
                     )
                     
                     Text(
-                        text = "Fingerprint verification adds an extra layer of security",
+                        text = localizeHelper.localize(Res.string.fingerprint_verification_adds_an_extra),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

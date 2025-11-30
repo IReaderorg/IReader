@@ -13,6 +13,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 enum class BilingualMode {
     SIDE_BY_SIDE,
@@ -82,6 +85,7 @@ private fun SideBySideText(
     letterSpacing: TextUnit,
     fontWeight: FontWeight?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -97,7 +101,7 @@ private fun SideBySideText(
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
-                        text = "Original",
+                        text = localizeHelper.localize(Res.string.original),
                         style = MaterialTheme.typography.labelSmall,
                         color = originalColor.copy(alpha = 0.7f),
                         modifier = Modifier.padding(bottom = 4.dp)
@@ -135,7 +139,7 @@ private fun SideBySideText(
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
-                        text = "Translation",
+                        text = localizeHelper.localize(Res.string.translation),
                         style = MaterialTheme.typography.labelSmall,
                         color = translatedColor.copy(alpha = 0.7f),
                         modifier = Modifier.padding(bottom = 4.dp)
@@ -170,6 +174,7 @@ private fun ParagraphByParagraphText(
     letterSpacing: TextUnit,
     fontWeight: FontWeight?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -182,7 +187,7 @@ private fun ParagraphByParagraphText(
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
-                    text = "Original",
+                    text = localizeHelper.localize(Res.string.original),
                     style = MaterialTheme.typography.labelSmall,
                     color = originalColor.copy(alpha = 0.7f),
                     modifier = Modifier.padding(bottom = 4.dp)
@@ -208,7 +213,7 @@ private fun ParagraphByParagraphText(
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
-                    text = "Translation",
+                    text = localizeHelper.localize(Res.string.translation),
                     style = MaterialTheme.typography.labelSmall,
                     color = translatedColor.copy(alpha = 0.7f),
                     modifier = Modifier.padding(bottom = 4.dp)

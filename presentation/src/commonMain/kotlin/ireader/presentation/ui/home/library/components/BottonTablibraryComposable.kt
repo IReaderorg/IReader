@@ -462,7 +462,7 @@ private fun LazyListScope.DispalyPage(
                     vm.toggleResumeReadingCard(it)
                 }
             )
-            MidSizeTextComposable(text = "Show Resume Card")
+            MidSizeTextComposable(text = localizeHelper.localize(Res.string.show_resume_card))
         }
     }
 }

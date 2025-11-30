@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 fun CategoryScreen(
     vm: CategoryScreenViewModel,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
     val data = vm.categories
     val snackbarHostState = remember { SnackbarHostState() }
@@ -67,7 +68,7 @@ fun CategoryScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             // Show Empty Categories Toggle using unified component
             SettingsSwitchItem(
-                title = "Show Empty Categories",
+                title = localizeHelper.localize(Res.string.show_empty_categories),
                 description = "Display categories with no books",
                 checked = vm.showEmptyCategories.value,
                 onCheckedChange = { vm.showEmptyCategories.value = it },
@@ -130,9 +131,9 @@ fun CategoryScreen(
     // Rename dialog using unified component
     if (showRenameDialog && categoryToRename != null) {
         SettingsTextInputDialog(
-            title = "Rename Category",
+            title = localizeHelper.localize(Res.string.rename_category),
             initialValue = categoryToRename!!.name,
-            label = "Category Name",
+            label = localizeHelper.localize(Res.string.category_name),
             placeholder = "Enter new category name",
             confirmText = "Rename",
             icon = Icons.Default.Edit,
@@ -174,7 +175,7 @@ fun CategoryScreen(
         }
         
         SettingsConfirmationDialog(
-            title = "Delete Category?",
+            title = localizeHelper.localize(Res.string.delete_category),
             message = message,
             confirmText = "Delete",
             icon = Icons.Default.DeleteForever,

@@ -32,6 +32,7 @@ import ireader.domain.services.tts_service.piper.VoiceModel
 import kotlin.math.roundToInt
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Composable that displays a list of available voice models with metadata
@@ -52,6 +53,7 @@ fun VoiceModelSelector(
     onDeleteModel: (VoiceModel) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -62,7 +64,7 @@ fun VoiceModelSelector(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Voice Models",
+                text = localizeHelper.localize(Res.string.voice_models),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -72,7 +74,7 @@ fun VoiceModelSelector(
             
             if (models.isEmpty()) {
                 Text(
-                    text = "No voice models available",
+                    text = localizeHelper.localize(Res.string.no_voice_models_available),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 16.dp)

@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Settings component for reading break reminders
@@ -59,7 +60,7 @@ fun ReadingBreakSettings(
                 tint = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Reading Break Reminder",
+                text = localizeHelper.localize(Res.string.reading_break_reminder),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -73,11 +74,11 @@ fun ReadingBreakSettings(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Enable Reminders",
+                    text = localizeHelper.localize(Res.string.enable_reminders),
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = "Get gentle reminders to rest your eyes",
+                    text = localizeHelper.localize(Res.string.get_gentle_reminders_to_rest_your_eyes),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -93,7 +94,7 @@ fun ReadingBreakSettings(
             Divider()
             
             Text(
-                text = "Reminder Interval",
+                text = localizeHelper.localize(Res.string.reminder_interval),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -124,7 +125,7 @@ fun ReadingBreakSettings(
             
             // Info text
             Text(
-                text = "You'll receive a gentle reminder after reading continuously for the selected duration.",
+                text = localizeHelper.localize(Res.string.youll_receive_a_gentle_reminder),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp)
@@ -157,7 +158,7 @@ fun ReadingBreakSettingsCompact(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Reading Break Reminder",
+                text = localizeHelper.localize(Res.string.reading_break_reminder),
                 style = MaterialTheme.typography.bodyMedium
             )
             Switch(

@@ -253,6 +253,7 @@ private fun SourceInformationSection(
     catalog: Catalog,
     modifier: Modifier = Modifier,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -296,7 +297,7 @@ private fun SourceInformationSection(
             if (catalog is CatalogInstalled) {
                 SourceInfoListItem(
                     icon = Icons.Default.Apps,
-                    label = "Package Name",
+                    label = localizeHelper.localize(Res.string.package_name),
                     value = catalog.pkgName
                 )
             }
@@ -308,7 +309,7 @@ private fun SourceInformationSection(
             }
             SourceInfoListItem(
                 icon = Icons.Default.Description,
-                label = "Description",
+                label = localizeHelper.localize(Res.string.description),
                 value = description
             )
         }
@@ -320,6 +321,7 @@ private fun SourceStatisticsSection(
     catalog: CatalogInstalled,
     modifier: Modifier = Modifier,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -329,7 +331,7 @@ private fun SourceStatisticsSection(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Statistics",
+                text = localizeHelper.localize(Res.string.statistics),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
@@ -337,20 +339,20 @@ private fun SourceStatisticsSection(
             
             SourceInfoListItem(
                 icon = Icons.Default.Numbers,
-                label = "Version Code",
+                label = localizeHelper.localize(Res.string.version_code),
                 value = catalog.versionCode.toString()
             )
             
             SourceInfoListItem(
                 icon = Icons.Default.Update,
-                label = "Version Name",
+                label = localizeHelper.localize(Res.string.version_name),
                 value = catalog.versionName
             )
             
             // Add more statistics as needed
             SourceInfoListItem(
                 icon = Icons.Default.Source,
-                label = "Source ID",
+                label = localizeHelper.localize(Res.string.source_id),
                 value = catalog.sourceId.toString()
             )
         }
@@ -363,6 +365,7 @@ private fun SourceActionsSection(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val reportBrokenSourceUseCase: ReportBrokenSourceUseCase = koinInject()
     val scope = rememberCoroutineScope()
     
@@ -378,7 +381,7 @@ private fun SourceActionsSection(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Actions",
+                text = localizeHelper.localize(Res.string.actions),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
@@ -386,7 +389,7 @@ private fun SourceActionsSection(
             
             // Report as broken button
             ActionButton(
-                title = "Report as Broken",
+                title = localizeHelper.localize(Res.string.report_as_broken),
                 icon = Icons.Default.BugReport,
                 onClick = { showReportDialog = true },
                 enabled = !isReporting && catalog is CatalogInstalled,
@@ -557,7 +560,7 @@ private fun EnhancedReportSourceDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Report Source Issue",
+                text = localizeHelper.localize(Res.string.report_source_issue),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -567,13 +570,13 @@ private fun EnhancedReportSourceDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Help us improve \"$sourceName\" by reporting the issue you're experiencing.",
+                    text = localizeHelper.localize(Res.string.help_us_improve)+ "$sourceName\" by reporting the issue you're experiencing.",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
                 // Category selection
                 Text(
-                    text = "Issue Category:",
+                    text = localizeHelper.localize(Res.string.issue_category),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -597,7 +600,7 @@ private fun EnhancedReportSourceDialog(
                 
                 // Description
                 Text(
-                    text = "Additional Details:",
+                    text = localizeHelper.localize(Res.string.additional_details),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -612,7 +615,7 @@ private fun EnhancedReportSourceDialog(
                 )
                 
                 Text(
-                    text = "Your report will help improve the source for all users.",
+                    text = localizeHelper.localize(Res.string.your_report_will_help_improve),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -620,7 +623,7 @@ private fun EnhancedReportSourceDialog(
         },
         confirmButton = {
             ActionButton(
-                title = "Submit Report",
+                title = localizeHelper.localize(Res.string.submit_report),
                 icon = Icons.Default.Send,
                 onClick = { 
                     val fullReason = if (selectedCategory.isNotEmpty()) {
@@ -635,7 +638,7 @@ private fun EnhancedReportSourceDialog(
         },
         dismissButton = {
             TextActionButton(
-                title = "Cancel",
+                title = localizeHelper.localize(Res.string.cancel),
                 onClick = onDismiss
             )
         }

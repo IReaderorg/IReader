@@ -20,6 +20,7 @@ import ireader.presentation.ui.home.updates.UpdateScreen
 import ireader.presentation.ui.home.updates.component.UpdatesToolbar
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 import kotlinx.coroutines.launch
+import ireader.i18n.resources.Res
 
 
 object UpdateScreenSpec : Tab {

@@ -523,7 +523,7 @@ fun DownloadScreenItem(
                     
                     isPaused -> {
                         Text(
-                            text = "Paused",
+                            text = localizeHelper.localize(Res.string.paused),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 4.dp)
@@ -532,7 +532,7 @@ fun DownloadScreenItem(
                     
                     isCompleted -> {
                         Text(
-                            text = "Downloaded",
+                            text = localizeHelper.localize(Res.string.downloaded),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(top = 4.dp)

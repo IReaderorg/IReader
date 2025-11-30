@@ -20,6 +20,7 @@ import ireader.presentation.ui.home.sources.extension.LanguageChoice
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Modern language filter with collapsible design
@@ -64,7 +65,7 @@ fun ModernLanguageFilter(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "Language Filter",
+                        text = localizeHelper.localize(Res.string.language_filter),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface

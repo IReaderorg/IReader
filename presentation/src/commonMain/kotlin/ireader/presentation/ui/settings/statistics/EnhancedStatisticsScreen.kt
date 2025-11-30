@@ -19,6 +19,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Enhanced statistics screen with comprehensive analytics and discovery features
@@ -112,6 +113,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
     @Composable
     private fun OverviewTab(state: StatsScreenModel.State) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -119,7 +121,7 @@ class EnhancedStatisticsScreen : KoinComponent {
         ) {
             item {
                 Text(
-                    text = "Library Overview",
+                    text = localizeHelper.localize(Res.string.library_overview),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -132,13 +134,13 @@ class EnhancedStatisticsScreen : KoinComponent {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     StatCard(
-                        title = "Total Books",
+                        title = localizeHelper.localize(Res.string.total_books),
                         value = state.libraryInsights.totalBooks.toString(),
                         icon = Icons.Default.MenuBook,
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
-                        title = "In Library",
+                        title = localizeHelper.localize(Res.string.in_library_1),
                         value = state.libraryInsights.booksInLibrary.toString(),
                         icon = Icons.Default.Favorite,
                         modifier = Modifier.weight(1f)
@@ -152,13 +154,13 @@ class EnhancedStatisticsScreen : KoinComponent {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     StatCard(
-                        title = "Completed",
+                        title = localizeHelper.localize(Res.string.completed),
                         value = state.libraryInsights.booksCompleted.toString(),
                         icon = Icons.Default.CheckCircle,
                         modifier = Modifier.weight(1f)
                     )
                     StatCard(
-                        title = "In Progress",
+                        title = localizeHelper.localize(Res.string.in_progress),
                         value = state.libraryInsights.booksInProgress.toString(),
                         icon = Icons.Default.AutoStories,
                         modifier = Modifier.weight(1f)
@@ -174,7 +176,7 @@ class EnhancedStatisticsScreen : KoinComponent {
             if (state.libraryInsights.genreDistribution.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Top Genres",
+                        text = localizeHelper.localize(Res.string.top_genres),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(top = 8.dp)
@@ -190,7 +192,7 @@ class EnhancedStatisticsScreen : KoinComponent {
             if (state.libraryInsights.topAuthors.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Top Authors",
+                        text = localizeHelper.localize(Res.string.top_authors),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(top = 8.dp)
@@ -206,6 +208,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
     @Composable
     private fun AnalyticsTab(state: StatsScreenModel.State) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -213,7 +216,7 @@ class EnhancedStatisticsScreen : KoinComponent {
         ) {
             item {
                 Text(
-                    text = "Reading Analytics",
+                    text = localizeHelper.localize(Res.string.reading_analytics),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -221,7 +224,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
             item {
                 StatCard(
-                    title = "Total Reading Time",
+                    title = localizeHelper.localize(Res.string.total_reading_time),
                     value = formatReadingTime(state.readingAnalytics.totalReadingTimeMinutes),
                     icon = Icons.Default.Schedule
                 )
@@ -229,7 +232,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
             item {
                 StatCard(
-                    title = "Reading Speed",
+                    title = localizeHelper.localize(Res.string.reading_speed),
                     value = "${state.readingAnalytics.averageReadingSpeedWPM} WPM",
                     icon = Icons.Default.Speed
                 )
@@ -237,7 +240,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
             item {
                 StatCard(
-                    title = "Words Read",
+                    title = localizeHelper.localize(Res.string.words_read),
                     value = formatNumber(state.readingAnalytics.totalWordsRead),
                     icon = Icons.Default.Article
                 )
@@ -245,7 +248,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
             item {
                 StatCard(
-                    title = "Reading Streak",
+                    title = localizeHelper.localize(Res.string.reading_streak),
                     value = "${state.libraryInsights.readingPatterns.readingStreak} days",
                     icon = Icons.Default.LocalFireDepartment
                 )
@@ -255,7 +258,7 @@ class EnhancedStatisticsScreen : KoinComponent {
             if (state.readingAnalytics.readingSessions.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Recent Sessions",
+                        text = localizeHelper.localize(Res.string.recent_sessions),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(top = 8.dp)
@@ -271,6 +274,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
     @Composable
     private fun UpcomingTab(state: StatsScreenModel.State) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -278,7 +282,7 @@ class EnhancedStatisticsScreen : KoinComponent {
         ) {
             item {
                 Text(
-                    text = "Upcoming Releases",
+                    text = localizeHelper.localize(Res.string.upcoming_releases),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -301,6 +305,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
     @Composable
     private fun RecommendationsTab(state: StatsScreenModel.State) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -308,7 +313,7 @@ class EnhancedStatisticsScreen : KoinComponent {
         ) {
             item {
                 Text(
-                    text = "Recommended for You",
+                    text = localizeHelper.localize(Res.string.recommended_for_you),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -339,7 +344,7 @@ class EnhancedStatisticsScreen : KoinComponent {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Global Search",
+                text = localizeHelper.localize(Res.string.global_search),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -392,7 +397,7 @@ class EnhancedStatisticsScreen : KoinComponent {
         ) {
             item {
                 Text(
-                    text = "Advanced Filters",
+                    text = localizeHelper.localize(Res.string.advanced_filters),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -405,7 +410,7 @@ class EnhancedStatisticsScreen : KoinComponent {
             // Genre filters
             item {
                 Text(
-                    text = "Genres",
+                    text = localizeHelper.localize(Res.string.genres),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -418,7 +423,7 @@ class EnhancedStatisticsScreen : KoinComponent {
             // Author filters
             item {
                 Text(
-                    text = "Authors",
+                    text = localizeHelper.localize(Res.string.authors),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -485,6 +490,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
     @Composable
     private fun CompletionRateCard(completionRate: Float) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -496,7 +502,7 @@ class EnhancedStatisticsScreen : KoinComponent {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Completion Rate",
+                    text = localizeHelper.localize(Res.string.completion_rate),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -805,7 +811,7 @@ class EnhancedStatisticsScreen : KoinComponent {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Error",
+                text = localizeHelper.localize(Res.string.download_notifier_title_error),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )

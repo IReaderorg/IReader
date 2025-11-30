@@ -20,6 +20,7 @@ import ireader.domain.models.BookCover
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun IBookImageComposable(

@@ -16,6 +16,7 @@ import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,20 +73,20 @@ fun AndroidTTSMManagerSettingsScreen(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = "Recommended: Sherpa TTS App",
+                                text = localizeHelper.localize(Res.string.recommended_sherpa_tts_app),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                         
                         Text(
-                            text = "For more powerful and natural-sounding voices on Android, install the Sherpa TTS app from the Play Store or F-Droid.",
+                            text = localizeHelper.localize(Res.string.for_more_powerful_and_natural),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         
                         Text(
-                            text = "✓ High-quality neural voices\n✓ Works offline\n✓ Multiple languages\n✓ Integrates with Android TTS",
+                            text = localizeHelper.localize(Res.string.high_quality_neural_voicesn_works),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -93,7 +94,7 @@ fun AndroidTTSMManagerSettingsScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         
                         Text(
-                            text = "Once installed, go to Android Settings → Accessibility → Text-to-speech → Preferred engine and select Sherpa TTS.",
+                            text = localizeHelper.localize(Res.string.once_installed_go_to_android),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
@@ -107,7 +108,7 @@ fun AndroidTTSMManagerSettingsScreen(
                 item {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     Text(
-                        text = "Online TTS Engines",
+                        text = localizeHelper.localize(Res.string.online_tts_engines),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -143,17 +144,17 @@ fun AndroidTTSMManagerSettingsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Native Android TTS",
+                            text = localizeHelper.localize(Res.string.native_android_tts),
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "IReader uses your device's built-in Text-to-Speech engine. You can configure voices in Android Settings → Accessibility → Text-to-speech.",
+                            text = localizeHelper.localize(Res.string.ireader_uses_your_devices_built),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "✓ System integration • ✓ Multiple engines supported • ✓ No downloads needed",
+                            text = localizeHelper.localize(Res.string.system_integration_multiple_engines_supported),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )

@@ -126,7 +126,7 @@ fun DesktopReaderScreenTopBar(
                             }
                         ) {
                             Text(
-                                text = "Aa",
+                                text = localizeHelper.localize(Res.string.aa),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground

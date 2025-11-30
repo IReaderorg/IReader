@@ -31,6 +31,7 @@ fun SettingsNotificationScreen(
     viewModel: SettingsNotificationViewModel,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberSaveable(
         key = "settings_notification_scroll_state",
         saver = LazyListState.Saver
@@ -60,7 +61,7 @@ fun SettingsNotificationScreen(
         modifier = modifier,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Notifications",
+                title = localizeHelper.localize(Res.string.notifications),
                 popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
@@ -77,14 +78,14 @@ fun SettingsNotificationScreen(
             // Library Notifications Section
             item {
                 SettingsSectionHeader(
-                    title = "Library Notifications",
+                    title = localizeHelper.localize(Res.string.library_notifications),
                     icon = Icons.Outlined.LibraryBooks
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Library Update Progress",
+                    title = localizeHelper.localize(Res.string.library_update_progress),
                     description = "Show progress when updating library",
                     icon = Icons.Outlined.Update,
                     checked = libraryUpdateNotifications,
@@ -94,7 +95,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "New Chapter Notifications",
+                    title = localizeHelper.localize(Res.string.new_chapter_notifications),
                     description = "Notify when new chapters are found",
                     icon = Icons.Outlined.NewReleases,
                     checked = newChapterNotifications,
@@ -105,14 +106,14 @@ fun SettingsNotificationScreen(
             // Download Notifications Section
             item {
                 SettingsSectionHeader(
-                    title = "Download Notifications",
+                    title = localizeHelper.localize(Res.string.download_notifications),
                     icon = Icons.Outlined.Download
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Download Progress",
+                    title = localizeHelper.localize(Res.string.download_progress),
                     description = "Show progress for active downloads",
                     icon = Icons.Outlined.Download,
                     checked = downloadProgressNotifications,
@@ -122,7 +123,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Download Complete",
+                    title = localizeHelper.localize(Res.string.download_complete),
                     description = "Notify when downloads finish",
                     icon = Icons.Outlined.DownloadDone,
                     checked = downloadCompleteNotifications,
@@ -133,14 +134,14 @@ fun SettingsNotificationScreen(
             // System Notifications Section
             item {
                 SettingsSectionHeader(
-                    title = "System Notifications",
+                    title = localizeHelper.localize(Res.string.system_notifications_1),
                     icon = Icons.Outlined.Settings
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Backup & Restore",
+                    title = localizeHelper.localize(Res.string.backup_restore),
                     description = "Notify about backup and restore operations",
                     icon = Icons.Outlined.SettingsBackupRestore,
                     checked = backupNotifications,
@@ -150,7 +151,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "App Updates",
+                    title = localizeHelper.localize(Res.string.app_updates),
                     description = "Notify when app updates are available",
                     icon = Icons.Outlined.SystemUpdate,
                     checked = appUpdateNotifications,
@@ -160,7 +161,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Extension Updates",
+                    title = localizeHelper.localize(Res.string.extension_updates),
                     description = "Notify when extension updates are available",
                     icon = Icons.Outlined.Extension,
                     checked = extensionUpdateNotifications,
@@ -170,7 +171,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Error Notifications",
+                    title = localizeHelper.localize(Res.string.error_notifications),
                     description = "Show notifications for errors and failures",
                     icon = Icons.Outlined.Error,
                     checked = errorNotifications,
@@ -181,14 +182,14 @@ fun SettingsNotificationScreen(
             // Notification Behavior Section
             item {
                 SettingsSectionHeader(
-                    title = "Notification Behavior",
+                    title = localizeHelper.localize(Res.string.notification_behavior),
                     icon = Icons.Outlined.NotificationsActive
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Sound",
+                    title = localizeHelper.localize(Res.string.sound),
                     description = "Play sound for notifications",
                     icon = Icons.Outlined.VolumeUp,
                     checked = notificationSound,
@@ -198,7 +199,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Vibration",
+                    title = localizeHelper.localize(Res.string.vibration),
                     description = "Vibrate for notifications",
                     icon = Icons.Outlined.Vibration,
                     checked = notificationVibration,
@@ -208,7 +209,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "LED Light",
+                    title = localizeHelper.localize(Res.string.led_light),
                     description = "Flash LED for notifications (if available)",
                     icon = Icons.Outlined.Lightbulb,
                     checked = notificationLED,
@@ -218,7 +219,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Group Notifications",
+                    title = localizeHelper.localize(Res.string.group_notifications),
                     description = "Group similar notifications together",
                     icon = Icons.Outlined.Group,
                     checked = groupNotifications,
@@ -229,14 +230,14 @@ fun SettingsNotificationScreen(
             // Quiet Hours Section
             item {
                 SettingsSectionHeader(
-                    title = "Quiet Hours",
+                    title = localizeHelper.localize(Res.string.quiet_hours),
                     icon = Icons.Outlined.DoNotDisturb
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Enable Quiet Hours",
+                    title = localizeHelper.localize(Res.string.enable_quiet_hours),
                     description = "Suppress notifications during specified hours",
                     icon = Icons.Outlined.DoNotDisturb,
                     checked = quietHoursEnabled,
@@ -246,7 +247,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Start Time",
+                    title = localizeHelper.localize(Res.string.start_time),
                     description = "When quiet hours begin",
                     icon = Icons.Outlined.Schedule,
                     onClick = { viewModel.showQuietHoursStartDialog() },
@@ -266,7 +267,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "End Time",
+                    title = localizeHelper.localize(Res.string.end_time),
                     description = "When quiet hours end",
                     icon = Icons.Outlined.Schedule,
                     onClick = { viewModel.showQuietHoursEndDialog() },
@@ -287,14 +288,14 @@ fun SettingsNotificationScreen(
             // Advanced Section
             item {
                 SettingsSectionHeader(
-                    title = "Advanced",
+                    title = localizeHelper.localize(Res.string.advanced),
                     icon = Icons.Outlined.Tune
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Notification Channels",
+                    title = localizeHelper.localize(Res.string.notification_channels),
                     description = "Manage system notification channels",
                     icon = Icons.Outlined.Tune,
                     onClick = { viewModel.openNotificationChannelSettings() }
@@ -303,7 +304,7 @@ fun SettingsNotificationScreen(
             
             item {
                 SettingsItem(
-                    title = "Test Notifications",
+                    title = localizeHelper.localize(Res.string.test_notifications),
                     description = "Send test notifications to verify settings",
                     icon = Icons.Outlined.Send,
                     onClick = { viewModel.sendTestNotifications() }
@@ -315,7 +316,7 @@ fun SettingsNotificationScreen(
     // Quiet Hours Start Time Dialog
     if (viewModel.showQuietHoursStartDialog) {
         TimePickerDialog(
-            title = "Quiet Hours Start",
+            title = localizeHelper.localize(Res.string.quiet_hours_start),
             initialTime = quietHoursStart,
             onTimeSelected = { time ->
                 viewModel.setQuietHoursStart(time)
@@ -328,7 +329,7 @@ fun SettingsNotificationScreen(
     // Quiet Hours End Time Dialog
     if (viewModel.showQuietHoursEndDialog) {
         TimePickerDialog(
-            title = "Quiet Hours End",
+            title = localizeHelper.localize(Res.string.quiet_hours_end),
             initialTime = quietHoursEnd,
             onTimeSelected = { time ->
                 viewModel.setQuietHoursEnd(time)
@@ -356,7 +357,7 @@ private fun TimePickerDialog(
         text = {
             Column {
                 Text(
-                    text = "Select time:",
+                    text = localizeHelper.localize(Res.string.select_time),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )

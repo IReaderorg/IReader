@@ -200,7 +200,7 @@ internal fun AddingRepositoryScreen(
                 ) {
                     HorizontalDivider(modifier = Modifier.weight(1f))
                     Text(
-                        text = "OR",
+                        text = localizeHelper.localize(Res.string.or),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -214,7 +214,7 @@ internal fun AddingRepositoryScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Repository Type",
+                        text = localizeHelper.localize(Res.string.repository_type),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -295,7 +295,7 @@ internal fun AddingRepositoryScreen(
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Text(
-                                        text = "Important: you need to enable JS plugin feature in general screen",
+                                        text = localizeHelper.localize(Res.string.important_you_need_to_enable),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.error,
                                         fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
@@ -310,7 +310,7 @@ internal fun AddingRepositoryScreen(
             // Required fields section
             item {
                 Text(
-                    text = "Required Information",
+                    text = localizeHelper.localize(Res.string.required_information),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 8.dp)
@@ -353,7 +353,7 @@ internal fun AddingRepositoryScreen(
             // Optional fields section
             item {
                 Text(
-                    text = "Optional Information",
+                    text = localizeHelper.localize(Res.string.optional_information),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
@@ -404,7 +404,7 @@ internal fun AddingRepositoryScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Authentication (Optional)",
+                        text = localizeHelper.localize(Res.string.authentication_optional),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -478,7 +478,7 @@ internal fun AddingRepositoryScreen(
             },
             title = {
                 Text(
-                    text = "Quick Add Repository",
+                    text = localizeHelper.localize(Res.string.quick_add_repository),
                     style = MaterialTheme.typography.headlineSmall
                 )
             },
@@ -586,7 +586,7 @@ internal fun AddingRepositoryScreen(
                             modifier = Modifier.padding(12.dp)
                         ) {
                             Text(
-                                text = "Example URL:",
+                                text = localizeHelper.localize(Res.string.example_url),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
@@ -627,7 +627,7 @@ internal fun AddingRepositoryScreen(
             },
             title = {
                 Text(
-                    text = "Enable JavaScript Plugins",
+                    text = localizeHelper.localize(Res.string.enable_javascript_plugins),
                     style = MaterialTheme.typography.headlineSmall
                 )
             },
@@ -636,7 +636,7 @@ internal fun AddingRepositoryScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "LNReader repositories require JavaScript plugins to be enabled.",
+                        text = localizeHelper.localize(Res.string.lnreader_repositories_require_javascript_plugins),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -651,13 +651,13 @@ internal fun AddingRepositoryScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "To enable JS plugins:",
+                                text = localizeHelper.localize(Res.string.to_enable_js_plugins),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
                             )
                             Text(
-                                text = "1. Go to Settings → General\n2. Toggle \"Enable JavaScript Plugins\"",
+                                text = localizeHelper.localize(Res.string.go_to_settings_generaln2_toggle),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

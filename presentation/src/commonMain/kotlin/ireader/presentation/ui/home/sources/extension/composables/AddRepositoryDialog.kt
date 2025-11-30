@@ -28,7 +28,7 @@ fun AddRepositoryDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Add Repository")
+            Text(text = localizeHelper.localize(Res.string.add_repository))
         },
         text = {
             Column(
@@ -36,7 +36,7 @@ fun AddRepositoryDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Enter the URL of the repository you want to add. The repository should contain an index.min.json file with available sources.",
+                    text = localizeHelper.localize(Res.string.enter_the_url_of_the),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -53,7 +53,7 @@ fun AddRepositoryDialog(
                     supportingText = {
                         if (!isValidUrl && repositoryUrl.isNotBlank()) {
                             Text(
-                                text = "Please enter a valid URL",
+                                text = localizeHelper.localize(Res.string.please_enter_a_valid_url),
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
@@ -62,7 +62,7 @@ fun AddRepositoryDialog(
                 )
                 
                 Text(
-                    text = "Example: https://raw.githubusercontent.com/username/repo/main/index.min.json",
+                    text = localizeHelper.localize(Res.string.example_httpsrawgithubusercontentcomusernamerepomainindexminjson),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

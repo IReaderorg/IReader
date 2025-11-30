@@ -61,7 +61,7 @@ fun SettingsTrackingScreen(
         modifier = modifier,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Tracking",
+                title = localizeHelper.localize(Res.string.tracking),
                 popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
@@ -78,7 +78,7 @@ fun SettingsTrackingScreen(
             // Tracking Services Section
             item {
                 SettingsSectionHeader(
-                    title = "Tracking Services",
+                    title = localizeHelper.localize(Res.string.tracking_services),
                     icon = Icons.Outlined.Sync
                 )
             }
@@ -142,14 +142,14 @@ fun SettingsTrackingScreen(
             // Auto-Sync Section
             item {
                 SettingsSectionHeader(
-                    title = "Auto-Sync",
+                    title = localizeHelper.localize(Res.string.auto_sync_1),
                     icon = Icons.Outlined.AutoMode
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Enable Auto-Sync",
+                    title = localizeHelper.localize(Res.string.enable_auto_sync),
                     description = "Automatically sync reading progress with tracking services",
                     icon = Icons.Outlined.AutoMode,
                     checked = autoSyncEnabled,
@@ -159,7 +159,7 @@ fun SettingsTrackingScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Sync Interval",
+                    title = localizeHelper.localize(Res.string.sync_interval),
                     description = "How often to sync with tracking services",
                     icon = Icons.Outlined.Schedule,
                     onClick = { viewModel.showSyncIntervalDialog() },
@@ -188,7 +188,7 @@ fun SettingsTrackingScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Sync Only Over WiFi",
+                    title = localizeHelper.localize(Res.string.sync_only_over_wifi),
                     description = "Restrict syncing to WiFi connections only",
                     icon = Icons.Outlined.Wifi,
                     checked = syncOnlyOverWifi,
@@ -200,14 +200,14 @@ fun SettingsTrackingScreen(
             // Auto-Update Section
             item {
                 SettingsSectionHeader(
-                    title = "Auto-Update",
+                    title = localizeHelper.localize(Res.string.auto_update_2),
                     icon = Icons.Outlined.Update
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Auto-Update Status",
+                    title = localizeHelper.localize(Res.string.auto_update_status),
                     description = "Automatically update reading status (reading, completed, etc.)",
                     icon = Icons.Outlined.PlaylistAddCheck,
                     checked = autoUpdateStatus,
@@ -218,7 +218,7 @@ fun SettingsTrackingScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Auto-Update Progress",
+                    title = localizeHelper.localize(Res.string.auto_update_progress),
                     description = "Automatically update chapter progress",
                     icon = Icons.Outlined.TrendingUp,
                     checked = autoUpdateProgress,
@@ -229,7 +229,7 @@ fun SettingsTrackingScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Auto-Update Score",
+                    title = localizeHelper.localize(Res.string.auto_update_score),
                     description = "Automatically sync ratings and scores",
                     icon = Icons.Outlined.Star,
                     checked = autoUpdateScore,
@@ -241,14 +241,14 @@ fun SettingsTrackingScreen(
             // Advanced Section
             item {
                 SettingsSectionHeader(
-                    title = "Advanced",
+                    title = localizeHelper.localize(Res.string.advanced),
                     icon = Icons.Outlined.Tune
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Sync History",
+                    title = localizeHelper.localize(Res.string.sync_history),
                     description = "View sync history and resolve conflicts",
                     icon = Icons.Outlined.History,
                     onClick = { viewModel.navigateToSyncHistory() }
@@ -257,7 +257,7 @@ fun SettingsTrackingScreen(
             
             item {
                 SettingsItem(
-                    title = "Manual Sync",
+                    title = localizeHelper.localize(Res.string.manual_sync),
                     description = "Force sync all tracked books now",
                     icon = Icons.Outlined.Sync,
                     onClick = { viewModel.performManualSync() }
@@ -266,7 +266,7 @@ fun SettingsTrackingScreen(
             
             item {
                 SettingsItem(
-                    title = "Clear Sync Data",
+                    title = localizeHelper.localize(Res.string.clear_sync_data),
                     description = "Remove all tracking data and start fresh",
                     icon = Icons.Outlined.ClearAll,
                     onClick = { viewModel.showClearSyncDataDialog() }

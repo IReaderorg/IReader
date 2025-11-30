@@ -15,6 +15,7 @@ import ireader.domain.services.tts_service.GradioParamType
 import ireader.domain.services.tts_service.GradioTTSConfig
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog for editing Gradio TTS configurations
@@ -117,7 +118,7 @@ fun GradioConfigEditDialog(
                 // Parameters section
                 item {
                     Text(
-                        text = "Parameters",
+                        text = localizeHelper.localize(Res.string.parameters),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary
                     )

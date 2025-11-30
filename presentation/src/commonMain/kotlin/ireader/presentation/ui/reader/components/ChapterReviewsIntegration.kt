@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Integration component for chapter reviews with bottom sheet
@@ -150,7 +151,7 @@ fun ChapterReviewsIntegration(
                         )
                     } else {
                         Text(
-                            text = "No reviews",
+                            text = localizeHelper.localize(Res.string.no_reviews),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -216,7 +217,7 @@ fun ChapterReviewsIntegration(
                         }
                     }
                 },
-                title = "Review Chapter"
+                title = localizeHelper.localize(Res.string.review_chapter)
             )
         }
     }

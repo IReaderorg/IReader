@@ -20,6 +20,7 @@ import ireader.domain.services.tts.VoiceSourceType
 import ireader.domain.services.tts.VoiceWithSource
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Enhanced voice selector that supports both built-in and plugin voices
@@ -33,6 +34,7 @@ fun PluginVoiceSelector(
     onConfigurationChanged: (VoiceConfiguration) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -44,7 +46,7 @@ fun PluginVoiceSelector(
         ) {
             // Header
             Text(
-                text = "Voice Selection",
+                text = localizeHelper.localize(Res.string.voice_selection),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -81,7 +83,7 @@ fun PluginVoiceSelector(
                 
                 if (filteredVoices.isEmpty()) {
                     Text(
-                        text = "No voices available",
+                        text = localizeHelper.localize(Res.string.no_voices_available),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -198,6 +200,7 @@ private fun VoiceItem(
     onSelect: () -> Unit,
     onPreview: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -245,7 +248,7 @@ private fun VoiceItem(
                                 shape = MaterialTheme.shapes.extraSmall
                             ) {
                                 Text(
-                                    text = "Built-in",
+                                    text = localizeHelper.localize(Res.string.built_in),
                                     style = MaterialTheme.typography.labelSmall,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
@@ -340,18 +343,19 @@ private fun VoiceConfigurationSection(
     configuration: VoiceConfiguration,
     onConfigurationChanged: (VoiceConfiguration) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Voice Settings",
+            text = localizeHelper.localize(Res.string.voice_settings),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
         
         // Speed slider
         ConfigurationSlider(
-            label = "Speed",
+            label = localizeHelper.localize(Res.string.speed),
             value = configuration.speed,
             valueRange = VoiceConfiguration.MIN_SPEED..VoiceConfiguration.MAX_SPEED,
             onValueChange = { onConfigurationChanged(configuration.copy(speed = it)) }
@@ -359,7 +363,7 @@ private fun VoiceConfigurationSection(
         
         // Pitch slider
         ConfigurationSlider(
-            label = "Pitch",
+            label = localizeHelper.localize(Res.string.pitch),
             value = configuration.pitch,
             valueRange = VoiceConfiguration.MIN_PITCH..VoiceConfiguration.MAX_PITCH,
             onValueChange = { onConfigurationChanged(configuration.copy(pitch = it)) }
@@ -367,7 +371,7 @@ private fun VoiceConfigurationSection(
         
         // Volume slider
         ConfigurationSlider(
-            label = "Volume",
+            label = localizeHelper.localize(Res.string.volume),
             value = configuration.volume,
             valueRange = VoiceConfiguration.MIN_VOLUME..VoiceConfiguration.MAX_VOLUME,
             onValueChange = { onConfigurationChanged(configuration.copy(volume = it)) }
@@ -380,7 +384,7 @@ private fun VoiceConfigurationSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Enable Streaming",
+                text = localizeHelper.localize(Res.string.enable_streaming),
                 style = MaterialTheme.typography.bodyMedium
             )
             Switch(

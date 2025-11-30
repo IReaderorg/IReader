@@ -13,6 +13,8 @@ import ireader.presentation.core.ui.EmptyScreenAction
 import ireader.presentation.core.ui.IReaderEmptyScreen
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +33,7 @@ fun EmptyScreenComposable(errorResId: UiText, onPopBackStack: () -> Unit) {
             modifier = Modifier.padding(padding),
             actions = listOf(
                 EmptyScreenAction(
-                    title = "Go Back",
+                    title = localizeHelper.localize(Res.string.go_back),
                     icon = Icons.Default.Refresh,
                     onClick = onPopBackStack
                 )

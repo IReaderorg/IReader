@@ -14,6 +14,9 @@ import ireader.domain.models.entities.UpdatesWithRelations
 import ireader.core.util.asRelativeTimeString
 import ireader.presentation.ui.component.text_related.TextSection
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -24,6 +27,7 @@ fun UpdatesContent(
         onClickCover: (UpdatesWithRelations) -> Unit,
         onClickDownload: (UpdatesWithRelations) -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             contentPadding = PaddingValues(
@@ -34,7 +38,7 @@ fun UpdatesContent(
             // New Updates Section
             if (state.updates.isNotEmpty()) {
                 item {
-                    TextSection(text = "New Updates")
+                    TextSection(text = localizeHelper.localize(Res.string.new_updates))
                 }
             }
             
@@ -62,7 +66,7 @@ fun UpdatesContent(
             // Update History Section
             if (state.updateHistory.isNotEmpty()) {
                 item {
-                    TextSection(text = "Update History")
+                    TextSection(text = localizeHelper.localize(Res.string.update_history))
                 }
                 items(
                     count = state.updateHistory.size

@@ -10,6 +10,7 @@ import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginMonetization
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Purchase dialog for premium plugins
@@ -48,7 +49,7 @@ fun PurchaseDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Price:",
+                        text = localizeHelper.localize(Res.string.price_1),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -70,7 +71,7 @@ fun PurchaseDialog(
                 }
                 
                 Text(
-                    text = "This purchase will be synced across all your devices.",
+                    text = localizeHelper.localize(Res.string.this_purchase_will_be_synced),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

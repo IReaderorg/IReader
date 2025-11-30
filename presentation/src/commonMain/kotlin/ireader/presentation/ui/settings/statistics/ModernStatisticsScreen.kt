@@ -34,6 +34,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.math.cos
 import kotlin.math.sin
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Modern, gamified statistics screen with charts and engaging UI
@@ -45,6 +48,7 @@ class ModernStatisticsScreen : KoinComponent {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val statistics by viewModel.statistics.collectAsState()
 
@@ -93,7 +97,7 @@ class ModernStatisticsScreen : KoinComponent {
                 // Circular Progress Charts
                 item {
                     Text(
-                        text = "Progress Overview",
+                        text = localizeHelper.localize(Res.string.progress_overview),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -107,7 +111,7 @@ class ModernStatisticsScreen : KoinComponent {
                 // Reading Activity Chart
                 item {
                     Text(
-                        text = "Reading Activity",
+                        text = localizeHelper.localize(Res.string.reading_activity),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -121,7 +125,7 @@ class ModernStatisticsScreen : KoinComponent {
                 // Achievements Section
                 item {
                     Text(
-                        text = "Achievements",
+                        text = localizeHelper.localize(Res.string.achievements),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -136,7 +140,7 @@ class ModernStatisticsScreen : KoinComponent {
                 if (statistics.favoriteGenres.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Favorite Genres",
+                            text = localizeHelper.localize(Res.string.favorite_genres),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp)
@@ -154,6 +158,7 @@ class ModernStatisticsScreen : KoinComponent {
 
 @Composable
 private fun GamificationHeroCard(statistics: ireader.domain.models.entities.ReadingStatisticsType1) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val level = calculateLevel(statistics.totalChaptersRead)
     val xpProgress = calculateXPProgress(statistics.totalChaptersRead)
     
@@ -195,7 +200,7 @@ private fun GamificationHeroCard(statistics: ireader.domain.models.entities.Read
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "LVL",
+                            text = localizeHelper.localize(Res.string.lvl),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onPrimary
                         )
@@ -239,6 +244,7 @@ private fun GamificationHeroCard(statistics: ireader.domain.models.entities.Read
 
 @Composable
 private fun QuickStatsGrid(statistics: ireader.domain.models.entities.ReadingStatisticsType1) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -246,7 +252,7 @@ private fun QuickStatsGrid(statistics: ireader.domain.models.entities.ReadingSta
         QuickStatCard(
             icon = Icons.AutoMirrored.Filled.MenuBook,
             value = statistics.totalChaptersRead.toString(),
-            label = "Chapters",
+            label = localizeHelper.localize(Res.string.chapters),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.weight(1f)
         )
@@ -254,7 +260,7 @@ private fun QuickStatsGrid(statistics: ireader.domain.models.entities.ReadingSta
         QuickStatCard(
             icon = Icons.Default.CheckCircle,
             value = statistics.booksCompleted.toString(),
-            label = "Completed",
+            label = localizeHelper.localize(Res.string.completed),
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.weight(1f)
         )
@@ -269,7 +275,7 @@ private fun QuickStatsGrid(statistics: ireader.domain.models.entities.ReadingSta
         QuickStatCard(
             icon = Icons.Default.Schedule,
             value = formatHours(statistics.totalReadingTimeMinutes),
-            label = "Hours",
+            label = localizeHelper.localize(Res.string.hours),
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.weight(1f)
         )
@@ -277,7 +283,7 @@ private fun QuickStatsGrid(statistics: ireader.domain.models.entities.ReadingSta
         QuickStatCard(
             icon = Icons.Default.Speed,
             value = "${statistics.averageReadingSpeedWPM}",
-            label = "WPM",
+            label = localizeHelper.localize(Res.string.reading_speed_wpm),
             color = MaterialTheme.colorScheme.error,
             modifier = Modifier.weight(1f)
         )
@@ -329,6 +335,7 @@ private fun QuickStatCard(
 
 @Composable
 private fun StreakCard(streak: Int) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -365,12 +372,12 @@ private fun StreakCard(streak: Int) {
                 )
                 Column {
                     Text(
-                        text = "Reading Streak",
+                        text = localizeHelper.localize(Res.string.reading_streak),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Keep it going!",
+                        text = localizeHelper.localize(Res.string.keep_it_going),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -389,6 +396,7 @@ private fun StreakCard(streak: Int) {
 
 @Composable
 private fun CircularChartsRow(statistics: ireader.domain.models.entities.ReadingStatisticsType1) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -397,7 +405,7 @@ private fun CircularChartsRow(statistics: ireader.domain.models.entities.Reading
             progress = if (statistics.booksCompleted + statistics.currentlyReading > 0) {
                 statistics.booksCompleted.toFloat() / (statistics.booksCompleted + statistics.currentlyReading).toFloat()
             } else 0f,
-            title = "Completion",
+            title = localizeHelper.localize(Res.string.completion),
             value = "${(if (statistics.booksCompleted + statistics.currentlyReading > 0) {
                 (statistics.booksCompleted.toFloat() / (statistics.booksCompleted + statistics.currentlyReading).toFloat() * 100).toInt()
             } else 0)}%",
@@ -407,7 +415,7 @@ private fun CircularChartsRow(statistics: ireader.domain.models.entities.Reading
         
         CircularProgressChart(
             progress = (statistics.readingStreak / 30f).coerceAtMost(1f),
-            title = "Monthly Goal",
+            title = localizeHelper.localize(Res.string.monthly_goal),
             value = "${statistics.readingStreak}/30",
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.weight(1f)
@@ -423,10 +431,11 @@ private fun CircularProgressChart(
     color: Color,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(durationMillis = 1000, easing = EaseOutCubic),
-        label = "progress"
+        label = localizeHelper.localize(Res.string.progress_1)
     )
     
     Card(
@@ -489,6 +498,7 @@ private fun CircularProgressChart(
 
 @Composable
 private fun ReadingActivityChart(statistics: ireader.domain.models.entities.ReadingStatisticsType1) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Simulated weekly data based on statistics
     val weeklyData = remember(statistics) {
         listOf(
@@ -517,7 +527,7 @@ private fun ReadingActivityChart(statistics: ireader.domain.models.entities.Read
                 .padding(16.dp)
         ) {
             Text(
-                text = "Last 7 Days",
+                text = localizeHelper.localize(Res.string.last_7_days),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -716,10 +726,11 @@ private fun GenreBar(
     maxCount: Int,
     color: Color
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = count.toFloat() / maxCount.toFloat(),
         animationSpec = tween(durationMillis = 800, easing = EaseOutCubic),
-        label = "genreProgress"
+        label = localizeHelper.localize(Res.string.genreprogress)
     )
     
     Column(
@@ -764,10 +775,11 @@ private fun AnimatedProgressBar(
     progress: Float,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(durationMillis = 1000, easing = EaseOutCubic),
-        label = "xpProgress"
+        label = localizeHelper.localize(Res.string.xpprogress)
     )
     
     Box(

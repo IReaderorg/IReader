@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog that reminds users to take a reading break with snooze functionality
@@ -50,7 +51,7 @@ fun ReadingBreakReminderDialog(
             onDismissRequest = { showSnoozeOptions = false },
             title = {
                 Text(
-                    text = "Snooze Reminder",
+                    text = localizeHelper.localize(Res.string.snooze_reminder),
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Center
                 )
@@ -61,7 +62,7 @@ fun ReadingBreakReminderDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Remind me again in:",
+                        text = localizeHelper.localize(Res.string.remind_me_again_in),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center
                     )
@@ -132,7 +133,7 @@ fun ReadingBreakReminderDialog(
             },
             title = {
                 Text(
-                    text = "Time for a Break!",
+                    text = localizeHelper.localize(Res.string.time_for_a_break),
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center
                 )
@@ -148,7 +149,7 @@ fun ReadingBreakReminderDialog(
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "Time to stretch your eyes and rest a bit! 👀",
+                        text = localizeHelper.localize(Res.string.time_to_stretch_your_eyes_and_rest_a_bit),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant

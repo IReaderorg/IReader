@@ -26,6 +26,7 @@ import ireader.presentation.ui.component.accessibility.AccessibilityUtils.access
 import ireader.core.log.IReaderLog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Accessibility-enhanced book list item following Mihon's patterns

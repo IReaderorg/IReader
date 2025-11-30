@@ -32,6 +32,9 @@ import ireader.domain.models.remote.UserBadge
 import ireader.presentation.ui.component.RatingStars
 import ireader.presentation.ui.component.ReviewCard
 import ireader.presentation.ui.component.WriteReviewDialog
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun ChapterReviewSection(
@@ -41,6 +44,7 @@ fun ChapterReviewSection(
     modifier: Modifier = Modifier,
     userBadgesMap: Map<String, List<UserBadge>> = emptyMap()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showWriteDialog by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     
@@ -64,7 +68,7 @@ fun ChapterReviewSection(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Chapter Reviews",
+                        text = localizeHelper.localize(Res.string.chapter_reviews),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -107,7 +111,7 @@ fun ChapterReviewSection(
             } else {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "No reviews for this chapter yet",
+                    text = localizeHelper.localize(Res.string.no_reviews_for_this_chapter_yet_1),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -119,7 +123,7 @@ fun ChapterReviewSection(
         WriteReviewDialog(
             onDismiss = { showWriteDialog = false },
             onSubmit = onWriteReview,
-            title = "Review Chapter"
+            title = localizeHelper.localize(Res.string.review_chapter)
         )
     }
 }

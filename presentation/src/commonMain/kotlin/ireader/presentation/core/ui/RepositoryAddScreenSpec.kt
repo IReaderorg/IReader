@@ -128,7 +128,7 @@ class RepositoryAddScreenSpec {
                                 text = it
                             },
                             label = {
-                                CaptionTextComposable(text = "please enter a valid repository URL")
+                                CaptionTextComposable(text = localizeHelper.localize(Res.string.please_enter_a_valid_repository_url))
                             },
                             maxLines = 5,
                             singleLine = true,

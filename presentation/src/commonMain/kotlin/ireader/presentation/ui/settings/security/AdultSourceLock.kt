@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog shown when user tries to access an 18+ source with adult source lock enabled
@@ -46,7 +47,7 @@ fun AdultSourceLockDialog(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "Authentication is required to access this source.",
+                    text = localizeHelper.localize(Res.string.authentication_is_required_to_access_this_source),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -84,6 +85,7 @@ fun AdultSourceLockDialog(
 fun AdultSourceIndicator(
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.small,
@@ -101,7 +103,7 @@ fun AdultSourceIndicator(
                 tint = MaterialTheme.colorScheme.onErrorContainer
             )
             Text(
-                text = "18+",
+                text = localizeHelper.localize(Res.string.eighteen),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )

@@ -6,6 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Indicator shown when updating all plugins
@@ -15,6 +18,7 @@ import androidx.compose.ui.unit.dp
 fun UpdatingAllIndicator(
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -36,7 +40,7 @@ fun UpdatingAllIndicator(
             Spacer(modifier = Modifier.width(12.dp))
             
             Text(
-                text = "Updating all plugins...",
+                text = localizeHelper.localize(Res.string.updating_all_plugins),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )

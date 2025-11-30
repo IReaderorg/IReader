@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Example implementation of BookDetailScreen using the new StateScreenModel pattern.
@@ -83,7 +84,7 @@ data class BookDetailScreenNew(
                 when {
                     vm.booksState.book == null && !vm.detailIsLoading -> {
                         EmptyScreen(
-                            text = "Book not found"
+                            text = localizeHelper.localize(Res.string.book_not_found)
                         )
                     }
                     
@@ -112,6 +113,7 @@ private fun BookDetailContent(
     isRefreshing: Boolean,
     isTogglingFavorite: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column {
         // Book information
         Text(
@@ -142,14 +144,14 @@ private fun BookDetailContent(
         // Status indicators
         if (isRefreshing) {
             Text(
-                text = "Refreshing...",
+                text = localizeHelper.localize(Res.string.refreshing_1),
                 modifier = Modifier.padding(1.dp)
             )
         }
         
         if (isTogglingFavorite) {
             Text(
-                text = "Updating favorite status...",
+                text = localizeHelper.localize(Res.string.updating_favorite_status),
                 modifier = Modifier.padding(1.dp)
             )
         }

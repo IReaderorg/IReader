@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Privacy settings screen for managing data collection and user consent
@@ -61,7 +62,7 @@ fun PrivacySettingsScreen(
             
             // Data collection settings
             PrivacySettingItem(
-                title = "Analytics",
+                title = localizeHelper.localize(Res.string.analytics),
                 description = "Help improve the app by sharing anonymous usage data",
                 icon = Icons.Default.Analytics,
                 checked = analyticsEnabled,
@@ -69,7 +70,7 @@ fun PrivacySettingsScreen(
             )
             
             PrivacySettingItem(
-                title = "Crash Reporting",
+                title = localizeHelper.localize(Res.string.crash_reporting),
                 description = "Automatically send crash reports to help fix bugs",
                 icon = Icons.Default.BugReport,
                 checked = crashReportingEnabled,
@@ -77,7 +78,7 @@ fun PrivacySettingsScreen(
             )
             
             PrivacySettingItem(
-                title = "Performance Monitoring",
+                title = localizeHelper.localize(Res.string.performance_monitoring),
                 description = "Track app performance to identify slow operations",
                 icon = Icons.Default.Speed,
                 checked = performanceMonitoringEnabled,
@@ -85,7 +86,7 @@ fun PrivacySettingsScreen(
             )
             
             PrivacySettingItem(
-                title = "Usage Statistics",
+                title = localizeHelper.localize(Res.string.usage_statistics),
                 description = "Collect statistics about feature usage",
                 icon = Icons.Default.BarChart,
                 checked = usageStatisticsEnabled,
@@ -93,7 +94,7 @@ fun PrivacySettingsScreen(
             )
             
             PrivacySettingItem(
-                title = "Diagnostic Data",
+                title = localizeHelper.localize(Res.string.diagnostic_data),
                 description = "Collect diagnostic data for troubleshooting",
                 icon = Icons.Default.Healing,
                 checked = diagnosticDataEnabled,
@@ -101,7 +102,7 @@ fun PrivacySettingsScreen(
             )
             
             PrivacySettingItem(
-                title = "Automatic Error Reporting",
+                title = localizeHelper.localize(Res.string.automatic_error_reporting),
                 description = "Automatically report errors when they occur",
                 icon = Icons.Default.ErrorOutline,
                 checked = autoErrorReportingEnabled,
@@ -109,7 +110,7 @@ fun PrivacySettingsScreen(
             )
             
             PrivacySettingItem(
-                title = "Anonymous Tracking",
+                title = localizeHelper.localize(Res.string.anonymous_tracking),
                 description = "Track app usage without identifying information",
                 icon = Icons.Default.VisibilityOff,
                 checked = anonymousTrackingEnabled,
@@ -137,13 +138,13 @@ fun PrivacySettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Your Privacy Matters",
+                                text = localizeHelper.localize(Res.string.your_privacy_matters),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "All data collection is optional and can be disabled at any time. " +
+                                text = localizeHelper.localize(Res.string.all_data_collection_is_optional) +
                                         "We never collect personally identifiable information without your explicit consent.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -171,14 +172,14 @@ private fun PrivacyModeSection(
             .padding(16.dp)
     ) {
         Text(
-            text = "Privacy Mode",
+            text = localizeHelper.localize(Res.string.privacy_mode),
             style = MaterialTheme.typography.titleMedium
         )
         
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Quickly disable all data collection features",
+            text = localizeHelper.localize(Res.string.quickly_disable_all_data_collection_features),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

@@ -48,6 +48,7 @@ import ireader.domain.models.entities.GlossaryTermType
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Wrapper composable that handles file picking for glossary import/export
@@ -112,7 +113,7 @@ fun GlossaryDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Glossary",
+                        text = localizeHelper.localize(Res.string.glossary),
                         style = MaterialTheme.typography.headlineSmall
                     )
                     Row {

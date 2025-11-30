@@ -20,8 +20,14 @@ class IterativeI18nFixer:
         
     def run_script(self, script_name: str) -> tuple[bool, str]:
         """Run a Python script and return success status and output"""
+        parts = script_name.split()
+        script = parts[0]
+        args = parts[1:]
+        
+        cmd = ['python', f'scripts/{script}'] + args
+        
         result = subprocess.run(
-            ['python', f'scripts/{script_name}'],
+            cmd,
             cwd=self.project_root,
             capture_output=True,
             text=True,

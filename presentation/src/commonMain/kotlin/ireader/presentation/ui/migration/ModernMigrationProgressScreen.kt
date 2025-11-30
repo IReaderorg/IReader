@@ -23,6 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Book
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 data class MigrationProgressState(
     val totalBooks: Int = 0,
@@ -149,6 +152,7 @@ fun ModernMigrationProgressScreen(
 
 @Composable
 private fun OverallProgressCard(state: MigrationProgressState) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val progress = if (state.totalBooks > 0) {
         state.completedBooks.toFloat() / state.totalBooks.toFloat()
     } else 0f
@@ -230,19 +234,19 @@ private fun OverallProgressCard(state: MigrationProgressState) {
             ) {
                 StatItem(
                     icon = Icons.Outlined.CheckCircle,
-                    label = "Completed",
+                    label = localizeHelper.localize(Res.string.completed),
                     value = state.completedBooks.toString(),
                     color = MaterialTheme.colorScheme.primary
                 )
                 StatItem(
                     icon = Icons.Outlined.Error,
-                    label = "Failed",
+                    label = localizeHelper.localize(Res.string.failed),
                     value = state.failedBooks.toString(),
                     color = MaterialTheme.colorScheme.error
                 )
                 StatItem(
                     icon = Icons.Outlined.Schedule,
-                    label = "Remaining",
+                    label = localizeHelper.localize(Res.string.remaining),
                     value = (state.totalBooks - state.completedBooks).toString(),
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )

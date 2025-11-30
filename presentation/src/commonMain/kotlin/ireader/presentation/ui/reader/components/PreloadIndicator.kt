@@ -24,12 +24,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun PreloadIndicator(
     isVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
         visible = isVisible,
         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -54,7 +58,7 @@ fun PreloadIndicator(
                 Spacer(modifier = Modifier.width(8.dp))
                 
                 Text(
-                    text = "Preloading next chapter...",
+                    text = localizeHelper.localize(Res.string.preloading_next_chapter),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )

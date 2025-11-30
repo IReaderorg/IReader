@@ -64,7 +64,7 @@ val PresentationModules = module {
     factory<LibraryStateImpl> { LibraryStateImpl() }
     factory<CatalogsStateImpl> { CatalogsStateImpl() }
     factory<UpdateStateImpl> { UpdateStateImpl() }
-    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
     factory <ExploreStateImpl> { ExploreStateImpl() }
     factory <GlobalSearchStateImpl> { GlobalSearchStateImpl() }
@@ -78,7 +78,7 @@ val PresentationModules = module {
     factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
     // Changed from single to factory - these ViewModels are heavy and should be created on-demand
     factory  { HistoryViewModel(get(), get(), get(),get(),) }
-    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     
@@ -106,7 +106,7 @@ val PresentationModules = module {
     factory  { AppearanceViewModel(get(), get()) }
 
     factory  { CategoryScreenViewModel(get(), get(), get(), get(), get()) }
-    factory  { DownloaderViewModel(get(), get(), get(), get()) }
+    factory  { DownloaderViewModel(get(), get(), get(), get(),get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { TranslationSettingsViewModel(get(), get()) }

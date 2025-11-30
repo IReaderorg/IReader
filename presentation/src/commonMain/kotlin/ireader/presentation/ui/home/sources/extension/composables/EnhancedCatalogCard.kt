@@ -60,6 +60,7 @@ fun EnhancedCatalogCard(
     onMigrate: (() -> Unit)? = null,
     isLoading: Boolean = false,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var isPressed by remember { mutableStateOf(false) }
     
     val scale by animateFloatAsState(
@@ -68,13 +69,13 @@ fun EnhancedCatalogCard(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessHigh
         ),
-        label = "card_scale"
+        label = localizeHelper.localize(Res.string.card_scale)
     )
     
     val elevation by animateDpAsState(
         targetValue = if (isPressed) 1.dp else 3.dp,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "card_elevation"
+        label = localizeHelper.localize(Res.string.card_elevation)
     )
 
     val lang = when (catalog) {
@@ -363,7 +364,7 @@ private fun EnhancedCatalogActions(
         if (sourceStatus is SourceStatus.LoginRequired && onLogin != null) {
             CompactActionButton(
                 icon = Icons.Default.Login,
-                text = "Login",
+                text = localizeHelper.localize(Res.string.login),
                 onClick = onLogin,
                 color = MaterialTheme.colorScheme.tertiary
             )
@@ -395,7 +396,7 @@ private fun EnhancedCatalogActions(
         } else if (onUninstall != null && catalog is CatalogLocal) {
             CompactActionButton(
                 icon = Icons.Default.Delete,
-                text = "Remove",
+                text = localizeHelper.localize(Res.string.remove),
                 onClick = onUninstall,
                 color = MaterialTheme.colorScheme.error
             )

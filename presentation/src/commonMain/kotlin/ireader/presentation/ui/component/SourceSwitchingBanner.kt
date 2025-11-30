@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Banner that displays when a better source is available for a book
@@ -66,7 +67,7 @@ fun SourceSwitchingBanner(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Better Source Available",
+                        text = localizeHelper.localize(Res.string.better_source_available),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary

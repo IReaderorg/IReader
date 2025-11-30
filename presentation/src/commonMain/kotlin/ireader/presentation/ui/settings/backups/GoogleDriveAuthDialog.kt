@@ -11,6 +11,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog for Google Drive OAuth2 authentication
@@ -44,12 +45,12 @@ fun GoogleDriveAuthDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "To enable Google Drive backup, you need to:",
+                    text = localizeHelper.localize(Res.string.to_enable_google_drive_backup_you_need_to),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
                 Text(
-                    text = "1. Configure OAuth2 credentials in Google Cloud Console\n" +
+                    text = localizeHelper.localize(Res.string.configure_oauth2_credentials_in) +
                             "2. Add Google Drive API dependencies\n" +
                             "3. Implement platform-specific authentication",
                     style = MaterialTheme.typography.bodySmall,
@@ -59,7 +60,7 @@ fun GoogleDriveAuthDialog(
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
                 
                 Text(
-                    text = "This feature is currently in development and requires additional setup.",
+                    text = localizeHelper.localize(Res.string.this_feature_is_currently_in),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
@@ -96,7 +97,7 @@ fun AuthenticationLoadingDialog(
             ) {
                 CircularProgressIndicator()
                 Text(
-                    text = "Please wait while we connect to Google Drive",
+                    text = localizeHelper.localize(Res.string.please_wait_while_we_connect_to_google_drive),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )

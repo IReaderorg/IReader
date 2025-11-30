@@ -14,6 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.PluginResourceUsage
 import ireader.domain.plugins.ResourceUsagePercentages
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Section displaying real-time resource usage for a plugin
@@ -25,6 +28,7 @@ fun ResourceUsageSection(
     percentages: ResourceUsagePercentages,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -35,7 +39,7 @@ fun ResourceUsageSection(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Resource Usage",
+                text = localizeHelper.localize(Res.string.resource_usage),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -46,7 +50,7 @@ fun ResourceUsageSection(
             // CPU Usage
             ResourceUsageItem(
                 icon = Icons.Default.Speed,
-                label = "CPU",
+                label = localizeHelper.localize(Res.string.cpu),
                 value = "${usage.cpuUsagePercent.format(1)}%",
                 percentage = percentages.cpuPercent.toFloat() / 100f,
                 limit = "50%",
@@ -58,7 +62,7 @@ fun ResourceUsageSection(
             // Memory Usage
             ResourceUsageItem(
                 icon = Icons.Default.Memory,
-                label = "Memory",
+                label = localizeHelper.localize(Res.string.memory),
                 value = "${usage.memoryUsageMB.format(1)} MB",
                 percentage = percentages.memoryPercent.toFloat() / 100f,
                 limit = "64 MB",
@@ -70,7 +74,7 @@ fun ResourceUsageSection(
             // Network Usage
             ResourceUsageItem(
                 icon = Icons.Default.NetworkCheck,
-                label = "Network",
+                label = localizeHelper.localize(Res.string.network),
                 value = "${(usage.networkUsageBytes / (1024.0 * 1024.0)).format(1)} MB/min",
                 percentage = percentages.networkPercent.toFloat() / 100f,
                 limit = "10 MB/min",
@@ -163,6 +167,7 @@ fun ResourceUsageHistoryGraph(
     history: List<PluginResourceUsage>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -173,7 +178,7 @@ fun ResourceUsageHistoryGraph(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Usage History (Last Hour)",
+                text = localizeHelper.localize(Res.string.usage_history_last_hour),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -183,7 +188,7 @@ fun ResourceUsageHistoryGraph(
             
             if (history.isEmpty()) {
                 Text(
-                    text = "No usage data available yet",
+                    text = localizeHelper.localize(Res.string.no_usage_data_available_yet),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

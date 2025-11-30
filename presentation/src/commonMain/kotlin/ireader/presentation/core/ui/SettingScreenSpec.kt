@@ -101,7 +101,7 @@ class SettingScreenSpec {
                 }
                 item {
                     SettingsItem(
-                        title = "Supabase Configuration",
+                        title = localizeHelper.localize(Res.string.supabase_configuration),
                         description = "Configure custom Supabase instance for sync",
                         icon = Icons.Outlined.Cloud,
                         onClick = {navController.navigate(NavigationRoutes.supabaseConfig)}
@@ -127,7 +127,7 @@ class SettingScreenSpec {
                 
                 item {
                     SettingsItem(
-                        title = "TTS Engine Manager",
+                        title = localizeHelper.localize(Res.string.tts_engine_manager),
                         description = "Configure text-to-speech engines and voices",
                         icon = Icons.Default.RecordVoiceOver,
                         onClick = { navController.navigate(NavigationRoutes.ttsEngineManager) }
@@ -163,7 +163,7 @@ class SettingScreenSpec {
                 // Advanced Section
                 item {
                     SettingsSectionHeader(
-                        title = "Advanced",
+                        title = localizeHelper.localize(Res.string.advanced),
                         icon = Icons.Default.Code
                     )
                 }

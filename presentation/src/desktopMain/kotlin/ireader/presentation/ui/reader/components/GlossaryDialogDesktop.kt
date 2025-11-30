@@ -10,6 +10,7 @@ import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 actual fun GlossaryDialogWithFilePickers(

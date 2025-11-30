@@ -139,15 +139,15 @@ fun AppearanceSettingScreen(
         item {
             Components.Switch(
                 preference = vm.dynamicColorMode,
-                title = "Material You (Dynamic Colors)",
-                subtitle = "Adapt colors from your wallpaper (Android 12+)",
+                title = localizeHelper.localize(Res.string.material_you_dynamic_colors),
+                subtitle = localizeHelper.localize(Res.string.adapt_colors_from_your_wallpaper_android_12),
             ).Build()
         }
         item {
             Components.Switch(
                 preference = vm.useTrueBlack,
-                title = "Use True Black (AMOLED)",
-                subtitle = "Pure black backgrounds for power saving on AMOLED screens",
+                title = localizeHelper.localize(Res.string.use_true_black_amoled),
+                subtitle = localizeHelper.localize(Res.string.pure_black_backgrounds_for_power),
             ).Build()
         }
         
@@ -159,7 +159,7 @@ fun AppearanceSettingScreen(
         // Font Customization Section
         item {
             Components.Header(
-                    text = "Font Customization",
+                    text = localizeHelper.localize(Res.string.font_customization),
             ).Build()
         }
         item {
@@ -167,8 +167,8 @@ fun AppearanceSettingScreen(
                 ChoicePreference<String>(
                         preference = vm.appUiFont,
                         choices = vm.availableFonts,
-                        title = "App UI Font",
-                        subtitle = "Font used for all app interface elements (not reader)",
+                        title = localizeHelper.localize(Res.string.app_ui_font),
+                        subtitle = localizeHelper.localize(Res.string.font_used_for_all_app),
                 )
             }.Build()
         }
@@ -183,7 +183,7 @@ fun AppearanceSettingScreen(
             Components.Dynamic {
                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
                     Text(
-                        text = "Light Themes",
+                        text = localizeHelper.localize(Res.string.light_themes),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -237,7 +237,7 @@ fun AppearanceSettingScreen(
             Components.Dynamic {
                 Column(modifier = Modifier.padding(vertical = 8.dp)) {
                     Text(
-                        text = "Dark Themes",
+                        text = localizeHelper.localize(Res.string.dark_themes),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -289,14 +289,14 @@ fun AppearanceSettingScreen(
         // Color Customization Section
         item {
             Components.Header(
-                    text = "Color Customization",
+                    text = localizeHelper.localize(Res.string.color_customization),
             ).Build()
         }
         item {
             Components.Dynamic {
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Text(
-                        text = "Customize individual colors to create your own theme",
+                        text = localizeHelper.localize(Res.string.customize_individual_colors_to_create),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -327,7 +327,7 @@ fun AppearanceSettingScreen(
                                     tonalElevation = 2.dp
                                 ) {}
                                 Text(
-                                    text = "Primary",
+                                    text = localizeHelper.localize(Res.string.primary),
                                     style = MaterialTheme.typography.labelSmall,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
@@ -345,7 +345,7 @@ fun AppearanceSettingScreen(
                                     tonalElevation = 2.dp
                                 ) {}
                                 Text(
-                                    text = "Secondary",
+                                    text = localizeHelper.localize(Res.string.secondary),
                                     style = MaterialTheme.typography.labelSmall,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
@@ -363,7 +363,7 @@ fun AppearanceSettingScreen(
                                     tonalElevation = 2.dp
                                 ) {}
                                 Text(
-                                    text = "Toolbar",
+                                    text = localizeHelper.localize(Res.string.toolbar),
                                     style = MaterialTheme.typography.labelSmall,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
@@ -394,8 +394,8 @@ fun AppearanceSettingScreen(
                 }
                 ColorPreference(
                         preference = primaryColorPref,
-                        title = "Color primary",
-                        subtitle = "Displayed most frequently across your app",
+                        title = localizeHelper.localize(Res.string.color_primary),
+                        subtitle = localizeHelper.localize(Res.string.displayed_most_frequently_across_your_app),
                         unsetColor = defaultPrimaryColor,
                         onChangeColor = onColorChange,
                         onRestToDefault = onColorReset,
@@ -427,8 +427,8 @@ fun AppearanceSettingScreen(
                 }
                 ColorPreference(
                         preference = secondaryColorPref,
-                        title = "Color secondary",
-                        subtitle = "Accents select parts of the UI",
+                        title = localizeHelper.localize(Res.string.color_secondary),
+                        subtitle = localizeHelper.localize(Res.string.accents_select_parts_of_the_ui),
                         unsetColor = defaultSecondaryColor,
                         onChangeColor = onColorChange,
                         onRestToDefault = onColorReset,
@@ -460,7 +460,7 @@ fun AppearanceSettingScreen(
                 }
                 ColorPreference(
                         preference = barsColorPref,
-                        title = "Toolbar color",
+                        title = localizeHelper.localize(Res.string.toolbar_color),
                         unsetColor = defaultBarsColor,
                         onChangeColor = onColorChange,
                         onRestToDefault = onColorReset,
@@ -536,7 +536,7 @@ fun AppearanceSettingScreen(
         // Theme Management Section
         item {
             Components.Header(
-                    text = "Theme Management",
+                    text = localizeHelper.localize(Res.string.theme_management),
             ).Build()
         }
         item {
@@ -548,7 +548,7 @@ fun AppearanceSettingScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Backup and restore your custom themes",
+                        text = localizeHelper.localize(Res.string.backup_and_restore_your_custom_themes),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -607,21 +607,21 @@ fun AppearanceSettingScreen(
         // Novel Info Section
         item {
             Components.Header(
-                    text = "Novel Info",
+                    text = localizeHelper.localize(Res.string.novel_info),
             ).Build()
         }
         item {
             Components.Switch(
                 preference = vm.hideNovelBackdrop,
-                title = "Hide Backdrop",
-                subtitle = "Hide background images on novel detail screens for cleaner look and better performance",
+                title = localizeHelper.localize(Res.string.hide_backdrop),
+                subtitle = localizeHelper.localize(Res.string.hide_background_images_on_novel),
             ).Build()
         }
         item {
             Components.Switch(
                 preference = vm.useFabInNovelInfo,
-                title = "Use FAB Instead of Buttons",
-                subtitle = "Replace standard action buttons with floating action button",
+                title = localizeHelper.localize(Res.string.use_fab_instead_of_buttons),
+                subtitle = localizeHelper.localize(Res.string.replace_standard_action_buttons_with),
             ).Build()
         }
         
@@ -633,7 +633,7 @@ fun AppearanceSettingScreen(
         // Timestamp Section
         item {
             Components.Header(
-                    text = "Date & Time",
+                    text = localizeHelper.localize(Res.string.date_time),
             ).Build()
         }
         item {

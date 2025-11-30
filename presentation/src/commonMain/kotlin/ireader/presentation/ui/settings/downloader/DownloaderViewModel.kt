@@ -8,6 +8,7 @@ import ireader.domain.services.common.NotificationPriority
 import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.common.ServiceState
 import ireader.domain.usecases.download.DownloadUseCases
+import ireader.i18n.LocalizeHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,6 +16,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 
 /**
@@ -27,7 +31,8 @@ class DownloaderViewModel(
         private val downloadUseCases: DownloadUseCases,
         private val downloadState: DownloadStateImpl,
         private val downloadService: DownloadService,  // ✅ Uses service interface
-        private val notificationService: NotificationService
+        private val notificationService: NotificationService,
+        private val localizeHelper: LocalizeHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), DownloadState by downloadState {
 
     // Expose service states
@@ -81,7 +86,7 @@ class DownloaderViewModel(
                             is ServiceResult.Success -> {
                                 notificationService.showNotification(
                                     id = 1001,
-                                    title = "Downloads Queued",
+                                    title = localizeHelper.localize(Res.string.downloads_queued),
                                     message = "${chapterIds.size} chapter(s) added to queue",
                                     priority = NotificationPriority.DEFAULT
                                 )
@@ -89,7 +94,7 @@ class DownloaderViewModel(
                             is ServiceResult.Error -> {
                                 notificationService.showNotification(
                                     id = 1002,
-                                    title = "Queue Failed",
+                                    title = localizeHelper.localize(Res.string.queue_failed),
                                     message = result.message,
                                     priority = NotificationPriority.HIGH
                                 )
@@ -113,7 +118,7 @@ class DownloaderViewModel(
                         is ServiceResult.Success -> {
                             notificationService.showNotification(
                                 id = 1001,
-                                title = "Downloads Started",
+                                title = localizeHelper.localize(Res.string.downloads_started),
                                 message = "${idsToDownload.size} chapter(s) queued",
                                 priority = NotificationPriority.DEFAULT
                             )
@@ -121,7 +126,7 @@ class DownloaderViewModel(
                         is ServiceResult.Error -> {
                             notificationService.showNotification(
                                 id = 1002,
-                                title = "Download Failed",
+                                title = localizeHelper.localize(Res.string.download_failed_title),
                                 message = result.message,
                                 priority = NotificationPriority.HIGH
                             )
@@ -160,7 +165,7 @@ class DownloaderViewModel(
                 is ServiceResult.Success -> {
                     notificationService.showNotification(
                         id = 1003,
-                        title = "Downloads Stopped",
+                        title = localizeHelper.localize(Res.string.downloads_stopped),
                         message = "All downloads cancelled",
                         priority = NotificationPriority.DEFAULT
                     )
@@ -218,7 +223,7 @@ class DownloaderViewModel(
                 is ServiceResult.Success -> {
                     notificationService.showNotification(
                         id = 1004,
-                        title = "Retrying Download",
+                        title = localizeHelper.localize(Res.string.retrying_download),
                         message = "Download queued for retry",
                         priority = NotificationPriority.LOW
                     )
@@ -226,7 +231,7 @@ class DownloaderViewModel(
                 is ServiceResult.Error -> {
                     notificationService.showNotification(
                         id = 1005,
-                        title = "Retry Failed",
+                        title = localizeHelper.localize(Res.string.retry_failed),
                         message = result.message,
                         priority = NotificationPriority.HIGH
                     )

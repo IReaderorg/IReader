@@ -114,6 +114,9 @@ class BatchI18nReplacer:
                 (r'placeholder\s*=\s*\{\s*Text\s*\(\s*"([^"]+)"\s*\)\s*\}', 'placeholder = {{ Text("{}") }}'),
                 (r'text\s*=\s*\{\s*Text\s*\(\s*"([^"]+)"\s*\)\s*\}', 'text = {{ Text("{}") }}'),
                 (r'contentDescription\s*=\s*"([^"]+)"', 'contentDescription = "{}"'),
+                (r'text\s*=\s*"([^"]+)"', 'text = "{}"'),
+                (r'title\s*=\s*"([^"]+)"', 'title = "{}"'),
+                (r'label\s*=\s*"([^"]+)"', 'label = "{}"'),
                 (r'TitleText\s*\(\s*"([^"]+)"\s*\)', 'TitleText("{}")'),
                 # Simple Text("...") should be LAST to avoid matching inside other patterns
                 (r'Text\s*\(\s*"([^"]+)"\s*\)', 'Text("{}")'),
@@ -185,6 +188,12 @@ class BatchI18nReplacer:
             return f'placeholder = {{ Text(localizeHelper.localize(Res.string.{key})) }}'
         elif 'text = { Text("' in original or 'text = {Text("' in original:
             return f'text = {{ Text(localizeHelper.localize(Res.string.{key})) }}'
+        elif 'text = "' in original:
+            return f'text = localizeHelper.localize(Res.string.{key})'
+        elif 'title = "' in original:
+            return f'title = localizeHelper.localize(Res.string.{key})'
+        elif 'label = "' in original:
+            return f'label = localizeHelper.localize(Res.string.{key})'
         # Then check simple Text("...")
         elif 'Text("' in original:
             return f'Text(localizeHelper.localize(Res.string.{key}))'

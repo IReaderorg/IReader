@@ -18,6 +18,7 @@ import ireader.domain.plugins.PluginAuthor
 import ireader.domain.plugins.PluginInfo
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Developer information section with contact details and other plugins
@@ -36,7 +37,7 @@ fun DeveloperInfoSection(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Developer",
+            text = localizeHelper.localize(Res.string.developer),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )

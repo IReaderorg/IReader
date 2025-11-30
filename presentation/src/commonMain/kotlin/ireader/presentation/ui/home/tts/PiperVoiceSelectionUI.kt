@@ -33,6 +33,7 @@ import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScr
 import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Enhanced Piper Voice Selection UI with search, filters, and better UX.
@@ -57,6 +58,7 @@ fun PiperVoiceSelectionContent(
     onVoiceDelete: ((PiperVoice) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var searchQuery by remember { mutableStateOf("") }
     var filterGender by remember { mutableStateOf<VoiceGender?>(null) }
     var filterQuality by remember { mutableStateOf<VoiceQuality?>(null) }
@@ -176,7 +178,7 @@ fun PiperVoiceSelectionContent(
                 if (downloadedVoices.isNotEmpty()) {
                     item(key = "downloaded_header") {
                         SectionHeader(
-                            title = "Downloaded",
+                            title = localizeHelper.localize(Res.string.downloaded),
                             count = downloadedVoices.size,
                             icon = Icons.Default.CheckCircle,
                             color = MaterialTheme.colorScheme.primary
@@ -203,7 +205,7 @@ fun PiperVoiceSelectionContent(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                         SectionHeader(
-                            title = "Available for Download",
+                            title = localizeHelper.localize(Res.string.available_for_download),
                             count = availableVoices.size,
                             icon = Icons.Default.CloudDownload,
                             color = MaterialTheme.colorScheme.secondary
@@ -241,6 +243,7 @@ private fun VoiceSelectionHeader(
     isRefreshing: Boolean,
     onRefresh: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         modifier = Modifier.fillMaxWidth()
@@ -254,7 +257,7 @@ private fun VoiceSelectionHeader(
         ) {
             Column {
                 Text(
-                    text = "Piper Voice Catalog",
+                    text = localizeHelper.localize(Res.string.piper_voice_catalog),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -460,7 +463,7 @@ private fun FilterChipsRow(
             ) {
                 // Gender filter
                 Text(
-                    text = "Gender",
+                    text = localizeHelper.localize(Res.string.gender),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -499,7 +502,7 @@ private fun FilterChipsRow(
                 
                 // Quality filter
                 Text(
-                    text = "Quality",
+                    text = localizeHelper.localize(Res.string.quality),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -528,7 +531,7 @@ private fun FilterChipsRow(
                 // All languages (scrollable with desktop mouse wheel support)
                 if (availableLanguages.size > 5) {
                     Text(
-                        text = "All Languages",
+                        text = localizeHelper.localize(Res.string.all_languages),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -601,6 +604,7 @@ private fun ErrorBanner(
 
 @Composable
 private fun LoadingState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -611,12 +615,12 @@ private fun LoadingState() {
         ) {
             CircularProgressIndicator()
             Text(
-                text = "Loading voice catalog...",
+                text = localizeHelper.localize(Res.string.loading_voice_catalog),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Fetching from rhasspy.github.io",
+                text = localizeHelper.localize(Res.string.fetching_from_rhasspygithubio),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
@@ -729,9 +733,10 @@ fun EnhancedVoiceCard(
     onDelete: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = downloadProgress,
-        label = "download_progress"
+        label = localizeHelper.localize(Res.string.download_progress_1)
     )
     
     Card(
@@ -860,7 +865,7 @@ fun EnhancedVoiceCard(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Downloading...",
+                            text = localizeHelper.localize(Res.string.downloading_1),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )

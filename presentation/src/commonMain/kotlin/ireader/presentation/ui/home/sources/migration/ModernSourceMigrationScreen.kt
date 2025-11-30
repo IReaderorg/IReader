@@ -178,7 +178,7 @@ private fun MigrationCompletionDialog(
         },
         title = {
             Text(
-                text = "Migration Complete!",
+                text = localizeHelper.localize(Res.string.migration_complete),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -317,6 +317,7 @@ private fun MigrationSetupView(
     onSetTargetSource: (Long) -> Unit,
     onStartMigration: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -336,7 +337,7 @@ private fun MigrationSetupView(
         // Novel selection header
         item {
             ModernSectionHeader(
-                title = "Select Books to Migrate",
+                title = localizeHelper.localize(Res.string.select_books_to_migrate),
                 subtitle = "${selectedNovels.size} / ${novels.size} selected"
             )
         }
@@ -367,6 +368,7 @@ private fun ModernTargetSourceSelector(
     selectedSourceId: Long?,
     onSelectSource: (Long) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -391,13 +393,13 @@ private fun ModernTargetSourceSelector(
                 )
                 Column {
                     Text(
-                        text = "Select Target Source",
+                        text = localizeHelper.localize(Res.string.select_target_source),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = "Choose where to migrate your books",
+                        text = localizeHelper.localize(Res.string.choose_where_to_migrate_your_books),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
@@ -643,6 +645,7 @@ private fun ModernMigrationProgressView(
     onSkip: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -673,7 +676,7 @@ private fun ModernMigrationProgressView(
                                 modifier = Modifier.size(28.dp)
                             )
                             Text(
-                                text = "Migrating Book",
+                                text = localizeHelper.localize(Res.string.migrating_book),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -749,6 +752,7 @@ private fun ModernMigrationProgressView(
 
 @Composable
 private fun ModernSearchingCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -769,12 +773,12 @@ private fun ModernSearchingCard() {
             )
             Column {
                 Text(
-                    text = "Searching for matches...",
+                    text = localizeHelper.localize(Res.string.searching_for_matches),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "Looking in target source",
+                    text = localizeHelper.localize(Res.string.looking_in_target_source),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -867,6 +871,7 @@ private fun ModernMatchCard(
 
 @Composable
 private fun ModernNoMatchCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -889,13 +894,13 @@ private fun ModernNoMatchCard() {
             )
             Column {
                 Text(
-                    text = "No matches found",
+                    text = localizeHelper.localize(Res.string.no_matches_found),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
                 Text(
-                    text = "The book could not be found in the target source",
+                    text = localizeHelper.localize(Res.string.the_book_could_not_be_found_in_the_target_source),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
                 )
@@ -952,6 +957,7 @@ private fun ModernMigrationActions(
 
 @Composable
 private fun LoadingState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -965,7 +971,7 @@ private fun LoadingState() {
                 strokeWidth = 4.dp
             )
             Text(
-                text = "Loading novels...",
+                text = localizeHelper.localize(Res.string.loading_novels),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -975,6 +981,7 @@ private fun LoadingState() {
 
 @Composable
 private fun EmptyState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -991,13 +998,13 @@ private fun EmptyState() {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
             Text(
-                text = "No novels found",
+                text = localizeHelper.localize(Res.string.no_novels_found),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "There are no novels in this source to migrate",
+                text = localizeHelper.localize(Res.string.there_are_no_novels_in_this_source_to_migrate),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

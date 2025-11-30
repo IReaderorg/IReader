@@ -62,6 +62,7 @@ import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 class ProfileScreen  {
     
@@ -216,7 +217,7 @@ private fun UserProfileCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Email",
+                        text = localizeHelper.localize(Res.string.email),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                     )
@@ -237,7 +238,7 @@ private fun UserProfileCard(
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = "⭐ Supporter",
+                            text = localizeHelper.localize(Res.string.supporter),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onTertiary,
                             fontWeight = FontWeight.Bold
@@ -255,7 +256,7 @@ private fun UserProfileCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Name",
+                        text = localizeHelper.localize(Res.string.name),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                     )
@@ -286,7 +287,7 @@ private fun UserProfileCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "ETH Wallet Address (API Key)",
+                        text = localizeHelper.localize(Res.string.eth_wallet_address_api_key),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                     )
@@ -362,7 +363,7 @@ private fun LoginPromptCard(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Sign In to Sync",
+                text = localizeHelper.localize(Res.string.sign_in_to_sync),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary
@@ -371,7 +372,7 @@ private fun LoginPromptCard(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Sign in to sync your reading progress across all your devices",
+                text = localizeHelper.localize(Res.string.sign_in_to_sync_your),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -451,6 +452,7 @@ private fun SyncStatusCard(
 
 @Composable
 private fun BenefitsCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -464,7 +466,7 @@ private fun BenefitsCard() {
                 .padding(20.dp)
         ) {
             Text(
-                text = "Benefits of Signing In",
+                text = localizeHelper.localize(Res.string.benefits_of_signing_in),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -473,7 +475,7 @@ private fun BenefitsCard() {
             
             BenefitItem(
                 icon = Icons.Default.Sync,
-                title = "Cross-Device Sync",
+                title = localizeHelper.localize(Res.string.cross_device_sync),
                 description = "Your reading progress syncs automatically across all your devices"
             )
             
@@ -481,7 +483,7 @@ private fun BenefitsCard() {
             
             BenefitItem(
                 icon = Icons.Default.Security,
-                title = "Secure & Private",
+                title = localizeHelper.localize(Res.string.secure_private),
                 description = "Your data is secured with industry-standard encryption"
             )
             
@@ -489,7 +491,7 @@ private fun BenefitsCard() {
             
             BenefitItem(
                 icon = Icons.Default.Cloud,
-                title = "Cloud Backup",
+                title = localizeHelper.localize(Res.string.cloud_backup),
                 description = "Never lose your reading progress again"
             )
         }
@@ -545,7 +547,7 @@ private fun UsernameDialog(
         text = {
             Column {
                 Text(
-                    text = "Choose a name for your profile",
+                    text = localizeHelper.localize(Res.string.choose_a_name_for_your_profile),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -601,7 +603,7 @@ private fun WalletDialog(
         text = {
             Column {
                 Text(
-                    text = "Enter your Ethereum wallet address. This will be used as an API key to access server features.",
+                    text = localizeHelper.localize(Res.string.enter_your_ethereum_wallet_address),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -662,7 +664,7 @@ private fun BadgesSection(
                 .padding(20.dp)
         ) {
             Text(
-                text = "Badges",
+                text = localizeHelper.localize(Res.string.badges),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -707,7 +709,7 @@ private fun BadgesSection(
                 badges.isEmpty() -> {
                     // Empty state
                     Text(
-                        text = "No badges yet. Earn badges by purchasing them or owning IReader NFTs!",
+                        text = localizeHelper.localize(Res.string.no_badges_yet_earn_badges),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -740,7 +742,7 @@ private fun AchievementBadgesSection(
                 .padding(20.dp)
         ) {
             Text(
-                text = "Achievement Badges",
+                text = localizeHelper.localize(Res.string.achievement_badges),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -748,7 +750,7 @@ private fun AchievementBadgesSection(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Earned through reading and app usage",
+                text = localizeHelper.localize(Res.string.earned_through_reading_and_app_usage),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -790,7 +792,7 @@ private fun AchievementBadgesSection(
                 
                 badges.isEmpty() -> {
                     Text(
-                        text = "No achievement badges yet. Keep reading to unlock them!",
+                        text = localizeHelper.localize(Res.string.no_achievement_badges_yet_keep),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -812,6 +814,7 @@ private fun ReadingStatisticsSection(
     readingStreak: Int,
     isLoading: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -822,7 +825,7 @@ private fun ReadingStatisticsSection(
                 .padding(20.dp)
         ) {
             Text(
-                text = "Reading Statistics",
+                text = localizeHelper.localize(Res.string.reading_statistics),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -837,25 +840,25 @@ private fun ReadingStatisticsSection(
                 ) {
                     StatisticItem(
                         icon = "📖",
-                        label = "Chapters Read",
+                        label = localizeHelper.localize(Res.string.chapters_read),
                         value = chaptersRead.toString()
                     )
                     
                     StatisticItem(
                         icon = "📚",
-                        label = "Books Completed",
+                        label = localizeHelper.localize(Res.string.books_completed),
                         value = booksCompleted.toString()
                     )
                     
                     StatisticItem(
                         icon = "✍️",
-                        label = "Reviews Written",
+                        label = localizeHelper.localize(Res.string.reviews_written),
                         value = reviewsWritten.toString()
                     )
                     
                     StatisticItem(
                         icon = "🔥",
-                        label = "Reading Streak",
+                        label = localizeHelper.localize(Res.string.reading_streak),
                         value = "$readingStreak days"
                     )
                 }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Desktop implementation of TTS Engine Settings Screen
@@ -75,7 +76,7 @@ actual fun TTSEngineSettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "TTS Engine Manager",
+                        text = localizeHelper.localize(Res.string.tts_engine_manager),
                         style = MaterialTheme.typography.headlineSmall
                     )
                     IconButton(onClick = onDismiss) {
@@ -106,7 +107,7 @@ actual fun TTSEngineSettingsScreen(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Current Engine",
+                                text = localizeHelper.localize(Res.string.current_engine),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
@@ -231,7 +232,7 @@ actual fun TTSEngineSettingsScreen(
                 
                 // Help text
                 Text(
-                    text = "Note: Some engines require installation. Use the full TTS Manager in Settings for installation options.",
+                    text = localizeHelper.localize(Res.string.note_some_engines_require_installation),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 16.dp)
@@ -295,7 +296,7 @@ private fun EngineCard(
                 )
                 if (!isAvailable) {
                     Text(
-                        text = "Not installed",
+                        text = localizeHelper.localize(Res.string.not_installed),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -369,17 +370,17 @@ private fun PiperEngineCard(
                 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Piper TTS",
+                        text = localizeHelper.localize(Res.string.piper_tts),
                         style = MaterialTheme.typography.titleSmall
                     )
                     Text(
-                        text = "High-performance neural TTS with 100+ voices (bundled)",
+                        text = localizeHelper.localize(Res.string.high_performance_neural_tts_with),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     // Piper is always available on desktop - bundled with the app
                     Text(
-                        text = "✓ Pre-installed",
+                        text = localizeHelper.localize(Res.string.pre_installed),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -483,7 +484,7 @@ actual fun TTSVoiceSelectionScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Piper Voice Selection",
+                        text = localizeHelper.localize(Res.string.piper_voice_selection),
                         style = MaterialTheme.typography.titleLarge
                     )
                     IconButton(onClick = onDismiss) {
@@ -582,12 +583,12 @@ private fun CoquiConfigDialog(
             ) {
                 // Header
                 Text(
-                    text = "Configure Gradio TTS",
+                    text = localizeHelper.localize(Res.string.configure_gradio_tts),
                     style = MaterialTheme.typography.headlineSmall
                 )
                 
                 Text(
-                    text = "Gradio TTS uses a HuggingFace Space to synthesize speech. You can use the default space or deploy your own.",
+                    text = localizeHelper.localize(Res.string.gradio_tts_uses_a_huggingface),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -741,12 +742,12 @@ private fun GradioConfigDialog(
             ) {
                 // Header
                 Text(
-                    text = "Configure Gradio TTS",
+                    text = localizeHelper.localize(Res.string.configure_gradio_tts),
                     style = MaterialTheme.typography.headlineSmall
                 )
                 
                 Text(
-                    text = "Select a preset TTS engine or configure a custom Gradio space.",
+                    text = localizeHelper.localize(Res.string.select_a_preset_tts_engine),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -845,7 +846,7 @@ private fun GradioConfigDialog(
                         )
                         
                         Text(
-                            text = "Tip: Check the API tab on the Hugging Face Space page to find the correct API name.",
+                            text = localizeHelper.localize(Res.string.tip_check_the_api_tab),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

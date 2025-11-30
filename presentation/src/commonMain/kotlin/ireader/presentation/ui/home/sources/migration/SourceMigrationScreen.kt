@@ -93,12 +93,12 @@ fun SourceMigrationScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Select Target Source",
+                            text = localizeHelper.localize(Res.string.select_target_source),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "Choose where to migrate your books",
+                            text = localizeHelper.localize(Res.string.choose_where_to_migrate_your_books),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -165,7 +165,7 @@ fun SourceMigrationScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Select Books to Migrate",
+                                text = localizeHelper.localize(Res.string.select_books_to_migrate),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -277,7 +277,7 @@ fun SourceMigrationScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No novels found in this source",
+                        text = localizeHelper.localize(Res.string.no_novels_found_in_this_source),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -307,7 +307,7 @@ private fun MigrationProgressView(
         Column(modifier = Modifier.padding(16.dp)) {
             if (currentNovel != null) {
                 Text(
-                    text = "Migrating Book",
+                    text = localizeHelper.localize(Res.string.migrating_book),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -348,7 +348,7 @@ private fun MigrationProgressView(
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                text = "Searching for matches in target source...",
+                                text = localizeHelper.localize(Res.string.searching_for_matches_in_target_source),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -440,12 +440,12 @@ private fun MigrationProgressView(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "No matches found",
+                                text = localizeHelper.localize(Res.string.no_matches_found),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
                             Text(
-                                text = "The book could not be found in the target source",
+                                text = localizeHelper.localize(Res.string.the_book_could_not_be_found_in_the_target_source),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )

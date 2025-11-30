@@ -16,6 +16,7 @@ import ireader.presentation.ui.plugins.marketplace.PriceFilter
 import ireader.presentation.ui.plugins.marketplace.SortOrder
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Bottom sheet for filtering and sorting plugins
@@ -51,7 +52,7 @@ fun FilterBottomSheet(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Filter & Sort",
+                text = localizeHelper.localize(Res.string.filter_and_sort),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -59,7 +60,7 @@ fun FilterBottomSheet(
             
             // Sort section
             Text(
-                text = "Sort By",
+                text = localizeHelper.localize(Res.string.sort_by),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -80,7 +81,7 @@ fun FilterBottomSheet(
             
             // Price filter section
             Text(
-                text = "Price",
+                text = localizeHelper.localize(Res.string.price),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -100,7 +101,7 @@ fun FilterBottomSheet(
             
             // Rating filter section
             Text(
-                text = "Minimum Rating",
+                text = localizeHelper.localize(Res.string.minimum_rating),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 8.dp)

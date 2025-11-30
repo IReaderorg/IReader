@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Full sheet for chapter reviews - combines viewing and writing in one place
@@ -140,7 +141,7 @@ fun ChapterReviewsFullSheet(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Chapter Reviews",
+                    text = localizeHelper.localize(Res.string.chapter_reviews),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -207,7 +208,7 @@ fun ChapterReviewsFullSheet(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Error loading reviews",
+                        text = localizeHelper.localize(Res.string.error_loading_reviews),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -227,13 +228,13 @@ fun ChapterReviewsFullSheet(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "No reviews for this chapter yet.",
+                        text = localizeHelper.localize(Res.string.no_reviews_for_this_chapter_yet),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Be the first to review!",
+                        text = localizeHelper.localize(Res.string.be_the_first_to_review),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -285,7 +286,7 @@ fun ChapterReviewsFullSheet(
                     }
                 }
             },
-            title = "Review Chapter"
+            title = localizeHelper.localize(Res.string.review_chapter)
         )
     }
 }

@@ -52,6 +52,7 @@ fun CleanCatalogCard(
     onMigrate: (() -> Unit)? = null,
     isLoading: Boolean = false,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val lang = when (catalog) {
         is CatalogBundled -> null
         is CatalogInstalled -> catalog.source?.lang
@@ -110,7 +111,7 @@ fun CleanCatalogCard(
                             strokeWidth = 2.dp
                         )
                         Text(
-                            text = "Loading...",
+                            text = localizeHelper.localize(Res.string.loading_1),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )

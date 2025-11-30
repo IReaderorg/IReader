@@ -21,6 +21,7 @@ import androidx.compose.ui.window.Dialog
 import ireader.domain.models.donation.FundingGoal
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Composable that displays the Fund-a-Feature section with progress bars
@@ -31,6 +32,7 @@ fun FundaFeatureSection(
     fundingGoals: List<FundingGoal>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedGoal by remember { mutableStateOf<FundingGoal?>(null) }
     
     Column(
@@ -39,7 +41,7 @@ fun FundaFeatureSection(
     ) {
         // Section Header
         Text(
-            text = "Fund-a-Feature",
+            text = localizeHelper.localize(Res.string.fund_a_feature),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 8.dp)
@@ -61,7 +63,7 @@ fun FundaFeatureSection(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No active funding goals at the moment",
+                        text = localizeHelper.localize(Res.string.no_active_funding_goals_at_the_moment),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -145,7 +147,7 @@ private fun FundingGoalCard(
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                         ) {
                             Text(
-                                text = "Monthly",
+                                text = localizeHelper.localize(Res.string.monthly),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -193,7 +195,7 @@ private fun FundingGoalCard(
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            text = "Goal Reached!",
+                            text = localizeHelper.localize(Res.string.goal_reached_1),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -243,10 +245,11 @@ private fun FundingProgressBar(
     isReached: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress.coerceIn(0f, 1f),
         animationSpec = tween(durationMillis = 1000),
-        label = "progress"
+        label = localizeHelper.localize(Res.string.progress_1)
     )
     
     Box(
@@ -307,7 +310,7 @@ private fun FundingGoalDetailDialog(
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
                     ) {
                         Text(
-                            text = "🔄 Monthly Recurring Goal",
+                            text = localizeHelper.localize(Res.string.monthly_recurring_goal),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -338,7 +341,7 @@ private fun FundingGoalDetailDialog(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Current Progress",
+                                text = localizeHelper.localize(Res.string.current_progress),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -378,7 +381,7 @@ private fun FundingGoalDetailDialog(
                                     modifier = Modifier.size(24.dp)
                                 )
                                 Text(
-                                    text = "Goal Reached! Thank you!",
+                                    text = localizeHelper.localize(Res.string.goal_reached_thank_you),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
@@ -392,7 +395,7 @@ private fun FundingGoalDetailDialog(
                 
                 // Description
                 Text(
-                    text = "About This Goal",
+                    text = localizeHelper.localize(Res.string.about_this_goal),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -406,7 +409,7 @@ private fun FundingGoalDetailDialog(
                 if (goal.isRecurring) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "This is a recurring monthly goal. Once reached, it will automatically reset for the next month to ensure continuous support.",
+                        text = localizeHelper.localize(Res.string.this_is_a_recurring_monthly),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )

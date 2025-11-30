@@ -34,6 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
+import ireader.presentation.ui.core.theme.currentOrThrow
 
 data class ChangelogEntry(
     val version: String,
@@ -91,6 +93,7 @@ fun ChangelogScreen(
 
 @Composable
 private fun ChangelogCard(entry: ChangelogEntry) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -139,7 +142,7 @@ private fun ChangelogCard(entry: ChangelogEntry) {
                         color = MaterialTheme.colorScheme.primary
                     ) {
                         Text(
-                            text = "Upcoming",
+                            text = localizeHelper.localize(Res.string.upcoming),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -211,15 +214,16 @@ private fun ChangelogSectionContent(
         }
     }
 }
-
+@Composable
 private fun getChangelogData(): List<ChangelogEntry> {
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     return listOf(
         ChangelogEntry(
             version = "v0.1.30",
             isUpcoming = true,
             sections = listOf(
                 ChangelogSection(
-                    title = "UI Improvements",
+                    title = localizeHelper.localize(Res.string.ui_improvements),
                     items = listOf(
                         "Enhanced Settings Screens with Material Design 3 components",
                         "Improved Appearance settings with better theme selection",
@@ -229,7 +233,7 @@ private fun getChangelogData(): List<ChangelogEntry> {
                     )
                 ),
                 ChangelogSection(
-                    title = "New Components",
+                    title = localizeHelper.localize(Res.string.new_components),
                     items = listOf(
                         "RowPreference: Flexible preference row with icon support",
                         "SectionHeader: Styled headers for grouping preferences",
@@ -239,7 +243,7 @@ private fun getChangelogData(): List<ChangelogEntry> {
                     )
                 ),
                 ChangelogSection(
-                    title = "Explore Screen",
+                    title = localizeHelper.localize(Res.string.explore_screen),
                     items = listOf(
                         "Enhanced novel card design with better covers",
                         "Improved grid layout with adaptive columns",
@@ -248,7 +252,7 @@ private fun getChangelogData(): List<ChangelogEntry> {
                     )
                 ),
                 ChangelogSection(
-                    title = "Performance",
+                    title = localizeHelper.localize(Res.string.performance),
                     items = listOf(
                         "Optimized list rendering with proper keys",
                         "Improved image loading and caching",
@@ -257,7 +261,7 @@ private fun getChangelogData(): List<ChangelogEntry> {
                     )
                 ),
                 ChangelogSection(
-                    title = "Accessibility",
+                    title = localizeHelper.localize(Res.string.accessibility),
                     items = listOf(
                         "Content descriptions for all interactive elements",
                         "Minimum 48dp touch targets",
@@ -271,7 +275,7 @@ private fun getChangelogData(): List<ChangelogEntry> {
             version = "v0.1.29",
             sections = listOf(
                 ChangelogSection(
-                    title = "Bug Fixes",
+                    title = localizeHelper.localize(Res.string.bug_fixes),
                     items = listOf(
                         "Fixed some sources not working properly"
                     )

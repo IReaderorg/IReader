@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.theme.Theme
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun PhoneNotch(
@@ -76,6 +79,7 @@ fun PhoneStatusBar(
     backgroundColor: Color,
     contentColor: Color
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -87,7 +91,7 @@ fun PhoneStatusBar(
     ) {
         // Time
         Text(
-            text = "9:41",
+            text = localizeHelper.localize(Res.string.nine_forty_one),
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
             fontSize = 10.sp
@@ -125,6 +129,7 @@ fun MiniAppPreview(
     theme: Theme,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -154,7 +159,7 @@ fun MiniAppPreview(
                     tint = theme.materialColors.onPrimary.toComposeColor()
                 )
                 Text(
-                    text = "Library",
+                    text = localizeHelper.localize(Res.string.library),
                     style = MaterialTheme.typography.labelMedium,
                     color = theme.materialColors.onPrimary.toComposeColor(),
                     fontSize = 10.sp

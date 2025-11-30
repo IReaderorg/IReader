@@ -16,6 +16,7 @@ import ireader.domain.models.entities.BookItem
 import ireader.domain.models.migration.MigrationMatch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun MigrationMatchDialog(
@@ -41,7 +42,7 @@ fun MigrationMatchDialog(
             ) {
                 // Title
                 Text(
-                    text = "Select Match",
+                    text = localizeHelper.localize(Res.string.select_match),
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
@@ -70,7 +71,7 @@ fun MigrationMatchDialog(
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = "Original",
+                                text = localizeHelper.localize(Res.string.original),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
@@ -95,7 +96,7 @@ fun MigrationMatchDialog(
                 
                 // Matches section
                 Text(
-                    text = "Potential Matches",
+                    text = localizeHelper.localize(Res.string.potential_matches),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -114,7 +115,7 @@ fun MigrationMatchDialog(
                             ) {
                                 CircularProgressIndicator()
                                 Text(
-                                    text = "Searching for matches...",
+                                    text = localizeHelper.localize(Res.string.searching_for_matches),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -128,7 +129,7 @@ fun MigrationMatchDialog(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No matches found",
+                                text = localizeHelper.localize(Res.string.no_matches_found),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

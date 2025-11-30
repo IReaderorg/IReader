@@ -17,6 +17,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Main settings screen following Mihon's comprehensive settings architecture.
@@ -40,6 +41,7 @@ fun SettingsMainScreen(
     onDataSettings: () -> Unit,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberSaveable(
         key = "settings_main_scroll_state",
         saver = LazyListState.Saver
@@ -68,14 +70,14 @@ fun SettingsMainScreen(
             // Appearance & Theme Section
             item {
                 SettingsSectionHeader(
-                    title = "Appearance & Theme",
+                    title = localizeHelper.localize(Res.string.appearance_theme),
                     icon = Icons.Outlined.Palette
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Appearance",
+                    title = localizeHelper.localize(Res.string.appearance),
                     description = "Theme, colors, and visual customization",
                     icon = Icons.Outlined.Palette,
                     onClick = onAppearanceSettings
@@ -85,14 +87,14 @@ fun SettingsMainScreen(
             // Reading Experience Section
             item {
                 SettingsSectionHeader(
-                    title = "Reading Experience",
+                    title = localizeHelper.localize(Res.string.reading_experience),
                     icon = Icons.Outlined.MenuBook
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Reader",
+                    title = localizeHelper.localize(Res.string.reader),
                     description = "Reading mode, controls, and display preferences",
                     icon = Icons.Outlined.ChromeReaderMode,
                     onClick = onReaderSettings
@@ -102,14 +104,14 @@ fun SettingsMainScreen(
             // Library Management Section
             item {
                 SettingsSectionHeader(
-                    title = "Library Management",
+                    title = localizeHelper.localize(Res.string.library_management),
                     icon = Icons.Outlined.LibraryBooks
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Library",
+                    title = localizeHelper.localize(Res.string.library),
                     description = "Sorting, filtering, and update preferences",
                     icon = Icons.Outlined.LibraryBooks,
                     onClick = onLibrarySettings
@@ -118,7 +120,7 @@ fun SettingsMainScreen(
             
             item {
                 SettingsItem(
-                    title = "Downloads",
+                    title = localizeHelper.localize(Res.string.downloads),
                     description = "Download management and storage settings",
                     icon = Icons.Outlined.Download,
                     onClick = onDownloadSettings
@@ -127,7 +129,7 @@ fun SettingsMainScreen(
             
             item {
                 SettingsItem(
-                    title = "Tracking",
+                    title = localizeHelper.localize(Res.string.tracking),
                     description = "External service integration (MyAnimeList, AniList, etc.)",
                     icon = Icons.Outlined.Sync,
                     onClick = onTrackingSettings
@@ -137,14 +139,14 @@ fun SettingsMainScreen(
             // Data & Backup Section
             item {
                 SettingsSectionHeader(
-                    title = "Data & Backup",
+                    title = localizeHelper.localize(Res.string.data_backup),
                     icon = Icons.Outlined.Storage
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Backup & Restore",
+                    title = localizeHelper.localize(Res.string.backup_restore),
                     description = "Automatic backups and cloud storage integration",
                     icon = Icons.Outlined.SettingsBackupRestore,
                     onClick = onBackupSettings
@@ -153,7 +155,7 @@ fun SettingsMainScreen(
             
             item {
                 SettingsItem(
-                    title = "Data & Storage",
+                    title = localizeHelper.localize(Res.string.data_storage),
                     description = "Cache management and data usage settings",
                     icon = Icons.Outlined.Storage,
                     onClick = onDataSettings
@@ -163,14 +165,14 @@ fun SettingsMainScreen(
             // Extensions & Sources Section
             item {
                 SettingsSectionHeader(
-                    title = "Extensions & Sources",
+                    title = localizeHelper.localize(Res.string.extensions_sources),
                     icon = Icons.Outlined.Extension
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Extensions",
+                    title = localizeHelper.localize(Res.string.extensions_1),
                     description = "Extension repository management and updates",
                     icon = Icons.Outlined.Extension,
                     onClick = onExtensionSettings
@@ -180,14 +182,14 @@ fun SettingsMainScreen(
             // Security & Privacy Section
             item {
                 SettingsSectionHeader(
-                    title = "Security & Privacy",
+                    title = localizeHelper.localize(Res.string.security_privacy),
                     icon = Icons.Outlined.Security
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Security & Privacy",
+                    title = localizeHelper.localize(Res.string.security_privacy),
                     description = "App lock, incognito mode, and secure screen options",
                     icon = Icons.Outlined.Security,
                     onClick = onSecuritySettings
@@ -197,14 +199,14 @@ fun SettingsMainScreen(
             // System & Notifications Section
             item {
                 SettingsSectionHeader(
-                    title = "System & Notifications",
+                    title = localizeHelper.localize(Res.string.system_notifications),
                     icon = Icons.Outlined.Settings
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Notifications",
+                    title = localizeHelper.localize(Res.string.notifications),
                     description = "Granular control over notification types and channels",
                     icon = Icons.Outlined.Notifications,
                     onClick = onNotificationSettings
@@ -213,7 +215,7 @@ fun SettingsMainScreen(
             
             item {
                 SettingsItem(
-                    title = "Advanced",
+                    title = localizeHelper.localize(Res.string.advanced),
                     description = "Developer options and advanced configurations",
                     icon = Icons.Outlined.DeveloperMode,
                     onClick = onAdvancedSettings

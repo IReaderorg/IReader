@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Enhanced extension management screen with security and statistics

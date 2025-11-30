@@ -16,6 +16,7 @@ import androidx.compose.ui.window.Dialog
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun TranslationApiKeyPromptDialog(
@@ -24,6 +25,7 @@ fun TranslationApiKeyPromptDialog(
     onGoToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = modifier
@@ -49,7 +51,7 @@ fun TranslationApiKeyPromptDialog(
                 
                 // Title
                 Text(
-                    text = "API Key Required",
+                    text = localizeHelper.localize(Res.string.api_key_required),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface

@@ -36,6 +36,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,7 +142,7 @@ fun NFTBadgeScreen(
                                             modifier = Modifier.padding(16.dp)
                                         ) {
                                             Text(
-                                                text = "Wallet Address",
+                                                text = localizeHelper.localize(Res.string.wallet_address),
                                                 style = MaterialTheme.typography.titleMedium,
                                                 fontWeight = FontWeight.Bold
                                             )
@@ -174,13 +175,13 @@ fun NFTBadgeScreen(
                                                 Spacer(modifier = Modifier.width(12.dp))
                                                 Column {
                                                     Text(
-                                                        text = "No NFT Found",
+                                                        text = localizeHelper.localize(Res.string.no_nft_found),
                                                         style = MaterialTheme.typography.titleMedium,
                                                         fontWeight = FontWeight.Bold,
                                                         color = MaterialTheme.colorScheme.onErrorContainer
                                                     )
                                                     Text(
-                                                        text = "This wallet does not own an IReader NFT",
+                                                        text = localizeHelper.localize(Res.string.this_wallet_does_not_own_an_ireader_nft),
                                                         style = MaterialTheme.typography.bodyMedium,
                                                         color = MaterialTheme.colorScheme.onErrorContainer
                                                     )
@@ -240,7 +241,7 @@ fun NFTBadgeScreen(
                             CircularProgressIndicator()
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "Verifying NFT ownership...",
+                                text = localizeHelper.localize(Res.string.verifying_nft_ownership),
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
@@ -288,7 +289,7 @@ fun WalletAddressInput(
     ) {
         // Explanatory text
         Text(
-            text = "Enter your Ethereum wallet address to verify NFT ownership",
+            text = localizeHelper.localize(Res.string.enter_your_ethereum_wallet_address_1),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -372,20 +373,20 @@ fun WalletAddressInput(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "NFT Information",
+                    text = localizeHelper.localize(Res.string.nft_information),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 
                 Text(
-                    text = "Contract Address:",
+                    text = localizeHelper.localize(Res.string.contract_address),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = "0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc",
+                    text = localizeHelper.localize(Res.string.wallet_placeholder),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )
@@ -393,12 +394,12 @@ fun WalletAddressInput(
                 Spacer(modifier = Modifier.height(4.dp))
                 
                 Text(
-                    text = "• Verification is automatic and takes a few seconds",
+                    text = localizeHelper.localize(Res.string.verification_is_automatic_and_takes_a_few_seconds),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
-                    text = "• Badge granted immediately upon successful verification",
+                    text = localizeHelper.localize(Res.string.badge_granted_immediately_upon_successful),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -416,6 +417,7 @@ fun NFTBadgeOwnershipDisplay(
     isVerifying: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val currentTime = System.currentTimeMillis()
     val isExpiringSoon = (cacheExpiresAt - currentTime) < (6 * 60 * 60 * 1000L) // Less than 6 hours
     
@@ -443,7 +445,7 @@ fun NFTBadgeOwnershipDisplay(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "You own an IReader NFT!",
+                    text = localizeHelper.localize(Res.string.you_own_an_ireader_nft),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -494,7 +496,7 @@ fun NFTBadgeOwnershipDisplay(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Verification Details",
+                        text = localizeHelper.localize(Res.string.verification_details),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -530,7 +532,7 @@ fun NFTBadgeOwnershipDisplay(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Last Verified:",
+                        text = localizeHelper.localize(Res.string.last_verified),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -547,7 +549,7 @@ fun NFTBadgeOwnershipDisplay(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Cache Expires:",
+                        text = localizeHelper.localize(Res.string.cache_expires),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -589,7 +591,7 @@ fun NFTBadgeOwnershipDisplay(
             )
         ) {
             Text(
-                text = "Verification is cached for 24 hours. Badge remains active for 7 days if re-verification fails.",
+                text = localizeHelper.localize(Res.string.verification_is_cached_for_24),
                 modifier = Modifier.padding(16.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -626,7 +628,7 @@ fun NFTMarketplaceLink(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Don't have an IReader NFT?",
+                    text = localizeHelper.localize(Res.string.dont_have_an_ireader_nft),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -634,7 +636,7 @@ fun NFTMarketplaceLink(
             }
             
             Text(
-                text = "Purchase from our official marketplace to unlock the exclusive NFT badge",
+                text = localizeHelper.localize(Res.string.purchase_from_our_official_marketplace),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )

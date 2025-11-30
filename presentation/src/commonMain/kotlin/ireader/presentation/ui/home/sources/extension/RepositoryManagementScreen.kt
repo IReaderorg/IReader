@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.ExtensionRepository
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Screen for managing extension repositories
@@ -66,12 +67,12 @@ fun RepositoryManagementScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "No repositories configured",
+                        text = localizeHelper.localize(Res.string.no_repositories_configured),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Button(onClick = onAddRepository) {
-                        Text("Add Repository")
+                        Text(localizeHelper.localize(Res.string.add_repository))
                     }
                 }
             }

@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.IssueCategory
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog for reporting broken or problematic chapters
@@ -48,7 +49,7 @@ fun ReportBrokenChapterDialog(
                 )
                 
                 Text(
-                    text = "Select issue type:",
+                    text = localizeHelper.localize(Res.string.select_issue_type),
                     style = MaterialTheme.typography.titleSmall
                 )
                 

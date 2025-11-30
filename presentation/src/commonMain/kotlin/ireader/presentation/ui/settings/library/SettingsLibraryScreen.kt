@@ -59,7 +59,7 @@ fun SettingsLibraryScreen(
         modifier = modifier,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Library",
+                title = localizeHelper.localize(Res.string.library),
                 popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
@@ -76,14 +76,14 @@ fun SettingsLibraryScreen(
             // Display Section
             item {
                 SettingsSectionHeader(
-                    title = "Display",
+                    title = localizeHelper.localize(Res.string.display),
                     icon = Icons.Outlined.ViewList
                 )
             }
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Default Sort",
+                    title = localizeHelper.localize(Res.string.default_sort),
                     description = "Default sorting method for library",
                     icon = Icons.Outlined.Sort,
                     onClick = { viewModel.showDefaultSortDialog() }
@@ -106,7 +106,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Sort Direction",
+                    title = localizeHelper.localize(Res.string.sort_direction),
                     description = "Ascending or descending order",
                     icon = Icons.Outlined.SwapVert,
                     onClick = { viewModel.toggleSortDirection() }
@@ -121,7 +121,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Continue Reading Button",
+                    title = localizeHelper.localize(Res.string.continue_reading_button),
                     description = "Show continue reading button for in-progress books",
                     icon = Icons.Outlined.PlayArrow,
                     checked = showContinueReadingButton,
@@ -132,14 +132,14 @@ fun SettingsLibraryScreen(
             // Badges Section
             item {
                 SettingsSectionHeader(
-                    title = "Badges",
+                    title = localizeHelper.localize(Res.string.badges),
                     icon = Icons.Outlined.Label
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Unread Badge",
+                    title = localizeHelper.localize(Res.string.unread_badge),
                     description = "Show unread chapter count on library items",
                     icon = Icons.Outlined.FiberNew,
                     checked = showUnreadBadge,
@@ -149,7 +149,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Download Badge",
+                    title = localizeHelper.localize(Res.string.download_badge),
                     description = "Show download status on library items",
                     icon = Icons.Outlined.Download,
                     checked = showDownloadBadge,
@@ -159,7 +159,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Language Badge",
+                    title = localizeHelper.localize(Res.string.language_badge),
                     description = "Show source language on library items",
                     icon = Icons.Outlined.Language,
                     checked = showLanguageBadge,
@@ -169,7 +169,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Local Badge",
+                    title = localizeHelper.localize(Res.string.local_badge),
                     description = "Show local source indicator on library items",
                     icon = Icons.Outlined.Storage,
                     checked = showLocalBadge,
@@ -180,14 +180,14 @@ fun SettingsLibraryScreen(
             // Auto Update Section
             item {
                 SettingsSectionHeader(
-                    title = "Auto Update",
+                    title = localizeHelper.localize(Res.string.auto_update_1),
                     icon = Icons.Outlined.Update
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Auto Update Library",
+                    title = localizeHelper.localize(Res.string.auto_update_library),
                     description = "Automatically check for new chapters",
                     icon = Icons.Outlined.Update,
                     checked = autoUpdateLibrary,
@@ -197,7 +197,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Update Interval",
+                    title = localizeHelper.localize(Res.string.update_interval),
                     description = "How often to check for updates",
                     icon = Icons.Outlined.Schedule,
                     onClick = { viewModel.showUpdateIntervalDialog() },
@@ -227,7 +227,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Update Restrictions",
+                    title = localizeHelper.localize(Res.string.update_restrictions),
                     description = "When automatic updates are allowed",
                     icon = Icons.Outlined.WifiOff,
                     onClick = { viewModel.showUpdateRestrictionsDialog() },
@@ -253,14 +253,14 @@ fun SettingsLibraryScreen(
             // Update Filters Section
             item {
                 SettingsSectionHeader(
-                    title = "Update Filters",
+                    title = localizeHelper.localize(Res.string.update_filters),
                     icon = Icons.Outlined.FilterList
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Update Only Completed",
+                    title = localizeHelper.localize(Res.string.update_only_completed),
                     description = "Only update books marked as completed",
                     icon = Icons.Outlined.CheckCircle,
                     checked = updateOnlyCompleted,
@@ -271,7 +271,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Update Only Non-Completed",
+                    title = localizeHelper.localize(Res.string.update_only_non_completed),
                     description = "Only update books not marked as completed",
                     icon = Icons.Outlined.RadioButtonUnchecked,
                     checked = updateOnlyNonCompleted,
@@ -282,7 +282,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Skip Titles Without Chapters",
+                    title = localizeHelper.localize(Res.string.skip_titles_without_chapters),
                     description = "Don't update books that have no chapters",
                     icon = Icons.Outlined.SkipNext,
                     checked = skipTitlesWithoutChapters,
@@ -293,7 +293,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Refresh Covers Too",
+                    title = localizeHelper.localize(Res.string.refresh_covers_too),
                     description = "Also update book covers during library updates",
                     icon = Icons.Outlined.Image,
                     checked = refreshCoversToo,
@@ -305,14 +305,14 @@ fun SettingsLibraryScreen(
             // Advanced Section
             item {
                 SettingsSectionHeader(
-                    title = "Advanced",
+                    title = localizeHelper.localize(Res.string.advanced),
                     icon = Icons.Outlined.Tune
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Category Management",
+                    title = localizeHelper.localize(Res.string.category_management),
                     description = "Create and organize book categories",
                     icon = Icons.Outlined.Category,
                     onClick = { viewModel.navigateToCategoryManagement() }
@@ -321,7 +321,7 @@ fun SettingsLibraryScreen(
             
             item {
                 SettingsItem(
-                    title = "Library Statistics",
+                    title = localizeHelper.localize(Res.string.library_statistics),
                     description = "View detailed library statistics and analytics",
                     icon = Icons.Outlined.Analytics,
                     onClick = { viewModel.navigateToLibraryStatistics() }
@@ -430,7 +430,7 @@ fun SettingsLibraryScreen(
             text = {
                 Column {
                     Text(
-                        text = "Select when automatic updates are allowed:",
+                        text = localizeHelper.localize(Res.string.select_when_automatic_updates_are_allowed),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -446,7 +446,7 @@ fun SettingsLibraryScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "WiFi Only",
+                            text = localizeHelper.localize(Res.string.wifi_only),
                             modifier = Modifier.align(androidx.compose.ui.Alignment.CenterVertically)
                         )
                     }
@@ -462,7 +462,7 @@ fun SettingsLibraryScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "While Charging",
+                            text = localizeHelper.localize(Res.string.while_charging),
                             modifier = Modifier.align(androidx.compose.ui.Alignment.CenterVertically)
                         )
                     }

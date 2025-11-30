@@ -93,6 +93,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(
     ExperimentalMaterialApi::class,
@@ -518,6 +519,7 @@ private fun ActionMenu(
     enableChaptersFetch: Boolean,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -534,7 +536,7 @@ private fun ActionMenu(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Fetch Actions",
+                text = localizeHelper.localize(Res.string.fetch_actions),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -543,7 +545,7 @@ private fun ActionMenu(
             if (enableBookFetch) {
                 ActionMenuItem(
                     icon = Icons.Outlined.Book,
-                    title = "Fetch Book Details",
+                    title = localizeHelper.localize(Res.string.fetch_book_details),
                     description = "Download book information from this page",
                     onClick = onFetchBook
                 )
@@ -552,7 +554,7 @@ private fun ActionMenu(
             if (enableChapterFetch) {
                 ActionMenuItem(
                     icon = Icons.Outlined.AutoStories,
-                    title = "Fetch Current Chapter",
+                    title = localizeHelper.localize(Res.string.fetch_current_chapter),
                     description = "Download this chapter's content",
                     onClick = onFetchChapter
                 )
@@ -561,7 +563,7 @@ private fun ActionMenu(
             if (enableChaptersFetch) {
                 ActionMenuItem(
                     icon = Icons.Outlined.BookmarkAdd,
-                    title = "Fetch All Chapters",
+                    title = localizeHelper.localize(Res.string.fetch_all_chapters),
                     description = "Find and download all book chapters",
                     onClick = onFetchChapters
                 )
@@ -582,7 +584,7 @@ private fun ActionMenu(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Cancel",
+                    text = localizeHelper.localize(Res.string.cancel),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium

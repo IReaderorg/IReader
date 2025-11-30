@@ -14,6 +14,7 @@ import coil3.compose.AsyncImage
 import ireader.domain.plugins.PluginInfo
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Plugin header displaying icon, name, author, version, rating, and download count

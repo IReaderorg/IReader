@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Android implementation of TTS Engine Settings Screen
@@ -40,7 +41,7 @@ actual fun TTSEngineSettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Choose which TTS settings to open:",
+                    text = localizeHelper.localize(Res.string.choose_which_tts_settings_to_open),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -66,11 +67,11 @@ actual fun TTSEngineSettingsScreen(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "System TTS Settings",
+                                text = localizeHelper.localize(Res.string.system_tts_settings),
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
-                                text = "Configure Android's built-in text-to-speech engine",
+                                text = localizeHelper.localize(Res.string.configure_androids_built_in_text_to_speech_engine),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -104,11 +105,11 @@ actual fun TTSEngineSettingsScreen(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Online TTS Engines",
+                                text = localizeHelper.localize(Res.string.online_tts_engines),
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
-                                text = "Configure Gradio-based TTS (Coqui, Edge TTS, Persian TTS, etc.)",
+                                text = localizeHelper.localize(Res.string.configure_gradio_based_tts_coqui),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -180,7 +181,7 @@ actual fun TTSVoiceSelectionScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Voice selection is managed through Android's TTS settings.",
+                    text = localizeHelper.localize(Res.string.voice_selection_is_managed_through),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -205,11 +206,11 @@ actual fun TTSVoiceSelectionScreen(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Open TTS Settings",
+                                text = localizeHelper.localize(Res.string.open_tts_settings),
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
-                                text = "Select voice, language, and speech rate",
+                                text = localizeHelper.localize(Res.string.select_voice_language_and_speech_rate),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

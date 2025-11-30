@@ -17,6 +17,7 @@ import ireader.domain.models.tts.VoiceModel
 import ireader.domain.models.tts.VoiceQuality
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Voice card component displaying voice metadata and actions

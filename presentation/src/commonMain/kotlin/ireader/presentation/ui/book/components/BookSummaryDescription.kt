@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
@@ -36,6 +39,7 @@ fun BookSummaryDescription(
     expanded: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expandedHeight by remember { mutableStateOf(0) }
     var shrunkHeight by remember { mutableStateOf(0) }
     val heightDelta = remember(expandedHeight, shrunkHeight) { expandedHeight - shrunkHeight }
@@ -48,7 +52,7 @@ fun BookSummaryDescription(
     SubcomposeLayout(modifier = modifier.clipToBounds()) { constraints ->
         val shrunkPlaceable = subcompose("description-s") {
             Text(
-                text = "\n\n\n", // Shows at least 4 lines
+                text = localizeHelper.localize(Res.string.nnn), // Shows at least 4 lines
                 style = MaterialTheme.typography.bodyLarge,
             )
         }.map { it.measure(constraints) }

@@ -14,6 +14,7 @@ import ireader.domain.models.remote.Badge
 import ireader.presentation.ui.component.badges.ReviewBadgeDisplay
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun WriteReviewDialog(
@@ -70,7 +71,7 @@ fun WriteReviewDialog(
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     Text(
-                        text = "Your review will appear as:",
+                        text = localizeHelper.localize(Res.string.your_review_will_appear_as),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

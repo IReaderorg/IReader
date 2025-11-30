@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Enhanced section header with custom design
@@ -41,7 +43,7 @@ fun EnhancedSourceHeader(
     val alpha by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
         animationSpec = tween(durationMillis = 300),
-        label = "header_alpha"
+        label = localizeHelper.localize(Res.string.header_alpha)
     )
 
     Box(

@@ -17,6 +17,7 @@ import ireader.core.system.CrashReport
 import kotlin.time.ExperimentalTime
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Screen displayed when the app crashes
@@ -65,7 +66,7 @@ fun CrashScreen(
             
             // Error message
             Text(
-                text = "Something went wrong",
+                text = localizeHelper.localize(Res.string.something_went_wrong),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.error
             )
@@ -73,7 +74,7 @@ fun CrashScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "The app encountered an unexpected error and needs to restart.",
+                text = localizeHelper.localize(Res.string.the_app_encountered_an_unexpected),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -91,7 +92,7 @@ fun CrashScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Error Details",
+                        text = localizeHelper.localize(Res.string.error_details),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )

@@ -20,6 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Material 3 NavigationRail with modern design
@@ -77,13 +80,14 @@ fun Material3NavigationRailItem(
     enabled: Boolean = true,
     alwaysShowLabel: Boolean = false
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedScale by animateFloatAsState(
         targetValue = if (selected) 1.05f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
         ),
-        label = "scale"
+        label = localizeHelper.localize(Res.string.scale)
     )
 
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -164,13 +168,14 @@ fun CompactNavigationRailItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedScale by animateFloatAsState(
         targetValue = if (selected) 1.08f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "scale"
+        label = localizeHelper.localize(Res.string.scale)
     )
 
     val primaryColor = MaterialTheme.colorScheme.primary

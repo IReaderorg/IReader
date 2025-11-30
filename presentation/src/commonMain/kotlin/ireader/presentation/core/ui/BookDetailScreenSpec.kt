@@ -56,6 +56,7 @@ import ireader.presentation.ui.core.utils.isScrolledToEnd
 import ireader.presentation.ui.core.utils.isScrollingUp
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
+import ireader.i18n.resources.Res
 
 data class BookDetailScreenSpec constructor(
     val bookId: Long,

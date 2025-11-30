@@ -18,6 +18,9 @@ import androidx.navigation.NavHostController
 import ireader.domain.plugins.PluginMenuItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Helper for integrating plugin menu items into the reader screen
@@ -40,6 +43,7 @@ object ReaderPluginMenuIntegration {
         scope: CoroutineScope,
         onDismiss: () -> Unit
     ) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         if (menuItems.isEmpty()) {
             return
         }
@@ -47,7 +51,7 @@ object ReaderPluginMenuIntegration {
         Column(modifier = Modifier.fillMaxWidth()) {
             // Section header
             Text(
-                text = "Plugin Features",
+                text = localizeHelper.localize(Res.string.plugin_features),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 style = androidx.compose.material3.MaterialTheme.typography.labelMedium
             )
@@ -120,13 +124,14 @@ fun PluginMenuBottomSheet(
     scope: CoroutineScope,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp)
     ) {
         Text(
-            text = "Plugin Features",
+            text = localizeHelper.localize(Res.string.plugin_features),
             style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )

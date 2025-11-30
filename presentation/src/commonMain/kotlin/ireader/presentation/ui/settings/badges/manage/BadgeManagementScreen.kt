@@ -68,6 +68,7 @@ import ireader.presentation.ui.component.badges.ProfileBadgeDisplay
 import ireader.presentation.ui.component.badges.ReviewBadgeDisplay
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -206,13 +207,13 @@ fun BadgeManagementScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "You don't have any badges yet",
+                            text = localizeHelper.localize(Res.string.you_dont_have_any_badges_yet),
                             style = MaterialTheme.typography.titleLarge,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Visit the Badge Store to purchase your first badge",
+                            text = localizeHelper.localize(Res.string.visit_the_badge_store_to_purchase_your_first_badge),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
@@ -304,16 +305,17 @@ private fun BadgeSelectionContent(
     state: BadgeManagementState,
     viewModel: BadgeManagementViewModel
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column {
         // Section 1: Primary Badge (for Reviews)
         Text(
-            text = "Primary Badge (for Reviews)",
+            text = localizeHelper.localize(Res.string.primary_badge_for_reviews),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "This badge will appear next to your username on all your reviews",
+            text = localizeHelper.localize(Res.string.this_badge_will_appear_next),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -329,13 +331,13 @@ private fun BadgeSelectionContent(
         
         // Section 2: Featured Badges (for Profile)
         Text(
-            text = "Featured Badges (for Profile)",
+            text = localizeHelper.localize(Res.string.featured_badges_for_profile),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Select up to 3 badges to display prominently on your profile",
+            text = localizeHelper.localize(Res.string.select_up_to_3_badges),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -485,7 +487,7 @@ private fun SelectableBadgeCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "None",
+                        text = localizeHelper.localize(Res.string.none),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -574,8 +576,9 @@ private fun BadgePreviewSection(
     primaryBadgeId: String?,
     featuredBadgeIds: List<String>
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Text(
-        text = "Preview",
+        text = localizeHelper.localize(Res.string.preview),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold
     )
@@ -592,7 +595,7 @@ private fun BadgePreviewSection(
         ) {
             // Profile Preview
             Text(
-                text = "How it appears on your profile:",
+                text = localizeHelper.localize(Res.string.how_it_appears_on_your_profile),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -609,7 +612,7 @@ private fun BadgePreviewSection(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Your Username",
+                        text = localizeHelper.localize(Res.string.your_username),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -620,7 +623,7 @@ private fun BadgePreviewSection(
                         ProfileBadgeDisplay(badges = featuredBadges)
                     } else {
                         Text(
-                            text = "No featured badges selected",
+                            text = localizeHelper.localize(Res.string.no_featured_badges_selected),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
@@ -633,7 +636,7 @@ private fun BadgePreviewSection(
             
             // Review Preview
             Text(
-                text = "How it appears on your reviews:",
+                text = localizeHelper.localize(Res.string.how_it_appears_on_your_reviews),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -655,7 +658,7 @@ private fun BadgePreviewSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Your Username",
+                            text = localizeHelper.localize(Res.string.your_username),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -669,7 +672,7 @@ private fun BadgePreviewSection(
                     if (primaryBadge == null) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "No primary badge selected",
+                            text = localizeHelper.localize(Res.string.no_primary_badge_selected),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
@@ -678,7 +681,7 @@ private fun BadgePreviewSection(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "This is a sample review text that shows how your badge will appear next to your username when you write reviews.",
+                        text = localizeHelper.localize(Res.string.this_is_a_sample_review),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

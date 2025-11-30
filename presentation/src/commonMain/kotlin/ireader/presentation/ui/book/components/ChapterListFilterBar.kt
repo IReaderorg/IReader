@@ -56,7 +56,7 @@ fun ChapterListFilterBar(
                     val hideReadFilter = filters.find { it.type == ChaptersFilters.Type.Read }
                     if (hideReadFilter?.value == ChaptersFilters.Value.Excluded) {
                         CompactFilterChip(
-                            label = "Hide Read",
+                            label = localizeHelper.localize(Res.string.hide_read),
                             onClick = { onToggleFilter(ChaptersFilters.Type.Read) }
                         )
                     }
@@ -65,7 +65,7 @@ fun ChapterListFilterBar(
                     val hideDuplicateFilter = filters.find { it.type == ChaptersFilters.Type.Duplicate }
                     if (hideDuplicateFilter?.value == ChaptersFilters.Value.Excluded) {
                         CompactFilterChip(
-                            label = "Hide Duplicates",
+                            label = localizeHelper.localize(Res.string.hide_duplicates),
                             onClick = { onToggleFilter(ChaptersFilters.Type.Duplicate) }
                         )
                     }
@@ -122,7 +122,7 @@ fun ChapterListFilterBar(
                         onDismissRequest = { showFilterMenu = false }
                     ) {
                         Text(
-                            text = "Chapter Filters",
+                            text = localizeHelper.localize(Res.string.chapter_filters),
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                         )

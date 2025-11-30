@@ -29,6 +29,7 @@ import ireader.domain.models.entities.LeaderboardEntry
 import kotlin.math.roundToInt
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun ReadingLeaderboardContent(
@@ -94,13 +95,13 @@ private fun EmptyReadingLeaderboardState(onSync: () -> Unit, isSyncing: Boolean)
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "No Rankings Yet",
+                text = localizeHelper.localize(Res.string.no_rankings_yet),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Be the first to sync your reading stats!",
+                text = localizeHelper.localize(Res.string.be_the_first_to_sync_your_reading_stats),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -132,6 +133,7 @@ private fun ReadingLeaderboardList(
     onSync: () -> Unit,
     onToggleRealtime: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
@@ -174,7 +176,7 @@ private fun ReadingLeaderboardList(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "All Rankings",
+                    text = localizeHelper.localize(Res.string.all_rankings),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -236,6 +238,7 @@ private fun ReadingUserRankCard(
     isSyncing: Boolean,
     totalUsers: Int
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -262,11 +265,11 @@ private fun ReadingUserRankCard(
             
             if (userRank != null) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    ReadingStatItem(icon = Icons.Default.Timer, label = "Reading Time", value = formatReadingTime(userRank.totalReadingTimeMinutes), modifier = Modifier.weight(1f))
+                    ReadingStatItem(icon = Icons.Default.Timer, label = localizeHelper.localize(Res.string.reading_time), value = formatReadingTime(userRank.totalReadingTimeMinutes), modifier = Modifier.weight(1f))
                     Spacer(modifier = Modifier.width(12.dp))
                     ReadingStatItem(
                         icon = Icons.Default.TrendingUp,
-                        label = "Percentile",
+                        label = localizeHelper.localize(Res.string.percentile),
                         value = if (totalUsers > 0) "Top ${((totalUsers - userRank.rank + 1).toFloat() / totalUsers * 100).roundToInt()}%" else "N/A",
                         modifier = Modifier.weight(1f)
                     )

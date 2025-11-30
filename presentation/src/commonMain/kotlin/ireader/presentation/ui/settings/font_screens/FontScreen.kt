@@ -24,6 +24,7 @@ import ireader.presentation.core.toComposeFontFamily
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun FontScreen(
@@ -58,7 +59,7 @@ fun FontScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Tap the eye icon to preview fonts",
+                        text = localizeHelper.localize(Res.string.tap_the_eye_icon_to_preview_fonts),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -127,7 +128,7 @@ fun FontScreen(
                     
                     // Sample paragraph
                     Text(
-                        text = "The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                        text = localizeHelper.localize(Res.string.the_quick_brown_fox_jumps),
                         fontSize = 16.sp,
                         lineHeight = 24.sp,
                         fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
@@ -142,19 +143,19 @@ fun FontScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Small",
+                            text = localizeHelper.localize(Res.string.small),
                             fontSize = 12.sp,
                             fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                         Text(
-                            text = "Medium",
+                            text = localizeHelper.localize(Res.string.medium),
                             fontSize = 16.sp,
                             fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                         Text(
-                            text = "Large",
+                            text = localizeHelper.localize(Res.string.large),
                             fontSize = 20.sp,
                             fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily(),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -263,7 +264,7 @@ private fun FontItem(
                     Spacer(modifier = Modifier.height(8.dp))
                     // Preview text in the actual font
                     Text(
-                        text = "The quick brown fox jumps over the lazy dog",
+                        text = localizeHelper.localize(Res.string.the_quick_brown_fox_jumps_over_the_lazy_dog),
                         fontFamily = fontFamily,
                         fontSize = 14.sp,
                         lineHeight = 20.sp,

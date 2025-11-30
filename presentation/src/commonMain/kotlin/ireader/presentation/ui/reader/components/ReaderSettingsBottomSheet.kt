@@ -110,7 +110,7 @@ fun ReaderSettingsBottomSheet(
                     onClick = { scope.launch { pagerState.animateScrollToPage(2) } }
                 )
                 Tab(
-                    text = { MidSizeTextComposable(text = "Fonts") },
+                    text = { MidSizeTextComposable(text = localizeHelper.localize(Res.string.fonts)) },
                     selected = pagerState.currentPage == 3,
                     onClick = { scope.launch { pagerState.animateScrollToPage(3) } }
                 )

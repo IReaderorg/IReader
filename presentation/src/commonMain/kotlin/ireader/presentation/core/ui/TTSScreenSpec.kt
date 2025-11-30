@@ -69,6 +69,7 @@ class TTSScreenSpec(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val ttsService: CommonTTSService = koinInject()
         val readerPreferences: ReaderPreferences = koinInject()
@@ -338,7 +339,7 @@ class TTSScreenSpec(
                         title = {
                             Column {
                                 Text(
-                                    text = "Text-to-Speech",
+                                    text = localizeHelper.localize(Res.string.text_to_speech),
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 if (currentChapter != null) {
@@ -564,6 +565,7 @@ private fun TTSScreenDrawer(
     drawerScrollState: LazyListState,
     onMap: (LazyListState) -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxWidth(0.9f),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -614,7 +616,7 @@ private fun TTSScreenDrawer(
         
         if (chapters.isEmpty()) {
             Text(
-                text = "No chapters available",
+                text = localizeHelper.localize(Res.string.no_chapters_available),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(20.dp),

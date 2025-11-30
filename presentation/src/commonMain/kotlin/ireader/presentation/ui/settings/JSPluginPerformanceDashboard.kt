@@ -9,6 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.js.models.PluginPerformanceMetrics
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dashboard showing performance metrics for JavaScript plugins.
@@ -18,6 +21,7 @@ fun JSPluginPerformanceDashboard(
     metrics: Map<String, PluginPerformanceMetrics>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -25,7 +29,7 @@ fun JSPluginPerformanceDashboard(
     ) {
         item {
             Text(
-                text = "Plugin Performance Metrics",
+                text = localizeHelper.localize(Res.string.plugin_performance_metrics),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -34,7 +38,7 @@ fun JSPluginPerformanceDashboard(
         if (metrics.isEmpty()) {
             item {
                 Text(
-                    text = "No performance data available yet",
+                    text = localizeHelper.localize(Res.string.no_performance_data_available_yet),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

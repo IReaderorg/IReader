@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.plugins.management.PluginErrorDetails
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog showing plugin error details and troubleshooting steps
@@ -36,7 +37,7 @@ fun PluginErrorDetailsDialog(
             ) {
                 // Error message
                 Text(
-                    text = "Error Message:",
+                    text = localizeHelper.localize(Res.string.error_message),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -57,7 +58,7 @@ fun PluginErrorDetailsDialog(
                 
                 // Troubleshooting steps
                 Text(
-                    text = "Troubleshooting Steps:",
+                    text = localizeHelper.localize(Res.string.troubleshooting_steps),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )

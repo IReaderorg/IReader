@@ -71,7 +71,7 @@ fun GeneralSettingScreen(
         listOf<Components>(
                 // App Updates & Display Section
                 Components.Header(
-                        text = "App Updates & Display",
+                        text = localizeHelper.localize(Res.string.app_updates_display),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.DisplaySettings
                 ),
@@ -100,20 +100,20 @@ fun GeneralSettingScreen(
                 
                 // Library Settings Section
                 Components.Header(
-                        text = "Library Settings",
+                        text = localizeHelper.localize(Res.string.library_settings),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Storage
                 ),
                 Components.Switch(
                         preference = vm.showSmartCategories,
-                        title = "Show Smart Categories",
-                        subtitle = "Display auto-populated categories like Recently Added, Currently Reading, etc.",
+                        title = localizeHelper.localize(Res.string.show_smart_categories),
+                        subtitle = localizeHelper.localize(Res.string.display_auto_populated_categories_like),
                         icon = Icons.Filled.Storage
                 ),
                 Components.Switch(
                         preference = vm.useFabInLibrary,
-                        title = "Use FAB in Library",
-                        subtitle = "Replace toolbar buttons with floating action button",
+                        title = localizeHelper.localize(Res.string.use_fab_in_library),
+                        subtitle = localizeHelper.localize(Res.string.replace_toolbar_buttons_with_floating),
                         icon = Icons.Filled.Settings
                 ),
                 Components.Dynamic {
@@ -125,8 +125,8 @@ fun GeneralSettingScreen(
                             "UPLOAD_DATE_ASC" to "By Upload Date (Ascending)",
                             "UPLOAD_DATE_DESC" to "By Upload Date (Descending)"
                         ),
-                        title = "Default Chapter Sort",
-                        subtitle = "Default sorting method for chapter lists"
+                        title = localizeHelper.localize(Res.string.default_chapter_sort),
+                        subtitle = localizeHelper.localize(Res.string.default_sorting_method_for_chapter_lists)
                     )
                 },
                 
@@ -134,20 +134,20 @@ fun GeneralSettingScreen(
                 
                 // Global Search Section
                 Components.Header(
-                        text = "Global Search",
+                        text = localizeHelper.localize(Res.string.global_search),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Search
                 ),
                 Components.Switch(
                         preference = vm.onlyUpdateOnFinding,
-                        title = "Only Update on Finding Novel",
-                        subtitle = "Add novels to library only when found in search results",
+                        title = localizeHelper.localize(Res.string.only_update_on_finding_novel),
+                        subtitle = localizeHelper.localize(Res.string.add_novels_to_library_only),
                         icon = Icons.Filled.Search
                 ),
                 Components.Switch(
                         preference = vm.showLastUpdateTime,
-                        title = "Show Last Update Time",
-                        subtitle = "Display when each novel was last checked for updates",
+                        title = localizeHelper.localize(Res.string.show_last_update_time),
+                        subtitle = localizeHelper.localize(Res.string.display_when_each_novel_was),
                         icon = Icons.Filled.Update
                 ),
                 
@@ -155,14 +155,14 @@ fun GeneralSettingScreen(
                 
                 // Auto Download Section
                 Components.Header(
-                        text = "Auto Download",
+                        text = localizeHelper.localize(Res.string.auto_download),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Download
                 ),
                 Components.Switch(
                         preference = vm.autoDownloadNewChapters,
-                        title = "Download New Chapters",
-                        subtitle = "Automatically download newly detected chapters in background",
+                        title = localizeHelper.localize(Res.string.download_new_chapters),
+                        subtitle = localizeHelper.localize(Res.string.automatically_download_newly_detected_chapters),
                         icon = Icons.Filled.Download
                 ),
                 
@@ -170,20 +170,20 @@ fun GeneralSettingScreen(
                 
                 // User Interface Section
                 Components.Header(
-                        text = "User Interface",
+                        text = localizeHelper.localize(Res.string.user_interface),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.DisplaySettings
                 ),
                 Components.Switch(
                         preference = vm.disableHapticFeedback,
-                        title = "Disable Haptic Feedback",
-                        subtitle = "Turn off vibration feedback for interactions",
+                        title = localizeHelper.localize(Res.string.disable_haptic_feedback),
+                        subtitle = localizeHelper.localize(Res.string.turn_off_vibration_feedback_for_interactions),
                         icon = Icons.Filled.TouchApp
                 ),
                 Components.Switch(
                         preference = vm.disableLoadingAnimations,
-                        title = "Disable Loading Animations",
-                        subtitle = "Use static indicators instead of animated ones",
+                        title = localizeHelper.localize(Res.string.disable_loading_animations),
+                        subtitle = localizeHelper.localize(Res.string.use_static_indicators_instead_of_animated_ones),
                         icon = Icons.Filled.Autorenew
                 ),
                 
@@ -191,14 +191,14 @@ fun GeneralSettingScreen(
                 
                 // Community & Leaderboard Section
                 Components.Header(
-                        text = "Community & Leaderboard",
+                        text = localizeHelper.localize(Res.string.community_leaderboard),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Settings
                 ),
                 Components.Switch(
                         preference = vm.leaderboardRealtimeEnabled,
-                        title = "Leaderboard Realtime Updates",
-                        subtitle = "Automatically refresh leaderboard when other users sync (uses more data)",
+                        title = localizeHelper.localize(Res.string.leaderboard_realtime_updates),
+                        subtitle = localizeHelper.localize(Res.string.automatically_refresh_leaderboard_when_other),
                         icon = Icons.Filled.Autorenew
                 ),
                 
@@ -206,14 +206,14 @@ fun GeneralSettingScreen(
                 
                 // Download Settings Section
                 Components.Header(
-                        text = "Download Settings",
+                        text = localizeHelper.localize(Res.string.download_settings),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Download
                 ),
                 Components.Slider(
                     preferenceAsLong = vm.downloadDelayMs,
-                    title = "Download Delay",
-                    subtitle = "Delay between chapter downloads to avoid IP blocking",
+                    title = localizeHelper.localize(Res.string.download_delay),
+                    subtitle = localizeHelper.localize(Res.string.delay_between_chapter_downloads_to),
                     icon = Icons.Filled.Download,
                     valueRange = 0f..10000f,
                     steps = 19,
@@ -225,7 +225,7 @@ fun GeneralSettingScreen(
                 
                 // Catalog Settings Section
                 Components.Header(
-                        text = "Catalog Settings",
+                        text = localizeHelper.localize(Res.string.catalog_settings),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Storage
                 ),
@@ -243,16 +243,16 @@ fun GeneralSettingScreen(
                 ),
                 Components.Dynamic {
                     NavigationPreferenceCustom(
-                        title = "JavaScript Plugin Settings",
-                        subtitle = "Configure JS plugins and enable LNReader-compatible sources",
+                        title = localizeHelper.localize(Res.string.javascript_plugin_settings),
+                        subtitle = localizeHelper.localize(Res.string.configure_js_plugins_and_enable),
                         icon = { Icon(Icons.Filled.Code, contentDescription = null) },
                         onClick = onJSPluginSettingsClick
                     )
                 },
                 Components.Switch(
                         preference = vm.enableJSPlugins,
-                        title = "Enable JavaScript Plugins",
-                        subtitle = "Allow loading LNReader-compatible JavaScript plugins",
+                        title = localizeHelper.localize(Res.string.enable_javascript_plugins),
+                        subtitle = localizeHelper.localize(Res.string.allow_loading_lnreader_compatible_javascript),
                         icon = Icons.Filled.Code
                 ),
                 Components.Switch(
@@ -285,7 +285,7 @@ fun GeneralSettingScreen(
                 
                 // Notifications Section
                 Components.Header(
-                        text = "Notifications",
+                        text = localizeHelper.localize(Res.string.notifications),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Notifications
                 ),
@@ -295,7 +295,7 @@ fun GeneralSettingScreen(
                 
                 // Language & Translation Section
                 Components.Header(
-                        text = "Language & Translation",
+                        text = localizeHelper.localize(Res.string.language_translation),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Language
                 ),

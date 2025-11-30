@@ -67,6 +67,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlin.math.round
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun ColorPickerDialog(
@@ -76,6 +77,7 @@ fun ColorPickerDialog(
     title: (@Composable () -> Unit)? = null,
     initialColor: Color = Color.Unspecified,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var currentColor by remember { mutableStateOf(initialColor) }
     var showPresets by remember { mutableStateOf(true) }
     
@@ -109,7 +111,7 @@ fun ColorPickerDialog(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         androidx.compose.material3.Text(
-                            text = "Preview",
+                            text = localizeHelper.localize(Res.string.preview),
                             style = MaterialTheme.typography.labelLarge,
                             color = if (currentColor.luminance() > 0.5) Color.Black else Color.White
                         )

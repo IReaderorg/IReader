@@ -57,7 +57,7 @@ fun SettingsDataScreen(
         modifier = modifier,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Data & Storage",
+                title = localizeHelper.localize(Res.string.data_storage),
                 popBackStack = onNavigateUp,
                 scrollBehavior = scrollBehavior
             )
@@ -74,14 +74,14 @@ fun SettingsDataScreen(
             // Storage Usage Section
             item {
                 SettingsSectionHeader(
-                    title = "Storage Usage",
+                    title = localizeHelper.localize(Res.string.storage_usage),
                     icon = Icons.Outlined.Storage
                 )
             }
             
             item {
                 SettingsHighlightCard(
-                    title = "Total Cache Size",
+                    title = localizeHelper.localize(Res.string.total_cache_size),
                     description = formatFileSize(totalCacheSize),
                     icon = Icons.Outlined.PieChart,
                     onClick = { viewModel.navigateToStorageBreakdown() }
@@ -90,7 +90,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Image Cache",
+                    title = localizeHelper.localize(Res.string.image_cache),
                     description = "Cached book covers and chapter images",
                     icon = Icons.Outlined.Image,
                     onClick = { viewModel.showImageCacheDialog() }
@@ -105,7 +105,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Chapter Cache",
+                    title = localizeHelper.localize(Res.string.chapter_cache),
                     description = "Cached chapter content and metadata",
                     icon = Icons.Outlined.Article,
                     onClick = { viewModel.showChapterCacheDialog() }
@@ -120,7 +120,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Network Cache",
+                    title = localizeHelper.localize(Res.string.network_cache),
                     description = "Cached API responses and web content",
                     icon = Icons.Outlined.Cloud,
                     onClick = { viewModel.showNetworkCacheDialog() }
@@ -136,14 +136,14 @@ fun SettingsDataScreen(
             // Cache Management Section
             item {
                 SettingsSectionHeader(
-                    title = "Cache Management",
+                    title = localizeHelper.localize(Res.string.cache_management),
                     icon = Icons.Outlined.CleaningServices
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Auto Cleanup",
+                    title = localizeHelper.localize(Res.string.auto_cleanup),
                     description = "Automatically clean old cache files",
                     icon = Icons.Outlined.AutoDelete,
                     checked = autoCleanupEnabled,
@@ -153,7 +153,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Cleanup Interval",
+                    title = localizeHelper.localize(Res.string.cleanup_interval),
                     description = "How often to run automatic cleanup",
                     icon = Icons.Outlined.Schedule,
                     onClick = { viewModel.showCleanupIntervalDialog() },
@@ -180,7 +180,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Max Cache Size",
+                    title = localizeHelper.localize(Res.string.max_cache_size),
                     description = "Maximum total cache size before cleanup",
                     icon = Icons.Outlined.Storage,
                     onClick = { viewModel.showMaxCacheSizeDialog() }
@@ -204,7 +204,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Clear Cache on Low Storage",
+                    title = localizeHelper.localize(Res.string.clear_cache_on_low_storage),
                     description = "Automatically clear cache when device storage is low",
                     icon = Icons.Outlined.Warning,
                     checked = clearCacheOnLowStorage,
@@ -215,14 +215,14 @@ fun SettingsDataScreen(
             // Image Settings Section
             item {
                 SettingsSectionHeader(
-                    title = "Image Settings",
+                    title = localizeHelper.localize(Res.string.image_settings),
                     icon = Icons.Outlined.Image
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Compress Images",
+                    title = localizeHelper.localize(Res.string.compress_images),
                     description = "Reduce image file sizes to save storage",
                     icon = Icons.Outlined.Compress,
                     checked = compressImages,
@@ -232,7 +232,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItemWithTrailing(
-                    title = "Image Quality",
+                    title = localizeHelper.localize(Res.string.image_quality),
                     description = "Balance between quality and file size",
                     icon = Icons.Outlined.HighQuality,
                     onClick = { viewModel.showImageQualityDialog() },
@@ -260,14 +260,14 @@ fun SettingsDataScreen(
             // Preloading Section
             item {
                 SettingsSectionHeader(
-                    title = "Preloading",
+                    title = localizeHelper.localize(Res.string.preloading),
                     icon = Icons.Outlined.Cached
                 )
             }
             
             item {
                 SettingsSwitchItem(
-                    title = "Preload Next Chapter",
+                    title = localizeHelper.localize(Res.string.preload_next_chapter),
                     description = "Load next chapter in background for faster reading",
                     icon = Icons.Outlined.SkipNext,
                     checked = preloadNextChapter,
@@ -277,7 +277,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsSwitchItem(
-                    title = "Preload Previous Chapter",
+                    title = localizeHelper.localize(Res.string.preload_previous_chapter),
                     description = "Keep previous chapter in memory for quick access",
                     icon = Icons.Outlined.SkipPrevious,
                     checked = preloadPreviousChapter,
@@ -288,14 +288,14 @@ fun SettingsDataScreen(
             // Data Usage Section
             item {
                 SettingsSectionHeader(
-                    title = "Data Usage",
+                    title = localizeHelper.localize(Res.string.data_usage),
                     icon = Icons.Outlined.DataUsage
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Data Usage Statistics",
+                    title = localizeHelper.localize(Res.string.data_usage_statistics),
                     description = "View detailed data usage by feature",
                     icon = Icons.Outlined.Analytics,
                     onClick = { viewModel.navigateToDataUsageStats() }
@@ -304,7 +304,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItem(
-                    title = "Network Settings",
+                    title = localizeHelper.localize(Res.string.network_settings),
                     description = "Configure network behavior and restrictions",
                     icon = Icons.Outlined.NetworkCheck,
                     onClick = { viewModel.navigateToNetworkSettings() }
@@ -314,14 +314,14 @@ fun SettingsDataScreen(
             // Maintenance Section
             item {
                 SettingsSectionHeader(
-                    title = "Maintenance",
+                    title = localizeHelper.localize(Res.string.maintenance),
                     icon = Icons.Outlined.Build
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Clear All Cache",
+                    title = localizeHelper.localize(Res.string.clear_all_cache),
                     description = "Remove all cached data to free up space",
                     icon = Icons.Outlined.ClearAll,
                     onClick = { viewModel.showClearAllCacheDialog() }
@@ -330,7 +330,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItem(
-                    title = "Optimize Database",
+                    title = localizeHelper.localize(Res.string.optimize_database),
                     description = "Compact database and improve performance",
                     icon = Icons.Outlined.Tune,
                     onClick = { viewModel.showOptimizeDatabaseDialog() }
@@ -339,7 +339,7 @@ fun SettingsDataScreen(
             
             item {
                 SettingsItem(
-                    title = "Reset Data Settings",
+                    title = localizeHelper.localize(Res.string.reset_data_settings),
                     description = "Reset all data and storage settings to defaults",
                     icon = Icons.Outlined.RestartAlt,
                     onClick = { viewModel.showResetDataSettingsDialog() }

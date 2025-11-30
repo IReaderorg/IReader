@@ -17,6 +17,9 @@ import ireader.core.source.model.MangaInfo
 import ireader.domain.models.entities.Book
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.ui.core.modifier.secondaryItemAlpha
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 internal fun RowScope.BookInfo(
@@ -25,6 +28,7 @@ internal fun RowScope.BookInfo(
     source: Source?,
     onCopyTitle:(bookTitle:String) -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier
             .weight(1f)
@@ -131,7 +135,7 @@ internal fun RowScope.BookInfo(
                         tint = MaterialTheme.colorScheme.tertiary
                     )
                     Text(
-                        text = "Archived",
+                        text = localizeHelper.localize(Res.string.archived),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.tertiary,

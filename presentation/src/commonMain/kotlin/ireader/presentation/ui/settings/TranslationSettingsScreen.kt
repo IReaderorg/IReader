@@ -141,7 +141,7 @@ fun TranslationSettingsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Select your preferred translation engine and configure its settings. AI-powered engines (OpenAI, DeepSeek) require API keys and offer more advanced features.",
+                    text = localizeHelper.localize(Res.string.select_your_preferred_translation_engine),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     modifier = Modifier.padding(top = 8.dp)
@@ -190,7 +190,7 @@ fun TranslationSettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Translation plugins extend IReader with additional translation services",
+                        text = localizeHelper.localize(Res.string.translation_plugins_extend_ireader_with),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                     )
@@ -204,7 +204,7 @@ fun TranslationSettingsScreen(
                 Components.Row(
                     title = pluginName,
                     icon = Icons.Default.Translate,
-                    subtitle = "Plugin-based translation",
+                    subtitle = localizeHelper.localize(Res.string.plugin_based_translation),
                     onClick = {
                         // Set plugin as selected engine
                         // This would need to be handled by the viewModel
@@ -229,7 +229,7 @@ fun TranslationSettingsScreen(
                 Components.Row(
                     title = localizeHelper.localize(Res.string.openai_api_key),
                     icon = Icons.Default.Api,
-                    subtitle = "Required for OpenAI translations",
+                    subtitle = localizeHelper.localize(Res.string.required_for_openai_translations),
                     onClick = {},
                     action = {
                         OutlinedTextField(
@@ -265,7 +265,7 @@ fun TranslationSettingsScreen(
                 Components.Row(
                     title = localizeHelper.localize(Res.string.deepseek_api_key),
                     icon = Icons.Default.Api,
-                    subtitle = "Required for DeepSeek translations",
+                    subtitle = localizeHelper.localize(Res.string.required_for_deepseek_translations),
                     onClick = {},
                     action = {
                         OutlinedTextField(
@@ -408,7 +408,7 @@ fun TranslationSettingsScreen(
             Components.Row(
                 title = localizeHelper.localize(Res.string.ollama_url),
                 icon = Icons.Default.Api,
-                subtitle = "URL of your Ollama API server",
+                subtitle = localizeHelper.localize(Res.string.url_of_your_ollama_api_server),
                 onClick = {},
                 action = {
                     OutlinedTextField(
@@ -431,7 +431,7 @@ fun TranslationSettingsScreen(
             Components.Row(
                 title = localizeHelper.localize(Res.string.ollama_model),
                 icon = Icons.Default.Settings,
-                subtitle = "Model to use for translation (e.g., mistral, llama2)",
+                subtitle = localizeHelper.localize(Res.string.model_to_use_for_translation_eg_mistral_llama2),
                 onClick = {},
                 action = {
                     OutlinedTextField(
@@ -461,12 +461,12 @@ fun TranslationSettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Ollama Information",
+                        text = localizeHelper.localize(Res.string.ollama_information),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Ollama is a local LLM server for translations. Make sure Ollama is installed and running on your device or network. You need to pull the model first with 'ollama pull modelname'.",
+                        text = localizeHelper.localize(Res.string.ollama_is_a_local_llm),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
@@ -497,7 +497,7 @@ fun TranslationSettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "LibreTranslate",
+                        text = localizeHelper.localize(Res.string.libretranslate),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -534,18 +534,18 @@ fun TranslationSettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "ChatGPT Login Required",
+                        text = localizeHelper.localize(Res.string.chatgpt_login_required),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "This translation engine uses a WebView to access ChatGPT directly. You need to sign in to ChatGPT with your account to use this feature. The app will save your cookies for future translations.",
+                        text = localizeHelper.localize(Res.string.this_translation_engine_uses_a),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
                     )
                     Text(
-                        text = "If a CAPTCHA appears, you will need to complete it manually.",
+                        text = localizeHelper.localize(Res.string.if_a_captcha_appears_you),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
@@ -590,18 +590,18 @@ fun TranslationSettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "DeepSeek Login Required",
+                        text = localizeHelper.localize(Res.string.deepseek_login_required),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "This translation engine uses a WebView to access DeepSeek directly. You need to sign in to DeepSeek with your account to use this feature. The app will save your cookies for future translations.",
+                        text = localizeHelper.localize(Res.string.this_translation_engine_uses_a_1),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
                     )
                     Text(
-                        text = "If a CAPTCHA appears, you will need to complete it manually.",
+                        text = localizeHelper.localize(Res.string.if_a_captcha_appears_you),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
@@ -641,7 +641,7 @@ fun TranslationSettingsScreen(
             Components.Row(
                 title = localizeHelper.localize(Res.string.gemini_api_key),
                 icon = Icons.Default.Api,
-                subtitle = "Required for Google Gemini translations",
+                subtitle = localizeHelper.localize(Res.string.required_for_google_gemini_translations),
                 onClick = {},
                 action = {
                     OutlinedTextField(
@@ -682,12 +682,12 @@ fun TranslationSettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Gemini API Information",
+                        text = localizeHelper.localize(Res.string.gemini_api_information),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Google's Gemini API provides high-quality translations through their AI platform. To use this feature, you need to obtain an API key from Google AI Studio (https://aistudio.google.com).",
+                        text = localizeHelper.localize(Res.string.googles_gemini_api_provides_high),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
@@ -711,7 +711,7 @@ fun TranslationSettingsScreen(
             Components.Chip(
             title = localizeHelper.localize(Res.string.content_type),
             icon = Icons.Default.Translate,
-            subtitle = "Optimizes translation for specific content",
+            subtitle = localizeHelper.localize(Res.string.optimizes_translation_for_specific_content),
             onValueChange = {
                 onTranslatorContentTypeChange(it)
                 forceRecompose()
@@ -724,7 +724,7 @@ fun TranslationSettingsScreen(
             Components.Chip(
             title = localizeHelper.localize(Res.string.tone_type),
             icon = Icons.Default.Translate,
-            subtitle = "Sets the tone of translated text",
+            subtitle = localizeHelper.localize(Res.string.sets_the_tone_of_translated_text),
             onValueChange = {
                 onTranslatorToneTypeChange(it)
                 forceRecompose()
@@ -737,7 +737,7 @@ fun TranslationSettingsScreen(
             Components.Switch(
                 title = localizeHelper.localize(Res.string.preserve_style),
                 icon = Icons.Default.Style,
-                subtitle = "Keep the original writing style when translating",
+                subtitle = localizeHelper.localize(Res.string.keep_the_original_writing_style_when_translating),
                 preference = translatorPreserveStyle,
             )
         )
@@ -753,12 +753,12 @@ fun TranslationSettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Advanced Features",
+                        text = localizeHelper.localize(Res.string.advanced_features),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Switch to an AI-powered engine (OpenAI or DeepSeek) to access advanced translation settings like content type, tone control, and style preservation.",
+                        text = localizeHelper.localize(Res.string.switch_to_an_ai_powered),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)
@@ -795,13 +795,13 @@ fun TranslationSettingsScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Text(
-                    text = "Gemini Model",
+                    text = localizeHelper.localize(Res.string.gemini_model),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
-                    text = "Select which Gemini model to use for translation",
+                    text = localizeHelper.localize(Res.string.select_which_gemini_model_to_use_for_translation),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -939,12 +939,12 @@ fun TranslationSettingsScreen(
                                 modifier = Modifier.padding(16.dp)
                             ) {
                                 Text(
-                                    text = "No models available",
+                                    text = localizeHelper.localize(Res.string.no_models_available),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
                                 Text(
-                                    text = "Please click 'Refresh Available Models' above to load models from the Gemini API.",
+                                    text = localizeHelper.localize(Res.string.please_click_refresh_available_models),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onErrorContainer,
                                     modifier = Modifier.padding(top = 4.dp)
@@ -985,7 +985,7 @@ fun TranslationSettingsScreen(
                     .padding(horizontal = 16.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = "Note: If a model's quota is exceeded, the app will automatically try other models.",
+                    text = localizeHelper.localize(Res.string.note_if_a_models_quota),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )

@@ -7,6 +7,9 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.security.SecuritySettingsScreen
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 actual class SecuritySettingSpec {
 
@@ -19,7 +22,7 @@ actual class SecuritySettingSpec {
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
-                    title = "Security",
+                    title = localizeHelper.localize(Res.string.security),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
                         navController.popBackStack()

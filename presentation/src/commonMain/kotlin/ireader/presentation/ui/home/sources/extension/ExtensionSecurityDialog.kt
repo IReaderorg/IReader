@@ -61,7 +61,7 @@ fun ExtensionSecurityDialog(
                 // Trust level
                 item {
                     SecurityInfoItem(
-                        title = "Trust Level",
+                        title = localizeHelper.localize(Res.string.trust_level),
                         value = security.trustLevel.name,
                         icon = Icons.Default.Security
                     )
@@ -71,7 +71,7 @@ fun ExtensionSecurityDialog(
                 security.signatureHash?.let { hash ->
                     item {
                         SecurityInfoItem(
-                            title = "Signature Hash",
+                            title = localizeHelper.localize(Res.string.signature_hash),
                             value = hash.take(16) + "...",
                             icon = Icons.Default.Fingerprint
                         )
@@ -81,7 +81,7 @@ fun ExtensionSecurityDialog(
                 // Permissions
                 item {
                     Text(
-                        text = "Permissions",
+                        text = localizeHelper.localize(Res.string.permissions),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -109,7 +109,7 @@ fun ExtensionSecurityDialog(
                 if (security.securityWarnings.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Security Warnings",
+                            text = localizeHelper.localize(Res.string.security_warnings),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.error
                         )

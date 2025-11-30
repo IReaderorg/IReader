@@ -3,6 +3,9 @@ package ireader.presentation.ui.video.component.cores.player
 
 import ireader.core.log.Log
 import java.util.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 
 object SubtitleHelper {
@@ -23,7 +26,7 @@ object SubtitleHelper {
         val document = Jsoup.parse(response)
         val headers = document.select("table.wikitable > tbody > tr")
 
-        var text = "listOf(\n"
+        var text = localizeHelper.localize(Res.string.listofn)
         for (head in headers) {
             val tds = head.select("td")
             if (tds.size < 8) continue

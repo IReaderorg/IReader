@@ -44,7 +44,7 @@ fun SourceLoginDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "This source requires authentication. Please enter your credentials.",
+                    text = localizeHelper.localize(Res.string.this_source_requires_authentication_please),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 

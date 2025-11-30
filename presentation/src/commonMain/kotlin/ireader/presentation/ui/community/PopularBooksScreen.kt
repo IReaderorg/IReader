@@ -29,6 +29,7 @@ import ireader.presentation.ui.core.ui.AsyncImage
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -241,6 +242,7 @@ private fun PopularBooksList(
 
 @Composable
 private fun HeaderCard(totalBooks: Int) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -281,7 +283,7 @@ private fun HeaderCard(totalBooks: Int) {
             
             Column {
                 Text(
-                    text = "Trending Now",
+                    text = localizeHelper.localize(Res.string.trending_now),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -465,7 +467,7 @@ private fun TopBookCard(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = "In Library",
+                                            text = localizeHelper.localize(Res.string.in_library_1),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onTertiaryContainer
                                         )
@@ -632,7 +634,7 @@ private fun PopularBookCard(
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Text(
-                                        text = "In Library",
+                                        text = localizeHelper.localize(Res.string.in_library_1),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onTertiaryContainer
                                     )
@@ -688,6 +690,7 @@ private fun PopularBookCard(
 
 @Composable
 private fun LoadingMoreIndicator() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -703,7 +706,7 @@ private fun LoadingMoreIndicator() {
                 strokeWidth = 2.dp
             )
             Text(
-                text = "Loading more books...",
+                text = localizeHelper.localize(Res.string.loading_more_books),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -713,6 +716,7 @@ private fun LoadingMoreIndicator() {
 
 @Composable
 private fun RateLimitMessage() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -731,7 +735,7 @@ private fun RateLimitMessage() {
                 tint = MaterialTheme.colorScheme.onTertiaryContainer
             )
             Text(
-                text = "Please wait a moment before loading more...",
+                text = localizeHelper.localize(Res.string.please_wait_a_moment_before_loading_more),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onTertiaryContainer
             )
@@ -741,6 +745,7 @@ private fun RateLimitMessage() {
 
 @Composable
 private fun EndOfListMessage() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -758,13 +763,13 @@ private fun EndOfListMessage() {
                 modifier = Modifier.size(32.dp)
             )
             Text(
-                text = "You've reached the end!",
+                text = localizeHelper.localize(Res.string.youve_reached_the_end),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "These are all the popular books",
+                text = localizeHelper.localize(Res.string.these_are_all_the_popular_books),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -774,6 +779,7 @@ private fun EndOfListMessage() {
 
 @Composable
 private fun LoadingView() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -784,7 +790,7 @@ private fun LoadingView() {
         ) {
             CircularProgressIndicator()
             Text(
-                text = "Loading popular books...",
+                text = localizeHelper.localize(Res.string.loading_popular_books),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -814,7 +820,7 @@ private fun ErrorView(
                 modifier = Modifier.size(64.dp)
             )
             Text(
-                text = "Error Occurred",
+                text = localizeHelper.localize(Res.string.error_occurred),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -834,6 +840,7 @@ private fun ErrorView(
 
 @Composable
 private fun EmptyView() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -850,12 +857,12 @@ private fun EmptyView() {
                 modifier = Modifier.size(64.dp)
             )
             Text(
-                text = "No popular books yet",
+                text = localizeHelper.localize(Res.string.no_popular_books_yet),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Start reading to see trending books",
+                text = localizeHelper.localize(Res.string.start_reading_to_see_trending_books),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

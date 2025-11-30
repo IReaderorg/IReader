@@ -34,6 +34,7 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
 import java.util.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun CatalogItem(
@@ -51,6 +52,7 @@ fun CatalogItem(
     onMigrate: (() -> Unit)? = null,
     isLoading: Boolean = false,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val title = buildAnnotatedString {
         append("${catalog.name} ")
     }
@@ -108,7 +110,7 @@ fun CatalogItem(
                             strokeWidth = 2.dp
                         )
                         Text(
-                            text = "Loading...",
+                            text = localizeHelper.localize(Res.string.loading_1),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -182,12 +184,13 @@ private fun CatalogButtons(
     onLogin: (() -> Unit)? = null,
     onMigrate: (() -> Unit)? = null,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(modifier = modifier) {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium()) {
             // Show login button if source requires authentication
             if (sourceStatus is SourceStatus.LoginRequired && onLogin != null) {
                 MidSizeTextComposable(
-                    text = "Login",
+                    text = localizeHelper.localize(Res.string.login),
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onLogin() }
                 )

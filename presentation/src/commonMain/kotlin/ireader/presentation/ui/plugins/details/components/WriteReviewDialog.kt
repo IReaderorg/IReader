@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog for writing a review with rating picker and text input
@@ -31,7 +32,7 @@ fun WriteReviewDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Write a Review",
+                text = localizeHelper.localize(Res.string.write_a_review),
                 fontWeight = FontWeight.Bold
             )
         },
@@ -46,7 +47,7 @@ fun WriteReviewDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Your Rating",
+                        text = localizeHelper.localize(Res.string.your_rating),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )

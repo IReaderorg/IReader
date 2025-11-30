@@ -50,7 +50,7 @@ fun ChapterBar(
             // Chapter count
             Column {
                 Text(
-                    text = "Chapters",
+                    text = localizeHelper.localize(Res.string.chapters),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,

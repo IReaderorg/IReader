@@ -13,6 +13,7 @@ import ireader.domain.plugins.PluginStatus
 import ireader.presentation.ui.plugins.details.InstallationState
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Install button handling different states and plugin types
@@ -118,6 +119,7 @@ private fun NotInstalledButton(
  */
 @Composable
 private fun DownloadingButton(progress: Float) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -133,7 +135,7 @@ private fun DownloadingButton(progress: Float) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Downloading...",
+                text = localizeHelper.localize(Res.string.downloading_1),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium
             )
@@ -151,6 +153,7 @@ private fun DownloadingButton(progress: Float) {
  */
 @Composable
 private fun InstallingButton() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
@@ -162,7 +165,7 @@ private fun InstallingButton() {
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = "Installing...",
+            text = localizeHelper.localize(Res.string.installing_1),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium
         )

@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun LibraryBadges(
@@ -73,7 +74,7 @@ fun LibraryBadges(
             }
             if (isLocal) {
                 BookCoverBadge(
-                    text = "LOCAL",
+                    text = localizeHelper.localize(Res.string.local),
                     backgroundColor = MaterialTheme.colorScheme.secondary,
                     textColor = MaterialTheme.colorScheme.onSecondary
                 )
@@ -81,7 +82,7 @@ fun LibraryBadges(
             }
             if (isArchived) {
                 BookCoverBadge(
-                    text = "ARCHIVED",
+                    text = localizeHelper.localize(Res.string.archived_1),
                     backgroundColor = MaterialTheme.colorScheme.error,
                     textColor = MaterialTheme.colorScheme.onError
                 )

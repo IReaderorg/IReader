@@ -88,6 +88,7 @@ fun TranslationResultDialog(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = modifier
@@ -118,7 +119,7 @@ fun TranslationResultDialog(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "Translation",
+                            text = localizeHelper.localize(Res.string.translation),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -136,7 +137,7 @@ fun TranslationResultDialog(
                 
                 // Original text
                 Text(
-                    text = "Original",
+                    text = localizeHelper.localize(Res.string.original),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

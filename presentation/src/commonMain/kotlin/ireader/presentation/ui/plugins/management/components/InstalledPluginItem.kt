@@ -19,6 +19,7 @@ import ireader.domain.plugins.PluginResourceUsage
 import ireader.domain.plugins.PluginStatus
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Item displaying an installed plugin with controls
@@ -196,6 +197,7 @@ private fun ResourceUsageIndicator(
     usage: PluginResourceUsage,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -203,7 +205,7 @@ private fun ResourceUsageIndicator(
         // Memory usage
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Memory",
+                text = localizeHelper.localize(Res.string.memory),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -226,7 +228,7 @@ private fun ResourceUsageIndicator(
         // CPU usage
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "CPU",
+                text = localizeHelper.localize(Res.string.cpu),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

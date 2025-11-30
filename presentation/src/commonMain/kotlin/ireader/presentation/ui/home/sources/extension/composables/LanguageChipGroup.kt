@@ -46,6 +46,7 @@ import ireader.presentation.ui.home.sources.extension.LocaleHelper
 import java.util.Locale
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 
 @Composable
@@ -186,7 +187,7 @@ private fun MoreLanguagesChip(onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             MidSizeTextComposable(
-                text = "More",
+                text = localizeHelper.localize(Res.string.more),
                 color = MaterialTheme.colorScheme.onPrimary
             )
         }
@@ -240,7 +241,7 @@ private fun LanguageSelectionDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Select Language",
+                        text = localizeHelper.localize(Res.string.select_language),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )

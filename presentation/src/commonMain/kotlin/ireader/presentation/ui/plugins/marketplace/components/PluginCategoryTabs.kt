@@ -7,6 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.PluginType
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Category tabs for filtering plugins by type
@@ -18,6 +21,7 @@ fun PluginCategoryTabs(
     onCategorySelected: (PluginType?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     ScrollableTabRow(
         selectedTabIndex = getCategoryIndex(selectedCategory),
         modifier = modifier.fillMaxWidth(),
@@ -30,7 +34,7 @@ fun PluginCategoryTabs(
             onClick = { onCategorySelected(null) },
             text = {
                 Text(
-                    text = "All",
+                    text = localizeHelper.localize(Res.string.all),
                     fontWeight = if (selectedCategory == null) FontWeight.Bold else FontWeight.Normal
                 )
             }
@@ -42,7 +46,7 @@ fun PluginCategoryTabs(
             onClick = { onCategorySelected(PluginType.THEME) },
             text = {
                 Text(
-                    text = "Themes",
+                    text = localizeHelper.localize(Res.string.themes),
                     fontWeight = if (selectedCategory == PluginType.THEME) FontWeight.Bold else FontWeight.Normal
                 )
             }
@@ -54,7 +58,7 @@ fun PluginCategoryTabs(
             onClick = { onCategorySelected(PluginType.TRANSLATION) },
             text = {
                 Text(
-                    text = "Translation",
+                    text = localizeHelper.localize(Res.string.translation),
                     fontWeight = if (selectedCategory == PluginType.TRANSLATION) FontWeight.Bold else FontWeight.Normal
                 )
             }
@@ -66,7 +70,7 @@ fun PluginCategoryTabs(
             onClick = { onCategorySelected(PluginType.TTS) },
             text = {
                 Text(
-                    text = "TTS",
+                    text = localizeHelper.localize(Res.string.tts),
                     fontWeight = if (selectedCategory == PluginType.TTS) FontWeight.Bold else FontWeight.Normal
                 )
             }
@@ -78,7 +82,7 @@ fun PluginCategoryTabs(
             onClick = { onCategorySelected(PluginType.FEATURE) },
             text = {
                 Text(
-                    text = "Features",
+                    text = localizeHelper.localize(Res.string.features),
                     fontWeight = if (selectedCategory == PluginType.FEATURE) FontWeight.Bold else FontWeight.Normal
                 )
             }

@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Showcase screen to preview and compare different navigation bar styles
@@ -32,22 +33,22 @@ fun NavigationStyleShowcase(
     
     val tabs = listOf(
         NavigationItem(
-            label = "Library",
+            label = localizeHelper.localize(Res.string.library),
             icon = Icons.Default.Home,
             selectedIcon = Icons.Default.Home
         ),
         NavigationItem(
-            label = "Updates",
+            label = localizeHelper.localize(Res.string.updates_screen_label),
             icon = Icons.Default.Notifications,
             selectedIcon = Icons.Default.Notifications
         ),
         NavigationItem(
-            label = "History",
+            label = localizeHelper.localize(Res.string.history),
             icon = Icons.Default.DateRange,
             selectedIcon = Icons.Default.DateRange
         ),
         NavigationItem(
-            label = "Browse",
+            label = localizeHelper.localize(Res.string.sources),
             icon = Icons.Default.Search,
             selectedIcon = Icons.Default.Search
         )
@@ -84,7 +85,7 @@ fun NavigationStyleShowcase(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Select Navigation Style",
+                        text = localizeHelper.localize(Res.string.select_navigation_style),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -229,7 +230,7 @@ fun NavigationStyleShowcase(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Style Features",
+                        text = localizeHelper.localize(Res.string.style_features),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

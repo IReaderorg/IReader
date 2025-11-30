@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Success message dialog after installation
@@ -35,14 +36,14 @@ fun SuccessMessageDialog(
         },
         title = {
             Text(
-                text = "Installation Complete",
+                text = localizeHelper.localize(Res.string.installation_complete),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
         },
         text = {
             Text(
-                text = "The plugin has been successfully installed. You can now enable and configure it.",
+                text = localizeHelper.localize(Res.string.the_plugin_has_been_successfully),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center
             )

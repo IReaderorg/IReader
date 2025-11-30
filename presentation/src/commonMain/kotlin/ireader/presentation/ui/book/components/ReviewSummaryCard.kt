@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Compact review summary card for BookDetailScreen
@@ -51,7 +52,7 @@ fun ReviewSummaryCard(
     ) {
         // Section header
         Text(
-            text = "Reviews",
+            text = localizeHelper.localize(Res.string.reviews),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -112,7 +113,7 @@ fun ReviewSummaryCard(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = "No reviews yet",
+                            text = localizeHelper.localize(Res.string.no_reviews_yet),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             fontSize = 14.sp
@@ -146,7 +147,7 @@ fun ReviewSummaryCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "View All Reviews",
+                    text = localizeHelper.localize(Res.string.view_all_reviews),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp

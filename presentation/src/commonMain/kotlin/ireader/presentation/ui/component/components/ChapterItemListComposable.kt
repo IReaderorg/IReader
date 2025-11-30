@@ -44,6 +44,7 @@ import ireader.domain.utils.extensions.toLocalDate
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -76,7 +77,7 @@ fun ChapterRow(
             else -> MaterialTheme.colorScheme.surface
         },
         animationSpec = spring(),
-        label = "chapter_background"
+        label = localizeHelper.localize(Res.string.chapter_background)
     )
     
     // Cache text color calculations

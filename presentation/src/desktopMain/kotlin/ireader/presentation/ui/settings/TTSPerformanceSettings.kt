@@ -12,6 +12,7 @@ import ireader.domain.services.tts_service.DesktopTTSService
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * TTS Performance Settings Dialog
@@ -38,12 +39,12 @@ fun TTSPerformanceSettingsDialog(
             ) {
                 // Max Concurrent Processes Setting
                 Text(
-                    text = "Maximum Concurrent Processes",
+                    text = localizeHelper.localize(Res.string.maximum_concurrent_processes),
                     style = MaterialTheme.typography.titleMedium
                 )
                 
                 Text(
-                    text = "Controls how many audio files can be generated simultaneously for Kokoro and Maya engines. Higher values = faster generation but more CPU/memory usage.",
+                    text = localizeHelper.localize(Res.string.controls_how_many_audio_files),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -104,7 +105,7 @@ fun TTSPerformanceSettingsDialog(
                         )
                         Column {
                             Text(
-                                text = "Recommendations:",
+                                text = localizeHelper.localize(Res.string.recommendations),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )

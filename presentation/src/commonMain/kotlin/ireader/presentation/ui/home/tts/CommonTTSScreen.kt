@@ -132,7 +132,7 @@ fun TTSContentDisplay(
                     CircularProgressIndicator()
                 } else {
                     Text(
-                        text = "No content available",
+                        text = localizeHelper.localize(Res.string.no_content_available),
                         color = textColor.copy(alpha = 0.6f),
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -492,7 +492,7 @@ private fun DesktopTTSControls(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Speed",
+                        text = localizeHelper.localize(Res.string.speed),
                         style = MaterialTheme.typography.labelMedium
                     )
                     Text(
@@ -516,7 +516,7 @@ private fun DesktopTTSControls(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Auto-next",
+                    text = localizeHelper.localize(Res.string.auto_next),
                     style = MaterialTheme.typography.labelSmall
                 )
                 Switch(
@@ -562,7 +562,7 @@ private fun DesktopTTSControls(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Voice",
+                        text = localizeHelper.localize(Res.string.voice),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -781,7 +781,7 @@ fun TTSSettingsPanelCommon(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "TTS Settings",
+                        text = localizeHelper.localize(Res.string.tts_settings),
                         style = MaterialTheme.typography.headlineSmall
                     )
                     IconButton(onClick = onDismiss) {
@@ -801,7 +801,7 @@ fun TTSSettingsPanelCommon(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 // TTS Engine Selection
-                SettingSectionCommon(title = "TTS Engine") {
+                SettingSectionCommon(title = localizeHelper.localize(Res.string.tts_engine)) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -813,7 +813,7 @@ fun TTSSettingsPanelCommon(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Current Engine",
+                                    text = localizeHelper.localize(Res.string.current_engine),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
@@ -845,7 +845,7 @@ fun TTSSettingsPanelCommon(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Use Coqui TTS",
+                                    text = localizeHelper.localize(Res.string.use_coqui_tts),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
@@ -874,7 +874,7 @@ fun TTSSettingsPanelCommon(
                 }
                 
                 // Auto-next Chapter
-                SettingSectionCommon(title = "Playback") {
+                SettingSectionCommon(title = localizeHelper.localize(Res.string.playback)) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -885,11 +885,11 @@ fun TTSSettingsPanelCommon(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Auto-next Chapter",
+                                    text = localizeHelper.localize(Res.string.auto_next_chapter_1),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
-                                    text = "Automatically play next chapter when current ends",
+                                    text = localizeHelper.localize(Res.string.automatically_play_next_chapter_when_current_ends),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -909,7 +909,7 @@ fun TTSSettingsPanelCommon(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Read Translated Text",
+                                        text = localizeHelper.localize(Res.string.read_translated_text),
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                     Text(
@@ -928,7 +928,7 @@ fun TTSSettingsPanelCommon(
                 }
                 
                 // Custom Colors Toggle
-                SettingSectionCommon(title = "Color Theme") {
+                SettingSectionCommon(title = localizeHelper.localize(Res.string.color_theme)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -936,7 +936,7 @@ fun TTSSettingsPanelCommon(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Use Custom Colors",
+                                text = localizeHelper.localize(Res.string.use_custom_colors),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
@@ -954,7 +954,7 @@ fun TTSSettingsPanelCommon(
                 
                 // Background Color (only if custom colors enabled)
                 if (useCustomColors) {
-                    SettingSectionCommon(title = "Background Color") {
+                    SettingSectionCommon(title = localizeHelper.localize(Res.string.background_color)) {
                         ColorPickerCommon(
                             selectedColor = customBackgroundColor,
                             onColorSelected = onBackgroundColorChange,
@@ -972,7 +972,7 @@ fun TTSSettingsPanelCommon(
                     }
                     
                     // Text Color
-                    SettingSectionCommon(title = "Text Color") {
+                    SettingSectionCommon(title = localizeHelper.localize(Res.string.text_color_1)) {
                         ColorPickerCommon(
                             selectedColor = customTextColor,
                             onColorSelected = onTextColorChange,
@@ -1002,32 +1002,32 @@ fun TTSSettingsPanelCommon(
                 }
                 
                 // Text Alignment
-                SettingSectionCommon(title = "Text Alignment") {
+                SettingSectionCommon(title = localizeHelper.localize(Res.string.text_alignment)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         AlignmentButtonCommon(
                             icon = Icons.Default.FormatAlignLeft,
-                            label = "Left",
+                            label = localizeHelper.localize(Res.string.left),
                             isSelected = textAlignment == TextAlign.Start,
                             onClick = { onTextAlignmentChange(TextAlign.Start) }
                         )
                         AlignmentButtonCommon(
                             icon = Icons.Default.FormatAlignCenter,
-                            label = "Center",
+                            label = localizeHelper.localize(Res.string.center),
                             isSelected = textAlignment == TextAlign.Center,
                             onClick = { onTextAlignmentChange(TextAlign.Center) }
                         )
                         AlignmentButtonCommon(
                             icon = Icons.Default.FormatAlignRight,
-                            label = "Right",
+                            label = localizeHelper.localize(Res.string.right),
                             isSelected = textAlignment == TextAlign.End,
                             onClick = { onTextAlignmentChange(TextAlign.End) }
                         )
                         AlignmentButtonCommon(
                             icon = Icons.Default.FormatAlignJustify,
-                            label = "Justify",
+                            label = localizeHelper.localize(Res.string.justify),
                             isSelected = textAlignment == TextAlign.Justify,
                             onClick = { onTextAlignmentChange(TextAlign.Justify) }
                         )
@@ -1035,7 +1035,7 @@ fun TTSSettingsPanelCommon(
                 }
                 
                 // Sleep Mode
-                SettingSectionCommon(title = "Sleep Mode") {
+                SettingSectionCommon(title = localizeHelper.localize(Res.string.enable_sleep_timer)) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -1046,11 +1046,11 @@ fun TTSSettingsPanelCommon(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Enable Sleep Timer",
+                                    text = localizeHelper.localize(Res.string.enable_sleep_timer_1),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
-                                    text = "Automatically stop playback after set time",
+                                    text = localizeHelper.localize(Res.string.automatically_stop_playback_after_set_time),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1200,7 +1200,7 @@ fun DownloadProgressDialog(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = "Generating audio for entire chapter...",
+                        text = localizeHelper.localize(Res.string.generating_audio_for_entire_chapter),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     
@@ -1227,7 +1227,7 @@ fun DownloadProgressDialog(
                     }
                     
                     Text(
-                        text = "This may take a few minutes for long chapters...",
+                        text = localizeHelper.localize(Res.string.this_may_take_a_few_minutes_for_long_chapters),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

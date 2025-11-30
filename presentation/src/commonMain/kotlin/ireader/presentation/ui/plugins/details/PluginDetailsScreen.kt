@@ -17,6 +17,7 @@ import ireader.presentation.ui.plugins.details.components.ResourceUsageSection
 import ireader.presentation.ui.plugins.details.components.ResourceUsageHistoryGraph
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Plugin Details screen showing comprehensive plugin information
@@ -253,6 +254,7 @@ private fun PluginDetailsContent(
  */
 @Composable
 private fun LoadingState(modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -264,7 +266,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
             CircularProgressIndicator()
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Loading plugin details...",
+                text = localizeHelper.localize(Res.string.loading_plugin_details),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -292,7 +294,7 @@ private fun ErrorState(
             modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = "Error",
+                text = localizeHelper.localize(Res.string.download_notifier_title_error),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.error
@@ -332,23 +334,23 @@ private fun EnablePluginFeatureDialog(
         },
         title = {
             Text(
-                text = "Enable Plugin Feature",
+                text = localizeHelper.localize(Res.string.enable_plugin_feature),
                 style = MaterialTheme.typography.titleLarge
             )
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "JavaScript plugins are currently disabled in your settings.",
+                    text = localizeHelper.localize(Res.string.javascript_plugins_are_currently_disabled),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "To use LNReader-compatible plugins, you need to enable the plugin feature in General Settings.",
+                    text = localizeHelper.localize(Res.string.to_use_lnreader_compatible_plugins),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Would you like to enable it now?",
+                    text = localizeHelper.localize(Res.string.would_you_like_to_enable_it_now),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )

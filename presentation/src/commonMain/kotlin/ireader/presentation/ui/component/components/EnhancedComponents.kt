@@ -49,6 +49,7 @@ import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.utils.horizontalPadding
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Enhanced UI Components Library
@@ -87,8 +88,8 @@ import ireader.i18n.resources.*
  * Example usage:
  * ```kotlin
  * RowPreference(
- *     title = "Theme",
- *     subtitle = "Choose your preferred theme",
+ *     title = localizeHelper.localize(Res.string.theme),
+ *     subtitle = localizeHelper.localize(Res.string.choose_your_preferred_theme),
  *     icon = Icons.Default.Palette,
  *     onClick = { navigateToThemeSettings() },
  *     trailing = {
@@ -252,11 +253,11 @@ fun RowPreference(
  * Example usage:
  * ```kotlin
  * SectionHeader(
- *     text = "Appearance",
+ *     text = localizeHelper.localize(Res.string.appearance),
  *     icon = Icons.Default.Palette
  * )
- * RowPreference(title = "Theme", ...)
- * RowPreference(title = "Font Size", ...)
+ * RowPreference(title = localizeHelper.localize(Res.string.theme), ...)
+ * RowPreference(title = localizeHelper.localize(Res.string.font_size), ...)
  * ```
  * 
  * @param text The header text to display (required)
@@ -365,8 +366,8 @@ fun EnhancedCard(
  * Example usage:
  * ```kotlin
  * NavigationRowPreference(
- *     title = "Advanced Settings",
- *     subtitle = "Configure advanced options",
+ *     title = localizeHelper.localize(Res.string.advanced_settings),
+ *     subtitle = localizeHelper.localize(Res.string.configure_advanced_options),
  *     icon = Icons.Default.Settings,
  *     onClick = { navigateToAdvancedSettings() }
  * )
@@ -451,11 +452,11 @@ fun PreferenceDivider(
  * Example usage:
  * ```kotlin
  * PreferenceGroup(
- *     title = "Display",
+ *     title = localizeHelper.localize(Res.string.display),
  *     icon = Icons.Default.Palette
  * ) {
- *     RowPreference(title = "Theme", ...)
- *     RowPreference(title = "Font Size", ...)
+ *     RowPreference(title = localizeHelper.localize(Res.string.theme), ...)
+ *     RowPreference(title = localizeHelper.localize(Res.string.font_size), ...)
  * }
  * ```
  * 
@@ -501,19 +502,20 @@ fun PreferenceGroup(
  */
 @Composable
 fun RowPreferencePreview() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
             Column {
                 RowPreference(
-                    title = "Theme",
-                    subtitle = "Choose your preferred theme",
+                    title = localizeHelper.localize(Res.string.theme),
+                    subtitle = localizeHelper.localize(Res.string.choose_your_preferred_theme),
                     icon = Icons.Default.Palette,
                     onClick = { /* Handle click */ }
                 )
                 
                 RowPreference(
-                    title = "Notifications",
-                    subtitle = "Manage notification settings",
+                    title = localizeHelper.localize(Res.string.notifications),
+                    subtitle = localizeHelper.localize(Res.string.manage_notification_settings),
                     icon = Icons.Default.Notifications,
                     onClick = { /* Handle click */ },
                     trailing = {
@@ -525,16 +527,16 @@ fun RowPreferencePreview() {
                 )
                 
                 RowPreference(
-                    title = "Disabled Option",
-                    subtitle = "This option is currently disabled",
+                    title = localizeHelper.localize(Res.string.disabled_option),
+                    subtitle = localizeHelper.localize(Res.string.this_option_is_currently_disabled),
                     icon = Icons.Default.Block,
                     enabled = false,
                     onClick = { /* Handle click */ }
                 )
                 
                 RowPreference(
-                    title = "Simple Row",
-                    subtitle = "No icon, just text",
+                    title = localizeHelper.localize(Res.string.simple_row),
+                    subtitle = localizeHelper.localize(Res.string.no_icon_just_text),
                     onClick = { /* Handle click */ }
                 )
             }
@@ -549,18 +551,19 @@ fun RowPreferencePreview() {
  */
 @Composable
 fun NavigationRowPreferencePreview() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
             Column {
                 NavigationRowPreference(
-                    title = "Advanced Settings",
-                    subtitle = "Configure advanced options",
+                    title = localizeHelper.localize(Res.string.advanced_settings),
+                    subtitle = localizeHelper.localize(Res.string.configure_advanced_options),
                     icon = Icons.Default.Settings,
                     onClick = { /* Navigate */ }
                 )
                 
                 NavigationRowPreference(
-                    title = "About",
+                    title = localizeHelper.localize(Res.string.about),
                     icon = Icons.Default.Info,
                     onClick = { /* Navigate */ }
                 )
@@ -578,16 +581,17 @@ fun NavigationRowPreferencePreview() {
  */
 @Composable
 fun SectionHeaderPreview() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
             Column {
                 SectionHeader(
-                    text = "Appearance",
+                    text = localizeHelper.localize(Res.string.appearance),
                     icon = Icons.Default.Palette
                 )
                 
                 SectionHeader(
-                    text = "General Settings"
+                    text = localizeHelper.localize(Res.string.general_settings)
                 )
             }
         }
@@ -603,6 +607,7 @@ fun SectionHeaderPreview() {
  */
 @Composable
 fun EnhancedCardPreview() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
             Column(
@@ -611,12 +616,12 @@ fun EnhancedCardPreview() {
             ) {
                 EnhancedCard {
                     Text(
-                        text = "Card Title",
+                        text = localizeHelper.localize(Res.string.card_title),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "This is an example of an enhanced card with Material Design 3 styling.",
+                        text = localizeHelper.localize(Res.string.this_is_an_example_of),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -625,12 +630,12 @@ fun EnhancedCardPreview() {
                     onClick = { /* Handle click */ }
                 ) {
                     Text(
-                        text = "Clickable Card",
+                        text = localizeHelper.localize(Res.string.clickable_card),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "This card can be clicked.",
+                        text = localizeHelper.localize(Res.string.this_card_can_be_clicked),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -646,21 +651,22 @@ fun EnhancedCardPreview() {
  */
 @Composable
 fun PreferenceGroupPreview() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
             Column {
                 PreferenceGroup(
-                    title = "Display",
+                    title = localizeHelper.localize(Res.string.display),
                     icon = Icons.Default.Palette
                 ) {
                     RowPreference(
-                        title = "Theme",
-                        subtitle = "Dark",
+                        title = localizeHelper.localize(Res.string.theme),
+                        subtitle = localizeHelper.localize(Res.string.dark_1),
                         onClick = { /* Handle click */ }
                     )
                     RowPreference(
                         title = "Font Size",
-                        subtitle = "Medium",
+                        subtitle = localizeHelper.localize(Res.string.medium),
                         onClick = { /* Handle click */ }
                     )
                 }
@@ -668,11 +674,11 @@ fun PreferenceGroupPreview() {
                 PreferenceDivider()
                 
                 PreferenceGroup(
-                    title = "Notifications",
+                    title = localizeHelper.localize(Res.string.notifications),
                     icon = Icons.Default.Notifications
                 ) {
                     RowPreference(
-                        title = "Enable Notifications",
+                        title = localizeHelper.localize(Res.string.enable_notifications),
                         onClick = { /* Handle click */ },
                         trailing = {
                             Switch(
@@ -694,26 +700,27 @@ fun PreferenceGroupPreview() {
  */
 @Composable
 fun CompleteSettingsScreenPreview() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
             Column {
                 // Header section
                 SectionHeader(
-                    text = "Appearance",
+                    text = localizeHelper.localize(Res.string.appearance),
                     icon = Icons.Default.Palette
                 )
                 
                 // Navigation preferences
                 NavigationRowPreference(
-                    title = "Theme",
-                    subtitle = "Dark mode",
+                    title = localizeHelper.localize(Res.string.theme),
+                    subtitle = localizeHelper.localize(Res.string.dark_mode),
                     icon = Icons.Default.Palette,
                     onClick = { /* Navigate */ }
                 )
                 
                 RowPreference(
-                    title = "Auto-rotate",
-                    subtitle = "Rotate screen automatically",
+                    title = localizeHelper.localize(Res.string.auto_rotate),
+                    subtitle = localizeHelper.localize(Res.string.rotate_screen_automatically),
                     onClick = { /* Handle click */ },
                     trailing = {
                         Switch(
@@ -729,13 +736,13 @@ fun CompleteSettingsScreenPreview() {
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     EnhancedCard {
                         Text(
-                            text = "Pro Tip",
+                            text = localizeHelper.localize(Res.string.pro_tip),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Long press on any preference to see additional options.",
+                            text = localizeHelper.localize(Res.string.long_press_on_any_preference),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -745,20 +752,20 @@ fun CompleteSettingsScreenPreview() {
                 
                 // Another section
                 SectionHeader(
-                    text = "Advanced",
+                    text = localizeHelper.localize(Res.string.advanced),
                     icon = Icons.Default.Settings
                 )
                 
                 NavigationRowPreference(
-                    title = "Advanced Settings",
-                    subtitle = "Configure advanced options",
+                    title = localizeHelper.localize(Res.string.advanced_settings),
+                    subtitle = localizeHelper.localize(Res.string.configure_advanced_options),
                     icon = Icons.Default.Settings,
                     onClick = { /* Navigate */ }
                 )
                 
                 RowPreference(
-                    title = "Disabled Feature",
-                    subtitle = "This feature is not available",
+                    title = localizeHelper.localize(Res.string.disabled_feature),
+                    subtitle = localizeHelper.localize(Res.string.this_feature_is_not_available),
                     icon = Icons.Default.Block,
                     enabled = false,
                     onClick = { /* Handle click */ }

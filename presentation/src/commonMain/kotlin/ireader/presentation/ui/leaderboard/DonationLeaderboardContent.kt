@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.DonationLeaderboardEntry
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun DonationLeaderboardContent(
@@ -34,6 +35,7 @@ fun DonationLeaderboardContent(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = modifier.fillMaxSize()) {
         if (state.isLoading && state.leaderboard.isEmpty()) {
             // Loading state
@@ -107,7 +109,7 @@ fun DonationLeaderboardContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "All Donors",
+                            text = localizeHelper.localize(Res.string.all_donors),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -173,13 +175,13 @@ private fun EmptyDonationLeaderboardState(onRefresh: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "No Donors Yet",
+                text = localizeHelper.localize(Res.string.no_donors_yet),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Be the first to support the app!",
+                text = localizeHelper.localize(Res.string.be_the_first_to_support_the_app),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -202,6 +204,7 @@ private fun DonationUserRankCard(
     userRank: DonationLeaderboardEntry?,
     totalDonors: Int
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -229,7 +232,7 @@ private fun DonationUserRankCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Your Donation Rank",
+                        text = localizeHelper.localize(Res.string.your_donation_rank),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -250,7 +253,7 @@ private fun DonationUserRankCard(
                 ) {
                     DonationStatItem(
                         icon = Icons.Default.AttachMoney,
-                        label = "Total Donated",
+                        label = localizeHelper.localize(Res.string.total_donated),
                         value = formatDonationAmount(userRank.totalDonationAmount),
                         modifier = Modifier.weight(1f)
                     )
@@ -259,7 +262,7 @@ private fun DonationUserRankCard(
                     
                     DonationStatItem(
                         icon = Icons.Default.Star,
-                        label = "Badges Owned",
+                        label = localizeHelper.localize(Res.string.badges_owned),
                         value = "${userRank.badgeCount}",
                         modifier = Modifier.weight(1f)
                     )
@@ -282,7 +285,7 @@ private fun DonationUserRankCard(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "Support the app to appear on the leaderboard!",
+                        text = localizeHelper.localize(Res.string.support_the_app_to_appear_on_the_leaderboard),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         textAlign = TextAlign.Center
@@ -298,6 +301,7 @@ private fun DonationRealtimeToggle(
     isEnabled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -343,7 +347,7 @@ private fun DonationRealtimeToggle(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "Realtime Updates",
+                        text = localizeHelper.localize(Res.string.realtime_updates),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -365,6 +369,7 @@ private fun DonationRealtimeToggle(
 
 @Composable
 private fun TopDonorsPodium(entries: List<DonationLeaderboardEntry>) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -385,7 +390,7 @@ private fun TopDonorsPodium(entries: List<DonationLeaderboardEntry>) {
                 Text(text = "💎", style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Top Supporters",
+                    text = localizeHelper.localize(Res.string.top_supporters),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -502,6 +507,7 @@ private fun DonationLeaderboardEntryCard(
     entry: DonationLeaderboardEntry,
     isCurrentUser: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val backgroundColor = if (isCurrentUser) {
         MaterialTheme.colorScheme.tertiaryContainer
     } else {
@@ -536,7 +542,7 @@ private fun DonationLeaderboardEntryCard(
                     if (isCurrentUser) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "(You)",
+                            text = localizeHelper.localize(Res.string.you),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold

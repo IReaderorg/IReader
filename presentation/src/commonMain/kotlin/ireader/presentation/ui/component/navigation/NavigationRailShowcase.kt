@@ -10,6 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Showcase composable to demonstrate NavigationRail vs BottomNavigation
@@ -123,6 +126,7 @@ private data class ShowcaseItem(
  */
 @Composable
 fun NavigationComparisonView() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedRail by remember { mutableStateOf(0) }
     var selectedBottom by remember { mutableStateOf(0) }
     
@@ -141,7 +145,7 @@ fun NavigationComparisonView() {
                 .fillMaxHeight()
         ) {
             Text(
-                text = "Navigation Rail",
+                text = localizeHelper.localize(Res.string.navigation_rail),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(16.dp)
             )
@@ -176,7 +180,7 @@ fun NavigationComparisonView() {
                 .fillMaxHeight()
         ) {
             Text(
-                text = "Bottom Navigation",
+                text = localizeHelper.localize(Res.string.bottom_navigation),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(16.dp)
             )

@@ -13,6 +13,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.PluginPermission
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Permissions section listing required permissions with explanations
@@ -23,12 +26,13 @@ fun PermissionsSection(
     permissions: List<PluginPermission>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Permissions",
+            text = localizeHelper.localize(Res.string.permissions),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )

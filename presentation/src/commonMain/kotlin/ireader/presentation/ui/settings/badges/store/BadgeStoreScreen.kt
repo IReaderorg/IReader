@@ -54,6 +54,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.AsyncImage
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 private const val DONATION_URL = "https://reymit.ir/kazemcodes"
 
@@ -290,6 +291,7 @@ fun BadgeStoreScreen(
 
 @Composable
 private fun HeroSection(isWideScreen: Boolean = false) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(if (isWideScreen) 28.dp else 24.dp),
@@ -325,7 +327,7 @@ private fun HeroSection(isWideScreen: Boolean = false) {
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Text(
-                                text = "Support & Collect",
+                                text = localizeHelper.localize(Res.string.support_collect),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -333,7 +335,7 @@ private fun HeroSection(isWideScreen: Boolean = false) {
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Purchase exclusive badges to support development and customize your profile. " +
+                            text = localizeHelper.localize(Res.string.purchase_exclusive_badges_to_support) +
                                     "Each badge is unique and shows your support for the project.",
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.White.copy(alpha = 0.9f)
@@ -344,9 +346,9 @@ private fun HeroSection(isWideScreen: Boolean = false) {
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        FeatureChip(icon = Icons.Outlined.Verified, text = "Verified Supporter")
-                        FeatureChip(icon = Icons.Outlined.Diamond, text = "Exclusive Designs")
-                        FeatureChip(icon = Icons.Outlined.Wallet, text = "Support Development")
+                        FeatureChip(icon = Icons.Outlined.Verified, text = localizeHelper.localize(Res.string.verified_supporter))
+                        FeatureChip(icon = Icons.Outlined.Diamond, text = localizeHelper.localize(Res.string.exclusive_designs))
+                        FeatureChip(icon = Icons.Outlined.Wallet, text = localizeHelper.localize(Res.string.support_development))
                     }
                 }
             } else {
@@ -361,7 +363,7 @@ private fun HeroSection(isWideScreen: Boolean = false) {
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Support & Collect",
+                            text = localizeHelper.localize(Res.string.support_collect),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -369,15 +371,15 @@ private fun HeroSection(isWideScreen: Boolean = false) {
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Purchase exclusive badges to support development and customize your profile",
+                        text = localizeHelper.localize(Res.string.purchase_exclusive_badges_to_support_1),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.9f)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        FeatureChip(icon = Icons.Outlined.Verified, text = "Verified")
-                        FeatureChip(icon = Icons.Outlined.Diamond, text = "Exclusive")
-                        FeatureChip(icon = Icons.Outlined.Wallet, text = "Support")
+                        FeatureChip(icon = Icons.Outlined.Verified, text = localizeHelper.localize(Res.string.verified))
+                        FeatureChip(icon = Icons.Outlined.Diamond, text = localizeHelper.localize(Res.string.exclusive))
+                        FeatureChip(icon = Icons.Outlined.Wallet, text = localizeHelper.localize(Res.string.support))
                     }
                 }
             }
@@ -420,6 +422,7 @@ private fun FeaturedBadgesSection(
     onBadgeClick: (Badge) -> Unit,
     cardWidth: Dp = 200.dp
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -430,7 +433,7 @@ private fun FeaturedBadgesSection(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = "Featured Badges",
+                text = localizeHelper.localize(Res.string.featured_badges),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -793,6 +796,7 @@ private fun getRarityGradient(rarity: BadgeRarity): List<Color> = when (rarity) 
 
 @Composable
 private fun LoadingState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -804,7 +808,7 @@ private fun LoadingState() {
             )
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "Loading badges...",
+                text = localizeHelper.localize(Res.string.loading_badges),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -856,6 +860,7 @@ private fun ErrorState(error: String, onRetry: () -> Unit) {
 
 @Composable
 private fun EmptyState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -867,13 +872,13 @@ private fun EmptyState() {
             Text(text = "🏪", fontSize = 72.sp)
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "No badges available",
+                text = localizeHelper.localize(Res.string.no_badges_available),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Check back later for new badges!",
+                text = localizeHelper.localize(Res.string.check_back_later_for_new_badges),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1011,15 +1016,15 @@ private fun ModernPurchaseDialog(
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Text(
-                                text = "How to Purchase",
+                                text = localizeHelper.localize(Res.string.how_to_purchase),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            PurchaseStep(number = "1", text = "Click the donation button below")
-                            PurchaseStep(number = "2", text = "Complete your donation")
-                            PurchaseStep(number = "3", text = "Copy your transaction ID")
-                            PurchaseStep(number = "4", text = "Submit for verification")
+                            PurchaseStep(number = "1", text = localizeHelper.localize(Res.string.click_the_donation_button_below))
+                            PurchaseStep(number = "2", text = localizeHelper.localize(Res.string.complete_your_donation))
+                            PurchaseStep(number = "3", text = localizeHelper.localize(Res.string.copy_your_transaction_id))
+                            PurchaseStep(number = "4", text = localizeHelper.localize(Res.string.submit_for_verification))
                         }
                     }
 

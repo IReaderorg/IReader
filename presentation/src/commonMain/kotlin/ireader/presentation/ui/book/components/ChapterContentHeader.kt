@@ -17,6 +17,7 @@ import ireader.presentation.ui.component.loading.DotsFlashing
 import ireader.presentation.ui.component.text_related.CardTile
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun ChapterContentHeader(
@@ -30,7 +31,7 @@ fun ChapterContentHeader(
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .fillMaxWidth(),
         onClick = onChapterContent,
-        title = "Contents",
+        title = localizeHelper.localize(Res.string.contents),
         subtitle = "${chapters.size} Chapters",
         trailing = {
             Row(verticalAlignment = Alignment.CenterVertically) {

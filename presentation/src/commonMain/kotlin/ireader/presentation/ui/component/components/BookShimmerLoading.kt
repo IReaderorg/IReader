@@ -18,6 +18,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun BookShimmerLoading(
@@ -25,6 +28,7 @@ fun BookShimmerLoading(
     columns: Int = 3,
     itemCount: Int = 12
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Create more vibrant shimmer colors with higher contrast
     val shimmerColors = listOf(
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f),
@@ -35,7 +39,7 @@ fun BookShimmerLoading(
     )
     
     // Make the animation faster and more noticeable
-    val transition = rememberInfiniteTransition(label = "shimmerTransition")
+    val transition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.shimmertransition))
     val translateAnim by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1000f,
@@ -46,7 +50,7 @@ fun BookShimmerLoading(
             ),
             repeatMode = RepeatMode.Restart
         ),
-        label = "shimmerAnimation"
+        label = localizeHelper.localize(Res.string.shimmeranimation)
     )
     
     // Second animation for a pulsating effect
@@ -60,7 +64,7 @@ fun BookShimmerLoading(
             ),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "pulseAnimation"
+        label = localizeHelper.localize(Res.string.pulseanimation)
     )
     
     val brush = Brush.linearGradient(

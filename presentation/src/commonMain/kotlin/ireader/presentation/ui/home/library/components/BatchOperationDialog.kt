@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Enum representing available batch operations
@@ -70,7 +71,7 @@ fun BatchOperationDialog(
                 ) {
                     BatchOperationItem(
                         icon = Icons.Outlined.Done,
-                        title = "Mark as Read",
+                        title = localizeHelper.localize(Res.string.mark_as_read_1),
                         onClick = {
                             onOperationSelected(BatchOperation.MARK_AS_READ)
                             onDismiss()
@@ -79,7 +80,7 @@ fun BatchOperationDialog(
                     
                     BatchOperationItem(
                         icon = Icons.Outlined.DoneOutline,
-                        title = "Mark as Unread",
+                        title = localizeHelper.localize(Res.string.mark_as_unread_1),
                         onClick = {
                             onOperationSelected(BatchOperation.MARK_AS_UNREAD)
                             onDismiss()
@@ -88,7 +89,7 @@ fun BatchOperationDialog(
                     
                     BatchOperationItem(
                         icon = Icons.Outlined.Download,
-                        title = "Download",
+                        title = localizeHelper.localize(Res.string.download),
                         onClick = {
                             onOperationSelected(BatchOperation.DOWNLOAD)
                             onDismiss()
@@ -97,7 +98,7 @@ fun BatchOperationDialog(
                     
                     BatchOperationItem(
                         icon = Icons.Outlined.DownloadForOffline,
-                        title = "Download Unread",
+                        title = localizeHelper.localize(Res.string.download_unread_1),
                         onClick = {
                             onOperationSelected(BatchOperation.DOWNLOAD_UNREAD)
                             onDismiss()
@@ -106,7 +107,7 @@ fun BatchOperationDialog(
                     
                     BatchOperationItem(
                         icon = Icons.Outlined.Delete,
-                        title = "Delete",
+                        title = localizeHelper.localize(Res.string.delete),
                         onClick = {
                             onOperationSelected(BatchOperation.DELETE)
                             onDismiss()
@@ -115,7 +116,7 @@ fun BatchOperationDialog(
                     
                     BatchOperationItem(
                         icon = Icons.Outlined.Label,
-                        title = "Change Category",
+                        title = localizeHelper.localize(Res.string.change_category_1),
                         onClick = {
                             onOperationSelected(BatchOperation.CHANGE_CATEGORY)
                             onDismiss()
@@ -124,7 +125,7 @@ fun BatchOperationDialog(
                     
                     BatchOperationItem(
                         icon = Icons.Outlined.Archive,
-                        title = "Archive",
+                        title = localizeHelper.localize(Res.string.archive_option_title),
                         onClick = {
                             onOperationSelected(BatchOperation.ARCHIVE)
                             onDismiss()

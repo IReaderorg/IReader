@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Brightness control overlay for the reader with tap-outside-to-dismiss behavior
@@ -74,7 +75,7 @@ fun BrightnessControl(
                             .fillMaxWidth()
                     ) {
                         Text(
-                            text = "Brightness",
+                            text = localizeHelper.localize(Res.string.brightness),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )

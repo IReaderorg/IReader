@@ -8,10 +8,14 @@ import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.RestoreBackup
 import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.storage.StorageManager
+import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.settings.reader.SettingState
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 
 
@@ -27,6 +31,7 @@ class BackupScreenViewModel(
     private val scheduleAutomaticBackup: ireader.domain.usecases.backup.ScheduleAutomaticBackup? = null,
     // Platform services - Clean architecture
     private val fileSystemService: ireader.domain.services.platform.FileSystemService,
+    private val localizeHelper: LocalizeHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
     private val _state = mutableStateOf(SettingState())
     val state: State<SettingState> = _state
@@ -122,7 +127,7 @@ class BackupScreenViewModel(
             when (val result = fileSystemService.saveFile(
                 defaultFileName = fileName,
                 fileExtension = "gz",
-                title = "Save Backup"
+                title = localizeHelper.localize(Res.string.save_backup)
             )) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
                     // Create backup to selected location
@@ -143,7 +148,7 @@ class BackupScreenViewModel(
         scope.launch {
             when (val result = fileSystemService.pickFile(
                 fileTypes = listOf("gz", "json"),
-                title = "Select Backup File"
+                title = localizeHelper.localize(Res.string.select_backup_file)
             )) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
                     // Restore from selected file

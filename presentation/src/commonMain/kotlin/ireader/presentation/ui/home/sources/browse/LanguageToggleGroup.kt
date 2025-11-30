@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 data class Language(
     val code: String,
@@ -172,7 +173,7 @@ private fun LanguageSelectionHeader(
     ) {
         Column {
             Text(
-                text = "Selected Languages",
+                text = localizeHelper.localize(Res.string.selected_languages),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -321,6 +322,7 @@ private fun ModernLanguageChip(
 
 @Composable
 private fun EmptySearchState(modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -334,13 +336,13 @@ private fun EmptySearchState(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "No languages found",
+            text = localizeHelper.localize(Res.string.no_languages_found),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Try a different search term",
+            text = localizeHelper.localize(Res.string.try_a_different_search_term),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center

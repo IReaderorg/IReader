@@ -17,6 +17,7 @@ import ireader.presentation.ui.settings.components.VoiceCard
 import ireader.presentation.ui.settings.viewmodels.VoiceSelectionViewModel
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Voice selection screen for choosing TTS voices

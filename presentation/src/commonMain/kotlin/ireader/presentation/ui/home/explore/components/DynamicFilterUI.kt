@@ -15,6 +15,7 @@ import ireader.domain.js.models.FilterDefinition
 import ireader.domain.js.models.FilterOption
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Composable that dynamically generates filter UI based on filter definitions.
@@ -220,6 +221,7 @@ private fun ExcludableCheckboxGroupFilter(
     onValueChange: (List<String>, List<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,
@@ -282,7 +284,7 @@ private fun ExcludableCheckboxGroupFilter(
         // Legend
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Tap to cycle: Include → Exclude → None",
+            text = localizeHelper.localize(Res.string.tap_to_cycle_include_exclude_none),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

@@ -21,6 +21,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +57,7 @@ fun AdminBadgeVerificationScreen(
         snackbarHostState = snackbarHostState,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Badge Verification",
+                title = localizeHelper.localize(Res.string.badge_verification),
                 popBackStack = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -118,12 +119,12 @@ fun AdminBadgeVerificationScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "No pending verifications",
+                            text = localizeHelper.localize(Res.string.no_pending_verifications),
                             style = MaterialTheme.typography.titleLarge
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "All payment proofs have been reviewed",
+                            text = localizeHelper.localize(Res.string.all_payment_proofs_have_been_reviewed),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -155,7 +156,7 @@ fun AdminBadgeVerificationScreen(
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column {
                                         Text(
-                                            text = "Pending Verifications",
+                                            text = localizeHelper.localize(Res.string.pending_verifications),
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -231,7 +232,7 @@ private fun PaymentProofCard(
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Text(
-                        text = "PENDING",
+                        text = localizeHelper.localize(Res.string.pending),
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
@@ -246,15 +247,15 @@ private fun PaymentProofCard(
             
             // Payment Details
             PaymentDetailRow(
-                label = "Transaction ID",
+                label = localizeHelper.localize(Res.string.transaction_id),
                 value = proof.transactionId
             )
             PaymentDetailRow(
-                label = "Payment Method",
+                label = localizeHelper.localize(Res.string.payment_method),
                 value = proof.paymentMethod
             )
             PaymentDetailRow(
-                label = "Submitted",
+                label = localizeHelper.localize(Res.string.submitted),
                 value = formatDate(proof.submittedAt)
             )
             

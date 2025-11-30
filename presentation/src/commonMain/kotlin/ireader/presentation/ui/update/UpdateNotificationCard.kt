@@ -13,6 +13,7 @@ import ireader.core.update.UpdateInfo
 import ireader.core.update.UpdateState
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Card component for displaying app update notifications
@@ -86,7 +87,7 @@ private fun UpdateAvailableCard(
                 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Update Available",
+                        text = localizeHelper.localize(Res.string.update_available_1),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -112,7 +113,7 @@ private fun UpdateAvailableCard(
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "What's New:",
+                    text = localizeHelper.localize(Res.string.whats_new_2),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -168,6 +169,7 @@ private fun DownloadingCard(
     progress: Float,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -189,7 +191,7 @@ private fun DownloadingCard(
                 
                 Column {
                     Text(
-                        text = "Downloading Update",
+                        text = localizeHelper.localize(Res.string.downloading_update),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -241,12 +243,12 @@ private fun DownloadedCard(
                 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Update Ready",
+                        text = localizeHelper.localize(Res.string.update_ready),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                     Text(
-                        text = "Tap to install and restart",
+                        text = localizeHelper.localize(Res.string.tap_to_install_and_restart),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )

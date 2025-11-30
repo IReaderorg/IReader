@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Banner component that displays when a broken chapter is detected
@@ -68,7 +69,7 @@ fun ChapterRepairBanner(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            text = "Broken Chapter Detected",
+                            text = localizeHelper.localize(Res.string.broken_chapter_detected),
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )

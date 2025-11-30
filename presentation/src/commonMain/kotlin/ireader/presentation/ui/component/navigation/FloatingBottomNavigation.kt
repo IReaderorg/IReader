@@ -21,6 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Floating bottom navigation bar with pill-shaped design
@@ -84,13 +87,14 @@ fun RowScope.FloatingNavigationItem(
     enabled: Boolean = true,
     showLabel: Boolean = true
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedScale by animateFloatAsState(
         targetValue = if (selected) 1.08f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "scale"
+        label = localizeHelper.localize(Res.string.scale)
     )
 
     val animatedWidth by animateDpAsState(
@@ -99,7 +103,7 @@ fun RowScope.FloatingNavigationItem(
             dampingRatio = Spring.DampingRatioLowBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "width"
+        label = localizeHelper.localize(Res.string.width_1)
     )
 
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -187,13 +191,14 @@ fun RowScope.CompactFloatingNavigationItem(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedScale by animateFloatAsState(
         targetValue = if (selected) 1.1f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "scale"
+        label = localizeHelper.localize(Res.string.scale)
     )
 
     val primaryColor = MaterialTheme.colorScheme.primary

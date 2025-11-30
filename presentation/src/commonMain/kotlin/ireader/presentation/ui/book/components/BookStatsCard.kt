@@ -16,6 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.entities.Book
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun BookStatsCard(
@@ -23,6 +26,7 @@ fun BookStatsCard(
     chapterCount: Int,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -41,7 +45,7 @@ fun BookStatsCard(
             StatItem(
                 icon = Icons.Default.MenuBook,
                 value = chapterCount.toString(),
-                label = "Chapters",
+                label = localizeHelper.localize(Res.string.chapters),
                 iconTint = MaterialTheme.colorScheme.primary
             )
             
@@ -58,7 +62,7 @@ fun BookStatsCard(
                     else -> Icons.Default.FavoriteBorder
                 },
                 value = if (book.favorite) "In Library" else "Not Added",
-                label = "Status",
+                label = localizeHelper.localize(Res.string.status),
                 iconTint = if (book.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
             )
             
@@ -72,7 +76,7 @@ fun BookStatsCard(
             StatItem(
                 icon = Icons.Default.Category,
                 value = book.genres.size.toString(),
-                label = "Genres",
+                label = localizeHelper.localize(Res.string.genres),
                 iconTint = MaterialTheme.colorScheme.tertiary
             )
         }

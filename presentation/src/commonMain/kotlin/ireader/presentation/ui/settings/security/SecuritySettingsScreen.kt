@@ -13,12 +13,16 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.security.AuthMethod
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @Composable
 fun SecuritySettingsScreen(
     vm: SecuritySettingsViewModel,
     padding: PaddingValues
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val appLockEnabled by vm.appLockEnabled
     val secureScreenEnabled by vm.secureScreenEnabled
     val hideContentEnabled by vm.hideContentEnabled
@@ -28,13 +32,13 @@ fun SecuritySettingsScreen(
     val items = buildList<Components> {
         // App Lock Section
         add(Components.Header(
-            text = "App Lock",
+            text = localizeHelper.localize(Res.string.app_lock),
             icon = Icons.Default.Lock
         ))
         add(Components.Switch(
             preference = vm.appLockEnabled,
-            title = "Enable App Lock",
-            subtitle = "Require authentication to open the app",
+            title = localizeHelper.localize(Res.string.enable_app_lock),
+            subtitle = localizeHelper.localize(Res.string.require_authentication_to_open_the_app),
             icon = Icons.Default.Lock,
             onValue = { vm.toggleAppLock(it) }
         ))
@@ -42,8 +46,8 @@ fun SecuritySettingsScreen(
         // Show auth method options only if app lock is enabled
         if (appLockEnabled) {
             add(Components.Row(
-                title = "Use PIN",
-                subtitle = "Protect with a 4-6 digit PIN",
+                title = localizeHelper.localize(Res.string.use_pin),
+                subtitle = localizeHelper.localize(Res.string.protect_with_a_4_6_digit_pin),
                 icon = Icons.Default.Pin,
                 onClick = { vm.showSetupDialog(AuthMethod.PIN("")) }
             ))
@@ -51,8 +55,8 @@ fun SecuritySettingsScreen(
         
         if (appLockEnabled) {
             add(Components.Row(
-                title = "Use Password",
-                subtitle = "Protect with a password",
+                title = localizeHelper.localize(Res.string.use_password),
+                subtitle = localizeHelper.localize(Res.string.protect_with_a_password),
                 icon = Icons.Default.Password,
                 onClick = { vm.showSetupDialog(AuthMethod.Password("")) }
             ))
@@ -61,8 +65,8 @@ fun SecuritySettingsScreen(
         if (appLockEnabled && vm.isBiometricAvailable) {
             add(Components.Switch(
                 preference = vm.biometricEnabled,
-                title = "Use Biometric",
-                subtitle = "Unlock with fingerprint or face",
+                title = localizeHelper.localize(Res.string.use_biometric),
+                subtitle = localizeHelper.localize(Res.string.unlock_with_fingerprint_or_face),
                 icon = Icons.Default.Fingerprint,
                 onValue = { 
                     if (it) {
@@ -78,27 +82,27 @@ fun SecuritySettingsScreen(
         
         // Privacy Section
         add(Components.Header(
-            text = "Privacy",
+            text = localizeHelper.localize(Res.string.privacy),
             icon = Icons.Default.VisibilityOff
         ))
         add(Components.Switch(
             preference = vm.secureScreenEnabled,
-            title = "Secure Screen",
-            subtitle = "Block screenshots and screen recording",
+            title = localizeHelper.localize(Res.string.secure_screen),
+            subtitle = localizeHelper.localize(Res.string.block_screenshots_and_screen_recording),
             icon = Icons.Default.Security,
             onValue = { vm.toggleSecureScreen(it) }
         ))
         add(Components.Switch(
             preference = vm.hideContentEnabled,
-            title = "Hide Content",
-            subtitle = "Blur library covers until tapped",
+            title = localizeHelper.localize(Res.string.hide_content),
+            subtitle = localizeHelper.localize(Res.string.blur_library_covers_until_tapped),
             icon = Icons.Default.BlurOn,
             onValue = { vm.toggleHideContent(it) }
         ))
         add(Components.Switch(
             preference = vm.adultSourceLockEnabled,
-            title = "18+ Source Lock",
-            subtitle = "Require authentication for adult sources",
+            title = localizeHelper.localize(Res.string.eighteen_source_lock),
+            subtitle = localizeHelper.localize(Res.string.require_authentication_for_adult_sources),
             icon = Icons.Default.Lock,
             onValue = { vm.toggleAdultSourceLock(it) }
         ))
@@ -107,12 +111,12 @@ fun SecuritySettingsScreen(
         
         // Information Section
         add(Components.Header(
-            text = "Information",
+            text = localizeHelper.localize(Res.string.information),
             icon = Icons.Default.Info
         ))
         add(Components.Row(
-            title = "Security Guide",
-            subtitle = "Learn about security features and best practices",
+            title = localizeHelper.localize(Res.string.security_guide),
+            subtitle = localizeHelper.localize(Res.string.learn_about_security_features_and_best_practices),
             icon = Icons.Default.Help,
             onClick = { vm.showOnboarding() }
         ))
@@ -129,12 +133,12 @@ fun SecuritySettingsScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     androidx.compose.material3.Text(
-                        text = "Security Best Practices",
+                        text = localizeHelper.localize(Res.string.security_best_practices),
                         style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                         color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     androidx.compose.material3.Text(
-                        text = "• Use a strong PIN or password\n• Enable biometric authentication for convenience\n• Enable secure screen in public places\n• Use 18+ source lock for additional privacy",
+                        text = localizeHelper.localize(Res.string.use_a_strong_pin_or),
                         style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                         color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                         modifier = Modifier.padding(top = 8.dp)

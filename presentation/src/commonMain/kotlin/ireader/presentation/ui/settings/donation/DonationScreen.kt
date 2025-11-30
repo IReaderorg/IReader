@@ -58,6 +58,7 @@ import ireader.domain.models.donation.CryptoType
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,7 +130,7 @@ fun DonationScreen(
             // Card Payment Section
             item {
                 Text(
-                    text = "Card Payment",
+                    text = localizeHelper.localize(Res.string.card_payment),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -147,7 +148,7 @@ fun DonationScreen(
             // Wallet Addresses Section
             item {
                 Text(
-                    text = "Cryptocurrency Wallets",
+                    text = localizeHelper.localize(Res.string.cryptocurrency_wallets),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -247,7 +248,7 @@ fun DonationScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Thank You for Your Support!",
+                            text = localizeHelper.localize(Res.string.thank_you_for_your_support),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -255,7 +256,7 @@ fun DonationScreen(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Your contribution helps keep IReader free and ad-free for everyone.",
+                            text = localizeHelper.localize(Res.string.your_contribution_helps_keep_ireader),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             textAlign = TextAlign.Center
@@ -297,6 +298,7 @@ fun DonationScreen(
 
 @Composable
 private fun ExplanationCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -321,7 +323,7 @@ private fun ExplanationCard() {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Why Donate?",
+                    text = localizeHelper.localize(Res.string.why_donate),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -329,7 +331,7 @@ private fun ExplanationCard() {
             }
             
             Text(
-                text = "IReader is a free, open-source app with no ads. Your donations help cover:",
+                text = localizeHelper.localize(Res.string.ireader_is_a_free_open),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -345,6 +347,7 @@ private fun ExplanationCard() {
 
 @Composable
 private fun DisclaimerCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -358,14 +361,14 @@ private fun DisclaimerCard() {
                 .padding(16.dp)
         ) {
             Text(
-                text = "⚠️ Important Disclaimer",
+                text = localizeHelper.localize(Res.string.important_disclaimer),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.error
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Cryptocurrency donations are non-refundable. Please verify the wallet address before sending. IReader does not store or have access to your private keys.",
+                text = localizeHelper.localize(Res.string.cryptocurrency_donations_are_non_refundable),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -398,14 +401,14 @@ private fun CardPaymentCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "💳 Donate via Card",
+                        text = localizeHelper.localize(Res.string.donate_via_card_1),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Support the project with a credit/debit card donation",
+                        text = localizeHelper.localize(Res.string.support_the_project_with_a),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                     )
@@ -500,7 +503,7 @@ private fun WalletCard(
             
             // Wallet address
             Text(
-                text = "Wallet Address",
+                text = localizeHelper.localize(Res.string.wallet_address),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -624,7 +627,7 @@ private fun QRCodeDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Failed to generate QR code",
+                            text = localizeHelper.localize(Res.string.failed_to_generate_qr_code),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -647,7 +650,7 @@ private fun QRCodeDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = "Scan this QR code with your crypto wallet app",
+                    text = localizeHelper.localize(Res.string.scan_this_qr_code_with_your_crypto_wallet_app),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center

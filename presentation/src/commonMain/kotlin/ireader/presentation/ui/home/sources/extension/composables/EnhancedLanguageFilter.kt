@@ -29,6 +29,7 @@ import ireader.presentation.ui.home.sources.extension.LanguageChoice
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Enhanced language filter with better performance and custom design
@@ -52,7 +53,7 @@ fun EnhancedLanguageFilter(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "rotation"
+        label = localizeHelper.localize(Res.string.rotation)
     )
 
     Card(
@@ -110,7 +111,7 @@ fun EnhancedLanguageFilter(
                         
                         Column {
                             Text(
-                                text = "Language Filter",
+                                text = localizeHelper.localize(Res.string.language_filter),
                                 style = MaterialTheme.typography.titleSmall.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp
@@ -191,6 +192,7 @@ private fun EnhancedLanguageChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val text = when (choice) {
         is LanguageChoice.All -> "🌐 All"
         is LanguageChoice.One -> {
@@ -209,7 +211,7 @@ private fun EnhancedLanguageChip(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessHigh
         ),
-        label = "chip_scale"
+        label = localizeHelper.localize(Res.string.chip_scale)
     )
     
     val backgroundColor by animateColorAsState(
@@ -218,7 +220,7 @@ private fun EnhancedLanguageChip(
         else 
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
         animationSpec = tween(durationMillis = 200),
-        label = "chip_bg"
+        label = localizeHelper.localize(Res.string.chip_bg)
     )
     
     val contentColor by animateColorAsState(
@@ -227,7 +229,7 @@ private fun EnhancedLanguageChip(
         else 
             MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = tween(durationMillis = 200),
-        label = "chip_content"
+        label = localizeHelper.localize(Res.string.chip_content)
     )
 
     Surface(

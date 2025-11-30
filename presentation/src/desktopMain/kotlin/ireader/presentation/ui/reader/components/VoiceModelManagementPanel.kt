@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Voice model management panel for selecting and managing Piper TTS voice models
@@ -236,7 +237,7 @@ fun VoiceModelManagementPanel(
                     )
                     
                     Text(
-                        text = "Voice Model Settings",
+                        text = localizeHelper.localize(Res.string.voice_model_settings),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -289,7 +290,7 @@ fun VoiceModelManagementPanel(
                     // Language filter
                     val languages = availableModels.map { it.language.substringBefore("-") }.distinct().sorted()
                     FilterChipDropdown(
-                        label = "Language",
+                        label = localizeHelper.localize(Res.string.lang),
                         options = languages,
                         selectedOption = selectedLanguageFilter,
                         onOptionSelected = { selectedLanguageFilter = it }
@@ -297,7 +298,7 @@ fun VoiceModelManagementPanel(
                     
                     // Quality filter
                     FilterChipDropdown(
-                        label = "Quality",
+                        label = localizeHelper.localize(Res.string.quality),
                         options = VoiceModel.Quality.values().map { it.name },
                         selectedOption = selectedQualityFilter?.name,
                         onOptionSelected = { 
@@ -307,7 +308,7 @@ fun VoiceModelManagementPanel(
                     
                     // Gender filter
                     FilterChipDropdown(
-                        label = "Gender",
+                        label = localizeHelper.localize(Res.string.gender),
                         options = VoiceModel.Gender.values().map { it.name },
                         selectedOption = selectedGenderFilter?.name,
                         onOptionSelected = { 
@@ -351,7 +352,7 @@ fun VoiceModelManagementPanel(
                 // Info text
                 if (selectedModelId.isEmpty()) {
                     Text(
-                        text = "Please download and select a voice model to enable TTS",
+                        text = localizeHelper.localize(Res.string.please_download_and_select_a),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

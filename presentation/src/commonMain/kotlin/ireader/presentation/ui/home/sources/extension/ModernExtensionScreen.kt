@@ -143,6 +143,7 @@ private fun ModernTabBar(
     pages: List<String>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceColor = MaterialTheme.colorScheme.surface
@@ -163,7 +164,7 @@ private fun ModernTabBar(
                 dampingRatio = Spring.DampingRatioMediumBouncy,
                 stiffness = Spring.StiffnessLow
             ),
-            label = "pill_offset"
+            label = localizeHelper.localize(Res.string.pill_offset)
         )
         
         BoxWithConstraints(
@@ -249,19 +250,20 @@ private fun CustomTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val contentColor by animateColorAsState(
         targetValue = if (isSelected) 
             MaterialTheme.colorScheme.primary 
         else 
             MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = tween(durationMillis = 250),
-        label = "tab_content"
+        label = localizeHelper.localize(Res.string.tab_content)
     )
     
     val fontWeight by animateIntAsState(
         targetValue = if (isSelected) 700 else 500,
         animationSpec = tween(durationMillis = 250),
-        label = "font_weight"
+        label = localizeHelper.localize(Res.string.font_weight_1)
     )
 
     Box(

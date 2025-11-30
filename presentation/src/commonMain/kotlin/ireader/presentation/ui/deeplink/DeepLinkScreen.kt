@@ -12,6 +12,7 @@ import ireader.core.deeplink.DeepLink
 import ireader.core.deeplink.DeepLinkType
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Screen for handling deep links and external URLs
@@ -101,7 +102,7 @@ private fun DeepLinkError(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Unable to Open Link",
+            text = localizeHelper.localize(Res.string.unable_to_open_link),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.error
         )

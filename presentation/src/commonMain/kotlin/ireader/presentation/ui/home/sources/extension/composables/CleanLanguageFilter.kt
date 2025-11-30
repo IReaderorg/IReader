@@ -17,6 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.home.sources.extension.LanguageChoice
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Clean and simple language filter
@@ -30,6 +33,7 @@ fun CleanLanguageFilter(
     onToggleVisibility: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -41,7 +45,7 @@ fun CleanLanguageFilter(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Language",
+                text = localizeHelper.localize(Res.string.lang),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Medium
             )

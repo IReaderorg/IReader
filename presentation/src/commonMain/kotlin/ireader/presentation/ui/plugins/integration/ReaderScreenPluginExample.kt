@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Example integration of feature plugins into the reader screen

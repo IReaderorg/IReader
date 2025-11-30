@@ -25,6 +25,7 @@ import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 class AuthScreen  {
     

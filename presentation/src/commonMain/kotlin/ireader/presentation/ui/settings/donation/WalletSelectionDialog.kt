@@ -37,6 +37,7 @@ import ireader.domain.models.donation.WalletApp
 import kotlinx.coroutines.launch
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Dialog for selecting a cryptocurrency wallet app
@@ -75,7 +76,7 @@ fun WalletSelectionDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "Select Wallet App",
+                    text = localizeHelper.localize(Res.string.select_wallet_app),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )

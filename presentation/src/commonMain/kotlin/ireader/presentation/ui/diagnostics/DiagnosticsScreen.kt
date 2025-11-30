@@ -15,6 +15,7 @@ import ireader.core.system.HealthStatus
 import ireader.core.system.SystemInfo
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Diagnostics screen for system information and troubleshooting
@@ -114,7 +115,7 @@ private fun HealthStatusCard(
                     
                     Column {
                         Text(
-                            text = "System Health",
+                            text = localizeHelper.localize(Res.string.system_health),
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
@@ -135,7 +136,7 @@ private fun HealthStatusCard(
             if (healthCheckResult.issues.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Issues:",
+                    text = localizeHelper.localize(Res.string.issues),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -151,7 +152,7 @@ private fun HealthStatusCard(
             if (healthCheckResult.warnings.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Warnings:",
+                    text = localizeHelper.localize(Res.string.warnings),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -172,6 +173,7 @@ private fun SystemInfoCard(
     systemInfo: SystemInfo,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -184,7 +186,7 @@ private fun SystemInfoCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "System Information",
+                    text = localizeHelper.localize(Res.string.system_information),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -205,6 +207,7 @@ private fun MemoryInfoCard(
     systemInfo: SystemInfo,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val usedMemory = systemInfo.totalMemoryMB - systemInfo.freeMemoryMB
     val memoryPercent = (usedMemory.toFloat() / systemInfo.totalMemoryMB.toFloat())
     
@@ -220,7 +223,7 @@ private fun MemoryInfoCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Memory Information",
+                    text = localizeHelper.localize(Res.string.memory_information),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -261,7 +264,7 @@ private fun DiagnosticActionsCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Actions",
+                text = localizeHelper.localize(Res.string.actions),
                 style = MaterialTheme.typography.titleMedium
             )
             
@@ -299,6 +302,7 @@ private fun DiagnosticReportCard(
     diagnosticReport: String,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     
     Card(modifier = modifier.fillMaxWidth()) {
@@ -310,7 +314,7 @@ private fun DiagnosticReportCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Diagnostic Report",
+                    text = localizeHelper.localize(Res.string.diagnostic_report),
                     style = MaterialTheme.typography.titleMedium
                 )
                 

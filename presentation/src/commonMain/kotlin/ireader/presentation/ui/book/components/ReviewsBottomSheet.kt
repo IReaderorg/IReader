@@ -18,6 +18,7 @@ import ireader.presentation.ui.component.ReviewCard
 import ireader.presentation.ui.component.getDisplayName
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Bottom sheet modal for displaying all book reviews
@@ -47,7 +48,7 @@ fun ReviewsBottomSheet(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Reviews",
+                    text = localizeHelper.localize(Res.string.reviews),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -87,7 +88,7 @@ fun ReviewsBottomSheet(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No reviews yet. Be the first to review!",
+                    text = localizeHelper.localize(Res.string.no_reviews_yet_be_the_first_to_review),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

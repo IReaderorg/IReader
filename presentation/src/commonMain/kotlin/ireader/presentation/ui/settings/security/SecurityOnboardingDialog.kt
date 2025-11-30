@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Onboarding dialog that explains security features to users
@@ -35,7 +36,7 @@ fun SecurityOnboardingDialog(
         },
         title = {
             Text(
-                text = "Security Features",
+                text = localizeHelper.localize(Res.string.security_features),
                 style = MaterialTheme.typography.headlineSmall
             )
         },
@@ -47,38 +48,38 @@ fun SecurityOnboardingDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Protect your privacy and secure your reading experience with these features:",
+                    text = localizeHelper.localize(Res.string.protect_your_privacy_and_secure),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
                 SecurityFeatureItem(
                     icon = Icons.Default.Lock,
-                    title = "App Lock",
+                    title = localizeHelper.localize(Res.string.app_lock),
                     description = "Require authentication (PIN, password, or biometric) to open the app. Choose the method that works best for you."
                 )
                 
                 SecurityFeatureItem(
                     icon = Icons.Default.Fingerprint,
-                    title = "Biometric Authentication",
+                    title = localizeHelper.localize(Res.string.biometric_authentication),
                     description = "Use your fingerprint or face recognition for quick and secure access. Your device PIN can be used as a fallback."
                 )
                 
                 SecurityFeatureItem(
                     icon = Icons.Default.Security,
-                    title = "Secure Screen",
+                    title = localizeHelper.localize(Res.string.secure_screen),
                     description = "Block screenshots and screen recording to prevent others from capturing your reading content."
                 )
                 
                 SecurityFeatureItem(
                     icon = Icons.Default.BlurOn,
-                    title = "Hide Content",
+                    title = localizeHelper.localize(Res.string.hide_content),
                     description = "Blur library book covers until you tap them. Perfect for reading in public places."
                 )
                 
                 SecurityFeatureItem(
                     icon = Icons.Default.Warning,
-                    title = "18+ Source Lock",
+                    title = localizeHelper.localize(Res.string.eighteen_source_lock),
                     description = "Require authentication to access adult content sources. Adds an extra layer of privacy protection."
                 )
                 
@@ -105,7 +106,7 @@ fun SecurityOnboardingDialog(
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
-                                text = "Best Practices",
+                                text = localizeHelper.localize(Res.string.best_practices),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -113,7 +114,7 @@ fun SecurityOnboardingDialog(
                         }
                         
                         Text(
-                            text = "• Use a strong PIN (6 digits) or password\n" +
+                            text = localizeHelper.localize(Res.string.use_a_strong_pin_6_digits_or_passwordn) +
                                    "• Enable biometric for convenience\n" +
                                    "• Turn on secure screen in public\n" +
                                    "• Use hide content for extra privacy",

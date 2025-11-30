@@ -268,7 +268,7 @@ actual fun ChatGptWebViewImpl(
                                     (function() {
                                         console.log('Forcing content display...');
                                         // Hide any skip-to-content buttons
-                                        var skipLinks = document.querySelectorAll('a[href="#content"], .skip-to-content, [aria-label="Skip to content"]');
+                                        var skipLinks = document.querySelectorAll('a[href="#content"], .skip-to-content, [aria-label=localizeHelper.localize(Res.string.skip_to_content)]');
                                         skipLinks.forEach(function(link) {
                                             link.style.display = 'none';
                                         });

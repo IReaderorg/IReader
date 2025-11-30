@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import ireader.domain.plugins.PluginScreen
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Navigation extensions for plugin screen registration

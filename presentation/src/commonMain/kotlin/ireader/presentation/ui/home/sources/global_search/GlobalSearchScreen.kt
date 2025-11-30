@@ -35,6 +35,7 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import ireader.presentation.ui.home.sources.global_search.viewmodel.SearchItem
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +79,7 @@ fun ModernGlobalSearchCard(
         goToExplore: () -> Unit,
         loading: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -163,7 +165,7 @@ fun ModernGlobalSearchCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No results found",
+                            text = localizeHelper.localize(Res.string.no_results_found_1),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

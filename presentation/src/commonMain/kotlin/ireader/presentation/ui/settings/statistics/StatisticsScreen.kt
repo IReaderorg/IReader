@@ -23,6 +23,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 class StatisticsScreen : KoinComponent {
     
@@ -126,7 +127,7 @@ class StatisticsScreen : KoinComponent {
                 
                 item {
                     Text(
-                        text = "Your Reading Journey",
+                        text = localizeHelper.localize(Res.string.your_reading_journey),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -134,7 +135,7 @@ class StatisticsScreen : KoinComponent {
 
                 item {
                     StatCard(
-                        title = "Chapters Read",
+                        title = localizeHelper.localize(Res.string.chapters_read),
                         value = statistics.totalChaptersRead.toString(),
                         icon = Icons.AutoMirrored.Filled.MenuBook,
                         color = MaterialTheme.colorScheme.primary
@@ -143,7 +144,7 @@ class StatisticsScreen : KoinComponent {
 
                 item {
                     StatCard(
-                        title = "Reading Time",
+                        title = localizeHelper.localize(Res.string.reading_time),
                         value = formatReadingTime(statistics.totalReadingTimeMinutes),
                         icon = Icons.Default.Schedule,
                         color = MaterialTheme.colorScheme.secondary
@@ -152,7 +153,7 @@ class StatisticsScreen : KoinComponent {
 
                 item {
                     StatCard(
-                        title = "Books Completed",
+                        title = localizeHelper.localize(Res.string.books_completed),
                         value = statistics.booksCompleted.toString(),
                         icon = Icons.Default.CheckCircle,
                         color = MaterialTheme.colorScheme.tertiary
@@ -161,7 +162,7 @@ class StatisticsScreen : KoinComponent {
 
                 item {
                     StatCard(
-                        title = "Currently Reading",
+                        title = localizeHelper.localize(Res.string.currently_reading),
                         value = statistics.currentlyReading.toString(),
                         icon = Icons.Default.AutoStories,
                         color = MaterialTheme.colorScheme.primary
@@ -170,7 +171,7 @@ class StatisticsScreen : KoinComponent {
 
                 item {
                     StatCard(
-                        title = "Reading Streak",
+                        title = localizeHelper.localize(Res.string.reading_streak),
                         value = "${statistics.readingStreak} days",
                         icon = Icons.Default.LocalFireDepartment,
                         color = MaterialTheme.colorScheme.error
@@ -179,7 +180,7 @@ class StatisticsScreen : KoinComponent {
 
                 item {
                     StatCard(
-                        title = "Average Reading Speed",
+                        title = localizeHelper.localize(Res.string.average_reading_speed),
                         value = "${statistics.averageReadingSpeedWPM} WPM",
                         icon = Icons.Default.Speed,
                         color = MaterialTheme.colorScheme.secondary
@@ -190,7 +191,7 @@ class StatisticsScreen : KoinComponent {
                 if (userBadges.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Your Badges",
+                            text = localizeHelper.localize(Res.string.your_badges),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 8.dp)
@@ -219,7 +220,7 @@ class StatisticsScreen : KoinComponent {
                 if (statistics.favoriteGenres.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Favorite Genres",
+                            text = localizeHelper.localize(Res.string.favorite_genres),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 8.dp)

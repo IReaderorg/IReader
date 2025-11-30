@@ -13,6 +13,7 @@ import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginResourceUsage
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Section displaying performance metrics for all plugins
@@ -40,7 +41,7 @@ fun PerformanceMetricsSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Performance Metrics",
+                    text = localizeHelper.localize(Res.string.performance_metrics),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -83,7 +84,7 @@ fun PerformanceMetricsSection(
             ) {
                 Column {
                     Text(
-                        text = "Total Memory",
+                        text = localizeHelper.localize(Res.string.total_memory),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -96,7 +97,7 @@ fun PerformanceMetricsSection(
                 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "Avg CPU",
+                        text = localizeHelper.localize(Res.string.avg_cpu),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -120,6 +121,7 @@ private fun PluginMetricItem(
     usage: PluginResourceUsage,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = pluginName,
@@ -139,7 +141,7 @@ private fun PluginMetricItem(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Memory",
+                        text = localizeHelper.localize(Res.string.memory),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -167,7 +169,7 @@ private fun PluginMetricItem(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "CPU",
+                        text = localizeHelper.localize(Res.string.cpu),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

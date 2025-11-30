@@ -29,6 +29,7 @@ import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * AsyncImage component for loading images asynchronously with caching and loading states.

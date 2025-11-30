@@ -29,6 +29,7 @@ import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.BadgeType
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Displays a badge icon with optional NFT animation effect.
@@ -86,7 +87,8 @@ fun BadgeIcon(
  */
 @Composable
 private fun NFTBadgeGlowEffect(size: Dp) {
-    val infiniteTransition = rememberInfiniteTransition(label = "nft_glow")
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.nft_glow))
     
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
@@ -98,7 +100,7 @@ private fun NFTBadgeGlowEffect(size: Dp) {
             ),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "glow_alpha"
+        label = localizeHelper.localize(Res.string.glow_alpha)
     )
     
     Box(

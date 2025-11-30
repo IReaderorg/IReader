@@ -12,6 +12,7 @@ import ireader.domain.plugins.FeaturePlugin
 import ireader.domain.plugins.PluginInfo
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Screen for plugin-specific configuration
@@ -59,12 +60,12 @@ fun PluginConfigurationScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Plugin Configuration",
+                    text = localizeHelper.localize(Res.string.plugin_configuration),
                     style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "This plugin does not provide custom settings.",
+                    text = localizeHelper.localize(Res.string.this_plugin_does_not_provide_custom_settings),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

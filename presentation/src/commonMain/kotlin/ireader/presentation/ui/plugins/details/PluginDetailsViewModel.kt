@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.File
+import ireader.i18n.resources.Res
 
 /**
  * ViewModel for Plugin Details screen

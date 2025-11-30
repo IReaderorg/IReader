@@ -42,6 +42,7 @@ import kotlin.math.PI
 import kotlin.math.sin
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -56,6 +57,7 @@ fun AnimatedBookItem(
     displayMode: DisplayMode = DisplayMode.CompactGrid,
     index: Int = 0
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Control how much stagger we want between items
     val staggerFactor = remember { 0.1f }
     // Index-based offset for staggered animation
@@ -73,7 +75,7 @@ fun AnimatedBookItem(
     val animatedScale = animateFloatAsState(
         targetValue = 1f,
         animationSpec = animSpec,
-        label = "scaleAnimation"
+        label = localizeHelper.localize(Res.string.scaleanimation)
     )
     
     // Animate alpha values
@@ -84,7 +86,7 @@ fun AnimatedBookItem(
             delayMillis = (indexOffset * 150).toInt(),
             easing = LinearOutSlowInEasing
         ),
-        label = "alphaAnimation"
+        label = localizeHelper.localize(Res.string.alphaanimation)
     )
     
     // Selection effect when a book is selected
@@ -94,7 +96,7 @@ fun AnimatedBookItem(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
         ),
-        label = "selectionAnimation"
+        label = localizeHelper.localize(Res.string.selectionanimation)
     )
     
     // Calculate floating effect
@@ -334,6 +336,7 @@ private fun ListModeBookCard(
     containerColor: Color,
     headers: ((url: String) -> okhttp3.Headers?)?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -420,7 +423,7 @@ private fun ListModeBookCard(
                         )
                         
                         Text(
-                            text = "Favorite",
+                            text = localizeHelper.localize(Res.string.favorite),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -438,7 +441,7 @@ private fun ListModeBookCard(
                         )
                         
                         Text(
-                            text = "New",
+                            text = localizeHelper.localize(Res.string.add_as_new),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.tertiary
                         )
