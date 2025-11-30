@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
+import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -172,6 +176,8 @@ fun TTSEngineManagerScreen(
         }
     }
     
+    val scrollState = rememberScrollState()
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -188,7 +194,8 @@ fun TTSEngineManagerScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+                .supportDesktopScroll(scrollState, scope)
+                .verticalScroll(scrollState)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -887,44 +894,51 @@ private fun EngineCard(
                 }
             }
             
-            // Actions
-            Row(
-                modifier = Modifier.fillMaxWidth(),
+            // Actions with horizontal scroll support
+            val engineActionRowState = rememberLazyListState()
+            val engineActionScope = rememberCoroutineScope()
+            
+            LazyRow(
+                state = engineActionRowState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .supportDesktopHorizontalLazyListScroll(engineActionRowState, engineActionScope),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 when (status) {
                     EngineStatus.NOT_INSTALLED, EngineStatus.ERROR -> {
-                        Button(
-                            onClick = onInstall,
-                            enabled = !isInstalling,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            if (isInstalling) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    strokeWidth = 2.dp
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
+                        item {
+                            Button(
+                                onClick = onInstall,
+                                enabled = !isInstalling
+                            ) {
+                                if (isInstalling) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                                Text(if (isInstalling) "Installing..." else "Install")
                             }
-                            Text(if (isInstalling) "Installing..." else "Install")
                         }
                     }
                     EngineStatus.INSTALLED -> {
-                        OutlinedButton(
-                            onClick = onUninstall,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Uninstall")
+                        item {
+                            OutlinedButton(onClick = onUninstall) {
+                                Text("Uninstall")
+                            }
                         }
-                        Button(
-                            onClick = onTest,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Test")
+                        item {
+                            Button(onClick = onTest) {
+                                Text("Test")
+                            }
                         }
                     }
                     EngineStatus.CHECKING -> {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        item {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        }
                     }
                 }
             }
@@ -1235,25 +1249,41 @@ private fun VoiceCard(
                     }
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                // Action buttons with horizontal scroll support
+                val voiceActionRowState = rememberLazyListState()
+                val voiceActionScope = rememberCoroutineScope()
+                
+                LazyRow(
+                    state = voiceActionRowState,
+                    modifier = Modifier.supportDesktopHorizontalLazyListScroll(voiceActionRowState, voiceActionScope),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     if (isDownloaded) {
-                        IconButton(onClick = onDelete) {
-                            Icon(Icons.Default.Delete, "Delete")
+                        item {
+                            IconButton(onClick = onDelete) {
+                                Icon(Icons.Default.Delete, "Delete")
+                            }
                         }
-                        IconButton(onClick = onPreview) {
-                            Icon(Icons.Default.PlayArrow, "Preview")
+                        item {
+                            IconButton(onClick = onPreview) {
+                                Icon(Icons.Default.PlayArrow, "Preview")
+                            }
                         }
                     } else {
-                        IconButton(onClick = onDownload, enabled = !isDownloading) {
-                            Icon(Icons.Default.Download, "Download")
+                        item {
+                            IconButton(onClick = onDownload, enabled = !isDownloading) {
+                                Icon(Icons.Default.Download, "Download")
+                            }
                         }
                     }
 
-                    RadioButton(
-                        selected = isSelected,
-                        onClick = onSelect,
-                        enabled = isDownloaded
-                    )
+                    item {
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = onSelect,
+                            enabled = isDownloaded
+                        )
+                    }
                 }
             }
 
@@ -1594,28 +1624,42 @@ private fun GradioConfigCardDesktop(
                 }
             }
             
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                IconButton(onClick = onTest, enabled = !isTesting) {
-                    if (isTesting) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(Icons.Default.PlayArrow, "Test", modifier = Modifier.size(20.dp))
+            // Action buttons with horizontal scroll support
+            val actionRowState = rememberLazyListState()
+            val actionScope = rememberCoroutineScope()
+            
+            LazyRow(
+                state = actionRowState,
+                modifier = Modifier.supportDesktopHorizontalLazyListScroll(actionRowState, actionScope),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                item {
+                    IconButton(onClick = onTest, enabled = !isTesting) {
+                        if (isTesting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.PlayArrow, "Test", modifier = Modifier.size(20.dp))
+                        }
                     }
                 }
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(20.dp))
+                item {
+                    IconButton(onClick = onEdit) {
+                        Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(20.dp))
+                    }
                 }
                 if (onDelete != null) {
-                    IconButton(onClick = onDelete) {
-                        Icon(
-                            Icons.Default.Delete,
-                            "Delete",
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.error
-                        )
+                    item {
+                        IconButton(onClick = onDelete) {
+                            Icon(
+                                Icons.Default.Delete,
+                                "Delete",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             }

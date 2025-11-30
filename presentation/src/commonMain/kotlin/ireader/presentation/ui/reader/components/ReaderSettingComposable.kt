@@ -500,39 +500,6 @@ fun GeneralScreenTab(
                 )
             )
         }
-        
-        // Show advanced options only for AI-powered engines
-        if (vm.translationEnginesManager.get().supportsContextAwareTranslation) {
-            item {
-                ChipChoicePreference(
-                    preference = vm.translatorContentType,
-                    choices = ireader.domain.data.engines.ContentType.values().mapIndexed { index, contentType -> 
-                        index to contentType.name.lowercase().replaceFirstChar { it.uppercase() }
-                    }.toMap(),
-                    title = localize(
-                        Res.string.content_type
-                    )
-                )
-            }
-            item {
-                ChipChoicePreference(
-                    preference = vm.translatorToneType,
-                    choices = ireader.domain.data.engines.ToneType.values().mapIndexed { index, toneType -> 
-                        index to toneType.name.lowercase().replaceFirstChar { it.uppercase() }
-                    }.toMap(),
-                    title = localize(
-                        Res.string.tone_type
-                    )
-                )
-            }
-            item {
-                SwitchPreference(
-                    preference = vm.translatorPreserveStyle,
-                    title = localizeHelper.localize(Res.string.preserve_style),
-                )
-            }
-        }
-        
         item {
             SwitchPreference(
                 preference = vm.autoTranslateNextChapter,

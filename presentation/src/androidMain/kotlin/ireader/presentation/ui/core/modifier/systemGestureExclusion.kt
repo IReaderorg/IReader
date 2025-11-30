@@ -21,3 +21,25 @@ actual fun Modifier.supportDesktopScroll(
     scrollState: LazyListState,
     scope: CoroutineScope,enable:Boolean
 ): Modifier = this
+
+@Composable
+actual fun Modifier.supportDesktopHorizontalScroll(
+    scrollState: ScrollState,
+    scope: CoroutineScope,
+    enable: Boolean
+): Modifier = this
+
+@Composable
+actual fun Modifier.supportDesktopBidirectionalScroll(
+    verticalScrollState: ScrollState,
+    horizontalScrollState: ScrollState,
+    scope: CoroutineScope,
+    enable: Boolean
+): Modifier = this
+
+@Composable
+actual fun Modifier.supportDesktopHorizontalLazyListScroll(
+    lazyListState: LazyListState,
+    scope: CoroutineScope,
+    enable: Boolean
+): Modifier = this

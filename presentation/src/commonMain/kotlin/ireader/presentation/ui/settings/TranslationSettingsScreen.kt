@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Settings
@@ -991,9 +993,15 @@ fun TranslationSettingsScreen(
         })
     }
 
+    val lazyListState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    
     LazyColumn(
+        state = lazyListState,
         verticalArrangement = Arrangement.Top,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .supportDesktopScroll(lazyListState, scope)
     ) {
         setupUiComponent(list = items)
     }

@@ -8,17 +8,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -34,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.tts.PiperVoice
 import ireader.domain.models.tts.VoiceGender
 import ireader.domain.models.tts.VoiceQuality
+import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
+import ireader.presentation.ui.core.modifier.supportDesktopScroll
 
 /**
  * Enhanced Piper Voice Selection UI with search, filters, and better UX.
@@ -82,79 +79,153 @@ fun PiperVoiceSelectionContent(
     val downloadedCount = voices.count { it.isDownloaded }
     val totalCount = voices.size
     
-    Column(modifier = modifier.fillMaxSize()) {
+    val mainListState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    
+    // Split voices into downloaded and available
+    val downloadedVoices = filteredVoices.filter { it.isDownloaded }
+    val availableVoices = filteredVoices.filter { !it.isDownloaded }
+    
+    LazyColumn(
+        state = mainListState,
+        modifier = modifier
+            .fillMaxSize()
+            .supportDesktopScroll(mainListState, scope)
+    ) {
         // Header with stats
-        VoiceSelectionHeader(
-            totalVoices = totalCount,
-            downloadedVoices = downloadedCount,
-            filteredVoices = filteredVoices.size,
-            isRefreshing = isRefreshing,
-            onRefresh = onRefresh
-        )
-        
-        // Search bar
-        SearchBar(
-            query = searchQuery,
-            onQueryChange = { searchQuery = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-        
-        // Filter chips row
-        FilterChipsRow(
-            availableLanguages = availableLanguages,
-            selectedLanguage = filterLanguage,
-            selectedGender = filterGender,
-            selectedQuality = filterQuality,
-            showDownloadedOnly = showDownloadedOnly,
-            expandedFilters = expandedFilters,
-            onLanguageChange = onFilterLanguageChange,
-            onGenderChange = { filterGender = it },
-            onQualityChange = { filterQuality = it },
-            onDownloadedOnlyChange = { showDownloadedOnly = it },
-            onExpandFilters = { expandedFilters = !expandedFilters }
-        )
-        
-        // Error message
-        AnimatedVisibility(
-            visible = refreshError != null,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            ErrorBanner(
-                message = refreshError ?: "",
-                onDismiss = onDismissError,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        item(key = "header") {
+            VoiceSelectionHeader(
+                totalVoices = totalCount,
+                downloadedVoices = downloadedCount,
+                filteredVoices = filteredVoices.size,
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh
             )
         }
         
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        // Search bar
+        item(key = "search") {
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
         
-        // Voice list
+        // Filter chips row
+        item(key = "filters") {
+            FilterChipsRow(
+                availableLanguages = availableLanguages,
+                selectedLanguage = filterLanguage,
+                selectedGender = filterGender,
+                selectedQuality = filterQuality,
+                showDownloadedOnly = showDownloadedOnly,
+                expandedFilters = expandedFilters,
+                onLanguageChange = onFilterLanguageChange,
+                onGenderChange = { filterGender = it },
+                onQualityChange = { filterQuality = it },
+                onDownloadedOnlyChange = { showDownloadedOnly = it },
+                onExpandFilters = { expandedFilters = !expandedFilters }
+            )
+        }
+        
+        // Error message
+        if (refreshError != null) {
+            item(key = "error") {
+                ErrorBanner(
+                    message = refreshError,
+                    onDismiss = onDismissError,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+        }
+        
+        item(key = "divider") {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        }
+        
+        // Content based on state
         when {
-            isLoading -> LoadingState()
-            filteredVoices.isEmpty() -> EmptyState(
-                hasFilters = filterLanguage != null || filterGender != null || 
-                    filterQuality != null || searchQuery.isNotBlank() || showDownloadedOnly,
-                onRefresh = onRefresh,
-                onClearFilters = {
-                    searchQuery = ""
-                    filterGender = null
-                    filterQuality = null
-                    showDownloadedOnly = false
-                    onFilterLanguageChange(null)
+            isLoading -> {
+                item(key = "loading") {
+                    LoadingState()
                 }
-            )
-            else -> VoiceList(
-                voices = filteredVoices,
-                selectedVoiceId = selectedVoiceId,
-                downloadingVoiceId = downloadingVoiceId,
-                downloadProgress = downloadProgress,
-                onVoiceSelect = onVoiceSelect,
-                onVoiceDownload = onVoiceDownload,
-                onVoiceDelete = onVoiceDelete
-            )
+            }
+            filteredVoices.isEmpty() -> {
+                item(key = "empty") {
+                    EmptyState(
+                        hasFilters = filterLanguage != null || filterGender != null || 
+                            filterQuality != null || searchQuery.isNotBlank() || showDownloadedOnly,
+                        onRefresh = onRefresh,
+                        onClearFilters = {
+                            searchQuery = ""
+                            filterGender = null
+                            filterQuality = null
+                            showDownloadedOnly = false
+                            onFilterLanguageChange(null)
+                        }
+                    )
+                }
+            }
+            else -> {
+                // Downloaded section
+                if (downloadedVoices.isNotEmpty()) {
+                    item(key = "downloaded_header") {
+                        SectionHeader(
+                            title = "Downloaded",
+                            count = downloadedVoices.size,
+                            icon = Icons.Default.CheckCircle,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    items(downloadedVoices, key = { "downloaded_${it.id}" }) { voice ->
+                        EnhancedVoiceCard(
+                            voice = voice,
+                            isSelected = voice.id == selectedVoiceId,
+                            isDownloading = downloadingVoiceId == voice.id,
+                            downloadProgress = if (downloadingVoiceId == voice.id) downloadProgress else 0f,
+                            onSelect = { onVoiceSelect(voice) },
+                            onDownload = { },
+                            onDelete = onVoiceDelete?.let { { it(voice) } },
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+                
+                // Available for download section
+                if (availableVoices.isNotEmpty()) {
+                    item(key = "available_header") {
+                        if (downloadedVoices.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        SectionHeader(
+                            title = "Available for Download",
+                            count = availableVoices.size,
+                            icon = Icons.Default.CloudDownload,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                    items(availableVoices, key = { "available_${it.id}" }) { voice ->
+                        EnhancedVoiceCard(
+                            voice = voice,
+                            isSelected = false,
+                            isDownloading = downloadingVoiceId == voice.id,
+                            downloadProgress = if (downloadingVoiceId == voice.id) downloadProgress else 0f,
+                            onSelect = { },
+                            onDownload = { onVoiceDownload(voice) },
+                            onDelete = null,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+                
+                // Bottom padding
+                item(key = "bottom_spacer") {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
     }
 }
@@ -294,52 +365,63 @@ private fun FilterChipsRow(
     val hasActiveFilters = selectedLanguage != null || selectedGender != null || 
         selectedQuality != null || showDownloadedOnly
     
-    // Use regular scroll state for better desktop mouse wheel support
-    val mainScrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+    
+    // LazyRow states for horizontal scroll support
+    val mainRowState = rememberLazyListState()
+    val genderRowState = rememberLazyListState()
+    val qualityRowState = rememberLazyListState()
+    val languageRowState = rememberLazyListState()
     
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Main filter row - using Row with horizontalScroll for desktop mouse wheel support
-        Row(
+        // Main filter row - using LazyRow for desktop mouse wheel support
+        LazyRow(
+            state = mainRowState,
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(mainScrollState)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .supportDesktopHorizontalLazyListScroll(mainRowState, scope),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Expand/collapse filters button
-            FilterChip(
-                selected = expandedFilters || hasActiveFilters,
-                onClick = onExpandFilters,
-                label = { Text("Filters") },
-                leadingIcon = {
-                    Icon(
-                        if (expandedFilters) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        "Toggle filters",
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
-                trailingIcon = if (hasActiveFilters) {
-                    { Badge { } }
-                } else null
-            )
+            item {
+                FilterChip(
+                    selected = expandedFilters || hasActiveFilters,
+                    onClick = onExpandFilters,
+                    label = { Text("Filters") },
+                    leadingIcon = {
+                        Icon(
+                            if (expandedFilters) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            "Toggle filters",
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
+                    trailingIcon = if (hasActiveFilters) {
+                        { Badge { } }
+                    } else null
+                )
+            }
             
             // Downloaded only toggle
-            FilterChip(
-                selected = showDownloadedOnly,
-                onClick = { onDownloadedOnlyChange(!showDownloadedOnly) },
-                label = { Text("Downloaded") },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Download,
-                        null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            )
+            item {
+                FilterChip(
+                    selected = showDownloadedOnly,
+                    onClick = { onDownloadedOnlyChange(!showDownloadedOnly) },
+                    label = { Text("Downloaded") },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Download,
+                            null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                )
+            }
             
             // Quick language filters (top 5)
-            availableLanguages.take(5).forEach { lang ->
+            items(availableLanguages.take(5).size) { index ->
+                val lang = availableLanguages[index]
                 FilterChip(
                     selected = selectedLanguage == lang,
                     onClick = { 
@@ -351,10 +433,12 @@ private fun FilterChipsRow(
             
             // More languages indicator
             if (availableLanguages.size > 5) {
-                AssistChip(
-                    onClick = onExpandFilters,
-                    label = { Text("+${availableLanguages.size - 5} more") }
-                )
+                item {
+                    AssistChip(
+                        onClick = onExpandFilters,
+                        label = { Text("+${availableLanguages.size - 5} more") }
+                    )
+                }
             }
         }
         
@@ -376,13 +460,20 @@ private fun FilterChipsRow(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(
-                        selected = selectedGender == null,
-                        onClick = { onGenderChange(null) },
-                        label = { Text("All") }
-                    )
-                    VoiceGender.entries.forEach { gender ->
+                LazyRow(
+                    state = genderRowState,
+                    modifier = Modifier.supportDesktopHorizontalLazyListScroll(genderRowState, scope),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        FilterChip(
+                            selected = selectedGender == null,
+                            onClick = { onGenderChange(null) },
+                            label = { Text("All") }
+                        )
+                    }
+                    items(VoiceGender.entries.size) { index ->
+                        val gender = VoiceGender.entries[index]
                         FilterChip(
                             selected = selectedGender == gender,
                             onClick = { onGenderChange(if (selectedGender == gender) null else gender) },
@@ -408,13 +499,20 @@ private fun FilterChipsRow(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(
-                        selected = selectedQuality == null,
-                        onClick = { onQualityChange(null) },
-                        label = { Text("All") }
-                    )
-                    VoiceQuality.entries.forEach { quality ->
+                LazyRow(
+                    state = qualityRowState,
+                    modifier = Modifier.supportDesktopHorizontalLazyListScroll(qualityRowState, scope),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        FilterChip(
+                            selected = selectedQuality == null,
+                            onClick = { onQualityChange(null) },
+                            label = { Text("All") }
+                        )
+                    }
+                    items(VoiceQuality.entries.size) { index ->
+                        val quality = VoiceQuality.entries[index]
                         FilterChip(
                             selected = selectedQuality == quality,
                             onClick = { onQualityChange(if (selectedQuality == quality) null else quality) },
@@ -425,25 +523,27 @@ private fun FilterChipsRow(
                 
                 // All languages (scrollable with desktop mouse wheel support)
                 if (availableLanguages.size > 5) {
-                    val languageScrollState = rememberScrollState()
-                    
                     Text(
                         text = "All Languages",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Row(
+                    LazyRow(
+                        state = languageRowState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .horizontalScroll(languageScrollState),
+                            .supportDesktopHorizontalLazyListScroll(languageRowState, scope),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        FilterChip(
-                            selected = selectedLanguage == null,
-                            onClick = { onLanguageChange(null) },
-                            label = { Text("All") }
-                        )
-                        availableLanguages.forEach { lang ->
+                        item {
+                            FilterChip(
+                                selected = selectedLanguage == null,
+                                onClick = { onLanguageChange(null) },
+                                label = { Text("All") }
+                            )
+                        }
+                        items(availableLanguages.size) { index ->
+                            val lang = availableLanguages[index]
                             FilterChip(
                                 selected = selectedLanguage == lang,
                                 onClick = { 
@@ -574,75 +674,6 @@ private fun EmptyState(
 
 
 @Composable
-private fun VoiceList(
-    voices: List<PiperVoice>,
-    selectedVoiceId: String?,
-    downloadingVoiceId: String?,
-    downloadProgress: Float,
-    onVoiceSelect: (PiperVoice) -> Unit,
-    onVoiceDownload: (PiperVoice) -> Unit,
-    onVoiceDelete: ((PiperVoice) -> Unit)?
-) {
-    val downloadedVoices = voices.filter { it.isDownloaded }
-    val availableVoices = voices.filter { !it.isDownloaded }
-    
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Downloaded section
-        if (downloadedVoices.isNotEmpty()) {
-            item {
-                SectionHeader(
-                    title = "Downloaded",
-                    count = downloadedVoices.size,
-                    icon = Icons.Default.CheckCircle,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            items(downloadedVoices, key = { "downloaded_${it.id}" }) { voice ->
-                EnhancedVoiceCard(
-                    voice = voice,
-                    isSelected = voice.id == selectedVoiceId,
-                    isDownloading = downloadingVoiceId == voice.id,
-                    downloadProgress = if (downloadingVoiceId == voice.id) downloadProgress else 0f,
-                    onSelect = { onVoiceSelect(voice) },
-                    onDownload = { },
-                    onDelete = onVoiceDelete?.let { { it(voice) } }
-                )
-            }
-        }
-        
-        // Available for download section
-        if (availableVoices.isNotEmpty()) {
-            item {
-                if (downloadedVoices.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-                SectionHeader(
-                    title = "Available for Download",
-                    count = availableVoices.size,
-                    icon = Icons.Default.CloudDownload,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-            }
-            items(availableVoices, key = { "available_${it.id}" }) { voice ->
-                EnhancedVoiceCard(
-                    voice = voice,
-                    isSelected = false,
-                    isDownloading = downloadingVoiceId == voice.id,
-                    downloadProgress = if (downloadingVoiceId == voice.id) downloadProgress else 0f,
-                    onSelect = { },
-                    onDownload = { onVoiceDownload(voice) },
-                    onDelete = null
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun SectionHeader(
     title: String,
     count: Int,
@@ -652,7 +683,7 @@ private fun SectionHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -740,28 +771,39 @@ fun EnhancedVoiceCard(
                     
                     Spacer(modifier = Modifier.height(4.dp))
                     
-                    // Tags row
-                    Row(
+                    // Tags row with horizontal scroll for overflow
+                    val tagsRowState = rememberLazyListState()
+                    val tagsScope = rememberCoroutineScope()
+                    
+                    LazyRow(
+                        state = tagsRowState,
+                        modifier = Modifier.supportDesktopHorizontalLazyListScroll(tagsRowState, tagsScope),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        VoiceTag(
-                            text = voice.locale,
-                            icon = Icons.Default.Language
-                        )
-                        VoiceTag(
-                            text = voice.quality.name.lowercase().replaceFirstChar { it.uppercase() },
-                            icon = when (voice.quality) {
-                                VoiceQuality.LOW -> Icons.Default.SignalCellularAlt1Bar
-                                VoiceQuality.MEDIUM -> Icons.Default.SignalCellularAlt2Bar
-                                VoiceQuality.HIGH, VoiceQuality.PREMIUM -> Icons.Default.SignalCellularAlt
-                            }
-                        )
-                        if (voice.modelSize > 0) {
+                        item {
                             VoiceTag(
-                                text = formatFileSize(voice.modelSize),
-                                icon = Icons.Default.Storage
+                                text = voice.locale,
+                                icon = Icons.Default.Language
                             )
+                        }
+                        item {
+                            VoiceTag(
+                                text = voice.quality.name.lowercase().replaceFirstChar { it.uppercase() },
+                                icon = when (voice.quality) {
+                                    VoiceQuality.LOW -> Icons.Default.SignalCellularAlt1Bar
+                                    VoiceQuality.MEDIUM -> Icons.Default.SignalCellularAlt2Bar
+                                    VoiceQuality.HIGH, VoiceQuality.PREMIUM -> Icons.Default.SignalCellularAlt
+                                }
+                            )
+                        }
+                        if (voice.modelSize > 0) {
+                            item {
+                                VoiceTag(
+                                    text = formatFileSize(voice.modelSize),
+                                    icon = Icons.Default.Storage
+                                )
+                            }
                         }
                     }
                     

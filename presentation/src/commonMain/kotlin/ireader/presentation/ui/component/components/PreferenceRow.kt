@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.reusable_composable.CaptionTextComposable
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import ireader.presentation.ui.core.utils.horizontalPadding
@@ -549,6 +550,9 @@ fun ChipPreference(
         append(preference.getOrNull(selected) ?: "None")
     }
     
+    val lazyRowState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    
     PreferenceRow(
             modifier = Modifier.semantics(mergeDescendants = true) {
                 contentDescription = contentDesc
@@ -557,7 +561,10 @@ fun ChipPreference(
             subtitle = subtitle,
             icon = icon,
             action = {
-                LazyRow {
+                LazyRow(
+                    state = lazyRowState,
+                    modifier = Modifier.supportDesktopHorizontalLazyListScroll(lazyRowState, scope)
+                ) {
                     items(count = preference.size) { index ->
                         FilterChip(
                                 modifier = Modifier.semantics {

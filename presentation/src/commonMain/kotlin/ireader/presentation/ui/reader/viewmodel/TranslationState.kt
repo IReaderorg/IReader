@@ -29,6 +29,29 @@ class TranslationStateHolder {
     var glossaryEntries by mutableStateOf<List<Glossary>>(emptyList())
     var showGlossaryDialog by mutableStateOf(false)
     
+    /**
+     * Update translation state atomically to prevent race conditions.
+     * Sets translatedContent first, then hasTranslation to ensure
+     * content is available when hasTranslation becomes true.
+     */
+    @Synchronized
+    fun setTranslation(content: List<Page>, error: String? = null) {
+        translationError = error
+        translatedContent = content
+        hasTranslation = content.isNotEmpty()
+    }
+    
+    /**
+     * Clear translation state atomically.
+     * Sets hasTranslation to false first to prevent reading stale content.
+     */
+    @Synchronized
+    fun clearTranslation(error: String? = null) {
+        hasTranslation = false
+        translatedContent = emptyList()
+        translationError = error
+    }
+    
     fun reset() {
         isShowingTranslation = false
         hasTranslation = false

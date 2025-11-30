@@ -3,7 +3,9 @@ package ireader.presentation.ui.settings.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,6 +18,7 @@ import ireader.domain.services.tts_service.GradioParam
 import ireader.domain.services.tts_service.GradioParamType
 import ireader.domain.services.tts_service.GradioTTSConfig
 import ireader.domain.services.tts_service.GradioTTSPresets
+import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
 
 /**
  * Gradio TTS Section - Common UI component for both Android and Desktop
@@ -274,61 +277,72 @@ private fun GradioConfigCard(
                 }
             }
             
-            // Action buttons row
-            Row(
+            // Action buttons row with horizontal scroll support for desktop
+            val actionRowState = rememberLazyListState()
+            val scope = rememberCoroutineScope()
+            
+            LazyRow(
+                state = actionRowState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(top = 8.dp)
+                    .supportDesktopHorizontalLazyListScroll(actionRowState, scope),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(
-                    onClick = onTest,
-                    enabled = !isTesting,
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    if (isTesting) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(14.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(
-                            Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Test", style = MaterialTheme.typography.labelMedium)
-                }
-                
-                TextButton(
-                    onClick = onEdit,
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Edit", style = MaterialTheme.typography.labelMedium)
-                }
-                
-                if (onDelete != null) {
+                item {
                     TextButton(
-                        onClick = onDelete,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        ),
+                        onClick = onTest,
+                        enabled = !isTesting,
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        if (isTesting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Test", style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+                
+                item {
+                    TextButton(
+                        onClick = onEdit,
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         Icon(
-                            Icons.Default.Delete,
+                            Icons.Default.Edit,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Edit", style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+                
+                if (onDelete != null) {
+                    item {
+                        TextButton(
+                            onClick = onDelete,
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            ),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             }
