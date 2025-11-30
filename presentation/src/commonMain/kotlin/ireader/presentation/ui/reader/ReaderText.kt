@@ -380,10 +380,16 @@ private fun StyleText(
     page: Text,
     enableBioReading: Boolean
 ) {
+    // Cache the content to avoid race conditions from multiple getCurrentContent() calls
+    val currentContent = remember(vm.stateChapter?.id, vm.translationViewModel.translationState.hasTranslation) {
+        vm.getCurrentContent()
+    }
+    val isLastIndex = index == currentContent.lastIndex
+    
     val originalText = setText(
         text = page.text,
         index = index,
-        isLast = index == vm.getCurrentContent().lastIndex,
+        isLast = isLastIndex,
         topContentPadding = vm.topContentPadding.value,
         contentPadding = vm.distanceBetweenParagraphs.value,
         bottomContentPadding = vm.bottomContentPadding.value
@@ -570,9 +576,15 @@ private fun ContinuesReaderPage(
     
     val items by remember {
         derivedStateOf {
-            vm.chapterShell.map { chapter ->
-                chapter.content.map { chapter.id to it }
-            }.flatten()
+            // Safely map chapter content, handling potential null or empty content
+            vm.chapterShell.flatMap { chapter ->
+                val content = chapter.content
+                if (content.isNullOrEmpty()) {
+                    emptyList()
+                } else {
+                    content.map { page -> chapter.id to page }
+                }
+            }
         }
     }
 

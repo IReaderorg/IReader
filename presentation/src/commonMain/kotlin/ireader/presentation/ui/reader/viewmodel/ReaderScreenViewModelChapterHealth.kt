@@ -23,48 +23,84 @@ fun ReaderScreenViewModel.checkChapterHealth(
 ) {
     scope.launch {
         try {
+            // First, check if we have a cached health status for this chapter
+            val existingHealth = chapterHealthRepository.getChapterHealthById(chapter.id)
+            
+            // If the chapter was recently checked (within last 5 minutes) and marked healthy,
+            // don't re-check to avoid false positives during navigation
+            val recentCheckThreshold = 5 * 60 * 1000L // 5 minutes
+            val now = System.currentTimeMillis()
+            if (existingHealth != null && 
+                !existingHealth.isBroken && 
+                (now - existingHealth.checkedAt) < recentCheckThreshold) {
+                // Chapter was recently verified as healthy, skip check
+                prefState.isChapterBroken = false
+                prefState.chapterBreakReason = null
+                prefState.showRepairBanner = false
+                return@launch
+            }
+            
             // Check if chapter is broken
             val isBroken = chapterHealthChecker.isChapterBroken(chapter.content)
             
             if (isBroken) {
                 val breakReason = chapterHealthChecker.getBreakReason(chapter.content)
                 
-                // Update UI state
-                prefState.isChapterBroken = true
-                prefState.chapterBreakReason = getBreakReasonMessage(breakReason)
-                prefState.showRepairBanner = true
+                // Only show broken banner if:
+                // 1. Chapter content is not empty (empty means still loading)
+                // 2. Chapter has been read before (has content in database)
+                // This prevents false positives for chapters that are still loading
+                val hasContent = chapter.content.isNotEmpty()
+                val contentText = chapter.content
+                    .filterIsInstance<ireader.core.source.model.Text>()
+                    .joinToString("") { it.text }
+                val hasTextContent = contentText.isNotBlank()
                 
-                // Save to database
-                chapterHealthRepository.upsertChapterHealth(
-                    ChapterHealth(
-                        chapterId = chapter.id,
-                        isBroken = true,
-                        breakReason = breakReason,
-                        checkedAt = System.currentTimeMillis()
+                if (hasContent && hasTextContent) {
+                    // Update UI state
+                    prefState.isChapterBroken = true
+                    prefState.chapterBreakReason = getBreakReasonMessage(breakReason)
+                    prefState.showRepairBanner = true
+                    
+                    // Save to database
+                    chapterHealthRepository.upsertChapterHealth(
+                        ChapterHealth(
+                            chapterId = chapter.id,
+                            isBroken = true,
+                            breakReason = breakReason,
+                            checkedAt = now
+                        )
                     )
-                )
+                } else {
+                    // Content is empty or has no text - likely still loading
+                    // Don't mark as broken, just reset the state
+                    prefState.isChapterBroken = false
+                    prefState.chapterBreakReason = null
+                    prefState.showRepairBanner = false
+                }
             } else {
                 // Chapter is healthy
                 prefState.isChapterBroken = false
                 prefState.chapterBreakReason = null
                 prefState.showRepairBanner = false
                 
-                // Update database if previously marked as broken
-                val existingHealth = chapterHealthRepository.getChapterHealthById(chapter.id)
-                if (existingHealth?.isBroken == true) {
-                    chapterHealthRepository.upsertChapterHealth(
-                        ChapterHealth(
-                            chapterId = chapter.id,
-                            isBroken = false,
-                            breakReason = null,
-                            checkedAt = System.currentTimeMillis()
-                        )
+                // Update database
+                chapterHealthRepository.upsertChapterHealth(
+                    ChapterHealth(
+                        chapterId = chapter.id,
+                        isBroken = false,
+                        breakReason = null,
+                        checkedAt = now
                     )
-                }
+                )
             }
         } catch (e: Exception) {
             // Silently fail - don't disrupt reading experience
             ireader.core.log.Log.error("Error checking chapter health: ${e.message}")
+            // Reset broken state on error to avoid false positives
+            prefState.isChapterBroken = false
+            prefState.chapterBreakReason = null
+            prefState.showRepairBanner = false
         }
     }
 }

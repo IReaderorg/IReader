@@ -152,10 +152,8 @@ class ReaderTranslationViewModel(
                     translationProgress = clampedProgress / 100f
                 },
                 onSuccess = { translatedChapter ->
-                    // Update translation state with saved translation
-                    translationState.translatedContent = translatedChapter.translatedContent
-                    translationState.hasTranslation = true
-                    translationState.translationError = null
+                    // Use atomic update to prevent race conditions
+                    translationState.setTranslation(translatedChapter.translatedContent)
                     
                     Log.debug("Translation saved successfully for chapter ${chapter.id} with ${translatedChapter.translatedContent.size} paragraphs")
                     showSnackBar(UiText.DynamicString("Translation complete and saved"))
@@ -165,7 +163,8 @@ class ReaderTranslationViewModel(
                 onError = { errorMessage ->
                     Log.error("Translation failed: $errorMessage")
                     showSnackBar(errorMessage)
-                    translationState.translationError = errorMessage.toString()
+                    // Use atomic clear with error
+                    translationState.clearTranslation(errorMessage.toString())
                     isTranslating = false
                     translationProgress = 0f
                 }
@@ -214,24 +213,19 @@ class ReaderTranslationViewModel(
             )
             
             if (translated != null && translated.translatedContent.isNotEmpty()) {
-                translationState.translatedContent = translated.translatedContent
-                translationState.hasTranslation = true
-                translationState.translationError = null
+                // Use atomic update to prevent race conditions
+                translationState.setTranslation(translated.translatedContent)
                 Log.debug("Loaded saved translation for chapter $chapterId with ${translated.translatedContent.size} paragraphs")
             } else {
-                // Don't reset completely - just mark as no translation available
-                translationState.hasTranslation = false
-                translationState.translatedContent = emptyList()
-                translationState.translationError = null
+                // Use atomic clear to prevent race conditions
+                translationState.clearTranslation()
                 Log.debug("No saved translation found for chapter $chapterId")
             }
             
         } catch (e: Exception) {
             Log.error("Failed to load translation", e)
-            // Don't reset completely on error - just mark as no translation
-            translationState.hasTranslation = false
-            translationState.translatedContent = emptyList()
-            translationState.translationError = e.message
+            // Use atomic clear with error message
+            translationState.clearTranslation(e.message)
         }
     }
     

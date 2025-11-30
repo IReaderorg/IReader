@@ -14,12 +14,20 @@ class ChapterHealthChecker {
     fun isChapterBroken(content: List<Page>): Boolean {
         val textContent = extractTextContent(content)
         
-        return when {
-            textContent.isBlank() -> true
-            getWordCount(textContent) < MIN_WORD_COUNT -> true
-            hasLowAlphaRatio(textContent) -> true
-            else -> false
+        // Empty content is definitely broken
+        if (textContent.isBlank()) return true
+        
+        // For very short content, only check if it's completely empty
+        // This avoids false positives for short chapters or chapter titles
+        if (textContent.length < MIN_CONTENT_LENGTH) {
+            return false // Short content is not necessarily broken
         }
+        
+        // Check for scrambled text (low letter ratio)
+        // This is more lenient to support non-Latin languages
+        if (hasLowLetterRatio(textContent)) return true
+        
+        return false
     }
     
     /**
@@ -30,8 +38,7 @@ class ChapterHealthChecker {
         
         return when {
             textContent.isBlank() -> BreakReason.EMPTY_CONTENT
-            getWordCount(textContent) < MIN_WORD_COUNT -> BreakReason.LOW_WORD_COUNT
-            hasLowAlphaRatio(textContent) -> BreakReason.SCRAMBLED_TEXT
+            textContent.length >= MIN_CONTENT_LENGTH && hasLowLetterRatio(textContent) -> BreakReason.SCRAMBLED_TEXT
             else -> null
         }
     }
@@ -45,30 +52,48 @@ class ChapterHealthChecker {
     }
     
     /**
-     * Counts words in text content
+     * Checks if text has a low ratio of letter characters (indicating scrambled content)
+     * Uses Character.isLetter() which supports all Unicode letters including CJK
      */
-    private fun getWordCount(text: String): Int {
-        return text.trim()
-            .split(Regex("\\s+"))
-            .filter { it.isNotBlank() }
-            .size
+    private fun hasLowLetterRatio(text: String): Boolean {
+        if (text.isEmpty()) return true
+        
+        // Count meaningful characters: letters, digits, whitespace, and common punctuation
+        val meaningfulCount = text.count { char ->
+            char.isLetterOrDigit() || char.isWhitespace() || isMeaningfulPunctuation(char)
+        }
+        
+        // If most characters are meaningful, it's probably not scrambled
+        val meaningfulRatio = meaningfulCount.toFloat() / text.length
+        
+        // Very low meaningful ratio indicates scrambled/corrupted text
+        return meaningfulRatio < MIN_MEANINGFUL_RATIO
     }
     
     /**
-     * Checks if text has a low ratio of alphabetic characters (indicating scrambled content)
+     * Checks if a character is meaningful punctuation (supports multiple languages)
      */
-    private fun hasLowAlphaRatio(text: String): Boolean {
-        if (text.isEmpty()) return true
-        
-        val alphaCount = text.count { it.isLetter() }
-        val alphaRatio = alphaCount.toFloat() / text.length
-        
-        return alphaRatio < MIN_ALPHA_RATIO
+    private fun isMeaningfulPunctuation(char: Char): Boolean {
+        return when (char) {
+            // Common ASCII punctuation
+            '.', ',', '!', '?', ';', ':', '\'', '"', '-', '(', ')', '[', ']', '{', '}' -> true
+            // CJK punctuation
+            '\u3002', '\uFF0C', '\uFF01', '\uFF1F', '\uFF1B', '\uFF1A' -> true // 。，！？；：
+            '\u201C', '\u201D', '\u2018', '\u2019' -> true // ""''
+            '\uFF08', '\uFF09', '\u3010', '\u3011' -> true // （）【】
+            '\u300C', '\u300D', '\u300E', '\u300F' -> true // 「」『』
+            else -> false
+        }
     }
     
     companion object {
-        private const val MIN_WORD_COUNT = 50
-        private const val MIN_ALPHA_RATIO = 0.5f
+        // Minimum content length before we check for scrambled text
+        // This prevents false positives for short chapters
+        private const val MIN_CONTENT_LENGTH = 100
+        
+        // Minimum ratio of meaningful characters (letters, digits, punctuation)
+        // Lowered from 0.5 to 0.3 to support languages with more symbols
+        private const val MIN_MEANINGFUL_RATIO = 0.3f
     }
 }
 

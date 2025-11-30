@@ -34,3 +34,40 @@ expect fun Modifier.supportDesktopScroll(scrollState: ScrollState,scope: Corouti
 
 @Composable
 expect fun Modifier.supportDesktopScroll(scrollState: LazyListState,scope: CoroutineScope,enable:Boolean = true): Modifier
+
+/**
+ * Desktop horizontal scroll support for ScrollState.
+ * Enables horizontal scrolling with mouse wheel (Shift+Scroll) and trackpad gestures.
+ * On non-desktop platforms, this is a no-op.
+ */
+@Composable
+expect fun Modifier.supportDesktopHorizontalScroll(
+    scrollState: ScrollState,
+    scope: CoroutineScope,
+    enable: Boolean = true
+): Modifier
+
+/**
+ * Desktop bidirectional scroll support for combined vertical and horizontal scrolling.
+ * Enables vertical scrolling with mouse wheel and horizontal scrolling with Shift+Scroll.
+ * On non-desktop platforms, this is a no-op.
+ */
+@Composable
+expect fun Modifier.supportDesktopBidirectionalScroll(
+    verticalScrollState: ScrollState,
+    horizontalScrollState: ScrollState,
+    scope: CoroutineScope,
+    enable: Boolean = true
+): Modifier
+
+/**
+ * Desktop horizontal scroll support for LazyListState (LazyRow).
+ * Enables horizontal scrolling with mouse wheel and trackpad gestures.
+ * On non-desktop platforms, this is a no-op.
+ */
+@Composable
+expect fun Modifier.supportDesktopHorizontalLazyListScroll(
+    lazyListState: LazyListState,
+    scope: CoroutineScope,
+    enable: Boolean = true
+): Modifier

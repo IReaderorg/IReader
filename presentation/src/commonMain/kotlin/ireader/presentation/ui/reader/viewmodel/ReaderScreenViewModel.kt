@@ -373,7 +373,6 @@ class ReaderScreenViewModel(
         // Check if chapter is already preloaded
         val preloadedChapter = preloadedChapters[chapterId]
         val chapter = if (preloadedChapter != null && !preloadedChapter.isEmpty()) {
-            ireader.core.log.Log.debug("Using preloaded chapter: ${preloadedChapter.name}")
             preloadedChapters.remove(chapterId) // Remove from cache after use
             preloadedChapter
         } else {
@@ -383,16 +382,25 @@ class ReaderScreenViewModel(
         chapter.let {
             stateChapter = it
         }
-        if (chapter != null && (chapter.isEmpty() || force)) {
-            state.source?.let { source -> getRemoteChapter(chapter) }
+        
+        // Track if we need to fetch remote content
+        val needsRemoteFetch = chapter != null && (chapter.isEmpty() || force) && state.source != null
+        
+        if (needsRemoteFetch) {
+            // Keep loading state while fetching remote content
+            getRemoteChapter(chapter!!)
+            // Note: isLoading will be set to false in getRemoteChapter callback
+        } else {
+            // No remote fetch needed, we can set loading to false
+            isLoading = false
         }
+        
         stateChapter?.let { ch -> getChapterUseCase.updateLastReadTime(ch) }
         val index = stateChapters.indexOfFirst { it.id == chapter?.id }
         if (index != -1) {
             currentChapterIndex = index
         }
 
-        isLoading = false
         initialized = true
 
         stateChapter?.let {
@@ -406,24 +414,32 @@ class ReaderScreenViewModel(
         // Track chapter open
         onChapterOpened()
         
-        // Check chapter health after loading - only if chapter has content
+        // Check chapter health after loading - only if:
+        // 1. Chapter has content
+        // 2. We're NOT waiting for remote content (needsRemoteFetch is false)
         // This prevents false positives when content is still loading
-        stateChapter?.let { ch ->
-            if (ch.content.isNotEmpty()) {
-                checkChapterHealth(ch, chapterHealthChecker, chapterHealthRepository)
-            } else {
-                // Reset broken chapter state if content is empty (might be loading)
-                prefState.isChapterBroken = false
-                prefState.chapterBreakReason = null
-                prefState.showRepairBanner = false
+        if (!needsRemoteFetch) {
+            stateChapter?.let { ch ->
+                if (ch.content.isNotEmpty()) {
+                    checkChapterHealth(ch, chapterHealthChecker, chapterHealthRepository)
+                } else {
+                    // Reset broken chapter state if content is empty (might be loading)
+                    prefState.isChapterBroken = false
+                    prefState.chapterBreakReason = null
+                    prefState.showRepairBanner = false
+                }
             }
+        } else {
+            // Remote fetch in progress - reset broken state until content loads
+            prefState.isChapterBroken = false
+            prefState.chapterBreakReason = null
+            prefState.showRepairBanner = false
         }
         
         // Clear old preloaded chapters to prevent memory buildup
         if (preloadedChapters.size > 3) {
             val oldestKeys = preloadedChapters.keys.take(preloadedChapters.size - 3)
             oldestKeys.forEach { preloadedChapters.remove(it) }
-            ireader.core.log.Log.debug("Cleared ${oldestKeys.size} old preloaded chapters from cache")
         }
         
         // Trigger preload of next chapter
@@ -457,13 +473,20 @@ class ReaderScreenViewModel(
             catalog,
             onSuccess = { result ->
                 state.stateChapter = result
-                // Save the chapter content to database to persist it
-                // Use the original chapter ID to update, not insert new
+                isLoading = false
+                
+                // Save the chapter content to database
                 scope.launch {
                     insertUseCases.insertChapter(result)
+                    
+                    // Check chapter health after remote content is loaded
+                    if (result.content.isNotEmpty()) {
+                        checkChapterHealth(result, chapterHealthChecker, chapterHealthRepository)
+                    }
                 }
             },
             onError = { message ->
+                isLoading = false // Set loading to false on error too
                 if (message != null) {
                     showSnackBar(message)
                 }
@@ -487,10 +510,15 @@ class ReaderScreenViewModel(
     var getContentJob: Job? = null
     var getChapterJob: Job? = null
     var preloadJob: Job? = null
+    private var chapterNavigationJob: Job? = null
     
     // Preload state
     var isPreloading by mutableStateOf(false)
-    private val preloadedChapters = mutableMapOf<Long, Chapter>()
+    // Navigation lock to prevent rapid chapter navigation race conditions
+    var isNavigating by mutableStateOf(false)
+        private set
+    // Use ConcurrentHashMap for thread-safe access from multiple coroutines
+    private val preloadedChapters = java.util.concurrent.ConcurrentHashMap<Long, Chapter>()
 
     fun nextChapter(): Chapter {
         val chapter =
@@ -515,6 +543,29 @@ class ReaderScreenViewModel(
         }
         throw IllegalAccessException("List doesn't contains ${chapter?.name}")
     }
+    
+    /**
+     * Navigate to a chapter with race condition protection.
+     * Cancels any pending navigation and prevents concurrent navigation.
+     */
+    fun navigateToChapter(
+        chapterId: Long,
+        next: Boolean = true,
+        onComplete: () -> Unit = {}
+    ) {
+        // Cancel any pending navigation
+        chapterNavigationJob?.cancel()
+        
+        chapterNavigationJob = scope.launch {
+            try {
+                isNavigating = true
+                getLocalChapter(chapterId, next)
+                onComplete()
+            } finally {
+                isNavigating = false
+            }
+        }
+    }
 
     fun bookmarkChapter() {
         scope.launch(Dispatchers.IO) {
@@ -532,15 +583,11 @@ class ReaderScreenViewModel(
     }
     fun ReaderScreenViewModel.toggleReaderMode(enable: Boolean?) {
         // Prevent rapid toggling with debounce
-        if (isToggleInProgress) {
-            ireader.core.log.Log.debug("Toggle in progress, ignoring request")
-            return
-        }
+        if (isToggleInProgress) return
         isToggleInProgress = true
         
-        // Set the reader mode state - this will trigger the LaunchedEffect in ReaderScreen
+        // Set the reader mode state
         val newState = enable ?: !isReaderModeEnable
-        ireader.core.log.Log.debug("Toggling reader mode: $isReaderModeEnable -> $newState")
         isReaderModeEnable = newState
         
         // Make sure the bottom content is accessible when reader mode is off
@@ -565,22 +612,28 @@ class ReaderScreenViewModel(
         }
     }
 
-    // TODO: Move preload logic to ChapterViewModel
     private fun triggerPreloadNextChapter() {
         if (!autoPreloadNextChapter.value) return
         preloadJob?.cancel()
         preloadJob = scope.launch {
             try {
                 val nextChapter = kotlin.runCatching { nextChapter() }.getOrNull()
-                if (nextChapter != null && !preloadedChapters.containsKey(nextChapter.id)) preloadChapter(nextChapter)
+                if (nextChapter != null && !preloadedChapters.containsKey(nextChapter.id)) {
+                    preloadChapter(nextChapter)
+                }
             } catch (e: Exception) {
-                ireader.core.log.Log.debug("No next chapter to preload: ${e.message}")
+                // No next chapter to preload
             }
         }
     }
     
     private suspend fun preloadChapter(chapter: Chapter) {
-        if (chapter.isEmpty() && state.catalog != null) {
+        // Check if the chapter already has content in the database
+        // (stateChapters uses lightweight mapper without content, so we need to check DB)
+        val dbChapter = getChapterUseCase.findChapterById(chapter.id)
+        val needsRemoteFetch = dbChapter == null || dbChapter.isEmpty()
+        
+        if (needsRemoteFetch && state.catalog != null) {
             isPreloading = true
             preloadChapterUseCase(chapter, state.catalog,
                 onSuccess = { preloadedChapter ->
@@ -590,8 +643,9 @@ class ReaderScreenViewModel(
                 },
                 onError = { isPreloading = false }
             )
-        } else if (!chapter.isEmpty()) {
-            preloadedChapters[chapter.id] = chapter
+        } else if (dbChapter != null && !dbChapter.isEmpty()) {
+            // Chapter already has content in DB, cache it for quick access
+            preloadedChapters[chapter.id] = dbChapter
         }
     }
     
@@ -1195,14 +1249,13 @@ class ReaderScreenViewModel(
                         if (!chapter.read) {
                             val updatedChapter = chapter.copy(read = true)
                             insertUseCases.insertChapter(updatedChapter)
-                            ireader.core.log.Log.debug("Chapter marked as read: ${chapter.name}")
                         }
                         
                         // Check if all chapters in the book are now read
                         checkAndTrackBookCompletion(chapter.bookId)
                     }
                 } catch (e: Exception) {
-                    ireader.core.log.Log.error("Failed to track reading progress", e)
+                    // Failed to track reading progress
                 }
             }
         }
@@ -1221,13 +1274,10 @@ class ReaderScreenViewModel(
         try {
             val chapters = getChapterUseCase.findChaptersByBookId(bookId)
             if (chapters.isNotEmpty()) {
-                val allChaptersRead = chapters.all { it.read }
-                if (allChaptersRead) {
-                    ireader.core.log.Log.debug("Book completed! All chapters read.")
-                }
+                chapters.all { it.read }
             }
         } catch (e: Exception) {
-            ireader.core.log.Log.error("Failed to check book completion", e)
+            // Failed to check book completion
         }
     }
 
@@ -1237,14 +1287,11 @@ class ReaderScreenViewModel(
      * Start the reading break timer if enabled
      */
     private fun startReadingBreakTimer() {
-        if (!readingBreakReminderEnabled.value) {
-            return
-        }
+        if (!readingBreakReminderEnabled.value) return
         
         val intervalMinutes = readingBreakInterval.value
         if (intervalMinutes > 0) {
             readingTimerManager.startTimer(intervalMinutes)
-            ireader.core.log.Log.debug("Reading break timer started: $intervalMinutes minutes")
         }
     }
     
@@ -1253,7 +1300,6 @@ class ReaderScreenViewModel(
      */
     private fun pauseReadingBreakTimer() {
         readingTimerManager.stopTimer()
-        ireader.core.log.Log.debug("Reading break timer paused")
     }
     
     /**
@@ -1265,7 +1311,6 @@ class ReaderScreenViewModel(
             if (intervalMinutes > 0) {
                 readingTimerManager.startTimer(intervalMinutes)
             }
-            ireader.core.log.Log.debug("Reading break timer resumed")
         }
     }
     
@@ -1274,16 +1319,13 @@ class ReaderScreenViewModel(
      */
     fun resetReadingBreakTimer() {
         readingTimerManager.stopTimer()
-        ireader.core.log.Log.debug("Reading break timer reset")
     }
     
     /**
      * Called when the reading break interval is reached
-     * Shows the reminder dialog if appropriate
      */
     private fun onReadingBreakIntervalReached() {
         showReadingBreakDialog = true
-        ireader.core.log.Log.debug("Reading break reminder shown")
     }
     
     /**
@@ -1292,7 +1334,6 @@ class ReaderScreenViewModel(
     fun onTakeBreak() {
         showReadingBreakDialog = false
         pauseReadingBreakTimer()
-        ireader.core.log.Log.debug("User chose to take a break")
     }
     
     /**
@@ -1302,7 +1343,6 @@ class ReaderScreenViewModel(
         showReadingBreakDialog = false
         resetReadingBreakTimer()
         startReadingBreakTimer()
-        ireader.core.log.Log.debug("User chose to continue reading")
     }
     
     /**
@@ -1310,7 +1350,6 @@ class ReaderScreenViewModel(
      */
     fun onSnoozeReadingBreak(minutes: Int) {
         showReadingBreakDialog = false
-        ireader.core.log.Log.debug("User snoozed reading break for $minutes minutes")
     }
     
     /**

@@ -21,7 +21,8 @@ class AutoRepairChapterUseCase(
 ) {
     
     /**
-     * Attempts to repair a broken chapter by finding a working version from other sources
+     * Attempts to repair a broken chapter by finding a working version.
+     * First tries to re-fetch from the book's original source, then searches alternative sources.
      * 
      * @param chapter The broken chapter to repair
      * @param book The book containing the chapter
@@ -46,81 +47,33 @@ class AutoRepairChapterUseCase(
             // Get all installed catalogs
             val catalogs = catalogStore.catalogs
             
-            // Search for the novel in other sources
+            // STEP 1: Try the book's original source first
+            val originalCatalog = catalogs.firstOrNull { it.sourceId == book.sourceId }
+            if (originalCatalog != null) {
+                val result = tryRepairFromSource(
+                    catalog = originalCatalog,
+                    chapter = chapter,
+                    book = book,
+                    isOriginalSource = true
+                )
+                if (result != null) {
+                    return@withContext Result.success(result)
+                }
+            }
+            
+            // STEP 2: Try other sources if original source failed
             for (catalog in catalogs) {
-                // Skip the current source
+                // Skip the original source (already tried)
                 if (catalog.sourceId == book.sourceId) continue
                 
-                try {
-                    val source = catalog.source
-                    if (source !is ireader.core.source.CatalogSource) continue
-                    
-                    // Search for the novel by title using title filter
-                    val searchResults = source.getMangaList(
-                        filters = listOf(
-                            ireader.core.source.model.Filter.Title().apply { 
-                                this.value = book.title 
-                            }
-                        ),
-                        page = 1
-                    )
-                    
-                    // Find exact or close match
-                    val matchingNovel = searchResults.mangas.firstOrNull { mangaInfo ->
-                        mangaInfo.title.equals(book.title, ignoreCase = true) ||
-                        mangaInfo.title.contains(book.title, ignoreCase = true)
-                    } ?: continue
-                    
-                    // Get chapter list from the alternative source
-                    val alternativeChapters = source.getChapterList(matchingNovel, emptyList())
-                    
-                    // Find matching chapter by name first (most reliable), then by number
-                    val matchingChapter = alternativeChapters.firstOrNull { altChapter ->
-                        // Exact name match (case-insensitive)
-                        altChapter.name.equals(chapter.name, ignoreCase = true)
-                    } ?: alternativeChapters.firstOrNull { altChapter ->
-                        // If name doesn't match, try number match (only if number is valid)
-                        chapter.isRecognizedNumber && 
-                        altChapter.number == chapter.number
-                    } ?: alternativeChapters.firstOrNull { altChapter ->
-                        // Fallback: fuzzy name matching (contains key parts)
-                        val chapterNameNormalized = chapter.name.lowercase().trim()
-                        val altChapterNameNormalized = altChapter.name.lowercase().trim()
-                        chapterNameNormalized.isNotEmpty() && 
-                        altChapterNameNormalized.contains(chapterNameNormalized)
-                    } ?: continue
-                    
-                    // Fetch the chapter content
-                    val chapterContent = source.getPageList(matchingChapter, emptyList())
-                    
-                    // Validate the replacement chapter
-                    if (!chapterHealthChecker.isChapterBroken(chapterContent)) {
-                        // Create repaired chapter
-                        val repairedChapter = chapter.copy(
-                            content = chapterContent
-                        )
-                        
-                        // Update chapter in database
-                        chapterRepository.insertChapter(repairedChapter)
-                        
-                        // Record successful repair
-                        chapterHealthRepository.upsertChapterHealth(
-                            ChapterHealth(
-                                chapterId = chapter.id,
-                                isBroken = false,
-                                breakReason = null,
-                                checkedAt = System.currentTimeMillis(),
-                                repairAttemptedAt = System.currentTimeMillis(),
-                                repairSuccessful = true,
-                                replacementSourceId = catalog.sourceId
-                            )
-                        )
-                        
-                        return@withContext Result.success(repairedChapter)
-                    }
-                } catch (e: Exception) {
-                    // Continue to next source if this one fails
-                    continue
+                val result = tryRepairFromSource(
+                    catalog = catalog,
+                    chapter = chapter,
+                    book = book,
+                    isOriginalSource = false
+                )
+                if (result != null) {
+                    return@withContext Result.success(result)
                 }
             }
             
@@ -137,9 +90,150 @@ class AutoRepairChapterUseCase(
                 )
             )
             
-            Result.failure(Exception("No working chapter found in alternative sources"))
+            Result.failure(Exception("No working chapter found from any source"))
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+    
+    /**
+     * Attempts to repair a chapter from a specific source
+     * 
+     * @param catalog The catalog to try
+     * @param chapter The broken chapter
+     * @param book The book containing the chapter
+     * @param isOriginalSource Whether this is the book's original source
+     * @return The repaired chapter if successful, null otherwise
+     */
+    private suspend fun tryRepairFromSource(
+        catalog: ireader.domain.models.entities.CatalogLocal,
+        chapter: Chapter,
+        book: Book,
+        isOriginalSource: Boolean
+    ): Chapter? {
+        try {
+            val source = catalog.source
+            if (source !is ireader.core.source.CatalogSource) return null
+            
+            if (isOriginalSource) {
+                // For original source, directly re-fetch the chapter content using the existing key
+                val chapterInfo = ireader.core.source.model.ChapterInfo(
+                    key = chapter.key,
+                    name = chapter.name,
+                    number = chapter.number,
+                    dateUpload = chapter.dateUpload
+                )
+                
+                val chapterContent = source.getPageList(chapterInfo, emptyList())
+                
+                // Validate the fetched content
+                if (chapterContent.isNotEmpty() && !chapterHealthChecker.isChapterBroken(chapterContent)) {
+                    val repairedChapter = chapter.copy(content = chapterContent)
+                    
+                    // Update chapter in database
+                    chapterRepository.insertChapter(repairedChapter)
+                    
+                    // Record successful repair
+                    chapterHealthRepository.upsertChapterHealth(
+                        ChapterHealth(
+                            chapterId = chapter.id,
+                            isBroken = false,
+                            breakReason = null,
+                            checkedAt = System.currentTimeMillis(),
+                            repairAttemptedAt = System.currentTimeMillis(),
+                            repairSuccessful = true,
+                            replacementSourceId = catalog.sourceId
+                        )
+                    )
+                    
+                    return repairedChapter
+                }
+            } else {
+                // For alternative sources, search for the novel first
+                val searchResults = source.getMangaList(
+                    filters = listOf(
+                        ireader.core.source.model.Filter.Title().apply { 
+                            this.value = book.title 
+                        }
+                    ),
+                    page = 1
+                )
+                
+                // Find exact or close match
+                val matchingNovel = searchResults.mangas.firstOrNull { mangaInfo ->
+                    mangaInfo.title.equals(book.title, ignoreCase = true) ||
+                    mangaInfo.title.contains(book.title, ignoreCase = true)
+                } ?: return null
+                
+                // Get chapter list from the alternative source
+                val alternativeChapters = source.getChapterList(matchingNovel, emptyList())
+                
+                // Find matching chapter by name first (most reliable), then by number
+                val matchingChapter = findMatchingChapter(chapter, alternativeChapters) ?: return null
+                
+                // Fetch the chapter content
+                val chapterContent = source.getPageList(matchingChapter, emptyList())
+                
+                // Validate the replacement chapter
+                if (chapterContent.isNotEmpty() && !chapterHealthChecker.isChapterBroken(chapterContent)) {
+                    val repairedChapter = chapter.copy(content = chapterContent)
+                    
+                    // Update chapter in database
+                    chapterRepository.insertChapter(repairedChapter)
+                    
+                    // Record successful repair
+                    chapterHealthRepository.upsertChapterHealth(
+                        ChapterHealth(
+                            chapterId = chapter.id,
+                            isBroken = false,
+                            breakReason = null,
+                            checkedAt = System.currentTimeMillis(),
+                            repairAttemptedAt = System.currentTimeMillis(),
+                            repairSuccessful = true,
+                            replacementSourceId = catalog.sourceId
+                        )
+                    )
+                    
+                    return repairedChapter
+                }
+            }
+        } catch (e: Exception) {
+            // Log and continue to next source
+            ireader.core.log.Log.debug("Failed to repair from source ${catalog.sourceId}: ${e.message}")
+        }
+        
+        return null
+    }
+    
+    /**
+     * Finds a matching chapter from a list of alternative chapters
+     */
+    private fun findMatchingChapter(
+        chapter: Chapter,
+        alternativeChapters: List<ireader.core.source.model.ChapterInfo>
+    ): ireader.core.source.model.ChapterInfo? {
+        // Try exact name match first (case-insensitive)
+        alternativeChapters.firstOrNull { altChapter ->
+            altChapter.name.equals(chapter.name, ignoreCase = true)
+        }?.let { return it }
+        
+        // Try number match (only if number is valid)
+        if (chapter.isRecognizedNumber) {
+            alternativeChapters.firstOrNull { altChapter ->
+                altChapter.number == chapter.number
+            }?.let { return it }
+        }
+        
+        // Fallback: fuzzy name matching (contains key parts)
+        val chapterNameNormalized = chapter.name.lowercase().trim()
+        if (chapterNameNormalized.isNotEmpty()) {
+            alternativeChapters.firstOrNull { altChapter ->
+                val altChapterNameNormalized = altChapter.name.lowercase().trim()
+                altChapterNameNormalized.contains(chapterNameNormalized) ||
+                chapterNameNormalized.contains(altChapterNameNormalized)
+            }?.let { return it }
+        }
+        
+        return null
     }
 }

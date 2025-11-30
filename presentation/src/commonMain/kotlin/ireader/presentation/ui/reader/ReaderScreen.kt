@@ -196,19 +196,25 @@ private fun ReadingScreenContent(
                 ModalBottomSheetValue.Expanded -> {
                     if (vm.isReaderModeEnable) {
                         isSyncing = true
-                        vm.isReaderModeEnable = false
-                        // Wait for layout to stabilize before releasing sync lock
-                        kotlinx.coroutines.delay(300)
-                        isSyncing = false
+                        try {
+                            vm.isReaderModeEnable = false
+                            // Wait for layout to stabilize before releasing sync lock
+                            kotlinx.coroutines.delay(300)
+                        } finally {
+                            isSyncing = false
+                        }
                     }
                 }
                 ModalBottomSheetValue.Hidden -> {
                     if (!vm.isReaderModeEnable) {
                         isSyncing = true
-                        vm.isReaderModeEnable = true
-                        // Wait for layout to stabilize before releasing sync lock
-                        kotlinx.coroutines.delay(300)
-                        isSyncing = false
+                        try {
+                            vm.isReaderModeEnable = true
+                            // Wait for layout to stabilize before releasing sync lock
+                            kotlinx.coroutines.delay(300)
+                        } finally {
+                            isSyncing = false
+                        }
                     }
                 }
                 else -> {}
