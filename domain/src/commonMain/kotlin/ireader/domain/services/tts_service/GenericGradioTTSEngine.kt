@@ -47,6 +47,14 @@ class GenericGradioTTSEngine(
     private var currentSpeechJob: Job? = null
     private var isPaused = false
     
+    // Debounce for rapid next/prev taps
+    private var pendingSpeechJob: Job? = null
+    private var pendingSpeechRequest: SpeechRequest? = null
+    
+    // Track if we're actively generating speech (making server request)
+    @Volatile
+    private var isGeneratingSpeech = false
+    
     // Audio cache for pre-fetching (thread-safe with ConcurrentHashMap)
     private val audioCache = java.util.concurrent.ConcurrentHashMap<String, ByteArray>()
     private val loadingParagraphs = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
@@ -72,7 +80,9 @@ class GenericGradioTTSEngine(
         private const val TAG = "GenericGradioTTS"
         private const val MAX_CACHE_SIZE = 20
         private const val MAX_TEXT_LENGTH = 5000
-        private const val MAX_PREFETCH_CONCURRENT = 2
+        private const val MAX_PREFETCH_CONCURRENT = 1 // Only 1 prefetch at a time to avoid server overload
+        private const val DEBOUNCE_DELAY_MS = 300L
+        private const val PREFETCH_DELAY_MS = 500L // Delay before starting prefetch
         
         // Cache of working API types per space URL - persists across engine instances
         private val workingApiCache = mutableMapOf<String, GradioApiType>()
@@ -87,7 +97,6 @@ class GenericGradioTTSEngine(
          */
         fun cacheWorkingApiType(spaceUrl: String, apiType: GradioApiType) {
             workingApiCache[spaceUrl] = apiType
-            Log.info { "$TAG: Cached working API type $apiType for $spaceUrl" }
         }
         
         /**
@@ -95,7 +104,6 @@ class GenericGradioTTSEngine(
          */
         fun clearApiCache() {
             workingApiCache.clear()
-            Log.info { "$TAG: Cleared API type cache" }
         }
     }
     
@@ -114,10 +122,9 @@ class GenericGradioTTSEngine(
                 try {
                     processSpeechRequest(request)
                 } catch (e: CancellationException) {
-                    Log.info { "$TAG: Queue processor cancelled" }
                     break
                 } catch (e: Exception) {
-                    Log.error { "$TAG: Error processing speech request: ${e.message}" }
+                    Log.error { "$TAG: Error processing speech: ${e.message}" }
                     callback?.onError(request.utteranceId, e.message ?: "Unknown error")
                 }
             }
@@ -143,12 +150,15 @@ class GenericGradioTTSEngine(
             val cachedAudio = audioCache[utteranceId]
             
             val audioData = if (cachedAudio != null) {
-                Log.info { "$TAG: Playing cached audio for $utteranceId" }
                 cachedAudio
             } else {
-                // Generate audio from server
-                Log.info { "$TAG: Generating audio for $utteranceId" }
-                generateSpeech(text)
+                // Generate audio from server - block prefetch during this
+                isGeneratingSpeech = true
+                try {
+                    generateSpeech(text)
+                } finally {
+                    isGeneratingSpeech = false
+                }
             }
             
             if (audioData != null) {
@@ -165,10 +175,9 @@ class GenericGradioTTSEngine(
                 return false
             }
         } catch (e: CancellationException) {
-            Log.info { "$TAG: Speech cancelled for $utteranceId" }
             throw e
         } catch (e: Exception) {
-            Log.error { "$TAG: Error speaking $utteranceId: ${e.message}" }
+            Log.error { "$TAG: Error speaking: ${e.message}" }
             callback?.onError(utteranceId, e.message ?: "Unknown error")
             return false
         } finally {
@@ -177,16 +186,35 @@ class GenericGradioTTSEngine(
     }
     
     override suspend fun speak(text: String, utteranceId: String) {
-        // Add to queue instead of processing immediately
-        Log.info { "$TAG: Queueing speech request: $utteranceId" }
-        speechQueue.send(SpeechRequest(text, utteranceId))
+        // Debounce rapid next/prev taps - wait 300ms before processing
+        // If user taps again within 300ms, cancel previous and restart timer
+        pendingSpeechJob?.cancel()
+        pendingSpeechRequest = SpeechRequest(text, utteranceId)
+        
+        // Stop current playback immediately for responsive feel
+        audioPlayer.stop()
+        
+        pendingSpeechJob = scope.launch {
+            delay(DEBOUNCE_DELAY_MS)
+            
+            val request = pendingSpeechRequest ?: return@launch
+            
+            // Clear any pending items in queue before adding new one
+            while (speechQueue.tryReceive().isSuccess) { }
+            
+            speechQueue.send(request)
+            pendingSpeechRequest = null
+        }
     }
     
     /**
      * Clear the speech queue and stop current playback
      */
     fun clearQueue() {
-        Log.info { "$TAG: Clearing speech queue" }
+        
+        // Cancel pending debounced speech
+        pendingSpeechJob?.cancel()
+        pendingSpeechRequest = null
         
         // Cancel current speech
         currentSpeechJob?.cancel()
@@ -206,8 +234,11 @@ class GenericGradioTTSEngine(
      */
     fun precacheParagraphs(paragraphs: List<Pair<String, String>>) {
         scope.launch {
-            // Small delay to give current speech request priority
-            delay(200)
+            // Delay to give current speech request priority
+            delay(PREFETCH_DELAY_MS)
+            
+            // Don't prefetch while actively generating speech for current paragraph
+            if (isGeneratingSpeech) return@launch
             
             // Filter out already cached or loading paragraphs (thread-safe check)
             val toFetch = paragraphs.filter { (utteranceId, _) ->
@@ -218,17 +249,16 @@ class GenericGradioTTSEngine(
             val currentActiveJobs = prefetchJobs.size
             val availableSlots = (MAX_PREFETCH_CONCURRENT - currentActiveJobs).coerceAtLeast(0)
             
-            if (availableSlots == 0) {
-                Log.debug { "$TAG: Max concurrent prefetch reached ($currentActiveJobs jobs), skipping" }
-                return@launch
-            }
+            if (availableSlots == 0) return@launch
             
             val limitedFetch = toFetch.take(availableSlots)
-            Log.debug { "$TAG: Prefetching ${limitedFetch.size} paragraphs (${currentActiveJobs} active jobs)" }
             
             limitedFetch.forEach { (utteranceId, text) ->
                 // Double-check if already being prefetched (race condition protection)
                 if (prefetchJobs.containsKey(utteranceId)) return@forEach
+                
+                // Don't start prefetch if speech generation started
+                if (isGeneratingSpeech) return@forEach
                 
                 // Mark as loading (thread-safe)
                 if (!loadingParagraphs.add(utteranceId)) return@forEach // Already added by another thread
@@ -236,15 +266,18 @@ class GenericGradioTTSEngine(
                 
                 val job = scope.launch {
                     try {
+                        // Wait if speech is being generated
+                        while (isGeneratingSpeech) {
+                            delay(100)
+                        }
                         val audioData = generateSpeech(text)
                         if (audioData != null) {
                             cacheAudio(utteranceId, audioData)
-                            Log.info { "$TAG: Pre-cached audio for $utteranceId" }
                         }
                     } catch (e: CancellationException) {
-                        Log.debug { "$TAG: Prefetch cancelled for $utteranceId" }
+                        // Prefetch cancelled - normal during navigation
                     } catch (e: Exception) {
-                        Log.warn { "$TAG: Error pre-caching $utteranceId: ${e.message}" }
+                        Log.warn { "$TAG: Prefetch error: ${e.message}" }
                     } finally {
                         loadingParagraphs.remove(utteranceId)
                         prefetchJobs.remove(utteranceId)
@@ -311,9 +344,6 @@ class GenericGradioTTSEngine(
             text
         }
         
-        Log.info { "$TAG: Generating speech for ${truncatedText.length} chars using ${config.name}" }
-        Log.info { "$TAG: Space URL: ${config.spaceUrl}, API: ${config.apiName}, ApiType: ${config.apiType}" }
-        
         // Build request body based on config parameters
         val requestBody = buildRequestBody(truncatedText)
         
@@ -327,16 +357,15 @@ class GenericGradioTTSEngine(
         
         // If we know which API works, use it directly
         if (apiTypeToUse != null && apiTypeToUse != GradioApiType.AUTO) {
-            Log.info { "$TAG: Using known working API type: $apiTypeToUse" }
             val result = trySpecificApi(apiTypeToUse, requestBody)
             if (result != null) return result
             
-            // If the cached API failed, clear cache and try all
-            Log.warn { "$TAG: Cached API type $apiTypeToUse failed, trying all endpoints..." }
-            workingApiCache.remove(config.spaceUrl)
+            // If the cached API failed, DON'T retry all APIs immediately
+            // This prevents retry storms - just return null and let next request try
+            return null
         }
         
-        // Try all API types and cache the one that works
+        // Only try all API types if we don't have a cached type yet
         return tryAllApisAndCache(requestBody)
     }
     
@@ -368,7 +397,6 @@ class GenericGradioTTSEngine(
         )
         
         for (apiType in apiTypes) {
-            Log.info { "$TAG: Trying API type: $apiType" }
             val result = trySpecificApi(apiType, requestBody)
             if (result != null) {
                 // Cache this working API type
@@ -377,7 +405,7 @@ class GenericGradioTTSEngine(
             }
         }
         
-        Log.error { "$TAG: All API types failed for ${config.spaceUrl}" }
+        Log.error { "$TAG: All API types failed" }
         return null
     }
     
@@ -411,8 +439,6 @@ class GenericGradioTTSEngine(
         // Try both /api/predict and /gradio_api/predict
         for (apiUrl in listOf("$baseUrl/api/predict", "$baseUrl/gradio_api/predict")) {
             try {
-                Log.info { "$TAG: Trying predict API: $apiUrl" }
-                
                 val response = httpClient.post(apiUrl) {
                     contentType(ContentType.Application.Json)
                     config.apiKey?.let { header("Authorization", "Bearer $it") }
@@ -420,13 +446,11 @@ class GenericGradioTTSEngine(
                 }
                 
                 if (response.status.isSuccess()) {
-                    val responseText = response.bodyAsText()
-                    Log.debug { "$TAG: Predict response: ${responseText.take(300)}..." }
-                    val result = parseGradioResponse(responseText)
+                    val result = parseGradioResponse(response.bodyAsText())
                     if (result != null) return result
                 }
             } catch (e: Exception) {
-                Log.warn { "$TAG: Predict API error at $apiUrl: ${e.message}" }
+                // Silently try next endpoint
             }
         }
         return null
@@ -441,8 +465,6 @@ class GenericGradioTTSEngine(
         
         for (apiUrl in listOf("$baseUrl/run/$apiName", "$baseUrl/gradio_api/run/$apiName")) {
             try {
-                Log.info { "$TAG: Trying run API: $apiUrl" }
-                
                 val response = httpClient.post(apiUrl) {
                     contentType(ContentType.Application.Json)
                     config.apiKey?.let { header("Authorization", "Bearer $it") }
@@ -454,7 +476,7 @@ class GenericGradioTTSEngine(
                     if (result != null) return result
                 }
             } catch (e: Exception) {
-                Log.warn { "$TAG: Run API error at $apiUrl: ${e.message}" }
+                // Silently try next endpoint
             }
         }
         return null
@@ -471,7 +493,6 @@ class GenericGradioTTSEngine(
         for (queuePrefix in listOf("$baseUrl/queue", "$baseUrl/gradio_api/queue")) {
             try {
                 val queueUrl = "$queuePrefix/join"
-                Log.info { "$TAG: Trying queue API: $queueUrl" }
                 
                 val response = httpClient.post(queueUrl) {
                     contentType(ContentType.Application.Json)
@@ -494,7 +515,7 @@ class GenericGradioTTSEngine(
                     }
                 }
             } catch (e: Exception) {
-                Log.warn { "$TAG: Queue API error at $queuePrefix: ${e.message}" }
+                // Silently try next endpoint
             }
         }
         return null
@@ -505,22 +526,15 @@ class GenericGradioTTSEngine(
      */
     private suspend fun tryCallEndpoint(apiUrl: String, requestBody: String): ByteArray? {
         return try {
-            Log.info { "$TAG: Trying call API: $apiUrl" }
-            Log.debug { "$TAG: Request body: $requestBody" }
-            
             val response = httpClient.post(apiUrl) {
                 contentType(ContentType.Application.Json)
                 config.apiKey?.let { header("Authorization", "Bearer $it") }
                 setBody(requestBody)
             }
             
-            if (!response.status.isSuccess()) {
-                Log.warn { "$TAG: Call API returned ${response.status} at $apiUrl" }
-                return null
-            }
+            if (!response.status.isSuccess()) return null
             
             val responseText = response.bodyAsText()
-            Log.debug { "$TAG: Call response: $responseText" }
             
             // Extract event_id for SSE streaming
             val eventIdRegex = """"event_id":\s*"([^"]+)"""".toRegex()
@@ -531,8 +545,6 @@ class GenericGradioTTSEngine(
                 return parseGradioResponse(responseText)
             }
             
-            Log.info { "$TAG: Got event_id: $eventId" }
-            
             // Get result using event_id
             val resultUrl = "$apiUrl/$eventId"
             val resultResponse = httpClient.get(resultUrl) {
@@ -540,14 +552,10 @@ class GenericGradioTTSEngine(
                 header("Accept", "text/event-stream")
             }
             
-            if (!resultResponse.status.isSuccess()) {
-                Log.warn { "$TAG: Result request failed: ${resultResponse.status}" }
-                return null
-            }
+            if (!resultResponse.status.isSuccess()) return null
             
             parseSSEResponse(resultResponse.bodyAsText())
         } catch (e: Exception) {
-            Log.warn { "$TAG: Call API error at $apiUrl: ${e.message}" }
             null
         }
     }
@@ -614,18 +622,12 @@ class GenericGradioTTSEngine(
                     pathRegex.find(jsonData)?.let { audioPath = it.groupValues[1] }
                     urlRegex.find(jsonData)?.let { audioUrl = it.groupValues[1] }
                     
-                    if (!audioPath.isNullOrEmpty() || !audioUrl.isNullOrEmpty()) {
-                        Log.info { "$TAG: Found audio - path: $audioPath, url: $audioUrl" }
-                        break
-                    }
+                    if (!audioPath.isNullOrEmpty() || !audioUrl.isNullOrEmpty()) break
                 }
             }
         }
         
-        if (audioPath.isNullOrEmpty() && audioUrl.isNullOrEmpty()) {
-            Log.warn { "$TAG: No audio path or URL found in SSE response" }
-            return null
-        }
+        if (audioPath.isNullOrEmpty() && audioUrl.isNullOrEmpty()) return null
         
         // Download audio
         val downloadUrl = when {
@@ -634,7 +636,6 @@ class GenericGradioTTSEngine(
             else -> return null
         }
         
-        Log.info { "$TAG: Downloading audio from: $downloadUrl" }
         return downloadAudio(downloadUrl)
     }
     
@@ -643,24 +644,12 @@ class GenericGradioTTSEngine(
      */
     private suspend fun parseGradioResponse(responseJson: String): ByteArray? {
         return try {
-            Log.debug { "$TAG: Parsing response: ${responseJson.take(500)}..." }
-            
             // Try to extract audio URL
             val audioUrl = extractAudioUrl(responseJson)
-            if (audioUrl != null) {
-                Log.info { "$TAG: Found audio URL: $audioUrl" }
-                return downloadAudio(audioUrl)
-            }
+            if (audioUrl != null) return downloadAudio(audioUrl)
             
             // Try base64 encoded audio
-            val base64Audio = extractBase64Audio(responseJson)
-            if (base64Audio != null) {
-                Log.info { "$TAG: Extracted base64 audio" }
-                return base64Audio
-            }
-            
-            Log.warn { "$TAG: Could not extract audio from response" }
-            null
+            extractBase64Audio(responseJson)
         } catch (e: Exception) {
             Log.error { "$TAG: Error parsing response: ${e.message}" }
             null
@@ -672,8 +661,6 @@ class GenericGradioTTSEngine(
      */
     private fun extractAudioUrl(responseJson: String): String? {
         val baseUrl = config.spaceUrl.trimEnd('/')
-        
-        Log.debug { "$TAG: Extracting audio URL from response (${responseJson.length} chars)" }
         
         // Try different URL patterns
         val patterns = listOf(
@@ -690,7 +677,6 @@ class GenericGradioTTSEngine(
             val match = regex.find(responseJson)
             if (match != null) {
                 val value = match.groupValues[1]
-                Log.info { "$TAG: Pattern '$pattern' matched: $value" }
                 return when {
                     value.startsWith("http") -> value
                     value.startsWith("/file=") -> "$baseUrl$value"
@@ -705,21 +691,17 @@ class GenericGradioTTSEngine(
         val dataMatch = dataArrayRegex.find(responseJson)
         if (dataMatch != null) {
             val dataContent = dataMatch.groupValues[1]
-            Log.debug { "$TAG: Found data array: ${dataContent.take(200)}..." }
             
             // Split by comma but respect nested structures
             val items = splitDataArray(dataContent)
-            Log.debug { "$TAG: Data array has ${items.size} items, looking for index ${config.audioOutputIndex}" }
             
             if (items.size > config.audioOutputIndex) {
                 val audioItem = items[config.audioOutputIndex].trim()
-                Log.debug { "$TAG: Audio item at index ${config.audioOutputIndex}: ${audioItem.take(200)}" }
                 
                 // Try to extract path from nested object
                 val pathInObject = """"path":\s*"([^"]+)"""".toRegex().find(audioItem)
                 if (pathInObject != null) {
                     val path = pathInObject.groupValues[1]
-                    Log.info { "$TAG: Found path in object: $path" }
                     return if (path.startsWith("http")) path else "$baseUrl/file=$path"
                 }
                 
@@ -727,7 +709,6 @@ class GenericGradioTTSEngine(
                 val urlInObject = """"url":\s*"([^"]+)"""".toRegex().find(audioItem)
                 if (urlInObject != null) {
                     val url = urlInObject.groupValues[1]
-                    Log.info { "$TAG: Found URL in object: $url" }
                     return if (url.startsWith("http")) url else "$baseUrl$url"
                 }
                 
@@ -736,14 +717,12 @@ class GenericGradioTTSEngine(
                 if (pathMatch != null) {
                     val path = pathMatch.groupValues[1]
                     if (path.contains(".wav") || path.contains(".mp3") || path.contains(".ogg") || path.contains(".flac")) {
-                        Log.info { "$TAG: Found audio file path: $path" }
                         return if (path.startsWith("http")) path else "$baseUrl/file=$path"
                     }
                 }
             }
         }
         
-        Log.warn { "$TAG: Could not extract audio URL from response" }
         return null
     }
     
@@ -851,7 +830,6 @@ class GenericGradioTTSEngine(
     // TTSEngine interface implementation
     
     override fun stop() {
-        Log.info { "$TAG: Stopping TTS" }
         // Complete any pending playback to unblock the coroutine
         currentPlaybackCompletion?.complete(false)
         currentPlaybackCompletion = null
@@ -861,18 +839,13 @@ class GenericGradioTTSEngine(
     }
     
     override fun pause() {
-        Log.info { "$TAG: Pausing TTS" }
         isPaused = true
         audioPlayer.pause()
-        // DON'T complete the deferred - let playback resume from where it was
-        // The audio player will call onComplete when playback finishes after resume
     }
     
     override fun resume() {
-        Log.info { "$TAG: Resuming TTS" }
         isPaused = false
         audioPlayer.resume()
-        // The audio player will continue and call onComplete when done
     }
     
     override fun setSpeed(speed: Float) {
@@ -892,8 +865,6 @@ class GenericGradioTTSEngine(
     }
     
     override fun cleanup() {
-        Log.info { "$TAG: Cleaning up TTS engine" }
-        
         // Stop everything
         clearQueue()
         cancelPrefetch()
