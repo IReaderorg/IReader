@@ -103,70 +103,7 @@ fun DownloaderScreen(
     val downloads = vm.downloads
 
     Scaffold(
-            modifier = Modifier,
-            topBar = {
-                if (vm.hasSelection) {
-                    TopAppBar(
-                            title = {
-                                Text(
-                                        text = "${vm.selection.size} ${localize(Res.string.selected)}",
-                                        style = MaterialTheme.typography.titleLarge
-                                )
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = { vm.selection.clear() }) {
-                                    Icon(
-                                            imageVector = Icons.Filled.Close,
-                                            contentDescription = localize(Res.string.cancel)
-                                    )
-                                }
-                            },
-                            actions = {
-                                // Select all button
-                                IconButton(
-                                        onClick = {
-                                            if (vm.selection.size == downloads.size) {
-                                                vm.selection.clear()
-                                            } else {
-                                                vm.selection.clear()
-                                                vm.selection.addAll(downloads.map { it.chapterId })
-                                            }
-                                        }
-                                ) {
-                                    Icon(
-                                            imageVector = Icons.Filled.SelectAll,
-                                            contentDescription = localize(Res.string.select_all),
-                                            tint = if (vm.selection.size == downloads.size) {
-                                                MaterialTheme.colorScheme.primary
-                                            } else {
-                                                MaterialTheme.colorScheme.onSurface
-                                            }
-                                    )
-                                }
-                                
-                                // Delete selected button
-                                IconButton(
-                                        onClick = {
-                                            val selectedDownloads = downloads
-                                                    .filter { it.chapterId in vm.selection }
-                                                    .map { it.toSavedDownload() }
-                                            vm.deleteSelectedDownloads(selectedDownloads)
-                                            vm.selection.clear()
-                                        }
-                                ) {
-                                    Icon(
-                                            imageVector = Icons.Filled.Delete,
-                                            contentDescription = localize(Res.string.delete),
-                                            tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                    )
-                }
-            },
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
             floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
             floatingActionButton = {
                 // Collect state reactively
@@ -285,8 +222,7 @@ fun DownloaderScreen(
                             )
                         }
                     }
-                }
-            }
+                }}}
             
             // Content
             ActiveDownloadsContent(
@@ -298,7 +234,7 @@ fun DownloaderScreen(
             )
         }
     }
-}
+
 
 @Composable
 private fun ActiveDownloadsContent(
