@@ -15,7 +15,7 @@ object GradioTTSPresets {
     val COQUI_IREADER = GradioTTSConfig(
         id = "coqui_ireader",
         name = "Coqui TTS (IReader)",
-        spaceUrl = "https://kazemcodes-ireader.hf.space",
+        spaceUrl = "https://need-to-add-you-space-check-docs-ireader.hf.space",
         apiName = "/text_to_speech",  // Function name for /gradio_api/call/{fn_name}
         parameters = listOf(
             GradioParam.textParam("text"),
