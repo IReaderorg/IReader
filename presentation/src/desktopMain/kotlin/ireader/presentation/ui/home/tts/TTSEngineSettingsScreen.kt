@@ -19,6 +19,7 @@ import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.ui.core.theme.currentOrThrow
 
 /**
  * Desktop implementation of TTS Engine Settings Screen
@@ -38,7 +39,7 @@ actual fun TTSEngineSettingsScreen(
 ) {
     val ttsService: DesktopTTSService = koinInject()
     val scope = rememberCoroutineScope()
-    
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     // Engine status - Piper is always available on desktop (bundled with app)
     var piperAvailable by remember { mutableStateOf(true) } // Piper is always available on desktop
     var kokoroAvailable by remember { mutableStateOf(false) }
@@ -447,7 +448,7 @@ actual fun TTSVoiceSelectionScreen(
     var downloadProgress by remember { mutableStateOf(0f) }
     var downloadError by remember { mutableStateOf<String?>(null) }
     var filterLanguage by remember { mutableStateOf<String?>(null) }
-    
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     // Initialize voice service and load current engine
     LaunchedEffect(Unit) {
         currentEngine = ttsService.getCurrentEngine().name

@@ -10,6 +10,7 @@ import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.presentation.ui.core.theme.currentOrThrow
 
 actual class SecuritySettingSpec {
 
@@ -18,7 +19,7 @@ actual class SecuritySettingSpec {
     actual fun Content() {
         val vm: SecuritySettingsViewModel = getIViewModel()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
-
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         IScaffold(
             topBar = { scrollBehavior ->
                 TitleToolbar(
