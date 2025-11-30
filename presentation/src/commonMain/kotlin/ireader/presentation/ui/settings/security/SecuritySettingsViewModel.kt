@@ -66,10 +66,9 @@ class SecuritySettingsViewModel(
             // Show setup dialog
             showSetupDialog = true
         } else {
-            // Disable app lock
+            // Disable app lock - clearAuthMethod handles all preference cleanup including useAuthenticator
             scope.launch {
                 securityRepository.clearAuthMethod()
-                uiPreferences.appLockEnabled().set(false)
             }
         }
     }

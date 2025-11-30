@@ -51,6 +51,8 @@ class SettingsSecurityViewModel(
     // App lock functions
     fun setAppLockEnabled(enabled: Boolean) {
         uiPreferences.appLockEnabled().set(enabled)
+        // Sync with legacy useAuthenticator preference for SecureActivityDelegate
+        uiPreferences.useAuthenticator().set(enabled)
         if (!enabled) {
             // Reset related settings when app lock is disabled
             uiPreferences.biometricEnabled().set(false)

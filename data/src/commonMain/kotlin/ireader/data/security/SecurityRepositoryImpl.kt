@@ -21,17 +21,23 @@ class SecurityRepositoryImpl(
                     uiPreferences.appLockMethod().set("pin")
                     uiPreferences.appLockPin().set(hashPassword(method.pin))
                     uiPreferences.appLockEnabled().set(true)
+                    // Sync with legacy useAuthenticator preference for SecureActivityDelegate
+                    uiPreferences.useAuthenticator().set(true)
                 }
                 is AuthMethod.Password -> {
                     uiPreferences.appLockMethod().set("password")
                     uiPreferences.appLockPassword().set(hashPassword(method.password))
                     uiPreferences.appLockEnabled().set(true)
+                    // Sync with legacy useAuthenticator preference for SecureActivityDelegate
+                    uiPreferences.useAuthenticator().set(true)
                 }
                 is AuthMethod.Biometric -> {
                     if (biometricAuthenticator.isBiometricAvailable()) {
                         uiPreferences.appLockMethod().set("biometric")
                         uiPreferences.biometricEnabled().set(true)
                         uiPreferences.appLockEnabled().set(true)
+                        // Sync with legacy useAuthenticator preference for SecureActivityDelegate
+                        uiPreferences.useAuthenticator().set(true)
                     } else {
                         return@withContext Result.failure(Exception("Biometric authentication not available"))
                     }
@@ -39,6 +45,8 @@ class SecurityRepositoryImpl(
                 is AuthMethod.None -> {
                     uiPreferences.appLockEnabled().set(false)
                     uiPreferences.appLockMethod().set("none")
+                    // Sync with legacy useAuthenticator preference for SecureActivityDelegate
+                    uiPreferences.useAuthenticator().set(false)
                 }
             }
             Result.success(Unit)
@@ -101,6 +109,8 @@ class SecurityRepositoryImpl(
             uiPreferences.appLockPin().set("")
             uiPreferences.appLockPassword().set("")
             uiPreferences.biometricEnabled().set(false)
+            // Sync with legacy useAuthenticator preference for SecureActivityDelegate
+            uiPreferences.useAuthenticator().set(false)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
