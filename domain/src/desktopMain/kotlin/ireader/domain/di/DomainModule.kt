@@ -224,5 +224,14 @@ actual val DomainModule: Module = module {
         )
     }
     
-
+    // Gradio TTS Manager for online TTS services
+    single<ireader.domain.services.tts_service.GradioTTSManager> {
+        val appPrefs: ireader.domain.preferences.prefs.AppPreferences = get()
+        ireader.domain.services.tts_service.GradioTTSManager(
+            httpClient = get<HttpClients>().default,
+            audioPlayerFactory = { ireader.domain.services.tts_service.DesktopGradioAudioPlayer() },
+            saveConfigs = { json -> appPrefs.gradioTTSConfigs().set(json) },
+            loadConfigs = { appPrefs.gradioTTSConfigs().get().ifEmpty { null } }
+        )
+    }
 }

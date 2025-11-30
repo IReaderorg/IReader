@@ -96,32 +96,18 @@ class AndroidTTSServiceAdapter(
     
     override suspend fun nextParagraph() {
         Log.info { "TTS next paragraph" }
-        // Use the shared state to advance paragraph
-        val current = sharedState.currentReadingParagraph.value
-        val content = sharedState.ttsContent.value
-        if (current < (content?.size ?:0) - 1) {
-            sharedState.setCurrentReadingParagraph(current + 1)
-            // Trigger re-read
-            val intent = Intent(context, TTSService::class.java).apply {
-                action = TTSService.ACTION_UPDATE
-                putExtra(TTSService.COMMAND, Player.PLAY)
-            }
-            context.startService(intent)
+        val intent = Intent(context, TTSService::class.java).apply {
+            action = TTSService.ACTION_NEXT_PARAGRAPH
         }
+        context.startService(intent)
     }
     
     override suspend fun previousParagraph() {
         Log.info { "TTS previous paragraph" }
-        val current = sharedState.currentReadingParagraph.value
-        if (current > 0) {
-            sharedState.setCurrentReadingParagraph(current - 1)
-            // Trigger re-read
-            val intent = Intent(context, TTSService::class.java).apply {
-                action = TTSService.ACTION_UPDATE
-                putExtra(TTSService.COMMAND, Player.PLAY)
-            }
-            context.startService(intent)
+        val intent = Intent(context, TTSService::class.java).apply {
+            action = TTSService.ACTION_PREVIOUS_PARAGRAPH
         }
+        context.startService(intent)
     }
     
     override fun setSpeed(speed: Float) {
@@ -136,16 +122,11 @@ class AndroidTTSServiceAdapter(
     
     override suspend fun jumpToParagraph(index: Int) {
         Log.info { "TTS jump to paragraph: $index" }
-        sharedState.setCurrentReadingParagraph(index)
-        
-        // If playing, restart from new position
-        if (sharedState.isPlaying.value) {
-            val intent = Intent(context, TTSService::class.java).apply {
-                action = TTSService.ACTION_UPDATE
-                putExtra(TTSService.COMMAND, Player.PLAY)
-            }
-            context.startService(intent)
+        val intent = Intent(context, TTSService::class.java).apply {
+            action = TTSService.ACTION_JUMP_TO_PARAGRAPH
+            putExtra(TTSService.PARAGRAPH_INDEX, index)
         }
+        context.startService(intent)
     }
     
     override fun setCustomContent(content: List<String>?) {

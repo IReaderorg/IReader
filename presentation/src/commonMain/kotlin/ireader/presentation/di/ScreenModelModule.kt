@@ -1,7 +1,9 @@
 package ireader.presentation.di
 
+import ireader.domain.services.tts_service.GradioTTSManager
 import ireader.presentation.ui.settings.statistics.StatsScreenModel
 import ireader.presentation.ui.reader.viewmodel.*
+import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -119,6 +121,21 @@ val screenModelModule = module {
         ReaderStatisticsViewModel(
             trackReadingProgressUseCase = get(),
             readerPreferences = get()
+        )
+    }
+    // Gradio TTS Settings ViewModel
+    factory {
+        GradioTTSSettingsViewModel(
+            gradioTTSManager = get(),
+            appPreferences = get()
+        )
+    }
+    
+    // AI TTS Settings ViewModel
+    factory {
+        ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel(
+            aiTTSManager = get(),
+            appPreferences = get()
         )
     }
     

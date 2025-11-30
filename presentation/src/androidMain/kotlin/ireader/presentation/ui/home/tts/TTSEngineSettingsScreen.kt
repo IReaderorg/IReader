@@ -116,44 +116,6 @@ actual fun TTSEngineSettingsScreen(
                         )
                     }
                 }
-                
-                // Legacy Coqui TTS Settings (for backward compatibility)
-                OutlinedCard(
-                    onClick = {
-                        onNavigateToTTSManager()
-                        onDismiss()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Legacy Coqui TTS",
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = "Original Coqui TTS configuration",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Icon(
-                            Icons.Default.ChevronRight,
-                            contentDescription = null
-                        )
-                    }
-                }
             }
         },
         confirmButton = {

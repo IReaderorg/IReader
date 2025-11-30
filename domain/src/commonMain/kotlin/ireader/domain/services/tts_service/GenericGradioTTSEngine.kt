@@ -11,8 +11,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+
 
 /**
  * Speech request for the queue
@@ -47,16 +46,13 @@ class GenericGradioTTSEngine(
     private var queueProcessorJob: Job? = null
     private var currentSpeechJob: Job? = null
     private var isPaused = false
-    private val pauseMutex = Mutex()
     
-    // Audio cache for pre-fetching
-    private val audioCache = mutableMapOf<String, ByteArray>()
-    private val loadingParagraphs = mutableSetOf<String>()
-    private val cacheMutex = Mutex()
+    // Audio cache for pre-fetching (thread-safe with ConcurrentHashMap)
+    private val audioCache = java.util.concurrent.ConcurrentHashMap<String, ByteArray>()
+    private val loadingParagraphs = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     
-    // Pre-fetch job management
-    private val prefetchJobs = mutableMapOf<String, Job>()
-    private val prefetchMutex = Mutex()
+    // Pre-fetch job management (thread-safe with ConcurrentHashMap)
+    private val prefetchJobs = java.util.concurrent.ConcurrentHashMap<String, Job>()
     
     private val _cachedParagraphs = MutableStateFlow<Set<Int>>(emptySet())
     val cachedParagraphs: StateFlow<Set<Int>> = _cachedParagraphs.asStateFlow()
@@ -130,16 +126,21 @@ class GenericGradioTTSEngine(
     
     /**
      * Process a single speech request
+     * Returns true if playback completed normally, false if interrupted
      */
-    private suspend fun processSpeechRequest(request: SpeechRequest) {
+    private suspend fun processSpeechRequest(request: SpeechRequest): Boolean {
         val (text, utteranceId) = request
         
         _isPlaying.value = true
         callback?.onStart(utteranceId)
         
         try {
-            // Check cache first
-            val cachedAudio = cacheMutex.withLock { audioCache[utteranceId] }
+            // Cancel any prefetch job for this utterance to avoid competing requests
+            prefetchJobs.remove(utteranceId)?.cancel()
+            loadingParagraphs.remove(utteranceId)
+            
+            // Check cache first (thread-safe)
+            val cachedAudio = audioCache[utteranceId]
             
             val audioData = if (cachedAudio != null) {
                 Log.info { "$TAG: Playing cached audio for $utteranceId" }
@@ -151,15 +152,17 @@ class GenericGradioTTSEngine(
             }
             
             if (audioData != null) {
-                // Cache the audio if not already cached
+                // Cache the audio if not already cached (thread-safe)
                 if (cachedAudio == null) {
                     cacheAudio(utteranceId, audioData)
                 }
                 
                 // Play the audio and wait for completion
-                playAudioAndWait(audioData, utteranceId)
+                val completedNormally = playAudioAndWait(audioData, utteranceId)
+                return completedNormally
             } else {
                 callback?.onError(utteranceId, "Failed to generate speech")
+                return false
             }
         } catch (e: CancellationException) {
             Log.info { "$TAG: Speech cancelled for $utteranceId" }
@@ -167,6 +170,7 @@ class GenericGradioTTSEngine(
         } catch (e: Exception) {
             Log.error { "$TAG: Error speaking $utteranceId: ${e.message}" }
             callback?.onError(utteranceId, e.message ?: "Unknown error")
+            return false
         } finally {
             _isPlaying.value = false
         }
@@ -202,43 +206,52 @@ class GenericGradioTTSEngine(
      */
     fun precacheParagraphs(paragraphs: List<Pair<String, String>>) {
         scope.launch {
-            // Filter out already cached or loading paragraphs
-            val toFetch = paragraphs.filter { (utteranceId, _) ->
-                cacheMutex.withLock {
-                    !audioCache.containsKey(utteranceId) && !loadingParagraphs.contains(utteranceId)
-                }
-            }.take(MAX_PREFETCH_CONCURRENT) // Limit concurrent prefetch
+            // Small delay to give current speech request priority
+            delay(200)
             
-            toFetch.forEach { (utteranceId, text) ->
-                prefetchMutex.withLock {
-                    if (prefetchJobs.containsKey(utteranceId)) return@forEach
-                    
-                    loadingParagraphs.add(utteranceId)
-                    updateLoadingState()
-                    
-                    val job = scope.launch {
-                        try {
-                            val audioData = generateSpeech(text)
-                            if (audioData != null) {
-                                cacheAudio(utteranceId, audioData)
-                                Log.info { "$TAG: Pre-cached audio for $utteranceId" }
-                            }
-                        } catch (e: CancellationException) {
-                            Log.debug { "$TAG: Prefetch cancelled for $utteranceId" }
-                        } catch (e: Exception) {
-                            Log.warn { "$TAG: Error pre-caching $utteranceId: ${e.message}" }
-                        } finally {
-                            cacheMutex.withLock {
-                                loadingParagraphs.remove(utteranceId)
-                            }
-                            prefetchMutex.withLock {
-                                prefetchJobs.remove(utteranceId)
-                            }
-                            updateLoadingState()
+            // Filter out already cached or loading paragraphs (thread-safe check)
+            val toFetch = paragraphs.filter { (utteranceId, _) ->
+                !audioCache.containsKey(utteranceId) && !loadingParagraphs.contains(utteranceId)
+            }
+            
+            // Limit total concurrent prefetch jobs globally
+            val currentActiveJobs = prefetchJobs.size
+            val availableSlots = (MAX_PREFETCH_CONCURRENT - currentActiveJobs).coerceAtLeast(0)
+            
+            if (availableSlots == 0) {
+                Log.debug { "$TAG: Max concurrent prefetch reached ($currentActiveJobs jobs), skipping" }
+                return@launch
+            }
+            
+            val limitedFetch = toFetch.take(availableSlots)
+            Log.debug { "$TAG: Prefetching ${limitedFetch.size} paragraphs (${currentActiveJobs} active jobs)" }
+            
+            limitedFetch.forEach { (utteranceId, text) ->
+                // Double-check if already being prefetched (race condition protection)
+                if (prefetchJobs.containsKey(utteranceId)) return@forEach
+                
+                // Mark as loading (thread-safe)
+                if (!loadingParagraphs.add(utteranceId)) return@forEach // Already added by another thread
+                updateLoadingState()
+                
+                val job = scope.launch {
+                    try {
+                        val audioData = generateSpeech(text)
+                        if (audioData != null) {
+                            cacheAudio(utteranceId, audioData)
+                            Log.info { "$TAG: Pre-cached audio for $utteranceId" }
                         }
+                    } catch (e: CancellationException) {
+                        Log.debug { "$TAG: Prefetch cancelled for $utteranceId" }
+                    } catch (e: Exception) {
+                        Log.warn { "$TAG: Error pre-caching $utteranceId: ${e.message}" }
+                    } finally {
+                        loadingParagraphs.remove(utteranceId)
+                        prefetchJobs.remove(utteranceId)
+                        updateLoadingState()
                     }
-                    prefetchJobs[utteranceId] = job
                 }
+                prefetchJobs[utteranceId] = job
             }
         }
     }
@@ -247,39 +260,47 @@ class GenericGradioTTSEngine(
      * Cancel all prefetch jobs
      */
     fun cancelPrefetch() {
-        scope.launch {
-            prefetchMutex.withLock {
-                prefetchJobs.values.forEach { it.cancel() }
-                prefetchJobs.clear()
-            }
-            cacheMutex.withLock {
-                loadingParagraphs.clear()
-            }
-            updateLoadingState()
-        }
+        // Cancel all jobs (thread-safe iteration via toList())
+        prefetchJobs.values.toList().forEach { it.cancel() }
+        prefetchJobs.clear()
+        loadingParagraphs.clear()
+        updateLoadingState()
     }
+    
+    // Track current playback completion for pause/stop
+    @Volatile
+    private var currentPlaybackCompletion: CompletableDeferred<Boolean>? = null
     
     /**
      * Play audio and wait for completion
+     * Returns true if playback completed normally, false if interrupted (pause/stop)
      */
-    private suspend fun playAudioAndWait(audioData: ByteArray, utteranceId: String) {
-        val completionDeferred = CompletableDeferred<Unit>()
+    private suspend fun playAudioAndWait(audioData: ByteArray, utteranceId: String): Boolean {
+        val completionDeferred = CompletableDeferred<Boolean>()
+        currentPlaybackCompletion = completionDeferred
         
         try {
             audioPlayer.play(audioData) {
-                // Playback completed
-                callback?.onDone(utteranceId)
-                completionDeferred.complete(Unit)
+                // Playback completed normally
+                completionDeferred.complete(true)
             }
             
             // Wait for playback to complete
-            completionDeferred.await()
+            val completedNormally = completionDeferred.await()
+            
+            if (completedNormally) {
+                callback?.onDone(utteranceId)
+            }
+            return completedNormally
         } catch (e: CancellationException) {
             audioPlayer.stop()
             throw e
         } catch (e: Exception) {
             Log.error { "$TAG: Error playing audio: ${e.message}" }
             callback?.onError(utteranceId, e.message ?: "Playback error")
+            return false
+        } finally {
+            currentPlaybackCompletion = null
         }
     }
     
@@ -798,31 +819,32 @@ class GenericGradioTTSEngine(
         }
     }
     
-    private suspend fun cacheAudio(utteranceId: String, audioData: ByteArray) {
-        cacheMutex.withLock {
-            // Remove oldest entries if cache is full
-            while (audioCache.size >= MAX_CACHE_SIZE) {
-                val oldestKey = audioCache.keys.firstOrNull()
-                oldestKey?.let { audioCache.remove(it) }
-            }
-            audioCache[utteranceId] = audioData
+    private fun cacheAudio(utteranceId: String, audioData: ByteArray) {
+        // Thread-safe cache management with ConcurrentHashMap
+        // Remove oldest entries if cache is full
+        while (audioCache.size >= MAX_CACHE_SIZE) {
+            val oldestKey = audioCache.keys.firstOrNull()
+            oldestKey?.let { audioCache.remove(it) }
         }
+        audioCache[utteranceId] = audioData
+        loadingParagraphs.remove(utteranceId)
         updateCacheState()
+        updateLoadingState()
     }
     
     private fun updateCacheState() {
         scope.launch {
-            cacheMutex.withLock {
-                _cachedParagraphs.value = audioCache.keys.mapNotNull { it.toIntOrNull() }.toSet()
-            }
+            // Take a snapshot of keys to avoid ConcurrentModificationException
+            val keys = audioCache.keys.toList()
+            _cachedParagraphs.value = keys.mapNotNull { it.toIntOrNull() }.toSet()
         }
     }
     
     private fun updateLoadingState() {
         scope.launch {
-            cacheMutex.withLock {
-                _loadingParagraphsFlow.value = loadingParagraphs.mapNotNull { it.toIntOrNull() }.toSet()
-            }
+            // Take a snapshot of the set to avoid ConcurrentModificationException
+            val loading = loadingParagraphs.toList()
+            _loadingParagraphsFlow.value = loading.mapNotNull { it.toIntOrNull() }.toSet()
         }
     }
     
@@ -830,6 +852,10 @@ class GenericGradioTTSEngine(
     
     override fun stop() {
         Log.info { "$TAG: Stopping TTS" }
+        // Complete any pending playback to unblock the coroutine
+        currentPlaybackCompletion?.complete(false)
+        currentPlaybackCompletion = null
+        isPaused = false
         clearQueue()
         cancelPrefetch()
     }
@@ -838,12 +864,15 @@ class GenericGradioTTSEngine(
         Log.info { "$TAG: Pausing TTS" }
         isPaused = true
         audioPlayer.pause()
+        // DON'T complete the deferred - let playback resume from where it was
+        // The audio player will call onComplete when playback finishes after resume
     }
     
     override fun resume() {
         Log.info { "$TAG: Resuming TTS" }
         isPaused = false
         audioPlayer.resume()
+        // The audio player will continue and call onComplete when done
     }
     
     override fun setSpeed(speed: Float) {
@@ -873,13 +902,9 @@ class GenericGradioTTSEngine(
         queueProcessorJob?.cancel()
         scope.cancel()
         
-        // Clear caches
-        runBlocking {
-            cacheMutex.withLock {
-                audioCache.clear()
-                loadingParagraphs.clear()
-            }
-        }
+        // Clear caches (thread-safe collections, no mutex needed)
+        audioCache.clear()
+        loadingParagraphs.clear()
         
         // Release audio player
         audioPlayer.release()

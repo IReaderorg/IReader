@@ -285,4 +285,15 @@ actual val DomainModule = module {
     single<ireader.domain.services.tts_service.CommonTTSService> {
         get<ireader.domain.services.tts_service.AndroidTTSServiceAdapter>()
     }
+    
+    // Gradio TTS Manager for online TTS services
+    single<ireader.domain.services.tts_service.GradioTTSManager> {
+        val appPrefs: ireader.domain.preferences.prefs.AppPreferences = get()
+        ireader.domain.services.tts_service.GradioTTSManager(
+            httpClient = get<ireader.core.http.HttpClients>().default,
+            audioPlayerFactory = { ireader.domain.services.tts_service.AndroidGradioAudioPlayer(androidContext()) },
+            saveConfigs = { json -> appPrefs.gradioTTSConfigs().set(json) },
+            loadConfigs = { appPrefs.gradioTTSConfigs().get().ifEmpty { null } }
+        )
+    }
 }
