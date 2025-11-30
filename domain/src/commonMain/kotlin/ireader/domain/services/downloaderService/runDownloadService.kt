@@ -93,6 +93,8 @@ suspend fun runDownloadService(
         val sources = extensions.catalogs.filter { it.sourceId in distinctSources }
 
         // Filter chapters that need downloading
+        // A chapter needs downloading if its content is empty or too short (< 50 chars)
+        // Note: The light mapper uses a placeholder text for downloaded chapters that is >= 50 chars
         val downloads = chapters
             .filter { chapter ->
                 val contentText = chapter.content.joinToString("")
@@ -165,6 +167,31 @@ suspend fun runDownloadService(
             val chapter = chapters.find { it.id == download.chapterId } ?: continue
             val book = books.find { it.id == chapter.bookId } ?: continue
             val source = sources.find { it.sourceId == book.sourceId } ?: continue
+
+            // Double-check if chapter is already downloaded (may have been downloaded by another process)
+            val freshChapter = withContext(Dispatchers.IO) {
+                chapterRepo.findChapterById(download.chapterId)
+            }
+            if (freshChapter != null) {
+                val freshContent = freshChapter.content.joinToString("")
+                if (freshContent.isNotEmpty() && freshContent.length >= 50) {
+                    // Mark as completed and skip
+                    withContext(Dispatchers.Main) {
+                        downloadServiceState.setDownloadProgress(downloadServiceState.downloadProgress.value + 
+                            (download.chapterId to DownloadProgress(
+                                chapterId = download.chapterId,
+                                status = DownloadStatus.COMPLETED,
+                                progress = 1f
+                            )))
+                    }
+                    withContext(Dispatchers.IO) {
+                        downloadUseCases.deleteSavedDownload(download.toDownload())
+                    }
+                    completedCount++
+                    updateProgress(downloads.size, completedCount, false)
+                    continue
+                }
+            }
 
             // Update status to downloading
             withContext(Dispatchers.Main) {

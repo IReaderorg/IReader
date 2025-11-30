@@ -26,7 +26,7 @@ class DownloadUnreadChaptersUseCase(
         bookIds.forEach { bookId ->
             try {
                 val chapters = localGetChapterUseCase.findChaptersByBookId(bookId)
-                val unreadChapters = chapters.filter { !it.read }
+                val unreadChapters = chapters.filter { it.content.joinToString().length < 10 }
                 unreadChapterIds.addAll(unreadChapters.map { it.id })
             } catch (e: Exception) {
                 failedBooks.add(bookId)

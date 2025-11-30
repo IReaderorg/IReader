@@ -120,12 +120,17 @@ class AndroidDownloadService(
             val chaptersToDownload = withContext(Dispatchers.IO) {
                 chapterIds.mapNotNull { chapterId ->
                     val chapter = chapterRepository.findChapterById(chapterId) ?: return@mapNotNull null
+                    // Skip chapters that are already downloaded (have content)
+                    val contentText = chapter.content.joinToString("")
+                    if (contentText.isNotEmpty() && contentText.length >= 50) {
+                        return@mapNotNull null
+                    }
                     val book = bookRepository.findBookById(chapter.bookId) ?: return@mapNotNull null
                     buildSavedDownload(book, chapter)
                 }
             }
             
-            if (chaptersToDownload.isEmpty()) return ServiceResult.Error("No valid chapters found")
+            if (chaptersToDownload.isEmpty()) return ServiceResult.Error("No chapters need downloading - all chapters already have content")
             
             withContext(Dispatchers.IO) {
                 downloadUseCases.insertDownloads(chaptersToDownload.map { it.toDownload() })
@@ -140,8 +145,11 @@ class AndroidDownloadService(
             downloadServiceState.setDownloadProgress(downloadServiceState.downloadProgress.value + initialProgress)
             downloadServiceState.setDownloads(chaptersToDownload)
             
-            val workName = "${DOWNLOADER_SERVICE_NAME}_chapters_${chapterIds.hashCode()}_${System.currentTimeMillis()}"
-            val workData = Data.Builder().putLongArray(DOWNLOADER_CHAPTERS_IDS, chapterIds.toLongArray()).build()
+            // Use only the filtered chapter IDs that actually need downloading
+            val filteredChapterIds = chaptersToDownload.map { it.chapterId }.toLongArray()
+            
+            val workName = "${DOWNLOADER_SERVICE_NAME}_chapters_${filteredChapterIds.contentHashCode()}_${System.currentTimeMillis()}"
+            val workData = Data.Builder().putLongArray(DOWNLOADER_CHAPTERS_IDS, filteredChapterIds).build()
             val workRequest = OneTimeWorkRequestBuilder<DownloaderService>()
                 .setInputData(workData)
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())

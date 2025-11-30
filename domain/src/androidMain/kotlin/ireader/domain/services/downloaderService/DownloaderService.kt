@@ -1,14 +1,18 @@
 package ireader.domain.services.downloaderService
 
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import ireader.core.util.createICoroutineScope
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_COMPLETE
+import ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_PROGRESS
 import ireader.domain.notification.NotificationsIds.ID_DOWNLOAD_CHAPTER_PROGRESS
 import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_BOOKS_IDS
 import ireader.domain.services.downloaderService.DownloadServiceConstants.DOWNLOADER_CHAPTERS_IDS
@@ -47,6 +51,30 @@ class DownloaderService constructor(
     
     @Volatile
     private var isCancelled = false
+
+    /**
+     * Provides foreground service info to prevent the 10-minute WorkManager timeout.
+     * This is critical for long-running downloads to prevent automatic restarts.
+     */
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        val notification = NotificationCompat.Builder(context, CHANNEL_DOWNLOADER_PROGRESS)
+            .setContentTitle("Downloading chapters...")
+            .setSmallIcon(R.drawable.ic_downloading)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
+            .build()
+        
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(
+                ID_DOWNLOAD_CHAPTER_PROGRESS,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            ForegroundInfo(ID_DOWNLOAD_CHAPTER_PROGRESS, notification)
+        }
+    }
 
     private fun cleanupOnCancel() {
         ireader.core.log.Log.info { "DownloaderService: Cleaning up on cancellation" }
@@ -104,6 +132,13 @@ class DownloaderService constructor(
         val notificationId = ID_DOWNLOAD_CHAPTER_PROGRESS
         
         try {
+            // Set foreground immediately to prevent 10-minute timeout
+            try {
+                setForeground(getForegroundInfo())
+            } catch (e: Exception) {
+                // Continue without foreground - some devices may not support it
+            }
+            
             // Check if work is stopped at the beginning
             if (isStopped) {
                 ireader.core.log.Log.info { "DownloaderService: Work already stopped at start" }

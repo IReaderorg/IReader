@@ -122,8 +122,29 @@ class DesktopDownloadService : DownloadService, KoinComponent {
         }
         
         return try {
+            // Filter out already-downloaded chapters by checking their content
+            // This prevents re-downloading chapters that already have content
+            val chapterRepository: ireader.domain.data.repository.ChapterRepository by inject()
+            
+            val filteredChapterIds = withContext(Dispatchers.IO) {
+                chapterIds.filter { chapterId ->
+                    val chapter = chapterRepository.findChapterById(chapterId)
+                    if (chapter == null) {
+                        false
+                    } else {
+                        val contentText = chapter.content.joinToString("")
+                        // Only include chapters that don't have content yet
+                        contentText.isEmpty() || contentText.length < 50
+                    }
+                }
+            }
+            
+            if (filteredChapterIds.isEmpty()) {
+                return ServiceResult.Error("No chapters need downloading - all chapters already have content")
+            }
+            
             // Initialize progress for queued chapters
-            val initialProgress = chapterIds.associateWith { chapterId ->
+            val initialProgress = filteredChapterIds.associateWith { chapterId ->
                 ireader.domain.services.downloaderService.DownloadProgress(
                     chapterId = chapterId,
                     status = ireader.domain.services.downloaderService.DownloadStatus.QUEUED
@@ -133,10 +154,10 @@ class DesktopDownloadService : DownloadService, KoinComponent {
                 downloadServiceState.downloadProgress.value + initialProgress
             )
             
-            // Start the download using the existing use case
+            // Start the download using the existing use case with filtered chapter IDs
             startDownloadServicesUseCase.start(
                 bookIds = null,
-                chapterIds = chapterIds.toLongArray(),
+                chapterIds = filteredChapterIds.toLongArray(),
                 downloadModes = false
             )
             

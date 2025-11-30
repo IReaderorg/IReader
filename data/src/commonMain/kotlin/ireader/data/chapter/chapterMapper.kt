@@ -36,6 +36,7 @@ val chapterMapper = {_id: Long,
 }
 
 // Lightweight mapper without content field to prevent OOM errors
+// Uses a special placeholder text to indicate downloaded status that can be detected by download service
 val chapterMapperLight = {_id: Long,
                           book_id: Long,
                           url: String,
@@ -62,8 +63,16 @@ val chapterMapperLight = {_id: Long,
         read = read,
         id = _id,
         lastPageRead = last_page_read,
-        content = if (is_downloaded == 1L) listOf(ireader.core.source.model.Text("")) else emptyList(), // Mark as downloaded with placeholder
+        // Use a placeholder with enough length (>= 50 chars) to indicate downloaded status
+        // This allows download service to correctly skip already-downloaded chapters
+        content = if (is_downloaded == 1L) listOf(ireader.core.source.model.Text(DOWNLOADED_CHAPTER_PLACEHOLDER)) else emptyList(),
         sourceOrder =  source_order,
         type = type,
     )
 }
+
+/**
+ * Placeholder text used to indicate a chapter has been downloaded when using the light mapper.
+ * This must be at least 50 characters to pass the download filter check.
+ */
+const val DOWNLOADED_CHAPTER_PLACEHOLDER = "[DOWNLOADED_CONTENT_PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER]"
