@@ -17,6 +17,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced data and storage settings screen following Mihon's comprehensive data management.
@@ -30,6 +31,7 @@ fun SettingsDataScreen(
     viewModel: SettingsDataViewModel,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberSaveable(
         key = "settings_data_scroll_state",
         saver = LazyListState.Saver
@@ -350,7 +352,7 @@ fun SettingsDataScreen(
     if (viewModel.showCleanupIntervalDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissCleanupIntervalDialog() },
-            title = { Text("Cleanup Interval") },
+            title = { Text(localizeHelper.localize(Res.string.cleanup_interval)) },
             text = {
                 Column {
                     val intervals = listOf(
@@ -384,7 +386,7 @@ fun SettingsDataScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissCleanupIntervalDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -394,7 +396,7 @@ fun SettingsDataScreen(
     if (viewModel.showMaxCacheSizeDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissMaxCacheSizeDialog() },
-            title = { Text("Max Cache Size") },
+            title = { Text(localizeHelper.localize(Res.string.max_cache_size)) },
             text = {
                 Column {
                     val sizes = listOf(
@@ -430,7 +432,7 @@ fun SettingsDataScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissMaxCacheSizeDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -440,7 +442,7 @@ fun SettingsDataScreen(
     if (viewModel.showImageQualityDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissImageQualityDialog() },
-            title = { Text("Image Quality") },
+            title = { Text(localizeHelper.localize(Res.string.image_quality)) },
             text = {
                 Column {
                     val qualities = listOf(
@@ -474,7 +476,7 @@ fun SettingsDataScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissImageQualityDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -484,9 +486,9 @@ fun SettingsDataScreen(
     if (viewModel.showClearAllCacheDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissClearAllCacheDialog() },
-            title = { Text("Clear All Cache") },
+            title = { Text(localizeHelper.localize(Res.string.clear_all_cache)) },
             text = {
-                Text("This will remove all cached images, chapters, and network data. This action cannot be undone.")
+                Text(localizeHelper.localize(Res.string.clear_all_cache_confirmation))
             },
             confirmButton = {
                 TextButton(
@@ -495,12 +497,12 @@ fun SettingsDataScreen(
                         viewModel.dismissClearAllCacheDialog()
                     }
                 ) {
-                    Text("Clear")
+                    Text(localizeHelper.localize(Res.string.clear_1))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissClearAllCacheDialog() }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -510,9 +512,9 @@ fun SettingsDataScreen(
     if (viewModel.showOptimizeDatabaseDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissOptimizeDatabaseDialog() },
-            title = { Text("Optimize Database") },
+            title = { Text(localizeHelper.localize(Res.string.optimize_database)) },
             text = {
-                Text("This will compact the database and may improve performance. The process may take a few minutes.")
+                Text(localizeHelper.localize(Res.string.this_will_compact_the_database))
             },
             confirmButton = {
                 TextButton(
@@ -521,12 +523,12 @@ fun SettingsDataScreen(
                         viewModel.dismissOptimizeDatabaseDialog()
                     }
                 ) {
-                    Text("Optimize")
+                    Text(localizeHelper.localize(Res.string.optimize))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissOptimizeDatabaseDialog() }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -536,9 +538,9 @@ fun SettingsDataScreen(
     if (viewModel.showResetDataSettingsDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissResetDataSettingsDialog() },
-            title = { Text("Reset Data Settings") },
+            title = { Text(localizeHelper.localize(Res.string.reset_data_settings)) },
             text = {
-                Text("This will reset all data and storage settings to their default values.")
+                Text(localizeHelper.localize(Res.string.this_will_reset_all_data))
             },
             confirmButton = {
                 TextButton(
@@ -547,12 +549,12 @@ fun SettingsDataScreen(
                         viewModel.dismissResetDataSettingsDialog()
                     }
                 ) {
-                    Text("Reset")
+                    Text(localizeHelper.localize(Res.string.reset))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissResetDataSettingsDialog() }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )

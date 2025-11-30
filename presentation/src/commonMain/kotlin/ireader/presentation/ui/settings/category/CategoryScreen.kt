@@ -273,6 +273,7 @@ private fun EnhancedCategoryItem(
     onDelete: () -> Unit,
     onRename: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = modifier
             .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -294,7 +295,7 @@ private fun EnhancedCategoryItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.DragHandle,
-                    contentDescription = "Drag to reorder",
+                    contentDescription = localizeHelper.localize(Res.string.drag_to_reorder),
                     modifier = Modifier
                         .size(32.dp)
                         .padding(4.dp),

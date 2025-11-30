@@ -28,6 +28,7 @@ import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.components.SourceStatusIndicator
 import ireader.presentation.ui.home.sources.extension.Language
 import java.util.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Modern card-based catalog item with enhanced visual design
@@ -210,6 +211,7 @@ private fun ModernCatalogActions(
     onLogin: (() -> Unit)?,
     onMigrate: (() -> Unit)?,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -223,7 +225,7 @@ private fun ModernCatalogActions(
             ) {
                 Icon(
                     imageVector = Icons.Default.Login,
-                    contentDescription = "Login",
+                    contentDescription = localizeHelper.localize(Res.string.login),
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -244,7 +246,7 @@ private fun ModernCatalogActions(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Cancel",
+                        contentDescription = localizeHelper.localize(Res.string.cancel),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -301,7 +303,7 @@ private fun ModernCatalogActions(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Uninstall",
+                    contentDescription = localizeHelper.localize(Res.string.uninstall),
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -320,7 +322,7 @@ private fun ModernCatalogActions(
             ) {
                 Icon(
                     imageVector = Icons.Default.SwapHoriz,
-                    contentDescription = "Migrate",
+                    contentDescription = localizeHelper.localize(Res.string.migrate),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )

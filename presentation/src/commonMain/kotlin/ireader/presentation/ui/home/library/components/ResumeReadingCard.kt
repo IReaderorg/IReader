@@ -23,6 +23,7 @@ import ireader.domain.models.entities.LastReadInfo
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Spotify-style bottom bar that displays the last read novel and allows quick resume
@@ -35,6 +36,7 @@ fun ResumeReadingCard(
     isVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
         visible = lastRead != null && isVisible,
         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -105,7 +107,7 @@ fun ResumeReadingCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Hide",
+                            contentDescription = localizeHelper.localize(Res.string.hide),
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )

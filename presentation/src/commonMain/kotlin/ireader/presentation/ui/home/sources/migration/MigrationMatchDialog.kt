@@ -14,6 +14,8 @@ import coil3.compose.AsyncImage
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.migration.MigrationMatch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun MigrationMatchDialog(
@@ -25,6 +27,7 @@ fun MigrationMatchDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = modifier
@@ -157,7 +160,7 @@ fun MigrationMatchDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text(localizeHelper.localize(Res.string.cancel))
                     }
                     
                     OutlinedButton(
@@ -165,7 +168,7 @@ fun MigrationMatchDialog(
                         modifier = Modifier.weight(1f),
                         enabled = !isSearching
                     ) {
-                        Text("Skip")
+                        Text(localizeHelper.localize(Res.string.skip))
                     }
                 }
             }
@@ -179,6 +182,7 @@ private fun MatchItem(
     onSelect: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = onSelect
@@ -239,7 +243,7 @@ private fun MatchItem(
             
             // Select button
             Button(onClick = onSelect) {
-                Text("Select")
+                Text(localizeHelper.localize(Res.string.select))
             }
         }
     }

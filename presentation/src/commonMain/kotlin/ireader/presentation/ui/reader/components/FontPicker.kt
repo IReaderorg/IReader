@@ -90,11 +90,11 @@ fun FontPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                placeholder = { Text("Search fonts...") },
+                placeholder = { Text(localizeHelper.localize(Res.string.search_fonts)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
+                        contentDescription = localizeHelper.localize(Res.string.search)
                     )
                 },
                 singleLine = true,
@@ -229,7 +229,7 @@ fun FontPicker(
     fontToDelete?.let { font ->
         AlertDialog(
             onDismissRequest = { fontToDelete = null },
-            title = { Text("Delete Font") },
+            title = { Text(localizeHelper.localize(Res.string.delete_font)) },
             text = { Text("Are you sure you want to delete \"${font.name}\"? This action cannot be undone.") },
             confirmButton = {
                 TextButton(
@@ -261,6 +261,7 @@ private fun FontItem(
     onDelete: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -313,7 +314,7 @@ private fun FontItem(
                 if (isSelected) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
+                        contentDescription = localizeHelper.localize(Res.string.selected),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -322,7 +323,7 @@ private fun FontItem(
                     IconButton(onClick = onDelete) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete font",
+                            contentDescription = localizeHelper.localize(Res.string.delete_font_1),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -347,16 +348,16 @@ fun ImportFontDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Import Font")
+            Text(localizeHelper.localize(Res.string.import_font))
         },
         text = {
             Column {
-                Text("Enter font name")
+                Text(localizeHelper.localize(Res.string.enter_font_name))
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = fontName,
                     onValueChange = { fontName = it },
-                    label = { Text("Font Name") },
+                    label = { Text(localizeHelper.localize(Res.string.font_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -367,7 +368,7 @@ fun ImportFontDialog(
                 onClick = { onConfirm(fontName) },
                 enabled = fontName.isNotBlank()
             ) {
-                Text("Import")
+                Text(localizeHelper.localize(Res.string.import_action))
             }
         },
         dismissButton = {

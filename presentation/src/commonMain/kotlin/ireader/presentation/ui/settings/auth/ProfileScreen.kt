@@ -60,12 +60,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 class ProfileScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: ProfileViewModel = koinInject()
         val state by viewModel.state.collectAsState()
@@ -73,10 +76,10 @@ class ProfileScreen  {
         Scaffold(
             topBar = {
                 Toolbar(
-                    title = { Text("Profile") },
+                    title = { Text(localizeHelper.localize(Res.string.profile)) },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     }
                 )
@@ -193,6 +196,7 @@ private fun UserProfileCard(
     onUpdateUsername: () -> Unit,
     onUpdateWallet: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -269,7 +273,7 @@ private fun UserProfileCard(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text("Edit")
+                    Text(localizeHelper.localize(Res.string.edit))
                 }
             }
             
@@ -302,7 +306,7 @@ private fun UserProfileCard(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text("Edit")
+                    Text(localizeHelper.localize(Res.string.edit))
                 }
             }
             
@@ -324,7 +328,7 @@ private fun UserProfileCard(
             ) {
                 Icon(Icons.Default.Logout, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Sign Out")
+                Text(localizeHelper.localize(Res.string.sign_out))
             }
         }
     }
@@ -334,6 +338,7 @@ private fun UserProfileCard(
 private fun LoginPromptCard(
     onLogin: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -384,7 +389,7 @@ private fun LoginPromptCard(
             ) {
                 Icon(Icons.Default.Login, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Sign In / Sign Up")
+                Text(localizeHelper.localize(Res.string.sign_in_sign_up))
             }
         }
     }
@@ -530,12 +535,13 @@ private fun UsernameDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var username by remember { mutableStateOf(currentUsername ?: "") }
     var error by remember { mutableStateOf<String?>(null) }
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set Name") },
+        title = { Text(localizeHelper.localize(Res.string.set_name)) },
         text = {
             Column {
                 Text(
@@ -551,7 +557,7 @@ private fun UsernameDialog(
                         username = it
                         error = null
                     },
-                    label = { Text("Name") },
+                    label = { Text(localizeHelper.localize(Res.string.name)) },
                     singleLine = true,
                     isError = error != null,
                     supportingText = error?.let { { Text(it) } }
@@ -568,12 +574,12 @@ private fun UsernameDialog(
                     }
                 }
             ) {
-                Text("Save")
+                Text(localizeHelper.localize(Res.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -585,12 +591,13 @@ private fun WalletDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var wallet by remember { mutableStateOf(currentWallet ?: "") }
     var error by remember { mutableStateOf<String?>(null) }
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set ETH Wallet Address") },
+        title = { Text(localizeHelper.localize(Res.string.set_eth_wallet_address)) },
         text = {
             Column {
                 Text(
@@ -606,8 +613,8 @@ private fun WalletDialog(
                         wallet = it
                         error = null
                     },
-                    label = { Text("Wallet Address") },
-                    placeholder = { Text("0x...") },
+                    label = { Text(localizeHelper.localize(Res.string.wallet_address)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.wallet_placeholder)) },
                     singleLine = true,
                     isError = error != null,
                     supportingText = error?.let { { Text(it) } }
@@ -626,12 +633,12 @@ private fun WalletDialog(
                     }
                 }
             ) {
-                Text("Save")
+                Text(localizeHelper.localize(Res.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -644,6 +651,7 @@ private fun BadgesSection(
     error: String?,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -691,7 +699,7 @@ private fun BadgesSection(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         TextButton(onClick = onRetry) {
-                            Text("Retry")
+                            Text(localizeHelper.localize(Res.string.retry))
                         }
                     }
                 }
@@ -721,6 +729,7 @@ private fun AchievementBadgesSection(
     error: String?,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -774,7 +783,7 @@ private fun AchievementBadgesSection(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         TextButton(onClick = onRetry) {
-                            Text("Retry")
+                            Text(localizeHelper.localize(Res.string.retry))
                         }
                     }
                 }

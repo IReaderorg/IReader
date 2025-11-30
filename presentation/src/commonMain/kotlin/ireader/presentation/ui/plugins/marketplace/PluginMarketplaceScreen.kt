@@ -18,6 +18,8 @@ import ireader.presentation.ui.plugins.marketplace.components.FeaturedPluginsSec
 import ireader.presentation.ui.plugins.marketplace.components.FilterBottomSheet
 import ireader.presentation.ui.plugins.marketplace.components.PluginCard
 import ireader.presentation.ui.plugins.marketplace.components.PluginCategoryTabs
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Plugin Marketplace screen for discovering and installing plugins
@@ -31,6 +33,7 @@ fun PluginMarketplaceScreen(
     onPluginClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state
     var showSearch by remember { mutableStateOf(false) }
     var showFilters by remember { mutableStateOf(false) }
@@ -48,12 +51,12 @@ fun PluginMarketplaceScreen(
                 )
             } else {
                 TopAppBar(
-                    title = { Text("Plugin Marketplace") },
+                    title = { Text(localizeHelper.localize(Res.string.plugin_marketplace)) },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = localizeHelper.localize(Res.string.back)
                             )
                         }
                     },
@@ -61,13 +64,13 @@ fun PluginMarketplaceScreen(
                         IconButton(onClick = { showSearch = true }) {
                             Icon(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = "Search"
+                                contentDescription = localizeHelper.localize(Res.string.search)
                             )
                         }
                         IconButton(onClick = { showFilters = true }) {
                             Icon(
                                 imageVector = Icons.Default.FilterList,
-                                contentDescription = "Filter"
+                                contentDescription = localizeHelper.localize(Res.string.filter)
                             )
                         }
                     }
@@ -213,12 +216,13 @@ private fun SearchTopBar(
     onCloseSearch: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     TopAppBar(
         title = {
             TextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
-                placeholder = { Text("Search plugins...") },
+                placeholder = { Text(localizeHelper.localize(Res.string.search_plugins)) },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -233,7 +237,7 @@ private fun SearchTopBar(
             IconButton(onClick = onCloseSearch) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Close search"
+                    contentDescription = localizeHelper.localize(Res.string.close_search)
                 )
             }
         },
@@ -274,6 +278,7 @@ private fun ErrorState(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -297,7 +302,7 @@ private fun ErrorState(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(localizeHelper.localize(Res.string.retry))
             }
         }
     }

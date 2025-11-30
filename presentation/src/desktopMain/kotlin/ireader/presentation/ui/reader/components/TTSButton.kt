@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import ireader.domain.services.tts_service.DesktopTTSService
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Desktop TTS button for the reader toolbar
@@ -18,6 +20,7 @@ fun TTSButton(
     onToggleTTSControls: () -> Unit,
     ttsService: DesktopTTSService = koinInject()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state = ttsService.state
     
     AppIconButton(
@@ -26,7 +29,7 @@ fun TTSButton(
             state.ttsChapter.value != null -> Icons.Default.PlayArrow
             else -> Icons.Default.VolumeUp
         },
-        contentDescription = "Text-to-Speech",
+        contentDescription = localizeHelper.localize(Res.string.text_to_speech),
         tint = if (state.isPlaying.value) 
             MaterialTheme.colorScheme.primary 
         else 

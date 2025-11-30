@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.backup.BackupInfo
 import java.text.SimpleDateFormat
 import java.util.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -28,6 +30,7 @@ fun GoogleDriveBackupScreen(
     onPopBackStack: () -> Unit,
     viewModel: GoogleDriveViewModel
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val isConnected by viewModel.isConnected
     val accountEmail by viewModel.accountEmail
     val backups by viewModel.backups.collectAsState()
@@ -72,12 +75,12 @@ fun GoogleDriveBackupScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Google Drive Backup") },
+                title = { Text(localizeHelper.localize(Res.string.google_drive_backup)) },
                 navigationIcon = {
                     IconButton(onClick = onPopBackStack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 }
@@ -91,7 +94,7 @@ fun GoogleDriveBackupScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.CloudUpload,
-                        contentDescription = "Create backup"
+                        contentDescription = localizeHelper.localize(Res.string.create_backup_1)
                     )
                 }
             }
@@ -231,7 +234,7 @@ fun GoogleDriveBackupScreen(
                     tint = MaterialTheme.colorScheme.error
                 )
             },
-            title = { Text("Restore Backup?") },
+            title = { Text(localizeHelper.localize(Res.string.restore_backup_1)) },
             text = {
                 Text(
                     "This will replace all current data with the backup from ${formatTimestamp(backup.timestamp)}. " +
@@ -248,12 +251,12 @@ fun GoogleDriveBackupScreen(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Restore")
+                    Text(localizeHelper.localize(Res.string.restore))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRestoreConfirmation = null }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -269,9 +272,9 @@ fun GoogleDriveBackupScreen(
                     contentDescription = null
                 )
             },
-            title = { Text("Delete Backup?") },
+            title = { Text(localizeHelper.localize(Res.string.delete_backup)) },
             text = {
-                Text("Are you sure you want to delete this backup? This action cannot be undone.")
+                Text(localizeHelper.localize(Res.string.are_you_sure_you_want))
             },
             confirmButton = {
                 Button(
@@ -283,12 +286,12 @@ fun GoogleDriveBackupScreen(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text(localizeHelper.localize(Res.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = null }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -302,6 +305,7 @@ private fun ConnectionStatusCard(
     onConnect: () -> Unit,
     onDisconnect: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -364,7 +368,7 @@ private fun ConnectionStatusCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Disconnect")
+                        Text(localizeHelper.localize(Res.string.disconnect))
                     }
                 }
             } else {
@@ -377,7 +381,7 @@ private fun ConnectionStatusCard(
                         contentDescription = null
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Connect to Google Drive")
+                    Text(localizeHelper.localize(Res.string.connect_to_google_drive))
                 }
             }
         }
@@ -430,6 +434,7 @@ private fun BackupItem(
     onRestore: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
@@ -464,14 +469,14 @@ private fun BackupItem(
                 IconButton(onClick = onRestore) {
                     Icon(
                         imageVector = Icons.Default.CloudDownload,
-                        contentDescription = "Restore",
+                        contentDescription = localizeHelper.localize(Res.string.restore),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = localizeHelper.localize(Res.string.delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

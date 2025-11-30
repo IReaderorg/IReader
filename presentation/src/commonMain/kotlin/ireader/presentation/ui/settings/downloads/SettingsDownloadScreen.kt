@@ -14,6 +14,8 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.Res
 
 /**
  * Enhanced download settings screen following Mihon's comprehensive download management.
@@ -27,6 +29,7 @@ fun SettingsDownloadScreen(
     viewModel: SettingsDownloadViewModel,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberSaveable(
         key = "settings_download_scroll_state",
         saver = LazyListState.Saver
@@ -251,7 +254,7 @@ fun SettingsDownloadScreen(
     if (viewModel.showDownloadLocationDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissDownloadLocationDialog() },
-            title = { Text("Download Location") },
+            title = { Text(localizeHelper.localize(Res.string.download_location)) },
             text = {
                 Column {
                     Text(
@@ -269,13 +272,13 @@ fun SettingsDownloadScreen(
                         onClick = { viewModel.selectDownloadLocation() },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Choose Folder")
+                        Text(localizeHelper.localize(Res.string.choose_folder))
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissDownloadLocationDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -286,9 +289,9 @@ fun SettingsDownloadScreen(
     if (viewModel.showClearCacheDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissClearCacheDialog() },
-            title = { Text("Clear Download Cache") },
+            title = { Text(localizeHelper.localize(Res.string.clear_download_cache)) },
             text = {
-                Text("This will remove all temporary download files. Downloaded chapters will not be affected.")
+                Text(localizeHelper.localize(Res.string.clear_download_cache_confirmation))
             },
             confirmButton = {
                 TextButton(
@@ -297,12 +300,12 @@ fun SettingsDownloadScreen(
                         viewModel.dismissClearCacheDialog()
                     }
                 ) {
-                    Text("Clear")
+                    Text(localizeHelper.localize(Res.string.clear_1))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissClearCacheDialog() }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )

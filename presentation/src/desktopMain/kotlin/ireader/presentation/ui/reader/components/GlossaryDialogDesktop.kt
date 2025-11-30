@@ -9,6 +9,7 @@ import ireader.i18n.resources.glossary_exported_successfully
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
+import ireader.i18n.resources.*
 
 @Composable
 actual fun GlossaryDialogWithFilePickers(

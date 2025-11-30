@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Banner component that displays when a broken chapter is detected
@@ -28,6 +30,7 @@ fun ChapterRepairBanner(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + expandVertically(),
@@ -57,7 +60,7 @@ fun ChapterRepairBanner(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Warning,
-                        contentDescription = "Warning",
+                        contentDescription = localizeHelper.localize(Res.string.warning),
                         tint = MaterialTheme.colorScheme.error
                     )
                     
@@ -94,7 +97,7 @@ fun ChapterRepairBanner(
                                 contentColor = MaterialTheme.colorScheme.error
                             )
                         ) {
-                            Text("Repair")
+                            Text(localizeHelper.localize(Res.string.repair))
                         }
                     }
                     
@@ -104,7 +107,7 @@ fun ChapterRepairBanner(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Dismiss",
+                            contentDescription = localizeHelper.localize(Res.string.dismiss),
                             tint = MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
@@ -124,6 +127,7 @@ fun ChapterRepairSuccessBanner(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + expandVertically(),
@@ -159,7 +163,7 @@ fun ChapterRepairSuccessBanner(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Dismiss",
+                        contentDescription = localizeHelper.localize(Res.string.dismiss),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }

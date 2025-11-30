@@ -15,6 +15,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import ireader.core.system.CrashReport
 import kotlin.time.ExperimentalTime
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Screen displayed when the app crashes
@@ -28,12 +30,13 @@ fun CrashScreen(
     onShareReport: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showFullStackTrace by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("App Crashed") },
+                title = { Text(localizeHelper.localize(Res.string.app_crashed)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     titleContentColor = MaterialTheme.colorScheme.onErrorContainer
@@ -161,7 +164,7 @@ fun CrashScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Share Report")
+                    Text(localizeHelper.localize(Res.string.share_report))
                 }
                 
                 Button(
@@ -174,7 +177,7 @@ fun CrashScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Restart App")
+                    Text(localizeHelper.localize(Res.string.restart_app))
                 }
             }
             

@@ -10,6 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.IssueCategory
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog for reporting broken or problematic chapters
@@ -22,6 +24,7 @@ fun ReportBrokenChapterDialog(
     onReport: (IssueCategory, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedCategory by remember { mutableStateOf<IssueCategory?>(null) }
     var description by remember { mutableStateOf("") }
     
@@ -29,7 +32,7 @@ fun ReportBrokenChapterDialog(
         onDismissRequest = onDismiss,
         modifier = modifier,
         title = {
-            Text("Report Broken Chapter")
+            Text(localizeHelper.localize(Res.string.report_broken_chapter_1))
         },
         text = {
             Column(
@@ -89,11 +92,11 @@ fun ReportBrokenChapterDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Additional details (optional)") },
+                    label = { Text(localizeHelper.localize(Res.string.additional_details_optional)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                     maxLines = 5,
-                    placeholder = { Text("Describe the issue...") }
+                    placeholder = { Text(localizeHelper.localize(Res.string.describe_the_issue)) }
                 )
             }
         },
@@ -107,12 +110,12 @@ fun ReportBrokenChapterDialog(
                 },
                 enabled = selectedCategory != null
             ) {
-                Text("Report")
+                Text(localizeHelper.localize(Res.string.report))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

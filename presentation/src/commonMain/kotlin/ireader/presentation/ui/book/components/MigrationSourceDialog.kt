@@ -19,6 +19,7 @@ import ireader.domain.models.migration.MigrationFlags
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced migration dialog with source selection and migration options
@@ -30,6 +31,7 @@ fun MigrationSourceDialog(
     onDismiss: () -> Unit,
     onSourceSelected: (CatalogLocal) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedSource by remember { mutableStateOf<CatalogLocal?>(null) }
     var showOptions by remember { mutableStateOf(false) }
     var migrationFlags by remember { mutableStateOf(MigrationFlags()) }
@@ -154,7 +156,7 @@ fun MigrationSourceDialog(
                             modifier = Modifier.weight(1f),
                             enabled = selectedSource != null
                         ) {
-                            Text("Next")
+                            Text(localizeHelper.localize(Res.string.next))
                         }
                     }
                 } else {
@@ -285,7 +287,7 @@ fun MigrationSourceDialog(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Back")
+                            Text(localizeHelper.localize(Res.string.back))
                         }
                         Button(
                             onClick = {
@@ -300,7 +302,7 @@ fun MigrationSourceDialog(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Migrate")
+                            Text(localizeHelper.localize(Res.string.migrate))
                         }
                     }
                 }

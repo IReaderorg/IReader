@@ -14,6 +14,7 @@ import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +35,7 @@ fun ExtensionScreenTopAppBar(
     repositoryFilterText: String = "All",
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
@@ -70,7 +72,7 @@ fun ExtensionScreenTopAppBar(
                 if (onAddRepository != null) {
                     AppIconButton(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add Repository",
+                        contentDescription = localizeHelper.localize(Res.string.add_repository),
                         onClick = onAddRepository,
                     )
                 }
@@ -95,14 +97,14 @@ fun ExtensionScreenTopAppBar(
                     if (onBrowseSettings != null) {
                         AppIconButton(
                             imageVector = Icons.Default.Tune,
-                            contentDescription = "Browse Settings",
+                            contentDescription = localizeHelper.localize(Res.string.browse_settings),
                             onClick = onBrowseSettings,
                         )
                     }
                     if (onMigrate != null) {
                         AppIconButton(
                             imageVector = Icons.Default.SwapHoriz,
-                            contentDescription = "Migrate from Source",
+                            contentDescription = localizeHelper.localize(Res.string.migrate_from_source),
                             onClick = onMigrate,
                         )
                     }

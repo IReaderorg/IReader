@@ -10,6 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * State for find in chapter functionality
@@ -37,6 +39,7 @@ fun FindInChapterBar(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = modifier.fillMaxWidth(),
         tonalElevation = 3.dp,
@@ -53,7 +56,7 @@ fun FindInChapterBar(
             OutlinedTextField(
                 value = state.query,
                 onValueChange = onQueryChange,
-                placeholder = { Text("Find in chapter") },
+                placeholder = { Text(localizeHelper.localize(Res.string.find_in_chapter)) },
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
@@ -83,7 +86,7 @@ fun FindInChapterBar(
             ) {
                 Icon(
                     Icons.Default.ArrowUpward,
-                    contentDescription = "Previous match"
+                    contentDescription = localizeHelper.localize(Res.string.previous_match)
                 )
             }
             
@@ -94,7 +97,7 @@ fun FindInChapterBar(
             ) {
                 Icon(
                     Icons.Default.ArrowDownward,
-                    contentDescription = "Next match"
+                    contentDescription = localizeHelper.localize(Res.string.next_match)
                 )
             }
             
@@ -102,7 +105,7 @@ fun FindInChapterBar(
             IconButton(onClick = onClose) {
                 Icon(
                     Icons.Default.Close,
-                    contentDescription = "Close search"
+                    contentDescription = localizeHelper.localize(Res.string.close_search)
                 )
             }
         }

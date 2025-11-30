@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.tts.VoiceGender
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.models.tts.VoiceQuality
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Voice card component displaying voice metadata and actions
@@ -32,6 +34,7 @@ fun VoiceCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -113,7 +116,7 @@ fun VoiceCard(
                         ) {
                             Icon(
                                 Icons.Default.PlayArrow,
-                                contentDescription = "Preview voice",
+                                contentDescription = localizeHelper.localize(Res.string.preview_voice),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -140,7 +143,7 @@ fun VoiceCard(
                             ) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "Delete voice",
+                                    contentDescription = localizeHelper.localize(Res.string.delete_voice),
                                     tint = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -156,7 +159,7 @@ fun VoiceCard(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Download")
+                                Text(localizeHelper.localize(Res.string.download))
                             }
                         }
                     }

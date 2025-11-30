@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.presentation.ui.home.sources.extension.LanguageChoice
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Enhanced language filter with better performance and custom design
@@ -43,6 +45,7 @@ fun EnhancedLanguageFilter(
     onToggleVisibility: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val rotation by animateFloatAsState(
         targetValue = if (isVisible) 180f else 0f,
         animationSpec = spring(
@@ -97,7 +100,7 @@ fun EnhancedLanguageFilter(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.FilterList,
-                                contentDescription = "Filter",
+                                contentDescription = localizeHelper.localize(Res.string.filter),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .padding(6.dp)

@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun LibraryBadges(
@@ -29,6 +31,7 @@ fun LibraryBadges(
     isPinned: Boolean = false,
     isArchived: Boolean = false,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Get language from catalog if needed
     val language = if (showLanguage && sourceId != null) {
         val catalogStore = org.koin.compose.koinInject<ireader.domain.catalogs.CatalogStore>()
@@ -43,7 +46,7 @@ fun LibraryBadges(
             Row {
                 Icon(
                     imageVector = Icons.Default.PushPin,
-                    contentDescription = "Pinned",
+                    contentDescription = localizeHelper.localize(Res.string.pinned_sources),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(2.dp)
                 )

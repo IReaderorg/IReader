@@ -17,6 +17,8 @@ import ireader.presentation.ui.component.RatingStars
 import ireader.presentation.ui.component.WriteReviewDialog
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Integration component for chapter reviews with bottom sheet
@@ -32,6 +34,7 @@ fun ChapterReviewsIntegration(
     submitChapterReviewUseCase: SubmitChapterReviewUseCase = koinInject(),
     getUserBadgesUseCase: GetUserBadgesUseCase = koinInject()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var reviews by remember { mutableStateOf<List<ChapterReview>>(emptyList()) }
     var averageRating by remember { mutableStateOf(0f) }
     var isLoading by remember { mutableStateOf(true) }
@@ -156,7 +159,7 @@ fun ChapterReviewsIntegration(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (reviews.isNotEmpty()) {
                         TextButton(onClick = { showReviewsSheet = true }) {
-                            Text("View")
+                            Text(localizeHelper.localize(Res.string.open_tts_screen))
                         }
                     }
                     

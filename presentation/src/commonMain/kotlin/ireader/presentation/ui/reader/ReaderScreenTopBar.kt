@@ -35,6 +35,7 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +52,7 @@ fun ReaderScreenTopBar(
         onPopBackStack: () -> Unit,
         isLoaded: Boolean = false,
 ) {
+val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
     AnimatedVisibility(
         visible = !isReaderModeEnable,
@@ -98,21 +100,21 @@ fun ReaderScreenTopBar(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Find in chapter",
+                            contentDescription = localizeHelper.localize(Res.string.find_in_chapter),
                             onClick = {
                                 vm.toggleFindInChapter()
                             }
                         )
                         AppIconButton(
                             imageVector = Icons.Default.Report,
-                            contentDescription = "Report broken chapter",
+                            contentDescription = localizeHelper.localize(Res.string.report_broken_chapter),
                             onClick = {
                                 vm.toggleReportDialog()
                             }
                         )
                         AppIconButton(
                             imageVector = Icons.Default.BrightnessHigh,
-                            contentDescription = "Brightness",
+                            contentDescription = localizeHelper.localize(Res.string.brightness),
                             onClick = {
                                 vm.showBrightnessControl = !vm.showBrightnessControl
                             }

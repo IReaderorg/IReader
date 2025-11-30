@@ -20,6 +20,7 @@ import androidx.compose.ui.window.Dialog
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun ParagraphTranslationMenu(
@@ -29,6 +30,7 @@ fun ParagraphTranslationMenu(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     DropdownMenu(
         expanded = true,
         onDismissRequest = onDismiss,
@@ -45,7 +47,7 @@ fun ParagraphTranslationMenu(
                         contentDescription = null,
                         modifier = Modifier.size(20.dp)
                     )
-                    Text("Translate")
+                    Text(localizeHelper.localize(Res.string.translate_action))
                 }
             },
             onClick = {
@@ -65,7 +67,7 @@ fun ParagraphTranslationMenu(
                         contentDescription = null,
                         modifier = Modifier.size(20.dp)
                     )
-                    Text("Copy")
+                    Text(localizeHelper.localize(Res.string.copy))
                 }
             },
             onClick = {

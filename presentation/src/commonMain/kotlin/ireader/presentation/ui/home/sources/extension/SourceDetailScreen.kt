@@ -29,6 +29,7 @@ import ireader.presentation.imageloader.IImageLoader
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.util.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 data class SourceDetailScreen(
     val catalog: Catalog
@@ -68,6 +69,7 @@ private fun SourceDetailContent(
     catalog: Catalog,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scrollState = rememberScrollState()
     val reportBrokenSourceUseCase: ReportBrokenSourceUseCase = koinInject()
     val scope = rememberCoroutineScope()
@@ -185,7 +187,7 @@ private fun SourceDetailContent(
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Report as Broken")
+            Text(localizeHelper.localize(Res.string.report_as_broken))
         }
 
         // Statistics Section (if available)
@@ -277,6 +279,7 @@ private fun ReportSourceDialog(
     onDismiss: () -> Unit,
     onConfirm: (reason: String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var reason by remember { mutableStateOf("") }
     
     AlertDialog(
@@ -307,7 +310,7 @@ private fun ReportSourceDialog(
                     value = reason,
                     onValueChange = { reason = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("e.g., Source not loading, broken search, missing content...") },
+                    placeholder = { Text(localizeHelper.localize(Res.string.eg_source_not_loading_broken)) },
                     minLines = 3,
                     maxLines = 5
                 )
@@ -328,12 +331,12 @@ private fun ReportSourceDialog(
                 },
                 enabled = reason.isNotBlank()
             ) {
-                Text("Submit Report")
+                Text(localizeHelper.localize(Res.string.submit_report))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

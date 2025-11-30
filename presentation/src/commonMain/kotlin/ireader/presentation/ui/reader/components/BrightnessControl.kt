@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Brightness control overlay for the reader with tap-outside-to-dismiss behavior
@@ -33,6 +35,7 @@ fun BrightnessControl(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (visible) {
         // Full-screen overlay to capture outside clicks
         Box(
@@ -85,7 +88,7 @@ fun BrightnessControl(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.BrightnessLow,
-                                contentDescription = "Low brightness",
+                                contentDescription = localizeHelper.localize(Res.string.low_brightness),
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 modifier = Modifier.size(24.dp)
                             )
@@ -104,7 +107,7 @@ fun BrightnessControl(
                             
                             Icon(
                                 imageVector = Icons.Default.BrightnessHigh,
-                                contentDescription = "High brightness",
+                                contentDescription = localizeHelper.localize(Res.string.high_brightness),
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 modifier = Modifier.size(24.dp)
                             )
@@ -134,13 +137,14 @@ fun BrightnessButton(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.onSurface
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     IconButton(
         onClick = onClick,
         modifier = modifier
     ) {
         Icon(
             imageVector = Icons.Default.BrightnessHigh,
-            contentDescription = "Adjust brightness",
+            contentDescription = localizeHelper.localize(Res.string.adjust_brightness),
             tint = tint
         )
     }

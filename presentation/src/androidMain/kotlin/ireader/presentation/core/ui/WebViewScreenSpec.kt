@@ -80,6 +80,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.web.WebPageScreen
@@ -90,6 +91,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(
     ExperimentalMaterialApi::class,
@@ -123,7 +126,7 @@ actual data class WebViewScreenSpec actual constructor(
         val urlFocusRequester = remember { FocusRequester() }
         val focusManager = LocalFocusManager.current
         val webView = vm.webViewManager.webView
-
+        val localizeHelper = LocalLocalizeHelper.currentOrThrow
         // URL state
         val url by remember { derivedStateOf { vm.webUrl } }
         val source = vm.source
@@ -175,7 +178,7 @@ actual data class WebViewScreenSpec actual constructor(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.BookmarkAdd,
-                            contentDescription = "Fetch Actions",
+                            contentDescription = localizeHelper.localize(Res.string.fetch_actions),
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -349,6 +352,7 @@ private fun ModernWebViewTopBar(
     onGoBack: () -> Unit,
     onGoForward: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -372,7 +376,7 @@ private fun ModernWebViewTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = localizeHelper.localize(Res.string.close),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                     )
@@ -386,7 +390,7 @@ private fun ModernWebViewTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = localizeHelper.localize(Res.string.back),
                         tint = if (canGoBack) MaterialTheme.colorScheme.onSurface
                               else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
@@ -401,7 +405,7 @@ private fun ModernWebViewTopBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Forward",
+                        contentDescription = localizeHelper.localize(Res.string.forward),
                         tint = if (canGoForward) MaterialTheme.colorScheme.onSurface
                               else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
@@ -446,7 +450,7 @@ private fun ModernWebViewTopBar(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Check,
-                                        contentDescription = "Go",
+                                        contentDescription = localizeHelper.localize(Res.string.go),
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                                     )
@@ -484,14 +488,14 @@ private fun ModernWebViewTopBar(
                     if (isLoading) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Stop",
+                            contentDescription = localizeHelper.localize(Res.string.stop),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh",
+                            contentDescription = localizeHelper.localize(Res.string.refresh),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(ToolbarDimensions.MinimizedIconSize)
                         )

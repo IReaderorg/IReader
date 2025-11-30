@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.remote.Badge
 import ireader.presentation.ui.component.badges.ReviewBadgeDisplay
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun WriteReviewDialog(
@@ -23,6 +25,7 @@ fun WriteReviewDialog(
     userName: String? = null,
     primaryBadge: Badge? = null
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var rating by remember { mutableStateOf(initialRating) }
     var reviewText by remember { mutableStateOf(initialReviewText) }
     
@@ -57,7 +60,7 @@ fun WriteReviewDialog(
                 OutlinedTextField(
                     value = reviewText,
                     onValueChange = { reviewText = it },
-                    label = { Text("Review") },
+                    label = { Text(localizeHelper.localize(Res.string.review)) },
                     modifier = Modifier.fillMaxWidth().height(150.dp),
                     maxLines = 5
                 )
@@ -98,12 +101,12 @@ fun WriteReviewDialog(
                 },
                 enabled = rating > 0 && reviewText.isNotBlank()
             ) {
-                Text("Submit")
+                Text(localizeHelper.localize(Res.string.submit))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

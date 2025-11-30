@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Dialog for entering source login credentials
@@ -27,6 +28,7 @@ fun SourceLoginDialog(
     onDismiss: () -> Unit,
     onLogin: (username: String, password: String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -93,7 +95,7 @@ fun SourceLoginDialog(
                 },
                 enabled = username.isNotBlank() && password.isNotBlank()
             ) {
-                Text("Login")
+                Text(localizeHelper.localize(Res.string.login))
             }
         },
         dismissButton = {

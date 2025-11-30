@@ -14,6 +14,8 @@ import ireader.presentation.ui.settings.components.GradioConfigEditDialog
 import ireader.presentation.ui.settings.components.GradioTTSSection
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,17 +24,18 @@ fun AndroidTTSMManagerSettingsScreen(
     viewModel: AITTSSettingsViewModel,
     gradioViewModel: GradioTTSSettingsViewModel? = null
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val gradioState = gradioViewModel?.state?.collectAsState()?.value
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("TTS Engine Manager") },
+                title = { Text(localizeHelper.localize(Res.string.tts_engine_manager)) },
                 navigationIcon = {
                     AppIconButton(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = localizeHelper.localize(Res.string.back),
                         onClick = onBackPressed
                     )
                 }

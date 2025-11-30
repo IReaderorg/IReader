@@ -18,6 +18,8 @@ import ireader.domain.services.tts.VoiceSelectionState
 import ireader.domain.services.tts.VoiceSource
 import ireader.domain.services.tts.VoiceSourceType
 import ireader.domain.services.tts.VoiceWithSource
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Enhanced voice selector that supports both built-in and plugin voices
@@ -127,6 +129,7 @@ private fun VoiceFilterSection(
     state: VoiceSelectionState,
     onFilterChanged: (VoiceFilter) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -165,7 +168,7 @@ private fun VoiceFilterSection(
                     onClick = {
                         onFilterChanged(state.filter.copy(language = null))
                     },
-                    label = { Text("All Languages") }
+                    label = { Text(localizeHelper.localize(Res.string.all_languages)) }
                 )
                 
                 // Show first few languages

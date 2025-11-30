@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import ireader.core.system.HealthCheckResult
 import ireader.core.system.HealthStatus
 import ireader.core.system.SystemInfo
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Diagnostics screen for system information and troubleshooting
@@ -28,10 +30,11 @@ fun DiagnosticsScreen(
     onClearCache: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("System Diagnostics") }
+                title = { Text(localizeHelper.localize(Res.string.system_diagnostics)) }
             )
         },
         modifier = modifier
@@ -74,6 +77,7 @@ private fun HealthStatusCard(
     onRunHealthCheck: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -123,7 +127,7 @@ private fun HealthStatusCard(
                 IconButton(onClick = onRunHealthCheck) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Run Health Check"
+                        contentDescription = localizeHelper.localize(Res.string.run_health_check)
                     )
                 }
             }
@@ -250,6 +254,7 @@ private fun DiagnosticActionsCard(
     onClearCache: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -270,7 +275,7 @@ private fun DiagnosticActionsCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Export Diagnostics")
+                Text(localizeHelper.localize(Res.string.export_diagnostics))
             }
             
             OutlinedButton(
@@ -283,7 +288,7 @@ private fun DiagnosticActionsCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Clear Cache")
+                Text(localizeHelper.localize(Res.string.clear_cache))
             }
         }
     }

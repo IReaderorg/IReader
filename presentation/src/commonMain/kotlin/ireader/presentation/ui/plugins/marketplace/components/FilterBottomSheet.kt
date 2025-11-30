@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.IBackHandler
 import ireader.presentation.ui.plugins.marketplace.PriceFilter
 import ireader.presentation.ui.plugins.marketplace.SortOrder
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Bottom sheet for filtering and sorting plugins
@@ -31,6 +33,7 @@ fun FilterBottomSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Handle back button to dismiss the sheet
     IBackHandler(enabled = true, onBack = onDismiss)
     
@@ -127,7 +130,7 @@ fun FilterBottomSheet(
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Apply Filters")
+                Text(localizeHelper.localize(Res.string.apply_filters))
             }
             
             Spacer(modifier = Modifier.height(16.dp))

@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.core.update.UpdateInfo
 import ireader.core.update.UpdateState
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Card component for displaying app update notifications
@@ -60,6 +62,7 @@ private fun UpdateAvailableCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -98,7 +101,7 @@ private fun UpdateAvailableCard(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Dismiss",
+                            contentDescription = localizeHelper.localize(Res.string.dismiss),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -137,7 +140,7 @@ private fun UpdateAvailableCard(
                 
                 if (updateInfo.isRequired) {
                     Badge {
-                        Text("Required")
+                        Text(localizeHelper.localize(Res.string.required))
                     }
                 }
             }
@@ -154,7 +157,7 @@ private fun UpdateAvailableCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Download Update")
+                Text(localizeHelper.localize(Res.string.download_update))
             }
         }
     }
@@ -214,6 +217,7 @@ private fun DownloadedCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -251,7 +255,7 @@ private fun DownloadedCard(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Dismiss",
+                        contentDescription = localizeHelper.localize(Res.string.dismiss),
                         tint = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
@@ -269,7 +273,7 @@ private fun DownloadedCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Install Now")
+                Text(localizeHelper.localize(Res.string.install_now))
             }
         }
     }

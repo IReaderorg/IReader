@@ -28,6 +28,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.SuperSmallTextComposable
 import kotlinx.coroutines.flow.StateFlow
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Common TTS Screen State that works across platforms
@@ -107,6 +108,7 @@ fun TTSContentDisplay(
     isTabletOrDesktop: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val displayContent = if (state.showTranslation && state.translatedContent != null) {
         state.translatedContent
     } else {
@@ -285,7 +287,7 @@ fun TTSContentDisplay(
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         imageVector = Icons.Default.Translate,
-                        contentDescription = "Translated",
+                        contentDescription = localizeHelper.localize(Res.string.translated),
                         modifier = Modifier.size(12.dp),
                         tint = textColor.copy(alpha = 0.7f)
                     )
@@ -307,6 +309,7 @@ fun TTSMediaControls(
     isTabletOrDesktop: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
@@ -347,7 +350,7 @@ fun TTSMediaControls(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Schedule,
-                                        contentDescription = "Sleep Timer",
+                                        contentDescription = localizeHelper.localize(Res.string.sleep_timer),
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.tertiary
                                     )
@@ -473,6 +476,7 @@ private fun DesktopTTSControls(
     state: CommonTTSScreenState,
     actions: CommonTTSActions
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -536,7 +540,7 @@ private fun DesktopTTSControls(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Select Engine",
+                        contentDescription = localizeHelper.localize(Res.string.select_engine),
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -553,7 +557,7 @@ private fun DesktopTTSControls(
                 ) {
                     Icon(
                         imageVector = Icons.Default.RecordVoiceOver,
-                        contentDescription = "Select Voice",
+                        contentDescription = localizeHelper.localize(Res.string.select_voice),
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -593,7 +597,7 @@ private fun DesktopTTSControls(
                 FilterChip(
                     selected = state.showTranslation,
                     onClick = { actions.onToggleTranslation() },
-                    label = { Text("Show Translation") },
+                    label = { Text(localizeHelper.localize(Res.string.show_translation)) },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Translate,
@@ -606,7 +610,7 @@ private fun DesktopTTSControls(
                 FilterChip(
                     selected = state.bilingualMode,
                     onClick = { actions.onToggleBilingualMode() },
-                    label = { Text("Bilingual") },
+                    label = { Text(localizeHelper.localize(Res.string.bilingual)) },
                     enabled = state.showTranslation
                 )
             }
@@ -623,6 +627,7 @@ private fun MobileTTSControls(
     state: CommonTTSScreenState,
     actions: CommonTTSActions
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val hasTranslation = state.translatedContent != null && state.translatedContent.isNotEmpty()
     
     Row(
@@ -637,7 +642,7 @@ private fun MobileTTSControls(
         ) {
             Icon(
                 Icons.Default.Speed,
-                contentDescription = "Speed",
+                contentDescription = localizeHelper.localize(Res.string.speed),
                 modifier = Modifier.size(16.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -679,7 +684,7 @@ private fun MobileTTSControls(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ViewAgenda,
-                            contentDescription = "Bilingual Mode",
+                            contentDescription = localizeHelper.localize(Res.string.bilingual_mode),
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -737,6 +742,7 @@ fun TTSSettingsPanelCommon(
     isTabletOrDesktop: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scrollState = rememberScrollState()
     
     Surface(
@@ -821,11 +827,11 @@ fun TTSSettingsPanelCommon(
                             ) {
                                 Icon(
                                     Icons.Default.Settings,
-                                    contentDescription = "Engine Settings",
+                                    contentDescription = localizeHelper.localize(Res.string.engine_settings),
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Engine Settings")
+                                Text(localizeHelper.localize(Res.string.engine_settings))
                             }
                         }
                         
@@ -1104,6 +1110,7 @@ private fun ColorPickerCommon(
     colors: List<Color>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1124,7 +1131,7 @@ private fun ColorPickerCommon(
                 if (color == selectedColor) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
+                        contentDescription = localizeHelper.localize(Res.string.selected),
                         tint = if (color.luminance() > 0.5f) Color.Black else Color.White,
                         modifier = Modifier.size(20.dp)
                     )
@@ -1183,10 +1190,11 @@ fun DownloadProgressDialog(
     onCancel: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (isDownloading) {
         AlertDialog(
             onDismissRequest = { /* Prevent dismissal during download */ },
-            title = { Text("Downloading Chapter Audio") },
+            title = { Text(localizeHelper.localize(Res.string.downloading_chapter_audio)) },
             text = {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -1228,7 +1236,7 @@ fun DownloadProgressDialog(
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = onCancel) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )

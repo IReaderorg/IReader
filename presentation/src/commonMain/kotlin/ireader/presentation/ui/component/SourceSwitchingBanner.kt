@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Banner that displays when a better source is available for a book
@@ -26,6 +28,7 @@ fun SourceSwitchingBanner(
     modifier: Modifier = Modifier,
     visible: Boolean = true
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
         visible = visible,
         enter = expandVertically(),
@@ -88,7 +91,7 @@ fun SourceSwitchingBanner(
                             contentColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text("Switch")
+                        Text(localizeHelper.localize(Res.string.switch))
                     }
                     
                     IconButton(
@@ -97,7 +100,7 @@ fun SourceSwitchingBanner(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Dismiss",
+                            contentDescription = localizeHelper.localize(Res.string.dismiss),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -117,10 +120,11 @@ fun MigrationProgressDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = { /* Prevent dismissal during migration */ },
         title = {
-            Text("Migrating Source")
+            Text(localizeHelper.localize(Res.string.migrating_source))
         },
         text = {
             Column(
@@ -147,7 +151,7 @@ fun MigrationProgressDialog(
         confirmButton = {
             if (progress >= 1.0f) {
                 TextButton(onClick = onDismiss) {
-                    Text("Done")
+                    Text(localizeHelper.localize(Res.string.done))
                 }
             }
         },

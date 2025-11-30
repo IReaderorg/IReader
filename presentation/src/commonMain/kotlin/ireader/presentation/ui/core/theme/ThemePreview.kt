@@ -17,6 +17,8 @@ import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeColorScheme
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Preview composable for theme options
@@ -27,6 +29,7 @@ fun ThemePreview(
     theme: Theme,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AppColors(
         materialColors = theme.materialColors.toComposeColorScheme(),
         extraColors = theme.extraColors,
@@ -81,7 +84,7 @@ fun ThemePreview(
                             contentColor = theme.materialColors.onPrimary.toComposeColor()
                         )
                     ) {
-                        Text("Primary Button")
+                        Text(localizeHelper.localize(Res.string.primary_button))
                     }
                     
                     // Secondary button
@@ -92,7 +95,7 @@ fun ThemePreview(
                             contentColor = theme.materialColors.secondary.toComposeColor()
                         )
                     ) {
-                        Text("Secondary Button")
+                        Text(localizeHelper.localize(Res.string.secondary_button))
                     }
                     
                     // Card preview

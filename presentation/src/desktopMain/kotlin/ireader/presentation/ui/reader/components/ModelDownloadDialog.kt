@@ -11,6 +11,8 @@ import ireader.domain.services.tts_service.piper.DownloadProgress
 import ireader.domain.services.tts_service.piper.VoiceModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog showing download progress for a voice model
@@ -23,6 +25,7 @@ fun ModelDownloadDialog(
     onDownloadComplete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var progress by remember { mutableStateOf<DownloadProgress?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     
@@ -119,14 +122,14 @@ fun ModelDownloadDialog(
         confirmButton = {
             if (progress?.status == "Complete" || error != null) {
                 Button(onClick = onDismiss) {
-                    Text("Close")
+                    Text(localizeHelper.localize(Res.string.close))
                 }
             }
         },
         dismissButton = {
             if (progress?.status != "Complete" && error == null) {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         }

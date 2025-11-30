@@ -17,6 +17,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced library settings screen following Mihon's LibrarySettingsScreenModel.
@@ -30,6 +31,7 @@ fun SettingsLibraryScreen(
     viewModel: SettingsLibraryViewModel,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberSaveable(
         key = "settings_library_scroll_state",
         saver = LazyListState.Saver
@@ -332,7 +334,7 @@ fun SettingsLibraryScreen(
     if (viewModel.showDefaultSortDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissDefaultSortDialog() },
-            title = { Text("Default Sort") },
+            title = { Text(localizeHelper.localize(Res.string.default_sort)) },
             text = {
                 Column {
                     val sortOptions = listOf(
@@ -367,7 +369,7 @@ fun SettingsLibraryScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissDefaultSortDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -377,7 +379,7 @@ fun SettingsLibraryScreen(
     if (viewModel.showUpdateIntervalDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissUpdateIntervalDialog() },
-            title = { Text("Update Interval") },
+            title = { Text(localizeHelper.localize(Res.string.update_interval)) },
             text = {
                 Column {
                     val intervals = listOf(
@@ -414,7 +416,7 @@ fun SettingsLibraryScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissUpdateIntervalDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -424,7 +426,7 @@ fun SettingsLibraryScreen(
     if (viewModel.showUpdateRestrictionsDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissUpdateRestrictionsDialog() },
-            title = { Text("Update Restrictions") },
+            title = { Text(localizeHelper.localize(Res.string.update_restrictions)) },
             text = {
                 Column {
                     Text(
@@ -468,7 +470,7 @@ fun SettingsLibraryScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissUpdateRestrictionsDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )

@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun BiometricAuthScreen(
@@ -17,6 +19,7 @@ fun BiometricAuthScreen(
     onCancel: () -> Unit,
     onFallbackToPinPassword: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     
     Surface(
@@ -70,7 +73,7 @@ fun BiometricAuthScreen(
                 onClick = onFallbackToPinPassword,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Use PIN/Password Instead")
+                Text(localizeHelper.localize(Res.string.use_pinpassword_instead))
             }
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -79,7 +82,7 @@ fun BiometricAuthScreen(
                 onClick = onCancel,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     }

@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog for writing a review with rating picker and text input
@@ -21,6 +23,7 @@ fun WriteReviewDialog(
     onSubmit: (rating: Float, reviewText: String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var rating by remember { mutableStateOf(0f) }
     var reviewText by remember { mutableStateOf("") }
     
@@ -60,8 +63,8 @@ fun WriteReviewDialog(
                 OutlinedTextField(
                     value = reviewText,
                     onValueChange = { reviewText = it },
-                    label = { Text("Your Review (Optional)") },
-                    placeholder = { Text("Share your experience with this plugin...") },
+                    label = { Text(localizeHelper.localize(Res.string.your_review_optional)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.share_your_experience_with_this_plugin)) },
                     minLines = 4,
                     maxLines = 8,
                     modifier = Modifier.fillMaxWidth()
@@ -73,12 +76,12 @@ fun WriteReviewDialog(
                 onClick = { onSubmit(rating, reviewText) },
                 enabled = rating > 0
             ) {
-                Text("Submit")
+                Text(localizeHelper.localize(Res.string.submit))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

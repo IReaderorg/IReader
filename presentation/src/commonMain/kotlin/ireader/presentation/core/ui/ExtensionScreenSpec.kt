@@ -49,6 +49,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 object ExtensionScreenSpec : Tab {
 
@@ -272,6 +273,7 @@ private fun AddRepositoryDialog(
     onDismiss: () -> Unit,
     onAdd: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var url by remember { mutableStateOf("") }
     var isValidUrl by remember { mutableStateOf(false) }
     
@@ -285,7 +287,7 @@ private fun AddRepositoryDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Add Repository")
+            Text(localizeHelper.localize(Res.string.add_repository))
         },
         text = {
             Column {
@@ -299,7 +301,7 @@ private fun AddRepositoryDialog(
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("Repository URL") },
+                    label = { Text(localizeHelper.localize(Res.string.repository_url)) },
                     placeholder = { Text("https://example.com/repo.json") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -329,12 +331,12 @@ private fun AddRepositoryDialog(
                 onClick = { onAdd(url) },
                 enabled = isValidUrl
             ) {
-                Text("Add")
+                Text(localizeHelper.localize(Res.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

@@ -32,6 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 data class ChangelogEntry(
     val version: String,
@@ -50,18 +52,19 @@ fun ChangelogScreen(
     modifier: Modifier = Modifier,
     onPopBackStack: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val changelogEntries = getChangelogData()
     
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("What's New") },
+                title = { Text(localizeHelper.localize(Res.string.whats_new_1)) },
                 navigationIcon = {
                     IconButton(onClick = onPopBackStack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 },

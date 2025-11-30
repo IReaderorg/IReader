@@ -29,6 +29,7 @@ import ireader.presentation.imageloader.IImageLoader
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.util.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced SourceDetailScreen following Mihon's comprehensive information display patterns.
@@ -539,6 +540,7 @@ private fun EnhancedReportSourceDialog(
     onDismiss: () -> Unit,
     onConfirm: (reason: String) -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var reason by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("") }
     
@@ -604,7 +606,7 @@ private fun EnhancedReportSourceDialog(
                     value = reason,
                     onValueChange = { reason = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Please provide more details about the issue...") },
+                    placeholder = { Text(localizeHelper.localize(Res.string.please_provide_more_details_about_the_issue)) },
                     minLines = 3,
                     maxLines = 5
                 )

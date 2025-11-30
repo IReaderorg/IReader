@@ -571,7 +571,7 @@ fun AppearanceSettingScreen(
                             modifier = Modifier.weight(1f),
                             enabled = vm.colorTheme.value > 0
                         ) {
-                            Text("Export Theme")
+                            Text(localizeHelper.localize(Res.string.export_theme))
                         }
                         
                         // Export all themes button
@@ -582,7 +582,7 @@ fun AppearanceSettingScreen(
                             },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Backup All")
+                            Text(localizeHelper.localize(Res.string.backup_all))
                         }
                     }
                     
@@ -593,7 +593,7 @@ fun AppearanceSettingScreen(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Import Theme")
+                        Text(localizeHelper.localize(Res.string.import_theme))
                     }
                 }
             }.Build()
@@ -676,10 +676,10 @@ fun AppearanceSettingScreen(
         var importText by remember { mutableStateOf("") }
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { vm.showImportDialog = false },
-            title = { Text("Import Theme") },
+            title = { Text(localizeHelper.localize(Res.string.import_theme)) },
             text = {
                 Column {
-                    Text("Paste the theme JSON below:")
+                    Text(localizeHelper.localize(Res.string.paste_the_theme_json_below))
                     androidx.compose.foundation.layout.Spacer(modifier = Modifier.requiredHeight(8.dp))
                     androidx.compose.material3.OutlinedTextField(
                         value = importText,
@@ -690,7 +690,7 @@ fun AppearanceSettingScreen(
                         textStyle = MaterialTheme.typography.bodySmall.copy(
                             fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
                         ),
-                        placeholder = { Text("Paste JSON here...") }
+                        placeholder = { Text(localizeHelper.localize(Res.string.paste_json_here)) }
                     )
                 }
             },
@@ -709,12 +709,12 @@ fun AppearanceSettingScreen(
                     },
                     enabled = importText.isNotBlank()
                 ) {
-                    Text("Import")
+                    Text(localizeHelper.localize(Res.string.import_action))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { vm.showImportDialog = false }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )

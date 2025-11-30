@@ -11,6 +11,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * TTS control panel with playback controls and speed adjustment
@@ -28,6 +30,7 @@ fun TTSControlPanel(
     onSpeechRateChanged: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -82,7 +85,7 @@ fun TTSControlPanel(
                 ) {
                     Icon(
                         Icons.Default.SkipPrevious,
-                        contentDescription = "Skip backward 10 seconds",
+                        contentDescription = localizeHelper.localize(Res.string.skip_backward_10_seconds),
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -110,7 +113,7 @@ fun TTSControlPanel(
                 ) {
                     Icon(
                         Icons.Default.SkipNext,
-                        contentDescription = "Skip forward 10 seconds",
+                        contentDescription = localizeHelper.localize(Res.string.skip_forward_10_seconds),
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -129,7 +132,7 @@ fun TTSControlPanel(
             ) {
                 Icon(
                     Icons.Default.Speed,
-                    contentDescription = "Speed",
+                    contentDescription = localizeHelper.localize(Res.string.speed),
                     modifier = Modifier.size(24.dp)
                 )
                 

@@ -45,6 +45,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Unified TTS Screen Spec - Works across all platforms
@@ -633,6 +634,7 @@ private fun FloatingFullscreenControlsCommon(
     actions: CommonTTSActions,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val hasTranslation = state.translatedContent != null && state.translatedContent.isNotEmpty()
     
     Row(
@@ -651,7 +653,7 @@ private fun FloatingFullscreenControlsCommon(
             ) {
                 Icon(
                     imageVector = Icons.Default.Translate,
-                    contentDescription = "Toggle Translation",
+                    contentDescription = localizeHelper.localize(Res.string.toggle_translation),
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -678,7 +680,7 @@ private fun FloatingFullscreenControlsCommon(
         ) {
             Icon(
                 imageVector = Icons.Default.FullscreenExit,
-                contentDescription = "Exit Fullscreen",
+                contentDescription = localizeHelper.localize(Res.string.exit_fullscreen),
                 modifier = Modifier.size(20.dp)
             )
         }

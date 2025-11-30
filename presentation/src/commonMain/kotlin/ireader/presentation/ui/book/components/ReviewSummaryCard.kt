@@ -27,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Compact review summary card for BookDetailScreen
@@ -41,6 +43,7 @@ fun ReviewSummaryCard(
     onWriteReview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -128,7 +131,7 @@ fun ReviewSummaryCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.RateReview,
-                        contentDescription = "Write Review",
+                        contentDescription = localizeHelper.localize(Res.string.write_review),
                         modifier = Modifier.size(20.dp)
                     )
                 }

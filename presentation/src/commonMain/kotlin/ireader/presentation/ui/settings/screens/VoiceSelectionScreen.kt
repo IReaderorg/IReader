@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.settings.components.VoiceCard
 import ireader.presentation.ui.settings.viewmodels.VoiceSelectionViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Voice selection screen for choosing TTS voices
@@ -59,13 +61,14 @@ fun VoiceSelectionContent(
     onNavigateBack: () -> Unit,
     onErrorDismissed: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Select Voice") },
+                title = { Text(localizeHelper.localize(Res.string.select_voice)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 }
             )
@@ -83,7 +86,7 @@ fun VoiceSelectionContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Search voices...") },
+                placeholder = { Text(localizeHelper.localize(Res.string.search_voices)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true
             )
@@ -100,7 +103,7 @@ fun VoiceSelectionContent(
                     FilterChip(
                         selected = state.selectedLanguage == null,
                         onClick = { onLanguageSelected(null) },
-                        label = { Text("All") }
+                        label = { Text(localizeHelper.localize(Res.string.all)) }
                     )
                 }
                 
@@ -147,7 +150,7 @@ fun VoiceSelectionContent(
                 modifier = Modifier.padding(16.dp),
                 action = {
                     TextButton(onClick = onErrorDismissed) {
-                        Text("Dismiss")
+                        Text(localizeHelper.localize(Res.string.dismiss))
                     }
                 }
             ) {

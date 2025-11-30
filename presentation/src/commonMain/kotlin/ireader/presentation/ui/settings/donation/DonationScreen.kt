@@ -56,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.domain.models.donation.CryptoType
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +66,7 @@ fun DonationScreen(
     modifier: Modifier = Modifier,
     onPopBackStack: () -> Unit = {}
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val clipboardManager = LocalClipboardManager.current
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
@@ -88,12 +91,12 @@ fun DonationScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Support Development") },
+                title = { Text(localizeHelper.localize(Res.string.support_development)) },
                 navigationIcon = {
                     IconButton(onClick = onPopBackStack) {
                         Icon(
                             imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 },
@@ -374,6 +377,7 @@ private fun DisclaimerCard() {
 private fun CardPaymentCard(
     onDonateClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -414,7 +418,7 @@ private fun CardPaymentCard(
                 onClick = onDonateClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Donate Now")
+                Text(localizeHelper.localize(Res.string.donate_now))
             }
         }
     }
@@ -448,6 +452,7 @@ private fun WalletCard(
     onQRClick: () -> Unit,
     onOpenWallet: () -> Unit = {}
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -529,7 +534,7 @@ private fun WalletCard(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Open in Wallet")
+                    Text(localizeHelper.localize(Res.string.open_in_wallet))
                 }
                 
                 // Secondary actions
@@ -547,7 +552,7 @@ private fun WalletCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Copy")
+                        Text(localizeHelper.localize(Res.string.copy))
                     }
                     
                     OutlinedButton(
@@ -560,7 +565,7 @@ private fun WalletCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("QR Code")
+                        Text(localizeHelper.localize(Res.string.qr_code))
                     }
                 }
             }
@@ -574,6 +579,7 @@ private fun QRCodeDialog(
     address: String,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val qrCodeBitmap = remember(address) {
         QRCodeGenerator.generateQRCode(address)
     }
@@ -653,7 +659,7 @@ private fun QRCodeDialog(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Close")
+                    Text(localizeHelper.localize(Res.string.close))
                 }
             }
         }

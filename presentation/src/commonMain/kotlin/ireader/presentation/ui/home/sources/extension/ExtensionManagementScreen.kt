@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Enhanced extension management screen with security and statistics
@@ -28,15 +29,15 @@ fun ExtensionManagementScreen(
     onBatchUpdate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val localizeHelper = LocalLocalizeHelper.current
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Extension Management") },
+                title = { Text(localizeHelper.localize(Res.string.extension_management)) },
                 actions = {
                     IconButton(onClick = onBatchUpdate) {
-                        Icon(Icons.Default.Update, contentDescription = "Update All")
+                        Icon(Icons.Default.Update, contentDescription = localizeHelper.localize(Res.string.update_all))
                     }
                 }
             )
@@ -70,6 +71,7 @@ private fun ExtensionManagementCard(
     onUninstall: () -> Unit,
     onUpdate: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     
     Card(
@@ -126,7 +128,7 @@ private fun ExtensionManagementCard(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Security")
+                            Text(localizeHelper.localize(Res.string.security))
                         }
                         
                         OutlinedButton(
@@ -139,7 +141,7 @@ private fun ExtensionManagementCard(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Stats")
+                            Text(localizeHelper.localize(Res.string.stats))
                         }
                     }
                     
@@ -157,7 +159,7 @@ private fun ExtensionManagementCard(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Update")
+                            Text(localizeHelper.localize(Res.string.update))
                         }
                         
                         OutlinedButton(
@@ -173,7 +175,7 @@ private fun ExtensionManagementCard(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Uninstall")
+                            Text(localizeHelper.localize(Res.string.uninstall))
                         }
                     }
                 }

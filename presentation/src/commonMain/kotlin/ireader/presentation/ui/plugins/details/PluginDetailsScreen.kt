@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.plugins.details.components.*
 import ireader.presentation.ui.plugins.details.components.ResourceUsageSection
 import ireader.presentation.ui.plugins.details.components.ResourceUsageHistoryGraph
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Plugin Details screen showing comprehensive plugin information
@@ -28,6 +30,7 @@ fun PluginDetailsScreen(
     onPluginClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state
     
     Scaffold(
@@ -38,7 +41,7 @@ fun PluginDetailsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 }
@@ -278,6 +281,7 @@ private fun ErrorState(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -301,7 +305,7 @@ private fun ErrorState(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(localizeHelper.localize(Res.string.retry))
             }
         }
     }
@@ -316,6 +320,7 @@ private fun EnablePluginFeatureDialog(
     onGoToSettings: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -351,12 +356,12 @@ private fun EnablePluginFeatureDialog(
         },
         confirmButton = {
             Button(onClick = onEnableAndContinue) {
-                Text("Enable & Continue")
+                Text(localizeHelper.localize(Res.string.enable_continue))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

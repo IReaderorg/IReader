@@ -24,6 +24,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.DonationLeaderboardEntry
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun DonationLeaderboardContent(
@@ -154,6 +156,7 @@ fun DonationLeaderboardContent(
 
 @Composable
 private fun EmptyDonationLeaderboardState(onRefresh: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -188,7 +191,7 @@ private fun EmptyDonationLeaderboardState(onRefresh: () -> Unit) {
             ) {
                 Icon(Icons.Default.Refresh, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Refresh")
+                Text(localizeHelper.localize(Res.string.refresh))
             }
         }
     }

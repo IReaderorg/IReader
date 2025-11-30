@@ -33,7 +33,7 @@ import ireader.domain.models.entities.Book
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.no_chapter_is_available
 import ireader.i18n.resources.resume
 import ireader.i18n.resources.source_not_available

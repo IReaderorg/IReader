@@ -18,6 +18,8 @@ import ireader.domain.plugins.PluginManager
 import ireader.presentation.ui.component.components.Divider
 import ireader.presentation.ui.core.theme.*
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Section for displaying plugin themes in appearance settings
@@ -31,6 +33,7 @@ fun PluginThemeSection(
     currentThemeId: Long,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val pluginExtension = rememberPluginThemeIntegration(pluginManager, viewModel)
     val allThemes by pluginExtension.getAllThemesFlow().collectAsState()
     val errors by rememberThemeErrors(pluginExtension.getErrorHandler())
@@ -85,7 +88,7 @@ fun PluginThemeSection(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Reload plugin themes",
+                        contentDescription = localizeHelper.localize(Res.string.reload_plugin_themes),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -128,7 +131,7 @@ fun PluginThemeSection(
                         TextButton(
                             onClick = { pluginExtension.getErrorHandler().clearErrors() }
                         ) {
-                            Text("Dismiss")
+                            Text(localizeHelper.localize(Res.string.dismiss))
                         }
                     }
                 }

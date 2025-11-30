@@ -8,6 +8,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginMonetization
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Purchase dialog for premium plugins
@@ -20,6 +22,7 @@ fun PurchaseDialog(
     onStartTrial: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val monetization = plugin.manifest.monetization as? PluginMonetization.Premium ?: return
     
     AlertDialog(
@@ -75,18 +78,18 @@ fun PurchaseDialog(
         },
         confirmButton = {
             Button(onClick = onPurchase) {
-                Text("Purchase")
+                Text(localizeHelper.localize(Res.string.purchase))
             }
         },
         dismissButton = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 monetization.trialDays?.let {
                     TextButton(onClick = onStartTrial) {
-                        Text("Start Trial")
+                        Text(localizeHelper.localize(Res.string.start_trial))
                     }
                 }
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         }

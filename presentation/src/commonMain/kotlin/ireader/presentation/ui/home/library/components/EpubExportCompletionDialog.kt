@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import ireader.core.util.StorageUtil
 import ireader.i18n.localize
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 /**
  * Result of EPUB export operation

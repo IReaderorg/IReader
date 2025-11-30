@@ -24,6 +24,8 @@ import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.accessibility.AccessibilityUtils
 import ireader.presentation.ui.component.accessibility.AccessibilityUtils.accessibleClickable
 import ireader.core.log.IReaderLog
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Accessibility-enhanced book list item following Mihon's patterns
@@ -41,6 +43,7 @@ fun AccessibleBookListItem(
     showAuthor: Boolean = true,
     showDescription: Boolean = false,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var contentDescription = buildString {
         append("Book: ${book.title}")
         if (showAuthor && book.author.isNotBlank()) {
@@ -143,7 +146,7 @@ fun AccessibleBookListItem(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.semantics {
-                                contentDescription = "Favorited"
+                                contentDescription = localizeHelper.localize(Res.string.favorited)
                             }
                         )
                     }

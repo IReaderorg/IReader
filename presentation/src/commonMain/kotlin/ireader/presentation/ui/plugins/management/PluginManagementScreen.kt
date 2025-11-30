@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.plugins.management.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Plugin Management screen for managing installed plugins
@@ -27,17 +29,18 @@ fun PluginManagementScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Installed Plugins") },
+                title = { Text(localizeHelper.localize(Res.string.installed_plugins)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 },
@@ -50,7 +53,7 @@ fun PluginManagementScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Update,
-                                contentDescription = "Update All"
+                                contentDescription = localizeHelper.localize(Res.string.update_all)
                             )
                         }
                     }
@@ -59,7 +62,7 @@ fun PluginManagementScreen(
                     IconButton(onClick = viewModel::loadInstalledPlugins) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = localizeHelper.localize(Res.string.refresh)
                         )
                     }
                 }
@@ -250,6 +253,7 @@ private fun ErrorState(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -273,7 +277,7 @@ private fun ErrorState(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(localizeHelper.localize(Res.string.retry))
             }
         }
     }
@@ -316,6 +320,7 @@ private fun EnablePluginFeatureDialog(
     onEnableAndContinue: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -351,12 +356,12 @@ private fun EnablePluginFeatureDialog(
         },
         confirmButton = {
             Button(onClick = onEnableAndContinue) {
-                Text("Enable & Continue")
+                Text(localizeHelper.localize(Res.string.enable_continue))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

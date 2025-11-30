@@ -18,6 +18,8 @@ import coil3.toUri
 import io.ktor.http.*
 import ireader.domain.models.BookCover
 import ireader.presentation.imageloader.IImageLoader
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun IBookImageComposable(
@@ -27,11 +29,12 @@ fun IBookImageComposable(
         contentScale: ContentScale = ContentScale.Crop,
         headers: ((url: String) -> okhttp3.Headers?)? = null
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     IImageLoader(
             modifier = modifier,
             contentScale = contentScale,
             model =  image.cover?.toUri(), // coil3 only supports Uri data type right now
-            contentDescription = "an image",
+            contentDescription = localizeHelper.localize(Res.string.an_image),
             alignment = alignment,
     )
 }

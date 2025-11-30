@@ -30,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.services.tts_service.piper.VoiceModel
 import kotlin.math.roundToInt
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Composable that displays a list of available voice models with metadata
@@ -109,6 +111,7 @@ private fun VoiceModelItem(
     onDeleteModel: (VoiceModel) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -161,7 +164,7 @@ private fun VoiceModelItem(
                     if (model.isDownloaded) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Downloaded",
+                            contentDescription = localizeHelper.localize(Res.string.downloaded),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -216,7 +219,7 @@ private fun VoiceModelItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.CloudDownload,
-                            contentDescription = "Download",
+                            contentDescription = localizeHelper.localize(Res.string.download),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -227,7 +230,7 @@ private fun VoiceModelItem(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
+                            contentDescription = localizeHelper.localize(Res.string.delete),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }

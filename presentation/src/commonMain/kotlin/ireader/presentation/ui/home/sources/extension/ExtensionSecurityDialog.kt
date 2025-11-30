@@ -27,7 +27,7 @@ fun ExtensionSecurityDialog(
     onTrustExtension: () -> Unit,
     onBlockExtension: () -> Unit,
 ) {
-    val localizeHelper = LocalLocalizeHelper.current
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -140,7 +140,7 @@ fun ExtensionSecurityDialog(
         confirmButton = {
             if (security.trustLevel != ExtensionTrustLevel.TRUSTED) {
                 TextButton(onClick = onTrustExtension) {
-                    Text("Trust")
+                    Text(localizeHelper.localize(Res.string.trust))
                 }
             }
         },
@@ -153,11 +153,11 @@ fun ExtensionSecurityDialog(
                             contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text("Block")
+                        Text(localizeHelper.localize(Res.string.block))
                     }
                 }
                 TextButton(onClick = onDismiss) {
-                    Text("Close")
+                    Text(localizeHelper.localize(Res.string.close))
                 }
             }
         }

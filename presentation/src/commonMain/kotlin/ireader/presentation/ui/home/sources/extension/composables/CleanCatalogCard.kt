@@ -27,6 +27,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.components.SourceStatusIndicator
 import ireader.presentation.ui.home.sources.extension.Language
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Flat, modern source item without cards
@@ -194,6 +195,7 @@ private fun CleanActions(
     sourceStatus: SourceStatus?,
     onLogin: (() -> Unit)?,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -217,7 +219,7 @@ private fun CleanActions(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Cancel",
+                        contentDescription = localizeHelper.localize(Res.string.cancel),
                         modifier = Modifier.size(16.dp)
                     )
                 }

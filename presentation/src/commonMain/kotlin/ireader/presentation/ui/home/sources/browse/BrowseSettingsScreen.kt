@@ -16,6 +16,7 @@ import ireader.i18n.UiEvent
 import ireader.i18n.asString
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.coroutines.flow.collectLatest
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,12 +45,12 @@ fun BrowseSettingsScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Browse Settings") },
+                title = { Text(localizeHelper.localize(Res.string.browse_settings)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = localizeHelper.localize(Res.string.navigate_back)
                         )
                     }
                 },
@@ -57,7 +58,7 @@ fun BrowseSettingsScreen(
                     IconButton(onClick = { vm.resetToDefaults() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Reset to defaults"
+                            contentDescription = localizeHelper.localize(Res.string.reset_to_defaults)
                         )
                     }
                 }

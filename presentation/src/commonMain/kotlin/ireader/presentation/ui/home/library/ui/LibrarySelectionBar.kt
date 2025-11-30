@@ -27,6 +27,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.core.theme.AppColors
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @Composable
@@ -40,6 +41,7 @@ internal fun LibrarySelectionBar(
     onClickDeleteDownload: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
         visible = visible,
         modifier = modifier,
@@ -63,7 +65,7 @@ internal fun LibrarySelectionBar(
                 IconButton(onClick = onClickChangeCategory) {
                     Icon(
                         imageVector = Icons.Outlined.Label,
-                        contentDescription = "Change category",
+                        contentDescription = localizeHelper.localize(Res.string.change_category),
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -77,21 +79,21 @@ internal fun LibrarySelectionBar(
                 IconButton(onClick = onClickDownloadUnread) {
                     Icon(
                         imageVector = Icons.Outlined.DownloadForOffline,
-                        contentDescription = "Download unread",
+                        contentDescription = localizeHelper.localize(Res.string.download_unread),
                         modifier = Modifier.size(24.dp)
                     )
                 }
                 IconButton(onClick = onClickMarkAsRead) {
                     Icon(
                         imageVector = Icons.Outlined.Done,
-                        contentDescription = "Mark as read",
+                        contentDescription = localizeHelper.localize(Res.string.mark_as_read),
                         modifier = Modifier.size(24.dp)
                     )
                 }
                 IconButton(onClick = onClickMarkAsUnread) {
                     Icon(
                         imageVector = Icons.Outlined.DoneOutline,
-                        contentDescription = "Mark as unread",
+                        contentDescription = localizeHelper.localize(Res.string.mark_as_unread),
                         modifier = Modifier.size(24.dp)
                     )
                 }

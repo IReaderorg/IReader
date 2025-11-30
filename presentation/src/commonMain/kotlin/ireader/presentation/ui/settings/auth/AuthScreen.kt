@@ -23,12 +23,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 class AuthScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: AuthViewModel = koinInject()
         val state by viewModel.state.collectAsState()
@@ -39,7 +42,7 @@ class AuthScreen  {
                     title = { Text(if (state.isSignUp) "Sign Up" else "Sign In") },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     }
                 )
@@ -89,7 +92,7 @@ class AuthScreen  {
                     OutlinedTextField(
                         value = state.email,
                         onValueChange = { viewModel.updateEmail(it) },
-                        label = { Text("Email") },
+                        label = { Text(localizeHelper.localize(Res.string.email)) },
                         leadingIcon = {
                             Icon(Icons.Default.Email, contentDescription = null)
                         },
@@ -109,7 +112,7 @@ class AuthScreen  {
                     OutlinedTextField(
                         value = state.password,
                         onValueChange = { viewModel.updatePassword(it) },
-                        label = { Text("Password") },
+                        label = { Text(localizeHelper.localize(Res.string.password)) },
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = null)
                         },

@@ -27,6 +27,7 @@ import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.home.updates.viewmodel.UpdateState
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,6 +116,7 @@ fun UpdatesRegularToolbar(
     onCategorySelected: (Long?) -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showCategoryMenu by remember { mutableStateOf(false) }
     
     Toolbar(
@@ -123,14 +125,14 @@ fun UpdatesRegularToolbar(
             if (categories.isNotEmpty()) {
                 Box {
                     IconButton(onClick = { showCategoryMenu = true }) {
-                        AppIcon(imageVector = Icons.Default.FilterList, contentDescription = "Filter by category")
+                        AppIcon(imageVector = Icons.Default.FilterList, contentDescription = localizeHelper.localize(Res.string.filter_by_category))
                     }
                     DropdownMenu(
                         expanded = showCategoryMenu,
                         onDismissRequest = { showCategoryMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("All Categories") },
+                            text = { Text(localizeHelper.localize(Res.string.all_categories)) },
                             onClick = {
                                 onCategorySelected(null)
                                 showCategoryMenu = false

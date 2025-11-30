@@ -42,6 +42,7 @@ import ireader.domain.data.engines.TranslateEngine
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun TranslationProgressIndicator(
@@ -54,6 +55,7 @@ fun TranslationProgressIndicator(
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
@@ -92,7 +94,7 @@ fun TranslationProgressIndicator(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Translate,
-                            contentDescription = "Translation",
+                            contentDescription = localizeHelper.localize(Res.string.translation),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
@@ -120,7 +122,7 @@ fun TranslationProgressIndicator(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Cancel",
+                            contentDescription = localizeHelper.localize(Res.string.cancel),
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }

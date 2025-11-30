@@ -21,6 +21,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +42,7 @@ fun MainBottomSettingComposable(
         onAutoScrollToggle: (() -> Unit)? = null,
         onReviews: (() -> Unit)? = null,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     ChaptersSliderComposable(
         onNext = {
             onNext()
@@ -79,7 +81,7 @@ fun MainBottomSettingComposable(
         if (onReviews != null) {
             AppIconButton(
                 imageVector = androidx.compose.material.icons.Icons.Default.RateReview,
-                contentDescription = "Chapter Reviews",
+                contentDescription = localizeHelper.localize(Res.string.chapter_reviews),
                 onClick = { onReviews() }
             )
         }
@@ -88,7 +90,7 @@ fun MainBottomSettingComposable(
         if (onAutoScrollToggle != null) {
             AppIconButton(
                 imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Auto Scroll",
+                contentDescription = localizeHelper.localize(Res.string.auto_scroll),
                 onClick = { onAutoScrollToggle() }
             )
         }

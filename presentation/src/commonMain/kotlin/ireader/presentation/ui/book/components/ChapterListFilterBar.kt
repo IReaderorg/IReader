@@ -16,6 +16,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.book.viewmodel.ChaptersFilters
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun ChapterListFilterBar(
@@ -23,6 +24,7 @@ fun ChapterListFilterBar(
     onToggleFilter: (ChaptersFilters.Type) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showFilterMenu by remember { mutableStateOf(false) }
     
     // Count active filters
@@ -109,7 +111,7 @@ fun ChapterListFilterBar(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.FilterList,
-                                contentDescription = "More filters",
+                                contentDescription = localizeHelper.localize(Res.string.more_filters),
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -164,6 +166,7 @@ private fun CompactFilterChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         onClick = onClick,
         modifier = modifier,
@@ -184,7 +187,7 @@ private fun CompactFilterChip(
             )
             Icon(
                 imageVector = androidx.compose.material.icons.Icons.Default.Close,
-                contentDescription = "Remove filter",
+                contentDescription = localizeHelper.localize(Res.string.remove_filter),
                 modifier = Modifier.size(12.dp)
             )
         }

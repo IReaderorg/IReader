@@ -18,6 +18,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced security and privacy settings screen following Mihon's SecurityPreferences.
@@ -31,6 +32,7 @@ fun SettingsSecurityScreen(
     viewModel: SettingsSecurityViewModel,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberSaveable(
         key = "settings_security_scroll_state",
         saver = LazyListState.Saver
@@ -257,7 +259,7 @@ fun SettingsSecurityScreen(
     if (viewModel.showLockMethodDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissLockMethodDialog() },
-            title = { Text("Lock Method") },
+            title = { Text(localizeHelper.localize(Res.string.lock_method)) },
             text = {
                 Column {
                     val methods = listOf(
@@ -292,7 +294,7 @@ fun SettingsSecurityScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissLockMethodDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -302,7 +304,7 @@ fun SettingsSecurityScreen(
     if (viewModel.showLockAfterInactivityDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissLockAfterInactivityDialog() },
-            title = { Text("Lock After Inactivity") },
+            title = { Text(localizeHelper.localize(Res.string.lock_after_inactivity)) },
             text = {
                 Column {
                     val options = listOf(
@@ -340,7 +342,7 @@ fun SettingsSecurityScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissLockAfterInactivityDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -350,7 +352,7 @@ fun SettingsSecurityScreen(
     if (viewModel.showSecureScreenModeDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissSecureScreenModeDialog() },
-            title = { Text("Secure Screen") },
+            title = { Text(localizeHelper.localize(Res.string.secure_screen)) },
             text = {
                 Column {
                     PreferenceValues.SecureScreenMode.values().forEach { mode ->
@@ -393,7 +395,7 @@ fun SettingsSecurityScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissSecureScreenModeDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -403,9 +405,9 @@ fun SettingsSecurityScreen(
     if (viewModel.showClearAuthDataDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissClearAuthDataDialog() },
-            title = { Text("Clear Authentication Data") },
+            title = { Text(localizeHelper.localize(Res.string.clear_authentication_data)) },
             text = {
-                Text("This will remove all saved authentication tokens and sessions. You will need to log in again to access protected sources.")
+                Text(localizeHelper.localize(Res.string.clear_auth_data_confirmation))
             },
             confirmButton = {
                 TextButton(
@@ -414,12 +416,12 @@ fun SettingsSecurityScreen(
                         viewModel.dismissClearAuthDataDialog()
                     }
                 ) {
-                    Text("Clear")
+                    Text(localizeHelper.localize(Res.string.clear_1))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissClearAuthDataDialog() }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )

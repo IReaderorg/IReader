@@ -17,6 +17,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced tracking settings screen following Mihon's TrackerManager system.
@@ -30,6 +31,7 @@ fun SettingsTrackingScreen(
     viewModel: SettingsTrackingViewModel,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberSaveable(
         key = "settings_tracking_scroll_state",
         saver = LazyListState.Saver
@@ -277,7 +279,7 @@ fun SettingsTrackingScreen(
     if (viewModel.showSyncIntervalDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissSyncIntervalDialog() },
-            title = { Text("Sync Interval") },
+            title = { Text(localizeHelper.localize(Res.string.sync_interval)) },
             text = {
                 Column {
                     val intervals = listOf(
@@ -313,7 +315,7 @@ fun SettingsTrackingScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissSyncIntervalDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -323,9 +325,9 @@ fun SettingsTrackingScreen(
     if (viewModel.showClearSyncDataDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissClearSyncDataDialog() },
-            title = { Text("Clear Sync Data") },
+            title = { Text(localizeHelper.localize(Res.string.clear_sync_data)) },
             text = {
-                Text("This will remove all tracking data and logout from all services. You will need to re-login and re-track your books.")
+                Text(localizeHelper.localize(Res.string.clear_sync_data_confirmation))
             },
             confirmButton = {
                 TextButton(
@@ -334,12 +336,12 @@ fun SettingsTrackingScreen(
                         viewModel.dismissClearSyncDataDialog()
                     }
                 ) {
-                    Text("Clear")
+                    Text(localizeHelper.localize(Res.string.clear_1))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissClearSyncDataDialog() }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -357,6 +359,7 @@ private fun TrackingServiceItem(
     onLogout: () -> Unit,
     onConfigure: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -427,21 +430,21 @@ private fun TrackingServiceItem(
                             onClick = onLogout,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Logout")
+                            Text(localizeHelper.localize(Res.string.logout))
                         }
                         
                         Button(
                             onClick = onConfigure,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Configure")
+                            Text(localizeHelper.localize(Res.string.configure))
                         }
                     } else {
                         Button(
                             onClick = onLogin,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Login")
+                            Text(localizeHelper.localize(Res.string.login))
                         }
                     }
                 }

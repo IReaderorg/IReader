@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.entities.LeaderboardEntry
 import kotlin.math.roundToInt
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun ReadingLeaderboardContent(
@@ -75,6 +77,7 @@ private fun LoadingState() {
 
 @Composable
 private fun EmptyReadingLeaderboardState(onSync: () -> Unit, isSyncing: Boolean) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -116,7 +119,7 @@ private fun EmptyReadingLeaderboardState(onSync: () -> Unit, isSyncing: Boolean)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text("Sync My Stats")
+                Text(localizeHelper.localize(Res.string.sync_my_stats))
             }
         }
     }
@@ -204,11 +207,12 @@ private fun ReadingLeaderboardList(
 
 @Composable
 private fun ShowErrors(state: LeaderboardState, onClearError: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     state.error?.let { error ->
         Snackbar(
             modifier = Modifier.padding(16.dp),
             action = {
-                TextButton(onClick = onClearError) { Text("Dismiss") }
+                TextButton(onClick = onClearError) { Text(localizeHelper.localize(Res.string.dismiss)) }
             }
         ) { Text(error) }
     }
@@ -217,7 +221,7 @@ private fun ShowErrors(state: LeaderboardState, onClearError: () -> Unit) {
         Snackbar(
             modifier = Modifier.padding(16.dp),
             action = {
-                TextButton(onClick = onClearError) { Text("Dismiss") }
+                TextButton(onClick = onClearError) { Text(localizeHelper.localize(Res.string.dismiss)) }
             }
         ) { Text(error) }
     }

@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Onboarding dialog that explains security features to users
@@ -20,6 +22,7 @@ fun SecurityOnboardingDialog(
     onDismiss: () -> Unit,
     onGetStarted: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -123,12 +126,12 @@ fun SecurityOnboardingDialog(
         },
         confirmButton = {
             Button(onClick = onGetStarted) {
-                Text("Get Started")
+                Text(localizeHelper.localize(Res.string.get_started))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Maybe Later")
+                Text(localizeHelper.localize(Res.string.maybe_later))
             }
         }
     )

@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Privacy settings screen for managing data collection and user consent
@@ -34,10 +36,11 @@ fun PrivacySettingsScreen(
     onDisablePrivacyMode: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Privacy Settings") }
+                title = { Text(localizeHelper.localize(Res.string.privacy_settings)) }
             )
         },
         modifier = modifier
@@ -159,6 +162,7 @@ private fun PrivacyModeSection(
     onDisablePrivacyMode: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showDialog by remember { mutableStateOf(false) }
     
     Column(
@@ -194,14 +198,14 @@ private fun PrivacyModeSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Enable Privacy Mode")
+                Text(localizeHelper.localize(Res.string.enable_privacy_mode))
             }
             
             Button(
                 onClick = onDisablePrivacyMode,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Disable Privacy Mode")
+                Text(localizeHelper.localize(Res.string.disable_privacy_mode))
             }
         }
     }
@@ -210,9 +214,9 @@ private fun PrivacyModeSection(
         AlertDialog(
             onDismissRequest = { showDialog = false },
             icon = { Icon(Icons.Default.Shield, contentDescription = null) },
-            title = { Text("Enable Privacy Mode?") },
+            title = { Text(localizeHelper.localize(Res.string.enable_privacy_mode_question)) },
             text = {
-                Text("This will disable all data collection features including analytics, crash reporting, and diagnostics.")
+                Text(localizeHelper.localize(Res.string.privacy_mode_description))
             },
             confirmButton = {
                 TextButton(
@@ -221,12 +225,12 @@ private fun PrivacyModeSection(
                         showDialog = false
                     }
                 ) {
-                    Text("Enable")
+                    Text(localizeHelper.localize(Res.string.enable))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )

@@ -13,6 +13,8 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import ireader.domain.js.models.FilterDefinition
 import ireader.domain.js.models.FilterOption
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Composable that dynamically generates filter UI based on filter definitions.
@@ -109,6 +111,7 @@ private fun PickerFilter(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     val selectedOption = options.find { it.value == selectedValue } ?: options.firstOrNull()
     
@@ -131,7 +134,7 @@ private fun PickerFilter(
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Dropdown"
+                        contentDescription = localizeHelper.localize(Res.string.dropdown)
                     )
                 },
                 modifier = Modifier

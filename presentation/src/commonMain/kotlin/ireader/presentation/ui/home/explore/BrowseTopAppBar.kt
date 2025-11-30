@@ -202,7 +202,7 @@ fun BrowseTopAppBar(
                         ) {
                             AppIconButton(
                                 imageVector = Icons.Default.FolderOpen,
-                                contentDescription = "Open Local Folder",
+                                contentDescription = localizeHelper.localize(Res.string.open_local_folder),
                                 onClick = {
                                     onOpenLocalFolder()
                                 },

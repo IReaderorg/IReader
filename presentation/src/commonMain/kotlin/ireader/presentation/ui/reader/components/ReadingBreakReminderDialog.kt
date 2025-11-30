@@ -11,6 +11,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog that reminds users to take a reading break with snooze functionality
@@ -25,6 +27,7 @@ fun ReadingBreakReminderDialog(
     onSnooze: (minutes: Int) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var countdown by remember { mutableStateOf(15) }
     var showSnoozeOptions by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -75,7 +78,7 @@ fun ReadingBreakReminderDialog(
                                 showSnoozeOptions = false
                             }
                         ) {
-                            Text("5 min")
+                            Text(localizeHelper.localize(Res.string.five_min))
                         }
                         OutlinedButton(
                             onClick = {
@@ -83,7 +86,7 @@ fun ReadingBreakReminderDialog(
                                 showSnoozeOptions = false
                             }
                         ) {
-                            Text("10 min")
+                            Text(localizeHelper.localize(Res.string.ten_min))
                         }
                     }
                     Row(
@@ -96,7 +99,7 @@ fun ReadingBreakReminderDialog(
                                 showSnoozeOptions = false
                             }
                         ) {
-                            Text("15 min")
+                            Text(localizeHelper.localize(Res.string.fifteen_min))
                         }
                         OutlinedButton(
                             onClick = {
@@ -104,14 +107,14 @@ fun ReadingBreakReminderDialog(
                                 showSnoozeOptions = false
                             }
                         ) {
-                            Text("30 min")
+                            Text(localizeHelper.localize(Res.string.thirty_min))
                         }
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showSnoozeOptions = false }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -122,7 +125,7 @@ fun ReadingBreakReminderDialog(
             icon = {
                 Icon(
                     imageVector = Icons.Default.Visibility,
-                    contentDescription = "Reading Break",
+                    contentDescription = localizeHelper.localize(Res.string.reading_break),
                     modifier = Modifier.size(48.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -166,7 +169,7 @@ fun ReadingBreakReminderDialog(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text("Continue Reading")
+                    Text(localizeHelper.localize(Res.string.continue_reading))
                 }
             },
             dismissButton = {
@@ -176,12 +179,12 @@ fun ReadingBreakReminderDialog(
                     OutlinedButton(
                         onClick = { showSnoozeOptions = true }
                     ) {
-                        Text("Snooze")
+                        Text(localizeHelper.localize(Res.string.snooze))
                     }
                     OutlinedButton(
                         onClick = onTakeBreak
                     ) {
-                        Text("Take a Break")
+                        Text(localizeHelper.localize(Res.string.take_a_break))
                     }
                 }
             }

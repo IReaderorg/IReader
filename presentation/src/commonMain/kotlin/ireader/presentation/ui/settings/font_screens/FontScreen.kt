@@ -22,12 +22,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.size
 import ireader.presentation.core.toComposeFontFamily
 import ireader.presentation.ui.component.reusable_composable.AppIcon
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun FontScreen(
     vm: FontScreenViewModel,
     onFont: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,9 +79,9 @@ fun FontScreen(
                 value = vm.searchQuery,
                 onValueChange = { vm.searchQuery = it },
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Search fonts...") },
+                placeholder = { Text(localizeHelper.localize(Res.string.search_fonts)) },
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
+                    Icon(Icons.Default.Search, contentDescription = localizeHelper.localize(Res.string.search))
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
@@ -210,6 +213,7 @@ private fun FontItem(
     showPreview: Boolean,
     onClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Create font family for this specific font with error handling
     val fontFamily = remember(fontName) {
         try {
@@ -290,7 +294,7 @@ private fun FontItem(
                 AppIcon(
                     imageVector = Icons.Default.Check,
                     tint = MaterialTheme.colorScheme.primary,
-                    contentDescription = "Selected"
+                    contentDescription = localizeHelper.localize(Res.string.selected)
                 )
             }
         }

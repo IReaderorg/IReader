@@ -15,6 +15,7 @@ import ireader.presentation.ui.home.sources.extension.LanguageChoice
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import ireader.i18n.resources.*
 
 class BrowseSettingsViewModel(
     private val browsePreferences: BrowsePreferences,

@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * A book cover that can be blurred until tapped
@@ -27,6 +29,7 @@ fun BlurredBookCover(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var revealed by remember(imageUrl) { mutableStateOf(!isBlurred) }
     
     Box(
@@ -54,7 +57,7 @@ fun BlurredBookCover(
         if (isBlurred && !revealed) {
             Icon(
                 imageVector = Icons.Default.Visibility,
-                contentDescription = "Tap to reveal",
+                contentDescription = localizeHelper.localize(Res.string.tap_to_reveal),
                 modifier = Modifier
                     .align(Alignment.Center)
                     .size(48.dp),

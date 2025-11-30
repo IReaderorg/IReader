@@ -55,6 +55,8 @@ import ireader.presentation.ui.web.WebViewState.WebContent
 import ireader.presentation.ui.web.WebViewState.WebViewError
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @ExperimentalCoroutinesApi
@@ -67,6 +69,7 @@ fun WebPageScreen(
     scaffoldPadding: PaddingValues,
     modifier: Modifier = Modifier.fillMaxSize()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val userAgent = remember {
         (source as? HttpSource)?.getCoverRequest("")?.second?.headers?.get(HttpHeaders.UserAgent)
     }
@@ -137,7 +140,7 @@ fun WebPageScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Error,
-                    contentDescription = "Error",
+                    contentDescription = localizeHelper.localize(Res.string.download_notifier_title_error),
                     modifier = Modifier.size(64.dp),
                     tint = MaterialTheme.colorScheme.error
                 )
@@ -169,11 +172,11 @@ fun WebPageScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Retry",
+                        contentDescription = localizeHelper.localize(Res.string.retry),
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.size(8.dp))
-                    Text("Retry")
+                    Text(localizeHelper.localize(Res.string.retry))
                 }
             }
         }

@@ -12,6 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import ireader.domain.plugins.PluginInfo
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Plugin header displaying icon, name, author, version, rating, and download count
@@ -22,6 +24,7 @@ fun PluginHeader(
     plugin: PluginInfo,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -78,7 +81,7 @@ fun PluginHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Star,
-                        contentDescription = "Rating",
+                        contentDescription = localizeHelper.localize(Res.string.rating),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
@@ -96,7 +99,7 @@ fun PluginHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Download,
-                        contentDescription = "Downloads",
+                        contentDescription = localizeHelper.localize(Res.string.downloads),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )

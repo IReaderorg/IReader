@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Autoscroll speed control overlay for the reader
@@ -44,6 +46,7 @@ fun AutoScrollSpeedControl(
     onToggleScroll: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(),
@@ -80,7 +83,7 @@ fun AutoScrollSpeedControl(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Remove,
-                        contentDescription = "Decrease speed",
+                        contentDescription = localizeHelper.localize(Res.string.decrease_speed),
                         tint = if (scrollSpeed > 1)
                             MaterialTheme.colorScheme.onPrimaryContainer 
                         else 
@@ -128,7 +131,7 @@ fun AutoScrollSpeedControl(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Increase speed",
+                        contentDescription = localizeHelper.localize(Res.string.increase_speed),
                         tint = if (scrollSpeed < 8)
                             MaterialTheme.colorScheme.onPrimaryContainer 
                         else 
@@ -168,6 +171,7 @@ fun AutoScrollIndicator(
     scrollSpeed: Int,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(),
@@ -186,7 +190,7 @@ fun AutoScrollIndicator(
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Auto scrolling",
+                    contentDescription = localizeHelper.localize(Res.string.auto_scrolling),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(16.dp)
                 )

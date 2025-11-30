@@ -52,6 +52,8 @@ import ireader.domain.models.remote.PaymentProof
 import ireader.domain.models.remote.PaymentProofStatus
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.ui.AsyncImage
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 private const val DONATION_URL = "https://reymit.ir/kazemcodes"
 
@@ -74,6 +76,7 @@ fun BadgeStoreScreen(
     onOpenDonationLink: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
@@ -125,12 +128,12 @@ fun BadgeStoreScreen(
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Badge Store")
+                        Text(localizeHelper.localize(Res.string.badge_store))
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -888,6 +891,7 @@ private fun ModernPurchaseDialog(
     isSubmitting: Boolean,
     onOpenDonationLink: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var transactionId by remember { mutableStateOf("") }
     val gradientColors = getRarityGradient(badge.badgeRarity)
 
@@ -1053,8 +1057,8 @@ private fun ModernPurchaseDialog(
                     OutlinedTextField(
                         value = transactionId,
                         onValueChange = { transactionId = it },
-                        label = { Text("Transaction ID") },
-                        placeholder = { Text("Enter your transaction ID") },
+                        label = { Text(localizeHelper.localize(Res.string.transaction_id)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.enter_your_transaction_id)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         enabled = !isSubmitting,

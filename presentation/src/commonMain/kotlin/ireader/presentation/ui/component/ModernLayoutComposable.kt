@@ -83,6 +83,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.BookShimmerLoading
 import kotlinx.coroutines.delay
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -656,6 +657,7 @@ fun EnhancedNovelCard(
     showTitle: Boolean = true,
     elevation: Dp = 4.dp
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Use remember for computed values to minimize recomposition
     val progress = remember(book.progress, book.unread, book.totalChapters) {
         book.progress ?: run {
@@ -714,7 +716,7 @@ fun EnhancedNovelCard(
                             StatusBadge(
                                 icon = Icons.Default.Check,
                                 backgroundColor = MaterialTheme.colorScheme.primary,
-                                contentDescription = "In Library"
+                                contentDescription = localizeHelper.localize(Res.string.in_library_1)
                             )
                         }
                         
@@ -723,7 +725,7 @@ fun EnhancedNovelCard(
                             StatusBadge(
                                 icon = Icons.Default.Download,
                                 backgroundColor = MaterialTheme.colorScheme.tertiary,
-                                contentDescription = "Has unread chapters"
+                                contentDescription = localizeHelper.localize(Res.string.has_unread_chapters)
                             )
                         }
                     }

@@ -11,6 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.currentOrThrow
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Android implementation of TTS Engine Settings Screen
@@ -26,11 +29,11 @@ actual fun TTSEngineSettingsScreen(
     onNavigateToTTSManager: () -> Unit
 ) {
     val context = LocalContext.current
-    
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("TTS Engine Settings")
+            Text(localizeHelper.localize(Res.string.tts_engine_settings))
         },
         text = {
             Column(
@@ -120,7 +123,7 @@ actual fun TTSEngineSettingsScreen(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )
@@ -166,11 +169,11 @@ actual fun TTSVoiceSelectionScreen(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
-    
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Voice Selection")
+            Text(localizeHelper.localize(Res.string.voice_selection))
         },
         text = {
             Column(
@@ -221,7 +224,7 @@ actual fun TTSVoiceSelectionScreen(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )

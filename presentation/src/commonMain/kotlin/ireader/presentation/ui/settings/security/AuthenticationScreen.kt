@@ -16,6 +16,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.security.AuthMethod
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun AuthenticationScreen(
@@ -25,6 +27,7 @@ fun AuthenticationScreen(
     onDismiss: () -> Unit,
     errorMessage: String? = null
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var input by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
     
@@ -74,7 +77,7 @@ fun AuthenticationScreen(
                     OutlinedTextField(
                         value = input,
                         onValueChange = { if (it.length <= 6 && it.all { char -> char.isDigit() }) input = it },
-                        label = { Text("PIN") },
+                        label = { Text(localizeHelper.localize(Res.string.pin_1)) },
                         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.NumberPassword,
@@ -100,7 +103,7 @@ fun AuthenticationScreen(
                     OutlinedTextField(
                         value = input,
                         onValueChange = { input = it },
-                        label = { Text("Password") },
+                        label = { Text(localizeHelper.localize(Res.string.password)) },
                         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
@@ -133,7 +136,7 @@ fun AuthenticationScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Authenticate with Biometric")
+                        Text(localizeHelper.localize(Res.string.authenticate_with_biometric))
                     }
                 }
                 is AuthMethod.None -> {
@@ -149,7 +152,7 @@ fun AuthenticationScreen(
                     enabled = input.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Unlock")
+                    Text(localizeHelper.localize(Res.string.unlock_app))
                 }
             }
             

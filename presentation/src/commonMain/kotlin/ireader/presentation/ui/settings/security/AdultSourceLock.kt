@@ -10,6 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog shown when user tries to access an 18+ source with adult source lock enabled
@@ -20,6 +22,7 @@ fun AdultSourceLockDialog(
     onAuthenticate: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -30,7 +33,7 @@ fun AdultSourceLockDialog(
             )
         },
         title = {
-            Text("Adult Content Warning")
+            Text(localizeHelper.localize(Res.string.adult_content_warning))
         },
         text = {
             Column(
@@ -63,12 +66,12 @@ fun AdultSourceLockDialog(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Authenticate")
+                Text(localizeHelper.localize(Res.string.authenticate))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

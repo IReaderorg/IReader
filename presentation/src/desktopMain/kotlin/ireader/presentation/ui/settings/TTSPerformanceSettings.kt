@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.services.tts_service.DesktopTTSService
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * TTS Performance Settings Dialog
@@ -20,13 +22,14 @@ fun TTSPerformanceSettingsDialog(
     ttsService: DesktopTTSService,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var maxProcesses by remember { mutableStateOf(ttsService.getMaxConcurrentProcesses()) }
     val scope = rememberCoroutineScope()
     
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("TTS Performance Settings")
+            Text(localizeHelper.localize(Res.string.tts_performance_settings))
         },
         text = {
             Column(
@@ -146,12 +149,12 @@ fun TTSPerformanceSettingsDialog(
                     }
                 }
             ) {
-                Text("Apply")
+                Text(localizeHelper.localize(Res.string.apply))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

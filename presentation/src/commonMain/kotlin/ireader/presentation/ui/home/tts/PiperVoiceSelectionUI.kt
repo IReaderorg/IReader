@@ -31,6 +31,8 @@ import ireader.domain.models.tts.VoiceGender
 import ireader.domain.models.tts.VoiceQuality
 import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
 import ireader.presentation.ui.core.modifier.supportDesktopScroll
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Enhanced Piper Voice Selection UI with search, filters, and better UX.
@@ -328,11 +330,12 @@ private fun SearchBar(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
         modifier = modifier,
-        placeholder = { Text("Search voices by name, language...") },
+        placeholder = { Text(localizeHelper.localize(Res.string.search_voices_by_name_language)) },
         leadingIcon = { Icon(Icons.Default.Search, "Search") },
         trailingIcon = {
             if (query.isNotEmpty()) {
@@ -362,6 +365,7 @@ private fun FilterChipsRow(
     onDownloadedOnlyChange: (Boolean) -> Unit,
     onExpandFilters: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val hasActiveFilters = selectedLanguage != null || selectedGender != null || 
         selectedQuality != null || showDownloadedOnly
     
@@ -389,7 +393,7 @@ private fun FilterChipsRow(
                 FilterChip(
                     selected = expandedFilters || hasActiveFilters,
                     onClick = onExpandFilters,
-                    label = { Text("Filters") },
+                    label = { Text(localizeHelper.localize(Res.string.filters)) },
                     leadingIcon = {
                         Icon(
                             if (expandedFilters) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
@@ -408,7 +412,7 @@ private fun FilterChipsRow(
                 FilterChip(
                     selected = showDownloadedOnly,
                     onClick = { onDownloadedOnlyChange(!showDownloadedOnly) },
-                    label = { Text("Downloaded") },
+                    label = { Text(localizeHelper.localize(Res.string.downloaded)) },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Download,
@@ -469,7 +473,7 @@ private fun FilterChipsRow(
                         FilterChip(
                             selected = selectedGender == null,
                             onClick = { onGenderChange(null) },
-                            label = { Text("All") }
+                            label = { Text(localizeHelper.localize(Res.string.all)) }
                         )
                     }
                     items(VoiceGender.entries.size) { index ->
@@ -508,7 +512,7 @@ private fun FilterChipsRow(
                         FilterChip(
                             selected = selectedQuality == null,
                             onClick = { onQualityChange(null) },
-                            label = { Text("All") }
+                            label = { Text(localizeHelper.localize(Res.string.all)) }
                         )
                     }
                     items(VoiceQuality.entries.size) { index ->
@@ -539,7 +543,7 @@ private fun FilterChipsRow(
                             FilterChip(
                                 selected = selectedLanguage == null,
                                 onClick = { onLanguageChange(null) },
-                                label = { Text("All") }
+                                label = { Text(localizeHelper.localize(Res.string.all)) }
                             )
                         }
                         items(availableLanguages.size) { index ->
@@ -626,6 +630,7 @@ private fun EmptyState(
     onRefresh: () -> Unit,
     onClearFilters: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -659,13 +664,13 @@ private fun EmptyState(
                     OutlinedButton(onClick = onClearFilters) {
                         Icon(Icons.Default.Clear, null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Clear Filters")
+                        Text(localizeHelper.localize(Res.string.clear_filters))
                     }
                 }
                 Button(onClick = onRefresh) {
                     Icon(Icons.Default.Refresh, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Refresh")
+                    Text(localizeHelper.localize(Res.string.refresh))
                 }
             }
         }
@@ -967,6 +972,7 @@ private fun VoiceActions(
     onDownload: () -> Unit,
     onDelete: (() -> Unit)?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -1015,7 +1021,7 @@ private fun VoiceActions(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Download")
+                    Text(localizeHelper.localize(Res.string.download))
                 }
             }
         }

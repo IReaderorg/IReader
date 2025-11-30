@@ -77,6 +77,8 @@ import ireader.presentation.ui.settings.components.GradioTTSSection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * TTS Engine Manager Screen
@@ -91,6 +93,7 @@ fun TTSEngineManagerScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val ttsService: DesktopTTSService = koinInject()
     val scope = rememberCoroutineScope()
     
@@ -181,7 +184,7 @@ fun TTSEngineManagerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("TTS Engine Manager") },
+                title = { Text(localizeHelper.localize(Res.string.tts_engine_manager)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Default.ArrowBack, "Back")
@@ -227,11 +230,11 @@ fun TTSEngineManagerScreen(
                 ) {
                     Icon(
                         Icons.Default.Speed,
-                        contentDescription = "Performance",
+                        contentDescription = localizeHelper.localize(Res.string.performance),
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Performance")
+                    Text(localizeHelper.localize(Res.string.performance))
                 }
                 
                 if (showPerformanceSettings) {
@@ -745,7 +748,7 @@ fun TTSEngineManagerScreen(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Manage Piper Voices")
+                        Text(localizeHelper.localize(Res.string.manage_piper_voices))
                     }
                 }
             }
@@ -814,6 +817,7 @@ private fun EngineCard(
     onTest: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -926,12 +930,12 @@ private fun EngineCard(
                     EngineStatus.INSTALLED -> {
                         item {
                             OutlinedButton(onClick = onUninstall) {
-                                Text("Uninstall")
+                                Text(localizeHelper.localize(Res.string.uninstall))
                             }
                         }
                         item {
                             Button(onClick = onTest) {
-                                Text("Test")
+                                Text(localizeHelper.localize(Res.string.test))
                             }
                         }
                     }
@@ -1204,6 +1208,7 @@ private fun VoiceCard(
     onDownload: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -1229,7 +1234,7 @@ private fun VoiceCard(
                             Spacer(modifier = Modifier.width(8.dp))
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
-                                contentDescription = "Downloaded",
+                                contentDescription = localizeHelper.localize(Res.string.downloaded),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -1313,6 +1318,7 @@ private fun GradioTTSSectionDesktop(
     appPrefs: AppPreferences,
     scope: CoroutineScope
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var useGradioTTS by remember { mutableStateOf(false) }
     var activeConfigId by remember { mutableStateOf<String?>(null) }
     var globalSpeed by remember { mutableStateOf(1.0f) }
@@ -1518,7 +1524,7 @@ private fun GradioTTSSectionDesktop(
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Add Custom TTS Engine")
+                    Text(localizeHelper.localize(Res.string.add_custom_tts_engine))
                 }
             }
         }

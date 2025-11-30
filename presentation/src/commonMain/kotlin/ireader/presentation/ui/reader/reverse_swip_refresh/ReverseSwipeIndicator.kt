@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * A class to encapsulate details of different indicator sizes.
@@ -95,6 +97,7 @@ fun SwipeRefreshIndicator(
         largeIndication: Boolean = false,
         elevation: Dp = 6.dp,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val adjustedElevation = when {
         state.isRefreshing -> elevation
         state.indicatorOffset > 0.5f -> elevation
@@ -204,7 +207,7 @@ fun SwipeRefreshIndicator(
                 } else {
                     Image(
                         painter = painter,
-                        contentDescription = "Refreshing"
+                        contentDescription = localizeHelper.localize(Res.string.refreshing)
                     )
                 }
             }

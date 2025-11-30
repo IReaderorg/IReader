@@ -27,6 +27,8 @@ import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * AsyncImage component for loading images asynchronously with caching and loading states.
@@ -50,6 +52,7 @@ fun AsyncImage(
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val context = LocalPlatformContext.current
     
     // Convert model to ImageRequest if it's not already
@@ -71,7 +74,7 @@ fun AsyncImage(
         ) {
             error?.invoke() ?: Icon(
                 imageVector = Icons.Default.BrokenImage,
-                contentDescription = "Error loading image",
+                contentDescription = localizeHelper.localize(Res.string.error_loading_image),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp)
             )
@@ -130,7 +133,7 @@ fun AsyncImage(
                 ) {
                     error?.invoke() ?: Icon(
                         imageVector = Icons.Default.BrokenImage,
-                        contentDescription = "Error loading image",
+                        contentDescription = localizeHelper.localize(Res.string.error_loading_image),
                         tint = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.size(24.dp)
                     )

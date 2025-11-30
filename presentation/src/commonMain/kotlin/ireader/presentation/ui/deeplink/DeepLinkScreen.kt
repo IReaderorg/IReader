@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.core.deeplink.DeepLink
 import ireader.core.deeplink.DeepLinkType
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Screen for handling deep links and external URLs
@@ -93,6 +95,7 @@ private fun DeepLinkError(
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -117,11 +120,11 @@ private fun DeepLinkError(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedButton(onClick = onCancel) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
             
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(localizeHelper.localize(Res.string.retry))
             }
         }
     }

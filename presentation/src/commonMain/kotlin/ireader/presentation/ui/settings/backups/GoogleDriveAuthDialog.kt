@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog for Google Drive OAuth2 authentication
@@ -24,6 +26,7 @@ fun GoogleDriveAuthDialog(
     onDismiss: () -> Unit,
     onAuthComplete: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -33,7 +36,7 @@ fun GoogleDriveAuthDialog(
             )
         },
         title = {
-            Text("Google Drive Authentication")
+            Text(localizeHelper.localize(Res.string.google_drive_authentication))
         },
         text = {
             Column(
@@ -66,7 +69,7 @@ fun GoogleDriveAuthDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("OK")
+                Text(localizeHelper.localize(Res.string.ok))
             }
         }
     )
@@ -79,10 +82,11 @@ fun GoogleDriveAuthDialog(
 fun AuthenticationLoadingDialog(
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Authenticating...")
+            Text(localizeHelper.localize(Res.string.authenticating))
         },
         text = {
             Column(
@@ -100,7 +104,7 @@ fun AuthenticationLoadingDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

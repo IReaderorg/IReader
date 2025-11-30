@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.presentation.ui.component.loading.DotsFlashing
 import ireader.presentation.ui.component.text_related.CardTile
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun ChapterContentHeader(
@@ -22,6 +24,7 @@ fun ChapterContentHeader(
     isChapterLoading: Boolean,
     chapters: List<Chapter>
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     CardTile(
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -40,7 +43,7 @@ fun ChapterContentHeader(
 
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Contents Detail",
+                    contentDescription = localizeHelper.localize(Res.string.contents_detail),
                     tint = MaterialTheme.colorScheme.onBackground,
                 )
             }

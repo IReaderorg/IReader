@@ -47,6 +47,7 @@ import ireader.presentation.ui.component.components.LinkIcon
 import ireader.presentation.ui.component.components.LogoHeader
 import ireader.presentation.ui.component.components.PreferenceRow
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +57,7 @@ fun AboutSettingScreen(
     onPopBackStack: () -> Unit,
     onNavigateToChangelog: () -> Unit = {}
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val uriHandler = LocalUriHandler.current
     val clipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
@@ -136,7 +138,7 @@ fun AboutSettingScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.ContentCopy,
-                                contentDescription = "Copy version info",
+                                contentDescription = localizeHelper.localize(Res.string.copy_version_info),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }

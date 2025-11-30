@@ -18,6 +18,8 @@ import ireader.domain.services.tts_service.piper.VoiceModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Voice model management panel for selecting and managing Piper TTS voice models
@@ -37,6 +39,7 @@ fun VoiceModelManagementPanel(
     synthesizer: PiperSpeechSynthesizer = koinInject(),
     appPrefs: AppPreferences = koinInject()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var availableModels by remember { mutableStateOf<List<VoiceModel>>(emptyList()) }
     var filteredModels by remember { mutableStateOf<List<VoiceModel>>(emptyList()) }
     var selectedModelId by remember { mutableStateOf("") }
@@ -228,7 +231,7 @@ fun VoiceModelManagementPanel(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Voice Settings",
+                        contentDescription = localizeHelper.localize(Res.string.voice_settings),
                         tint = MaterialTheme.colorScheme.primary
                     )
                     
@@ -264,14 +267,14 @@ fun VoiceModelManagementPanel(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search voices...") },
+                    placeholder = { Text(localizeHelper.localize(Res.string.search_voices)) },
                     leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
+                        Icon(Icons.Default.Search, contentDescription = localizeHelper.localize(Res.string.search))
                     },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                Icon(Icons.Default.Clear, contentDescription = localizeHelper.localize(Res.string.clear_1))
                             }
                         }
                     },
@@ -319,7 +322,7 @@ fun VoiceModelManagementPanel(
                         label = { 
                             Icon(
                                 imageVector = Icons.Default.CloudDownload,
-                                contentDescription = "Show Downloaded Only",
+                                contentDescription = localizeHelper.localize(Res.string.show_downloaded_only),
                                 modifier = Modifier.size(18.dp)
                             )
                         },
@@ -394,7 +397,7 @@ fun VoiceModelManagementPanel(
                 modelToDelete = null
             },
             title = {
-                Text("Delete Voice Model")
+                Text(localizeHelper.localize(Res.string.delete_voice_model))
             },
             text = {
                 Text("Are you sure you want to delete ${modelToDelete!!.name}? This will free up ${formatFileSize(modelToDelete!!.sizeBytes)} of storage.")
@@ -406,7 +409,7 @@ fun VoiceModelManagementPanel(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text(localizeHelper.localize(Res.string.delete))
                 }
             },
             dismissButton = {
@@ -416,7 +419,7 @@ fun VoiceModelManagementPanel(
                         modelToDelete = null
                     }
                 ) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -449,6 +452,7 @@ private fun FilterChipDropdown(
     onOptionSelected: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     
     Box(modifier = modifier) {
@@ -477,7 +481,7 @@ private fun FilterChipDropdown(
             // Clear option
             if (selectedOption != null) {
                 DropdownMenuItem(
-                    text = { Text("All") },
+                    text = { Text(localizeHelper.localize(Res.string.all)) },
                     onClick = {
                         onOptionSelected(null)
                         expanded = false

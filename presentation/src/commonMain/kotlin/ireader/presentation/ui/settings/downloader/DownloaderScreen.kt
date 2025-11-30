@@ -407,6 +407,7 @@ fun DownloadScreenItem(
         onCancelAllFromThisSeries: (SavedDownload) -> Unit,
         onRetry: ((SavedDownload) -> Unit)? = null,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val status = downloadProgress?.status ?: ireader.domain.services.common.DownloadStatus.QUEUED
     val isDownloading = status == ireader.domain.services.common.DownloadStatus.DOWNLOADING
     val isCompleted = status == ireader.domain.services.common.DownloadStatus.COMPLETED
@@ -558,7 +559,7 @@ fun DownloadScreenItem(
                     isFailed -> {
                         Icon(
                                 imageVector = Icons.Outlined.Cancel,
-                                contentDescription = "Failed",
+                                contentDescription = localizeHelper.localize(Res.string.failed),
                                 tint = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(24.dp)
                         )
@@ -573,7 +574,7 @@ fun DownloadScreenItem(
                     isPaused -> {
                         Icon(
                                 imageVector = Icons.Filled.Pause,
-                                contentDescription = "Paused",
+                                contentDescription = localizeHelper.localize(Res.string.paused),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(24.dp)
                         )
@@ -582,7 +583,7 @@ fun DownloadScreenItem(
                     else -> {
                         Icon(
                                 imageVector = Icons.Outlined.Download,
-                                contentDescription = "Queued",
+                                contentDescription = localizeHelper.localize(Res.string.queued),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(24.dp)
                         )

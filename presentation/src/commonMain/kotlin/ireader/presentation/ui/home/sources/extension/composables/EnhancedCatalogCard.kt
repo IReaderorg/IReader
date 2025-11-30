@@ -34,6 +34,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.components.SourceStatusIndicator
 import ireader.presentation.ui.home.sources.extension.Language
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced catalog card with custom modern design
@@ -208,6 +209,7 @@ private fun EnhancedCatalogIcon(
     isPinned: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = modifier) {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -273,7 +275,7 @@ private fun EnhancedCatalogIcon(
             ) {
                 Icon(
                     imageVector = Icons.Filled.PushPin,
-                    contentDescription = "Pinned",
+                    contentDescription = localizeHelper.localize(Res.string.pinned_sources),
                     tint = Color.White,
                     modifier = Modifier
                         .padding(4.dp)
@@ -352,6 +354,7 @@ private fun EnhancedCatalogActions(
     onLogin: (() -> Unit)?,
     onMigrate: (() -> Unit)?,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.End
@@ -377,7 +380,7 @@ private fun EnhancedCatalogActions(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Cancel",
+                        contentDescription = localizeHelper.localize(Res.string.cancel),
                         modifier = Modifier.size(16.dp)
                     )
                 }

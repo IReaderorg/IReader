@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import ireader.domain.models.entities.Chapter
 import ireader.presentation.ui.component.reusable_composable.AppIcon
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun ChaptersSliderComposable(
@@ -30,6 +32,7 @@ fun ChaptersSliderComposable(
         onSliderChange: (index: Float) -> Unit,
         onSliderDragFinished: () -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = if (chapters.isNotEmpty() && currentChapterIndex != -1) chapters[currentChapterIndex].name else currentChapter?.name ?: "",
@@ -46,7 +49,7 @@ fun ChaptersSliderComposable(
                     onPrev()
                 },
             ) {
-                AppIcon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Chapter")
+                AppIcon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.previous_chapter_1))
             }
             Slider(
                 modifier = Modifier
@@ -71,7 +74,7 @@ fun ChaptersSliderComposable(
             IconButton(modifier = modifier.weight(1f), onClick = {
                 onNext()
             }) {
-                AppIcon(imageVector = Icons.Default.ArrowForward, contentDescription = "Next Chapter")
+                AppIcon(imageVector = Icons.Default.ArrowForward, contentDescription = localizeHelper.localize(Res.string.next_chapter_1))
             }
         }
     }

@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Dialog for adding a new repository
@@ -20,6 +21,7 @@ fun AddRepositoryDialog(
     onDismiss: () -> Unit,
     onAdd: (url: String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var repositoryUrl by remember { mutableStateOf("") }
     var isValidUrl by remember { mutableStateOf(true) }
     
@@ -44,7 +46,7 @@ fun AddRepositoryDialog(
                         repositoryUrl = it
                         isValidUrl = isValidRepositoryUrl(it)
                     },
-                    label = { Text("Repository URL") },
+                    label = { Text(localizeHelper.localize(Res.string.repository_url)) },
                     placeholder = { Text("https://example.com/repo/index.min.json") },
                     singleLine = true,
                     isError = !isValidUrl && repositoryUrl.isNotBlank(),
@@ -75,7 +77,7 @@ fun AddRepositoryDialog(
                 },
                 enabled = isValidUrl && repositoryUrl.isNotBlank()
             ) {
-                Text("Add")
+                Text(localizeHelper.localize(Res.string.add))
             }
         },
         dismissButton = {

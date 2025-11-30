@@ -19,6 +19,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun ChapterBar(
@@ -27,6 +28,7 @@ fun ChapterBar(
         onMap: () -> Unit,
         onSortClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showDownloadMenu by remember { mutableStateOf(false) }
     
     Surface(
@@ -78,7 +80,7 @@ fun ChapterBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Download,
-                            contentDescription = "Download chapters",
+                            contentDescription = localizeHelper.localize(Res.string.download_chapters),
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -88,21 +90,21 @@ fun ChapterBar(
                         onDismissRequest = { showDownloadMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Download all unread") },
+                            text = { Text(localizeHelper.localize(Res.string.download_all_unread)) },
                             onClick = {
                                 showDownloadMenu = false
                                 vm.downloadUnreadChapters()
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Download all un-downloaded") },
+                            text = { Text(localizeHelper.localize(Res.string.download_all_un_downloaded)) },
                             onClick = {
                                 showDownloadMenu = false
                                 vm.downloadUndownloadedChapters()
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Download all") },
+                            text = { Text(localizeHelper.localize(Res.string.download_all)) },
                             onClick = {
                                 showDownloadMenu = false
                                 vm.booksState.book?.let { book ->
@@ -153,7 +155,7 @@ fun ChapterBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Sort,
-                        contentDescription = "Sort",
+                        contentDescription = localizeHelper.localize(Res.string.sort),
                         modifier = Modifier.size(18.dp)
                     )
                 }

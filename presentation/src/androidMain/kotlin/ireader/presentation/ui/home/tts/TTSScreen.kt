@@ -63,6 +63,7 @@ import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeAlignment
 import ireader.presentation.core.toComposeFontFamily
 import ireader.presentation.core.toComposeTextAlign
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -79,6 +80,7 @@ fun TTSScreen(
         lazyState: LazyListState,
         paddingValues: PaddingValues
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Collect StateFlows as State to trigger recomposition on changes
     val currentReadingParagraph by vm.ttsState.currentReadingParagraph.collectAsState()
     val ttsContent by vm.ttsState.ttsContent.collectAsState()
@@ -219,7 +221,7 @@ fun TTSScreen(
                                     vm.ttsState.cachedParagraphs.contains(index) -> {
                                         Icon(
                                             imageVector = Icons.Default.CheckCircle,
-                                            contentDescription = "Cached",
+                                            contentDescription = localizeHelper.localize(Res.string.cached),
                                             modifier = Modifier
                                                 .size(16.dp)
                                                 .padding(end = 8.dp),
@@ -252,7 +254,7 @@ fun TTSScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         imageVector = Icons.Default.Translate,
-                        contentDescription = "Translated",
+                        contentDescription = localizeHelper.localize(Res.string.translated),
                         modifier = Modifier.size(12.dp),
                         tint = vm.theme.value.onTextColor.toComposeColor()
                     )

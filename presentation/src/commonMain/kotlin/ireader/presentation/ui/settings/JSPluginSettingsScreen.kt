@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.js.models.JSPluginRepository
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Settings screen for JavaScript plugin configuration.
@@ -182,6 +184,7 @@ private fun RepositoryItem(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -212,7 +215,7 @@ private fun RepositoryItem(
                     onCheckedChange = onToggle
                 )
                 IconButton(onClick = onRemove) {
-                    Icon(Icons.Default.Delete, contentDescription = "Remove")
+                    Icon(Icons.Default.Delete, contentDescription = localizeHelper.localize(Res.string.remove))
                 }
             }
         }
@@ -224,24 +227,25 @@ private fun AddRepositoryDialog(
     onDismiss: () -> Unit,
     onAdd: (JSPluginRepository) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var name by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Repository") },
+        title = { Text(localizeHelper.localize(Res.string.add_repository)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Name") },
+                    label = { Text(localizeHelper.localize(Res.string.name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("URL") },
+                    label = { Text(localizeHelper.localize(Res.string.url_1)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -255,12 +259,12 @@ private fun AddRepositoryDialog(
                 },
                 enabled = name.isNotBlank() && url.isNotBlank()
             ) {
-                Text("Add")
+                Text(localizeHelper.localize(Res.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

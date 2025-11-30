@@ -40,6 +40,8 @@ import ireader.presentation.ui.component.list.layouts.BookImage
 import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.sin
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -454,6 +456,7 @@ fun BookCoverImage(
     isSelected: Boolean = false,
     isBlurred: Boolean = false
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var revealed by remember(book.id) { mutableStateOf(!isBlurred) }
     
     Box(
@@ -497,7 +500,7 @@ fun BookCoverImage(
         if (isBlurred && !revealed) {
             Icon(
                 imageVector = androidx.compose.material.icons.Icons.Default.Visibility,
-                contentDescription = "Tap to reveal",
+                contentDescription = localizeHelper.localize(Res.string.tap_to_reveal),
                 modifier = Modifier
                     .align(Alignment.Center)
                     .size(32.dp),

@@ -11,6 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginResourceUsage
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Section displaying performance metrics for all plugins
@@ -23,6 +25,7 @@ fun PerformanceMetricsSection(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -45,7 +48,7 @@ fun PerformanceMetricsSection(
                 IconButton(onClick = onRefresh) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh metrics"
+                        contentDescription = localizeHelper.localize(Res.string.refresh_metrics)
                     )
                 }
             }

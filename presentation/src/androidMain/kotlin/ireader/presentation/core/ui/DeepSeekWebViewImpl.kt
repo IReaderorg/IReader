@@ -38,11 +38,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import kotlinx.coroutines.delay
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 private const val TAG = "DeepSeekWebViewImpl"
 private const val DEEPSEEK_URL = "https://chat.deepseek.com"
@@ -55,7 +57,7 @@ actual fun DeepSeekWebViewImpl(
     onClose: () -> Unit
 ) {
     val context = LocalContext.current
-    
+    val localizeHelper = LocalLocalizeHelper.currentOrThrow
     // State
     var isLoading by remember { mutableStateOf(true) }
     var isLoggedIn by remember { mutableStateOf(false) }
@@ -150,7 +152,7 @@ actual fun DeepSeekWebViewImpl(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Reload"
+                        contentDescription = localizeHelper.localize(Res.string.reload)
                     )
                 }
             }

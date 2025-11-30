@@ -17,6 +17,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced reader settings screen following Mihon's comprehensive reader customization.
@@ -30,6 +31,7 @@ fun SettingsReaderScreen(
     viewModel: SettingsReaderViewModel,
     scaffoldPaddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val listState = rememberSaveable(
         key = "settings_reader_scroll_state",
         saver = LazyListState.Saver
@@ -324,7 +326,7 @@ fun SettingsReaderScreen(
     if (viewModel.showReadingModeDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissReadingModeDialog() },
-            title = { Text("Reading Mode") },
+            title = { Text(localizeHelper.localize(Res.string.reading_mode)) },
             text = {
                 Column {
                     val modes = listOf(
@@ -356,7 +358,7 @@ fun SettingsReaderScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissReadingModeDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -366,7 +368,7 @@ fun SettingsReaderScreen(
     if (viewModel.showPageTransitionsDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissPageTransitionsDialog() },
-            title = { Text("Page Transitions") },
+            title = { Text(localizeHelper.localize(Res.string.page_transitions)) },
             text = {
                 Column {
                     val transitions = listOf(
@@ -398,7 +400,7 @@ fun SettingsReaderScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissPageTransitionsDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )
@@ -408,7 +410,7 @@ fun SettingsReaderScreen(
     if (viewModel.showNavigationModeDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissNavigationModeDialog() },
-            title = { Text("Navigation Mode") },
+            title = { Text(localizeHelper.localize(Res.string.navigation_mode)) },
             text = {
                 Column {
                     val modes = listOf(
@@ -440,7 +442,7 @@ fun SettingsReaderScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.dismissNavigationModeDialog() }) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             }
         )

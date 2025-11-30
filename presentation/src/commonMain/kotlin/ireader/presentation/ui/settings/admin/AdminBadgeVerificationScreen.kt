@@ -19,6 +19,8 @@ import ireader.domain.models.remote.PaymentProof
 import ireader.domain.models.remote.PaymentProofStatus
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +28,7 @@ fun AdminBadgeVerificationScreen(
     viewModel: AdminBadgeVerificationViewModel,
     onNavigateBack: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     
@@ -95,7 +98,7 @@ fun AdminBadgeVerificationScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.loadPendingProofs() }) {
-                            Text("Retry")
+                            Text(localizeHelper.localize(Res.string.retry))
                         }
                     }
                 }
@@ -189,6 +192,7 @@ private fun PaymentProofCard(
     onReject: () -> Unit,
     isProcessing: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showConfirmDialog by remember { mutableStateOf<Boolean?>(null) }
     
     Card(
@@ -266,7 +270,7 @@ private fun PaymentProofCard(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("View Payment Proof")
+                    Text(localizeHelper.localize(Res.string.view_payment_proof))
                 }
             }
             
@@ -291,7 +295,7 @@ private fun PaymentProofCard(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Reject")
+                    Text(localizeHelper.localize(Res.string.reject))
                 }
                 
                 Button(
@@ -313,7 +317,7 @@ private fun PaymentProofCard(
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Approve")
+                    Text(localizeHelper.localize(Res.string.approve))
                 }
             }
         }
@@ -367,7 +371,7 @@ private fun PaymentProofCard(
             },
             dismissButton = {
                 TextButton(onClick = { showConfirmDialog = null }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )

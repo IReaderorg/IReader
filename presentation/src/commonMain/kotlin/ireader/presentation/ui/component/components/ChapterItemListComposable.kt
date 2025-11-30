@@ -42,6 +42,8 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.asRelativeTimeString
 import ireader.domain.utils.extensions.toLocalDate
 import ireader.presentation.ui.core.theme.ContentAlpha
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -55,6 +57,7 @@ fun ChapterRow(
         isLoading: Boolean = false,
         showNumber: Boolean = true,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Use remember to cache computed values and minimize recomposition
     val hasBookmark = remember(chapter.bookmark) { chapter.bookmark }
     val hasTranslator = remember(chapter.translator) { chapter.translator.isNotBlank() }
@@ -99,7 +102,7 @@ fun ChapterRow(
         if (hasBookmark) {
             Icon(
                 imageVector = Icons.Default.Bookmark,
-                contentDescription = "Bookmarked",
+                contentDescription = localizeHelper.localize(Res.string.bookmarked),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
@@ -180,7 +183,7 @@ fun ChapterRow(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = "Cached",
+                            contentDescription = localizeHelper.localize(Res.string.cached),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )

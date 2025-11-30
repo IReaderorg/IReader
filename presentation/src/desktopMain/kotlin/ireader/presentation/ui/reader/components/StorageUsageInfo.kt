@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.services.tts_service.piper.VoiceModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Display storage usage information for voice models
@@ -18,6 +20,7 @@ fun StorageUsageInfo(
     models: List<VoiceModel>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val downloadedModels = models.filter { it.isDownloaded }
     val totalSize = downloadedModels.sumOf { it.sizeBytes }
     
@@ -37,7 +40,7 @@ fun StorageUsageInfo(
             ) {
                 Icon(
                     imageVector = Icons.Default.Storage,
-                    contentDescription = "Storage",
+                    contentDescription = localizeHelper.localize(Res.string.storage),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 

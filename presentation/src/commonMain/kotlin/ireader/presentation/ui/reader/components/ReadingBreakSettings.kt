@@ -26,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Settings component for reading break reminders
@@ -39,6 +41,7 @@ fun ReadingBreakSettings(
     onIntervalChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -52,7 +55,7 @@ fun ReadingBreakSettings(
         ) {
             Icon(
                 imageVector = Icons.Default.Timer,
-                contentDescription = "Reading Break",
+                contentDescription = localizeHelper.localize(Res.string.reading_break),
                 tint = MaterialTheme.colorScheme.primary
             )
             Text(
@@ -142,6 +145,7 @@ fun ReadingBreakSettingsCompact(
     onIntervalChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -175,7 +179,7 @@ fun ReadingBreakSettingsCompact(
                     value = "$intervalMinutes minutes",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Interval") },
+                    label = { Text(localizeHelper.localize(Res.string.interval)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     modifier = Modifier
                         .fillMaxWidth()

@@ -28,6 +28,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 data class Language(
     val code: String,
@@ -42,6 +44,7 @@ fun LanguageToggleGroup(
     onLanguageToggle: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var searchQuery by remember { mutableStateOf("") }
     
     val availableLanguages = listOf(
@@ -110,11 +113,11 @@ fun LanguageToggleGroup(
             value = searchQuery,
             onValueChange = { searchQuery = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Search languages...") },
+            placeholder = { Text(localizeHelper.localize(Res.string.search_languages)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
+                    contentDescription = localizeHelper.localize(Res.string.search)
                 )
             },
             singleLine = true,
@@ -161,6 +164,7 @@ private fun LanguageSelectionHeader(
     onDeselectAll: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -191,7 +195,7 @@ private fun LanguageSelectionHeader(
             ) {
                 Icon(
                     imageVector = Icons.Default.SelectAll,
-                    contentDescription = "Select All",
+                    contentDescription = localizeHelper.localize(Res.string.select_all),
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -207,7 +211,7 @@ private fun LanguageSelectionHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Deselect,
-                        contentDescription = "Clear",
+                        contentDescription = localizeHelper.localize(Res.string.clear_1),
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -225,6 +229,7 @@ private fun ModernLanguageChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val backgroundColor by animateColorAsState(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.primaryContainer
@@ -305,7 +310,7 @@ private fun ModernLanguageChip(
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
+                    contentDescription = localizeHelper.localize(Res.string.selected),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )

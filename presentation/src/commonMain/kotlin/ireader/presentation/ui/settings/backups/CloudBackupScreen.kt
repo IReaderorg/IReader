@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.usecases.backup.CloudBackupFile
 import ireader.domain.usecases.backup.CloudProvider
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,18 +35,19 @@ fun CloudBackupScreen(
     onDeleteBackup: (CloudBackupFile) -> Unit,
     onNavigateToGoogleDrive: () -> Unit = {}
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showProviderDialog by remember { mutableStateOf(false) }
     
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Cloud Backup") },
+                title = { Text(localizeHelper.localize(Res.string.cloud_backup)) },
                 navigationIcon = {
                     IconButton(onClick = onPopBackStack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 }
@@ -58,7 +61,7 @@ fun CloudBackupScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.CloudUpload,
-                        contentDescription = "Upload backup"
+                        contentDescription = localizeHelper.localize(Res.string.upload_backup)
                     )
                 }
             }
@@ -141,7 +144,7 @@ fun CloudBackupScreen(
                                     )
                                     Spacer(modifier = Modifier.weight(1f))
                                     TextButton(onClick = onSignOut) {
-                                        Text("Sign Out")
+                                        Text(localizeHelper.localize(Res.string.sign_out))
                                     }
                                 }
                             } else {
@@ -154,7 +157,7 @@ fun CloudBackupScreen(
                                         contentDescription = null
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Sign In")
+                                    Text(localizeHelper.localize(Res.string.sign_in))
                                 }
                             }
                         }
@@ -273,6 +276,7 @@ private fun CloudBackupItem(
     onDownload: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp)
@@ -302,13 +306,13 @@ private fun CloudBackupItem(
                 IconButton(onClick = onDownload) {
                     Icon(
                         imageVector = Icons.Default.CloudDownload,
-                        contentDescription = "Download"
+                        contentDescription = localizeHelper.localize(Res.string.download)
                     )
                 }
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = localizeHelper.localize(Res.string.delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -322,9 +326,10 @@ private fun CloudProviderDialog(
     onDismiss: () -> Unit,
     onProviderSelected: (CloudProvider) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Cloud Provider") },
+        title = { Text(localizeHelper.localize(Res.string.select_cloud_provider)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 CloudProviderOption(
@@ -341,7 +346,7 @@ private fun CloudProviderDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -381,6 +386,7 @@ private fun CloudProviderOption(
 private fun GoogleDriveCard(
     onNavigate: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         onClick = onNavigate,
         modifier = Modifier.fillMaxWidth(),
@@ -418,7 +424,7 @@ private fun GoogleDriveCard(
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Open",
+                contentDescription = localizeHelper.localize(Res.string.open),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }

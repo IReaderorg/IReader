@@ -7,6 +7,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog for adding a custom extension repository
@@ -16,6 +18,7 @@ fun AddRepositoryDialog(
     onDismiss: () -> Unit,
     onAdd: (name: String, url: String, fingerprint: String?) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var name by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
     var fingerprint by remember { mutableStateOf("") }
@@ -27,7 +30,7 @@ fun AddRepositoryDialog(
             Icon(Icons.Default.Add, contentDescription = null)
         },
         title = {
-            Text("Add Repository")
+            Text(localizeHelper.localize(Res.string.add_repository))
         },
         text = {
             Column(
@@ -36,7 +39,7 @@ fun AddRepositoryDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Repository Name") },
+                    label = { Text(localizeHelper.localize(Res.string.repository_name)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -44,7 +47,7 @@ fun AddRepositoryDialog(
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("Repository URL") },
+                    label = { Text(localizeHelper.localize(Res.string.repository_url)) },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("https://example.com/repo") },
                     singleLine = true
@@ -60,9 +63,9 @@ fun AddRepositoryDialog(
                     OutlinedTextField(
                         value = fingerprint,
                         onValueChange = { fingerprint = it },
-                        label = { Text("Fingerprint (Optional)") },
+                        label = { Text(localizeHelper.localize(Res.string.fingerprint_optional)) },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("SHA-256 fingerprint") },
+                        placeholder = { Text(localizeHelper.localize(Res.string.sha_256_fingerprint)) },
                         singleLine = true
                     )
                     
@@ -85,12 +88,12 @@ fun AddRepositoryDialog(
                 },
                 enabled = name.isNotBlank() && url.isNotBlank()
             ) {
-                Text("Add")
+                Text(localizeHelper.localize(Res.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

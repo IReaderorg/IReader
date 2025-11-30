@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="library_screen_label">Library</string>
     <string name="explore_screen_label">Sources</string>
@@ -53,13 +52,11 @@
     <string name="category">Categories</string>
     <string name="help">Help</string>
     <string name="pref_incognito_mode">Incognito mode</string>
-
     <string name="lock_never">Never</string>
     <string name="lock_always">Always</string>
     <string name="lock_when_idle">Lock when Idle After</string>
     <string name="authentication">Authentication</string>
     <string name="authenticate_to_confirm_change">Authenticate to confirm change</string>
-
     <string name="pref_incognito_mode_summary">Pause reading history</string>
     <string name="no_app_was_found_to_lauch">Something went wrong. you don\'t have the required
         app.
@@ -135,7 +132,6 @@
     <string name="check_the_update">Check the Update</string>
     <string name="check_permissions">Check Permissions</string>
     <string name="use_local_cache">Use Local Cache</string>
-
     <string name="appearance">Appearance</string>
     <string name="updater_is_enable">Updater</string>
     <string name="show_update">Show App Update Notifications</string>
@@ -252,11 +248,9 @@
     <string name="by_date_fetched">By date fetched</string>
     <string name="by_date_uploaded">By date Uploaded</string>
     <string name="by_date_read">By read</string>
-    <!--- UiText -->
     <string name="empty_library">There is no book is Library, you can add books in the Explore
         screen.
     </string>
-    <!--- install steps -->
     <string name="fatal_error">Fatal error for</string>
     <string name="installation_error">Error while (un)installing package</string>
     <string name="installation_error_aborted">PackageManger: Cancelled</string>
@@ -276,8 +270,6 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="owner">Owner</string>
-    <!-- IReader-->
-    <!-- Detail-->
     <string name="start">Start</string>
     <string name="error_unknown">An Unknown Error Happened.</string>
     <string name="no_error">No error</string>
@@ -295,7 +287,6 @@
     <string name="trying_to_fetch">Trying to fetch…</string>
     <string name="this_is_first_chapter">This is the first chapter</string>
     <string name="this_is_last_chapter">This is the last chapter</string>
-    <!-- Download Notification -->
     <string name="download_notifier_downloader_title">Downloader</string>
     <string name="download_notifier_title_error">Error</string>
     <string name="download_notifier_unknown_error">Could not download chapter due to unexpected
@@ -305,7 +296,6 @@
     <string name="download_notifier_no_network">No network connection available</string>
     <string name="download_notifier_download_paused">Download paused</string>
     <string name="download_notifier_download_finish">Download completed</string>
-    <!-- Notification channels -->
     <string name="channel_common">Common</string>
     <string name="channel_progress">Progress</string>
     <string name="channel_complete">Complete</string>
@@ -443,7 +433,6 @@
     <string name="preload_only_on_wifi_summary">Restrict automatic preloading to WiFi connections only</string>
     <string name="auto_translate_next_chapter">Auto-translate next chapter</string>
     <string name="auto_translate_next_chapter_summary">Automatically translate the next chapter when navigating using the selected translation engine</string>
-    <!--- core -->
     <string name="history_screen_label">History</string>
     <string name="updates_screen_label">Updates</string>
     <string name="content">Content</string>
@@ -457,7 +446,6 @@
     <string name="open_in_webView">Open in WebView</string>
     <string name="downloads_queue">Downloads queue</string>
     <string name="cancel_all_for_this_series">"Cancel all for this series</string>
-    <!-- IReader-->
     <string name="catalog_not_found_error">Can\'t found any Extensions.</string>
     <string name="there_was_a_problem_in_getting_chapter">There was a problem in getting the
         chapter.
@@ -612,16 +600,12 @@
     <string name="export_epub_option_title">Export as ePub</string>
     <string name="export_epub_option_description">Download as ePub file for offline reading</string>
     <string name="export_epub">Export ePub</string>
-    
-    <!-- Library Toolbar Actions -->
     <string name="update_library">Update Library</string>
     <string name="update_category">Update Category</string>
     <string name="import_epub">Import EPUB</string>
     <string name="open_random">Open Random</string>
     <string name="sync_remote">Sync Remote</string>
     <string name="no_categories_found">No categories found</string>
-    
-    <!-- Missing strings for new features -->
     <string name="export_as_epub">Export as ePub</string>
     <string name="info">Info</string>
     <string name="more_options">More Options</string>
@@ -638,8 +622,6 @@
     <string name="select_source_to_migrate_to">Select source to migrate to</string>
     <string name="no_sources_available">No sources available</string>
     <string name="lang">Language</string>
-    
-    <!-- ePub Export/Import strings -->
     <string name="export_successful">Export Successful</string>
     <string name="export_failed">Export Failed</string>
     <string name="file_name">File Name</string>
@@ -674,8 +656,6 @@
     <string name="publisher">Publisher</string>
     <string name="chapters">Chapters</string>
     <string name="import_action">Import</string>
-    
-    <!-- Error and Status Messages -->
     <string name="something_wrong_with_book">Something is wrong with this book</string>
     <string name="glossary_exported_successfully">Glossary exported successfully</string>
     <string name="category_renamed">Category renamed to \'%1$s\'</string>
@@ -710,22 +690,16 @@
     <string name="chapter_repaired_successfully">Chapter repaired successfully from %1$s</string>
     <string name="repair_failed">Repair failed: %1$s</string>
     <string name="failed_to_set_secure_screen">Failed to set secure screen: %1$s</string>
-    
-    <!-- Reader and Font Messages -->
     <string name="failed_to_load_font">Failed to load font: %1$s</string>
     <string name="font_imported_successfully">Font imported successfully</string>
     <string name="font_deleted_successfully">Font deleted successfully</string>
     <string name="chapter_reported_successfully">Chapter reported successfully. Thank you for your feedback!</string>
     <string name="failed_to_report_chapter">Failed to report chapter: %1$s</string>
-    
-    <!-- TTS Messages -->
     <string name="tts_error">TTS error: %1$s</string>
     <string name="downloading_voice">Downloading voice…</string>
     <string name="voice_downloaded">Voice downloaded</string>
     <string name="delete_voice_not_supported">Delete voice not supported yet</string>
     <string name="delete_failed">Delete failed: %1$s</string>
-    
-    <!-- Translation Messages -->
     <string name="glossary_entry_added">Glossary entry added</string>
     <string name="failed_to_add_entry">Failed to add entry: %1$s</string>
     <string name="glossary_entry_updated">Glossary entry updated</string>
@@ -735,11 +709,7 @@
     <string name="glossary_exported">Glossary exported</string>
     <string name="glossary_imported">Glossary imported: %1$s entries</string>
     <string name="import_failed">Import failed: %1$s</string>
-    
-    <!-- Download Messages -->
     <string name="chapters_queued_for_download">%1$s chapters queued for download</string>
-    
-    <!-- Plugin Messages -->
     <string name="plugin_enabled_successfully">Plugin enabled successfully</string>
     <string name="plugin_disabled_successfully">Plugin disabled successfully</string>
     <string name="plugin_uninstalled_successfully">Plugin uninstalled successfully</string>
@@ -748,8 +718,6 @@
     <string name="failed_to_update_plugin">Failed to update plugin</string>
     <string name="all_plugins_updated_successfully">All plugins updated successfully</string>
     <string name="js_plugins_enabled">JavaScript plugins enabled. You can now enable plugins.</string>
-    
-    <!-- UI Labels -->
     <string name="tts_performance_settings">TTS Performance Settings</string>
     <string name="tts_engine_manager">TTS Engine Manager</string>
     <string name="performance">Performance</string>
@@ -777,28 +745,20 @@
     <string name="sync_interval">Sync Interval</string>
     <string name="clear_sync_data">Clear Sync Data</string>
     <string name="clear_sync_data_confirmation">This will remove all tracking data and logout from all services. You will need to re-login and re-track your books.</string>
-    
-    <!-- More Plugin Messages -->
     <string name="plugin_enabled">Plugin enabled</string>
     <string name="plugin_already_enabled">Plugin is already enabled</string>
     <string name="review_submitted_successfully">Review submitted successfully</string>
     <string name="failed_to_submit_review">Failed to submit review</string>
     <string name="js_plugins_enabled_active">JavaScript plugins enabled. Plugin is now active.</string>
-    
-    <!-- Language and Browse Settings -->
     <string name="language_added">Language added</string>
     <string name="all_languages_selected">All languages selected</string>
     <string name="settings_reset_to_defaults">Settings reset to defaults</string>
     <string name="browse_settings_updated">Browse settings updated</string>
-    
-    <!-- Migration Messages -->
     <string name="failed_to_load_novels">Failed to load novels: %1$s</string>
     <string name="please_select_target_source">Please select a target source</string>
     <string name="please_select_at_least_one_novel">Please select at least one novel</string>
     <string name="migration_failed">Migration failed: %1$s</string>
     <string name="migration_completed_successfully">Migration completed successfully</string>
-    
-    <!-- Extension Messages -->
     <string name="extension_added">Extension added: %1$s</string>
     <string name="extension_removed">Extension removed: %1$s</string>
     <string name="login_successful">Login successful</string>
@@ -820,23 +780,17 @@
     <string name="update_check_failed">Update check failed: %1$s</string>
     <string name="error_adding_repository">Error adding repository: %1$s</string>
     <string name="books_queued_for_download">%1$s books queued for download</string>
-    
-    <!-- Download Screen Labels -->
     <string name="downloads">Downloads</string>
     <string name="pause_all">Pause All</string>
     <string name="resume_all">Resume All</string>
     <string name="show_completed">Show Completed</string>
     <string name="show_failed">Show Failed</string>
     <string name="all_status">All Status</string>
-    
-    <!-- Settings Screen Labels -->
     <string name="privacy_settings">Privacy Settings</string>
     <string name="enable_privacy_mode">Enable Privacy Mode</string>
     <string name="disable_privacy_mode">Disable Privacy Mode</string>
     <string name="enable">Enable</string>
     <string name="test_coqui_tts">Test Coqui TTS</string>
-    
-    <!-- WebView Messages -->
     <string name="error_failed_to_fetch_chapter">Error: %1$s</string>
     <string name="chapter_content_extracted">Chapter content extracted using %1$s</string>
     <string name="no_reliable_content_found">No reliable content found. Try a different page or source.</string>
@@ -846,8 +800,6 @@
     <string name="failed_to_fetch_book_details">Failed to fetch book details. Please ensure you\'re on the book\'s detail page and try again.</string>
     <string name="book_added_to_library">Book \'%1$s\' added to library</string>
     <string name="could_not_extract_book_info">Could not extract book information from this page.</string>
-    
-    <!-- More Plugin Error Messages -->
     <string name="installation_failed_generic">Installation failed</string>
     <string name="purchase_failed">Purchase failed</string>
     <string name="failed_to_start_trial">Failed to start trial</string>
@@ -857,8 +809,6 @@
     <string name="failed_to_disable_plugin">Failed to disable plugin</string>
     <string name="failed_to_uninstall_plugin">Failed to uninstall plugin</string>
     <string name="failed_to_update_plugins">Failed to update plugins</string>
-    
-    <!-- Dialog Titles -->
     <string name="page_transitions">Page Transitions</string>
     <string name="navigation_mode">Navigation Mode</string>
     <string name="supabase_configuration">Supabase Configuration</string>
@@ -883,8 +833,6 @@
     <string name="image_quality">Image Quality</string>
     <string name="clear_all_cache_confirmation">This will remove all cached images, chapters, and network data. This action cannot be undone.</string>
     <string name="optimize_database">Optimize Database</string>
-    
-    <!-- Book Detail Messages -->
     <string name="no_alternative_sources_available">No alternative sources available. Total sources: %1$s, Current: %2$s</string>
     <string name="failed_to_load_sources">Failed to load sources: %1$s</string>
     <string name="successfully_migrated_to">Successfully migrated to %1$s</string>
@@ -905,22 +853,286 @@
     <string name="no_unread_chapters_to_download">No unread chapters to download</string>
     <string name="downloading_chapters">Downloading %1$s chapters</string>
     <string name="all_chapters_already_downloaded">All chapters are already downloaded</string>
-    
-    <!-- Additional Missing Strings -->
     <string name="download_failed">Download failed: %1$s</string>
     <string name="failed_to_set_brightness">Failed to set brightness: %1$s</string>
     <string name="failed_to_set_keep_screen_on">Failed to set keep screen on: %1$s</string>
     <string name="no_text_to_read">No text to read</string>
-    
-    <!-- Plugin Related Strings -->
-    
-    <!-- TTS Related Strings -->
-    
-    <!-- Translation Related Strings -->
-    
-    <!-- Glossary Related Strings -->
-    
-    <!-- Database Related Strings -->
-    
-    <!-- Theme Related Strings -->
+    <string name="wallet_placeholder">0x...</string>
+    <string name="ten_min">10 min</string>
+    <string name="fifteen_min">15 min</string>
+    <string name="thirty_min">30 min</string>
+    <string name="five_min">5 min</string>
+    <string name="add_custom_tts_engine">Add Custom TTS Engine</string>
+    <string name="add_entry">Add Entry</string>
+    <string name="add_glossary_entry">Add Glossary Entry</string>
+    <string name="add_parameter">Add Parameter</string>
+    <string name="additional_details_optional">Additional details (optional)</string>
+    <string name="adjust_brightness">Adjust brightness</string>
+    <string name="adult_content_warning">Adult Content Warning</string>
+    <string name="all_categories">All Categories</string>
+    <string name="all_languages">All Languages</string>
+    <string name="all_time">All Time</string>
+    <string name="an_image">an image</string>
+    <string name="api_key">API Key</string>
+    <string name="api_key_optional">API Key (optional)</string>
+    <string name="api_name">API Name</string>
+    <string name="app_crashed">App Crashed</string>
+    <string name="apply_filters">Apply Filters</string>
+    <string name="approve">Approve</string>
+    <string name="are_you_sure_you_want">Are you sure you want to delete this backup? This action cannot be undone.</string>
+    <string name="audio_output_index">Audio Output Index</string>
+    <string name="authenticate">Authenticate</string>
+    <string name="authenticate_with_biometric">Authenticate with Biometric</string>
+    <string name="authenticating">Authenticating...</string>
+    <string name="auto_scroll">Auto Scroll</string>
+    <string name="auto_scrolling">Auto scrolling</string>
+    <string name="auto_update">Auto-update</string>
+    <string name="back">Back</string>
+    <string name="backup_all">Backup All</string>
+    <string name="badge_placeholder">Badge placeholder</string>
+    <string name="badge_store">Badge Store</string>
+    <string name="bilingual">Bilingual</string>
+    <string name="bilingual_mode">Bilingual Mode</string>
+    <string name="block">Block</string>
+    <string name="book_cover_1">Book cover</string>
+    <string name="bookmarked">Bookmarked</string>
+    <string name="brightness">Brightness</string>
+    <string name="browse_settings">Browse Settings</string>
+    <string name="cached">Cached</string>
+    <string name="cancel_migration">Cancel Migration</string>
+    <string name="change_category">Change category</string>
+    <string name="chapter_reviews">Chapter Reviews</string>
+    <string name="choose_folder">Choose Folder</string>
+    <string name="clear_1">Clear</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="clear_filters">Clear Filters</string>
+    <string name="close_search">Close search</string>
+    <string name="cloud_backup">Cloud Backup</string>
+    <string name="color_selected">color selected</string>
+    <string name="configure">Configure</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="confirm_pin">Confirm PIN</string>
+    <string name="connect_to_google_drive">Connect to Google Drive</string>
+    <string name="contents_detail">Contents Detail</string>
+    <string name="copy">Copy</string>
+    <string name="copy_version_info">Copy version info</string>
+    <string name="create_backup_1">Create backup</string>
+    <string name="currently_viewing_a_plugin_screen">Currently viewing a plugin screen</string>
+    <string name="decrease_font_size">Decrease font size</string>
+    <string name="decrease_speed">Decrease speed</string>
+    <string name="default_value">Default Value</string>
+    <string name="delete_backup">Delete Backup?</string>
+    <string name="delete_font">Delete Font</string>
+    <string name="delete_font_1">Delete font</string>
+    <string name="delete_voice">Delete voice</string>
+    <string name="describe_the_issue">Describe the issue...</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="donate_now">Donate Now</string>
+    <string name="download_all">Download all</string>
+    <string name="download_all_un_downloaded">Download all un-downloaded</string>
+    <string name="download_all_unread">Download all unread</string>
+    <string name="download_chapters">Download chapters</string>
+    <string name="download_unread">Download unread</string>
+    <string name="drag_to_reorder">Drag to reorder</string>
+    <string name="dropdown">Dropdown</string>
+    <string name="edit">Edit</string>
+    <string name="edit_glossary_entry">Edit Glossary Entry</string>
+    <string name="eg_source_not_loading_broken">e.g., Source not loading, broken search, missing content...</string>
+    <string name="email">Email</string>
+    <string name="enable_continue">Enable &amp; Continue</string>
+    <string name="enable_plugin">Enable Plugin</string>
+    <string name="enable_sleep_timer_1">Enable Sleep Timer</string>
+    <string name="engine_settings">Engine Settings</string>
+    <string name="enter_font_name">Enter font name</string>
+    <string name="enter_your_transaction_id">Enter your transaction ID</string>
+    <string name="error_loading_image">Error loading image</string>
+    <string name="error_tap_to_retry">Error - Tap to retry</string>
+    <string name="exit_fullscreen">Exit Fullscreen</string>
+    <string name="export_diagnostics">Export Diagnostics</string>
+    <string name="export_theme">Export Theme</string>
+    <string name="extension_management">Extension Management</string>
+    <string name="extension_repositories">Extension Repositories</string>
+    <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
+    <string name="favorited">Favorited</string>
+    <string name="fetch_actions">Fetch Actions</string>
+    <string name="fill_all_projects">Fill All Projects</string>
+    <string name="filter_by_category">Filter by category</string>
+    <string name="filter_your_library_with_advanced_criteria">Filter your library with advanced criteria</string>
+    <string name="filters">Filters</string>
+    <string name="find_in_chapter">Find in chapter</string>
+    <string name="fingerprint_optional">Fingerprint (Optional)</string>
+    <string name="font_name">Font Name</string>
+    <string name="for_private_spaces">For private spaces</string>
+    <string name="forward">Forward</string>
+    <string name="get_started">Get Started</string>
+    <string name="go_to_badge_store">Go to Badge Store</string>
+    <string name="go_to_chapter">Go to Chapter</string>
+    <string name="goal_reached">Goal Reached</string>
+    <string name="google_drive_authentication">Google Drive Authentication</string>
+    <string name="google_drive_backup">Google Drive Backup</string>
+    <string name="got_it">Got it</string>
+    <string name="group_by_novel">Group by Novel</string>
+    <string name="has_unread_chapters">Has unread chapters</string>
+    <string name="helpful">Helpful</string>
+    <string name="hide_language_filter">Hide language filter</string>
+    <string name="high_brightness">High brightness</string>
+    <string name="huggingface_space_url">HuggingFace Space URL</string>
+    <string name="image">image</string>
+    <string name="import_font">Import Font</string>
+    <string name="import_theme">Import Theme</string>
+    <string name="in_library_1">In Library</string>
+    <string name="increase_font_size">Increase font size</string>
+    <string name="increase_speed">Increase speed</string>
+    <string name="install_free_with_in_app_purchases">Install (Free with in-app purchases)</string>
+    <string name="installed_plugins">Installed Plugins</string>
+    <string name="ireader_logo">IReader Logo</string>
+    <string name="lnreader">LNReader</string>
+    <string name="login">Login</string>
+    <string name="low_brightness">Low brightness</string>
+    <string name="manage_badges">Manage Badges</string>
+    <string name="manage_piper_voices">Manage Piper Voices</string>
+    <string name="maybe_later">Maybe Later</string>
+    <string name="migrate_from_source">Migrate from Source</string>
+    <string name="migrating_source">Migrating Source</string>
+    <string name="more_filters">More filters</string>
+    <string name="more_info">More info</string>
+    <string name="more_languages">More languages</string>
+    <string name="more_options_1">More options</string>
+    <string name="navigate">Navigate</string>
+    <string name="navigate_back">Navigate back</string>
+    <string name="navigation_styles_showcase">Navigation Styles Showcase</string>
+    <string name="next">Next</string>
+    <string name="next_chapter_1">Next Chapter</string>
+    <string name="next_match">Next match</string>
+    <string name="nft_badge">NFT Badge</string>
+    <string name="no_badge">No badge</string>
+    <string name="notes_optional">Notes (optional)</string>
+    <string name="open">Open</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="open_in_wallet">Open in Wallet</string>
+    <string name="open_local_folder">Open Local Folder</string>
+    <string name="open_site">Open Site</string>
+    <string name="optimize">Optimize</string>
+    <string name="original_term">Original Term</string>
+    <string name="paste_json_here">Paste JSON here...</string>
+    <string name="paste_the_theme_json_below">Paste the theme JSON below:</string>
+    <string name="paused">Paused</string>
+    <string name="pin_1">PIN</string>
+    <string name="please_provide_more_details_about_the_issue">Please provide more details about the issue...</string>
+    <string name="plugin_error">Plugin Error</string>
+    <string name="plugin_marketplace">Plugin Marketplace</string>
+    <string name="predict_or_synthesize_speech">/predict or /synthesize_speech</string>
+    <string name="presets">Presets</string>
+    <string name="preview_voice">Preview voice</string>
+    <string name="previous_chapter_1">Previous Chapter</string>
+    <string name="previous_match">Previous match</string>
+    <string name="primary_badge">Primary badge</string>
+    <string name="primary_button">Primary Button</string>
+    <string name="profile">Profile</string>
+    <string name="purchase">Purchase</string>
+    <string name="qr_code">QR Code</string>
+    <string name="queued">Queued</string>
+    <string name="quick_add_popular_repositories">Quick Add Popular Repositories</string>
+    <string name="rating">Rating</string>
+    <string name="reading_break">Reading Break</string>
+    <string name="refresh_metrics">Refresh metrics</string>
+    <string name="refreshing">Refreshing</string>
+    <string name="reject">Reject</string>
+    <string name="reload">Reload</string>
+    <string name="reload_plugin_themes">Reload plugin themes</string>
+    <string name="remove_filter">Remove filter</string>
+    <string name="remove_from_history">Remove from History</string>
+    <string name="remove_repository">Remove Repository?</string>
+    <string name="repair">Repair</string>
+    <string name="report">Report</string>
+    <string name="report_as_broken">Report as Broken</string>
+    <string name="report_broken_chapter">Report broken chapter</string>
+    <string name="report_broken_chapter_1">Report Broken Chapter</string>
+    <string name="repository_name">Repository Name</string>
+    <string name="repository_url">Repository URL</string>
+    <string name="reset_data_settings">Reset Data Settings</string>
+    <string name="reset_to_defaults">Reset to defaults</string>
+    <string name="restart_app">Restart App</string>
+    <string name="restore_backup_1">Restore Backup?</string>
+    <string name="retry_loading">Retry Loading</string>
+    <string name="review">Review</string>
+    <string name="run_health_check">Run Health Check</string>
+    <string name="save">Save</string>
+    <string name="save_configuration">Save Configuration</string>
+    <string name="save_multi_endpoint_configuration">Save Multi-Endpoint Configuration</string>
+    <string name="search_across_all_sources_1">Search across all sources...</string>
+    <string name="search_fonts">Search fonts...</string>
+    <string name="search_glossary">Search glossary...</string>
+    <string name="search_languages">Search languages...</string>
+    <string name="search_plugins">Search plugins...</string>
+    <string name="search_voices">Search voices...</string>
+    <string name="search_voices_by_name_language">Search voices by name, language...</string>
+    <string name="secondary_button">Secondary Button</string>
+    <string name="select_cloud_provider">Select Cloud Provider</string>
+    <string name="select_engine">Select Engine</string>
+    <string name="set_eth_wallet_address">Set ETH Wallet Address</string>
+    <string name="set_name">Set Name</string>
+    <string name="sha_256_fingerprint">SHA-256 fingerprint</string>
+    <string name="share_report">Share Report</string>
+    <string name="share_your_experience_with_this_plugin">Share your experience with this plugin...</string>
+    <string name="show_downloaded_only">Show Downloaded Only</string>
+    <string name="show_error_details">Show error details</string>
+    <string name="show_language_filter">Show language filter</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_sign_up">Sign In / Sign Up</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="skip">Skip</string>
+    <string name="skip_backward_10_seconds">Skip backward 10 seconds</string>
+    <string name="skip_forward_10_seconds">Skip forward 10 seconds</string>
+    <string name="skip_this_book">Skip This Book</string>
+    <string name="sleep_timer">Sleep Timer</string>
+    <string name="snooze">Snooze</string>
+    <string name="space_url">Space URL</string>
+    <string name="speed">Speed</string>
+    <string name="start_trial">Start Trial</string>
+    <string name="stats">Stats</string>
+    <string name="stop">Stop</string>
+    <string name="storage">Storage</string>
+    <string name="submit">Submit</string>
+    <string name="submit_report">Submit Report</string>
+    <string name="supabase_url">Supabase URL</string>
+    <string name="switch">Switch</string>
+    <string name="sync">Sync</string>
+    <string name="sync_my_stats">Sync My Stats</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="sync_stats">Sync Stats</string>
+    <string name="sync_with_cloud">Sync with cloud</string>
+    <string name="syncing_with_cloud">Syncing with cloud...</string>
+    <string name="system_diagnostics">System Diagnostics</string>
+    <string name="take_a_break">Take a Break</string>
+    <string name="tap_to_reveal">Tap to reveal</string>
+    <string name="testing_connection_1">Testing Connection...</string>
+    <string name="text_to_speech">Text-to-Speech</string>
+    <string name="this_will_compact_the_database">This will compact the database and may improve performance. The process may take a few minutes.</string>
+    <string name="this_will_reset_all_data">This will reset all data and storage settings to their default values.</string>
+    <string name="toggle_translation">Toggle Translation</string>
+    <string name="transaction_id">Transaction ID</string>
+    <string name="translation">Translation</string>
+    <string name="trust">Trust</string>
+    <string name="try_again">Try Again</string>
+    <string name="try_alternative_url">Try Alternative URL</string>
+    <string name="tts_engine_settings">TTS Engine Settings</string>
+    <string name="type">Type</string>
+    <string name="undo">UNDO</string>
+    <string name="uninstall_plugin">Uninstall Plugin</string>
+    <string name="updating">Updating...</string>
+    <string name="upload_backup">Upload backup</string>
+    <string name="url_1">URL</string>
+    <string name="use_pinpassword_instead">Use PIN/Password Instead</string>
+    <string name="view_novel_details">View Novel Details</string>
+    <string name="view_payment_proof">View Payment Proof</string>
+    <string name="visit_marketplace">Visit Marketplace</string>
+    <string name="voice_selection">Voice Selection</string>
+    <string name="voice_settings">Voice Settings</string>
+    <string name="wallet_address">Wallet Address</string>
+    <string name="warning">Warning</string>
+    <string name="website_1">Website</string>
+    <string name="whats_new_1">What's New</string>
+    <string name="write_review">Write Review</string>
+    <string name="your_review_optional">Your Review (Optional)</string>
 </resources>

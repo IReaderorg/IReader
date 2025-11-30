@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Enum representing available batch operations
@@ -54,6 +56,7 @@ fun BatchOperationDialog(
     onOperationSelected: (BatchOperation) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (isVisible) {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -131,7 +134,7 @@ fun BatchOperationDialog(
             },
             confirmButton = {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -226,6 +229,7 @@ fun BatchOperationResultDialog(
     onUndo: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (isVisible) {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -237,7 +241,7 @@ fun BatchOperationResultDialog(
             },
             confirmButton = {
                 TextButton(onClick = onDismiss) {
-                    Text("OK")
+                    Text(localizeHelper.localize(Res.string.ok))
                 }
             },
             dismissButton = if (showUndo) {
@@ -246,7 +250,7 @@ fun BatchOperationResultDialog(
                         onUndo()
                         onDismiss()
                     }) {
-                        Text("UNDO")
+                        Text(localizeHelper.localize(Res.string.undo))
                     }
                 }
             } else null

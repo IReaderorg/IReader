@@ -17,6 +17,8 @@ import ireader.domain.models.entities.*
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Enhanced statistics screen with comprehensive analytics and discovery features
@@ -29,13 +31,14 @@ class EnhancedStatisticsScreen : KoinComponent {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navigator = LocalNavigator.current
         val state by screenModel.state.collectAsState()
 
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Statistics & Analytics") },
+                    title = { Text(localizeHelper.localize(Res.string.statistics_and_analytics)) },
                     navigationIcon = {
                         TopAppBarBackButton(onClick = { navigator?.pop() })
                     },
@@ -328,6 +331,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
     @Composable
     private fun SearchTab(state: StatsScreenModel.State, screenModel: StatsScreenModel) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -345,7 +349,7 @@ class EnhancedStatisticsScreen : KoinComponent {
                 value = state.searchQuery,
                 onValueChange = { /* Update search query */ },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search across all sources...") },
+                placeholder = { Text(localizeHelper.localize(Res.string.search_across_all_sources_1)) },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
                 trailingIcon = {
                     if (state.isSearching) {
@@ -359,7 +363,7 @@ class EnhancedStatisticsScreen : KoinComponent {
                 modifier = Modifier.fillMaxWidth(),
                 enabled = state.searchQuery.isNotBlank() && !state.isSearching
             ) {
-                Text("Search")
+                Text(localizeHelper.localize(Res.string.search))
             }
 
             // Search results
@@ -380,6 +384,7 @@ class EnhancedStatisticsScreen : KoinComponent {
 
     @Composable
     private fun FiltersTab(state: StatsScreenModel.State, screenModel: StatsScreenModel) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -394,7 +399,7 @@ class EnhancedStatisticsScreen : KoinComponent {
             }
 
             item {
-                Text("Filter your library with advanced criteria")
+                Text(localizeHelper.localize(Res.string.filter_your_library_with_advanced_criteria))
             }
 
             // Genre filters
@@ -784,6 +789,7 @@ class EnhancedStatisticsScreen : KoinComponent {
         onRetry: () -> Unit,
         onDismiss: () -> Unit
     ) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -814,10 +820,10 @@ class EnhancedStatisticsScreen : KoinComponent {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedButton(onClick = onDismiss) {
-                    Text("Dismiss")
+                    Text(localizeHelper.localize(Res.string.dismiss))
                 }
                 Button(onClick = onRetry) {
-                    Text("Retry")
+                    Text(localizeHelper.localize(Res.string.retry))
                 }
             }
         }

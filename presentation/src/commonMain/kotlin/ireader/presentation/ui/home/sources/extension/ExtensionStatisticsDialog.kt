@@ -11,6 +11,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.ExtensionStatistics
 import java.text.SimpleDateFormat
 import java.util.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog showing extension usage statistics
@@ -21,6 +23,7 @@ fun ExtensionStatisticsDialog(
     extensionName: String,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -91,7 +94,7 @@ fun ExtensionStatisticsDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )

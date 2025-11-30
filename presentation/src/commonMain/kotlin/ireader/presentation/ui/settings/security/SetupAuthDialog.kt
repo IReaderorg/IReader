@@ -13,6 +13,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.security.AuthMethod
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun SetupAuthDialog(
@@ -21,6 +23,7 @@ fun SetupAuthDialog(
     onDismiss: () -> Unit,
     errorMessage: String? = null
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var input by remember { mutableStateOf("") }
     var confirmInput by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
@@ -71,7 +74,7 @@ fun SetupAuthDialog(
                         OutlinedTextField(
                             value = input,
                             onValueChange = { if (it.length <= 6 && it.all { char -> char.isDigit() }) input = it },
-                            label = { Text("PIN") },
+                            label = { Text(localizeHelper.localize(Res.string.pin_1)) },
                             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.NumberPassword,
@@ -91,7 +94,7 @@ fun SetupAuthDialog(
                         OutlinedTextField(
                             value = confirmInput,
                             onValueChange = { if (it.length <= 6 && it.all { char -> char.isDigit() }) confirmInput = it },
-                            label = { Text("Confirm PIN") },
+                            label = { Text(localizeHelper.localize(Res.string.confirm_pin)) },
                             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.NumberPassword,
@@ -114,7 +117,7 @@ fun SetupAuthDialog(
                         OutlinedTextField(
                             value = input,
                             onValueChange = { input = it },
-                            label = { Text("Password") },
+                            label = { Text(localizeHelper.localize(Res.string.password)) },
                             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Password,
@@ -134,7 +137,7 @@ fun SetupAuthDialog(
                         OutlinedTextField(
                             value = confirmInput,
                             onValueChange = { confirmInput = it },
-                            label = { Text("Confirm Password") },
+                            label = { Text(localizeHelper.localize(Res.string.confirm_password)) },
                             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Password,
@@ -181,12 +184,12 @@ fun SetupAuthDialog(
                 },
                 enabled = isValid
             ) {
-                Text("Confirm")
+                Text(localizeHelper.localize(Res.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

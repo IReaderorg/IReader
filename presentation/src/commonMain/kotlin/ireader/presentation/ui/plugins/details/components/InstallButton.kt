@@ -11,6 +11,8 @@ import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginMonetization
 import ireader.domain.plugins.PluginStatus
 import ireader.presentation.ui.plugins.details.InstallationState
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Install button handling different states and plugin types
@@ -71,6 +73,7 @@ private fun NotInstalledButton(
     onInstall: () -> Unit,
     onPurchase: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val monetization = plugin.manifest.monetization
     
     when (monetization) {
@@ -80,7 +83,7 @@ private fun NotInstalledButton(
                     onClick = onInstall,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Install")
+                    Text(localizeHelper.localize(Res.string.install))
                 }
             } else {
                 Button(
@@ -96,7 +99,7 @@ private fun NotInstalledButton(
                 onClick = onInstall,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Install (Free with in-app purchases)")
+                Text(localizeHelper.localize(Res.string.install_free_with_in_app_purchases))
             }
         }
         is PluginMonetization.Free, null -> {
@@ -104,7 +107,7 @@ private fun NotInstalledButton(
                 onClick = onInstall,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Install")
+                Text(localizeHelper.localize(Res.string.install))
             }
         }
     }
@@ -174,13 +177,14 @@ private fun InstalledButton(
     plugin: PluginInfo,
     onOpen: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     when (plugin.status) {
         PluginStatus.ENABLED -> {
             OutlinedButton(
                 onClick = onOpen,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Enabled")
+                Text(localizeHelper.localize(Res.string.enabled))
             }
         }
         PluginStatus.DISABLED -> {
@@ -188,7 +192,7 @@ private fun InstalledButton(
                 onClick = onOpen,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Enable")
+                Text(localizeHelper.localize(Res.string.enable))
             }
         }
         PluginStatus.ERROR -> {
@@ -199,7 +203,7 @@ private fun InstalledButton(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Error - Tap to retry")
+                Text(localizeHelper.localize(Res.string.error_tap_to_retry))
             }
         }
         PluginStatus.UPDATING -> {
@@ -208,7 +212,7 @@ private fun InstalledButton(
                 enabled = false,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Updating...")
+                Text(localizeHelper.localize(Res.string.updating))
             }
         }
     }
@@ -222,6 +226,7 @@ private fun ErrorButton(
     message: String,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -239,7 +244,7 @@ private fun ErrorButton(
                 containerColor = MaterialTheme.colorScheme.error
             )
         ) {
-            Text("Retry")
+            Text(localizeHelper.localize(Res.string.retry))
         }
     }
 }

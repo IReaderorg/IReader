@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Desktop placeholder implementation
@@ -23,6 +25,7 @@ actual fun ChatGptWebViewImpl(
     onTranslationDone: () -> Unit,
     onClose: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -39,7 +42,7 @@ actual fun ChatGptWebViewImpl(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
             Button(onClick = onClose) {
-                Text("Go Back")
+                Text(localizeHelper.localize(Res.string.go_back))
             }
         }
     }

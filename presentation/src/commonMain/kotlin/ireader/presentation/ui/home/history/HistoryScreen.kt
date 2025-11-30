@@ -171,6 +171,7 @@ fun HistoryTopAppBar(
     onClearAll: () -> Unit,
     hasHistory: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val interactionSource = remember { MutableInteractionSource() }
     var showFilterMenu by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
@@ -240,7 +241,7 @@ fun HistoryTopAppBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options",
+                            contentDescription = localizeHelper.localize(Res.string.more_options_1),
                             tint = if (hasHistory) MaterialTheme.colorScheme.onSurface 
                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
@@ -284,7 +285,7 @@ fun HistoryTopAppBar(
                                     onCheckedChange = null
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Group by Novel")
+                                Text(localizeHelper.localize(Res.string.group_by_novel))
                             }
                         },
                         onClick = {
@@ -295,7 +296,7 @@ fun HistoryTopAppBar(
                     HorizontalDivider()
                     
                     DropdownMenuItem(
-                        text = { Text("All Time") },
+                        text = { Text(localizeHelper.localize(Res.string.all_time)) },
                         onClick = {
                             onDateFilterChange(null)
                             showFilterMenu = false
@@ -548,6 +549,7 @@ fun HistoryItem(
     onHistoryDelete: (HistoryWithRelations) -> Unit,
     vm: HistoryViewModel
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
     var showContextMenu by remember { mutableStateOf(false) }
     
@@ -747,7 +749,7 @@ fun HistoryItem(
         onDismissRequest = { showContextMenu = false }
     ) {
         DropdownMenuItem(
-            text = { Text("Go to Chapter") },
+            text = { Text(localizeHelper.localize(Res.string.go_to_chapter)) },
             onClick = {
                 showContextMenu = false
                 onClickItem(history)
@@ -758,7 +760,7 @@ fun HistoryItem(
         )
         
         DropdownMenuItem(
-            text = { Text("View Novel Details") },
+            text = { Text(localizeHelper.localize(Res.string.view_novel_details)) },
             onClick = {
                 showContextMenu = false
                 onBookCover(history)
@@ -771,7 +773,7 @@ fun HistoryItem(
         HorizontalDivider()
         
         DropdownMenuItem(
-            text = { Text("Remove from History") },
+            text = { Text(localizeHelper.localize(Res.string.remove_from_history)) },
             onClick = {
                 showContextMenu = false
                 onHistoryDelete(history)

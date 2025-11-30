@@ -19,6 +19,7 @@ import ireader.domain.models.migration.MigrationMatch
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Source migration screen - allows users to migrate books from one source to another
@@ -30,6 +31,7 @@ fun SourceMigrationScreen(
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val novels by viewModel.novels.collectAsState()
     val selectedNovels by viewModel.selectedNovels.collectAsState()
     val targetSources by viewModel.targetSources.collectAsState()
@@ -53,7 +55,7 @@ fun SourceMigrationScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
@@ -293,6 +295,7 @@ private fun MigrationProgressView(
     onSkip: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -417,7 +420,7 @@ private fun MigrationProgressView(
                             onClick = onSkip,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Skip This Book")
+                            Text(localizeHelper.localize(Res.string.skip_this_book))
                         }
                         Button(
                             onClick = onCancel,
@@ -426,7 +429,7 @@ private fun MigrationProgressView(
                                 containerColor = MaterialTheme.colorScheme.error
                             )
                         ) {
-                            Text("Cancel Migration")
+                            Text(localizeHelper.localize(Res.string.cancel_migration))
                         }
                     }
                 } else {
@@ -457,7 +460,7 @@ private fun MigrationProgressView(
                             onClick = onSkip,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Skip This Book")
+                            Text(localizeHelper.localize(Res.string.skip_this_book))
                         }
                         Button(
                             onClick = onCancel,
@@ -466,7 +469,7 @@ private fun MigrationProgressView(
                                 containerColor = MaterialTheme.colorScheme.error
                             )
                         ) {
-                            Text("Cancel Migration")
+                            Text(localizeHelper.localize(Res.string.cancel_migration))
                         }
                     }
                 }

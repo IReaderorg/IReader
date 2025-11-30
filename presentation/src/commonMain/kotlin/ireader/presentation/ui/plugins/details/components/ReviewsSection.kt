@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.plugins.details.PluginReview
 import java.text.SimpleDateFormat
 import java.util.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Reviews section header with average rating and write review button
@@ -27,6 +29,7 @@ fun ReviewsSectionHeader(
     onWriteReview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -50,7 +53,7 @@ fun ReviewsSectionHeader(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Rating",
+                            contentDescription = localizeHelper.localize(Res.string.rating),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -69,7 +72,7 @@ fun ReviewsSectionHeader(
             }
             
             Button(onClick = onWriteReview) {
-                Text("Write Review")
+                Text(localizeHelper.localize(Res.string.write_review))
             }
         }
     }
@@ -85,6 +88,7 @@ fun ReviewItem(
     onMarkHelpful: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -138,7 +142,7 @@ fun ReviewItem(
                 ) {
                     Icon(
                         imageVector = if (review.isHelpful) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
-                        contentDescription = "Helpful",
+                        contentDescription = localizeHelper.localize(Res.string.helpful),
                         tint = if (review.isHelpful) 
                             MaterialTheme.colorScheme.primary 
                         else 

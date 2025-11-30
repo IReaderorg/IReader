@@ -47,6 +47,8 @@ import ireader.presentation.ui.component.WriteReviewDialog
 import ireader.presentation.ui.component.getDisplayName
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Full sheet for chapter reviews - combines viewing and writing in one place
@@ -62,6 +64,7 @@ fun ChapterReviewsFullSheet(
     submitChapterReviewUseCase: SubmitChapterReviewUseCase = koinInject(),
     getUserBadgesUseCase: GetUserBadgesUseCase = koinInject()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var reviews by remember { mutableStateOf<List<ChapterReview>>(emptyList()) }
     var averageRating by remember { mutableStateOf(0f) }
     var isLoading by remember { mutableStateOf(true) }
@@ -177,7 +180,7 @@ fun ChapterReviewsFullSheet(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",tint = MaterialTheme.colorScheme.onPrimary
+                        contentDescription = localizeHelper.localize(Res.string.close),tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }

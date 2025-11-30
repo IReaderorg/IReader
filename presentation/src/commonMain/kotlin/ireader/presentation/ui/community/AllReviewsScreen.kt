@@ -25,6 +25,8 @@ import ireader.domain.models.remote.BookReview
 import ireader.domain.models.remote.ChapterReview
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +34,7 @@ fun AllReviewsScreen(
     vm: AllReviewsViewModel,
     onBackPressed: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state = vm.state
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -80,7 +83,7 @@ fun AllReviewsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
@@ -95,7 +98,7 @@ fun AllReviewsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = localizeHelper.localize(Res.string.refresh)
                         )
                     }
                 },
@@ -786,6 +789,7 @@ private fun ErrorView(
     message: String,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -814,7 +818,7 @@ private fun ErrorView(
             Button(onClick = onRetry) {
                 Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Retry")
+                Text(localizeHelper.localize(Res.string.retry))
             }
         }
     }

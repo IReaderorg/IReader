@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 enum class LeaderboardTab(val title: String, val icon: @Composable () -> Unit) {
     READING(
@@ -33,6 +35,7 @@ fun CombinedLeaderboardScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val readingState = readingVm.state
     val donationState = donationVm.state
     
@@ -63,7 +66,7 @@ fun CombinedLeaderboardScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
@@ -90,7 +93,7 @@ fun CombinedLeaderboardScreen(
                         } else {
                             Icon(
                                 if (pagerState.currentPage == 0) Icons.Default.Sync else Icons.Default.Refresh,
-                                contentDescription = "Refresh",
+                                contentDescription = localizeHelper.localize(Res.string.refresh),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }

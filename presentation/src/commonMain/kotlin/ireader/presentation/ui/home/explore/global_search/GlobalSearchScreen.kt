@@ -23,6 +23,7 @@ import ireader.domain.models.entities.toBookItem
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +33,7 @@ fun GlobalSearchScreen(
     onBookClick: (BookItem, Long) -> Unit,
     onBackClick: () -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state = vm.state
 
     Scaffold(
@@ -53,7 +55,7 @@ fun GlobalSearchScreen(
                         trailingIcon = {
                             if (state.searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { vm.onSearchQueryChange("") }) {
-                                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                    Icon(Icons.Default.Clear, contentDescription = localizeHelper.localize(Res.string.clear_1))
                                 }
                             }
                         },
@@ -62,7 +64,7 @@ fun GlobalSearchScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
@@ -70,7 +72,7 @@ fun GlobalSearchScreen(
                         onClick = { vm.search() },
                         enabled = state.searchQuery.isNotBlank() && !state.isSearching
                     ) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
+                        Icon(Icons.Default.Search, contentDescription = localizeHelper.localize(Res.string.search))
                     }
                 }
             )

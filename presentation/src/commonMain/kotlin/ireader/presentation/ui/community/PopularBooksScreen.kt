@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.remote.PopularBook
 import ireader.presentation.ui.core.ui.AsyncImage
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +39,7 @@ fun PopularBooksScreen(
     onNavigateToGlobalSearch: (String) -> Unit = {},
     onOpenExternalUrl: (String) -> Unit = {}
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state = vm.state
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -83,7 +86,7 @@ fun PopularBooksScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
@@ -98,7 +101,7 @@ fun PopularBooksScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh"
+                            contentDescription = localizeHelper.localize(Res.string.refresh)
                         )
                     }
                 },
@@ -302,6 +305,7 @@ private fun TopBookCard(
     onClick: () -> Unit,
     onExternalLinkClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val rankColor = when (rank) {
         1 -> Color(0xFFFFD700) // Gold
         2 -> Color(0xFFC0C0C0) // Silver
@@ -394,7 +398,7 @@ private fun TopBookCard(
                     if (book.coverUrl != null) {
                         AsyncImage(
                             model = book.coverUrl,
-                            contentDescription = "Book cover",
+                            contentDescription = localizeHelper.localize(Res.string.book_cover_1),
                             modifier = Modifier
                                 .width(60.dp)
                                 .height(90.dp)
@@ -511,7 +515,7 @@ private fun TopBookCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Open Site")
+                        Text(localizeHelper.localize(Res.string.open_site))
                     }
                 }
             }
@@ -527,6 +531,7 @@ private fun PopularBookCard(
     onClick: () -> Unit,
     onExternalLinkClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -566,7 +571,7 @@ private fun PopularBookCard(
                 if (book.coverUrl != null) {
                     AsyncImage(
                         model = book.coverUrl,
-                        contentDescription = "Book cover",
+                        contentDescription = localizeHelper.localize(Res.string.book_cover_1),
                         modifier = Modifier
                             .width(40.dp)
                             .height(60.dp)
@@ -672,7 +677,7 @@ private fun PopularBookCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.OpenInBrowser,
-                        contentDescription = "Open in browser",
+                        contentDescription = localizeHelper.localize(Res.string.open_in_browser),
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -792,6 +797,7 @@ private fun ErrorView(
     message: String,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -820,7 +826,7 @@ private fun ErrorView(
             Button(onClick = onRetry) {
                 Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Retry")
+                Text(localizeHelper.localize(Res.string.retry))
             }
         }
     }

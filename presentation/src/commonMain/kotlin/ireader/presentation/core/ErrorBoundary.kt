@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.core.error.GlobalExceptionHandler
 import ireader.core.log.IReaderLog
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Error boundary component for graceful error handling in Compose UI
@@ -70,6 +72,7 @@ fun DefaultErrorFallback(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.errorContainer
@@ -118,7 +121,7 @@ fun DefaultErrorFallback(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Try Again")
+                Text(localizeHelper.localize(Res.string.try_again))
             }
         }
     }
@@ -133,6 +136,7 @@ fun CompactErrorDisplay(
     onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -172,7 +176,7 @@ fun CompactErrorDisplay(
                 IconButton(onClick = onRetry) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Retry",
+                        contentDescription = localizeHelper.localize(Res.string.retry),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

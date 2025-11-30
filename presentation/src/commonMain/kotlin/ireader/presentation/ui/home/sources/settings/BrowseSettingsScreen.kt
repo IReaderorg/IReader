@@ -33,6 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.home.sources.extension.Language
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Browse Settings Screen - Modern UI
@@ -51,6 +53,7 @@ fun BrowseSettingsScreen(
     onDeselectAll: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var searchQuery by remember { mutableStateOf("") }
     
     // Remove duplicates and sort languages
@@ -86,7 +89,7 @@ fun BrowseSettingsScreen(
                     IconButton(onClick = onBackPressed) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 }
@@ -161,11 +164,11 @@ fun BrowseSettingsScreen(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Search languages...") },
+                        placeholder = { Text(localizeHelper.localize(Res.string.search_languages)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
-                                contentDescription = "Search"
+                                contentDescription = localizeHelper.localize(Res.string.search)
                             )
                         },
                         singleLine = true,
@@ -215,6 +218,7 @@ private fun LanguageSelectionHeader(
     onDeselectAll: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -245,7 +249,7 @@ private fun LanguageSelectionHeader(
             ) {
                 Icon(
                     imageVector = Icons.Default.SelectAll,
-                    contentDescription = "Select All",
+                    contentDescription = localizeHelper.localize(Res.string.select_all),
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -261,7 +265,7 @@ private fun LanguageSelectionHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Deselect,
-                        contentDescription = "Clear",
+                        contentDescription = localizeHelper.localize(Res.string.clear_1),
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -279,6 +283,7 @@ private fun ModernLanguageCard(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val language = Language(languageCode)
     val emoji = language.toEmoji() ?: "🌐"
     val displayName = LocaleHelper.getDisplayName(languageCode)
@@ -365,7 +370,7 @@ private fun ModernLanguageCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
+                    contentDescription = localizeHelper.localize(Res.string.selected),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )

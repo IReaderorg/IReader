@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.services.tts_service.GradioParam
 import ireader.domain.services.tts_service.GradioParamType
 import ireader.domain.services.tts_service.GradioTTSConfig
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog for editing Gradio TTS configurations
@@ -24,6 +26,7 @@ fun GradioConfigEditDialog(
     onDismiss: () -> Unit,
     onSave: (GradioTTSConfig) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var name by remember { mutableStateOf(config.name) }
     var spaceUrl by remember { mutableStateOf(config.spaceUrl) }
     var apiName by remember { mutableStateOf(config.apiName) }
@@ -51,7 +54,7 @@ fun GradioConfigEditDialog(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Name") },
+                        label = { Text(localizeHelper.localize(Res.string.name)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -61,7 +64,7 @@ fun GradioConfigEditDialog(
                     OutlinedTextField(
                         value = spaceUrl,
                         onValueChange = { spaceUrl = it },
-                        label = { Text("Space URL") },
+                        label = { Text(localizeHelper.localize(Res.string.space_url)) },
                         placeholder = { Text("https://username-space.hf.space") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -72,8 +75,8 @@ fun GradioConfigEditDialog(
                     OutlinedTextField(
                         value = apiName,
                         onValueChange = { apiName = it },
-                        label = { Text("API Name") },
-                        placeholder = { Text("/predict or /synthesize_speech") },
+                        label = { Text(localizeHelper.localize(Res.string.api_name)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.predict_or_synthesize_speech)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -83,8 +86,8 @@ fun GradioConfigEditDialog(
                     OutlinedTextField(
                         value = apiKey,
                         onValueChange = { apiKey = it },
-                        label = { Text("API Key (optional)") },
-                        placeholder = { Text("For private spaces") },
+                        label = { Text(localizeHelper.localize(Res.string.api_key_optional)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.for_private_spaces)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -94,7 +97,7 @@ fun GradioConfigEditDialog(
                     OutlinedTextField(
                         value = description,
                         onValueChange = { description = it },
-                        label = { Text("Description") },
+                        label = { Text(localizeHelper.localize(Res.string.description)) },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = 2
                     )
@@ -104,7 +107,7 @@ fun GradioConfigEditDialog(
                     OutlinedTextField(
                         value = audioOutputIndex,
                         onValueChange = { audioOutputIndex = it.filter { c -> c.isDigit() } },
-                        label = { Text("Audio Output Index") },
+                        label = { Text(localizeHelper.localize(Res.string.audio_output_index)) },
                         placeholder = { Text("0") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -149,7 +152,7 @@ fun GradioConfigEditDialog(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Parameter")
+                        Text(localizeHelper.localize(Res.string.add_parameter))
                     }
                 }
             }
@@ -170,12 +173,12 @@ fun GradioConfigEditDialog(
                 },
                 enabled = name.isNotBlank() && spaceUrl.isNotBlank()
             ) {
-                Text("Save")
+                Text(localizeHelper.localize(Res.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -188,6 +191,7 @@ private fun ParameterEditor(
     onUpdate: (GradioParam) -> Unit,
     onRemove: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     
     Card(
@@ -209,7 +213,7 @@ private fun ParameterEditor(
                 OutlinedTextField(
                     value = param.name,
                     onValueChange = { onUpdate(param.copy(name = it)) },
-                    label = { Text("Name") },
+                    label = { Text(localizeHelper.localize(Res.string.name)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
@@ -219,7 +223,7 @@ private fun ParameterEditor(
                 IconButton(onClick = onRemove) {
                     Icon(
                         Icons.Default.Close,
-                        contentDescription = "Remove",
+                        contentDescription = localizeHelper.localize(Res.string.remove),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -234,7 +238,7 @@ private fun ParameterEditor(
                     value = param.type.name,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Type") },
+                    label = { Text(localizeHelper.localize(Res.string.type)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -261,7 +265,7 @@ private fun ParameterEditor(
             OutlinedTextField(
                 value = param.defaultValue ?: "",
                 onValueChange = { onUpdate(param.copy(defaultValue = it)) },
-                label = { Text("Default Value") },
+                label = { Text(localizeHelper.localize(Res.string.default_value)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )

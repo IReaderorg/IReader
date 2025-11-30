@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Quick font size adjuster overlay for the reader with tap-outside-to-dismiss behavior
@@ -35,6 +37,7 @@ fun QuickFontSizeAdjuster(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (visible) {
         // Full-screen overlay to capture outside clicks
         Box(
@@ -95,7 +98,7 @@ fun QuickFontSizeAdjuster(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.TextDecrease,
-                                    contentDescription = "Decrease font size",
+                                    contentDescription = localizeHelper.localize(Res.string.decrease_font_size),
                                     tint = if (fontSize > 8) 
                                         MaterialTheme.colorScheme.onSurface 
                                     else 
@@ -126,7 +129,7 @@ fun QuickFontSizeAdjuster(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.TextIncrease,
-                                    contentDescription = "Increase font size",
+                                    contentDescription = localizeHelper.localize(Res.string.increase_font_size),
                                     tint = if (fontSize < 36) 
                                         MaterialTheme.colorScheme.onSurface 
                                     else 

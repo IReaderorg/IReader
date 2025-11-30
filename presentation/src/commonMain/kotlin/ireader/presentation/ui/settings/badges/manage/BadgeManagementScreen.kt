@@ -66,6 +66,8 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.badges.BadgeIcon
 import ireader.presentation.ui.component.badges.ProfileBadgeDisplay
 import ireader.presentation.ui.component.badges.ReviewBadgeDisplay
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +76,7 @@ fun BadgeManagementScreen(
     onNavigateBack: () -> Unit,
     onNavigateToBadgeStore: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     
@@ -101,12 +104,12 @@ fun BadgeManagementScreen(
         snackbarHostState = snackbarHostState,
         topBar = { scrollBehavior ->
             TopAppBar(
-                title = { Text("Manage Badges") },
+                title = { Text(localizeHelper.localize(Res.string.manage_badges)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = localizeHelper.localize(Res.string.navigate_back)
                         )
                     }
                 },
@@ -136,7 +139,7 @@ fun BadgeManagementScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                             }
-                            Text("Save")
+                            Text(localizeHelper.localize(Res.string.save))
                         }
                     }
                 },
@@ -189,7 +192,7 @@ fun BadgeManagementScreen(
                                 defaultElevation = if (isRetryButtonHovered) 4.dp else 2.dp
                             )
                         ) {
-                            Text("Retry")
+                            Text(localizeHelper.localize(Res.string.retry))
                         }
                     }
                 }
@@ -229,7 +232,7 @@ fun BadgeManagementScreen(
                                 defaultElevation = if (isStoreButtonHovered) 4.dp else 2.dp
                             )
                         ) {
-                            Text("Go to Badge Store")
+                            Text(localizeHelper.localize(Res.string.go_to_badge_store))
                         }
                     }
                 }
@@ -428,6 +431,7 @@ private fun SelectableBadgeCard(
     onClick: () -> Unit,
     showCheckmark: Boolean = false
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Desktop hover effects
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -475,7 +479,7 @@ private fun SelectableBadgeCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "No badge",
+                        contentDescription = localizeHelper.localize(Res.string.no_badge),
                         modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -554,7 +558,7 @@ private fun SelectableBadgeCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
+                        contentDescription = localizeHelper.localize(Res.string.selected),
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(16.dp)
                     )

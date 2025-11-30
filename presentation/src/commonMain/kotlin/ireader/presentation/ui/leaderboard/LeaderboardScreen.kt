@@ -66,7 +66,7 @@ fun LeaderboardScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
@@ -84,7 +84,7 @@ fun LeaderboardScreen(
                         } else {
                             Icon(
                                 Icons.Default.Sync,
-                                contentDescription = "Sync Stats",
+                                contentDescription = localizeHelper.localize(Res.string.sync_stats),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -222,7 +222,7 @@ fun LeaderboardScreen(
                         .padding(16.dp),
                     action = {
                         TextButton(onClick = { vm.clearError() }) {
-                            Text("Dismiss")
+                            Text(localizeHelper.localize(Res.string.dismiss))
                         }
                     }
                 ) {
@@ -237,7 +237,7 @@ fun LeaderboardScreen(
                         .padding(16.dp),
                     action = {
                         TextButton(onClick = { vm.clearError() }) {
-                            Text("Dismiss")
+                            Text(localizeHelper.localize(Res.string.dismiss))
                         }
                     }
                 ) {
@@ -254,6 +254,7 @@ private fun EmptyLeaderboardState(
     onSync: () -> Unit,
     isSyncing: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -295,7 +296,7 @@ private fun EmptyLeaderboardState(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text("Sync My Stats")
+                Text(localizeHelper.localize(Res.string.sync_my_stats))
             }
         }
     }

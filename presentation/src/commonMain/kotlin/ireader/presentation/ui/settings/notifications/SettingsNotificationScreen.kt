@@ -17,6 +17,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Enhanced notification settings screen following Mihon's comprehensive notification system.
@@ -345,6 +346,7 @@ private fun TimePickerDialog(
     onTimeSelected: (Pair<Int, Int>) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedHour by remember { mutableStateOf(initialTime.first) }
     var selectedMinute by remember { mutableStateOf(initialTime.second) }
     
@@ -405,12 +407,12 @@ private fun TimePickerDialog(
             TextButton(
                 onClick = { onTimeSelected(selectedHour to selectedMinute) }
             ) {
-                Text("OK")
+                Text(localizeHelper.localize(Res.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.SubcomposeAsyncImage
 import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.BadgeType
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Displays a badge icon with optional NFT animation effect.
@@ -43,6 +45,7 @@ fun BadgeIcon(
     showAnimation: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier.size(size),
         contentAlignment = Alignment.Center
@@ -63,7 +66,7 @@ fun BadgeIcon(
                 // Show placeholder icon on error
                 Icon(
                     imageVector = androidx.compose.material.icons.Icons.Default.Star,
-                    contentDescription = "Badge placeholder",
+                    contentDescription = localizeHelper.localize(Res.string.badge_placeholder),
                     modifier = Modifier.fillMaxSize(),
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                 )

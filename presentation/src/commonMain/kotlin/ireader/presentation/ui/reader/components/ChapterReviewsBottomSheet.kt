@@ -15,6 +15,8 @@ import ireader.domain.models.remote.ChapterReview
 import ireader.domain.models.remote.UserBadge
 import ireader.presentation.ui.component.RatingStars
 import ireader.presentation.ui.component.ReviewCard
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Bottom sheet modal for displaying all chapter reviews
@@ -29,6 +31,7 @@ fun ChapterReviewsBottomSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -74,7 +77,7 @@ fun ChapterReviewsBottomSheet(
             IconButton(onClick = onDismiss) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Close"
+                    contentDescription = localizeHelper.localize(Res.string.close)
                 )
             }
         }

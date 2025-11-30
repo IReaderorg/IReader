@@ -27,6 +27,8 @@ import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.core.ui.EmptyScreen
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Example implementation of BookDetailScreen using the new StateScreenModel pattern.
@@ -39,6 +41,7 @@ data class BookDetailScreenNew(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val vm: BookDetailViewModel = getIViewModel(parameters = { parametersOf(BookDetailViewModel.Param(bookId)) })
         val book = vm.booksState.book
 
@@ -50,7 +53,7 @@ data class BookDetailScreenNew(
                         IconButton(onClick = { 
                             book?.let { vm.scope.launch { vm.getRemoteChapterDetail(it, vm.catalogSource) } }
                         }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                            Icon(Icons.Default.Refresh, contentDescription = localizeHelper.localize(Res.string.refresh))
                         }
                     }
                 )

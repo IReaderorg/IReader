@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.ExtensionRepository
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Screen for managing extension repositories
@@ -26,13 +28,14 @@ fun RepositoryManagementScreen(
     onSyncRepository: (ExtensionRepository) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Extension Repositories") },
+                title = { Text(localizeHelper.localize(Res.string.extension_repositories)) },
                 actions = {
                     IconButton(onClick = onAddRepository) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Repository")
+                        Icon(Icons.Default.Add, contentDescription = localizeHelper.localize(Res.string.add_repository))
                     }
                 }
             )
@@ -41,7 +44,7 @@ fun RepositoryManagementScreen(
             ExtendedFloatingActionButton(
                 onClick = onAddRepository,
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Add Repository") }
+                text = { Text(localizeHelper.localize(Res.string.add_repository)) }
             )
         }
     ) { paddingValues ->
@@ -102,6 +105,7 @@ private fun RepositoryCard(
     onToggleAutoUpdate: () -> Unit,
     onSync: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     
@@ -186,7 +190,7 @@ private fun RepositoryCard(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Enabled")
+                        Text(localizeHelper.localize(Res.string.enabled))
                         Switch(
                             checked = repository.enabled,
                             onCheckedChange = { onToggleEnabled() }
@@ -198,7 +202,7 @@ private fun RepositoryCard(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Auto-update")
+                        Text(localizeHelper.localize(Res.string.auto_update))
                         Switch(
                             checked = repository.autoUpdate,
                             onCheckedChange = { onToggleAutoUpdate() }
@@ -220,7 +224,7 @@ private fun RepositoryCard(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Sync")
+                            Text(localizeHelper.localize(Res.string.sync))
                         }
                         
                         OutlinedButton(
@@ -236,7 +240,7 @@ private fun RepositoryCard(
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Remove")
+                            Text(localizeHelper.localize(Res.string.remove))
                         }
                     }
                 }
@@ -248,7 +252,7 @@ private fun RepositoryCard(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Remove Repository?") },
+            title = { Text(localizeHelper.localize(Res.string.remove_repository)) },
             text = {
                 Text("Are you sure you want to remove ${repository.name}? This will not uninstall extensions from this repository.")
             },
@@ -262,12 +266,12 @@ private fun RepositoryCard(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Remove")
+                    Text(localizeHelper.localize(Res.string.remove))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )

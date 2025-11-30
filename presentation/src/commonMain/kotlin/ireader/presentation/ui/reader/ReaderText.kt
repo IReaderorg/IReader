@@ -70,6 +70,8 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -332,6 +334,7 @@ private fun MainText(
     page: Page,
     vm: ReaderScreenViewModel
 ) {
+val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
     val context = LocalPlatformContext.current
     when (page) {
@@ -349,7 +352,7 @@ private fun MainText(
                         .fillMaxWidth()
                         .requiredHeight(500.dp),
                     model = ImageRequest.Builder(context=context).data(page.url.toUri()).diskCachePolicy(CachePolicy.DISABLED).build(),
-                    contentDescription = "image",
+                    contentDescription = localizeHelper.localize(Res.string.image),
                     contentScale = ContentScale.FillWidth,
                     onLoading = {
                         isLoading.value = true

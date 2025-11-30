@@ -16,6 +16,8 @@ import ireader.domain.services.tts_service.PiperVoiceService
 import ireader.domain.services.tts_service.PiperVoiceDownloader
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Desktop implementation of TTS Engine Settings Screen
@@ -247,6 +249,7 @@ private fun EngineCard(
     isCurrentEngine: Boolean,
     onSelect: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     OutlinedCard(
         onClick = { if (isAvailable) onSelect() },
         modifier = Modifier.fillMaxWidth(),
@@ -302,7 +305,7 @@ private fun EngineCard(
             if (isCurrentEngine) {
                 AssistChip(
                     onClick = {},
-                    label = { Text("Active") },
+                    label = { Text(localizeHelper.localize(Res.string.active_downloads)) },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         labelColor = MaterialTheme.colorScheme.onPrimary
@@ -325,6 +328,7 @@ private fun PiperEngineCard(
     onSelect: () -> Unit,
     onManageVoices: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Piper is always available on desktop - bundled with the app
     OutlinedCard(
         onClick = onSelect,
@@ -384,7 +388,7 @@ private fun PiperEngineCard(
                 if (isCurrentEngine) {
                     AssistChip(
                         onClick = {},
-                        label = { Text("Active") },
+                        label = { Text(localizeHelper.localize(Res.string.active_downloads)) },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             labelColor = MaterialTheme.colorScheme.onPrimary
@@ -404,7 +408,7 @@ private fun PiperEngineCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Manage Piper Voices")
+                Text(localizeHelper.localize(Res.string.manage_piper_voices))
             }
         }
     }
@@ -555,6 +559,7 @@ private fun CoquiConfigDialog(
     onDismiss: () -> Unit,
     onConfigured: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var spaceUrl by remember { mutableStateOf(appPrefs.activeGradioConfigId().get()) }
     var apiKey by remember { mutableStateOf(appPrefs.gradioTTSConfigs().get()) }
     var isTesting by remember { mutableStateOf(false) }
@@ -593,7 +598,7 @@ private fun CoquiConfigDialog(
                 OutlinedTextField(
                     value = spaceUrl,
                     onValueChange = { spaceUrl = it },
-                    label = { Text("HuggingFace Space URL") },
+                    label = { Text(localizeHelper.localize(Res.string.huggingface_space_url)) },
                     placeholder = { Text("https://x-ireader.hf.space") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -603,8 +608,8 @@ private fun CoquiConfigDialog(
                 OutlinedTextField(
                     value = apiKey,
                     onValueChange = { apiKey = it },
-                    label = { Text("API Key (optional)") },
-                    placeholder = { Text("For private spaces") },
+                    label = { Text(localizeHelper.localize(Res.string.api_key_optional)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.for_private_spaces)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -637,7 +642,7 @@ private fun CoquiConfigDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text(localizeHelper.localize(Res.string.cancel))
                     }
                     
                     OutlinedButton(
@@ -669,7 +674,7 @@ private fun CoquiConfigDialog(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Text("Test")
+                            Text(localizeHelper.localize(Res.string.test))
                         }
                     }
                     
@@ -689,7 +694,7 @@ private fun CoquiConfigDialog(
                         enabled = spaceUrl.isNotEmpty(),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Save")
+                        Text(localizeHelper.localize(Res.string.save))
                     }
                 }
             }
@@ -709,6 +714,7 @@ private fun GradioConfigDialog(
     onDismiss: () -> Unit,
     onConfigured: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val presets = remember { ireader.domain.services.tts_service.GradioTTSPresets.getAllPresets() }
     var selectedPresetId by remember { mutableStateOf(appPrefs.activeGradioConfigId().get().ifEmpty { presets.firstOrNull()?.id ?: "" }) }
     var customSpaceUrl by remember { mutableStateOf("") }
@@ -755,12 +761,12 @@ private fun GradioConfigDialog(
                     FilterChip(
                         selected = !useCustom,
                         onClick = { useCustom = false },
-                        label = { Text("Presets") }
+                        label = { Text(localizeHelper.localize(Res.string.presets)) }
                     )
                     FilterChip(
                         selected = useCustom,
                         onClick = { useCustom = true },
-                        label = { Text("Custom") }
+                        label = { Text(localizeHelper.localize(Res.string.custom)) }
                     )
                 }
                 
@@ -823,7 +829,7 @@ private fun GradioConfigDialog(
                         OutlinedTextField(
                             value = customSpaceUrl,
                             onValueChange = { customSpaceUrl = it },
-                            label = { Text("Space URL") },
+                            label = { Text(localizeHelper.localize(Res.string.space_url)) },
                             placeholder = { Text("https://username-space.hf.space") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
@@ -832,8 +838,8 @@ private fun GradioConfigDialog(
                         OutlinedTextField(
                             value = customApiName,
                             onValueChange = { customApiName = it },
-                            label = { Text("API Name") },
-                            placeholder = { Text("/predict or /synthesize_speech") },
+                            label = { Text(localizeHelper.localize(Res.string.api_name)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.predict_or_synthesize_speech)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
@@ -874,7 +880,7 @@ private fun GradioConfigDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text(localizeHelper.localize(Res.string.cancel))
                     }
                     
                     OutlinedButton(
@@ -921,7 +927,7 @@ private fun GradioConfigDialog(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Text("Test")
+                            Text(localizeHelper.localize(Res.string.test))
                         }
                     }
                     
@@ -955,7 +961,7 @@ private fun GradioConfigDialog(
                         enabled = (useCustom && customSpaceUrl.isNotEmpty()) || (!useCustom && selectedPresetId.isNotEmpty()),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Save")
+                        Text(localizeHelper.localize(Res.string.save))
                     }
                 }
             }

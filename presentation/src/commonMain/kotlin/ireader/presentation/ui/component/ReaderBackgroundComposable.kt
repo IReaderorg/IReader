@@ -20,6 +20,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @Composable
@@ -29,6 +30,7 @@ fun ThemePreference(
     themes: List<ReaderColors>,
     selected:(color: ReaderColors) -> Boolean
 ) {
+val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
     PreferenceRow(
         modifier = Modifier.height(80.dp),
@@ -55,13 +57,13 @@ fun ThemePreference(
                                     CircleShape
                                 ),
                             imageVector = Icons.Default.Circle,
-                            contentDescription = "color selected",
+                            contentDescription = localizeHelper.localize(Res.string.color_selected),
                             tint = themes[index].backgroundColor.toComposeColor()
                         )
                         if (selected(themes[index])) {
                             Icon(
                                 imageVector = Icons.Default.Check,
-                                contentDescription = "color selected",
+                                contentDescription = localizeHelper.localize(Res.string.color_selected),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }

@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.utils.horizontalPadding
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Enhanced UI Components Library
@@ -390,6 +392,7 @@ fun NavigationRowPreference(
     enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     RowPreference(
         title = title,
         subtitle = subtitle,
@@ -401,7 +404,7 @@ fun NavigationRowPreference(
         trailing = {
             Icon(
                 imageVector = Icons.Default.ChevronRight,
-                contentDescription = "Navigate",
+                contentDescription = localizeHelper.localize(Res.string.navigate),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

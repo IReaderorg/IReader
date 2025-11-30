@@ -11,6 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Example integration of feature plugins into the reader screen
@@ -37,6 +39,7 @@ fun ReaderOverflowMenuWithPlugins(
     onBookmarkClick: () -> Unit,
     // ... other menu items
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
     
     // Get plugin menu items
@@ -50,7 +53,7 @@ fun ReaderOverflowMenuWithPlugins(
     ) {
         // Regular menu items
         DropdownMenuItem(
-            text = { Text("Settings") },
+            text = { Text(localizeHelper.localize(Res.string.settings)) },
             onClick = {
                 onSettingsClick()
                 onDismiss()
@@ -58,7 +61,7 @@ fun ReaderOverflowMenuWithPlugins(
         )
         
         DropdownMenuItem(
-            text = { Text("Bookmark") },
+            text = { Text(localizeHelper.localize(Res.string.bookmark)) },
             onClick = {
                 onBookmarkClick()
                 onDismiss()
@@ -170,10 +173,11 @@ fun CurrentScreenInfo(
     navController: NavHostController,
     featurePluginIntegration: FeaturePluginIntegration
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val currentRoute = navController.currentBackStackEntry?.destination?.route
     val isPlugin = isPluginScreen(currentRoute, featurePluginIntegration)
     
     if (isPlugin) {
-        Text("Currently viewing a plugin screen")
+        Text(localizeHelper.localize(Res.string.currently_viewing_a_plugin_screen))
     }
 }

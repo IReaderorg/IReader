@@ -19,6 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.domain.models.donation.FundingGoal
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Composable that displays the Fund-a-Feature section with progress bars
@@ -95,6 +97,7 @@ private fun FundingGoalCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -153,7 +156,7 @@ private fun FundingGoalCard(
                 
                 Icon(
                     imageVector = Icons.Default.Info,
-                    contentDescription = "More info",
+                    contentDescription = localizeHelper.localize(Res.string.more_info),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
@@ -185,7 +188,7 @@ private fun FundingGoalCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Goal Reached",
+                            contentDescription = localizeHelper.localize(Res.string.goal_reached),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
@@ -277,6 +280,7 @@ private fun FundingGoalDetailDialog(
     goal: FundingGoal,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -369,7 +373,7 @@ private fun FundingGoalDetailDialog(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Goal Reached",
+                                    contentDescription = localizeHelper.localize(Res.string.goal_reached),
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
                                 )
@@ -415,7 +419,7 @@ private fun FundingGoalDetailDialog(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Close")
+                    Text(localizeHelper.localize(Res.string.close))
                 }
             }
         }

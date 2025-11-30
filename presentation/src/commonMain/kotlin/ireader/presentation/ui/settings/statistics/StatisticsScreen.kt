@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 class StatisticsScreen : KoinComponent {
     
@@ -29,6 +31,7 @@ class StatisticsScreen : KoinComponent {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val statistics by viewModel.statistics.collectAsState()
         val syncState by viewModel.syncState.collectAsState()
@@ -37,7 +40,7 @@ class StatisticsScreen : KoinComponent {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Reading Statistics") },
+                    title = { Text(localizeHelper.localize(Res.string.reading_statistics)) },
                     navigationIcon = {
                         TopAppBarBackButton(onClick = { navController.popBackStack() })
                     },
@@ -45,7 +48,7 @@ class StatisticsScreen : KoinComponent {
                         IconButton(onClick = { viewModel.syncWithRemote() }) {
                             Icon(
                                 imageVector = Icons.Default.Sync,
-                                contentDescription = "Sync with cloud"
+                                contentDescription = localizeHelper.localize(Res.string.sync_with_cloud)
                             )
                         }
                     }
@@ -75,7 +78,7 @@ class StatisticsScreen : KoinComponent {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                                    Text("Syncing with cloud...")
+                                    Text(localizeHelper.localize(Res.string.syncing_with_cloud))
                                 }
                             }
                         }
@@ -254,6 +257,7 @@ private fun BadgeItem(
     badge: ireader.data.statistics.UserBadge,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -285,7 +289,7 @@ private fun BadgeItem(
         if (badge.is_primary) {
             Icon(
                 imageVector = Icons.Default.Star,
-                contentDescription = "Primary badge",
+                contentDescription = localizeHelper.localize(Res.string.primary_badge),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

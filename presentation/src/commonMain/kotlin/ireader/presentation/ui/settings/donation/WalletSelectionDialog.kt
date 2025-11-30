@@ -35,6 +35,8 @@ import androidx.compose.ui.window.Dialog
 import ireader.domain.models.donation.CryptoType
 import ireader.domain.models.donation.WalletApp
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog for selecting a cryptocurrency wallet app
@@ -47,6 +49,7 @@ fun WalletSelectionDialog(
     onDismiss: () -> Unit,
     checkWalletInstalled: suspend (WalletApp) -> Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
     var installedWallets by remember { mutableStateOf<Map<WalletApp, Boolean>>(emptyMap()) }
     
@@ -110,7 +113,7 @@ fun WalletSelectionDialog(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         }
@@ -123,6 +126,7 @@ private fun WalletAppItem(
     isInstalled: Boolean,
     onClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -157,7 +161,7 @@ private fun WalletAppItem(
         if (isInstalled) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
-                contentDescription = "Installed",
+                contentDescription = localizeHelper.localize(Res.string.installed),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )

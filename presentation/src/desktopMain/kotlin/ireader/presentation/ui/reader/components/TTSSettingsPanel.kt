@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun TTSSettingsPanel(
@@ -39,6 +41,7 @@ fun TTSSettingsPanel(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier
@@ -195,7 +198,7 @@ fun TTSSettingsPanel(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("Enable Sleep Timer")
+                                Text(localizeHelper.localize(Res.string.enable_sleep_timer_1))
                                 Switch(
                                     checked = sleepModeEnabled,
                                     onCheckedChange = onSleepModeChange
@@ -249,6 +252,7 @@ private fun ColorPicker(
     colors: List<Color>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         modifier = modifier,
@@ -275,7 +279,7 @@ private fun ColorPicker(
                 if (color == selectedColor) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
+                        contentDescription = localizeHelper.localize(Res.string.selected),
                         tint = if (color.luminance() > 0.5f) Color.Black else Color.White
                     )
                 }

@@ -62,12 +62,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.components.Toolbar
 import org.koin.compose.koinInject
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 class SupabaseConfigScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: SupabaseConfigViewModel = koinInject()
         val state by viewModel.state.collectAsState()
@@ -75,10 +78,10 @@ class SupabaseConfigScreen  {
         Scaffold(
             topBar = {
                 Toolbar(
-                    title = { Text("Supabase Configuration") },
+                    title = { Text(localizeHelper.localize(Res.string.supabase_configuration)) },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     }
                 )
@@ -376,6 +379,7 @@ private fun LastSyncCard(
     onManualSync: () -> Unit,
     isSyncing: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -418,7 +422,7 @@ private fun LastSyncCard(
                         Icon(Icons.Default.Sync, contentDescription = null)
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Sync Now")
+                    Text(localizeHelper.localize(Res.string.sync_now))
                 }
             }
         }
@@ -590,6 +594,7 @@ private fun MultiEndpointCard(
     onCommunityApiKeyChanged: (String) -> Unit,
     onSave: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -692,7 +697,7 @@ private fun MultiEndpointCard(
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Save Multi-Endpoint Configuration")
+                    Text(localizeHelper.localize(Res.string.save_multi_endpoint_configuration))
                 }
             }
         }
@@ -711,6 +716,7 @@ private fun EndpointSection(
     enabled: Boolean = true,
     badge: String? = null
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showApiKey by remember { mutableStateOf(false) }
     
     Column {
@@ -759,7 +765,7 @@ private fun EndpointSection(
         OutlinedTextField(
             value = url,
             onValueChange = onUrlChanged,
-            label = { Text("URL") },
+            label = { Text(localizeHelper.localize(Res.string.url_1)) },
             placeholder = { Text("https://$title-project.supabase.co") },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
@@ -776,8 +782,8 @@ private fun EndpointSection(
         OutlinedTextField(
             value = apiKey,
             onValueChange = onApiKeyChanged,
-            label = { Text("API Key") },
-            placeholder = { Text("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...") },
+            label = { Text(localizeHelper.localize(Res.string.api_key)) },
+            placeholder = { Text(localizeHelper.localize(Res.string.eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9)) },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             trailingIcon = {
@@ -835,6 +841,7 @@ private fun MultiProjectCard(
     isTesting: Boolean,
     testResult: String?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var quickFillUrl by remember { mutableStateOf("") }
     var quickFillKey by remember { mutableStateOf("") }
     
@@ -889,7 +896,7 @@ private fun MultiProjectCard(
                     OutlinedTextField(
                         value = quickFillUrl,
                         onValueChange = { quickFillUrl = it },
-                        label = { Text("Supabase URL") },
+                        label = { Text(localizeHelper.localize(Res.string.supabase_url)) },
                         placeholder = { Text("https://xxx.supabase.co") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -900,8 +907,8 @@ private fun MultiProjectCard(
                     OutlinedTextField(
                         value = quickFillKey,
                         onValueChange = { quickFillKey = it },
-                        label = { Text("API Key") },
-                        placeholder = { Text("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...") },
+                        label = { Text(localizeHelper.localize(Res.string.api_key)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -915,7 +922,7 @@ private fun MultiProjectCard(
                     ) {
                         Icon(Icons.Default.ContentCopy, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Fill All Projects")
+                        Text(localizeHelper.localize(Res.string.fill_all_projects))
                     }
                 }
             }
@@ -1054,7 +1061,7 @@ private fun MultiProjectCard(
                             Icon(Icons.Default.CloudSync, contentDescription = null)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Test")
+                        Text(localizeHelper.localize(Res.string.test))
                     }
                     
                     Button(
@@ -1064,7 +1071,7 @@ private fun MultiProjectCard(
                     ) {
                         Icon(Icons.Default.Save, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Save Configuration")
+                        Text(localizeHelper.localize(Res.string.save_configuration))
                     }
                 }
         }

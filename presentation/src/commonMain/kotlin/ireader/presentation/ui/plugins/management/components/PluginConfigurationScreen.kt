@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.FeaturePlugin
 import ireader.domain.plugins.PluginInfo
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Screen for plugin-specific configuration
@@ -22,6 +24,7 @@ fun PluginConfigurationScreen(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -30,7 +33,7 @@ fun PluginConfigurationScreen(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close"
+                            contentDescription = localizeHelper.localize(Res.string.close)
                         )
                     }
                 }

@@ -47,6 +47,7 @@ import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import android.os.Build
 import androidx.compose.foundation.layout.systemBarsPadding
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 private const val TAG = "ChatGptWebView"
 
@@ -58,6 +59,7 @@ fun ChatGptWebView(
     onTranslationDone: (() -> Unit)? = null,
     onClose: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(true) }
     var isLoggedIn by remember { mutableStateOf(false) }
@@ -106,7 +108,7 @@ fun ChatGptWebView(
                     onClick = onClose,
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
-                    Text("Go Back")
+                    Text(localizeHelper.localize(Res.string.go_back))
                 }
             }
         }
@@ -191,7 +193,7 @@ fun ChatGptWebView(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = localizeHelper.localize(Res.string.back)
                 )
             }
             
@@ -312,7 +314,7 @@ fun ChatGptWebView(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Text("Retry Loading")
+                Text(localizeHelper.localize(Res.string.retry_loading))
             }
             
             // Try alternative URL button
@@ -330,7 +332,7 @@ fun ChatGptWebView(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text("Try Alternative URL")
+                    Text(localizeHelper.localize(Res.string.try_alternative_url))
                 }
             }
         }

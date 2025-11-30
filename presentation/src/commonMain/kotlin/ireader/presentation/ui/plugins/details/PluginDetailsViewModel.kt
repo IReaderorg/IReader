@@ -9,7 +9,7 @@ import ireader.domain.plugins.PluginManager
 import ireader.domain.plugins.PluginMonetization
 import ireader.domain.plugins.PluginStatus
 import ireader.i18n.UiText
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.error_unknown
 import ireader.i18n.resources.failed_to_enable_plugin
 import ireader.i18n.resources.failed_to_open_plugin

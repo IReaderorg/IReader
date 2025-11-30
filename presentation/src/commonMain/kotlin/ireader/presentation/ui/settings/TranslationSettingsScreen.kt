@@ -78,6 +78,7 @@ fun TranslationSettingsScreen(
     translationEnginesManager: TranslationEnginesManager,
     viewModel: TranslationSettingsViewModel? = null,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // This state is used to force recomposition
     var recomposeCounter by remember { mutableStateOf(0) }
     val forceRecompose = { recomposeCounter += 1 }
@@ -108,7 +109,6 @@ fun TranslationSettingsScreen(
     //Temp
     var deepSeekKeyVisible by remember { mutableStateOf(false) }
     var pluginKeyVisible by remember { mutableStateOf(false) }
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val contentTypes = ContentType.entries.map {
         it.ordinal to it.name.lowercase()
             .replaceFirstChar { c -> c.uppercase() }
@@ -365,8 +365,8 @@ fun TranslationSettingsScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         when (testState) {
-                            is TestConnectionState.Testing -> Text("Testing Connection...")
-                            else -> Text("Test Connection")
+                            is TestConnectionState.Testing -> Text(localizeHelper.localize(Res.string.testing_connection_1))
+                            else -> Text(localizeHelper.localize(Res.string.test_connection))
                         }
                     }
                     
@@ -562,7 +562,7 @@ fun TranslationSettingsScreen(
                             .align(Alignment.End)
                             .padding(top = 16.dp)
                     ) {
-                        Text("Sign in to ChatGPT")
+                        Text(localizeHelper.localize(Res.string.sign_in_to_chatgpt))
                     }
                 }
             }
@@ -618,7 +618,7 @@ fun TranslationSettingsScreen(
                             .align(Alignment.End)
                             .padding(top = 16.dp)
                     ) {
-                        Text("Sign in to DeepSeek")
+                        Text(localizeHelper.localize(Res.string.sign_in_to_deepseek))
                     }
                 }
             }
@@ -774,10 +774,10 @@ fun TranslationSettingsScreen(
 
         items.add(Components.Dynamic {
             TextField(
-                label = { Text("Gemini API Key") },
+                label = { Text(localizeHelper.localize(Res.string.gemini_api_key)) },
                 value = geminiApiKey.value,
                 onValueChange = { onGeminiApiKeyChange(it) },
-                placeholder = { Text("Enter your Gemini API key") },
+                placeholder = { Text(localizeHelper.localize(Res.string.enter_gemini_api_key)) },
             )
 
         })

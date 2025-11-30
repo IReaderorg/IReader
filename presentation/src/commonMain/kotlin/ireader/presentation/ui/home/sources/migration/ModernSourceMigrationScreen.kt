@@ -26,6 +26,7 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.migration.MigrationResult
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Modern redesigned Source Migration Screen
@@ -161,6 +162,7 @@ private fun MigrationCompletionDialog(
     results: List<ireader.domain.models.migration.MigrationResult>,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val successCount = results.count { it.success }
     val failedCount = results.size - successCount
     
@@ -244,7 +246,7 @@ private fun MigrationCompletionDialog(
         },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("Done")
+                Text(localizeHelper.localize(Res.string.done))
             }
         },
         shape = RoundedCornerShape(20.dp)
@@ -263,6 +265,7 @@ private fun ModernMigrationTopBar(
     onSelectAll: () -> Unit,
     onDeselectAll: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     TopAppBar(
         title = {
             Column {
@@ -284,7 +287,7 @@ private fun ModernMigrationTopBar(
             IconButton(onClick = onBackPressed) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = localizeHelper.localize(Res.string.back)
                 )
             }
         },
@@ -420,6 +423,7 @@ private fun ModernSourceOption(
     isSelected: Boolean,
     onSelect: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -474,7 +478,7 @@ private fun ModernSourceOption(
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Selected",
+                    contentDescription = localizeHelper.localize(Res.string.selected),
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(24.dp)
                 )
@@ -529,6 +533,7 @@ private fun ModernNovelCard(
     isSelected: Boolean,
     onToggle: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -584,7 +589,7 @@ private fun ModernNovelCard(
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Selected",
+                    contentDescription = localizeHelper.localize(Res.string.selected),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
@@ -904,6 +909,7 @@ private fun ModernMigrationActions(
     onSkip: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -921,7 +927,7 @@ private fun ModernMigrationActions(
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Skip")
+            Text(localizeHelper.localize(Res.string.skip))
         }
         Button(
             onClick = onCancel,
@@ -939,7 +945,7 @@ private fun ModernMigrationActions(
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Cancel")
+            Text(localizeHelper.localize(Res.string.cancel))
         }
     }
 }

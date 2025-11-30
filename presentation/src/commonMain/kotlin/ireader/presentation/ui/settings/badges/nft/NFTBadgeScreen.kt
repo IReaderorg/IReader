@@ -34,6 +34,8 @@ import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +45,7 @@ fun NFTBadgeScreen(
     onOpenUrl: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     
@@ -62,12 +65,12 @@ fun NFTBadgeScreen(
         snackbarHostState = snackbarHostState,
         topBar = { scrollBehavior ->
             TopAppBar(
-                title = { Text("NFT Badge") },
+                title = { Text(localizeHelper.localize(Res.string.nft_badge)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Navigate back"
+                            contentDescription = localizeHelper.localize(Res.string.navigate_back)
                         )
                     }
                 },
@@ -257,6 +260,7 @@ fun WalletAddressInput(
     error: String?,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var address by remember { mutableStateOf(currentAddress ?: "") }
     var validationError by remember { mutableStateOf<String?>(null) }
     
@@ -296,8 +300,8 @@ fun WalletAddressInput(
                 address = it
                 validationError = null
             },
-            label = { Text("Wallet Address") },
-            placeholder = { Text("0x...") },
+            label = { Text(localizeHelper.localize(Res.string.wallet_address)) },
+            placeholder = { Text(localizeHelper.localize(Res.string.wallet_placeholder)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Outlined.AccountBalanceWallet,
@@ -600,6 +604,7 @@ fun NFTMarketplaceLink(
     onOpenMarketplace: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -657,7 +662,7 @@ fun NFTMarketplaceLink(
                     contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Visit Marketplace")
+                Text(localizeHelper.localize(Res.string.visit_marketplace))
             }
         }
     }

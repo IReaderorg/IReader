@@ -17,6 +17,8 @@ import coil3.compose.AsyncImage
 import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginResourceUsage
 import ireader.domain.plugins.PluginStatus
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Item displaying an installed plugin with controls
@@ -35,6 +37,7 @@ fun InstalledPluginItem(
     onUpdate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -111,7 +114,7 @@ fun InstalledPluginItem(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Error,
-                                    contentDescription = "Show error details",
+                                    contentDescription = localizeHelper.localize(Res.string.show_error_details),
                                     tint = statusColor,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -165,7 +168,7 @@ fun InstalledPluginItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Configure"
+                        contentDescription = localizeHelper.localize(Res.string.configure)
                     )
                 }
                 
@@ -176,7 +179,7 @@ fun InstalledPluginItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Uninstall",
+                        contentDescription = localizeHelper.localize(Res.string.uninstall),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

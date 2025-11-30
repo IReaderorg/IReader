@@ -27,9 +27,12 @@ import ireader.i18n.Images.eternityLight
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @Composable
 fun LogoHeader() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Animation state for entrance effect
     var isVisible by remember { mutableStateOf(false) }
     
@@ -72,7 +75,7 @@ fun LogoHeader() {
             ) {
                 Icon(
                     imageVector = eternityLight(),
-                    contentDescription = "IReader Logo",
+                    contentDescription = localizeHelper.localize(Res.string.ireader_logo),
                     tint = AppColors.current.onBars.toComposeColor(),
                     modifier = Modifier
                         .size(140.dp) // Increased from 100.dp to 140.dp

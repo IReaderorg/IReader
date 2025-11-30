@@ -21,6 +21,7 @@ import ireader.core.source.Source
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
 fun ModernActionButtons(
@@ -31,6 +32,7 @@ fun ModernActionButtons(
     onMigrate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -59,7 +61,7 @@ fun ModernActionButtons(
         SecondaryActionButton(
             icon = Icons.Default.SwapHoriz,
             onClick = onMigrate,
-            contentDescription = "Migrate"
+            contentDescription = localizeHelper.localize(Res.string.migrate)
         )
     }
 }

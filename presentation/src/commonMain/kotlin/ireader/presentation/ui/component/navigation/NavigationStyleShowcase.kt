@@ -14,6 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Showcase screen to preview and compare different navigation bar styles
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 fun NavigationStyleShowcase(
     onBackClick: () -> Unit = {}
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedTab by remember { mutableStateOf(0) }
     var currentStyle by remember { mutableStateOf(NavigationStyle.MODERN) }
     
@@ -53,7 +56,7 @@ fun NavigationStyleShowcase(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Navigation Styles Showcase") },
+                title = { Text(localizeHelper.localize(Res.string.navigation_styles_showcase)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, "Back")

@@ -16,6 +16,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import ireader.domain.plugins.PluginScreen
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Navigation extensions for plugin screen registration
@@ -101,10 +103,11 @@ object PluginNavigationExtensions {
      */
     @Composable
     private fun PluginScreenError(message: String) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Plugin Error") }
+                    title = { Text(localizeHelper.localize(Res.string.plugin_error)) }
                 )
             }
         ) { paddingValues ->

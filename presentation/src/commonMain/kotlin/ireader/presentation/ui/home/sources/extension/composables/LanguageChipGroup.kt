@@ -44,6 +44,8 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.home.sources.extension.LanguageChoice
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
 import java.util.Locale
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 
 @Composable
@@ -55,6 +57,7 @@ fun LanguageChipGroup(
         onToggleVisibility: (Boolean) -> Unit,
         modifier: Modifier = Modifier,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showDialog by remember { mutableStateOf(false) }
     
     if (isVisible) {
@@ -121,7 +124,7 @@ fun LanguageChipGroup(
             ) {
                 Icon(
                     imageVector = Icons.Default.VisibilityOff,
-                    contentDescription = "Hide language filter",
+                    contentDescription = localizeHelper.localize(Res.string.hide_language_filter),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
@@ -139,7 +142,7 @@ fun LanguageChipGroup(
             ) {
                 Icon(
                     imageVector = androidx.compose.material.icons.Icons.Default.Visibility,
-                    contentDescription = "Show language filter",
+                    contentDescription = localizeHelper.localize(Res.string.show_language_filter),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -161,6 +164,7 @@ fun LanguageChipGroup(
 
 @Composable
 private fun MoreLanguagesChip(onClick: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         modifier = Modifier
@@ -176,7 +180,7 @@ private fun MoreLanguagesChip(onClick: () -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.Default.MoreHoriz,
-                contentDescription = "More languages",
+                contentDescription = localizeHelper.localize(Res.string.more_languages),
                 modifier = Modifier.size(18.dp),
                 tint = MaterialTheme.colorScheme.onPrimary
             )
@@ -196,6 +200,7 @@ private fun LanguageSelectionDialog(
     onSelect: (LanguageChoice) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var searchQuery by remember { mutableStateOf("") }
     
     val filteredChoices = remember(choices, searchQuery) {
@@ -242,7 +247,7 @@ private fun LanguageSelectionDialog(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
+                            contentDescription = localizeHelper.localize(Res.string.close),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -255,11 +260,11 @@ private fun LanguageSelectionDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    placeholder = { Text("Search languages...") },
+                    placeholder = { Text(localizeHelper.localize(Res.string.search_languages)) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
+                            contentDescription = localizeHelper.localize(Res.string.search)
                         )
                     },
                     singleLine = true,
@@ -301,6 +306,7 @@ private fun LanguageListItem(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val text = when (choice) {
         is LanguageChoice.All -> "🌐 All Languages"
         is LanguageChoice.One -> {
@@ -341,7 +347,7 @@ private fun LanguageListItem(
             if (isSelected) {
                 Icon(
                     imageVector = androidx.compose.material.icons.Icons.Default.Check,
-                    contentDescription = "Selected",
+                    contentDescription = localizeHelper.localize(Res.string.selected),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )

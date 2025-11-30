@@ -106,7 +106,7 @@ internal fun AddingRepositoryScreen(
             modifier = Modifier.fillMaxSize().padding(top = scaffoldPadding.calculateTopPadding()),
             topBar = {
                 TopAppBar(
-                    title = { Text("Add Repository") },
+                    title = { Text(localizeHelper.localize(Res.string.add_repository)) },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                         titleContentColor = MaterialTheme.colorScheme.onSurface
@@ -153,7 +153,7 @@ internal fun AddingRepositoryScreen(
                             } else {
                                 Icon(
                                     imageVector = Icons.Default.Save,
-                                    contentDescription = "Save"
+                                    contentDescription = localizeHelper.localize(Res.string.save)
                                 )
                             }
                         },
@@ -187,7 +187,7 @@ internal fun AddingRepositoryScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Quick Add Popular Repositories")
+                    Text(localizeHelper.localize(Res.string.quick_add_popular_repositories))
                 }
             }
             
@@ -226,7 +226,7 @@ internal fun AddingRepositoryScreen(
                         FilterChip(
                             selected = repositoryType == RepositoryType.IREADER,
                             onClick = { repositoryType = RepositoryType.IREADER },
-                            label = { Text("IReader") },
+                            label = { Text(localizeHelper.localize(Res.string.website)) },
                             leadingIcon = if (repositoryType == RepositoryType.IREADER) {
                                 { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
                             } else null,
@@ -239,7 +239,7 @@ internal fun AddingRepositoryScreen(
                                 repositoryType = RepositoryType.LNREADER
                                 showJSPluginPrompt = true
                             },
-                            label = { Text("LNReader") },
+                            label = { Text(localizeHelper.localize(Res.string.lnreader)) },
                             leadingIcon = if (repositoryType == RepositoryType.LNREADER) {
                                 { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
                             } else null,
@@ -542,7 +542,7 @@ internal fun AddingRepositoryScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showQuickAddDialog = false }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -606,7 +606,7 @@ internal fun AddingRepositoryScreen(
                 TextButton(
                     onClick = { showHelpDialog = false }
                 ) {
-                    Text("Got it")
+                    Text(localizeHelper.localize(Res.string.got_it))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,
@@ -669,7 +669,7 @@ internal fun AddingRepositoryScreen(
                 TextButton(
                     onClick = { showJSPluginPrompt = false }
                 ) {
-                    Text("Got it")
+                    Text(localizeHelper.localize(Res.string.got_it))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface,

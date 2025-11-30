@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import ireader.domain.plugins.PluginAuthor
 import ireader.domain.plugins.PluginInfo
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Developer information section with contact details and other plugins
@@ -28,6 +30,7 @@ fun DeveloperInfoSection(
     onPluginClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -54,7 +57,7 @@ fun DeveloperInfoSection(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Email,
-                        contentDescription = "Email",
+                        contentDescription = localizeHelper.localize(Res.string.email),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
@@ -73,7 +76,7 @@ fun DeveloperInfoSection(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Language,
-                        contentDescription = "Website",
+                        contentDescription = localizeHelper.localize(Res.string.website_1),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )

@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Glossary
 import ireader.domain.models.entities.GlossaryTermType
 import ireader.i18n.UiText
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Wrapper composable that handles file picking for glossary import/export
@@ -76,6 +78,7 @@ fun GlossaryDialog(
     onImport: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showAddDialog by remember { mutableStateOf(false) }
     var editingEntry by remember { mutableStateOf<Glossary?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -132,7 +135,7 @@ fun GlossaryDialog(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Search glossary...") },
+                    placeholder = { Text(localizeHelper.localize(Res.string.search_glossary)) },
                     leadingIcon = { Icon(Icons.Default.Search, null) },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
@@ -169,7 +172,7 @@ fun GlossaryDialog(
                 ) {
                     Icon(Icons.Default.Add, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Add Entry")
+                    Text(localizeHelper.localize(Res.string.add_entry))
                 }
             }
         }
@@ -249,6 +252,7 @@ fun AddGlossaryEntryDialog(
     onConfirm: (String, String, GlossaryTermType, String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var sourceTerm by remember { mutableStateOf("") }
     var targetTerm by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(GlossaryTermType.CUSTOM) }
@@ -257,7 +261,7 @@ fun AddGlossaryEntryDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Glossary Entry") },
+        title = { Text(localizeHelper.localize(Res.string.add_glossary_entry)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -265,7 +269,7 @@ fun AddGlossaryEntryDialog(
                 OutlinedTextField(
                     value = sourceTerm,
                     onValueChange = { sourceTerm = it },
-                    label = { Text("Original Term") },
+                    label = { Text(localizeHelper.localize(Res.string.original_term)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -273,7 +277,7 @@ fun AddGlossaryEntryDialog(
                 OutlinedTextField(
                     value = targetTerm,
                     onValueChange = { targetTerm = it },
-                    label = { Text("Translation") },
+                    label = { Text(localizeHelper.localize(Res.string.translation)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -286,7 +290,7 @@ fun AddGlossaryEntryDialog(
                         value = selectedType.toString().lowercase().replaceFirstChar { it.uppercase() },
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Type") },
+                        label = { Text(localizeHelper.localize(Res.string.type)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                         modifier = Modifier.fillMaxWidth().menuAnchor()
                     )
@@ -310,7 +314,7 @@ fun AddGlossaryEntryDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Notes (optional)") },
+                    label = { Text(localizeHelper.localize(Res.string.notes_optional)) },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3
                 )
@@ -330,12 +334,12 @@ fun AddGlossaryEntryDialog(
                 },
                 enabled = sourceTerm.isNotBlank() && targetTerm.isNotBlank()
             ) {
-                Text("Add")
+                Text(localizeHelper.localize(Res.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -349,6 +353,7 @@ fun EditGlossaryEntryDialog(
     onConfirm: (Glossary) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var sourceTerm by remember { mutableStateOf(entry.sourceTerm) }
     var targetTerm by remember { mutableStateOf(entry.targetTerm) }
     var selectedType by remember { mutableStateOf(entry.termType) }
@@ -357,7 +362,7 @@ fun EditGlossaryEntryDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Glossary Entry") },
+        title = { Text(localizeHelper.localize(Res.string.edit_glossary_entry)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -365,7 +370,7 @@ fun EditGlossaryEntryDialog(
                 OutlinedTextField(
                     value = sourceTerm,
                     onValueChange = { sourceTerm = it },
-                    label = { Text("Original Term") },
+                    label = { Text(localizeHelper.localize(Res.string.original_term)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -373,7 +378,7 @@ fun EditGlossaryEntryDialog(
                 OutlinedTextField(
                     value = targetTerm,
                     onValueChange = { targetTerm = it },
-                    label = { Text("Translation") },
+                    label = { Text(localizeHelper.localize(Res.string.translation)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -386,7 +391,7 @@ fun EditGlossaryEntryDialog(
                         value = selectedType.toString().lowercase().replaceFirstChar { it.uppercase() },
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Type") },
+                        label = { Text(localizeHelper.localize(Res.string.type)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                         modifier = Modifier.fillMaxWidth().menuAnchor()
                     )
@@ -410,7 +415,7 @@ fun EditGlossaryEntryDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Notes (optional)") },
+                    label = { Text(localizeHelper.localize(Res.string.notes_optional)) },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3
                 )
@@ -432,12 +437,12 @@ fun EditGlossaryEntryDialog(
                 },
                 enabled = sourceTerm.isNotBlank() && targetTerm.isNotBlank()
             ) {
-                Text("Save")
+                Text(localizeHelper.localize(Res.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
