@@ -77,18 +77,12 @@ class GradioTTSEngineAdapter(
         val completion = CompletableDeferred<Boolean>()
         currentCompletion = completion
         
-        Log.debug { "$TAG: playAndWait starting, audioData size=${audioData.size}" }
-        
         try {
             audioPlayer.play(audioData) {
-                Log.debug { "$TAG: playAndWait onComplete callback, completing with true" }
                 completion.complete(true)
             }
-            val result = completion.await()
-            Log.debug { "$TAG: playAndWait completed with result=$result" }
-            return result
+            return completion.await()
         } catch (e: CancellationException) {
-            Log.debug { "$TAG: playAndWait cancelled" }
             audioPlayer.stop()
             throw e
         } catch (e: Exception) {
@@ -100,7 +94,6 @@ class GradioTTSEngineAdapter(
     }
     
     override fun stop() {
-        Log.debug { "$TAG: stop() called, currentCompletion=${currentCompletion != null}" }
         currentPlaybackJob?.cancel()
         audioPlayer.stop()
         // Reset pause state

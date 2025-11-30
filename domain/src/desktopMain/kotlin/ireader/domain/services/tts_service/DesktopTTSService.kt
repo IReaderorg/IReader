@@ -892,8 +892,6 @@ class DesktopTTSService : KoinComponent {
                 val newParagraph = oldParagraph + 1
                 state.setCurrentReadingParagraph(newParagraph)
                 
-                Log.debug { "nextParagraph: moved from $oldParagraph to $newParagraph, wasPlaying=$wasPlaying" }
-                
                 // Start reading if was playing (responds within 500ms as per requirements)
                 if (wasPlaying) {
                     serviceScope.launch {
@@ -942,8 +940,6 @@ class DesktopTTSService : KoinComponent {
                 val newParagraph = oldParagraph - 1
                 state.setCurrentReadingParagraph(newParagraph)
                 
-                Log.debug { "previousParagraph: moved from $oldParagraph to $newParagraph, wasPlaying=$wasPlaying" }
-                
                 // Start reading if was playing (responds within 500ms as per requirements)
                 if (wasPlaying) {
                     serviceScope.launch {
@@ -966,13 +962,10 @@ class DesktopTTSService : KoinComponent {
         }
         
         if (content == null || content.isEmpty()) {
-            Log.debug { "readText: No content available" }
             return
         }
         
         val currentParagraph = state.currentReadingParagraph.value
-        
-        Log.debug { "readText: Starting for paragraph $currentParagraph, engine=$currentEngine, isPlaying=${state.isPlaying.value}" }
         
         if (currentParagraph >= content.size) {
             handleEndOfChapter()
@@ -1008,7 +1001,6 @@ class DesktopTTSService : KoinComponent {
 
         speechJob = serviceScope.launch {
             try {
-                Log.debug { "readText: speechJob started for paragraph $currentParagraph" }
                 when (currentEngine) {
                     TTSEngine.PIPER -> readTextWithPiper(text)
                     TTSEngine.KOKORO -> readTextWithKokoro(text)
@@ -1017,7 +1009,6 @@ class DesktopTTSService : KoinComponent {
                     TTSEngine.SIMULATION -> readTextSimulation(text)
                 }
             } catch (e: CancellationException) {
-                Log.debug { "readText: speechJob cancelled for paragraph $currentParagraph" }
                 audioEngine.stop()
             } catch (e: Exception) {
                 Log.error { "Error during speech: ${e.message}" }
@@ -1252,7 +1243,6 @@ class DesktopTTSService : KoinComponent {
             // Try to configure from preferences
             configureGradioFromPreferences()
             if (gradioAdapter == null) {
-                Log.debug { "readTextWithGradio: No Gradio adapter, falling back to simulation" }
                 readTextSimulation(text)
                 return
             }
@@ -1261,12 +1251,9 @@ class DesktopTTSService : KoinComponent {
         val activeAdapter = gradioAdapter ?: return
         val currentParagraph = state.currentReadingParagraph.value
         
-        Log.debug { "readTextWithGradio: Starting for paragraph $currentParagraph, isPlaying=${state.isPlaying.value}" }
-        
         try {
             // Check if cancelled or not playing before starting
             if (!kotlinx.coroutines.currentCoroutineContext().isActive || !state.isPlaying.value) {
-                Log.debug { "readTextWithGradio: Early return - not active or not playing" }
                 return
             }
             
@@ -1278,7 +1265,6 @@ class DesktopTTSService : KoinComponent {
             var audioData = getCachedGradioAudio(currentParagraph)
             
             if (audioData != null) {
-                Log.debug { "Using cached audio for paragraph $currentParagraph" }
                 // Remove from cache after use
                 gradioAudioCache.remove(currentParagraph)
             } else {
@@ -1330,7 +1316,6 @@ class DesktopTTSService : KoinComponent {
         val currentParagraph = state.currentReadingParagraph.value
         if (speechJobStartParagraph != -1 && currentParagraph != speechJobStartParagraph) {
             // Paragraph was changed externally (manual navigation), don't advance
-            Log.debug { "Skipping auto-advance: paragraph changed from $speechJobStartParagraph to $currentParagraph" }
             return
         }
         
@@ -1402,15 +1387,13 @@ class DesktopTTSService : KoinComponent {
                     break
                 }
                 
-                Log.debug { "Prefetching audio for paragraph $nextParagraph" }
                 val audioData = adapter.generateAudio(text)
                 
                 if (audioData != null) {
                     gradioAudioCache[nextParagraph] = audioData
-                    Log.debug { "Cached audio for paragraph $nextParagraph (${audioData.size} bytes)" }
                 }
             } catch (e: Exception) {
-                Log.debug { "Prefetch failed for paragraph $nextParagraph: ${e.message}" }
+                // Prefetch failed, ignore
             } finally {
                 prefetchingParagraphs.remove(nextParagraph)
             }
