@@ -638,6 +638,11 @@ class ReaderPreferences constructor(
         return preferenceStore.getBoolean("tts_skip_empty_lines", true)
     }
     
+    // Performance preferences for older devices
+    fun reducedAnimations(): Preference<Boolean> {
+        return preferenceStore.getBoolean("reduced_animations", false)
+    }
+    
     // TTS Screen Display Preferences
     fun ttsUseCustomColors(): Preference<Boolean> {
         return preferenceStore.getBoolean("tts_use_custom_colors", false)

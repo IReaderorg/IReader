@@ -6,11 +6,11 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.PagerDefaults
-import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +25,12 @@ import ireader.presentation.ui.component.list.LayoutComposable
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+
+/**
+ * Stable key generator for book items to ensure efficient list updates
+ */
+@Stable
+private fun stableBookKey(book: BookItem): Any = book.id
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -50,6 +56,9 @@ internal fun LibraryPager(
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
 
     ) {
+    // Pre-compute stable key function to avoid lambda recreation
+    val stableKeyFunction = remember { { book: BookItem -> stableBookKey(book) } }
+    
     HorizontalPager(
         state = pagerState,
         pageSpacing = 0.dp,
@@ -57,12 +66,17 @@ internal fun LibraryPager(
         reverseLayout = false,
         contentPadding = PaddingValues(0.dp),
         pageSize = PageSize.Fill,
-        key = null,
+        key = { page -> categories.getOrNull(page)?.id ?: page },
         pageContent = { page ->
             val books by onPageChange(page)
             val gridState = rememberLazyGridState()
             val lazyListState = rememberLazyListState()
-            val displayMode = categories[page].category.displayMode
+            
+            // Use derivedStateOf for display mode to minimize recompositions
+            val displayMode by remember(page, categories) {
+                derivedStateOf { categories.getOrNull(page)?.category?.displayMode ?: DisplayMode.CompactGrid }
+            }
+            
             val columns by if (displayMode != DisplayMode.List) {
                 val isLandscape = isLandscape()
                 with(rememberCoroutineScope()) {
@@ -71,6 +85,7 @@ internal fun LibraryPager(
             } else {
                 remember { mutableStateOf(0) }
             }
+            
             ILazyColumnScrollbar(
                 listState = lazyListState,
             ) {
@@ -96,6 +111,7 @@ internal fun LibraryPager(
                         showLocalMangaBadge = showLocalMangaBadge,
                         showLanguageBadge = showLanguageBadge,
                         columns = columns,
+                        keys = stableKeyFunction,
                     )
                 }
             }

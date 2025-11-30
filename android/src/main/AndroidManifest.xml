@@ -127,6 +127,11 @@
             <meta-data
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"
                 tools:node="remove" />
+            <!-- Ensure ProfileInstaller is initialized for baseline profiles -->
+            <meta-data
+                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+                android:value="androidx.startup"
+                tools:node="merge" />
         </provider>
 
         <service
@@ -168,6 +173,27 @@
         <meta-data
             android:name="android.webkit.WebView.MetricsOptOut"
             android:value="true" />
+
+        <!-- ProfileInstaller receiver for baseline profiles and benchmark support -->
+        <!-- Explicitly declare to ensure it's not removed by manifest merger -->
+        <receiver
+            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            android:directBootAware="false"
+            android:exported="true"
+            tools:node="merge">
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

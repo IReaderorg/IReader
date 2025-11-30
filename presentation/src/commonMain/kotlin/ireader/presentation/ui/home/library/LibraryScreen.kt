@@ -1,4 +1,5 @@
 package ireader.presentation.ui.home.library
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -11,11 +12,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.i18n.localize
@@ -30,12 +35,6 @@ import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import kotlinx.coroutines.launch
-
 
 @ExperimentalAnimationApi
 @Composable
@@ -66,12 +65,34 @@ fun LibraryScreen(
     onShowFilterSheet: () -> Unit = {},
     onHideFilterSheet: () -> Unit = {},
 ) {
+    // Pre-compute modifiers to avoid recreation on each recomposition
+    val fillMaxSizeModifier = remember { Modifier.fillMaxSize() }
+    val selectionBarModifier = remember {
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    }
     
-    // Handle back button to close filter sheet instead of closing screen
-    // BackHandler removed - Android-specific, implement in androidMain if needed
-    // androidx.activity.compose.BackHandler(enabled = showFilterSheet) {
-    //     onHideFilterSheet()
-    // }
+    // Memoize callbacks to prevent unnecessary recompositions
+    val stableGoToLatestChapter = remember(goToLatestChapter) { goToLatestChapter }
+    val stableOnBook = remember(onBook) { onBook }
+    val stableOnLongBook = remember(onLongBook) { onLongBook }
+    
+    // Derive loading/empty state to minimize recompositions
+    val screenState by remember {
+        derivedStateOf {
+            when {
+                vm.isLoading -> LibraryScreenState.Loading
+                vm.isEmpty && vm.filters.value.isEmpty() -> LibraryScreenState.Empty
+                else -> LibraryScreenState.Content
+            }
+        }
+    }
+    
+    // Derive resume card visibility
+    val showResumeCard by remember {
+        derivedStateOf { vm.isResumeCardVisible && !vm.selectionMode }
+    }
     
     LaunchedEffect(vm.selectionMode) {
         requestHideBottomNav(vm.selectionMode)
@@ -86,27 +107,26 @@ fun LibraryScreen(
         modifier = modifier.fillMaxSize(),
         tonalElevation = 1.dp
     ) {
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .padding(scaffoldPadding)
                 .fillMaxSize(),
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = fillMaxSizeModifier) {
                 LibraryContent(
                     vm = vm,
-                    onBook = onBook,
-                    onLongBook = onLongBook,
-                    goToLatestChapter = goToLatestChapter,
+                    onBook = stableOnBook,
+                    onLongBook = stableOnLongBook,
+                    goToLatestChapter = stableGoToLatestChapter,
                     onPageChanged = onPagerPageChange,
                     getColumnsForOrientation = getColumnsForOrientation,
                     onResumeReading = {}
                 )
             }
             
-            // Spotify-style Resume Reading Bar at the bottom
-            ireader.presentation.ui.home.library.components.ResumeReadingCard(
-                lastRead = vm.lastReadInfo,
-                onResume = {
+            // Spotify-style Resume Reading Bar at the bottom - memoized click handler
+            val resumeClickHandler: () -> Unit = remember(vm.lastReadInfo, stableGoToLatestChapter) {
+                {
                     vm.lastReadInfo?.let { info ->
                         val bookItem = BookItem(
                             id = info.novelId,
@@ -115,11 +135,17 @@ fun LibraryScreen(
                             cover = info.coverUrl,
                             customCover = info.coverUrl
                         )
-                        goToLatestChapter(bookItem)
+                        stableGoToLatestChapter(bookItem)
                     }
-                },
+                    Unit
+                }
+            }
+            
+            ireader.presentation.ui.home.library.components.ResumeReadingCard(
+                lastRead = vm.lastReadInfo,
+                onResume = resumeClickHandler,
                 onDismiss = { vm.dismissResumeCard() },
-                isVisible = vm.isResumeCardVisible && !vm.selectionMode,
+                isVisible = showResumeCard,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
             
@@ -147,15 +173,17 @@ fun LibraryScreen(
                 )
             }
             
+            // Use derived state for efficient state-based rendering
             Crossfade(
-                targetState = Pair(vm.isLoading, vm.isEmpty),
+                targetState = screenState,
                 animationSpec = tween(durationMillis = 300)
-            ) { (isLoading, isEmpty) ->
-                when {
-                    isLoading -> LoadingScreen()
-                    isEmpty && vm.filters.value.isEmpty() -> EmptyScreen(
+            ) { state ->
+                when (state) {
+                    LibraryScreenState.Loading -> LoadingScreen()
+                    LibraryScreenState.Empty -> EmptyScreen(
                         text = localize(Res.string.empty_library)
                     )
+                    LibraryScreenState.Content -> { /* Content is rendered above */ }
                 }
             }
 
@@ -172,9 +200,7 @@ fun LibraryScreen(
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 LibrarySelectionBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = selectionBarModifier,
                     visible = true,
                     onClickChangeCategory = onClickChangeCategory,
                     onClickDeleteDownload = onDelete,
@@ -219,7 +245,15 @@ fun LibraryScreen(
                 onDismiss = onHideFilterSheet
             )
         }
-        
-
     }
+}
+
+/**
+ * Enum representing the different states of the library screen
+ * Used with derivedStateOf for efficient recomposition
+ */
+private enum class LibraryScreenState {
+    Loading,
+    Empty,
+    Content
 }

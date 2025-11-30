@@ -634,6 +634,12 @@
 ##---------------End: Additional QuickJS Size Optimizations  ----------
 
 
+##---------------Begin: proguard configuration for ProfileInstaller  ----------
+# Keep ProfileInstaller receiver for baseline profiles and benchmark support
+-keep class androidx.profileinstaller.** { *; }
+-keep class androidx.profileinstaller.ProfileInstallReceiver { *; }
+##---------------End: proguard configuration for ProfileInstaller  ----------
+
 ##---------------Begin: Startup Performance Optimizations  ----------
 # Aggressive optimizations for faster startup
 -optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*

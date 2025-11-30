@@ -84,6 +84,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.BookShimmerLoading
 import kotlinx.coroutines.delay
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import androidx.compose.runtime.Stable
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

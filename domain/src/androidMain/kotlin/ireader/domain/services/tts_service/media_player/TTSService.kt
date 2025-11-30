@@ -139,14 +139,15 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         mediaSession = MediaSessionCompat(this, TTS_SERVICE_NAME)
         sessionToken = mediaSession.sessionToken
         
+        // Only include FAST_FORWARD and REWIND for paragraph navigation in compact view
+        // Exclude SKIP_TO_NEXT/SKIP_TO_PREVIOUS to prevent Android from showing skip icons
+        // instead of rewind/fast-forward icons in the compact notification
         stateBuilder = PlaybackStateCompat.Builder()
             .setActions(
                 PlaybackStateCompat.ACTION_PLAY or
                 PlaybackStateCompat.ACTION_STOP or
                 PlaybackStateCompat.ACTION_PAUSE or
                 PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
                 PlaybackStateCompat.ACTION_FAST_FORWARD or
                 PlaybackStateCompat.ACTION_REWIND
             )

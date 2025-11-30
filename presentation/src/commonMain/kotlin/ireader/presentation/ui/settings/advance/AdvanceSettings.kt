@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -23,6 +24,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+/**
+ * State holder for dialog visibility to reduce individual state variables
+ */
+private class AdvanceSettingsDialogState {
+    var showImport by mutableStateOf(false)
+    var showDeleteAllDb by mutableStateOf(false)
+    var showClearAllDatabase by mutableStateOf(false)
+    var showClearNotInLibrary by mutableStateOf(false)
+    var showClearAllChapters by mutableStateOf(false)
+    var showClearCache by mutableStateOf(false)
+    var showClearCoverCache by mutableStateOf(false)
+    var showResetReaderSettings by mutableStateOf(false)
+    var showResetThemes by mutableStateOf(false)
+    var showResetCategories by mutableStateOf(false)
+}
 
 @Composable
 fun AdvanceSettings(
@@ -31,18 +50,23 @@ fun AdvanceSettings(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
-    val showImport = remember { mutableStateOf(false) }
-    var showDeleteAllDb by remember { mutableStateOf(false) }
-    var showClearAllDatabase by remember { mutableStateOf(false) }
-    var showClearNotInLibrary by remember { mutableStateOf(false) }
-    var showClearAllChapters by remember { mutableStateOf(false) }
-    var showClearCache by remember { mutableStateOf(false) }
-    var showClearCoverCache by remember { mutableStateOf(false) }
-    var showResetReaderSettings by remember { mutableStateOf(false) }
-    var showResetThemes by remember { mutableStateOf(false) }
-    var showResetCategories by remember { mutableStateOf(false) }
     
-    OnShowImportEpub(showImport.value, onFileSelected = {
+    // Consolidated dialog state to reduce state management overhead
+    val dialogState = remember { AdvanceSettingsDialogState() }
+    
+    // Cache sizes loaded asynchronously to avoid blocking main thread
+    var cacheSize by remember { mutableStateOf("...") }
+    var coverCacheSize by remember { mutableStateOf("...") }
+    
+    // Load cache sizes asynchronously
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            cacheSize = vm.cacheManager.getCacheSize()
+            coverCacheSize = vm.getCoverCacheSize()
+        }
+    }
+    
+    OnShowImportEpub(dialogState.showImport, onFileSelected = {
         try {
             vm.importEpub.parse(it)
             vm.showSnackBar(UiText.MStringResource(Res.string.success))
@@ -52,7 +76,8 @@ fun AdvanceSettings(
         }
     })
 
-    val items = remember {
+    // Pre-compute items list with stable keys - uses async loaded cache sizes
+    val items = remember(cacheSize, coverCacheSize) {
         listOf<Components>(
             // Cache Management Section (Safe operations)
             Components.Header(
@@ -60,19 +85,19 @@ fun AdvanceSettings(
                 icon = Icons.Default.Storage
             ),
             Components.Row(
-                title = "${localizeHelper.localize(Res.string.clear_all_cache)} (${vm.cacheManager.getCacheSize()})",
+                title = "${localizeHelper.localize(Res.string.clear_all_cache)} ($cacheSize)",
                 subtitle = localizeHelper.localize(Res.string.clear_all_cached_data_to_free_up_storage_space),
                 icon = Icons.Default.FolderDelete,
                 onClick = {
-                    showClearCache = true
+                    dialogState.showClearCache = true
                 }
             ),
             Components.Row(
-                title = "${localizeHelper.localize(Res.string.clear_all_cover_cache)} (${vm.getCoverCacheSize()})",
+                title = "${localizeHelper.localize(Res.string.clear_all_cover_cache)} ($coverCacheSize)",
                 subtitle = localizeHelper.localize(Res.string.clear_cached_book_cover_images_to_free_up_storage),
                 icon = Icons.Default.Image,
                 onClick = {
-                    showClearCoverCache = true
+                    dialogState.showClearCoverCache = true
                 }
             ),
             
@@ -88,7 +113,7 @@ fun AdvanceSettings(
                 subtitle = localizeHelper.localize(Res.string.import_epub_files_into_your_library),
                 icon = Icons.Default.Upload,
                 onClick = {
-                    showImport.value = true
+                    dialogState.showImport = true
                 }
             ),
             
@@ -121,13 +146,13 @@ fun AdvanceSettings(
             // Danger Zone Section (Destructive operations)
             Components.Dynamic {
                 DangerZoneSection(
-                    onClearAllDatabase = { showClearAllDatabase = true },
-                    onClearNotInLibrary = { showClearNotInLibrary = true },
-                    onClearAllChapters = { showClearAllChapters = true },
-                    onResetReaderSettings = { showResetReaderSettings = true },
-                    onResetThemes = { showResetThemes = true },
-                    onResetCategories = { showResetCategories = true },
-                    onDeleteAllDatabase = { showDeleteAllDb = true }
+                    onClearAllDatabase = { dialogState.showClearAllDatabase = true },
+                    onClearNotInLibrary = { dialogState.showClearNotInLibrary = true },
+                    onClearAllChapters = { dialogState.showClearAllChapters = true },
+                    onResetReaderSettings = { dialogState.showResetReaderSettings = true },
+                    onResetThemes = { dialogState.showResetThemes = true },
+                    onResetCategories = { dialogState.showResetCategories = true },
+                    onDeleteAllDatabase = { dialogState.showDeleteAllDb = true }
                 )
             },
         )
@@ -137,7 +162,8 @@ fun AdvanceSettings(
     SetupSettingComponents(scaffoldPadding = padding, items = items)
     
     // Destructive Action Dialogs with Typed Confirmation
-    if (showClearAllDatabase) {
+    // Using consolidated dialogState for better performance
+    if (dialogState.showClearAllDatabase) {
         DestructiveActionDialog(
             title = localizeHelper.localize(Res.string.clear_all_database),
             message = "⚠️ WARNING: This will permanently remove all books and chapters from the database. This action cannot be undone and all your library data will be lost.",
@@ -145,13 +171,13 @@ fun AdvanceSettings(
             onConfirm = {
                 vm.deleteAllDatabase()
                 vm.showSnackBar(UiText.MStringResource(Res.string.database_was_cleared))
-                showClearAllDatabase = false
+                dialogState.showClearAllDatabase = false
             },
-            onDismiss = { showClearAllDatabase = false }
+            onDismiss = { dialogState.showClearAllDatabase = false }
         )
     }
     
-    if (showClearNotInLibrary) {
+    if (dialogState.showClearNotInLibrary) {
         DestructiveActionDialog(
             title = localizeHelper.localize(Res.string.clear_not_in_library_books),
             message = "This will remove all books that are not in your library. This action cannot be undone.",
@@ -161,13 +187,13 @@ fun AdvanceSettings(
                     vm.deleteUseCase.deleteNotInLibraryBooks()
                     vm.showSnackBar(UiText.MStringResource(Res.string.success))
                 }
-                showClearNotInLibrary = false
+                dialogState.showClearNotInLibrary = false
             },
-            onDismiss = { showClearNotInLibrary = false }
+            onDismiss = { dialogState.showClearNotInLibrary = false }
         )
     }
     
-    if (showClearAllChapters) {
+    if (dialogState.showClearAllChapters) {
         DestructiveActionDialog(
             title = localizeHelper.localize(Res.string.clear_all_chapters),
             message = "This will remove all downloaded chapter content. You will need to re-download chapters to read offline. This action cannot be undone.",
@@ -175,28 +201,28 @@ fun AdvanceSettings(
             onConfirm = {
                 vm.deleteAllChapters()
                 vm.showSnackBar(UiText.MStringResource(Res.string.chapters_was_cleared))
-                showClearAllChapters = false
+                dialogState.showClearAllChapters = false
             },
-            onDismiss = { showClearAllChapters = false }
+            onDismiss = { dialogState.showClearAllChapters = false }
         )
     }
     
-    if (showClearCache) {
+    if (dialogState.showClearCache) {
         ConfirmationDialog(
             title = localizeHelper.localize(Res.string.clear_all_cache),
-            message = "This will clear all cached data (${vm.cacheManager.getCacheSize()}). The app may need to re-download some content.",
+            message = "This will clear all cached data ($cacheSize). The app may need to re-download some content.",
             confirmText = "Clear",
             onConfirm = {
                 vm.cacheManager.clearAllCache()
                 vm.showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.cache_cleared))
-                showClearCache = false
+                dialogState.showClearCache = false
             },
-            onDismiss = { showClearCache = false },
+            onDismiss = { dialogState.showClearCache = false },
             isDestructive = false
         )
     }
     
-    if (showClearCoverCache) {
+    if (dialogState.showClearCoverCache) {
         ConfirmationDialog(
             title = localizeHelper.localize(Res.string.clear_all_cover_cache),
             message = "This will clear all cached book cover images. Covers will be re-downloaded when needed.",
@@ -204,14 +230,14 @@ fun AdvanceSettings(
             onConfirm = {
                 vm.clearImageCache()
                 vm.showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.cover_cache_cleared))
-                showClearCoverCache = false
+                dialogState.showClearCoverCache = false
             },
-            onDismiss = { showClearCoverCache = false },
+            onDismiss = { dialogState.showClearCoverCache = false },
             isDestructive = false
         )
     }
     
-    if (showResetReaderSettings) {
+    if (dialogState.showResetReaderSettings) {
         DestructiveActionDialog(
             title = localizeHelper.localize(Res.string.reset_reader_screen_settings),
             message = "This will restore all reader settings to their default values. Your custom preferences (font size, colors, spacing, etc.) will be lost. This action cannot be undone.",
@@ -219,13 +245,13 @@ fun AdvanceSettings(
             onConfirm = {
                 vm.deleteDefaultSettings()
                 vm.showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.reader_settings_reset))
-                showResetReaderSettings = false
+                dialogState.showResetReaderSettings = false
             },
-            onDismiss = { showResetReaderSettings = false }
+            onDismiss = { dialogState.showResetReaderSettings = false }
         )
     }
     
-    if (showResetThemes) {
+    if (dialogState.showResetThemes) {
         DestructiveActionDialog(
             title = localizeHelper.localize(Res.string.reset_themes),
             message = "This will remove all custom themes. Only default themes will remain. This action cannot be undone.",
@@ -233,13 +259,13 @@ fun AdvanceSettings(
             onConfirm = {
                 vm.resetThemes()
                 vm.showSnackBar(UiText.MStringResource(Res.string.success))
-                showResetThemes = false
+                dialogState.showResetThemes = false
             },
-            onDismiss = { showResetThemes = false }
+            onDismiss = { dialogState.showResetThemes = false }
         )
     }
     
-    if (showResetCategories) {
+    if (dialogState.showResetCategories) {
         DestructiveActionDialog(
             title = localizeHelper.localize(Res.string.reset_categories),
             message = "This will restore the default category list. Your custom categories will be removed and books will be reassigned. This action cannot be undone.",
@@ -247,13 +273,13 @@ fun AdvanceSettings(
             onConfirm = {
                 vm.resetCategories()
                 vm.showSnackBar(UiText.MStringResource(Res.string.success))
-                showResetCategories = false
+                dialogState.showResetCategories = false
             },
-            onDismiss = { showResetCategories = false }
+            onDismiss = { dialogState.showResetCategories = false }
         )
     }
     
-    if (showDeleteAllDb) {
+    if (dialogState.showDeleteAllDb) {
         DestructiveActionDialog(
             title = localizeHelper.localize(Res.string.delete_all_database),
             message = "⚠️⚠️⚠️ CRITICAL WARNING ⚠️⚠️⚠️\n\nThis will PERMANENTLY DELETE the ENTIRE database. ALL your data including:\n• All books in your library\n• All reading history\n• All bookmarks\n• All settings\n• All categories\n\nThis action CANNOT be recovered. Are you absolutely sure?",
@@ -261,9 +287,9 @@ fun AdvanceSettings(
             onConfirm = {
                 vm.deleteAllDatabase()
                 vm.showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.database_deleted))
-                showDeleteAllDb = false
+                dialogState.showDeleteAllDb = false
             },
-            onDismiss = { showDeleteAllDb = false }
+            onDismiss = { dialogState.showDeleteAllDb = false }
         )
     }
 }

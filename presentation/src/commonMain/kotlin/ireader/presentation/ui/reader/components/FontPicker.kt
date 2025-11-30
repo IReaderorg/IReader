@@ -4,11 +4,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,8 +23,11 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
+// Page size for lazy loading fonts
+private const val FONTS_PAGE_SIZE = 20
+
 /**
- * Font picker composable that displays system and custom fonts
+ * Font picker composable that displays system and custom fonts with lazy loading
  */
 @Composable
 fun FontPicker(
@@ -38,6 +43,10 @@ fun FontPicker(
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var fontToDelete by remember { mutableStateOf<CustomFont?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    
+    // Lazy loading state - how many fonts to show
+    var visibleFontsCount by remember { mutableStateOf(FONTS_PAGE_SIZE) }
+    val listState = rememberLazyListState()
     
     // Define 8 most popular fonts
     val popularFontNames = listOf(
@@ -77,8 +86,30 @@ fun FontPicker(
         }
     }
     
-    val filteredSystemFonts = remember(popularFonts, otherFonts) {
-        popularFonts + otherFonts
+    // Lazy loaded other fonts - only show visibleFontsCount items
+    val visibleOtherFonts = remember(otherFonts, visibleFontsCount) {
+        otherFonts.take(visibleFontsCount)
+    }
+    
+    val hasMoreFonts = otherFonts.size > visibleFontsCount
+    
+    // Reset visible count when search changes
+    LaunchedEffect(searchQuery) {
+        visibleFontsCount = FONTS_PAGE_SIZE
+    }
+    
+    // Auto-load more when scrolling near the end
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .collect { lastVisibleIndex ->
+                if (lastVisibleIndex != null && hasMoreFonts) {
+                    val totalItems = popularFonts.size + visibleOtherFonts.size + customFonts.size + 3 // +3 for headers
+                    if (lastVisibleIndex >= totalItems - 5) {
+                        // Load more fonts when near the end
+                        visibleFontsCount = (visibleFontsCount + FONTS_PAGE_SIZE).coerceAtMost(otherFonts.size)
+                    }
+                }
+            }
     }
     
     Column(modifier = modifier.fillMaxWidth()) {
@@ -122,12 +153,13 @@ fun FontPicker(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
+                state = listState,
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Popular Fonts Section
+                // Popular Fonts Section - always show all popular fonts
                 if (popularFonts.isNotEmpty()) {
-                    item {
+                    item(key = "popular_header") {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -148,19 +180,22 @@ fun FontPicker(
                         }
                     }
                     
-                    items(popularFonts) { font ->
+                    items(
+                        items = popularFonts,
+                        key = { "popular_${it.id}" }
+                    ) { font ->
                         FontItem(
                             font = font,
                             isSelected = selectedFontId == font.id,
                             onClick = { onFontSelected(font.id) },
-                            onDelete = null // Google Fonts cannot be deleted
+                            onDelete = null
                         )
                     }
                 }
                 
-                // Other Google Fonts Section
-                if (otherFonts.isNotEmpty()) {
-                    item {
+                // Other Google Fonts Section - lazy loaded
+                if (visibleOtherFonts.isNotEmpty()) {
+                    item(key = "other_header") {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -173,26 +208,51 @@ fun FontPicker(
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = "${otherFonts.size} fonts",
+                                text = "${visibleOtherFonts.size}/${otherFonts.size} fonts",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                     
-                    items(otherFonts) { font ->
+                    items(
+                        items = visibleOtherFonts,
+                        key = { "other_${it.id}" }
+                    ) { font ->
                         FontItem(
                             font = font,
                             isSelected = selectedFontId == font.id,
                             onClick = { onFontSelected(font.id) },
-                            onDelete = null // Google Fonts cannot be deleted
+                            onDelete = null
                         )
+                    }
+                    
+                    // Load more button if there are more fonts
+                    if (hasMoreFonts) {
+                        item(key = "load_more") {
+                            TextButton(
+                                onClick = { 
+                                    visibleFontsCount = (visibleFontsCount + FONTS_PAGE_SIZE).coerceAtMost(otherFonts.size)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ExpandMore,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Load more (${otherFonts.size - visibleFontsCount} remaining)")
+                            }
+                        }
                     }
                 }
                 
                 // Custom Fonts Section
                 if (customFonts.isNotEmpty()) {
-                    item {
+                    item(key = "custom_header") {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -212,7 +272,10 @@ fun FontPicker(
                         }
                     }
                     
-                    items(customFonts) { font ->
+                    items(
+                        items = customFonts,
+                        key = { "custom_${it.id}" }
+                    ) { font ->
                         FontItem(
                             font = font,
                             isSelected = selectedFontId == font.id,

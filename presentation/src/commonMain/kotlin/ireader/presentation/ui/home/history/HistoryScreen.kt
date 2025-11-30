@@ -49,10 +49,30 @@ import ireader.presentation.ui.core.coil.rememberBookCover
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.history.viewmodel.DateFilter
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
+
+/**
+ * Stable holder for history item click handlers to prevent recomposition
+ */
+@Stable
+private class HistoryClickHandlers(
+    val onClickItem: (HistoryWithRelations) -> Unit,
+    val onClickDelete: (HistoryWithRelations) -> Unit,
+    val onClickPlay: (HistoryWithRelations) -> Unit,
+    val onBookCover: (HistoryWithRelations) -> Unit,
+    val onLongClickDelete: (HistoryWithRelations) -> Unit
+)
+
+/**
+ * Stable key generator for history items
+ */
+@Stable
+private fun stableHistoryKey(history: HistoryWithRelations): Any = history.id
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +90,29 @@ fun HistoryScreen(
     val listState = rememberLazyListState()
     val searchFocusRequester = remember { FocusRequester() }
     val localizeHelper = requireNotNull<ireader.i18n.LocalizeHelper>(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    // Memoize click handlers to prevent unnecessary recompositions
+    val clickHandlers = remember(onHistory, onHistoryDelete, onHistoryPlay, onBookCover, onLongClickDelete) {
+        HistoryClickHandlers(
+            onClickItem = onHistory,
+            onClickDelete = onHistoryDelete,
+            onClickPlay = onHistoryPlay,
+            onBookCover = onBookCover,
+            onLongClickDelete = onLongClickDelete
+        )
+    }
+    
+    // Derive screen state for efficient rendering
+    val screenState by remember(items, vm.searchQuery) {
+        derivedStateOf {
+            when {
+                items.values.flatten().isEmpty() && vm.searchQuery.isNotEmpty() -> HistoryScreenState.NoSearchResults
+                items.values.isEmpty() -> HistoryScreenState.Empty
+                else -> HistoryScreenState.Content
+            }
+        }
+    }
+    
     // Observe when back in history
     LaunchedEffect(vm.searchQuery) {
         vm.applySearchFilter()
@@ -116,24 +159,24 @@ fun HistoryScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when {
-                items.values.flatten().isEmpty() && vm.searchQuery.isNotEmpty() -> EmptyScreen(
+            when (screenState) {
+                HistoryScreenState.NoSearchResults -> EmptyScreen(
                     text = localize(Res.string.no_matches_found_in_search) + " \"${vm.searchQuery}\"",
                     modifier = Modifier.fillMaxSize(),
                     icon = Icons.Outlined.Search
                 )
-                items.values.isEmpty() -> EmptyScreen(
+                HistoryScreenState.Empty -> EmptyScreen(
                     text = localize(Res.string.nothing_read_recently),
                     modifier = Modifier.fillMaxSize(),
                     icon = Icons.Outlined.History
                 )
-                else -> HistoryContent(
+                HistoryScreenState.Content -> HistoryContent(
                     items = items,
                     listState = listState,
-                    onClickItem = onHistory,
+                    onClickItem = clickHandlers.onClickItem,
                     onClickDelete = { history -> vm.deleteHistory(history, localizeHelper) },
-                    onClickPlay = onHistoryPlay,
-                    onBookCover = onBookCover,
+                    onClickPlay = clickHandlers.onClickPlay,
+                    onBookCover = clickHandlers.onBookCover,
                     onLongClickDelete = { history -> vm.deleteHistory(history, localizeHelper) },
                     vm = vm
                 )
@@ -363,52 +406,66 @@ fun HistoryContent(
     onLongClickDelete: (HistoryWithRelations) -> Unit,
     vm: HistoryViewModel
 ) {
-    // Group history items by time period
-    val now = System.currentTimeMillis()
-    val calendar = Calendar.getInstance()
-    val today = calendar.apply {
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
-    }.timeInMillis
-    
-    // Copy the calendar and subtract days
-    val yesterday = calendar.apply {
-        add(Calendar.DAY_OF_MONTH, -1)
-    }.timeInMillis
-    
-    val lastWeek = calendar.apply {
-        add(Calendar.DAY_OF_MONTH, -6) // Now 7 days ago in total
-    }.timeInMillis
-    
-    // Apply date filter
-    val allItems = items.values.flatten()
-    val filteredItems = when (vm.dateFilter) {
-        DateFilter.TODAY -> allItems.filter { it.readAt >= today }
-        DateFilter.YESTERDAY -> allItems.filter { it.readAt >= yesterday && it.readAt < today }
-        DateFilter.PAST_7_DAYS -> allItems.filter { it.readAt >= lastWeek }
-        null -> allItems
+    // Memoize time boundaries to avoid recalculation
+    val timeBoundaries = remember {
+        val calendar = Calendar.getInstance()
+        val today = calendar.apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        
+        val yesterday = calendar.apply {
+            add(Calendar.DAY_OF_MONTH, -1)
+        }.timeInMillis
+        
+        val lastWeek = calendar.apply {
+            add(Calendar.DAY_OF_MONTH, -6)
+        }.timeInMillis
+        
+        Triple(today, yesterday, lastWeek)
     }
     
-    // Group history items
-    val todayItems = mutableListOf<HistoryWithRelations>()
-    val yesterdayItems = mutableListOf<HistoryWithRelations>()
-    val thisWeekItems = mutableListOf<HistoryWithRelations>()
-    val earlierItems = mutableListOf<HistoryWithRelations>()
+    val (today, yesterday, lastWeek) = timeBoundaries
     
-    filteredItems.forEach { history ->
-        when {
-            history.readAt >= today -> todayItems.add(history)
-            history.readAt >= yesterday -> yesterdayItems.add(history)
-            history.readAt >= lastWeek -> thisWeekItems.add(history)
-            else -> earlierItems.add(history)
+    // Use derivedStateOf for grouped items to minimize recompositions
+    val groupedItems by remember(items, vm.dateFilter, today, yesterday, lastWeek) {
+        derivedStateOf {
+            val allItems = items.values.flatten()
+            val filteredItems = when (vm.dateFilter) {
+                DateFilter.TODAY -> allItems.filter { it.readAt >= today }
+                DateFilter.YESTERDAY -> allItems.filter { it.readAt >= yesterday && it.readAt < today }
+                DateFilter.PAST_7_DAYS -> allItems.filter { it.readAt >= lastWeek }
+                null -> allItems
+            }
+            
+            val todayItems = mutableListOf<HistoryWithRelations>()
+            val yesterdayItems = mutableListOf<HistoryWithRelations>()
+            val thisWeekItems = mutableListOf<HistoryWithRelations>()
+            val earlierItems = mutableListOf<HistoryWithRelations>()
+            
+            filteredItems.forEach { history ->
+                when {
+                    history.readAt >= today -> todayItems.add(history)
+                    history.readAt >= yesterday -> yesterdayItems.add(history)
+                    history.readAt >= lastWeek -> thisWeekItems.add(history)
+                    else -> earlierItems.add(history)
+                }
+            }
+            
+            GroupedHistoryItems(
+                todayItems = todayItems.sortedByDescending { it.readAt },
+                yesterdayItems = yesterdayItems.sortedByDescending { it.readAt },
+                thisWeekItems = thisWeekItems.sortedByDescending { it.readAt },
+                earlierItems = earlierItems.sortedByDescending { it.readAt }
+            )
         }
     }
     
-    // Format for showing time
-    val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-    val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    // Memoize date formatters
+    val timeFormat = remember { SimpleDateFormat("h:mm a", Locale.getDefault()) }
+    val dateFormat = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
     
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
@@ -419,12 +476,16 @@ fun HistoryContent(
             horizontalAlignment = Alignment.Start
         ) {
             // Today section
-            if (todayItems.isNotEmpty()) {
-                item {
+            if (groupedItems.todayItems.isNotEmpty()) {
+                item(key = "header_today") {
                     HistoryTimeHeader(title = localize(Res.string.relative_time_today))
                 }
                 
-                items(todayItems.sortedByDescending { it.readAt }) { history ->
+                items(
+                    items = groupedItems.todayItems,
+                    key = { history -> stableHistoryKey(history) },
+                    contentType = { "history_item" }
+                ) { history ->
                     HistoryItem(
                         history = history,
                         timeString = timeFormat.format(Date(history.readAt)),
@@ -440,12 +501,16 @@ fun HistoryContent(
             }
             
             // Yesterday section
-            if (yesterdayItems.isNotEmpty()) {
-                item {
+            if (groupedItems.yesterdayItems.isNotEmpty()) {
+                item(key = "header_yesterday") {
                     HistoryTimeHeader(title = localize(Res.string.yesterday))
                 }
                 
-                items(yesterdayItems.sortedByDescending { it.readAt }) { history ->
+                items(
+                    items = groupedItems.yesterdayItems,
+                    key = { history -> stableHistoryKey(history) },
+                    contentType = { "history_item" }
+                ) { history ->
                     HistoryItem(
                         history = history,
                         timeString = timeFormat.format(Date(history.readAt)),
@@ -461,12 +526,16 @@ fun HistoryContent(
             }
             
             // This week section
-            if (thisWeekItems.isNotEmpty()) {
-                item {
+            if (groupedItems.thisWeekItems.isNotEmpty()) {
+                item(key = "header_week") {
                     HistoryTimeHeader(title = localize(Res.string.weekly))
                 }
                 
-                items(thisWeekItems.sortedByDescending { it.readAt }) { history ->
+                items(
+                    items = groupedItems.thisWeekItems,
+                    key = { history -> stableHistoryKey(history) },
+                    contentType = { "history_item" }
+                ) { history ->
                     HistoryItem(
                         history = history,
                         timeString = dateFormat.format(Date(history.readAt)),
@@ -482,12 +551,16 @@ fun HistoryContent(
             }
             
             // Earlier section
-            if (earlierItems.isNotEmpty()) {
-                item {
+            if (groupedItems.earlierItems.isNotEmpty()) {
+                item(key = "header_earlier") {
                     HistoryTimeHeader(title = localize(Res.string.recently))
                 }
                 
-                items(earlierItems.sortedByDescending { it.readAt }) { history ->
+                items(
+                    items = groupedItems.earlierItems,
+                    key = { history -> stableHistoryKey(history) },
+                    contentType = { "history_item" }
+                ) { history ->
                     HistoryItem(
                         history = history,
                         timeString = dateFormat.format(Date(history.readAt)),
@@ -952,3 +1025,24 @@ fun HighlightedText(
         )
     }
 }
+
+/**
+ * Enum representing the different states of the history screen
+ * Used with derivedStateOf for efficient recomposition
+ */
+private enum class HistoryScreenState {
+    NoSearchResults,
+    Empty,
+    Content
+}
+
+/**
+ * Stable data class for grouped history items
+ */
+@Stable
+private data class GroupedHistoryItems(
+    val todayItems: List<HistoryWithRelations>,
+    val yesterdayItems: List<HistoryWithRelations>,
+    val thisWeekItems: List<HistoryWithRelations>,
+    val earlierItems: List<HistoryWithRelations>
+)

@@ -31,6 +31,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +68,21 @@ import ireader.presentation.ui.reader.viewmodel.dismissRepairBanner
 import ireader.presentation.ui.reader.viewmodel.dismissRepairSuccessBanner
 import ireader.presentation.ui.reader.viewmodel.repairChapter
 import kotlinx.coroutines.launch
+
+/**
+ * Pre-computed modifiers for ReaderScreen to avoid recreation on each recomposition
+ */
+private object ReaderScreenModifiers {
+    val fillMaxSize = Modifier.fillMaxSize()
+    val loadingIndicator = Modifier.size(48.dp)
+    val bottomSheetHandle = Modifier
+        .width(40.dp)
+        .height(4.dp)
+        .clip(RoundedCornerShape(2.dp))
+    val bottomSheetColumn = Modifier
+        .height(140.dp)
+        .padding(horizontal = 16.dp)
+}
 
 @ExperimentalAnimationApi
 @OptIn(
@@ -168,6 +185,23 @@ private fun ReadingScreenContent(
         chapter: Chapter?,
         showChapterReviews: androidx.compose.runtime.MutableState<Boolean>
 ) {
+    // Pre-compute background color to avoid repeated conversions
+    val backgroundColor = remember(vm.backgroundColor.value) { 
+        vm.backgroundColor.value.toComposeColor() 
+    }
+    
+    // Derive loading state for efficient Crossfade
+    val isContentLoading by remember(vm.isLoading, vm.readingMode.value, vm.chapterShell) {
+        derivedStateOf {
+            vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues) vm.chapterShell.isEmpty() else true
+        }
+    }
+    
+    // Memoize navigation callbacks
+    val onNextWithReset = remember(onNext) { { onNext(true) } }
+    val onPrevWithReset = remember(onPrev) { { onPrev(true) } }
+    val onNextWithoutReset = remember(onNext) { { onNext(false) } }
+    val onPrevWithoutReset = remember(onPrev) { { onPrev(false) } }
     
     // Calculate reading time when chapter changes
     LaunchedEffect(key1 = chapter?.id, key2 = vm.isLoading) {
@@ -260,36 +294,34 @@ private fun ReadingScreenContent(
     }
     
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(vm.backgroundColor.value.toComposeColor())
+        modifier = ReaderScreenModifiers.fillMaxSize
+            .background(backgroundColor)
             .volumeKeyHandler(
                 enabled = vm.volumeKeyNavigation.value,
-                onVolumeUp = { onPrev(true) },
-                onVolumeDown = { onNext(true) }
+                onVolumeUp = onPrevWithReset,
+                onVolumeDown = onNextWithReset
             ),
         contentAlignment = Alignment.Center,
     ) {
         
         Crossfade(
-            modifier = Modifier.fillMaxSize(),
-            targetState = vm.isLoading && if (vm.readingMode.value == ReadingMode.Continues) vm.chapterShell.isEmpty() else true,
+            modifier = ReaderScreenModifiers.fillMaxSize,
+            targetState = isContentLoading,
             animationSpec = tween(durationMillis = 300)
         ) { isLoading ->
 
             when (isLoading) {
                 true -> {
                     Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = vm.backgroundColor.value.toComposeColor()
+                        modifier = ReaderScreenModifiers.fillMaxSize,
+                        color = backgroundColor
                     ) {
                         Box(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = ReaderScreenModifiers.fillMaxSize,
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(48.dp)
+                                modifier = ReaderScreenModifiers.loadingIndicator
                                     .align(Alignment.Center),
                                 color = MaterialTheme.colorScheme.primary,
                                 strokeWidth = 3.dp
@@ -311,16 +343,11 @@ private fun ReadingScreenContent(
                         sheetState = modalBottomSheetState,
                         sheetContent = {
                             Column(
-                                modifier = Modifier
-                                    .height(140.dp)
-                                    .padding(horizontal = 16.dp)
+                                modifier = ReaderScreenModifiers.bottomSheetColumn
                             ) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Box(
-                                    modifier = Modifier
-                                        .width(40.dp)
-                                        .height(4.dp)
-                                        .clip(RoundedCornerShape(2.dp))
+                                    modifier = ReaderScreenModifiers.bottomSheetHandle
                                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                                         .align(Alignment.CenterHorizontally)
                                 )
@@ -332,8 +359,8 @@ private fun ReadingScreenContent(
                                     chapters = vm.stateChapters,
                                     currentChapterIndex = vm.currentChapterIndex,
                                     onSetting = { vm.showSettingsBottomSheet = true },
-                                    onNext = { onNext(true) },
-                                    onPrev = { onPrev(true) },
+                                    onNext = onNextWithReset,
+                                    onPrev = onPrevWithReset,
                                     onSliderChange = onSliderChange,
                                     onSliderFinished = onSliderFinished,
                                     onPlay = onReaderPlay,
@@ -345,12 +372,12 @@ private fun ReadingScreenContent(
                             }
                         },
                     ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
+                        Box(modifier = ReaderScreenModifiers.fillMaxSize) {
                             ReaderText(
                                 vm = readerScreenPreferencesState,
-                                onNext = { onNext(false) },
+                                onNext = onNextWithoutReset,
                                 swipeState = swipeState,
-                                onPrev = { onPrev(false) },
+                                onPrev = onPrevWithoutReset,
                                 scrollState = scrollState,
                                 modalState = modalBottomSheetState,
                                 toggleReaderMode = toggleReaderMode,

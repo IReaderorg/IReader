@@ -50,14 +50,20 @@ class TTSNotificationBuilder constructor(
             PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
         )
     )
-    val rewindAction = NotificationCompat.Action(
-        R.drawable.ic_baseline_fast_rewind,
-        localizeHelper.localize(Res.string.previous_paragraph),
-        MediaButtonReceiver.buildMediaButtonPendingIntent(
-            context,
-            PlaybackStateCompat.ACTION_REWIND
+    // Use custom PendingIntent for rewind to ensure Android doesn't override with skip icons
+    val rewindAction: NotificationCompat.Action
+        get() = NotificationCompat.Action(
+            R.drawable.ic_baseline_fast_rewind,
+            localizeHelper.localize(Res.string.previous_paragraph),
+            PendingIntent.getService(
+                context,
+                Player.PREV_PAR,
+                Intent(context, TTSService::class.java).apply {
+                    action = TTSService.ACTION_PREVIOUS_PARAGRAPH
+                },
+                pendingIntentFlags
+            )
         )
-    )
 
     val pauseAction = NotificationCompat.Action(
         R.drawable.ic_baseline_pause,
@@ -71,14 +77,20 @@ class TTSNotificationBuilder constructor(
         MediaButtonReceiver.buildMediaButtonPendingIntent(context, PlaybackStateCompat.ACTION_PLAY)
     )
 
-    val next = NotificationCompat.Action(
-        R.drawable.ic_baseline_fast_forward,
-        localizeHelper.localize(Res.string.next_chapter),
-        MediaButtonReceiver.buildMediaButtonPendingIntent(
-            context,
-            PlaybackStateCompat.ACTION_FAST_FORWARD
+    // Use custom PendingIntent for fast-forward to ensure Android doesn't override with skip icons
+    val next: NotificationCompat.Action
+        get() = NotificationCompat.Action(
+            R.drawable.ic_baseline_fast_forward,
+            localizeHelper.localize(Res.string.next_paragraph),
+            PendingIntent.getService(
+                context,
+                Player.NEXT_PAR,
+                Intent(context, TTSService::class.java).apply {
+                    action = TTSService.ACTION_NEXT_PARAGRAPH
+                },
+                pendingIntentFlags
+            )
         )
-    )
 
     val skipNext =
         NotificationCompat.Action(

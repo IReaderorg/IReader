@@ -646,6 +646,22 @@ fun GeneralScreenTab(
         }
         item {
             Components.Header(
+                "Performance"
+            ).Build()
+        }
+        item {
+            // Reduced animations toggle for older devices
+            SwitchPreference(
+                preference = vm.readerPreferences.reducedAnimations().get(),
+                title = "Reduced Animations",
+                subtitle = "Disable animations for better performance on older devices",
+                onValueChange = { enabled ->
+                    vm.readerPreferences.reducedAnimations().set(enabled)
+                }
+            )
+        }
+        item {
+            Components.Header(
                 "Text-to-Speech Settings"
             ).Build()
         }

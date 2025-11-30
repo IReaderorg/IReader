@@ -17,9 +17,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -39,8 +43,19 @@ import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+
+/**
+ * Stable holder for chapter item click handlers to prevent recomposition
+ */
+@Stable
+private class ChapterClickHandlers(
+    val onItemClick: (Chapter) -> Unit,
+    val onLongItemClick: (Chapter) -> Unit
+)
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -75,6 +90,36 @@ fun BookDetailScreen(
     
     // Check if we're on a tablet for responsive design
     val isTablet = isTableUi()
+    
+    // Pre-compute modifiers to avoid recreation
+    val fillMaxSizeModifier = remember { Modifier.fillMaxSize() }
+    val dividerModifier = remember { Modifier.padding(horizontal = 16.dp) }
+    val searchFieldModifier = remember { Modifier.padding(horizontal = 16.dp, vertical = 8.dp) }
+    
+    // Memoize chapter click handlers
+    val chapterClickHandlers = remember(onItemClick, onLongItemClick) {
+        ChapterClickHandlers(onItemClick, onLongItemClick)
+    }
+    
+    // Memoize reversed chapters list to avoid recalculation on each recomposition
+    val reversedChapters by remember(chapters) {
+        derivedStateOf { chapters.value.reversed() }
+    }
+    
+    // Derive chapter count for efficient updates
+    val chapterCount by remember(chapters) {
+        derivedStateOf { chapters.value.size }
+    }
+    
+    // Derive show number flag
+    val showChapterNumber by remember(vm.layout) {
+        derivedStateOf { 
+            vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default 
+        }
+    }
+    
+    // Divider color - memoized
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
 
     // All dialogs
     if (vm.showDialog) {
@@ -193,7 +238,7 @@ fun BookDetailScreen(
                     item {
                         BookStatsCard(
                             book = book,
-                            chapterCount = chapters.value.size
+                            chapterCount = chapterCount
                         )
                     }
                     item {
@@ -223,14 +268,14 @@ fun BookDetailScreen(
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                         )
                     }
-                item {
-                    ChapterBar(
-                        vm = vm,
-                        chapters = chapters.value,
-                        onMap = onMap,
-                        onSortClick = onSortClick
-                    )
-                }
+                    item {
+                        ChapterBar(
+                            vm = vm,
+                            chapters = chapters.value,
+                            onMap = onMap,
+                            onSortClick = onSortClick
+                        )
+                    }
                 
                 // Source switching banner
                 if (vm.sourceSwitchingState.showBanner) {
@@ -279,22 +324,26 @@ fun BookDetailScreen(
                 }
                 
                     items(
-                        items = chapters.value.reversed(),
+                        items = reversedChapters,
                         key = { chapter -> chapter.id },
                         contentType = { "chapter_item" }
                     ) { chapter ->
+                        // Use memoized click handlers
+                        val itemClickHandler = remember(chapter) { { chapterClickHandlers.onItemClick(chapter) } }
+                        val longClickHandler = remember(chapter) { { chapterClickHandlers.onLongItemClick(chapter) } }
+                        
                         ChapterRow(
                             modifier = Modifier.animateItem(),
                             chapter = chapter,
-                            onItemClick = { onItemClick(chapter) },
+                            onItemClick = itemClickHandler,
                             isLastRead = chapter.id == vm.lastRead,
                             isSelected = chapter.id in vm.selection,
-                            onLongClick = { onLongItemClick(chapter) },
-                            showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default
+                            onLongClick = longClickHandler,
+                            showNumber = showChapterNumber
                         )
                         HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                            modifier = dividerModifier,
+                            color = dividerColor,
                             thickness = 0.5.dp
                         )
                     }
@@ -423,12 +472,34 @@ private fun ChapterListPanel(
     focusManager: androidx.compose.ui.focus.FocusManager,
     keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?
 ) {
+    // Pre-compute modifiers
+    val dividerModifier = remember { Modifier.padding(horizontal = 16.dp) }
+    val searchFieldModifier = remember { Modifier.padding(horizontal = 16.dp, vertical = 8.dp) }
+    
+    // Memoize reversed chapters
+    val reversedChapters = remember(chapters) { chapters.reversed() }
+    
+    // Memoize click handlers
+    val chapterClickHandlers = remember(onItemClick, onLongItemClick) {
+        ChapterClickHandlers(onItemClick, onLongItemClick)
+    }
+    
+    // Derive show number flag
+    val showChapterNumber by remember(vm.layout) {
+        derivedStateOf { 
+            vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default 
+        }
+    }
+    
+    // Divider color - memoized
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    
     IVerticalFastScroller(listState = scrollState) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             state = scrollState,
-            contentPadding = PaddingValues(top = 72.dp) // Add padding to prevent toolbar overlap
+            contentPadding = PaddingValues(top = 72.dp)
         ) {
             item {
                 ChapterBar(
@@ -467,10 +538,7 @@ private fun ChapterListPanel(
             if (vm.searchMode) {
                 item {
                     AppTextField(
-                        modifier = Modifier.padding(
-                            horizontal = 16.dp,
-                            vertical = 8.dp
-                        ),
+                        modifier = searchFieldModifier,
                         query = vm.query ?: "",
                         onValueChange = { query ->
                             vm.query = query
@@ -486,22 +554,26 @@ private fun ChapterListPanel(
             }
             
             items(
-                items = chapters.reversed(),
+                items = reversedChapters,
                 key = { chapter -> chapter.id },
                 contentType = { "chapter_item" }
             ) { chapter ->
+                // Use memoized click handlers
+                val itemClickHandler = remember(chapter) { { chapterClickHandlers.onItemClick(chapter) } }
+                val longClickHandler = remember(chapter) { { chapterClickHandlers.onLongItemClick(chapter) } }
+                
                 ChapterRow(
                     modifier = Modifier.animateItem(),
                     chapter = chapter,
-                    onItemClick = { onItemClick(chapter) },
+                    onItemClick = itemClickHandler,
                     isLastRead = chapter.id == vm.lastRead,
                     isSelected = chapter.id in vm.selection,
-                    onLongClick = { onLongItemClick(chapter) },
-                    showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default
+                    onLongClick = longClickHandler,
+                    showNumber = showChapterNumber
                 )
                 HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                    modifier = dividerModifier,
+                    color = dividerColor,
                     thickness = 0.5.dp
                 )
             }

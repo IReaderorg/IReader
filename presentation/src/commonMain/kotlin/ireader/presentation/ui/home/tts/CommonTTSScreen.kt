@@ -109,13 +109,33 @@ fun TTSContentDisplay(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val displayContent = if (state.showTranslation && state.translatedContent != null) {
-        state.translatedContent
-    } else {
-        state.content
+    
+    // Use derivedStateOf for display content to minimize recompositions
+    val displayContent by remember(state.showTranslation, state.translatedContent, state.content) {
+        derivedStateOf {
+            if (state.showTranslation && state.translatedContent != null) {
+                state.translatedContent
+            } else {
+                state.content
+            }
+        }
     }
     
-    val hasTranslation = state.translatedContent != null && state.translatedContent.isNotEmpty()
+    // Memoize hasTranslation check
+    val hasTranslation by remember(state.translatedContent) {
+        derivedStateOf { state.translatedContent != null && state.translatedContent.isNotEmpty() }
+    }
+    
+    // Pre-compute content padding
+    val contentPadding = remember(isTabletOrDesktop, paragraphDistance) {
+        PaddingValues(
+            horizontal = if (isTabletOrDesktop) 32.dp else 16.dp,
+            vertical = 16.dp
+        )
+    }
+    
+    // Memoize paragraph click handler
+    val onParagraphClick = remember(actions) { { index: Int -> actions.onParagraphClick(index) } }
     
     Box(
         modifier = modifier
@@ -142,13 +162,14 @@ fun TTSContentDisplay(
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    horizontal = if (isTabletOrDesktop) 32.dp else 16.dp,
-                    vertical = 16.dp
-                ),
+                contentPadding = contentPadding,
                 verticalArrangement = Arrangement.spacedBy(paragraphDistance.dp)
             ) {
-                items(displayContent.size) { index ->
+                items(
+                    count = displayContent.size,
+                    key = { index -> "paragraph_$index" },
+                    contentType = { "tts_paragraph" }
+                ) { index ->
                     val isCurrentParagraph = index == state.currentReadingParagraph
                     val isPreviousParagraph = index == state.previousReadingParagraph && index != state.currentReadingParagraph
                     val originalText = state.content.getOrNull(index) ?: ""
@@ -159,7 +180,7 @@ fun TTSContentDisplay(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { actions.onParagraphClick(index) }
+                            .clickable { onParagraphClick(index) }
                             .padding(vertical = 4.dp),
                         verticalAlignment = Alignment.Top
                     ) {

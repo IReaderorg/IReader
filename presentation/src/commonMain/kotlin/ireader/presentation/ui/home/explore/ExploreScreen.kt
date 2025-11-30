@@ -44,6 +44,12 @@ import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Stable key generator for explore book items
+ */
+@Stable
+private fun stableExploreBookKey(book: BookItem): Any = "${book.id}_${book.column}"
+
 @OptIn(
     ExperimentalMaterial3Api::class
 )
@@ -77,8 +83,36 @@ fun ExploreScreen(
     )
 
     val scope = rememberCoroutineScope()
+    
+    // Pre-compute stable key function for book items
+    val stableKeyFunction = remember { { book: BookItem -> stableExploreBookKey(book) } }
+    
+    // Memoize click handlers to prevent unnecessary recompositions
+    val stableOnBook = remember(onBook) { onBook }
+    val stableOnLongClick = remember(onLongClick) { onLongClick }
+    
+    // Derive screen state for efficient rendering
+    val screenState by remember {
+        derivedStateOf {
+            when {
+                vm.isLoading && vm.page == 1 -> ExploreScreenState.Loading
+                vm.error != null && vm.page == 1 -> ExploreScreenState.Error
+                vm.booksState.books.isEmpty() && !vm.isLoading -> ExploreScreenState.Empty
+                else -> ExploreScreenState.Content
+            }
+        }
+    }
+    
+    // Memoize books with stable keys
+    val booksWithKeys by remember(vm.booksState.books) {
+        derivedStateOf {
+            vm.booksState.books.mapIndexed { index, book -> 
+                book.toBookItem().copy(column = index.toLong())
+            }
+        }
+    }
 
-    // Save scroll position when it changes
+    // Save scroll position when it changes - debounced
     LaunchedEffect(scrollState.firstVisibleItemIndex, scrollState.firstVisibleItemScrollOffset) {
         vm.savedScrollIndex = scrollState.firstVisibleItemIndex
         vm.savedScrollOffset = scrollState.firstVisibleItemScrollOffset
@@ -205,28 +239,33 @@ fun ExploreScreen(
                 }
                 else -> {
                     ModernLayoutComposable(
-                        books = vm.booksState.books
-                            .mapIndexed { index, book ->  book.toBookItem()
-                                .copy(column = index.toLong())},
+                        books = booksWithKeys,
                         layout = vm.layout,
                         scrollState = scrollState,
                         gridState = gridState,
-                        onClick = { book ->
-                            onBook(book)
-                        },
+                        onClick = stableOnBook,
                         isLoading = vm.isLoading,
                         showInLibraryBadge = true,
-                        onLongClick = {
-                            onLongClick(it.toBook())
+                        onLongClick = { book ->
+                            stableOnLongClick(book.toBook())
                         },
                         headers = headers,
-                        keys = {
-                            it.column
-                        },
+                        keys = stableKeyFunction,
                         columns = columns
                     )
                 }
             }
         }
     }
+}
+
+/**
+ * Enum representing the different states of the explore screen
+ * Used with derivedStateOf for efficient recomposition
+ */
+private enum class ExploreScreenState {
+    Loading,
+    Error,
+    Empty,
+    Content
 }
