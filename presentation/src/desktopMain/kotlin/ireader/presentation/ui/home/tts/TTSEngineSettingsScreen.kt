@@ -12,7 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.domain.services.tts_service.DesktopTTSService
-import ireader.domain.services.tts_service.piper.PiperModelManager
+import ireader.domain.services.tts_service.PiperVoiceService
+import ireader.domain.services.tts_service.PiperVoiceDownloader
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -35,15 +36,17 @@ actual fun TTSEngineSettingsScreen(
     val ttsService: DesktopTTSService = koinInject()
     val scope = rememberCoroutineScope()
     
-    // Engine status
-    var piperAvailable by remember { mutableStateOf(false) }
+    // Engine status - Piper is always available on desktop (bundled with app)
+    var piperAvailable by remember { mutableStateOf(true) } // Piper is always available on desktop
     var kokoroAvailable by remember { mutableStateOf(false) }
     var mayaAvailable by remember { mutableStateOf(false) }
     var currentEngine by remember { mutableStateOf("") }
     
     // Check engine status
     LaunchedEffect(Unit) {
-        piperAvailable = ttsService.synthesizer.isInitialized()
+        // Piper is always available on desktop - it's bundled with the app
+        // The synthesizer might not be initialized yet, but it will be when selected
+        piperAvailable = true
         kokoroAvailable = ttsService.kokoroAvailable
         mayaAvailable = ttsService.mayaAvailable
         currentEngine = ttsService.getCurrentEngine().name
@@ -116,6 +119,9 @@ actual fun TTSEngineSettingsScreen(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
+                // State for voice selection dialog
+                var showVoiceSelection by remember { mutableStateOf(false) }
+                
                 // Engine list
                 Column(
                     modifier = Modifier
@@ -123,10 +129,8 @@ actual fun TTSEngineSettingsScreen(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Piper TTS
-                    EngineCard(
-                        name = "Piper TTS",
-                        description = "High-performance neural TTS with 30+ voices",
+                    // Piper TTS with voice management
+                    PiperEngineCard(
                         isAvailable = piperAvailable,
                         isCurrentEngine = currentEngine == "PIPER",
                         onSelect = {
@@ -134,8 +138,17 @@ actual fun TTSEngineSettingsScreen(
                                 ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.PIPER)
                                 currentEngine = "PIPER"
                             }
-                        }
+                        },
+                        onManageVoices = { showVoiceSelection = true }
                     )
+                    
+                    // Voice Selection Dialog
+                    if (showVoiceSelection) {
+                        TTSVoiceSelectionScreen(
+                            isDesktop = true,
+                            onDismiss = { showVoiceSelection = false }
+                        )
+                    }
                     
                     // Kokoro TTS
                     EngineCard(
@@ -300,12 +313,110 @@ private fun EngineCard(
     }
 }
 
+/**
+ * Special Engine Card for Piper TTS with voice management button
+ * Piper is always available on desktop - bundled with the app
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PiperEngineCard(
+    isAvailable: Boolean,
+    isCurrentEngine: Boolean,
+    onSelect: () -> Unit,
+    onManageVoices: () -> Unit
+) {
+    // Piper is always available on desktop - bundled with the app
+    OutlinedCard(
+        onClick = onSelect,
+        modifier = Modifier.fillMaxWidth(),
+        enabled = true, // Always enabled - Piper is bundled
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = if (isCurrentEngine) 
+                MaterialTheme.colorScheme.secondaryContainer 
+            else 
+                MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Status icon
+                Icon(
+                    imageVector = when {
+                        isCurrentEngine -> Icons.Default.CheckCircle
+                        isAvailable -> Icons.Default.RadioButtonUnchecked
+                        else -> Icons.Default.Cancel
+                    },
+                    contentDescription = null,
+                    tint = when {
+                        isCurrentEngine -> MaterialTheme.colorScheme.primary
+                        isAvailable -> MaterialTheme.colorScheme.onSurfaceVariant
+                        else -> MaterialTheme.colorScheme.error
+                    }
+                )
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Piper TTS",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Text(
+                        text = "High-performance neural TTS with 100+ voices (bundled)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    // Piper is always available on desktop - bundled with the app
+                    Text(
+                        text = "✓ Pre-installed",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                if (isCurrentEngine) {
+                    AssistChip(
+                        onClick = {},
+                        label = { Text("Active") },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            labelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
+            }
+            
+            // Manage Voices button - always show since Piper is bundled
+            OutlinedButton(
+                onClick = onManageVoices,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    Icons.Default.RecordVoiceOver,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Manage Piper Voices")
+            }
+        }
+    }
+}
+
 
 /**
  * Desktop implementation of TTS Voice Selection Screen
  * 
- * Shows available Piper/Kokoro/Maya voices based on current engine
- * For Piper: Shows ALL available voices with download option
+ * Uses the unified PiperVoiceService for voice catalog management.
+ * Voices are fetched from https://rhasspy.github.io/piper-samples/voices.json
+ * and stored in the local database for offline access.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -314,14 +425,16 @@ actual fun TTSVoiceSelectionScreen(
     onDismiss: () -> Unit
 ) {
     val ttsService: DesktopTTSService = koinInject()
-    val modelManager: ireader.domain.services.tts_service.piper.PiperModelManager = koinInject()
-    val appPrefs: ireader.domain.preferences.prefs.AppPreferences = koinInject()
+    val voiceService: ireader.domain.services.tts_service.PiperVoiceService = koinInject()
+    val voiceDownloader: PiperVoiceDownloader = koinInject()
     val scope = rememberCoroutineScope()
     
-    // Voice state
-    var allVoices by remember { mutableStateOf<List<PiperVoiceInfo>>(emptyList()) }
-    // Store full VoiceModel objects for download
-    var fullVoiceModels by remember { mutableStateOf<List<ireader.domain.services.tts_service.piper.VoiceModel>>(emptyList()) }
+    // Collect state from unified service
+    val voices by voiceService.subscribeAll().collectAsState(initial = emptyList())
+    val isRefreshing by voiceService.isRefreshing.collectAsState()
+    val refreshError by voiceService.refreshError.collectAsState()
+    
+    // Local state
     var selectedVoice by remember { mutableStateOf<String?>(null) }
     var currentEngine by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
@@ -330,462 +443,106 @@ actual fun TTSVoiceSelectionScreen(
     var downloadError by remember { mutableStateOf<String?>(null) }
     var filterLanguage by remember { mutableStateOf<String?>(null) }
     
-    // Load voices based on current engine
+    // Initialize voice service and load current engine
     LaunchedEffect(Unit) {
         currentEngine = ttsService.getCurrentEngine().name
         selectedVoice = ttsService.state.selectedVoiceModel?.id
         
         ireader.core.log.Log.info { "TTSVoiceSelectionScreen: Loading voices for engine $currentEngine" }
         
-        // Get available voices based on engine
-        when (currentEngine) {
-            "PIPER" -> {
-                // Load ALL available Piper voices from model manager
-                ireader.core.log.Log.info { "Loading Piper voices from modelManager..." }
-                val models = modelManager.getAvailableModels()
-                ireader.core.log.Log.info { "ModelManager returned ${models.size} models" }
-                
-                // Get downloaded model IDs from preferences
-                val downloadedIds = appPrefs.downloadedModels().get()
-                ireader.core.log.Log.info { "Downloaded model IDs: $downloadedIds" }
-                
-                // Check which models are actually downloaded (file exists)
-                val modelsWithDownloadStatus = models.map { model ->
-                    val paths = modelManager.getModelPaths(model.id)
-                    val isActuallyDownloaded = paths != null || downloadedIds.contains(model.id)
-                    model.copy(isDownloaded = isActuallyDownloaded)
-                }
-                
-                // Store full models for download
-                fullVoiceModels = modelsWithDownloadStatus
-                
-                // Convert to UI model
-                allVoices = modelsWithDownloadStatus.map { model ->
-                    PiperVoiceInfo(
-                        id = model.id,
-                        name = model.name,
-                        language = model.language,
-                        isDownloaded = model.isDownloaded,
-                        sizeBytes = model.sizeBytes,
-                        quality = model.quality.name
-                    )
-                }
-                ireader.core.log.Log.info { "Loaded ${allVoices.size} Piper voices" }
-            }
-            "KOKORO" -> {
-                // Kokoro has predefined voices
-                allVoices = listOf(
-                    PiperVoiceInfo("af_bella", "Bella (Female)", "en-US", true, 0, "HIGH"),
-                    PiperVoiceInfo("af_nicole", "Nicole (Female)", "en-US", true, 0, "HIGH"),
-                    PiperVoiceInfo("af_sarah", "Sarah (Female)", "en-US", true, 0, "HIGH"),
-                    PiperVoiceInfo("af_sky", "Sky (Female)", "en-US", true, 0, "HIGH"),
-                    PiperVoiceInfo("am_adam", "Adam (Male)", "en-US", true, 0, "HIGH"),
-                    PiperVoiceInfo("am_michael", "Michael (Male)", "en-US", true, 0, "HIGH"),
-                    PiperVoiceInfo("bf_emma", "Emma (Female)", "en-GB", true, 0, "HIGH"),
-                    PiperVoiceInfo("bm_george", "George (Male)", "en-GB", true, 0, "HIGH")
-                )
-            }
-            "MAYA" -> {
-                // Maya supports multiple languages
-                allVoices = listOf(
-                    PiperVoiceInfo("en", "English", "en", true, 0, "HIGH"),
-                    PiperVoiceInfo("es", "Spanish", "es", true, 0, "HIGH"),
-                    PiperVoiceInfo("fr", "French", "fr", true, 0, "HIGH"),
-                    PiperVoiceInfo("de", "German", "de", true, 0, "HIGH"),
-                    PiperVoiceInfo("it", "Italian", "it", true, 0, "HIGH"),
-                    PiperVoiceInfo("pt", "Portuguese", "pt", true, 0, "HIGH"),
-                    PiperVoiceInfo("ru", "Russian", "ru", true, 0, "HIGH"),
-                    PiperVoiceInfo("zh", "Chinese", "zh", true, 0, "HIGH"),
-                    PiperVoiceInfo("ja", "Japanese", "ja", true, 0, "HIGH"),
-                    PiperVoiceInfo("ko", "Korean", "ko", true, 0, "HIGH")
-                )
-            }
-        }
+        // Initialize voice service (fetches from remote if needed)
+        voiceService.initialize()
         isLoading = false
     }
     
     // Get unique languages for filter
-    val availableLanguages = remember(allVoices) {
-        allVoices.map { it.language }.distinct().sorted()
-    }
-    
-    // Filter voices by language
-    val filteredVoices = remember(allVoices, filterLanguage) {
-        if (filterLanguage == null) allVoices
-        else allVoices.filter { it.language == filterLanguage }
+    val availableLanguages = remember(voices) {
+        voices.map { it.language }.distinct().sorted()
     }
     
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .fillMaxHeight(0.9f),
+                .fillMaxWidth(0.85f)
+                .fillMaxHeight(0.95f),
             shape = MaterialTheme.shapes.large,
             color = MaterialTheme.colorScheme.surface,
             tonalElevation = 8.dp
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp)
-            ) {
-                // Header
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Compact header with close button
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "Voice Selection",
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                        Text(
-                            text = "Engine: $currentEngine • ${allVoices.size} voices available",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Text(
+                        text = "Piper Voice Selection",
+                        style = MaterialTheme.typography.titleLarge
+                    )
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, "Close")
                     }
                 }
                 
-                // Language filter (for Piper)
-                if (currentEngine == "PIPER" && availableLanguages.size > 1) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Filter:", style = MaterialTheme.typography.bodyMedium)
-                        FilterChip(
-                            selected = filterLanguage == null,
-                            onClick = { filterLanguage = null },
-                            label = { Text("All") }
-                        )
-                        availableLanguages.take(6).forEach { lang ->
-                            FilterChip(
-                                selected = filterLanguage == lang,
-                                onClick = { filterLanguage = if (filterLanguage == lang) null else lang },
-                                label = { Text(lang) }
-                            )
+                // Use the enhanced unified voice selection UI
+                PiperVoiceSelectionContent(
+                    voices = voices,
+                    selectedVoiceId = selectedVoice,
+                    isLoading = isLoading,
+                    isRefreshing = isRefreshing,
+                    refreshError = refreshError ?: downloadError,
+                    downloadingVoiceId = downloadingVoiceId,
+                    downloadProgress = downloadProgress,
+                    filterLanguage = filterLanguage,
+                    availableLanguages = availableLanguages,
+                    onVoiceSelect = { voice ->
+                        scope.launch {
+                            ttsService.selectVoiceModel(voice.id)
+                            selectedVoice = voice.id
                         }
-                    }
-                }
-                
-                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-                
-                // Error message
-                if (downloadError != null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Default.Warning, null, tint = MaterialTheme.colorScheme.error)
-                            Text(
-                                text = downloadError ?: "",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(onClick = { downloadError = null }) {
-                                Icon(Icons.Default.Close, "Dismiss")
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator()
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text("Loading voices...")
-                        }
-                    }
-                } else if (filteredVoices.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Warning,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "No voices available",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = if (currentEngine == "PIPER") 
-                                    "Voice catalog could not be loaded. Check logs for details."
-                                else 
-                                    "Please install the TTS engine first from Settings > TTS Engine Manager",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                } else {
-                    // Voice list
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Show downloaded voices first
-                        val downloadedVoices = filteredVoices.filter { it.isDownloaded }
-                        val notDownloadedVoices = filteredVoices.filter { !it.isDownloaded }
-                        
-                        if (downloadedVoices.isNotEmpty()) {
-                            Text(
-                                text = "Downloaded (${downloadedVoices.size})",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            downloadedVoices.forEach { voice ->
-                                PiperVoiceCard(
-                                    voice = voice,
-                                    isSelected = voice.id == selectedVoice,
-                                    isDownloading = downloadingVoiceId == voice.id,
-                                    downloadProgress = if (downloadingVoiceId == voice.id) downloadProgress else 0f,
-                                    onSelect = {
-                                        scope.launch {
-                                            when (currentEngine) {
-                                                "PIPER" -> ttsService.selectVoiceModel(voice.id)
-                                            }
-                                            selectedVoice = voice.id
-                                        }
-                                    },
-                                    onDownload = {}
-                                )
-                            }
-                        }
-                        
-                        if (notDownloadedVoices.isNotEmpty() && currentEngine == "PIPER") {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Available for Download (${notDownloadedVoices.size})",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            notDownloadedVoices.forEach { voice ->
-                                PiperVoiceCard(
-                                    voice = voice,
-                                    isSelected = false,
-                                    isDownloading = downloadingVoiceId == voice.id,
-                                    downloadProgress = if (downloadingVoiceId == voice.id) downloadProgress else 0f,
-                                    onSelect = {},
-                                    onDownload = {
-                                        scope.launch {
-                                            downloadingVoiceId = voice.id
-                                            downloadProgress = 0f
-                                            downloadError = null
-                                            
-                                            try {
-                                                // Find the full model from our stored list
-                                                val model = fullVoiceModels.find { it.id == voice.id }
-                                                ireader.core.log.Log.info { "Downloading voice: ${voice.id}, model found: ${model != null}" }
-                                                
-                                                if (model != null) {
-                                                    ireader.core.log.Log.info { "Starting download for ${model.name} from ${model.modelUrl}" }
-                                                    modelManager.downloadModel(model).collect { progress ->
-                                                        downloadProgress = progress.progress
-                                                        ireader.core.log.Log.info { "Download progress: ${(progress.progress * 100).toInt()}% - ${progress.status}" }
-                                                    }
-                                                    
-                                                    // Update the voice as downloaded in UI
-                                                    allVoices = allVoices.map { v ->
-                                                        if (v.id == voice.id) v.copy(isDownloaded = true) else v
-                                                    }
-                                                    
-                                                    // Update fullVoiceModels
-                                                    fullVoiceModels = fullVoiceModels.map { m ->
-                                                        if (m.id == voice.id) m.copy(isDownloaded = true) else m
-                                                    }
-                                                    
-                                                    // Save to preferences
-                                                    val currentDownloaded = appPrefs.downloadedModels().get().toMutableSet()
-                                                    currentDownloaded.add(voice.id)
-                                                    appPrefs.downloadedModels().set(currentDownloaded)
-                                                    
-                                                    ireader.core.log.Log.info { "Voice ${voice.id} downloaded successfully" }
-                                                } else {
-                                                    downloadError = "Voice model not found in catalog"
-                                                    ireader.core.log.Log.error { "Voice model ${voice.id} not found in fullVoiceModels (size: ${fullVoiceModels.size})" }
-                                                }
-                                            } catch (e: Exception) {
-                                                downloadError = "Download failed: ${e.message}"
-                                                ireader.core.log.Log.error { "Voice download failed: ${e.message}" }
-                                                e.printStackTrace()
-                                            } finally {
-                                                downloadingVoiceId = null
-                                            }
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private data class PiperVoiceInfo(
-    val id: String,
-    val name: String,
-    val language: String,
-    val isDownloaded: Boolean,
-    val sizeBytes: Long,
-    val quality: String
-)
-
-@Composable
-private fun PiperVoiceCard(
-    voice: PiperVoiceInfo,
-    isSelected: Boolean,
-    isDownloading: Boolean,
-    downloadProgress: Float,
-    onSelect: () -> Unit,
-    onDownload: () -> Unit
-) {
-    OutlinedCard(
-        onClick = { if (voice.isDownloaded) onSelect() },
-        modifier = Modifier.fillMaxWidth(),
-        enabled = voice.isDownloaded && !isDownloading,
-        colors = CardDefaults.outlinedCardColors(
-            containerColor = if (isSelected) 
-                MaterialTheme.colorScheme.primaryContainer 
-            else 
-                MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = when {
-                        isSelected -> Icons.Default.CheckCircle
-                        voice.isDownloaded -> Icons.Default.RadioButtonUnchecked
-                        else -> Icons.Default.Download
                     },
-                    contentDescription = null,
-                    tint = when {
-                        isSelected -> MaterialTheme.colorScheme.primary
-                        voice.isDownloaded -> MaterialTheme.colorScheme.onSurfaceVariant
-                        else -> MaterialTheme.colorScheme.secondary
-                    }
-                )
-                
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = voice.name,
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = voice.language,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (voice.sizeBytes > 0) {
-                            Text(
-                                text = "• ${voice.sizeBytes / (1024 * 1024)} MB",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                    onVoiceDownload = { voice ->
+                        scope.launch {
+                            downloadingVoiceId = voice.id
+                            downloadProgress = 0f
+                            downloadError = null
+                            
+                            try {
+                                voiceDownloader.downloadVoice(voice) { progress ->
+                                    downloadProgress = progress
+                                }
+                                voiceService.markAsDownloaded(voice.id)
+                                ireader.core.log.Log.info { "Voice ${voice.id} downloaded successfully" }
+                            } catch (e: Exception) {
+                                downloadError = "Download failed: ${e.message}"
+                                ireader.core.log.Log.error { "Voice download failed: ${e.message}" }
+                            } finally {
+                                downloadingVoiceId = null
+                            }
                         }
-                        Text(
-                            text = "• ${voice.quality}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                
-                when {
-                    isSelected -> {
-                        AssistChip(
-                            onClick = {},
-                            label = { Text("Selected") },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                labelColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        )
-                    }
-                    isDownloading -> {
-                        CircularProgressIndicator(
-                            progress = { downloadProgress },
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
-                        )
-                    }
-                    !voice.isDownloaded -> {
-                        Button(
-                            onClick = onDownload,
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Download,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Download")
+                    },
+                    onRefresh = { scope.launch { voiceService.refresh() } },
+                    onFilterLanguageChange = { filterLanguage = it },
+                    onDismissError = { downloadError = null },
+                    onVoiceDelete = { voice ->
+                        scope.launch {
+                            try {
+                                voiceDownloader.deleteVoice(voice.id)
+                                voiceService.markAsNotDownloaded(voice.id)
+                            } catch (e: Exception) {
+                                downloadError = "Delete failed: ${e.message}"
+                            }
                         }
-                    }
-                }
-            }
-            
-            // Download progress bar
-            if (isDownloading) {
-                Spacer(modifier = Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = { downloadProgress },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Text(
-                    text = "Downloading... ${(downloadProgress * 100).toInt()}%",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
     }
 }
-
 
 /**
  * Dialog for configuring Gradio TTS

@@ -28,7 +28,9 @@ import ireader.data.statistics.ReadingStatisticsRepositoryImpl
 import ireader.data.translation.GlossaryRepositoryImpl
 import ireader.data.translation.TranslatedChapterRepositoryImpl
 import ireader.data.tts.VoiceModelRepositoryImpl
+import ireader.data.repository.PiperVoiceRepositoryImpl
 import ireader.domain.catalogs.service.CatalogRemoteRepository
+import ireader.domain.data.repository.PiperVoiceRepository
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CategoryRepository
@@ -139,6 +141,9 @@ val repositoryInjectModule = module {
     
     // Voice model repository
     single<VoiceModelRepository> { VoiceModelRepositoryImpl(get(), get()) }
+    
+    // Piper voice repository (for unified voice catalog)
+    single<PiperVoiceRepository> { PiperVoiceRepositoryImpl(get()) }
     
     // NFT repository is defined in reviewModule
     

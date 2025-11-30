@@ -44,6 +44,9 @@ class DesktopTTSService : KoinComponent {
     private val audioEngine: ireader.domain.services.tts_service.piper.AudioPlaybackEngine by inject()
     private val modelManager: ireader.domain.services.tts_service.piper.PiperModelManager by inject()
     
+    // Piper Voice Service for unified voice management
+    private val piperVoiceService: PiperVoiceService by inject()
+    
     // Kokoro TTS components (optional)
     private val kokoroEngine: ireader.domain.services.tts_service.kokoro.KokoroTTSEngine by lazy {
         val maxProcesses = appPrefs.maxConcurrentTTSProcesses().get()
@@ -1477,6 +1480,38 @@ class DesktopTTSService : KoinComponent {
                     }
                     // Re-find the model with updated download status
                     model = state.availableVoiceModels.find { it.id == modelId }
+                }
+            }
+            
+            // If still not found, try PiperVoiceService (unified voice database)
+            if (model == null) {
+                Log.info { "Model not found in catalog, checking PiperVoiceService..." }
+                val piperVoice = piperVoiceService.getById(modelId)
+                if (piperVoice != null) {
+                    // Convert PiperVoice to VoiceModel
+                    model = ireader.domain.services.tts_service.piper.VoiceModel(
+                        id = piperVoice.id,
+                        name = piperVoice.name,
+                        language = piperVoice.locale,
+                        quality = when (piperVoice.quality) {
+                            ireader.domain.models.tts.VoiceQuality.LOW -> ireader.domain.services.tts_service.piper.VoiceModel.Quality.LOW
+                            ireader.domain.models.tts.VoiceQuality.MEDIUM -> ireader.domain.services.tts_service.piper.VoiceModel.Quality.MEDIUM
+                            ireader.domain.models.tts.VoiceQuality.HIGH -> ireader.domain.services.tts_service.piper.VoiceModel.Quality.HIGH
+                            ireader.domain.models.tts.VoiceQuality.PREMIUM -> ireader.domain.services.tts_service.piper.VoiceModel.Quality.HIGH
+                        },
+                        gender = when (piperVoice.gender) {
+                            ireader.domain.models.tts.VoiceGender.MALE -> ireader.domain.services.tts_service.piper.VoiceModel.Gender.MALE
+                            ireader.domain.models.tts.VoiceGender.FEMALE -> ireader.domain.services.tts_service.piper.VoiceModel.Gender.FEMALE
+                            ireader.domain.models.tts.VoiceGender.NEUTRAL -> ireader.domain.services.tts_service.piper.VoiceModel.Gender.NEUTRAL
+                        },
+                        sizeBytes = piperVoice.modelSize,
+                        modelUrl = piperVoice.downloadUrl,
+                        configUrl = piperVoice.configUrl,
+                        modelChecksum = piperVoice.checksum.takeIf { it.isNotEmpty() },
+                        configChecksum = null,
+                        isDownloaded = piperVoice.isDownloaded || modelManager.getModelPaths(modelId) != null
+                    )
+                    Log.info { "Found voice in PiperVoiceService: ${model.name}, downloaded: ${model.isDownloaded}" }
                 }
             }
             

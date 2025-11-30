@@ -56,6 +56,8 @@ class SettingsSecurityViewModel(
         if (!enabled) {
             // Reset related settings when app lock is disabled
             uiPreferences.biometricEnabled().set(false)
+            // Reset runtime lock state so app doesn't prompt for auth anymore
+            uiPreferences.isAppLocked = false
         }
     }
     

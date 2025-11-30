@@ -32,6 +32,9 @@ import ireader.i18n.LocalizeHelper
 import ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer
 import ireader.domain.services.tts_service.piper.AudioPlaybackEngine
 import ireader.domain.services.tts_service.piper.PiperModelManager
+import ireader.domain.services.tts_service.PiperVoiceService
+import ireader.domain.services.tts_service.DesktopPiperVoiceDownloader
+import ireader.domain.services.tts_service.PiperVoiceDownloader
 import ireader.domain.services.ExtensionWatcherService
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -135,6 +138,20 @@ actual val DomainModule: Module = module {
     single<PiperModelManager> {
         val appDataDir = File(System.getProperty("user.home"), ".ireader")
         PiperModelManager(appDataDir)
+    }
+    
+    // Unified Piper Voice Service
+    single<PiperVoiceService> {
+        PiperVoiceService(
+            repository = get(),
+            httpClient = get<HttpClients>().default
+        )
+    }
+    
+    // Desktop Piper Voice Downloader
+    single<PiperVoiceDownloader> {
+        val appDataDir = File(System.getProperty("user.home"), ".ireader")
+        DesktopPiperVoiceDownloader(appDataDir)
     }
     
     // Desktop TTS Service (legacy implementation)

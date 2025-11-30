@@ -111,6 +111,8 @@ class SecurityRepositoryImpl(
             uiPreferences.biometricEnabled().set(false)
             // Sync with legacy useAuthenticator preference for SecureActivityDelegate
             uiPreferences.useAuthenticator().set(false)
+            // Reset runtime lock state so app doesn't prompt for auth anymore
+            uiPreferences.isAppLocked = false
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

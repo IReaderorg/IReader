@@ -1,0 +1,70 @@
+-- Piper Voice Model table for storing voice catalog from remote source
+-- Voices are fetched from https://rhasspy.github.io/piper-samples/voices.json
+
+CREATE TABLE piperVoice (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    language TEXT NOT NULL,
+    locale TEXT NOT NULL,
+    gender TEXT NOT NULL,
+    quality TEXT NOT NULL,
+    sampleRate INTEGER NOT NULL DEFAULT 22050,
+    modelSize INTEGER NOT NULL DEFAULT 0,
+    downloadUrl TEXT NOT NULL,
+    configUrl TEXT NOT NULL,
+    checksum TEXT NOT NULL DEFAULT '',
+    license TEXT NOT NULL DEFAULT 'MIT',
+    description TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '',
+    isDownloaded INTEGER NOT NULL DEFAULT 0,
+    lastUpdated INTEGER NOT NULL DEFAULT 0
+);
+
+-- Get all voices
+selectAll:
+SELECT * FROM piperVoice ORDER BY language, name;
+
+-- Get voice by ID
+selectById:
+SELECT * FROM piperVoice WHERE id = ?;
+
+-- Get voices by language
+selectByLanguage:
+SELECT * FROM piperVoice WHERE language = ? ORDER BY name;
+
+-- Get downloaded voices
+selectDownloaded:
+SELECT * FROM piperVoice WHERE isDownloaded = 1 ORDER BY language, name;
+
+-- Get distinct languages
+selectLanguages:
+SELECT DISTINCT language FROM piperVoice ORDER BY language;
+
+-- Insert or replace voice
+upsert:
+INSERT OR REPLACE INTO piperVoice (
+    id, name, language, locale, gender, quality, sampleRate, modelSize,
+    downloadUrl, configUrl, checksum, license, description, tags, isDownloaded, lastUpdated
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Update download status
+updateDownloadStatus:
+UPDATE piperVoice SET isDownloaded = ? WHERE id = ?;
+
+-- Delete all voices (for refresh)
+deleteAll:
+DELETE FROM piperVoice;
+
+-- Count voices
+countAll:
+SELECT COUNT(*) FROM piperVoice;
+
+-- Count downloaded voices
+countDownloaded:
+SELECT COUNT(*) FROM piperVoice WHERE isDownloaded = 1;
+
+-- Search voices by name or language
+search:
+SELECT * FROM piperVoice 
+WHERE name LIKE '%' || ? || '%' OR language LIKE '%' || ? || '%' OR tags LIKE '%' || ? || '%'
+ORDER BY language, name;
