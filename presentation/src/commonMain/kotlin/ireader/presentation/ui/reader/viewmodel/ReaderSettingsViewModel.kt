@@ -37,17 +37,17 @@ class ReaderSettingsViewModel(
     private val fontUseCase: ireader.domain.usecases.fonts.FontUseCase,
 ) : BaseViewModel() {
     
-    // Brightness settings
-    val brightness = readerPreferences.brightness().asState()
+    // Brightness settings - debounced for smooth slider interaction
+    val brightness = readerPreferences.brightness().asStateDebounced()
     val autoBrightnessMode = readerPreferences.autoBrightness().asState()
     var showBrightnessControl by mutableStateOf(false)
     
-    // Font settings
-    val fontSize = readerPreferences.fontSize().asState()
+    // Font settings - debounced for sliders
+    val fontSize = readerPreferences.fontSize().asStateDebounced()
     val font = platformUiPreferences.font()?.asState()
-    val lineHeight = readerPreferences.lineHeight().asState()
-    val betweenLetterSpaces = readerPreferences.betweenLetterSpaces().asState()
-    val textWeight = readerPreferences.textWeight().asState()
+    val lineHeight = readerPreferences.lineHeight().asStateDebounced()
+    val betweenLetterSpaces = readerPreferences.betweenLetterSpaces().asStateDebounced()
+    val textWeight = readerPreferences.textWeight().asStateDebounced()
     var showFontSizeAdjuster by mutableStateOf(false)
     var showFontPicker by mutableStateOf(false)
     
@@ -82,26 +82,26 @@ class ReaderSettingsViewModel(
     val textColor = androidUiPreferences.textColorReader().asState()
     val readerTheme = androidUiPreferences.readerTheme().asState()
     
-    // Layout settings
+    // Layout settings - debounced for slider controls
     val textAlignment = readerPreferences.textAlign().asState()
-    val paragraphsIndent = readerPreferences.paragraphIndent().asState()
-    val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asState()
-    val topContentPadding = readerPreferences.topContentPadding().asState()
-    val bottomContentPadding = readerPreferences.bottomContentPadding().asState()
-    val topMargin = readerPreferences.topMargin().asState()
-    val leftMargin = readerPreferences.leftMargin().asState()
-    val rightMargin = readerPreferences.rightMargin().asState()
-    val bottomMargin = readerPreferences.bottomMargin().asState()
+    val paragraphsIndent = readerPreferences.paragraphIndent().asStateDebounced()
+    val distanceBetweenParagraphs = readerPreferences.paragraphDistance().asStateDebounced()
+    val topContentPadding = readerPreferences.topContentPadding().asStateDebounced()
+    val bottomContentPadding = readerPreferences.bottomContentPadding().asStateDebounced()
+    val topMargin = readerPreferences.topMargin().asStateDebounced()
+    val leftMargin = readerPreferences.leftMargin().asStateDebounced()
+    val rightMargin = readerPreferences.rightMargin().asStateDebounced()
+    val bottomMargin = readerPreferences.bottomMargin().asStateDebounced()
     
     // Screen settings
     val screenAlwaysOn = readerPreferences.screenAlwaysOn().asState()
     val immersiveMode = readerPreferences.immersiveMode().asState()
     val orientation = androidUiPreferences.orientation().asState()
     
-    // Scroll settings
+    // Scroll settings - debounced for slider controls
     val showScrollIndicator = readerPreferences.showScrollIndicator().asState()
-    val scrollIndicatorWith = readerPreferences.scrollIndicatorWith().asState()
-    val scrollIndicatorPadding = readerPreferences.scrollIndicatorPadding().asState()
+    val scrollIndicatorWith = readerPreferences.scrollIndicatorWith().asStateDebounced()
+    val scrollIndicatorPadding = readerPreferences.scrollIndicatorPadding().asStateDebounced()
     val scrollIndicatorAlignment = readerPreferences.scrollBarAlignment().asState()
     val isScrollIndicatorDraggable = readerPreferences.scrollbarMode().asState()
     val selectedScrollBarColor = androidUiPreferences.selectedScrollBarColor().asState()
@@ -112,9 +112,9 @@ class ReaderSettingsViewModel(
     val selectableMode = readerPreferences.selectableText().asState()
     val bionicReadingMode = readerPreferences.bionicReading().asState()
     
-    // Auto-scroll settings
-    val autoScrollOffset = readerPreferences.autoScrollOffset().asState()
-    val autoScrollInterval = readerPreferences.autoScrollInterval().asState()
+    // Auto-scroll settings - debounced for slider controls
+    val autoScrollOffset = readerPreferences.autoScrollOffset().asStateDebounced()
+    val autoScrollInterval = readerPreferences.autoScrollInterval().asStateDebounced()
     var autoScrollMode by mutableStateOf(false)
     
     // WebView settings

@@ -298,22 +298,17 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsLong = vm.autoScrollInterval,
                 title = localizeHelper.localize(Res.string.interval),
-                trailing = (vm.autoScrollInterval.value / 1000).toInt().toString(),
-                valueRange = 500.0F..10000.0F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = (vm.autoScrollInterval.lazyValue / 1000).toInt().toString(),
+                valueRange = 500.0F..10000.0F
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.autoScrollOffset,
                 title = localizeHelper.localize(Res.string.offset),
-                trailing = (vm.autoScrollOffset.value / 100).toInt().toString(),
-                valueRange = 1.0F..8F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = (vm.autoScrollOffset.lazyValue / 100).toInt().toString(),
+                valueRange = 1.0F..8F
             ).Build()
-
         }
         item {
             Components.Header(
@@ -324,20 +319,16 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.scrollIndicatorPadding,
                 title = localizeHelper.localize(Res.string.padding),
-                trailing = vm.scrollIndicatorPadding.value.toString(),
-                valueRange = 0F..32F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.scrollIndicatorPadding.lazyValue.toString(),
+                valueRange = 0F..32F
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.scrollIndicatorWith,
                 title = localizeHelper.localize(Res.string.width),
-                trailing = vm.scrollIndicatorWith.value.toString(),
-                valueRange = 0F..32F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.scrollIndicatorWith.lazyValue.toString(),
+                valueRange = 0F..32F
             ).Build()
         }
         item {
@@ -367,40 +358,32 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.topMargin,
                 title = localizeHelper.localize(Res.string.top),
-                trailing = vm.topMargin.value.toString(),
-                valueRange = 0F..200F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.topMargin.lazyValue.toString(),
+                valueRange = 0F..200F
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.bottomMargin,
                 title = localizeHelper.localize(Res.string.bottom),
-                trailing = vm.bottomMargin.value.toString(),
-                valueRange = 0F..200F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.bottomMargin.lazyValue.toString(),
+                valueRange = 0F..200F
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.leftMargin,
                 title = localizeHelper.localize(Res.string.left),
-                trailing = vm.leftMargin.value.toString(),
-                valueRange = 0F..200F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.leftMargin.lazyValue.toString(),
+                valueRange = 0F..200F
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.rightMargin,
                 title = localizeHelper.localize(Res.string.right),
-                trailing = vm.rightMargin.value.toString(),
-                valueRange = 0F..200F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.rightMargin.lazyValue.toString(),
+                valueRange = 0F..200F
             ).Build()
         }
         item {
@@ -412,30 +395,24 @@ fun ReaderScreenTab(
             Components.Slider(
                 preferenceAsInt = vm.topContentPadding,
                 title = localizeHelper.localize(Res.string.top),
-                trailing = vm.topContentPadding.value.toString(),
-                valueRange = 0F..32F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.topContentPadding.lazyValue.toString(),
+                valueRange = 0F..32F
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.bottomContentPadding,
                 title = localizeHelper.localize(Res.string.bottom),
-                trailing = vm.bottomContentPadding.value.toString(),
-                valueRange = 0F..32F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.bottomContentPadding.lazyValue.toString(),
+                valueRange = 0F..32F
             ).Build()
         }
         item {
             Components.Slider(
                 preferenceAsInt = vm.betweenLetterSpaces,
                 title = localizeHelper.localize(Res.string.letter),
-                trailing = vm.betweenLetterSpaces.value.toString(),
-                valueRange = 0F..32F,onValueChange = {
-                    vm.makeSettingTransparent()
-                }
+                trailing = vm.betweenLetterSpaces.lazyValue.toString(),
+                valueRange = 0F..32F
             ).Build()
         }
         item {

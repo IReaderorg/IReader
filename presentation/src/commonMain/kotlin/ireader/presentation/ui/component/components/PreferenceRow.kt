@@ -484,6 +484,7 @@ fun SliderPreference(
         Spacer(modifier = Modifier.height(8.dp))
         
         // Slider with enhanced visual feedback
+        // Uses lazyValue for immediate UI updates, commits on drag end for persistence
         Slider(
             modifier = Modifier
                 .fillMaxWidth()
@@ -492,6 +493,7 @@ fun SliderPreference(
                 ?: preferenceAsLong?.lazyValue?.toFloat() ?: mutablePreferences?.value ?: 0F,
             onValueChange = {
                 isInteracting = true
+                // Update lazy value for immediate UI feedback (debounced persistence)
                 preferenceAsFloat?.lazyValue = it
                 preferenceAsInt?.lazyValue = it.toInt()
                 preferenceAsLong?.lazyValue = it.toLong()
@@ -501,11 +503,16 @@ fun SliderPreference(
             valueRange = valueRange,
             onValueChangeFinished = {
                 isInteracting = false
+                // Commit lazy values to ensure persistence when drag ends
+                preferenceAsFloat?.commitLazyValue()
+                preferenceAsInt?.commitLazyValue()
+                preferenceAsLong?.commitLazyValue()
+                
                 if (onValueChangeFinished != null) {
                     onValueChangeFinished(
-                        preferenceAsFloat?.value?.toFloat()
-                            ?: preferenceAsInt?.value?.toFloat()
-                            ?: preferenceAsLong?.value?.toFloat()
+                        preferenceAsFloat?.lazyValue
+                            ?: preferenceAsInt?.lazyValue?.toFloat()
+                            ?: preferenceAsLong?.lazyValue?.toFloat()
                             ?: mutablePreferences?.value ?: 0F
                     )
                 }

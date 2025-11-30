@@ -303,14 +303,9 @@ private fun ReadingScreenContent(
                             .padding(if (vm.immersiveMode.value) PaddingValues() else paddingValues)
                             .fillMaxWidth(),
                         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                        sheetBackgroundColor = if(vm.isSettingChanging) 
-                            MaterialTheme.colorScheme.Transparent.copy(0f) 
-                        else 
-                            MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
-                        sheetContentColor = if(vm.isSettingChanging) 
-                            MaterialTheme.colorScheme.Transparent.copy(0f) 
-                        else 
-                            MaterialTheme.colorScheme.onSurface,
+                        // Removed transparency hack - performance is now optimized via debounced preferences
+                        sheetBackgroundColor = MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
+                        sheetContentColor = MaterialTheme.colorScheme.onSurface,
                         scrimColor = Color.Black.copy(alpha = 0.32f),
                         sheetElevation = 8.dp,
                         sheetState = modalBottomSheetState,

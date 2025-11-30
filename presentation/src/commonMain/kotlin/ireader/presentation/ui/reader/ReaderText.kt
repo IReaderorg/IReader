@@ -135,12 +135,13 @@ fun ReaderText(
             remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
 
 
+        // Use lazyValue for immediate UI updates during slider drag
         Box(
             modifier = Modifier.padding(
-                top = vm.topMargin.value.dp,
-                bottom = vm.bottomMargin.value.dp,
-                start = vm.leftMargin.value.dp,
-                end = vm.rightMargin.value.dp
+                top = vm.topMargin.lazyValue.dp,
+                bottom = vm.bottomMargin.lazyValue.dp,
+                start = vm.leftMargin.lazyValue.dp,
+                end = vm.rightMargin.lazyValue.dp
             )
         ) {
             MultiSwipeRefresh(
@@ -297,31 +298,38 @@ private fun PagedReaderText(
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
-
+        // Use lazyValue for immediate UI updates during slider drag
         IColumnScrollbar(
             state = scrollState,
-            padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
-            thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
+            padding = if (vm.scrollIndicatorPadding.lazyValue < 0) 0.dp else vm.scrollIndicatorPadding.lazyValue.dp,
+            thickness = if (vm.scrollIndicatorWith.lazyValue < 0) 0.dp else vm.scrollIndicatorWith.lazyValue.dp,
             enabled = vm.showScrollIndicator.value,
             thumbColor = vm.unselectedScrollBarColor.value.toComposeColor(),
             thumbSelectedColor = vm.selectedScrollBarColor.value.toComposeColor(),
             selectionMode = vm.isScrollIndicatorDraggable.value,
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right
         ) {
+            // Memoize content to prevent unnecessary recomposition
+            val content = remember(vm.stateChapter?.id, vm.translationViewModel.translationState.hasTranslation) {
+                vm.getCurrentContent()
+            }
+            
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(top = 32.dp)
-
             ) {
-                vm.getCurrentContent().forEachIndexed { index, text ->
-                    MainText(
-                        modifier = modifier,
-                        index = index,
-                        page = text,
-                        vm = vm
-                    )
+                content.forEachIndexed { index, text ->
+                    // Use key to help Compose identify items and skip unchanged ones
+                    androidx.compose.runtime.key(index, text) {
+                        MainText(
+                            modifier = modifier,
+                            index = index,
+                            page = text,
+                            vm = vm
+                        )
+                    }
                 }
             }
         }
@@ -335,44 +343,89 @@ private fun MainText(
     page: Page,
     vm: ReaderScreenViewModel
 ) {
-val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val context = LocalPlatformContext.current
-    when (page) {
-        is Text -> {
-            StyleText(modifier, vm, index, page, vm.bionicReadingMode.value)
-        }
-        is ImageUrl -> {
-            val isLoading = remember {
-                mutableStateOf(false)
-
+    
+    // Use key to prevent unnecessary recomposition when only index changes
+    androidx.compose.runtime.key(page) {
+        when (page) {
+            is Text -> {
+                // Memoize text styling parameters to prevent recomposition on unrelated changes
+                val textStyleParams = remember(
+                    vm.fontSize.lazyValue,
+                    vm.lineHeight.lazyValue,
+                    vm.betweenLetterSpaces.lazyValue,
+                    vm.textWeight.lazyValue,
+                    vm.paragraphsIndent.lazyValue,
+                    vm.textAlignment.value,
+                    vm.textColor.value,
+                    vm.font?.value,
+                    vm.fontVersion
+                ) {
+                    TextStyleParams(
+                        fontSize = vm.fontSize.lazyValue,
+                        lineHeight = vm.lineHeight.lazyValue,
+                        letterSpacing = vm.betweenLetterSpaces.lazyValue,
+                        fontWeight = vm.textWeight.lazyValue,
+                        paragraphIndent = vm.paragraphsIndent.lazyValue,
+                        textAlignment = vm.textAlignment.value,
+                        textColor = vm.textColor.value.toComposeColor(),
+                        fontFamily = vm.font?.value?.fontFamily?.toComposeFontFamily()
+                    )
+                }
+                StyleTextOptimized(modifier, vm, index, page, vm.bionicReadingMode.value, textStyleParams)
             }
-            Box(contentAlignment = Alignment.Center) {
-                IImageLoader(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredHeight(500.dp),
-                    model = ImageRequest.Builder(context=context).data(page.url.toUri()).diskCachePolicy(CachePolicy.DISABLED).build(),
-                    contentDescription = localizeHelper.localize(Res.string.image),
-                    contentScale = ContentScale.FillWidth,
-                    onLoading = {
-                        isLoading.value = true
-                    },
-                    onError = {
-                        isLoading.value = false
-                    },
-                    onSuccess = {
-                        isLoading.value = false
-                    },
-                )
-                if (isLoading.value) {
-                    androidx.compose.material3.CircularProgressIndicator()
+            is ImageUrl -> {
+                val isLoading = remember { mutableStateOf(false) }
+                Box(contentAlignment = Alignment.Center) {
+                    IImageLoader(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .requiredHeight(500.dp),
+                        model = ImageRequest.Builder(context=context).data(page.url.toUri()).diskCachePolicy(CachePolicy.DISABLED).build(),
+                        contentDescription = localizeHelper.localize(Res.string.image),
+                        contentScale = ContentScale.FillWidth,
+                        onLoading = { isLoading.value = true },
+                        onError = { isLoading.value = false },
+                        onSuccess = { isLoading.value = false },
+                    )
+                    if (isLoading.value) {
+                        androidx.compose.material3.CircularProgressIndicator()
+                    }
                 }
             }
+            else -> {}
         }
+    }
+}
 
-        else -> {
-        }
+/**
+ * Data class to hold text styling parameters for memoization.
+ * This prevents recomposition when unrelated ViewModel properties change.
+ * Marked as @Stable to help Compose skip recomposition when values are equal.
+ */
+@androidx.compose.runtime.Stable
+private data class TextStyleParams(
+    val fontSize: Int,
+    val lineHeight: Int,
+    val letterSpacing: Int,
+    val fontWeight: Int,
+    val paragraphIndent: Int,
+    val textAlignment: PreferenceValues.PreferenceTextAlignment,
+    val textColor: Color,
+    val fontFamily: androidx.compose.ui.text.font.FontFamily?
+) {
+    // Pre-compute TextStyle to avoid creating new objects during recomposition
+    val textStyle: androidx.compose.ui.text.TextStyle by lazy {
+        androidx.compose.ui.text.TextStyle(
+            fontSize = fontSize.sp,
+            lineHeight = lineHeight.sp,
+            letterSpacing = letterSpacing.sp,
+            fontWeight = FontWeight(fontWeight),
+            fontFamily = fontFamily,
+            color = textColor,
+            textAlign = mapTextAlign(textAlignment).toComposeTextAlign()
+        )
     }
 }
 
@@ -394,9 +447,9 @@ private fun StyleText(
         text = page.text,
         index = index,
         isLast = isLastIndex,
-        topContentPadding = vm.topContentPadding.value,
-        contentPadding = vm.distanceBetweenParagraphs.value,
-        bottomContentPadding = vm.bottomContentPadding.value
+        topContentPadding = vm.topContentPadding.lazyValue,
+        contentPadding = vm.distanceBetweenParagraphs.lazyValue,
+        bottomContentPadding = vm.bottomContentPadding.lazyValue
     )
     
     // Check if bilingual mode is enabled and we have a translation for this paragraph
@@ -417,17 +470,17 @@ private fun StyleText(
             mode = bilingualMode,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = vm.paragraphsIndent.value.dp),
-            fontSize = vm.fontSize.value.sp,
+                .padding(horizontal = vm.paragraphsIndent.lazyValue.dp),
+            fontSize = vm.fontSize.lazyValue.sp,
             fontFamily = remember(vm.font?.value, vm.fontVersion) { 
                 vm.font?.value?.fontFamily?.toComposeFontFamily() 
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             originalColor = vm.textColor.value.toComposeColor(),
             translatedColor = vm.textColor.value.toComposeColor().copy(alpha = 0.9f),
-            lineHeight = vm.lineHeight.value.sp,
-            letterSpacing = vm.betweenLetterSpaces.value.sp,
-            fontWeight = FontWeight(vm.textWeight.value)
+            lineHeight = vm.lineHeight.lazyValue.sp,
+            letterSpacing = vm.betweenLetterSpaces.lazyValue.sp,
+            fontWeight = FontWeight(vm.textWeight.lazyValue)
         )
     } else if (enableBioReading) {
         Text(
@@ -464,16 +517,16 @@ private fun StyleText(
             },
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = vm.paragraphsIndent.value.dp),
-            fontSize = vm.fontSize.value.sp,
+                .padding(horizontal = vm.paragraphsIndent.lazyValue.dp),
+            fontSize = vm.fontSize.lazyValue.sp,
             fontFamily = remember(vm.font?.value, vm.fontVersion) { 
                 vm.font?.value?.fontFamily?.toComposeFontFamily() 
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             color = vm.textColor.value.toComposeColor(),
-            lineHeight = vm.lineHeight.value.sp,
-            letterSpacing = vm.betweenLetterSpaces.value.sp,
-            fontWeight = FontWeight(vm.textWeight.value),
+            lineHeight = vm.lineHeight.lazyValue.sp,
+            letterSpacing = vm.betweenLetterSpaces.lazyValue.sp,
+            fontWeight = FontWeight(vm.textWeight.lazyValue),
         )
     } else {
         // Normal text rendering
@@ -481,16 +534,16 @@ private fun StyleText(
             text = originalText,
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = vm.paragraphsIndent.value.dp),
-            fontSize = vm.fontSize.value.sp,
+                .padding(horizontal = vm.paragraphsIndent.lazyValue.dp),
+            fontSize = vm.fontSize.lazyValue.sp,
             fontFamily = remember(vm.font?.value, vm.fontVersion) { 
                 vm.font?.value?.fontFamily?.toComposeFontFamily() 
             },
             textAlign = mapTextAlign(vm.textAlignment.value).toComposeTextAlign(),
             color = vm.textColor.value.toComposeColor(),
-            lineHeight = vm.lineHeight.value.sp,
-            letterSpacing = vm.betweenLetterSpaces.value.sp,
-            fontWeight = FontWeight(vm.textWeight.value),
+            lineHeight = vm.lineHeight.lazyValue.sp,
+            letterSpacing = vm.betweenLetterSpaces.lazyValue.sp,
+            fontWeight = FontWeight(vm.textWeight.lazyValue),
             selectable = vm.selectableMode.value,
             paragraphTranslationEnabled = vm.paragraphTranslationEnabled.value,
             onTranslateRequest = { selectedText ->
@@ -499,6 +552,128 @@ private fun StyleText(
         )
     }
 
+}
+
+/**
+ * Optimized StyleText that uses pre-computed TextStyleParams to minimize recomposition.
+ */
+@Composable
+private fun StyleTextOptimized(
+    modifier: Modifier,
+    vm: ReaderScreenViewModel,
+    index: Int,
+    page: Text,
+    enableBioReading: Boolean,
+    styleParams: TextStyleParams
+) {
+    // Cache the content to avoid race conditions from multiple getCurrentContent() calls
+    val currentContent = remember(vm.stateChapter?.id, vm.translationViewModel.translationState.hasTranslation) {
+        vm.getCurrentContent()
+    }
+    val isLastIndex = index == currentContent.lastIndex
+    
+    // Use lazyValue for immediate UI updates during slider drag
+    val originalText = remember(
+        page.text, 
+        index, 
+        isLastIndex, 
+        vm.topContentPadding.lazyValue,
+        vm.distanceBetweenParagraphs.lazyValue,
+        vm.bottomContentPadding.lazyValue
+    ) {
+        setText(
+            text = page.text,
+            index = index,
+            isLast = isLastIndex,
+            topContentPadding = vm.topContentPadding.lazyValue,
+            contentPadding = vm.distanceBetweenParagraphs.lazyValue,
+            bottomContentPadding = vm.bottomContentPadding.lazyValue
+        )
+    }
+    
+    // Check if bilingual mode is enabled and we have a translation for this paragraph
+    val bilingualModeEnabled = vm.bilingualModeEnabled.value
+    val translatedText = vm.getTranslationForParagraph(index)
+    
+    if (bilingualModeEnabled && translatedText != null) {
+        // Display bilingual text
+        val bilingualMode = if (vm.bilingualModeLayout.value == 0) {
+            ireader.presentation.ui.reader.components.BilingualMode.SIDE_BY_SIDE
+        } else {
+            ireader.presentation.ui.reader.components.BilingualMode.PARAGRAPH_BY_PARAGRAPH
+        }
+        
+        ireader.presentation.ui.reader.components.BilingualText(
+            originalText = originalText,
+            translatedText = translatedText,
+            mode = bilingualMode,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = styleParams.paragraphIndent.dp),
+            fontSize = styleParams.fontSize.sp,
+            fontFamily = styleParams.fontFamily,
+            textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
+            originalColor = styleParams.textColor,
+            translatedColor = styleParams.textColor.copy(alpha = 0.9f),
+            lineHeight = styleParams.lineHeight.sp,
+            letterSpacing = styleParams.letterSpacing.sp,
+            fontWeight = FontWeight(styleParams.fontWeight)
+        )
+    } else if (enableBioReading) {
+        // Memoize the annotated string to avoid rebuilding on every recomposition
+        val bionicText = remember(originalText, styleParams.fontWeight) {
+            buildAnnotatedString {
+                originalText.split(" ").forEach { s ->
+                    s.forEachIndexed { charIndex, c ->
+                        if (charIndex <= (s.length / 2)) {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
+                                append(c)
+                            }
+                        } else {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Light)) {
+                                append(c)
+                            }
+                        }
+                    }
+                    append(" ")
+                }
+            }
+        }
+        
+        Text(
+            text = bionicText,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = styleParams.paragraphIndent.dp),
+            fontSize = styleParams.fontSize.sp,
+            fontFamily = styleParams.fontFamily,
+            textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
+            color = styleParams.textColor,
+            lineHeight = styleParams.lineHeight.sp,
+            letterSpacing = styleParams.letterSpacing.sp,
+            fontWeight = FontWeight(styleParams.fontWeight),
+        )
+    } else {
+        // Normal text rendering with optimized parameters
+        SelectableTranslatableText(
+            text = originalText,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = styleParams.paragraphIndent.dp),
+            fontSize = styleParams.fontSize.sp,
+            fontFamily = styleParams.fontFamily,
+            textAlign = mapTextAlign(styleParams.textAlignment).toComposeTextAlign(),
+            color = styleParams.textColor,
+            lineHeight = styleParams.lineHeight.sp,
+            letterSpacing = styleParams.letterSpacing.sp,
+            fontWeight = FontWeight(styleParams.fontWeight),
+            selectable = vm.selectableMode.value,
+            paragraphTranslationEnabled = vm.paragraphTranslationEnabled.value,
+            onTranslateRequest = { selectedText ->
+                vm.showParagraphTranslation(selectedText)
+            }
+        )
+    }
 }
 @Composable
 private fun ContinuesReaderPage(
@@ -592,17 +767,17 @@ private fun ContinuesReaderPage(
         }
     }
 
+    // Use lazyValue for immediate UI updates during slider drag
     ILazyColumnScrollbar(
         listState = scrollState,
-        padding = if (vm.scrollIndicatorPadding.value < 0) 0.dp else vm.scrollIndicatorPadding.value.dp,
-        thickness = if (vm.scrollIndicatorWith.value < 0) 0.dp else vm.scrollIndicatorWith.value.dp,
+        padding = if (vm.scrollIndicatorPadding.lazyValue < 0) 0.dp else vm.scrollIndicatorPadding.lazyValue.dp,
+        thickness = if (vm.scrollIndicatorWith.lazyValue < 0) 0.dp else vm.scrollIndicatorWith.lazyValue.dp,
         enable = vm.showScrollIndicator.value,
         thumbColor = vm.unselectedScrollBarColor.value.toComposeColor(),
         thumbSelectedColor = vm.selectedScrollBarColor.value.toComposeColor(),
         selectionMode = vm.isScrollIndicatorDraggable.value,
         rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right,
     ) {
-
         LazyColumn(
             modifier = modifier.fillMaxSize(),
             state = scrollState,
@@ -610,6 +785,7 @@ private fun ContinuesReaderPage(
             items(
                 count = items.size,
                 key = { index ->
+                    // Stable key for better item reuse
                     "$index-${items[index].first}"
                 }
             ) { index ->

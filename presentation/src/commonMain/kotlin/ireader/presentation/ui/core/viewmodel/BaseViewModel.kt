@@ -45,6 +45,15 @@ abstract class BaseViewModel : ViewModel() {
    open fun onDestroy() {
   }
    fun <T> Preference<T>.asState() = PreferenceMutableState(this, scope)
+   
+   /**
+    * Creates a debounced PreferenceMutableState for slider-like controls.
+    * Updates UI immediately but delays persistence to avoid excessive writes.
+    * @param debounceMs Delay before persisting changes (default: 150ms)
+    */
+   fun <T> Preference<T>.asStateDebounced(debounceMs: Long = 150L) = 
+       PreferenceMutableState(this, scope, debounceMs)
+   
    fun <T> Preference<T>.asState(onChange: (T) -> Unit): PreferenceMutableState<T> {
     this.changes()
             .onEach { onChange(it) }
