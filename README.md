@@ -7,7 +7,7 @@
 
 **A free and open-source novel reader for Android and Desktop**
 
-[Download](https://github.com/IReaderorg/IReader/releases) • [Documentation](docs/README.md)
+[Download](https://github.com/IReaderorg/IReader/releases) • [Documentation](docs/README.md) • [中文](README_zh.md)
 
 </div>
 
