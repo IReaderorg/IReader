@@ -28,7 +28,8 @@ fun IBookImageComposable(
         modifier: Modifier = Modifier,
         alignment: Alignment = Alignment.Center,
         contentScale: ContentScale = ContentScale.Crop,
-        headers: ((url: String) -> okhttp3.Headers?)? = null
+        headers: ((url: String) -> okhttp3.Headers?)? = null,
+        crossfadeDurationMs: Int = 200
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     IImageLoader(
@@ -37,6 +38,7 @@ fun IBookImageComposable(
             model =  image.cover?.toUri(), // coil3 only supports Uri data type right now
             contentDescription = localizeHelper.localize(Res.string.an_image),
             alignment = alignment,
+            crossfadeDurationMs = crossfadeDurationMs,
     )
 }
 enum class BookImageCover(val ratio: Float) {

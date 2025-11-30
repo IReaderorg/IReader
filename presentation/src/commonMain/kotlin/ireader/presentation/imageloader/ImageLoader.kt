@@ -34,7 +34,10 @@ import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.size.Size
 import ireader.core.log.Log
+import ireader.presentation.ui.component.LocalPerformanceConfig
+import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.components.LoadingScreen
 import kotlin.time.measureTime
 
@@ -85,6 +88,7 @@ fun IImageLoader(
     animationSpec: FiniteAnimationSpec<Float>? = tween(),
     enableMemoryCache: Boolean = true,
     enableDiskCache: Boolean = true,
+    crossfadeDurationMs: Int = 200,
 ) = ImageLoaderImage(
     data = model ?: "",
     contentDescription = contentDescription,
@@ -102,7 +106,8 @@ fun IImageLoader(
     animationSpec = animationSpec,
     enableMemoryCache = enableMemoryCache,
     enableDiskCache = enableDiskCache,
-    placeholder = placeholder
+    placeholder = placeholder,
+    crossfadeDurationMs = crossfadeDurationMs
 )
 
 private enum class ImageLoaderImageState {
@@ -148,24 +153,42 @@ fun ImageLoaderImage(
     enableMemoryCache: Boolean = true,
     enableDiskCache: Boolean = true,
     placeholder: ColorPainter? = null,
+    crossfadeDurationMs: Int = 200,
 ) {
+    // Get performance config for size optimization
+    val performanceConfig = LocalPerformanceConfig.current
+    
     Box(modifier.fillMaxSize(), contentAlignment) {
         key(data) {
             val context = LocalPlatformContext.current
             val loadStartTime = remember { System.currentTimeMillis() }
             
-            val request = remember(data, enableMemoryCache, enableDiskCache) {
+            val request = remember(data, enableMemoryCache, enableDiskCache, crossfadeDurationMs, performanceConfig) {
                 when (data) {
                     is ImageRequest -> data.newBuilder()
                         .memoryCachePolicy(if (enableMemoryCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
                         .diskCachePolicy(if (enableDiskCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
-                        .crossfade(300) // Smooth transition
+                        .crossfade(crossfadeDurationMs) // Configurable transition duration
+                        .apply {
+                            // Limit image size on low-end devices to reduce memory usage
+                            if (!performanceConfig.enableComplexAnimations) {
+                                // Low-end: limit to 512px max dimension
+                                size(Size(512, 512))
+                            }
+                        }
                         .build()
                     else -> ImageRequest.Builder(context = context)
                         .data(data)
                         .memoryCachePolicy(if (enableMemoryCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
                         .diskCachePolicy(if (enableDiskCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
-                        .crossfade(300) // Smooth transition
+                        .crossfade(crossfadeDurationMs) // Configurable transition duration
+                        .apply {
+                            // Limit image size on low-end devices to reduce memory usage
+                            if (!performanceConfig.enableComplexAnimations) {
+                                // Low-end: limit to 512px max dimension
+                                size(Size(512, 512))
+                            }
+                        }
                         .build()
                 }
             }

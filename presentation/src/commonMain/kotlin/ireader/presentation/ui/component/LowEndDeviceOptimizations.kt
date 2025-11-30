@@ -5,12 +5,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.graphicsLayer
 
 /**
@@ -144,8 +145,8 @@ fun rememberIsGridScrollingFast(
 @Composable
 inline fun <T> rememberScrollAwareContent(
     isScrollingFast: Boolean,
-    crossinline placeholder: @Composable () -> T,
-    crossinline content: @Composable () -> T
+    noinline placeholder: @Composable () -> T,
+    noinline content: @Composable () -> T
 ): @Composable () -> T {
     return remember(isScrollingFast) {
         if (isScrollingFast) placeholder else content
@@ -170,6 +171,24 @@ fun rememberVisibleItemRange(
         }
     }
     return visibleRange
+}
+
+/**
+ * CompositionLocal for providing PerformanceConfig throughout the app
+ */
+val LocalPerformanceConfig = compositionLocalOf { PerformanceConfig.Default }
+
+/**
+ * Provides PerformanceConfig to the composition tree
+ */
+@Composable
+fun PerformanceConfigProvider(
+    config: PerformanceConfig,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(LocalPerformanceConfig provides config) {
+        content()
+    }
 }
 
 /**

@@ -20,7 +20,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.BookCover
 import ireader.domain.models.entities.BaseBook
+import ireader.presentation.ui.component.LocalPerformanceConfig
+import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.components.IBookImageComposable
+import ireader.presentation.ui.component.optimizedForList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -33,7 +36,9 @@ fun BookImage(
     selected: Boolean = false,
     header: ((url: String) -> okhttp3.Headers?)? = null,
     onlyCover: Boolean = false,
-    comfortableMode:Boolean =false,
+    comfortableMode: Boolean = false,
+    isScrollingFast: Boolean = false,
+    performanceConfig: PerformanceConfig = LocalPerformanceConfig.current,
     badge: @Composable BoxScope.() -> Unit,
 ) {
     Column(
@@ -44,6 +49,8 @@ fun BookImage(
             modifier = modifier
                 .fillMaxSize()
                 .padding(2.dp)
+                // Apply layer promotion for better scroll performance
+                .optimizedForList(enableLayerPromotion = performanceConfig.enableComplexAnimations)
                 .combinedClickable(
                     onClick = { onClick(book) },
                     onLongClick = { onLongClick(book) }
@@ -55,17 +62,31 @@ fun BookImage(
                     )
                 ),
         ) {
-            IBookImageComposable(
-                modifier = Modifier
-                    .aspectRatio(ratio)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(4.dp))
-                    .align(Alignment.Center),
-                image = BookCover.from(book),
-                headers = header,
-                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                alignment = Alignment.Center
-            )
+            // During fast scrolling, show a placeholder instead of loading images
+            if (!isScrollingFast) {
+                IBookImageComposable(
+                    modifier = Modifier
+                        .aspectRatio(ratio)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(4.dp))
+                        .align(Alignment.Center),
+                    image = BookCover.from(book),
+                    headers = header,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    alignment = Alignment.Center,
+                    crossfadeDurationMs = performanceConfig.crossfadeDurationMs
+                )
+            } else {
+                // Simple placeholder during fast scroll
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(ratio)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(4.dp))
+                        .align(Alignment.Center)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                )
+            }
             if (!onlyCover) {
                 Box(
                     Modifier

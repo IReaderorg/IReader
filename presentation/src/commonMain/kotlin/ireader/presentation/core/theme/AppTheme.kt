@@ -6,6 +6,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.i18n.LocalizeHelper
+import ireader.presentation.ui.component.LocalPerformanceConfig
+import ireader.presentation.ui.component.PerformanceConfig
+import ireader.presentation.ui.component.rememberPlatformPerformanceConfig
 import ireader.presentation.ui.core.theme.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.core.toComposeColor
@@ -97,6 +100,9 @@ fun AppTheme(
         }
     }
 
+    // Get performance config - uses platform-specific detection when available
+    val performanceConfig = rememberPlatformPerformanceConfig()
+    
     AppColors(
         materialColors = materialColors,
         extraColors = customColors,
@@ -106,6 +112,7 @@ fun AppTheme(
         CompositionLocalProvider(
             LocalLocalizeHelper provides mainLocalizeHelper,
             LocalGlobalCoroutineScope provides scope,
+            LocalPerformanceConfig provides performanceConfig,
             content = content
         )
     }

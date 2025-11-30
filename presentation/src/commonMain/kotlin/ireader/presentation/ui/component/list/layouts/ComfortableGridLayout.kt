@@ -20,7 +20,9 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
+import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
+import ireader.presentation.ui.component.rememberIsGridScrollingFast
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 @OptIn(ExperimentalFoundationApi::class)
@@ -52,6 +54,11 @@ fun ComfortableGridLayout(
     } else {
         GridCells.Adaptive(130.dp)
     }
+    
+    // Performance optimization: track fast scrolling to defer expensive operations
+    val performanceConfig = LocalPerformanceConfig.current
+    val isScrollingFast = rememberIsGridScrollingFast(scrollState)
+    
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
             state = scrollState,
@@ -78,6 +85,8 @@ fun ComfortableGridLayout(
                         onlyCover = true,
                         comfortableMode = true,
                         onLongClick = { onLongClick(book) },
+                        isScrollingFast = isScrollingFast,
+                        performanceConfig = performanceConfig,
                     ) {
 
                         if (showGoToLastChapterBadge) {

@@ -1,6 +1,7 @@
 package ireader.presentation.ui.component.list.layouts
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +21,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.BookCover
 import ireader.domain.models.entities.BookItem
+import ireader.presentation.ui.component.LocalPerformanceConfig
+import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.components.IBookImageComposable
+import ireader.presentation.ui.component.optimizedForList
+import ireader.presentation.ui.component.rememberIsScrollingFast
 
 @Composable
 fun LinearBookItem(
@@ -29,12 +34,14 @@ fun LinearBookItem(
     selected: Boolean = false,
     book: BookItem,
     headers: ((url: String) -> okhttp3.Headers?)? = null,
-
-    ) {
+    isScrollingFast: Boolean = false,
+    performanceConfig: PerformanceConfig = LocalPerformanceConfig.current,
+) {
 
     Box(
         modifier = modifier
-            .padding(vertical = 8.dp, horizontal = 8.dp),
+            .padding(vertical = 8.dp, horizontal = 8.dp)
+            .optimizedForList(enableLayerPromotion = performanceConfig.enableComplexAnimations),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -43,21 +50,39 @@ fun LinearBookItem(
                 .height(80.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Book cover thumbnail
-            IBookImageComposable(
-                image = BookCover.from(book),
-                modifier = Modifier
-                    .width(48.dp)
-                    .height(64.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .border(
-                        .2.dp,
-                        if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .5f) else MaterialTheme.colorScheme.onBackground.copy(
-                            alpha = .1f
+            // Book cover thumbnail - show placeholder during fast scroll
+            if (!isScrollingFast) {
+                IBookImageComposable(
+                    image = BookCover.from(book),
+                    modifier = Modifier
+                        .width(48.dp)
+                        .height(64.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .border(
+                            .2.dp,
+                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .5f) else MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = .1f
+                            )
+                        ),
+                    headers = headers,
+                    crossfadeDurationMs = performanceConfig.crossfadeDurationMs
+                )
+            } else {
+                // Simple placeholder during fast scroll
+                Box(
+                    modifier = Modifier
+                        .width(48.dp)
+                        .height(64.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(
+                            .2.dp,
+                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .5f) else MaterialTheme.colorScheme.onBackground.copy(
+                                alpha = .1f
+                            )
                         )
-                    ),
-                headers = headers
-            )
+                )
+            }
             
             Spacer(modifier = Modifier.width(12.dp))
             
@@ -123,6 +148,10 @@ fun LinearListDisplay(
     headers: ((url: String) -> okhttp3.Headers?)? = null,
     keys: ((item: BookItem) -> Any)
 ) {
+    // Performance optimization: track fast scrolling to defer expensive operations
+    val performanceConfig = LocalPerformanceConfig.current
+    val isScrollingFast = rememberIsScrollingFast(scrollState)
+    
     LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
         items(
             items = books, key = keys,
@@ -136,7 +165,9 @@ fun LinearListDisplay(
                     onLongClick = { onClick(book) },
                 ).animateItem(),
                 selected = book.id in selection,
-                headers = headers
+                headers = headers,
+                isScrollingFast = isScrollingFast,
+                performanceConfig = performanceConfig
             )
         }
         item {

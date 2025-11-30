@@ -1,7 +1,7 @@
 package org.ireader.benchmark
 
+import androidx.benchmark.macro.BaselineProfileMode
 import androidx.benchmark.macro.CompilationMode
-import androidx.benchmark.macro.ExperimentalMacrobenchmarkApi
 import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
@@ -15,13 +15,12 @@ import org.junit.runner.RunWith
 
 /**
  * Startup Benchmark for IReader.
- * Measures app startup time under different compilation modes.
+ * Measures app startup time under different startup modes.
  * 
- * Note: Some compilation modes (None, Full) require ProfileInstaller receiver
- * to be properly configured. If you see DROP_SHADER_CACHE errors, ensure:
- * 1. profileinstaller library is version 1.3.0+ 
- * 2. ProfileInstallReceiver is declared in AndroidManifest
- * 3. The app is reinstalled after manifest changes
+ * Note: This benchmark uses CompilationMode.DEFAULT to avoid ProfileInstaller
+ * broadcast issues on devices with aggressive battery optimization (e.g., Huawei/EMUI).
+ * 
+ * For accurate compilation mode comparisons, use a Pixel device or emulator.
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -31,40 +30,41 @@ class StartupBenchmark {
     val rule = MacrobenchmarkRule()
 
     /**
-     * Startup without any compilation - worst case scenario.
-     * Uses Ignore compilation mode as fallback if None() fails due to ProfileInstaller issues.
+     * Cold startup - app process is killed before each iteration.
+     * This is the most important metric for user-perceived startup time.
      */
-    @OptIn(ExperimentalMacrobenchmarkApi::class)
     @Test
-    fun startupNoCompilation() {
-        measureStartup(CompilationMode.Ignore())
+    fun startupCold() {
+        measureStartup(StartupMode.COLD)
     }
 
     /**
-     * Startup with partial compilation using baseline profile.
-     * This is more reliable than Full() which requires shader cache operations.
+     * Warm startup - app process exists but activity is recreated.
+     * Measures activity creation time without process initialization.
      */
     @Test
-    fun startupFullCompilation() {
-        measureStartup(CompilationMode.Partial())
+    fun startupWarm() {
+        measureStartup(StartupMode.WARM)
     }
     
     /**
-     * Startup with default compilation (whatever the device has).
-     * This is the most realistic test.
+     * Hot startup - activity is brought to foreground from background.
+     * Fastest startup scenario, measures resume time.
      */
     @Test
-    fun startupDefault() {
-        measureStartup(CompilationMode.DEFAULT)
+    fun startupHot() {
+        measureStartup(StartupMode.HOT)
     }
 
-    private fun measureStartup(compilationMode: CompilationMode) {
+    private fun measureStartup(startupMode: StartupMode) {
         rule.measureRepeated(
             packageName = PACKAGE_NAME,
             metrics = listOf(StartupTimingMetric()),
-            compilationMode = compilationMode,
-            startupMode = StartupMode.COLD,
-            iterations = 3,
+            // Use DEFAULT to avoid ProfileInstaller broadcast issues on Huawei/EMUI devices
+            // DEFAULT uses whatever compilation state the app is already in
+            compilationMode = CompilationMode.DEFAULT,
+            startupMode = startupMode,
+            iterations = 5,
             setupBlock = {
                 pressHome()
             },
@@ -76,35 +76,22 @@ class StartupBenchmark {
             }
         )
     }
-
-    // Note: Scroll performance test removed - requires hardware acceleration tracing
-    // which may not work on all devices. Startup benchmarks are the most important.
     
     /**
      * Dismiss any dialogs (permissions, app dialogs, etc.)
      */
     private fun androidx.benchmark.macro.MacrobenchmarkScope.dismissPermissionDialogs() {
         for (i in 0 until 5) {
-            // Common dismiss buttons - check all variations
             val dismissButton = device.findObject(By.text("Not now"))
                 ?: device.findObject(By.text("NOT NOW"))
-                ?: device.findObject(By.text("Not Now"))
                 ?: device.findObject(By.text("Later"))
                 ?: device.findObject(By.text("LATER"))
                 ?: device.findObject(By.text("Skip"))
                 ?: device.findObject(By.text("SKIP"))
                 ?: device.findObject(By.text("Cancel"))
-                ?: device.findObject(By.text("CANCEL"))
-                ?: device.findObject(By.text("No thanks"))
-                ?: device.findObject(By.text("NO THANKS"))
-                ?: device.findObject(By.text("Dismiss"))
-                ?: device.findObject(By.text("Close"))
                 ?: device.findObject(By.text("OK"))
-                ?: device.findObject(By.text("Got it"))
-                // Permission dialogs
                 ?: device.findObject(By.text("Allow"))
                 ?: device.findObject(By.text("ALLOW"))
-                ?: device.findObject(By.text("While using the app"))
                 ?: device.findObject(By.text("Deny"))
                 ?: device.findObject(By.text("Don't allow"))
                 ?: device.findObject(By.res("com.android.permissioncontroller:id/permission_allow_button"))
@@ -114,7 +101,6 @@ class StartupBenchmark {
                 dismissButton.click()
                 Thread.sleep(400)
             } else {
-                // No more dialogs found
                 break
             }
         }

@@ -25,7 +25,9 @@ import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
+import ireader.presentation.ui.component.rememberIsGridScrollingFast
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -47,6 +49,10 @@ fun CoverOnlyGrid(
     header: ((url: String) -> okhttp3.Headers?)? = null,
     keys: ((item: BookItem) -> Any)
 ) {
+    // Performance optimization: track fast scrolling to defer expensive operations
+    val performanceConfig = LocalPerformanceConfig.current
+    val isScrollingFast = rememberIsGridScrollingFast(scrollState)
+    
     Box(modifier = Modifier.fillMaxSize()) {
         val cells = if (columns > 1) {
             GridCells.Fixed(columns)
@@ -80,6 +86,8 @@ fun CoverOnlyGrid(
                         header = header,
                         onlyCover = true,
                         onLongClick = { onLongClick(book) },
+                        isScrollingFast = isScrollingFast,
+                        performanceConfig = performanceConfig,
                     ) {
                         if (showGoToLastChapterBadge) {
                             GoToLastReadComposable(onClick = { goToLatestChapter(book) }, size = (height.value.height / 20).dp)
