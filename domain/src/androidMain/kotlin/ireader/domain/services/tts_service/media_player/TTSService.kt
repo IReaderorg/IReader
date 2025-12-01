@@ -418,10 +418,9 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             // Set callback for TTS events
             ttsEngine?.setCallback(object : TTSEngineCallback {
                 override fun onStart(utteranceId: String) {
-                    state.setPlaying(true
-)
-                    state.setUtteranceId(utteranceId
-)
+                    state.setLoading(false) // Clear loading state when TTS starts
+                    state.setPlaying(true)
+                    state.setUtteranceId(utteranceId)
                     setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
                     scope.launch { updateNotification() }
                 }
@@ -432,7 +431,13 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 
                 override fun onError(utteranceId: String, error: String) {
                     Log.error { "TTS error: $error" }
+                    state.setLoading(false) // Clear loading state on error too
                     handleParagraphComplete()
+                }
+                
+                override fun onReady() {
+                    Log.info { "TTS engine is ready" }
+                    state.setTTSReady(true)
                 }
             })
             
@@ -521,22 +526,9 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 }
             }
             
-            // For Native TTS, retry a few times if not ready yet
-            if (currentEngineType == TTSEngineType.NATIVE && ttsEngine?.isReady() == false) {
-                scope.launch {
-                    repeat(30) { attempt ->
-                        delay(100)
-                        if (ttsEngine?.isReady() == true) {
-                            ttsEngine?.speak(text, utteranceId)
-                            return@launch
-                        }
-                    }
-                    Log.error { "TTS: Native TTS failed to initialize" }
-                }
-            } else {
-                scope.launch {
-                    ttsEngine?.speak(text, utteranceId)
-                }
+            // Speak the text - NativeTTSPlayer handles queuing if not ready yet
+            scope.launch {
+                ttsEngine?.speak(text, utteranceId)
             }
             
         }.onFailure { e ->

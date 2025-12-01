@@ -61,6 +61,7 @@ class AndroidNativeTTSEngine(context: Context) : TTSEngine {
             override fun onStart(utteranceId: String) = callback.onStart(utteranceId)
             override fun onDone(utteranceId: String) = callback.onDone(utteranceId)
             override fun onError(utteranceId: String, error: String) = callback.onError(utteranceId, error)
+            override fun onReady() = callback.onReady()
         })
     }
 }

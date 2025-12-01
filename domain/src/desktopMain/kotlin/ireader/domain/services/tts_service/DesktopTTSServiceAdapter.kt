@@ -186,6 +186,10 @@ class DesktopTTSStateAdapter(
     private val _hasAudioFocus = MutableStateFlow(true)
     override val hasAudioFocus: StateFlow<Boolean> = _hasAudioFocus.asStateFlow()
     
+    // TTS engine ready state (desktop engines are always ready after init)
+    private val _isTTSReady = MutableStateFlow(true)
+    override val isTTSReady: StateFlow<Boolean> = _isTTSReady.asStateFlow()
+    
     init {
         // Observe ttsContent changes and update derived state
         scope.launch {

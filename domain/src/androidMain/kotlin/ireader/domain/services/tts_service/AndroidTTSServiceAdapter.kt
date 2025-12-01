@@ -56,6 +56,10 @@ class AndroidTTSServiceAdapter(
     
     override suspend fun play() {
         Log.info { "TTS play" }
+        // Set loading state if TTS is not ready yet
+        if (!sharedState.isTTSReady.value) {
+            sharedState.setLoading(true)
+        }
         val intent = Intent(context, TTSService::class.java).apply {
             action = TTSService.ACTION_PLAY
         }
@@ -222,6 +226,9 @@ class AndroidTTSStateAdapter(
     // Audio focus state
     private val _hasAudioFocus = MutableStateFlow(true)
     override val hasAudioFocus: StateFlow<Boolean> = _hasAudioFocus.asStateFlow()
+    
+    // TTS engine ready state
+    override val isTTSReady: StateFlow<Boolean> = sharedState.isTTSReady
     
     init {
         // Observe ttsContent and update currentContent

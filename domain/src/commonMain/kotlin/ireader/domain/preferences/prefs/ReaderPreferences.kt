@@ -668,7 +668,7 @@ class ReaderPreferences constructor(
     
     // Sentence-level highlighting for TTS (time-based estimation)
     fun ttsSentenceHighlight(): Preference<Boolean> {
-        return preferenceStore.getBoolean("tts_sentence_highlight", true)
+        return preferenceStore.getBoolean("tts_sentence_highlight", false)
     }
 }
 

@@ -234,7 +234,9 @@ data class CommonTTSScreenState(
     // null = not yet calibrated (first paragraph), value = calibrated WPM at 1.0x speed
     val calibratedWPM: Float? = null,
     // Whether calibration is complete (first paragraph has finished)
-    val isCalibrated: Boolean = false
+    val isCalibrated: Boolean = false,
+    // Whether TTS engine is ready to speak
+    val isTTSReady: Boolean = false
 ) {
     // Pre-computed properties to avoid repeated calculations during recomposition
     val contentSize: Int get() = content.size
@@ -813,6 +815,7 @@ fun TTSMediaControls(
             TTSPlaybackControls(
                 isPlaying = state.isPlaying,
                 isLoading = state.isLoading,
+                isTTSReady = state.isTTSReady,
                 currentParagraph = state.currentReadingParagraph,
                 contentLastIndex = state.content.lastIndex,
                 hasChapter = state.chapterName.isNotEmpty(),
@@ -921,6 +924,7 @@ private fun TTSProgressBar(
 private fun TTSPlaybackControls(
     isPlaying: Boolean,
     isLoading: Boolean,
+    isTTSReady: Boolean,
     currentParagraph: Int,
     contentLastIndex: Int,
     hasChapter: Boolean,
@@ -963,6 +967,14 @@ private fun TTSPlaybackControls(
         }
         
         // Play/Pause (Large circular button)
+        // States:
+        // 1. Initial (not playing, TTS ready or not): Show play icon
+        // 2. User pressed play but TTS not ready yet (isLoading or !isTTSReady while waiting): Show loading
+        // 3. TTS is playing: Show pause icon
+        // 
+        // isLoading = user requested play but TTS is initializing
+        val isWaitingForTTS = isLoading || (!isTTSReady && !isPlaying && isLoading)
+        
         FloatingActionButton(
             onClick = onPlayPause,
             modifier = Modifier.size(fabSize),
@@ -970,17 +982,30 @@ private fun TTSPlaybackControls(
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = CircleShape
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Icon(
-                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlaying) localize(Res.string.pause) else localize(Res.string.play),
-                    modifier = Modifier.size(fabIconSize)
-                )
+            when {
+                isLoading -> {
+                    // User pressed play, TTS is initializing - show loading spinner
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                isPlaying -> {
+                    // TTS is actively playing - show pause icon
+                    Icon(
+                        imageVector = Icons.Default.Pause,
+                        contentDescription = localize(Res.string.pause),
+                        modifier = Modifier.size(fabIconSize)
+                    )
+                }
+                else -> {
+                    // Initial state or paused - show play icon
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = localize(Res.string.play),
+                        modifier = Modifier.size(fabIconSize)
+                    )
+                }
             }
         }
         

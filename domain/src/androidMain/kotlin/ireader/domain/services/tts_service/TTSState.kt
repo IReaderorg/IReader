@@ -90,6 +90,9 @@ class TTSStateImpl() : AndroidTTSState {
     private val _sleepMode = kotlinx.coroutines.flow.MutableStateFlow(false)
     override val sleepMode: kotlinx.coroutines.flow.StateFlow<Boolean> = _sleepMode
     
+    private val _isTTSReady = kotlinx.coroutines.flow.MutableStateFlow(false)
+    override val isTTSReady: kotlinx.coroutines.flow.StateFlow<Boolean> = _isTTSReady
+    
     private val _prevSpeechSpeed = kotlinx.coroutines.flow.MutableStateFlow(0.8f)
     override val prevSpeechSpeed: kotlinx.coroutines.flow.StateFlow<Float> = _prevSpeechSpeed
     
@@ -175,6 +178,7 @@ class TTSStateImpl() : AndroidTTSState {
     @OptIn(ExperimentalTime::class)
     override fun setStartTime(value: kotlin.time.Instant?) { _startTime.value = value }
     override fun setSleepMode(value: Boolean) { _sleepMode.value = value }
+    override fun setTTSReady(value: Boolean) { _isTTSReady.value = value }
     
     private fun updateTtsContent() {
         val chapter = _ttsChapter.value

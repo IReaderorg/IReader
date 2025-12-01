@@ -279,6 +279,7 @@ open class MockTTSService : CommonTTSService {
         override val sleepTimeRemaining: StateFlow<Long> = _sleepTimeRemaining
         override val sleepModeEnabled: StateFlow<Boolean> = _sleepModeEnabled
         override val hasAudioFocus: StateFlow<Boolean> = _hasAudioFocus
+        override val isTTSReady: StateFlow<Boolean> = MutableStateFlow(true)
     }
     
     override fun initialize() {}

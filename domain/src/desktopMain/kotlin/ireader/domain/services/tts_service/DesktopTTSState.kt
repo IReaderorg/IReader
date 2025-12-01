@@ -77,6 +77,9 @@ class DesktopTTSState : TTSState {
     private val _sleepMode = MutableStateFlow(false)
     override val sleepMode: StateFlow<Boolean> = _sleepMode.asStateFlow()
     
+    private val _isTTSReady = MutableStateFlow(true) // Desktop engines are ready after init
+    override val isTTSReady: StateFlow<Boolean> = _isTTSReady.asStateFlow()
+    
     private val _prevSpeechSpeed = MutableStateFlow(0.8f)
     override val prevSpeechSpeed: StateFlow<Float> = _prevSpeechSpeed.asStateFlow()
     
@@ -168,6 +171,7 @@ class DesktopTTSState : TTSState {
     @OptIn(ExperimentalTime::class)
     override fun setStartTime(value: kotlin.time.Instant?) { _startTime.value = value }
     override fun setSleepMode(value: Boolean) { _sleepMode.value = value }
+    override fun setTTSReady(value: Boolean) { _isTTSReady.value = value }
     
     private fun updateTtsContent() {
         val chapter = _ttsChapter.value

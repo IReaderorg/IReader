@@ -34,6 +34,8 @@ interface TTSCallback {
     fun onStart(utteranceId: String)
     fun onDone(utteranceId: String)
     fun onError(utteranceId: String, error: String)
+    /** Called when TTS engine becomes ready to speak */
+    fun onReady() {}
 }
 
 /**
@@ -48,17 +50,50 @@ class NativeTTSPlayer(
     private var isInitialized = false
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     
+    // Pending speak request to execute when TTS is ready
+    private var pendingSpeak: Pair<String, String>? = null
+    
     init {
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 isInitialized = true
+                Log.info { "Native TTS initialized successfully" }
+                
+                // Notify that TTS is ready
+                scope.launch {
+                    callback?.onReady()
+                }
+                
+                // Execute pending speak request if any
+                pendingSpeak?.let { (text, utteranceId) ->
+                    pendingSpeak = null
+                    speakInternal(text, utteranceId)
+                }
             } else {
                 Log.error { "Native TTS initialization failed with status: $status" }
+                // Notify error for pending request
+                pendingSpeak?.let { (_, utteranceId) ->
+                    pendingSpeak = null
+                    scope.launch {
+                        callback?.onError(utteranceId, "TTS initialization failed")
+                    }
+                }
             }
         }
     }
     
     override fun speak(text: String, utteranceId: String) {
+        if (!isReady()) {
+            // Queue the request to be executed when TTS is ready
+            Log.info { "Native TTS not ready yet, queuing speak request: $utteranceId" }
+            pendingSpeak = text to utteranceId
+            return
+        }
+        
+        speakInternal(text, utteranceId)
+    }
+    
+    private fun speakInternal(text: String, utteranceId: String) {
         if (!isReady()) {
             scope.launch {
                 callback?.onError(utteranceId, "TTS not initialized")
@@ -106,10 +141,12 @@ class NativeTTSPlayer(
     }
     
     override fun stop() {
+        pendingSpeak = null
         tts?.stop()
     }
     
     override fun pause() {
+        pendingSpeak = null
         tts?.stop()
     }
     
@@ -127,9 +164,16 @@ class NativeTTSPlayer(
     
     override fun setCallback(callback: TTSCallback) {
         this.callback = callback
+        // If TTS is already initialized, notify immediately
+        if (isInitialized) {
+            scope.launch {
+                callback.onReady()
+            }
+        }
     }
     
     override fun cleanup() {
+        pendingSpeak = null
         tts?.stop()
         tts?.shutdown()
         tts = null

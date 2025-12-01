@@ -141,6 +141,7 @@ class TTSScreenSpec(
         // Collect state from service with debouncing for low-end device optimization
         val isPlaying by ttsService.state.isPlaying.collectAsState()
         val isLoading by ttsService.state.isLoading.collectAsState()
+        val isTTSReady by ttsService.state.isTTSReady.collectAsState()
         val currentBook by ttsService.state.currentBook.collectAsState()
         val currentChapter by ttsService.state.currentChapter.collectAsState()
         val currentParagraph by remember(ttsService) {
@@ -330,7 +331,7 @@ class TTSScreenSpec(
         
         // Create state object for unified components - memoized to reduce object allocations
         val screenState by remember(
-            currentParagraph, previousParagraph, isPlaying, isLoading, content,
+            currentParagraph, previousParagraph, isPlaying, isLoading, isTTSReady, content,
             translatedContent, showTranslation, bilingualMode, chapterName, bookTitle,
             speechSpeed, autoNextChapter, fullScreenMode, cachedParagraphs, loadingParagraphs,
             sleepTimeRemaining, sleepModeEnabledState, paragraphStartTime, sentenceHighlightEnabled,
@@ -361,7 +362,8 @@ class TTSScreenSpec(
                     paragraphStartTime = paragraphStartTime,
                     sentenceHighlightEnabled = sentenceHighlightEnabled,
                     calibratedWPM = calibratedWPM,
-                    isCalibrated = isCalibrated
+                    isCalibrated = isCalibrated,
+                    isTTSReady = isTTSReady
                 )
             }
         }

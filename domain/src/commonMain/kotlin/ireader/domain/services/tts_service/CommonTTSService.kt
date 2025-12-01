@@ -145,6 +145,9 @@ interface TTSServiceState {
     
     // Audio focus state
     val hasAudioFocus: StateFlow<Boolean>
+    
+    // TTS engine ready state
+    val isTTSReady: StateFlow<Boolean>
 }
 
 /**

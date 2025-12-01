@@ -98,6 +98,132 @@ class BaselineProfileGenerator {
             }
         )
     }
+
+    @Test
+    fun generateBookDetailProfile() {
+        rule.collect(
+            packageName = PACKAGE_NAME,
+            profileBlock = {
+                startActivityAndWait()
+                dismissPermissionDialogs()
+                device.wait(Until.hasObject(By.pkg(PACKAGE_NAME).depth(0)), TIMEOUT)
+                Thread.sleep(1500)
+                
+                // Click on a book to open detail screen
+                val bookItem = device.findObject(By.clickable(true).hasDescendant(By.clazz("android.widget.ImageView")))
+                if (bookItem != null) {
+                    bookItem.click()
+                    Thread.sleep(2000)
+                    
+                    // Scroll through chapters
+                    val scrollable = device.findObject(By.scrollable(true))
+                    scrollable?.scroll(Direction.DOWN, 0.5f)
+                    Thread.sleep(300)
+                    
+                    // Go back
+                    device.pressBack()
+                    Thread.sleep(500)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun generateAllTabsProfile() {
+        rule.collect(
+            packageName = PACKAGE_NAME,
+            profileBlock = {
+                startActivityAndWait()
+                dismissPermissionDialogs()
+                device.wait(Until.hasObject(By.pkg(PACKAGE_NAME).depth(0)), TIMEOUT)
+                Thread.sleep(1500)
+                
+                // Visit all tabs to generate profiles for each
+                listOf("Extensions", "More", "History", "Updates", "Library").forEach { tabName ->
+                    val tab = device.findObject(By.desc(tabName))
+                        ?: device.findObject(By.text(tabName))
+                        ?: device.findObject(By.descContains(tabName))
+                    tab?.click()
+                    Thread.sleep(800)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun generateReaderProfile() {
+        rule.collect(
+            packageName = PACKAGE_NAME,
+            profileBlock = {
+                startActivityAndWait()
+                dismissPermissionDialogs()
+                device.wait(Until.hasObject(By.pkg(PACKAGE_NAME).depth(0)), TIMEOUT)
+                Thread.sleep(1500)
+                
+                // Open a book
+                val bookItem = device.findObject(By.clickable(true).hasDescendant(By.clazz("android.widget.ImageView")))
+                if (bookItem != null) {
+                    bookItem.click()
+                    Thread.sleep(2000)
+                    
+                    // Try to start reading
+                    val fab = device.findObject(By.descContains("Start"))
+                        ?: device.findObject(By.descContains("Resume"))
+                        ?: device.findObject(By.clazz("androidx.compose.material3.FloatingActionButton"))
+                    
+                    if (fab != null) {
+                        fab.click()
+                        Thread.sleep(2000)
+                        
+                        // Scroll in reader
+                        val scrollable = device.findObject(By.scrollable(true))
+                        scrollable?.scroll(Direction.DOWN, 0.3f)
+                        Thread.sleep(300)
+                        
+                        device.pressBack()
+                        Thread.sleep(500)
+                    }
+                    
+                    device.pressBack()
+                    Thread.sleep(500)
+                }
+            }
+        )
+    }
+
+    @Test
+    fun generateSettingsProfile() {
+        rule.collect(
+            packageName = PACKAGE_NAME,
+            profileBlock = {
+                startActivityAndWait()
+                dismissPermissionDialogs()
+                device.wait(Until.hasObject(By.pkg(PACKAGE_NAME).depth(0)), TIMEOUT)
+                Thread.sleep(1500)
+                
+                // Go to More tab
+                val moreTab = device.findObject(By.desc("More"))
+                    ?: device.findObject(By.text("More"))
+                moreTab?.click()
+                Thread.sleep(800)
+                
+                // Open Settings
+                val settingsItem = device.findObject(By.text("Settings"))
+                if (settingsItem != null) {
+                    settingsItem.click()
+                    Thread.sleep(1500)
+                    
+                    // Scroll through settings
+                    val scrollable = device.findObject(By.scrollable(true))
+                    scrollable?.scroll(Direction.DOWN, 0.5f)
+                    Thread.sleep(300)
+                    
+                    device.pressBack()
+                    Thread.sleep(500)
+                }
+            }
+        )
+    }
     
     /**
      * Dismiss any dialogs (permissions, app dialogs, etc.)

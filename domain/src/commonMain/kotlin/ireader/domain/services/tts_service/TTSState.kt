@@ -43,6 +43,7 @@ interface TTSState {
     @OptIn(ExperimentalTime::class)
     val startTime: StateFlow<kotlin.time.Instant?>
     val sleepMode: StateFlow<Boolean>
+    val isTTSReady: StateFlow<Boolean>
     
     // Setters for updating state
     fun setPlaying(value: Boolean)
@@ -73,4 +74,5 @@ interface TTSState {
     @OptIn(ExperimentalTime::class)
     fun setStartTime(value: kotlin.time.Instant?)
     fun setSleepMode(value: Boolean)
+    fun setTTSReady(value: Boolean)
 }

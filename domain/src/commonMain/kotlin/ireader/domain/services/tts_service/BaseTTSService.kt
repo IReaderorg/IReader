@@ -62,6 +62,9 @@ abstract class BaseTTSService(
     // Audio focus state
     private val _hasAudioFocus = MutableStateFlow(false)
     
+    // TTS engine ready state
+    private val _isTTSReady = MutableStateFlow(false)
+    
     // TTS Engine
     protected var ttsEngine: TTSEngine? = null
     protected var ttsNotification: TTSNotification? = null
@@ -93,6 +96,7 @@ abstract class BaseTTSService(
         override val sleepTimeRemaining = _sleepTimeRemaining.asStateFlow()
         override val sleepModeEnabled = _sleepModeEnabled.asStateFlow()
         override val hasAudioFocus = _hasAudioFocus.asStateFlow()
+        override val isTTSReady = _isTTSReady.asStateFlow()
     }
     
     override fun initialize() {
@@ -467,6 +471,11 @@ abstract class BaseTTSService(
                     _error.value = error
                     handleParagraphComplete()
                 }
+            }
+            
+            override fun onReady() {
+                Log.info { "TTS engine is ready" }
+                _isTTSReady.value = true
             }
         })
     }
