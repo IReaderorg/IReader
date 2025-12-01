@@ -80,46 +80,69 @@ fun NavHostController.popUntilRoot() {
  * Use navigateTo() instead of navigate() to avoid serialization issues.
  */
 
+/**
+ * Optimized navigation with launchSingleTop to prevent duplicate destinations
+ * and reduce recomposition overhead.
+ */
 fun NavHostController.navigateTo(spec: BookDetailScreenSpec) {
-    navigate(NavigationRoutes.bookDetail(spec.bookId))
+    navigate(NavigationRoutes.bookDetail(spec.bookId)) {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateTo(spec: ReaderScreenSpec) {
-    navigate("reader/${spec.bookId}/${spec.chapterId}")
+    navigate("reader/${spec.bookId}/${spec.chapterId}") {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateTo(spec: ExploreScreenSpec) {
-    // Don't include query in route since it's not part of the path pattern
-    navigate("explore/${spec.sourceId}")
+    navigate("explore/${spec.sourceId}") {
+        launchSingleTop = true
+    }
 }
+
 fun NavHostController.navigateTo(spec: RepositoryAddScreenSpec) {
-    // Don't include query in route since it's not part of the path pattern
-    navigate(repositoryAdd)
+    navigate(repositoryAdd) {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateTo(spec: GlobalSearchScreenSpec) {
     val query = spec.query?.let { "?query=${java.net.URLEncoder.encode(it, "UTF-8")}" } ?: ""
-    navigate("globalSearch$query")
+    navigate("globalSearch$query") {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateTo(spec: ChatGptLoginScreenSpec) {
-    navigate("chatGptLogin")
+    navigate("chatGptLogin") {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateTo(spec: DeepSeekLoginScreenSpec) {
-    navigate("deepSeekLogin")
+    navigate("deepSeekLogin") {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateTo(spec: ireader.presentation.ui.home.sources.extension.SourceDetailScreen) {
-    navigate("sourceDetail/${spec.catalog.sourceId}")
+    navigate("sourceDetail/${spec.catalog.sourceId}") {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.SourceMigrationScreenSpec) {
-    navigate("sourceMigration/${spec.sourceId}")
+    navigate("sourceMigration/${spec.sourceId}") {
+        launchSingleTop = true
+    }
 }
 
 fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.BrowseSettingsScreenSpec) {
-    navigate("browseSettings")
+    navigate("browseSettings") {
+        launchSingleTop = true
+    }
 }
 
 // Expect functions for platform-specific screen specs
@@ -127,5 +150,7 @@ expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.WebVi
 
 // TTSScreenSpec is now a common class, so we can define the navigation directly
 fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSScreenSpec) {
-    navigate("tts/${spec.bookId}/${spec.chapterId}/${spec.sourceId}/${spec.readingParagraph}")
+    navigate("tts/${spec.bookId}/${spec.chapterId}/${spec.sourceId}/${spec.readingParagraph}") {
+        launchSingleTop = true
+    }
 }

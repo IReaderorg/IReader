@@ -441,9 +441,9 @@ fun TTSContentDisplay(
                         translatedText = state.translatedContent?.getOrNull(index),
                         isCurrentParagraph = isCurrentParagraph,
                         isPlaying = state.isPlaying,
-                        currentSentenceIndex = if (isCurrentParagraph) 
+                        currentSentenceIndex = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
                             currentSentenceIndex.coerceAtLeast(0) else 0,
-                        sentences = if (isCurrentParagraph) 
+                        sentences = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
                             currentSentences else emptyList(),
                         isBilingualMode = state.bilingualMode,
                         hasTranslation = hasTranslation,
@@ -517,6 +517,7 @@ private fun TTSParagraphItemWithSentenceHighlight(
     // Determine if we should show sentence highlighting
     // Show for current paragraph when playing and sentences are available
     // Also show when paused on current paragraph to maintain visual continuity
+    // NOTE: sentenceHighlightEnabled is checked at the call site (TTSContentDisplay)
     val showSentenceHighlight = isCurrentParagraph && sentences.isNotEmpty()
     
     Row(

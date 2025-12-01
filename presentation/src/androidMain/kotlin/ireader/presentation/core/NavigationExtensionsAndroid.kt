@@ -9,6 +9,7 @@ import ireader.presentation.core.ui.WebViewScreenSpec
 
 actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
     // For Android, navigate to webView with all parameters
+    // Using launchSingleTop to prevent duplicate destinations and reduce recomposition
     navigate(
         NavigationRoutes.webView(
             url = spec.url ?: "",
@@ -19,7 +20,9 @@ actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
             enableChapterFetch = spec.enableChapterFetch,
             enableChaptersFetch = spec.enableChaptersFetch
         )
-    )
+    ) {
+        launchSingleTop = true
+    }
 }
 
 // TTSScreenSpec navigation is now defined in common Navigator.kt
