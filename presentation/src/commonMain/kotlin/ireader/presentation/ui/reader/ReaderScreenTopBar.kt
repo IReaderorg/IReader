@@ -4,8 +4,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.material3.Text
-import androidx.compose.material3.SheetValue
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Bookmark
@@ -18,7 +22,10 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,59 +33,89 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
+import ireader.i18n.resources.aa
+import ireader.i18n.resources.bookmark
+import ireader.i18n.resources.brightness
+import ireader.i18n.resources.expand_menu
+import ireader.i18n.resources.find_in_chapter
+import ireader.i18n.resources.refresh
+import ireader.i18n.resources.report_broken_chapter
+import ireader.i18n.resources.webView
 import ireader.presentation.core.toComposeColor
-import ireader.i18n.resources.*
-import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
-@OptIn( ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReaderScreenTopBar(
-        modifier: Modifier,
-        isReaderModeEnable: Boolean,
-        vm: ReaderScreenViewModel,
-        state: ReaderScreenState,
-        modalBottomSheetValue: SheetValue,
-        chapter: Chapter?,
-        onRefresh: () -> Unit,
-        onWebView: () -> Unit,
-        onBookMark: () -> Unit,
-        onPopBackStack: () -> Unit,
-        isLoaded: Boolean = false,
+    modifier: Modifier = Modifier,
+    isReaderModeEnable: Boolean,
+    vm: ReaderScreenViewModel,
+    state: ReaderScreenState,
+    chapter: Chapter?,
+    onRefresh: () -> Unit,
+    onWebView: () -> Unit,
+    onBookMark: () -> Unit,
+    onPopBackStack: () -> Unit,
+    isLoaded: Boolean = false,
 ) {
-val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
+    // Main top bar with animation (shown when reader mode is disabled)
     AnimatedVisibility(
-        visible = !isReaderModeEnable,
-        enter = slideInVertically(initialOffsetY = { -it }, animationSpec = tween(250)),
-        exit = slideOutVertically(targetOffsetY = { -it }, animationSpec = tween(250))
+        visible = !isReaderModeEnable && isLoaded,
+        enter = slideInVertically(
+            initialOffsetY = { fullHeight -> -fullHeight },
+            animationSpec = tween(
+                durationMillis = 300,
+                easing = androidx.compose.animation.core.FastOutSlowInEasing
+            )
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { fullHeight -> -fullHeight },
+            animationSpec = tween(
+                durationMillis = 250,
+                easing = androidx.compose.animation.core.FastOutLinearInEasing
+            )
+        ),
+        modifier = modifier
     ) {
-        Toolbar(
-            modifier = modifier,
-            title = {
-                Text(
-                    text = chapter?.name ?: "",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
-                )
-            },
-            backgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            elevation = 4.dp,
-            navigationIcon = {
+            shadowElevation = 4.dp,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .height(56.dp)
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Back button
                 TopAppBarBackButton(
                     onClick = { onPopBackStack() }
                 )
-            },
-            actions = {
 
+                // Title
+                Text(
+                    text = chapter?.name ?: "",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                )
+
+                // Actions
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = if (vm.expandTopMenu) Icons.Default.ChevronRight else Icons.Default.ChevronLeft,
@@ -87,102 +124,96 @@ val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocaliz
                             vm.expandTopMenu = !vm.expandTopMenu
                         }
                     )
+                    
                     if (vm.expandTopMenu) {
                         AppIconButton(
                             imageVector = if (chapter.bookmark) Icons.Filled.Bookmark else Icons.Default.Bookmark,
                             contentDescription = localize(Res.string.bookmark),
-                            tint = if (chapter.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
-                            onClick = {
-                                onBookMark()
-                            }
+                            tint = if (chapter.bookmark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            onClick = { onBookMark() }
                         )
                         AppIconButton(
                             imageVector = Icons.Default.Search,
                             contentDescription = localizeHelper.localize(Res.string.find_in_chapter),
-                            onClick = {
-                                vm.toggleFindInChapter()
-                            }
+                            onClick = { vm.toggleFindInChapter() }
                         )
                         AppIconButton(
                             imageVector = Icons.Default.Report,
                             contentDescription = localizeHelper.localize(Res.string.report_broken_chapter),
-                            onClick = {
-                                vm.toggleReportDialog()
-                            }
+                            onClick = { vm.toggleReportDialog() }
                         )
                         AppIconButton(
                             imageVector = Icons.Default.BrightnessHigh,
                             contentDescription = localizeHelper.localize(Res.string.brightness),
-                            onClick = {
-                                vm.showBrightnessControl = !vm.showBrightnessControl
-                            }
+                            onClick = { vm.showBrightnessControl = !vm.showBrightnessControl }
                         )
                         // Font size quick adjuster button
                         IconButton(
-                            onClick = {
-                                vm.showFontSizeAdjuster = !vm.showFontSizeAdjuster
-                            }
+                            onClick = { vm.showFontSizeAdjuster = !vm.showFontSizeAdjuster }
                         ) {
                             Text(
                                 text = localizeHelper.localize(Res.string.aa),
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                         if (!vm.webViewIntegration.value) {
                             AppIconButton(
                                 imageVector = Icons.Default.Public,
                                 contentDescription = localize(Res.string.webView),
-                                onClick = {
-                                    onWebView()
-                                }
+                                onClick = { onWebView() }
                             )
                         }
-
                     }
+                    
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
                         contentDescription = localize(Res.string.refresh),
-                        onClick = {
-                            onRefresh()
-                        }
+                        onClick = { onRefresh() }
                     )
                 }
             }
-        )
+        }
     }
 
+    // Minimal top bar when not loaded (always visible)
     if (!isLoaded) {
-        Toolbar(
-            title = {},
-            elevation = 0.dp,
-            backgroundColor = vm.backgroundColor.value.toComposeColor(),
-            actions = {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            color = vm.backgroundColor.value.toComposeColor(),
+            contentColor = vm.textColor.value.toComposeColor(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .height(56.dp)
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TopAppBarBackButton(
+                    onClick = { onPopBackStack() },
+                    tint = vm.textColor.value.toComposeColor()
+                )
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
                 if (chapter != null) {
                     AppIconButton(
                         imageVector = Icons.Default.Autorenew,
                         contentDescription = localize(Res.string.refresh),
-                        onClick = {
-                            onRefresh()
-                        },
+                        onClick = { onRefresh() },
                         tint = vm.textColor.value.toComposeColor()
                     )
                     AppIconButton(
                         imageVector = Icons.Default.Public,
                         contentDescription = localize(Res.string.webView),
-                        onClick = {
-                            onWebView()
-                        },
+                        onClick = { onWebView() },
                         tint = vm.textColor.value.toComposeColor()
                     )
                 }
-            },
-            navigationIcon = {
-                TopAppBarBackButton(onClick = {
-                    onPopBackStack()
-                }, tint = vm.textColor.value.toComposeColor())
             }
-        )
+        }
     }
 }

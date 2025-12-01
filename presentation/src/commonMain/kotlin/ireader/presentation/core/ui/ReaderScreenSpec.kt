@@ -7,17 +7,16 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +32,7 @@ import ireader.domain.preferences.models.FontType
 import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.i18n.UiText
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 import ireader.i18n.resources.this_is_first_chapter
 import ireader.i18n.resources.this_is_last_chapter
 import ireader.presentation.core.IModalDrawer
@@ -43,7 +42,6 @@ import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.core.toComposeColor
-import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.getContextWrapper
 import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.ui.core.theme.CustomSystemColor
@@ -58,7 +56,6 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
-import ireader.i18n.resources.Res
 
 
 @OptIn( ExperimentalMaterial3Api::class)
@@ -288,67 +285,12 @@ data class ReaderScreenSpec(
                 statusBar = customColor.status,
                 navigationBar = customColor.navigation
             ) {
-                IScaffold(
-                    topBar = {
-                        val catalog = vm.catalog
-                        val book = vm.book
-                        val readerScrollState = vm.readerScrollState
-
-                        if (readerScrollState != null) {
-                            ReaderScreenTopBar(
-                                modifier = Modifier,
-                                isReaderModeEnable = vm.isReaderModeEnable,
-                                isLoaded = vm.isChapterLoaded.value,
-                                modalBottomSheetValue = sheetState.targetValue,
-                                onRefresh = {
-                                    scope.launch {
-                                        vm.getLocalChapter(
-                                            chapter?.id,
-                                            force = true
-                                        )
-                                    }
-                                },
-                                chapter = chapter,
-                                onWebView = {
-                                    try {
-                                        catalog?.let { catalog ->
-                                            val absoluteUrl = chapter?.key?.let { url ->
-                                                ensureAbsoluteUrlForWebView(url, catalog.source)
-                                            }
-                                            navController.navigateTo(
-                                                WebViewScreenSpec(
-                                                    url = absoluteUrl,
-                                                    sourceId = catalog.sourceId,
-                                                    chapterId = chapter?.id,
-                                                    bookId = book?.id,
-                                                    enableChapterFetch = true,
-                                                    enableChaptersFetch = false,
-                                                    enableBookFetch = false
-                                                )
-                                            )
-                                        }
-                                    } catch (e: Throwable) {
-                                        scope.launch {
-                                            vm.showSnackBar(
-                                                UiText.ExceptionString(
-                                                    e
-                                                )
-                                            )
-                                        }
-                                    }
-                                },
-                                vm = vm,
-                                state = vm,
-                                onBookMark = {
-                                    vm.bookmarkChapter()
-                                },
-                                onPopBackStack = {
-                                    navController.popBackStack()
-                                }
-                            )
-                        }
-                    }
-                ) { padding ->
+                // Use Box to overlay top bar without affecting content layout
+                androidx.compose.foundation.layout.Box(
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize()
+                ) {
+                    // Content first (below the top bar)
+                    val padding = androidx.compose.foundation.layout.PaddingValues(0.dp)
 
                     ReadingScreen(
                         drawerState = drawerState,
@@ -513,6 +455,64 @@ data class ReaderScreenSpec(
                             navController.navigate(NavigationRoutes.translationSettings)
                         }
                     )
+                    
+                    // Top bar overlay (rendered on top of content)
+                    val catalog = vm.catalog
+                    val book = vm.book
+                    val readerScrollState = vm.readerScrollState
+
+                    if (readerScrollState != null) {
+                        ReaderScreenTopBar(
+                            modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopCenter),
+                            isReaderModeEnable = vm.isReaderModeEnable,
+                            isLoaded = vm.isChapterLoaded.value,
+                            onRefresh = {
+                                scope.launch {
+                                    vm.getLocalChapter(
+                                        chapter?.id,
+                                        force = true
+                                    )
+                                }
+                            },
+                            chapter = chapter,
+                            onWebView = {
+                                try {
+                                    catalog?.let { catalog ->
+                                        val absoluteUrl = chapter?.key?.let { url ->
+                                            ensureAbsoluteUrlForWebView(url, catalog.source)
+                                        }
+                                        navController.navigateTo(
+                                            WebViewScreenSpec(
+                                                url = absoluteUrl,
+                                                sourceId = catalog.sourceId,
+                                                chapterId = chapter?.id,
+                                                bookId = book?.id,
+                                                enableChapterFetch = true,
+                                                enableChaptersFetch = false,
+                                                enableBookFetch = false
+                                            )
+                                        )
+                                    }
+                                } catch (e: Throwable) {
+                                    scope.launch {
+                                        vm.showSnackBar(
+                                            UiText.ExceptionString(
+                                                e
+                                            )
+                                        )
+                                    }
+                                }
+                            },
+                            vm = vm,
+                            state = vm,
+                            onBookMark = {
+                                vm.bookmarkChapter()
+                            },
+                            onPopBackStack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
                 }
             }
         }
