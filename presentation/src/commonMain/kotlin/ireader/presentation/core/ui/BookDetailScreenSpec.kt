@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
+import ireader.domain.models.entities.Chapter
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.i18n.localize
@@ -375,9 +376,48 @@ data class BookDetailScreenSpec constructor(
                     ) { scaffoldPadding ->
                         val appbarPadding = scaffoldPadding.calculateTopPadding()
                         
+                        // Apply filtering based on vm.query and vm.filters
+                        val filteredChapters by remember(state.chapters, vm.query, vm.filters.value) {
+                            derivedStateOf {
+                                var result = state.chapters.toList()
+                                
+                                // Apply search filter
+                                val query = vm.query
+                                if (!query.isNullOrBlank()) {
+                                    result = result.filter { it.name.contains(query, ignoreCase = true) }
+                                }
+                                
+                                // Apply chapter filters
+                                for (filter in vm.filters.value) {
+                                    if (filter.value == ireader.presentation.ui.book.viewmodel.ChaptersFilters.Value.Missing) continue
+                                    
+                                    val predicate: (Chapter) -> Boolean = when (filter.type) {
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type.Unread -> { ch -> !ch.read }
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type.Read -> { ch -> ch.read }
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type.Bookmarked -> { ch -> ch.bookmark }
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type.Downloaded -> { ch -> ch.content.joinToString("").isNotBlank() }
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type.Duplicate -> { ch ->
+                                            state.chapters.any { other ->
+                                                other.id != ch.id && other.name.trim().equals(ch.name.trim(), ignoreCase = true)
+                                            }
+                                        }
+                                    }
+                                    
+                                    result = when (filter.value) {
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Value.Included -> result.filter(predicate)
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Value.Excluded -> result.filterNot(predicate)
+                                        ireader.presentation.ui.book.viewmodel.ChaptersFilters.Value.Missing -> result
+                                    }
+                                }
+                                
+                                result
+                            }
+                        }
+                        
                         // Create chapters state for BookDetailScreen
-                        val chaptersState = remember(state.chapters) {
-                            mutableStateOf(state.chapters.toList())
+                        val chaptersState = remember { mutableStateOf<List<Chapter>>(emptyList()) }
+                        LaunchedEffect(filteredChapters) {
+                            chaptersState.value = filteredChapters
                         }
                         
                         BookDetailScreen(

@@ -175,3 +175,4 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
 - [Compose Performance](https://developer.android.com/jetpack/compose/performance)
 - [Baseline Profiles](https://developer.android.com/studio/profile/baselineprofiles)
 - [Immutable Collections](https://github.com/Kotlin/kotlinx.collections.immutable)
+- [Migration Lessons Learned](./MIGRATION_LESSONS_LEARNED.md) - Common bugs and how to avoid them

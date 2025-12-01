@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
@@ -13,12 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import ireader.core.source.HttpSource
-import ireader.core.source.Source
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
 import ireader.domain.models.DisplayMode
@@ -34,12 +30,8 @@ import ireader.presentation.ui.component.ModernLayoutComposable
 import ireader.presentation.ui.component.components.BookShimmerLoading
 import ireader.presentation.ui.component.isLandscape
 import ireader.presentation.ui.component.list.isScrolledToTheEnd
-import ireader.presentation.ui.component.reusable_composable.AppIconButton
-import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
-import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.ui.kaomojis
+import ireader.presentation.ui.home.explore.viewmodel.ExploreScreenState
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -50,13 +42,12 @@ import kotlinx.coroutines.flow.StateFlow
 @Stable
 private fun stableExploreBookKey(book: BookItem): Any = "${book.id}_${book.column}"
 
-@OptIn(
-    ExperimentalMaterial3Api::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen(
     modifier: Modifier = Modifier,
     vm: ExploreViewModel,
+    state: ExploreScreenState,
     source: ireader.core.source.CatalogSource,
     onFilterClick: () -> Unit,
     getBooks: (query: String?, listing: Listing?, filters: List<Filter<*>>) -> Unit,
@@ -71,17 +62,19 @@ fun ExploreScreen(
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
     prevPaddingValues: PaddingValues
 ) {
-    val scrollState = rememberLazyListState(
-        initialFirstVisibleItemIndex = vm.savedScrollIndex,
-        initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
-    )
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-
-    val gridState = rememberLazyGridState(
-        initialFirstVisibleItemIndex = vm.savedScrollIndex,
-        initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
+    
+    // Initialize scroll states with saved positions
+    val scrollState = rememberLazyListState(
+        initialFirstVisibleItemIndex = state.savedScrollIndex,
+        initialFirstVisibleItemScrollOffset = state.savedScrollOffset
     )
-
+    
+    val gridState = rememberLazyGridState(
+        initialFirstVisibleItemIndex = state.savedScrollIndex,
+        initialFirstVisibleItemScrollOffset = state.savedScrollOffset
+    )
+    
     val scope = rememberCoroutineScope()
     
     // Pre-compute stable key function for book items
@@ -91,28 +84,16 @@ fun ExploreScreen(
     val stableOnBook = remember(onBook) { onBook }
     val stableOnLongClick = remember(onLongClick) { onLongClick }
     
-    // Derive screen state for efficient rendering
-    val screenState by remember {
+    // Memoize books with stable keys - derived from state
+    val booksWithKeys by remember(state.books) {
         derivedStateOf {
-            when {
-                vm.isLoading && vm.page == 1 -> ExploreScreenState.Loading
-                vm.error != null && vm.page == 1 -> ExploreScreenState.Error
-                vm.booksState.books.isEmpty() && !vm.isLoading -> ExploreScreenState.Empty
-                else -> ExploreScreenState.Content
-            }
-        }
-    }
-    
-    // Memoize books with stable keys
-    val booksWithKeys by remember(vm.booksState.books) {
-        derivedStateOf {
-            vm.booksState.books.mapIndexed { index, book -> 
+            state.books.mapIndexed { index, book ->
                 book.toBookItem().copy(column = index.toLong())
             }
         }
     }
-
-    // Save scroll position when it changes - debounced
+    
+    // Save scroll position when it changes
     LaunchedEffect(scrollState.firstVisibleItemIndex, scrollState.firstVisibleItemScrollOffset) {
         vm.savedScrollIndex = scrollState.firstVisibleItemIndex
         vm.savedScrollOffset = scrollState.firstVisibleItemScrollOffset
@@ -122,27 +103,26 @@ fun ExploreScreen(
         vm.savedScrollIndex = gridState.firstVisibleItemIndex
         vm.savedScrollOffset = gridState.firstVisibleItemScrollOffset
     }
-
-    LaunchedEffect(key1 = true) {
+    
+    // Initialize filters from source
+    LaunchedEffect(source) {
         vm.modifiedFilter = source.getFilters()
     }
-
-    val (showSnackBar, setShowSnackBar) = remember {
-        mutableStateOf(false)
-    }
-    val (snackBarText, setSnackBarText) = remember {
-        mutableStateOf("")
-    }
-
+    
+    // Snackbar state for errors
+    val (showSnackBar, setShowSnackBar) = remember { mutableStateOf(false) }
+    val (snackBarText, setSnackBarText) = remember { mutableStateOf("") }
+    
+    // Show snackbar for errors on subsequent pages
     if (showSnackBar) {
         LaunchedEffect(snackBarHostState.currentSnackbarData) {
             val result = snackBarHostState.showSnackbar(
                 message = snackBarText,
                 actionLabel = "Reload",
-                duration = androidx.compose.material3.SnackbarDuration.Indefinite
+                duration = SnackbarDuration.Indefinite
             )
             when (result) {
-                androidx.compose.material3.SnackbarResult.ActionPerformed -> {
+                SnackbarResult.ActionPerformed -> {
                     setShowSnackBar(false)
                     vm.endReached = false
                     loadItems(false)
@@ -151,39 +131,63 @@ fun ExploreScreen(
             }
         }
     }
-    LaunchedEffect(key1 = vm.error != null) {
-        val errors = vm.error
-        if (errors != null && errors.asString(localizeHelper).isNotBlank() && vm.page > 1) {
+    
+    // Handle errors for pages > 1
+    LaunchedEffect(state.error, state.page) {
+        val error = state.error
+        if (error != null && error.asString(localizeHelper).isNotBlank() && state.page > 1) {
             setShowSnackBar(true)
-            setSnackBarText(errors.asString(localizeHelper))
+            setSnackBarText(error.asString(localizeHelper))
         }
     }
-    LaunchedEffect(key1 = scrollState.layoutInfo.totalItemsCount > 0, key2 = scrollState.isScrolledToTheEnd(), key3 = !vm.endReached && !vm.isLoading) {
-        if (scrollState.layoutInfo.totalItemsCount > 0 && scrollState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading) {
+    
+    // Load more items when scrolled to end (list view)
+    LaunchedEffect(
+        scrollState.layoutInfo.totalItemsCount,
+        scrollState.isScrolledToTheEnd(),
+        state.endReached,
+        state.isLoading
+    ) {
+        if (scrollState.layoutInfo.totalItemsCount > 0 &&
+            scrollState.isScrolledToTheEnd() &&
+            !state.endReached &&
+            !state.isLoading
+        ) {
             loadItems(false)
         }
     }
-    LaunchedEffect(key1 = gridState.layoutInfo.totalItemsCount > 0, key2 = gridState.isScrolledToTheEnd(), key3 = !vm.endReached && !vm.isLoading) {
-        if (gridState.layoutInfo.totalItemsCount > 0 && gridState.isScrolledToTheEnd() && !vm.endReached && !vm.isLoading) {
+    
+    // Load more items when scrolled to end (grid view)
+    LaunchedEffect(
+        gridState.layoutInfo.totalItemsCount,
+        gridState.isScrolledToTheEnd(),
+        state.endReached,
+        state.isLoading
+    ) {
+        if (gridState.layoutInfo.totalItemsCount > 0 &&
+            gridState.isScrolledToTheEnd() &&
+            !state.endReached &&
+            !state.isLoading
+        ) {
             loadItems(false)
         }
     }
-    val columns by if (vm.layout != DisplayMode.List) {
+    
+    // Calculate columns based on layout and orientation
+    val columns by if (state.layout != DisplayMode.List) {
         val isLandscape = isLandscape()
-
         with(rememberCoroutineScope()) {
-            remember(isLandscape, vm.layout) {
+            remember(isLandscape, state.layout) {
                 getColumnsForOrientation(isLandscape)
-            }.collectAsState(
-                initial = 2
-            )
+            }.collectAsState(initial = 2)
         }
     } else {
         remember { mutableStateOf(0) }
     }
+    
     Scaffold(
         modifier = modifier,
-        floatingActionButtonPosition = androidx.compose.material3.FabPosition.End,
+        floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 text = {
@@ -192,20 +196,20 @@ fun ExploreScreen(
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 },
-                onClick = {
-                    showmodalSheet()
-                },
+                onClick = showmodalSheet,
                 icon = {
-                    Icon(Icons.Filled.Add, "", tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 },
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 shape = CircleShape
             )
         },
-        snackbarHost = {
-            SnackbarHost(hostState = snackBarHostState)
-        }
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
     ) { paddingValue ->
         Box(
             modifier = Modifier
@@ -213,42 +217,43 @@ fun ExploreScreen(
                 .padding(prevPaddingValues)
         ) {
             when {
-                vm.isLoading && vm.page == 1 -> {
+                // Initial loading state
+                state.isInitialLoading -> {
                     BookShimmerLoading(columns = columns)
                 }
-                vm.error != null && vm.page == 1 -> {
+                // Error with no content
+                state.isErrorWithNoContent -> {
                     ExploreScreenError(
-                        error = vm.error!!.asString(localizeHelper),
+                        error = state.error?.asString(localizeHelper) ?: localize(Res.string.no_results_found),
                         source = source,
                         onRefresh = { getBooks(null, null, emptyList()) },
-                        onWebView = {
-                            onAppbarWebView(it.baseUrl)
+                        onWebView = { src -> 
+                            (src as? HttpSource)?.let { onAppbarWebView(it.baseUrl) }
                         }
                     )
                 }
-                vm.booksState.books.isEmpty() && !vm.isLoading -> {
-                    // Show error screen when no books loaded (could be due to error or truly empty)
+                // Empty state (no books, not loading, no error)
+                !state.hasContent && !state.isLoading -> {
                     ExploreScreenError(
-                        error = vm.error?.asString(localizeHelper) ?: localize(Res.string.no_results_found),
+                        error = localize(Res.string.no_results_found),
                         source = source,
                         onRefresh = { getBooks(null, null, emptyList()) },
-                        onWebView = {
-                            onAppbarWebView(it.baseUrl)
+                        onWebView = { src -> 
+                            (src as? HttpSource)?.let { onAppbarWebView(it.baseUrl) }
                         }
                     )
                 }
+                // Content state
                 else -> {
                     ModernLayoutComposable(
                         books = booksWithKeys,
-                        layout = vm.layout,
+                        layout = state.layout,
                         scrollState = scrollState,
                         gridState = gridState,
                         onClick = stableOnBook,
-                        isLoading = vm.isLoading,
+                        isLoading = state.isLoading,
                         showInLibraryBadge = true,
-                        onLongClick = { book ->
-                            stableOnLongClick(book.toBook())
-                        },
+                        onLongClick = { book -> stableOnLongClick(book.toBook()) },
                         headers = headers,
                         keys = stableKeyFunction,
                         columns = columns
@@ -259,13 +264,71 @@ fun ExploreScreen(
     }
 }
 
+
 /**
- * Enum representing the different states of the explore screen
- * Used with derivedStateOf for efficient recomposition
+ * Error screen for the Explore screen with retry and webview options
  */
-private enum class ExploreScreenState {
-    Loading,
-    Error,
-    Empty,
-    Content
+@Composable
+fun ExploreScreenError(
+    error: String,
+    source: ireader.core.source.CatalogSource,
+    onRefresh: () -> Unit,
+    onWebView: (ireader.core.source.CatalogSource) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Random kaomoji for visual interest
+        val kaomoji = remember { ireader.presentation.ui.core.ui.kaomojis.random() }
+        
+        Text(
+            text = kaomoji,
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = error,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Refresh button
+            OutlinedButton(onClick = onRefresh) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = localize(Res.string.retry))
+            }
+            
+            // WebView button (only for HTTP sources)
+            if (source is HttpSource) {
+                OutlinedButton(onClick = { onWebView(source) }) {
+                    Icon(
+                        imageVector = Icons.Default.Public,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = localize(Res.string.open_in_webView))
+                }
+            }
+        }
+    }
 }

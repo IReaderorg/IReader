@@ -242,10 +242,13 @@ val state by viewModel.state.collectAsStateWithLifecycle()
 - [ ] Replace multiple `mutableStateOf` with single `MutableStateFlow<State>`
 - [ ] Create `updateSuccessState` helper function
 - [ ] Update init block to emit states via Flow
+- [ ] **Ensure async operations wait for `Success` state before updating** (see Bug #1 in MIGRATION_LESSONS_LEARNED.md)
+- [ ] **Preserve all data transformations (filtering, sorting)** (see Bug #2)
 - [ ] Update all action methods to use `updateSuccessState`
 - [ ] Update Screen composable to use `when` on state
-- [ ] Replace `collectAsState` with `collectAsStateWithLifecycle`
+- [ ] Use `collectAsState()` (not `collectAsStateWithLifecycle` in KMP common code)
 - [ ] Test loading, success, and error states
+- [ ] Test all data transformations (filters, search, sort)
 
 ---
 

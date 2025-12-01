@@ -235,12 +235,6 @@ class BookRepositoryImpl(
 
 
     override suspend fun upsert(book: Book): Long {
-        return if (book.id == 0L) {
-            insert(book) ?: -1
-        } else {
-            updateBook(book)
-            book.id
-        }
         return handler.awaitOneOrNullAsync(inTransaction = true) {
             bookQueries.upsert(
                 id = book.id.toDB(),
@@ -267,8 +261,6 @@ class BookRepositoryImpl(
             )
             bookQueries.selectLastInsertedRowId()
         } ?: -1
-
-
     }
 
     override suspend fun updatePartial(book: Book): Long {

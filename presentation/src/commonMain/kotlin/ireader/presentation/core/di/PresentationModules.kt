@@ -5,8 +5,6 @@ import ireader.presentation.core.ScreenContentViewModel
 import ireader.presentation.core.theme.AppThemeViewModel
 import ireader.presentation.di.screenModelModule
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
-import ireader.presentation.ui.home.explore.viewmodel.BooksState
-import ireader.presentation.ui.home.explore.viewmodel.ExploreStateImpl
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import ireader.presentation.ui.home.history.viewmodel.HistoryStateImpl
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
@@ -54,9 +52,7 @@ import org.koin.dsl.module
 
 val PresentationModules = module {
 
-    // BooksState should be a factory, not a singleton, to avoid state sharing between ViewModels
-    // Each ViewModel instance should have its own BooksState to prevent data mixing when navigating quickly
-    factory { BooksState() }
+
     // Changed state objects from single to factory - each screen should have its own state
     factory<HistoryStateImpl> { HistoryStateImpl() }
     factory<LibraryStateImpl> { LibraryStateImpl() }
@@ -64,7 +60,7 @@ val PresentationModules = module {
     factory<UpdateStateImpl> { UpdateStateImpl() }
     factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
-    factory <ExploreStateImpl> { ExploreStateImpl() }
+
     factory <GlobalSearchStateImpl> { GlobalSearchStateImpl() }
     factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }
     factory <DownloadStateImpl> { DownloadStateImpl() }
@@ -73,7 +69,20 @@ val PresentationModules = module {
     factory  { ScreenContentViewModel(get()) }
     single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
 
-    factory<ExploreViewModel> { ExploreViewModel(get(), get(), get(), get(),get(), get(), get(),get(),get(),get(),getOrNull(), getOrNull()) }
+    factory<ExploreViewModel> { (params: ExploreViewModel.Param) -> 
+        ExploreViewModel(
+            remoteUseCases = get(),
+            catalogStore = get(),
+            browseScreenPrefUseCase = get(),
+            insertUseCases = get(),
+            param = params,
+            findDuplicateBook = get(),
+            libraryPreferences = get(),
+            openLocalFolder = get(),
+            syncUseCases = getOrNull(),
+            filterStateManager = getOrNull()
+        )
+    }
     // Changed from single to factory - these ViewModels are heavy and should be created on-demand
     factory  { HistoryViewModel(get(), get(), get(),get(),) }
     factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }

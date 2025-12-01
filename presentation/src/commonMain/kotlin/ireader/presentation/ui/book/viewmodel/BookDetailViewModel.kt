@@ -46,6 +46,7 @@ import ireader.presentation.ui.book.helpers.PlatformHelper
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +60,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -115,6 +117,7 @@ class BookDetailViewModel(
     // Jobs for cancellation
     private var getBookDetailJob: Job? = null
     private var getChapterDetailJob: Job? = null
+    private var subscriptionJob: Job? = null
     
     // Preferences - exposed for UI compatibility
     var filters = mutableStateOf<List<ChaptersFilters>>(ChaptersFilters.getDefault(true))
@@ -173,19 +176,56 @@ class BookDetailViewModel(
     private fun initializeBook(bookId: Long) {
         scope.launch {
             try {
+                // First, try to get the book directly for immediate display
                 val book = getBookUseCases.findBookById(bookId)
                 val sourceId = book?.sourceId
                 
                 val catalogSource = if (sourceId != null) {
-                    getLocalCatalog.get(sourceId)
+                    try {
+                        getLocalCatalog.get(sourceId)
+                    } catch (e: Exception) {
+                        Log.error("Failed to get catalog for source $sourceId", e)
+                        null
+                    }
                 } else null
                 
-                subscribeToBookAndChapters(bookId, catalogSource)
-                
-                if (book != null && book.lastUpdate < 1L && catalogSource?.source != null) {
-                    refreshBookFromSource(book, catalogSource)
-                    refreshChaptersFromSource()
+                // If book exists, immediately show it (don't wait for subscription)
+                if (book != null) {
+                    val chapters = getChapterUseCase.findChaptersByBookId(bookId)
+                    val history = historyUseCase.findHistoryByBookId(bookId)
+                    
+                    val source = catalogSource?.source
+                    val commands = try {
+                        if (source is CatalogSource) {
+                            source.getCommands().toImmutableList()
+                        } else persistentListOf()
+                    } catch (e: Exception) {
+                        persistentListOf()
+                    }
+                    
+                    // Set initial state immediately
+                    val initialState = BookDetailState.Success(
+                        book = book,
+                        chapters = chapters.toImmutableList(),
+                        source = source,
+                        catalogSource = catalogSource,
+                        lastReadChapterId = history?.chapterId,
+                        commands = commands,
+                        modifiedCommands = commands,
+                    )
+                    _state.value = initialState
+                    Log.info { "BookDetailState.Success (immediate): book=${book.title}, chapters=${chapters.size}" }
+                    
+                    // Trigger initial fetch if book needs updating (BEFORE subscribing)
+                    if (book.lastUpdate < 1L && catalogSource?.source != null) {
+                        // Don't show loading indicator for initial fetch
+                        getRemoteBookDetailSilent(book, catalogSource)
+                        getRemoteChapterDetailSilent(book, catalogSource)
+                    }
                 }
+                
+                // Subscribe for updates AFTER initial state is set
+                subscribeToBookAndChapters(bookId, catalogSource)
                 
                 checkSourceAvailability(bookId)
                 
@@ -196,19 +236,79 @@ class BookDetailViewModel(
         }
     }
     
+    // Silent versions that don't show loading indicator
+    private suspend fun getRemoteBookDetailSilent(book: Book, catalog: CatalogLocal?) {
+        getBookDetailJob?.cancel()
+        getBookDetailJob = scope.launch {
+            remoteUseCases.getBookDetail(
+                book = book,
+                catalog = catalog,
+                onError = { message ->
+                    message?.let { showSnackBar(it) }
+                },
+                onSuccess = { resultBook ->
+                    localInsertUseCases.updateBook.update(resultBook)
+                }
+            )
+        }
+    }
+    
+    private suspend fun getRemoteChapterDetailSilent(book: Book, catalog: CatalogLocal?) {
+        getChapterDetailJob?.cancel()
+        getChapterDetailJob = scope.launch {
+            Log.info { "Fetching remote chapters for book: ${book.title}" }
+            remoteUseCases.getRemoteChapters(
+                book = book,
+                catalog = catalog,
+                onError = { message ->
+                    Log.error { "Error fetching chapters: $message" }
+                    message?.let { showSnackBar(it) }
+                },
+                onSuccess = { result ->
+                    Log.info { "Successfully fetched ${result.size} chapters" }
+                    localInsertUseCases.insertChapters(result)
+                },
+                commands = emptyList(),
+                oldChapters = chapters
+            )
+        }
+    }
+    
     private fun subscribeToBookAndChapters(bookId: Long, initialCatalog: CatalogLocal?) {
-        combine(
+        // Cancel previous subscription if any
+        subscriptionJob?.cancel()
+        
+        // Track if we've ever received a valid book
+        var hasReceivedBook = false
+        
+        subscriptionJob = combine(
             getBookUseCases.subscribeBookById(bookId),
             getChapterUseCase.subscribeChaptersByBookId(bookId),
             historyUseCase.subscribeHistoryByBookId(bookId),
         ) { book, chapters, history ->
             if (book != null) {
-                val catalog = getLocalCatalog.get(book.sourceId) ?: initialCatalog
-                val source = catalog?.source
+                hasReceivedBook = true
                 
-                val commands = if (source is CatalogSource) {
-                    source.getCommands().toImmutableList()
-                } else persistentListOf()
+                // Safely get catalog and source - extension might not be installed
+                val (catalog, source) = try {
+                    val cat = getLocalCatalog.get(book.sourceId) ?: initialCatalog
+                    cat to cat?.source
+                } catch (e: Exception) {
+                    Log.error("Failed to load catalog for source ${book.sourceId}", e)
+                    initialCatalog to initialCatalog?.source
+                }
+                
+                val commands = try {
+                    if (source is CatalogSource) {
+                        source.getCommands().toImmutableList()
+                    } else persistentListOf()
+                } catch (e: Exception) {
+                    Log.error("Failed to get commands from source", e)
+                    persistentListOf()
+                }
+                
+                // Preserve refreshing state from current state
+                val currentState = _state.value as? BookDetailState.Success
                 
                 BookDetailState.Success(
                     book = book,
@@ -217,12 +317,25 @@ class BookDetailViewModel(
                     catalogSource = catalog,
                     lastReadChapterId = history?.chapterId,
                     commands = commands,
-                    modifiedCommands = commands,
+                    modifiedCommands = currentState?.modifiedCommands ?: commands,
+                    // Preserve UI state
+                    isRefreshingBook = currentState?.isRefreshingBook ?: false,
+                    isRefreshingChapters = currentState?.isRefreshingChapters ?: false,
+                    isSummaryExpanded = currentState?.isSummaryExpanded ?: false,
+                    selectedChapterIds = currentState?.selectedChapterIds ?: persistentSetOf(),
+                    searchQuery = currentState?.searchQuery,
+                    isSearchMode = currentState?.isSearchMode ?: false,
                 )
-            } else {
+            } else if (hasReceivedBook) {
+                // Book was deleted after we had it - show error
                 BookDetailState.Error("Book not found")
+            } else {
+                // Book not found yet - might be race condition, keep current state
+                // Return null to filter out this emission
+                null
             }
         }
+        .filterNotNull() // Filter out null emissions while waiting for book
         .distinctUntilChanged()
         .catch { e ->
             Log.error("Error subscribing to book data", e)
@@ -230,6 +343,19 @@ class BookDetailViewModel(
         }
         .onEach { newState ->
             _state.value = newState
+            
+            // Log state changes for debugging
+            when (newState) {
+                is BookDetailState.Success -> {
+                    Log.info { "BookDetailState.Success: book=${newState.book.title}, chapters=${newState.chapters.size}" }
+                }
+                is BookDetailState.Loading -> {
+                    Log.info { "BookDetailState.Loading" }
+                }
+                is BookDetailState.Error -> {
+                    Log.error { "BookDetailState.Error: ${newState.message}" }
+                }
+            }
         }
         .launchIn(scope)
     }
@@ -394,21 +520,27 @@ class BookDetailViewModel(
         commands: CommandList = emptyList()
     ) {
         if (book == null) return
-        updateSuccessState { it.copy(isRefreshingChapters = true) }
+        
+        // Only update if we're in Success state, otherwise the loading indicator won't show
+        if (_state.value is BookDetailState.Success) {
+            updateSuccessState { it.copy(isRefreshingChapters = true) }
+        }
         
         getChapterDetailJob?.cancel()
         getChapterDetailJob = scope.launch {
+            Log.info { "Fetching remote chapters for book: ${book.title}" }
             remoteUseCases.getRemoteChapters(
                 book = book,
                 catalog = catalog,
                 onError = { message ->
-                    Log.error { message.toString() }
+                    Log.error { "Error fetching chapters: $message" }
                     message?.let { showSnackBar(it) }
                     withUIContext {
                         updateSuccessState { it.copy(isRefreshingChapters = false) }
                     }
                 },
                 onSuccess = { result ->
+                    Log.info { "Successfully fetched ${result.size} chapters" }
                     localInsertUseCases.insertChapters(result)
                     withUIContext {
                         updateSuccessState { it.copy(isRefreshingChapters = false) }
@@ -806,5 +938,18 @@ class BookDetailViewModel(
         } else emptyList()
         modifiedCommandsState = commands
         updateSuccessState { it.copy(modifiedCommands = commands.toImmutableList()) }
+    }
+    
+    // ==================== Cleanup ====================
+    
+    override fun onCleared() {
+        super.onCleared()
+        
+        // Cancel all jobs when ViewModel is destroyed
+        getBookDetailJob?.cancel()
+        getChapterDetailJob?.cancel()
+        subscriptionJob?.cancel()
+        
+        Log.info { "BookDetailViewModel cleared - all jobs cancelled" }
     }
 }

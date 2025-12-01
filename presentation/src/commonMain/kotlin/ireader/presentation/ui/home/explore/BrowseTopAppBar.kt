@@ -44,12 +44,12 @@ import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposab
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.component.text_related.RadioButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.home.explore.viewmodel.ExploreState
+import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrowseTopAppBar(
-        state: ExploreState,
+        state: ExploreViewModel,
         source: ireader.core.source.CatalogSource?,
         onValueChange: (String) -> Unit,
         onSearch: () -> Unit,
