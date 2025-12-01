@@ -74,12 +74,16 @@ fun LibraryFilterBottomSheet(
     // Handle back button to dismiss the sheet
     IBackHandler(enabled = true, onBack = onDismiss)
     
+    // Use skipPartiallyExpanded = true to go directly to expanded state without flash
+    // This avoids the animation glitch where it shows full then goes to half
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = modifier,
-        sheetState = rememberModalBottomSheetState(
-            skipPartiallyExpanded = false
-        ),
+        sheetState = sheetState,
         dragHandle = {
             Column(
                 modifier = Modifier.fillMaxWidth(),

@@ -235,32 +235,66 @@ class BookRepositoryImpl(
 
 
     override suspend fun upsert(book: Book): Long {
-        return handler.awaitOneOrNullAsync(inTransaction = true) {
-            bookQueries.upsert(
-                id = book.id.toDB(),
-                source = book.sourceId,
-                dateAdded = book.dateAdded,
-                lastUpdate = book.lastUpdate,
-                favorite = book.favorite,
-                title = book.title,
-                status = book.status,
-                genre = book.genres,
-                description = book.description,
-                author = book.author,
-                initialized = book.initialized,
-                url = book.key,
-                artist = book.author,
-                chapterFlags = book.flags,
-                coverLastModified = 0,
-                nextUpdate = 0,
-                thumbnailUrl = book.cover,
-                viewerFlags = book.viewer,
-                isPinned = book.isPinned,
-                pinnedOrder = book.pinnedOrder.toLong(),
-                isArchived = book.isArchived,
-            )
-            bookQueries.selectLastInsertedRowId()
-        } ?: -1
+        // First, check if book already exists by key and source
+        val existingBook = handler.awaitOneOrNull {
+            bookQueries.getBookByKey(book.key, book.sourceId, booksMapper)
+        }
+        
+        return if (existingBook != null) {
+            // Book exists - update it and return existing ID
+            handler.await(inTransaction = true) {
+                bookQueries.update(
+                    source = book.sourceId,
+                    dateAdded = book.dateAdded,
+                    lastUpdate = book.lastUpdate,
+                    title = book.title,
+                    status = book.status,
+                    description = book.description,
+                    author = book.author,
+                    url = book.key,
+                    chapterFlags = book.flags,
+                    coverLastModified = 0,
+                    thumbnailUrl = book.cover,
+                    viewer = book.viewer,
+                    id = existingBook.id,
+                    initialized = book.initialized,
+                    favorite = existingBook.favorite, // Preserve favorite status
+                    genre = book.genres.let(bookGenresConverter::encode),
+                    isPinned = existingBook.isPinned, // Preserve pin status
+                    pinnedOrder = existingBook.pinnedOrder.toLong(),
+                    isArchived = existingBook.isArchived, // Preserve archive status
+                )
+            }
+            existingBook.id
+        } else {
+            // Book doesn't exist - insert it
+            handler.awaitOneOrNullAsync(inTransaction = true) {
+                bookQueries.upsert(
+                    id = book.id.toDB(),
+                    source = book.sourceId,
+                    dateAdded = book.dateAdded,
+                    lastUpdate = book.lastUpdate,
+                    favorite = book.favorite,
+                    title = book.title,
+                    status = book.status,
+                    genre = book.genres,
+                    description = book.description,
+                    author = book.author,
+                    initialized = book.initialized,
+                    url = book.key,
+                    artist = book.author,
+                    chapterFlags = book.flags,
+                    coverLastModified = 0,
+                    nextUpdate = 0,
+                    thumbnailUrl = book.cover,
+                    viewerFlags = book.viewer,
+                    isPinned = book.isPinned,
+                    pinnedOrder = book.pinnedOrder.toLong(),
+                    isArchived = book.isArchived,
+                )
+                bookQueries.selectLastInsertedRowId()
+            } ?: -1
+        }
     }
 
     override suspend fun updatePartial(book: Book): Long {

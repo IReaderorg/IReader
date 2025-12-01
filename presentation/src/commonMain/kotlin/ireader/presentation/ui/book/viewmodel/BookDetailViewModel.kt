@@ -2,13 +2,12 @@ package ireader.presentation.ui.book.viewmodel
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.mutableStateListOf
 import ireader.core.log.Log
 import ireader.core.source.CatalogSource
-import ireader.core.source.HttpSource
 import ireader.core.source.Source
 import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
@@ -18,7 +17,6 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.isObsolete
-import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.common.DownloadService
 import ireader.domain.services.common.ServiceResult
@@ -44,7 +42,6 @@ import ireader.i18n.UiText
 import ireader.presentation.ui.book.components.ExportOptions
 import ireader.presentation.ui.book.helpers.PlatformHelper
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
@@ -236,17 +233,24 @@ class BookDetailViewModel(
         }
     }
     
-    // Silent versions that don't show loading indicator
+    // Fetch functions for initial load - now show loading indicator
     private suspend fun getRemoteBookDetailSilent(book: Book, catalog: CatalogLocal?) {
+        updateSuccessState { it.copy(isRefreshingBook = true) }
         getBookDetailJob?.cancel()
         getBookDetailJob = scope.launch {
             remoteUseCases.getBookDetail(
                 book = book,
                 catalog = catalog,
                 onError = { message ->
+                    withUIContext {
+                        updateSuccessState { it.copy(isRefreshingBook = false) }
+                    }
                     message?.let { showSnackBar(it) }
                 },
                 onSuccess = { resultBook ->
+                    withUIContext {
+                        updateSuccessState { it.copy(isRefreshingBook = false) }
+                    }
                     localInsertUseCases.updateBook.update(resultBook)
                 }
             )
@@ -254,18 +258,22 @@ class BookDetailViewModel(
     }
     
     private suspend fun getRemoteChapterDetailSilent(book: Book, catalog: CatalogLocal?) {
+        updateSuccessState { it.copy(isRefreshingChapters = true) }
         getChapterDetailJob?.cancel()
         getChapterDetailJob = scope.launch {
-            Log.info { "Fetching remote chapters for book: ${book.title}" }
             remoteUseCases.getRemoteChapters(
                 book = book,
                 catalog = catalog,
                 onError = { message ->
-                    Log.error { "Error fetching chapters: $message" }
+                    withUIContext {
+                        updateSuccessState { it.copy(isRefreshingChapters = false) }
+                    }
                     message?.let { showSnackBar(it) }
                 },
                 onSuccess = { result ->
-                    Log.info { "Successfully fetched ${result.size} chapters" }
+                    withUIContext {
+                        updateSuccessState { it.copy(isRefreshingChapters = false) }
+                    }
                     localInsertUseCases.insertChapters(result)
                 },
                 commands = emptyList(),
@@ -280,6 +288,9 @@ class BookDetailViewModel(
         
         // Track if we've ever received a valid book
         var hasReceivedBook = false
+        // Track number of null emissions for timeout
+        var nullEmissionCount = 0
+        val maxNullEmissions = 10 // After ~10 emissions without book, show error
         
         subscriptionJob = combine(
             getBookUseCases.subscribeBookById(bookId),
@@ -288,6 +299,7 @@ class BookDetailViewModel(
         ) { book, chapters, history ->
             if (book != null) {
                 hasReceivedBook = true
+                nullEmissionCount = 0 // Reset counter
                 
                 // Safely get catalog and source - extension might not be installed
                 val (catalog, source) = try {
@@ -330,9 +342,16 @@ class BookDetailViewModel(
                 // Book was deleted after we had it - show error
                 BookDetailState.Error("Book not found")
             } else {
-                // Book not found yet - might be race condition, keep current state
-                // Return null to filter out this emission
-                null
+                // Book not found yet - might be race condition
+                nullEmissionCount++
+                if (nullEmissionCount >= maxNullEmissions) {
+                    // Timeout - book was never found, show error
+                    Log.error { "BookDetailViewModel: Timeout waiting for book $bookId after $nullEmissionCount emissions" }
+                    BookDetailState.Error("Book not found in database")
+                } else {
+                    // Still waiting - return null to filter out
+                    null
+                }
             }
         }
         .filterNotNull() // Filter out null emissions while waiting for book
@@ -523,6 +542,7 @@ class BookDetailViewModel(
         
         // Only update if we're in Success state, otherwise the loading indicator won't show
         if (_state.value is BookDetailState.Success) {
+            Log.info { "getRemoteChapterDetail: Setting isRefreshingChapters = true" }
             updateSuccessState { it.copy(isRefreshingChapters = true) }
         }
         

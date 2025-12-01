@@ -243,22 +243,27 @@ class ExploreViewModel(
     
     /**
      * Process successful fetch result with deduplication
+     * 
+     * NOTE: We do NOT check for duplicates in the database here.
+     * This is intentional - we want to show fresh data from the source.
+     * When the user clicks on a book, we'll insert/upsert it then.
+     * This fixes the issue where stale database entries caused BookDetail to fail.
      */
     private suspend fun processSuccessResult(pageInfo: MangasPageInfo) {
         val sourceId = source?.id ?: return
         
-        // Convert and deduplicate books efficiently
-        val newBooks = withContext(Dispatchers.IO) {
+        // Convert and deduplicate books efficiently (in-memory only)
+        val newBooks = withContext(Dispatchers.Default) {
             pageInfo.mangas
                 .filter { manga -> 
-                    // Deduplicate by URL (like Mihon's seenManga)
+                    // Deduplicate by URL (like Mihon's seenManga) - in-memory only
                     val key = "${manga.key}_$sourceId"
                     seenBooks.add(key)
                 }
                 .map { manga -> 
-                    val book = manga.toBook(sourceId = sourceId)
-                    // Check for existing book in database (suspend call)
-                    findDuplicateBook(book.title, book.sourceId) ?: book
+                    // Just convert to Book, don't check database
+                    // Database check happens when user clicks on the book
+                    manga.toBook(sourceId = sourceId)
                 }
         }
         

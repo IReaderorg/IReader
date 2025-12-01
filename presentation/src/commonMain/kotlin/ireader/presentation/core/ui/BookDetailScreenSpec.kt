@@ -216,15 +216,17 @@ data class BookDetailScreenSpec constructor(
         // Chapter mode for bottom sheet
         val chapterMode = remember { mutableStateOf(true) }
         
-        // Derive refreshing state
-        val refreshing by remember { derivedStateOf { state.isRefreshing } }
+        // Refreshing state - directly use state.isRefreshing (no derivedStateOf needed)
+        val refreshing = state.isRefreshing
         val pullToRefreshState = rememberPullToRefreshState()
         val topbarState = rememberTopAppBarState()
         
-        // Memoize refresh callback
+        // Memoize refresh callback - refreshes both book details and chapters
         val onRefresh = remember(state.book, state.catalogSource) {
             {
                 scope.launch {
+                    // Refresh book details first, then chapters
+                    vm.getRemoteBookDetail(state.book, state.catalogSource)
                     vm.getRemoteChapterDetail(state.book, state.catalogSource)
                 }
                 Unit
