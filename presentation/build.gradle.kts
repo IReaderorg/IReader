@@ -63,6 +63,9 @@ kotlin {
                 // Voyager tab navigator removed - using pure Compose Navigation
                 api(libs.koin.core)
                 api(libs.koin.compose)
+                
+                // Immutable Collections - Critical for Compose performance (Mihon pattern)
+                api(libs.kotlinx.collections.immutable)
 
                 api(libs.coil.core)
                 api(libs.coil.compose)

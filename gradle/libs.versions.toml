@@ -2,6 +2,8 @@
 # Compose
 apkParser = "2.6.10"
 composeGradle = "1.9.3"
+# Immutable Collections for Compose stability
+kotlinxImmutable = "0.3.7"
 coreSplashscreen = "1.2.0"
 profileinstaller = "1.4.1"
 firebaseAnalytics = "23.0.0"
@@ -103,6 +105,9 @@ firebase-analytic = { module = "com.google.firebase:firebase-analytics" }
 
 okio = "com.squareup.okio:okio:3.16.2"
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+
+# Immutable Collections - Critical for Compose performance
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxImmutable" }
 
 
 # Inject

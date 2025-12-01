@@ -70,6 +70,10 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.androidx.datastore.core)
                 api(libs.androidx.datastore.preferences.core)
+                
+                // Immutable Collections - Critical for Compose performance (Mihon pattern)
+                api(libs.kotlinx.collections.immutable)
+                
                 // Kermit logging - available transitively from source-api
                 // Explicitly included here for direct usage in core module
             }

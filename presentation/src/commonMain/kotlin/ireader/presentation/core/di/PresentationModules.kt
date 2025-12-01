@@ -1,11 +1,10 @@
 package ireader.presentation.core.di
 
-import ireader.presentation.di.screenModelModule
+// Enhanced Settings ViewModels
 import ireader.presentation.core.ScreenContentViewModel
 import ireader.presentation.core.theme.AppThemeViewModel
+import ireader.presentation.di.screenModelModule
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
-import ireader.presentation.ui.book.viewmodel.ChapterStateImpl
-import ireader.presentation.ui.book.viewmodel.DetailStateImpl
 import ireader.presentation.ui.home.explore.viewmodel.BooksState
 import ireader.presentation.ui.home.explore.viewmodel.ExploreStateImpl
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
@@ -29,28 +28,27 @@ import ireader.presentation.ui.reader.viewmodel.ReaderTranslationViewModel
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.advance.AdvanceSettingViewModel
 import ireader.presentation.ui.settings.appearance.AppearanceViewModel
+import ireader.presentation.ui.settings.appearance.SettingsAppearanceViewModel
 import ireader.presentation.ui.settings.backups.BackupScreenViewModel
 import ireader.presentation.ui.settings.backups.CloudBackupViewModel
 import ireader.presentation.ui.settings.category.CategoryScreenViewModel
+import ireader.presentation.ui.settings.data.SettingsDataViewModel
 import ireader.presentation.ui.settings.downloader.DownloadStateImpl
 import ireader.presentation.ui.settings.downloader.DownloaderViewModel
+import ireader.presentation.ui.settings.downloads.SettingsDownloadViewModel
 import ireader.presentation.ui.settings.font_screens.FontScreenStateImpl
 import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
+import ireader.presentation.ui.settings.library.SettingsLibraryViewModel
+import ireader.presentation.ui.settings.notifications.SettingsNotificationViewModel
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
+import ireader.presentation.ui.settings.reader.SettingsReaderViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
-import ireader.presentation.ui.settings.statistics.StatisticsViewModel
-// Enhanced Settings ViewModels
-import ireader.presentation.ui.settings.appearance.SettingsAppearanceViewModel
-import ireader.presentation.ui.settings.reader.SettingsReaderViewModel
-import ireader.presentation.ui.settings.library.SettingsLibraryViewModel
-import ireader.presentation.ui.settings.downloads.SettingsDownloadViewModel
 import ireader.presentation.ui.settings.security.SettingsSecurityViewModel
-import ireader.presentation.ui.settings.notifications.SettingsNotificationViewModel
+import ireader.presentation.ui.settings.statistics.StatisticsViewModel
 import ireader.presentation.ui.settings.tracking.SettingsTrackingViewModel
-import ireader.presentation.ui.settings.data.SettingsDataViewModel
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import org.koin.dsl.module
 
@@ -92,7 +90,7 @@ val PresentationModules = module {
     // Changed from single to factory - created on-demand when user navigates to updates
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get()) }
+    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }
     // Changed from single to factory - settings screen is not always needed
     factory  { 
         MainSettingScreenViewModel(
@@ -175,8 +173,6 @@ val PresentationModules = module {
         )
     }
 
-    factory <ChapterStateImpl> { ChapterStateImpl() }
-    factory <DetailStateImpl> { DetailStateImpl() }
 
     factory <ReaderScreenStateImpl> { ReaderScreenStateImpl() }
     factory <ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }

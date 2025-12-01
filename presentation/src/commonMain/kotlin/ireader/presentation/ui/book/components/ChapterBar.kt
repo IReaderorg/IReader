@@ -107,7 +107,7 @@ fun ChapterBar(
                             text = { Text(localizeHelper.localize(Res.string.download_all)) },
                             onClick = {
                                 showDownloadMenu = false
-                                vm.booksState.book?.let { book ->
+                                vm.book?.let { book ->
                                     vm.startDownloadService(book)
                                 }
                             }

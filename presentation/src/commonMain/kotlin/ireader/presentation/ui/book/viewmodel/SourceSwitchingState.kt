@@ -1,5 +1,6 @@
 package ireader.presentation.ui.book.viewmodel
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,8 +8,10 @@ import ireader.domain.models.entities.SourceComparison
 import ireader.domain.usecases.source.MigrateToSourceUseCase
 
 /**
- * State holder for source switching feature
+ * State holder for source switching feature.
+ * Marked as @Stable to help Compose compiler optimize recomposition.
  */
+@Stable
 class SourceSwitchingState {
     var sourceComparison by mutableStateOf<SourceComparison?>(null)
     var showBanner by mutableStateOf(false)

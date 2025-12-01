@@ -116,6 +116,9 @@ kotlin {
 
                 api(libs.coil.core)
                 
+                // Immutable Collections - Critical for Compose performance (Mihon pattern)
+                api(libs.kotlinx.collections.immutable)
+                
                 // Zipline - not used anymore, kept for reference
                 // implementation("app.cash.zipline:zipline:1.24.0")
                 // implementation("app.cash.zipline:zipline-loader:1.24.0")

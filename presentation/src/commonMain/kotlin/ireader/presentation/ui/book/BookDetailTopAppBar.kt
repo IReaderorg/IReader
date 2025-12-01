@@ -56,7 +56,8 @@ fun BookDetailTopAppBar(
     onPopBackStack: () -> Unit,
     onCommand: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?,
-    state: BookDetailViewModel,
+    hasSelection: Boolean,
+    selectionSize: Int,
     onClickCancelSelection: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
@@ -69,38 +70,36 @@ fun BookDetailTopAppBar(
     onShareBook: () -> Unit = {},
     onExportEpub: () -> Unit = {},
 ) {
-
-        when {
-            state.hasSelection -> {
-                EditModeChapterDetailTopAppBar(
-                    modifier = modifier.padding(paddingValues),
-                    selectionSize = state.selection.size,
-                    onClickCancelSelection = onClickCancelSelection,
-                    onClickSelectAll = onClickSelectAll,
-                    onClickInvertSelection = onClickInvertSelection,
-                    onSelectBetween = onSelectBetween,
-                    scrollBehavior = scrollBehavior,
-                    paddingValues = paddingValues
-                )
-            }
-            else -> {
-                RegularChapterDetailTopAppBar(
-                    onPopBackStack = onPopBackStack,
-                    scrollBehavior = scrollBehavior,
-                    onCommand = onCommand,
-                    onRefresh = onRefresh,
-                    source = source,
-                    onDownload = onDownload,
-                    onInfo = onInfo,
-                    onArchive = onArchive,
-                    onUnarchive = onUnarchive,
-                    isArchived = isArchived,
-                    onExportEpub = onExportEpub,
-                    onShareBook = onShareBook
-                )
-            }
+    when {
+        hasSelection -> {
+            EditModeChapterDetailTopAppBar(
+                modifier = modifier.padding(paddingValues),
+                selectionSize = selectionSize,
+                onClickCancelSelection = onClickCancelSelection,
+                onClickSelectAll = onClickSelectAll,
+                onClickInvertSelection = onClickInvertSelection,
+                onSelectBetween = onSelectBetween,
+                scrollBehavior = scrollBehavior,
+                paddingValues = paddingValues
+            )
         }
-
+        else -> {
+            RegularChapterDetailTopAppBar(
+                onPopBackStack = onPopBackStack,
+                scrollBehavior = scrollBehavior,
+                onCommand = onCommand,
+                onRefresh = onRefresh,
+                source = source,
+                onDownload = onDownload,
+                onInfo = onInfo,
+                onArchive = onArchive,
+                onUnarchive = onUnarchive,
+                isArchived = isArchived,
+                onExportEpub = onExportEpub,
+                onShareBook = onShareBook
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
