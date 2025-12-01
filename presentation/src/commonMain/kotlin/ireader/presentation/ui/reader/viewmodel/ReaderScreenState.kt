@@ -10,11 +10,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import ireader.core.source.Source
+import ireader.core.source.model.Page
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
-import ireader.core.source.Source
-import ireader.core.source.model.Page
 
 
 open class ReaderScreenStateImpl: ReaderScreenState {
@@ -102,7 +102,7 @@ open class ReaderScreenPreferencesStateImpl() : ReaderScreenPreferencesState {
     override var showReportDialog by mutableStateOf<Boolean>(false)
     
     // Reading time estimation state
-    override var showReadingTime by mutableStateOf<Boolean>(true)
+    override var showReadingTime by mutableStateOf<Boolean>(false)
     override var estimatedReadingMinutes by mutableStateOf<Int>(0)
     override var wordsRemaining by mutableStateOf<Int>(0)
     override var totalWords by mutableStateOf<Int>(0)

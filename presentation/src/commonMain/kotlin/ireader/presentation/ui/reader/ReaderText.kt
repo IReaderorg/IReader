@@ -1,29 +1,55 @@
 package ireader.presentation.ui.reader
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.RateReview
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -34,12 +60,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,21 +79,30 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.toUri
 import ireader.core.source.model.ImageUrl
-import ireader.presentation.core.toComposeColor
-import ireader.presentation.core.toDomainColor
-import ireader.presentation.core.toComposeColor
-import ireader.presentation.core.toComposeFontFamily
-import ireader.presentation.core.toComposeTextAlign
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
+import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.chapter_completed
+import ireader.i18n.resources.hide_reviews
+import ireader.i18n.resources.image
+import ireader.i18n.resources.next_chapter
+import ireader.i18n.resources.previous_chapter
+import ireader.i18n.resources.this_is_last_chapter
+import ireader.i18n.resources.view_chapter_reviews
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toComposeFontFamily
+import ireader.presentation.core.toComposeTextAlign
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.list.scrollbars.IColumnScrollbar
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
 import ireader.presentation.ui.core.modifier.supportDesktopScroll
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.reader.components.ChapterReviewSection
 import ireader.presentation.ui.reader.components.SelectableTranslatableText
 import ireader.presentation.ui.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import ireader.presentation.ui.reader.reverse_swip_refresh.MultiSwipeRefresh
@@ -70,9 +110,6 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -131,9 +168,39 @@ fun ReaderText(
         val maxHeight = remember {
             constraints.maxHeight.toFloat()
         }
-        val firstVisibleValue =
-            remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }
-
+        // Check if at boundaries for swipe refresh
+        // Both Page and Continues modes now use LazyColumn
+        val isAtTop by remember { derivedStateOf {
+            val firstIndex = lazyListState.firstVisibleItemIndex
+            val firstOffset = lazyListState.firstVisibleItemScrollOffset
+            // At top if first item is visible and scroll offset is minimal
+            firstIndex == 0 && firstOffset <= 20
+        }}
+        
+        val isAtBottom by remember { derivedStateOf {
+            val layoutInfo = lazyListState.layoutInfo
+            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+            val totalItems = layoutInfo.totalItemsCount
+            if (totalItems == 0) {
+                false
+            } else {
+                // At bottom if last item is fully visible
+                val isLastItemVisible = lastVisibleItem?.index == totalItems - 1
+                val isLastItemFullyVisible = if (lastVisibleItem != null) {
+                    val viewportEnd = layoutInfo.viewportEndOffset
+                    lastVisibleItem.offset + lastVisibleItem.size <= viewportEnd + 20
+                } else false
+                isLastItemVisible && isLastItemFullyVisible
+            }
+        }}
+        
+        // Get chapter names for indicators
+        val currentIndex = vm.currentChapterIndex
+        val chapters = vm.stateChapters
+        val hasPrevChapter = currentIndex > 0
+        val hasNextChapter = currentIndex < chapters.lastIndex
+        val prevChapterName = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1)?.name else null
+        val nextChapterName = if (hasNextChapter) chapters.getOrNull(currentIndex + 1)?.name else null
 
         // Use lazyValue for immediate UI updates during slider drag
         Box(
@@ -149,31 +216,36 @@ fun ReaderText(
                 state = swipeState,
                 indicators = listOf(
                     ISwipeRefreshIndicator(
-                        (scrollState.value == 0 && vm.readingMode.value == ReadingMode.Page) || (vm.readingMode.value == ReadingMode.Continues && firstVisibleValue.value == 0),
+                        enable = isAtTop && hasPrevChapter,
                         alignment = Alignment.TopCenter,
-                        indicator = { _, _ ->
+                        indicator = { state, _ ->
                             ArrowIndicator(
                                 icon = Icons.Default.KeyboardArrowUp,
-                                swipeRefreshState = swipeState,
+                                swipeRefreshState = state,
                                 refreshTriggerDistance = 80.dp,
-                                color = vm.textColor.value.toComposeColor()
+                                color = vm.textColor.value.toComposeColor(),
+                                chapterName = prevChapterName,
+                                isTop = true
                             )
-                        }, onRefresh = {
+                        }, 
+                        onRefresh = {
                             onPrev()
                         }
                     ),
                     ISwipeRefreshIndicator(
-                        (scrollState.value != 0 && vm.readingMode.value == ReadingMode.Page) || (vm.readingMode.value == ReadingMode.Continues && firstVisibleValue.value != 0),
+                        enable = isAtBottom && hasNextChapter,
                         alignment = Alignment.BottomCenter,
                         onRefresh = {
                             onNext()
                         },
-                        indicator = { _, _ ->
+                        indicator = { state, _ ->
                             ArrowIndicator(
                                 icon = Icons.Default.KeyboardArrowDown,
-                                swipeRefreshState = swipeState,
+                                swipeRefreshState = state,
                                 refreshTriggerDistance = 80.dp,
-                                color = vm.textColor.value.toComposeColor()
+                                color = vm.textColor.value.toComposeColor(),
+                                chapterName = nextChapterName,
+                                isTop = false
                             )
                         }
                     ),
@@ -182,6 +254,10 @@ fun ReaderText(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .graphicsLayer {
+                            // Translate content based on swipe state for drag effect
+                            translationY = swipeState.indicatorOffset * 0.3f
+                        }
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onTap = {
@@ -196,6 +272,7 @@ fun ReaderText(
                                 PagedReaderText(
                                     interactionSource = interactionSource,
                                     scrollState = scrollState,
+                                    lazyListState = lazyListState,
                                     vm = vm,
                                     maxHeight = maxHeight,
                                     onNext = onNext,
@@ -255,6 +332,197 @@ private fun TextSelectionContainer(
 
 @Composable
 private fun PagedReaderText(
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource,
+    scrollState: ScrollState,
+    lazyListState: LazyListState,
+    vm: ReaderScreenViewModel,
+    maxHeight: Float,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    toggleReaderMode: () -> Unit
+) {
+    // Use optimized LazyColumn-based implementation for better performance
+    OptimizedPagedReaderText(
+        modifier = modifier,
+        interactionSource = interactionSource,
+        lazyListState = lazyListState,
+        vm = vm,
+        maxHeight = maxHeight,
+        onPrev = onPrev,
+        onNext = onNext,
+        toggleReaderMode = toggleReaderMode
+    )
+}
+
+/**
+ * Optimized paged reader that uses LazyColumn instead of Column with verticalScroll.
+ * This provides significant performance improvements for long chapters by:
+ * 1. Only composing visible paragraphs (lazy loading)
+ * 2. Recycling paragraph composables as user scrolls
+ * 3. Reducing memory usage for chapters with many paragraphs
+ * 4. Chapter end UI with navigation and comments section
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OptimizedPagedReaderText(
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource,
+    lazyListState: LazyListState,
+    vm: ReaderScreenViewModel,
+    maxHeight: Float,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    toggleReaderMode: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    
+    // Scroll to top when chapter changes
+    LaunchedEffect(key1 = vm.stateChapter?.id) {
+        // Small delay to ensure content is loaded
+        kotlinx.coroutines.delay(50)
+        lazyListState.scrollToItem(0)
+    }
+    
+    // Track scroll progress for reading time estimation
+    val visibleItemInfo = remember { derivedStateOf { lazyListState.layoutInfo } }
+    LaunchedEffect(key1 = visibleItemInfo.value, key2 = vm.stateChapter?.id) {
+        val layoutInfo = lazyListState.layoutInfo
+        val totalItems = layoutInfo.totalItemsCount
+        val firstVisibleItem = layoutInfo.visibleItemsInfo.firstOrNull()?.index ?: 0
+        
+        if (totalItems > 0 && !vm.isLoading) {
+            val scrollProgress = firstVisibleItem.toFloat() / totalItems.toFloat()
+            vm.updateReadingTimeEstimation(scrollProgress)
+        }
+    }
+    
+    // Auto-scroll logic for optimized Page mode
+    LaunchedEffect(key1 = vm.autoScrollMode, key2 = vm.autoScrollOffset.value, key3 = vm.stateChapter?.id) {
+        if (vm.autoScrollMode) {
+            while (vm.autoScrollMode) {
+                val scrollAmount = vm.autoScrollOffset.value.toFloat()
+                
+                // Check if we've reached the end before scrolling
+                val layoutInfo = lazyListState.layoutInfo
+                val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+                val isAtEnd = lastVisibleItem?.index == layoutInfo.totalItemsCount - 1
+                
+                if (isAtEnd) {
+                    // Stop auto-scroll before advancing to prevent double-advance
+                    vm.autoScrollMode = false
+                    // Auto-advance to next chapter
+                    onNext()
+                    break
+                }
+                
+                lazyListState.scrollBy(scrollAmount)
+                
+                // Delay based on interval (smooth scrolling)
+                kotlinx.coroutines.delay(16L) // ~60fps
+            }
+        }
+    }
+    
+    // Memoize content to prevent unnecessary recomposition
+    val content = remember(vm.stateChapter?.id, vm.translationViewModel.translationState.hasTranslation) {
+        vm.getCurrentContent()
+    }
+    
+    // Check chapter navigation availability
+    val currentIndex = vm.currentChapterIndex
+    val chapters = vm.stateChapters
+    val hasPrevChapter = currentIndex > 0
+    val hasNextChapter = currentIndex < chapters.lastIndex
+    val prevChapterName = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1)?.name else null
+    val nextChapterName = if (hasNextChapter) chapters.getOrNull(currentIndex + 1)?.name else null
+    
+    var showCommentsSheet by remember { mutableStateOf(false) }
+    val prevChapter = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1) else null
+    
+    Box(modifier = Modifier.fillMaxSize()) {
+        ILazyColumnScrollbar(
+            listState = lazyListState,
+            padding = if (vm.scrollIndicatorPadding.lazyValue < 0) 0.dp else vm.scrollIndicatorPadding.lazyValue.dp,
+            thickness = if (vm.scrollIndicatorWith.lazyValue < 0) 0.dp else vm.scrollIndicatorWith.lazyValue.dp,
+            enable = vm.showScrollIndicator.value,
+            thumbColor = vm.unselectedScrollBarColor.value.toComposeColor(),
+            thumbSelectedColor = vm.selectedScrollBarColor.value.toComposeColor(),
+            selectionMode = vm.isScrollIndicatorDraggable.value,
+            rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right,
+        ) {
+            LazyColumn(
+                modifier = modifier.fillMaxSize(),
+                state = lazyListState,
+            ) {
+                // Chapter header (shown at top of content)
+                item(key = "${vm.stateChapter?.id ?: 0}-header") {
+                    InfiniteChapterHeader(
+                        chapter = vm.stateChapter ?: return@item,
+                        isFirst = true,
+                        textColor = vm.textColor.value.toComposeColor(),
+                        backgroundColor = vm.backgroundColor.value.toComposeColor()
+                    )
+                }
+                
+                // Chapter content items
+                items(
+                    count = content.size,
+                    key = { index ->
+                        // Stable key combining chapter ID and paragraph index for better item reuse
+                        "${vm.stateChapter?.id ?: 0}-content-$index"
+                    }
+                ) { index ->
+                    // Use remember to cache the page reference
+                    val page = remember(content, index) { content.getOrNull(index) }
+                    if (page != null) {
+                        MainText(
+                            modifier = modifier,
+                            index = index,
+                            page = page,
+                            vm = vm
+                        )
+                    }
+                }
+                
+                // Void space at end of chapter with comments (only shown after scrolling to end)
+                item(key = "${vm.stateChapter?.id ?: 0}-chapter-void") {
+                    ChapterVoidSpace(
+                        chapter = vm.stateChapter ?: return@item,
+                        isLast = !hasNextChapter,
+                        textColor = vm.textColor.value.toComposeColor(),
+                        backgroundColor = vm.backgroundColor.value.toComposeColor(),
+                        onShowComments = { showCommentsSheet = true },
+                        onNextChapter = onNext,
+                        isLoading = vm.isLoading
+                    )
+                }
+            }
+        }
+    }
+    
+    // Comments bottom sheet
+    if (showCommentsSheet && vm.stateChapter != null) {
+        androidx.compose.material3.ModalBottomSheet(
+            onDismissRequest = { showCommentsSheet = false },
+            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
+        ) {
+            ChapterReviewSection(
+                reviews = emptyList(),
+                averageRating = 0f,
+                onWriteReview = { _, _ -> },
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Legacy paged reader using Column with verticalScroll.
+ * Kept for compatibility - use OptimizedPagedReaderText for better performance.
+ */
+@Composable
+private fun LegacyPagedReaderText(
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource,
     scrollState: ScrollState,
@@ -675,6 +943,15 @@ private fun StyleTextOptimized(
         )
     }
 }
+/**
+ * Continues reading mode with infinite scroll and void space between chapters.
+ * Features:
+ * - Seamless chapter transitions with dark void space
+ * - Bouncing effect at chapter boundaries
+ * - Automatic chapter state updates
+ * - Optimized for performance on old devices
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ContinuesReaderPage(
     modifier: Modifier = Modifier,
@@ -688,19 +965,45 @@ private fun ContinuesReaderPage(
     onChapterShown: (chapter: Chapter) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    var showCommentsForChapter by remember { mutableStateOf<Chapter?>(null) }
     
-    var lastChapterId: Chapter? by remember {
-        mutableStateOf(null)
-    }
+    // Track current chapter for state updates
+    var lastChapterId: Chapter? by remember { mutableStateOf(null) }
+    
     LaunchedEffect(key1 = lastChapterId) {
-        lastChapterId?.let { onChapterShown(it) }
+        lastChapterId?.let { chapter ->
+            onChapterShown(chapter)
+            // Update the current chapter index in ViewModel
+            val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
+            if (index != -1 && index != vm.currentChapterIndex) {
+                vm.currentChapterIndex = index
+            }
+        }
     }
+    
+    // Build items for infinite scroll with void spaces
+    val items = remember(vm.chapterShell, vm.stateChapters, vm.currentChapterIndex) {
+        buildInfiniteReaderItems(
+            chapterShell = vm.chapterShell,
+            allChapters = vm.stateChapters,
+            currentIndex = vm.currentChapterIndex
+        )
+    }
+    
+    // Track visible item to update chapter state
     val visibleItemInfo = remember { derivedStateOf { scrollState.layoutInfo } }
+    
     LaunchedEffect(key1 = visibleItemInfo.value.visibleItemsInfo.firstOrNull()?.key) {
         runCatching {
             val visibleKey = scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.key?.toString()
             if (visibleKey != null) {
-                val chapterId = visibleKey.substringAfter("-").toLongOrNull()
+                // Extract chapter ID from key (format: "content-{chapterId}-{index}" or "void-{chapterId}")
+                val chapterId = when {
+                    visibleKey.startsWith("content-") -> visibleKey.split("-").getOrNull(1)?.toLongOrNull()
+                    visibleKey.startsWith("void-") -> visibleKey.substringAfter("void-").toLongOrNull()
+                    visibleKey.startsWith("header-") -> visibleKey.substringAfter("header-").toLongOrNull()
+                    else -> visibleKey.substringAfter("-").toLongOrNull()
+                }
                 if (chapterId != null) {
                     vm.chapterShell.firstOrNull { it.id == chapterId }?.let { chapter ->
                         if (chapter.id != lastChapterId?.id) {
@@ -753,19 +1056,12 @@ private fun ContinuesReaderPage(
         }
     }
     
-    val items by remember {
-        derivedStateOf {
-            // Safely map chapter content, handling potential null or empty content
-            vm.chapterShell.flatMap { chapter ->
-                val content = chapter.content
-                if (content.isNullOrEmpty()) {
-                    emptyList()
-                } else {
-                    content.map { page -> chapter.id to page }
-                }
-            }
-        }
-    }
+    // Check chapter navigation availability
+    val currentIndex = vm.currentChapterIndex
+    val chapters = vm.stateChapters
+    val hasPrevChapter = currentIndex > 0
+    val hasNextChapter = currentIndex < chapters.lastIndex
+    val prevChapter = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1) else null
 
     // Use lazyValue for immediate UI updates during slider drag
     ILazyColumnScrollbar(
@@ -782,20 +1078,703 @@ private fun ContinuesReaderPage(
             modifier = modifier.fillMaxSize(),
             state = scrollState,
         ) {
-            items(
-                count = items.size,
-                key = { index ->
-                    // Stable key for better item reuse
-                    "$index-${items[index].first}"
+            // Render each chapter with void space between them
+            // The pull-to-previous is handled by MultiSwipeRefresh in the parent
+            vm.chapterShell.forEachIndexed { shellIndex, chapter ->
+                val isFirstChapter = shellIndex == 0
+                val isLastChapter = shellIndex == vm.chapterShell.lastIndex
+                
+                // Chapter header
+                item(key = "header-${chapter.id}") {
+                    InfiniteChapterHeader(
+                        chapter = chapter,
+                        isFirst = isFirstChapter,
+                        textColor = vm.textColor.value.toComposeColor(),
+                        backgroundColor = vm.backgroundColor.value.toComposeColor()
+                    )
                 }
-            ) { index ->
-                MainText(
-                    modifier = modifier,
-                    index = index,
-                    page = items[index].second,
-                    vm = vm
+                
+                // Chapter content
+                val content = chapter.content ?: emptyList()
+                items(
+                    count = content.size,
+                    key = { index -> "content-${chapter.id}-$index" }
+                ) { index ->
+                    val page = content.getOrNull(index)
+                    if (page != null) {
+                        MainText(
+                            modifier = modifier,
+                            index = index,
+                            page = page,
+                            vm = vm
+                        )
+                    }
+                }
+                
+                // Void space at end of chapter
+                item(key = "void-${chapter.id}") {
+                    ChapterVoidSpace(
+                        chapter = chapter,
+                        isLast = isLastChapter && !hasNextChapter,
+                        textColor = vm.textColor.value.toComposeColor(),
+                        backgroundColor = vm.backgroundColor.value.toComposeColor(),
+                        onShowComments = { showCommentsForChapter = chapter },
+                        onNextChapter = onNext,
+                        isLoading = vm.isLoading
+                    )
+                }
+            }
+        }
+    }
+    
+    // Comments bottom sheet
+    if (showCommentsForChapter != null) {
+        val chapter = showCommentsForChapter!!
+        androidx.compose.material3.ModalBottomSheet(
+            onDismissRequest = { showCommentsForChapter = null },
+            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
+        ) {
+            ChapterReviewSection(
+                reviews = emptyList(),
+                averageRating = 0f,
+                onWriteReview = { _, _ -> },
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Build items for infinite scroll with void spaces between chapters.
+ */
+private fun buildInfiniteReaderItems(
+    chapterShell: List<Chapter>,
+    allChapters: List<Chapter>,
+    currentIndex: Int
+): List<Any> {
+    if (chapterShell.isEmpty()) return emptyList()
+    
+    val items = mutableListOf<Any>()
+    val prevChapter = if (currentIndex > 0) allChapters.getOrNull(currentIndex - 1) else null
+    
+    // Add prev indicator
+    items.add("prev-indicator" to prevChapter)
+    
+    chapterShell.forEachIndexed { shellIndex, chapter ->
+        items.add("header" to chapter)
+        chapter.content?.forEachIndexed { index, page ->
+            items.add(Triple(chapter.id, index, page))
+        }
+        items.add("void" to chapter)
+    }
+    
+    return items
+}
+
+/**
+ * Overscroll indicator that appears when user drags at the top.
+ * This is shown as an overlay, not as a list item.
+ * @param dragOffset The current drag offset (0 = no drag, positive = dragging down)
+ */
+@Composable
+private fun OverscrollPrevIndicator(
+    prevChapter: Chapter?,
+    textColor: Color,
+    dragOffset: Float,
+    modifier: Modifier = Modifier
+) {
+    // Only show when dragging (offset > threshold)
+    val showThreshold = 20f
+    val maxOffset = 120f
+    val progress = ((dragOffset - showThreshold) / (maxOffset - showThreshold)).coerceIn(0f, 1f)
+    
+    if (progress > 0f) {
+        val infiniteTransition = rememberInfiniteTransition(label = "bounce")
+        val bounceOffset by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 6f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(600, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "bounceOffset"
+        )
+        
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height((progress * 100).dp)
+                .alpha(progress)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF0A0A0A),
+                            Color.Transparent
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .graphicsLayer { translationY = bounceOffset }
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowUp,
+                    contentDescription = null,
+                    tint = textColor.copy(alpha = 0.6f * progress),
+                    modifier = Modifier.size(24.dp)
+                )
+                
+                if (prevChapter != null && progress > 0.5f) {
+                    Text(
+                        text = "Release for previous",
+                        color = textColor.copy(alpha = 0.5f * progress),
+                        fontSize = 11.sp
+                    )
+                    Text(
+                        text = prevChapter.name,
+                        color = textColor.copy(alpha = 0.7f * progress),
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                } else if (prevChapter == null && progress > 0.3f) {
+                    Text(
+                        text = "First chapter",
+                        color = textColor.copy(alpha = 0.4f * progress),
+                        fontSize = 11.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Chapter header with elegant styling.
+ */
+@Composable
+private fun InfiniteChapterHeader(
+    chapter: Chapter,
+    isFirst: Boolean,
+    textColor: Color,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .padding(horizontal = 16.dp, vertical = if (isFirst) 8.dp else 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (!isFirst) {
+            Box(
+                modifier = Modifier
+                    .width(50.dp)
+                    .height(2.dp)
+                    .background(textColor.copy(alpha = 0.15f), RoundedCornerShape(1.dp))
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+        
+        Text(
+            text = chapter.name,
+            color = textColor.copy(alpha = 0.75f),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
+        
+        Spacer(modifier = Modifier.height(20.dp))
+    }
+}
+
+/**
+ * Premium void space between chapters with cinematic floating elements.
+ * Creates an immersive effect with professional animations.
+ * Colors are based on reader text/background colors for consistency.
+ */
+@Composable
+private fun ChapterVoidSpace(
+    chapter: Chapter,
+    isLast: Boolean,
+    textColor: Color,
+    backgroundColor: Color = Color.Black,
+    onShowComments: () -> Unit,
+    onNextChapter: () -> Unit,
+    isLoading: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "void")
+    
+    // Determine if background is dark or light for color adaptation
+    val isDarkBackground = remember(backgroundColor) {
+        (backgroundColor.red * 0.299f + backgroundColor.green * 0.587f + backgroundColor.blue * 0.114f) < 0.5f
+    }
+    
+    // Smooth floating animation
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 12f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float"
+    )
+    
+    // Secondary float for parallax effect
+    val floatOffset2 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float2"
+    )
+    
+    // Breathing glow effect
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow"
+    )
+    
+    // Secondary glow for depth
+    val glowAlpha2 by infiniteTransition.animateFloat(
+        initialValue = 0.2f,
+        targetValue = 0.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow2"
+    )
+    
+    // Pulse for the continue button
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
+    
+    // Rotation for decorative elements
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(20000, easing = androidx.compose.animation.core.LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
+    
+    // Dynamic void colors based on reader background
+    val voidDeep = if (isDarkBackground) Color(0xFF020204) else Color(0xFFF8F8F8)
+    val voidMid = if (isDarkBackground) Color(0xFF0A0A10) else Color(0xFFEEEEEE)
+    val voidLight = if (isDarkBackground) Color(0xFF12121A) else Color(0xFFE0E0E0)
+    
+    // Accent colors that work on both light and dark backgrounds
+    val accentPrimary = if (isDarkBackground) Color(0xFF3D5AFE) else Color(0xFF1565C0)
+    val accentSecondary = if (isDarkBackground) Color(0xFF7C4DFF) else Color(0xFF6A1B9A)
+    val accentGold = if (isDarkBackground) Color(0xFFFFD54F) else Color(0xFFFF8F00)
+    
+    // Content text color based on reader text color
+    val contentTextColor = textColor
+    val contentTextColorMuted = textColor.copy(alpha = 0.6f)
+    val contentTextColorSubtle = textColor.copy(alpha = 0.4f)
+    
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(450.dp)
+    ) {
+        // Multi-layer gradient background for depth
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            backgroundColor,
+                            voidLight.copy(alpha = 0.5f),
+                            voidMid.copy(alpha = 0.8f),
+                            voidDeep,
+                            voidDeep,
+                            voidDeep,
+                            voidMid.copy(alpha = 0.8f),
+                            voidLight.copy(alpha = 0.5f),
+                            backgroundColor
+                        )
+                    )
+                )
+        )
+        
+        // Primary ambient glow orb
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .align(Alignment.Center)
+                .graphicsLayer { translationY = floatOffset2 }
+                .alpha(glowAlpha)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            accentPrimary.copy(alpha = 0.2f),
+                            accentSecondary.copy(alpha = 0.08f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        
+        // Secondary glow for depth
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .align(Alignment.Center)
+                .graphicsLayer { translationY = floatOffset }
+                .alpha(glowAlpha2)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            textColor.copy(alpha = 0.1f),
+                            accentPrimary.copy(alpha = 0.03f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        
+        // Content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Top decorative element - animated line
+            Box(
+                modifier = Modifier
+                    .width(60.dp)
+                    .height(2.dp)
+                    .graphicsLayer { 
+                        scaleX = 0.5f + (glowAlpha * 1.5f)
+                    }
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                accentPrimary.copy(alpha = 0.6f),
+                                contentTextColor.copy(alpha = 0.5f),
+                                accentPrimary.copy(alpha = 0.6f),
+                                Color.Transparent
+                            )
+                        ),
+                        shape = RoundedCornerShape(1.dp)
+                    )
+            )
+            
+            Spacer(modifier = Modifier.height(28.dp))
+            
+            // Floating chapter completion card
+            Card(
+                modifier = Modifier
+                    .graphicsLayer { 
+                        translationY = floatOffset
+                        shadowElevation = 20f
+                    }
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isDarkBackground) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.03f)
+                ),
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(
+                    1.dp,
+                    Brush.linearGradient(
+                        colors = listOf(
+                            contentTextColor.copy(alpha = 0.1f),
+                            accentPrimary.copy(alpha = 0.3f),
+                            contentTextColor.copy(alpha = 0.08f)
+                        )
+                    )
+                )
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp)
+                ) {
+                    // Checkmark icon with glow
+                    Box(contentAlignment = Alignment.Center) {
+                        // Glow behind icon
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .alpha(glowAlpha)
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(
+                                            accentGold.copy(alpha = 0.4f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
+                        )
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = accentGold,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text(
+                        text = "CHAPTER COMPLETE",
+                        color = contentTextColorMuted,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 4.sp
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Text(
+                        text = chapter.name,
+                        color = contentTextColor.copy(alpha = 0.95f),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // Comment button with premium glass effect - uses reader text color
+            Button(
+                onClick = onShowComments,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isDarkBackground) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.05f),
+                    contentColor = contentTextColor
+                ),
+                shape = RoundedCornerShape(28.dp),
+                border = BorderStroke(
+                    1.dp,
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            accentSecondary.copy(alpha = 0.3f),
+                            accentPrimary.copy(alpha = 0.5f),
+                            accentSecondary.copy(alpha = 0.3f)
+                        )
+                    )
+                ),
+                modifier = Modifier
+                    .height(48.dp)
+                    .widthIn(min = 160.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.RateReview,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "View Comments",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = fgd
                 )
             }
+            
+            // Loading indicator when fetching next chapter
+            if (isLoading) {
+                Spacer(modifier = Modifier.height(24.dp))
+                androidx.compose.material3.CircularProgressIndicator(
+                    modifier = Modifier.size(32.dp),
+                    color = accentPrimary,
+                    strokeWidth = 3.dp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Loading next chapter...",
+                    color = contentTextColorMuted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            
+            // Next chapter section
+            if (!isLast && !isLoading) {
+                Spacer(modifier = Modifier.height(40.dp))
+                
+                // Animated decorative dots
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    repeat(3) { index ->
+                        val dotAlpha by infiniteTransition.animateFloat(
+                            initialValue = 0.2f,
+                            targetValue = 0.8f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(800, delayMillis = index * 200, easing = FastOutSlowInEasing),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "dot$index"
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .alpha(dotAlpha)
+                                .background(accentPrimary, RoundedCornerShape(3.dp))
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                // Continue button with pulse and glow
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .clickable { onNextChapter() }
+                        .padding(16.dp)
+                ) {
+                    // Glow behind button
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .alpha(glowAlpha * 0.6f)
+                            .graphicsLayer { 
+                                scaleX = pulseScale
+                                scaleY = pulseScale
+                            }
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        accentPrimary.copy(alpha = 0.3f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                    )
+                    
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.graphicsLayer { 
+                            scaleX = pulseScale
+                            scaleY = pulseScale
+                        }
+                    ) {
+                        Text(
+                            text = "Continue Reading",
+                            color = contentTextColor.copy(alpha = 0.7f),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Next chapter",
+                            tint = accentPrimary,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .graphicsLayer { translationY = floatOffset * 0.4f }
+                        )
+                    }
+                }
+            } else if (isLast) {
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                // End of book indicator - premium style
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.graphicsLayer { translationY = floatOffset }
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .alpha(glowAlpha)
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(
+                                            accentGold.copy(alpha = 0.3f),
+                                            Color.Transparent
+                                        )
+                                    )
+                                )
+                        )
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = accentGold,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "THE END",
+                        color = contentTextColorMuted,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 4.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "You've completed this story",
+                        color = contentTextColorSubtle,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Light
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Bottom decorative element
+            Box(
+                modifier = Modifier
+                    .width(60.dp)
+                    .height(2.dp)
+                    .graphicsLayer { 
+                        scaleX = 0.5f + (glowAlpha * 1.5f)
+                    }
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                accentSecondary.copy(alpha = 0.6f),
+                                contentTextColor.copy(alpha = 0.5f),
+                                accentSecondary.copy(alpha = 0.6f),
+                                Color.Transparent
+                            )
+                        ),
+                        shape = RoundedCornerShape(1.dp)
+                    )
+            )
         }
     }
 }
@@ -936,4 +1915,192 @@ private fun setText(
     }
     
     return stringBuilder.toString()
+}
+
+/**
+ * Chapter end section displayed after all chapter content.
+ * Shows chapter completion status, navigation buttons, and comments section.
+ */
+@Composable
+private fun ChapterEndSection(
+    chapterName: String,
+    hasPrevChapter: Boolean,
+    hasNextChapter: Boolean,
+    prevChapterName: String?,
+    nextChapterName: String?,
+    onPrevChapter: () -> Unit,
+    onNextChapter: () -> Unit,
+    textColor: Color,
+    backgroundColor: Color,
+    book: Book?,
+    chapter: Chapter?,
+    modifier: Modifier = Modifier
+) {
+    val localizeHelper = LocalLocalizeHelper.current
+    var showReviewSection by remember { mutableStateOf(false) }
+    
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Chapter completion indicator
+        HorizontalDivider(
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .padding(vertical = 16.dp),
+            color = textColor.copy(alpha = 0.3f)
+        )
+        
+        // Completion message
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = textColor.copy(alpha = 0.7f),
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = localizeHelper?.localize(Res.string.chapter_completed) ?: "Chapter Completed",
+                color = textColor.copy(alpha = 0.7f),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Chapter navigation buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            // Previous chapter button
+            OutlinedButton(
+                onClick = onPrevChapter,
+                enabled = hasPrevChapter,
+                modifier = Modifier.weight(1f).padding(end = 8.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = textColor
+                ),
+                border = BorderStroke(1.dp, textColor.copy(alpha = if (hasPrevChapter) 0.5f else 0.2f))
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(
+                        text = localizeHelper?.localize(Res.string.previous_chapter) ?: "Previous",
+                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall
+                    )
+                    if (prevChapterName != null) {
+                        Text(
+                            text = prevChapterName.take(20) + if (prevChapterName.length > 20) "..." else "",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+            
+            // Next chapter button
+            Button(
+                onClick = onNextChapter,
+                enabled = hasNextChapter,
+                modifier = Modifier.weight(1f).padding(start = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = textColor.copy(alpha = 0.9f),
+                    contentColor = backgroundColor
+                )
+            ) {
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = localizeHelper?.localize(Res.string.next_chapter) ?: "Next",
+                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall
+                    )
+                    if (nextChapterName != null) {
+                        Text(
+                            text = nextChapterName.take(20) + if (nextChapterName.length > 20) "..." else "",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                            maxLines = 1
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        // View comments button
+        if (book != null && chapter != null) {
+            OutlinedButton(
+                onClick = { showReviewSection = !showReviewSection },
+                modifier = Modifier.fillMaxWidth(0.8f),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = textColor
+                ),
+                border = BorderStroke(1.dp, textColor.copy(alpha = 0.3f))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.RateReview,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (showReviewSection) 
+                        (localizeHelper?.localize(Res.string.hide_reviews) ?: "Hide Reviews")
+                    else 
+                        (localizeHelper?.localize(Res.string.view_chapter_reviews) ?: "View Chapter Reviews"),
+                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium
+                )
+            }
+            
+            // Reviews section (expandable)
+            if (showReviewSection) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = backgroundColor.copy(alpha = 0.5f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    ChapterReviewSection(
+                        reviews = emptyList(), // TODO: Load actual reviews from ViewModel
+                        averageRating = 0f,
+                        onWriteReview = { rating, text ->
+                            // TODO: Submit review through ViewModel
+                        },
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+        }
+        
+        // End of chapter indicator
+        if (!hasNextChapter) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = localizeHelper?.localize(Res.string.this_is_last_chapter) ?: "This is the last chapter",
+                color = textColor.copy(alpha = 0.5f),
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(48.dp))
+    }
 }

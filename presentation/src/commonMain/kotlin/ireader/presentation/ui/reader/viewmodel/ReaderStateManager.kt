@@ -29,8 +29,8 @@ class ReaderStateManager(
     var isToggleInProgress by mutableStateOf(false)
         private set
     
-    // Reading time state
-    var showReadingTime by mutableStateOf(true)
+
+
     var estimatedReadingMinutes by mutableStateOf(0)
         private set
     var wordsRemaining by mutableStateOf(0)
