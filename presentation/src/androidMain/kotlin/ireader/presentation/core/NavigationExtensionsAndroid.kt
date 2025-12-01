@@ -9,7 +9,7 @@ import ireader.presentation.core.ui.WebViewScreenSpec
 
 actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
     // For Android, navigate to webView with all parameters
-    // Using launchSingleTop to prevent duplicate destinations and reduce recomposition
+    // Using launchSingleTop and popUpTo to prevent duplicate destinations and manage back stack
     navigate(
         NavigationRoutes.webView(
             url = spec.url ?: "",
@@ -22,6 +22,10 @@ actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
         )
     ) {
         launchSingleTop = true
+        // Clear other WebView instances to prevent memory buildup
+        popUpTo("webView") {
+            inclusive = true
+        }
     }
 }
 

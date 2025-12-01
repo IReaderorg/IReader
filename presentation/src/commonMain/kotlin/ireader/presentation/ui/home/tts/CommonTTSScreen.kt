@@ -2,18 +2,75 @@ package ireader.presentation.ui.home.tts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.FastRewind
+import androidx.compose.material.icons.filled.FormatAlignCenter
+import androidx.compose.material.icons.filled.FormatAlignJustify
+import androidx.compose.material.icons.filled.FormatAlignLeft
+import androidx.compose.material.icons.filled.FormatAlignRight
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.RecordVoiceOver
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.ViewAgenda
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,9 +83,51 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.auto_next
+import ireader.i18n.resources.auto_next_chapter_1
+import ireader.i18n.resources.automatically_play_next_chapter_when_current_ends
+import ireader.i18n.resources.automatically_stop_playback_after_set_time
+import ireader.i18n.resources.background_color
+import ireader.i18n.resources.bilingual
+import ireader.i18n.resources.bilingual_mode
+import ireader.i18n.resources.cancel
+import ireader.i18n.resources.center
+import ireader.i18n.resources.color_theme
+import ireader.i18n.resources.current_engine
+import ireader.i18n.resources.downloading_chapter_audio
+import ireader.i18n.resources.enable_sleep_timer
+import ireader.i18n.resources.enable_sleep_timer_1
+import ireader.i18n.resources.engine_settings
+import ireader.i18n.resources.generating_audio_for_entire_chapter
+import ireader.i18n.resources.justify
+import ireader.i18n.resources.left
+import ireader.i18n.resources.next_chapter
+import ireader.i18n.resources.next_paragraph
+import ireader.i18n.resources.no_content_available
+import ireader.i18n.resources.pause
+import ireader.i18n.resources.play
+import ireader.i18n.resources.playback
+import ireader.i18n.resources.previous_chapter
+import ireader.i18n.resources.previous_paragraph
+import ireader.i18n.resources.read_translated_text
+import ireader.i18n.resources.right
+import ireader.i18n.resources.select_engine
+import ireader.i18n.resources.select_voice
+import ireader.i18n.resources.selected
+import ireader.i18n.resources.show_translation
+import ireader.i18n.resources.sleep_timer
+import ireader.i18n.resources.speed
+import ireader.i18n.resources.text_alignment
+import ireader.i18n.resources.text_color_1
+import ireader.i18n.resources.this_may_take_a_few_minutes_for_long_chapters
+import ireader.i18n.resources.translated
+import ireader.i18n.resources.tts_engine
+import ireader.i18n.resources.tts_settings
+import ireader.i18n.resources.use_coqui_tts
+import ireader.i18n.resources.use_custom_colors
+import ireader.i18n.resources.voice
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import androidx.compose.runtime.Stable
+import ireader.presentation.ui.reader.components.countWords
 import kotlinx.coroutines.delay
 
 /**
@@ -55,6 +154,11 @@ data class SentenceHighlightState(
  * CALIBRATION: The first paragraph is used to measure actual TTS speed.
  * After the first paragraph completes, we calculate the real words-per-minute
  * and use that for accurate highlighting of subsequent paragraphs.
+ * 
+ * Optimizations:
+ * - Pre-compiled regex patterns (static)
+ * - Minimal allocations in hot paths
+ * - Simple word counting without intermediate lists
  */
 object SentenceHighlighter {
     // Default words per minute for TTS at 1.0x speed
@@ -63,8 +167,10 @@ object SentenceHighlighter {
     // Maximum words per sentence before splitting (keep sentences reasonably sized)
     private const val MAX_WORDS_PER_SENTENCE = 50
     
-    // Sentence endings pattern
+    // Pre-compiled regex patterns for better performance
     private val SENTENCE_END_PATTERN = Regex("(?<=[.!?。！？;；])")
+    private val COMMA_PATTERN = Regex("(?<=[,，])")
+    private val WHITESPACE_PATTERN = Regex("\\s+")
     
     /**
      * Split text into sentences for highlighting
@@ -75,57 +181,53 @@ object SentenceHighlighter {
         
         // Split by sentence endings
         val sentences = text.split(SENTENCE_END_PATTERN)
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
         
-        // Only split very long sentences (50+ words) by commas
-        val result = sentences.flatMap { sentence ->
-            if (countWords(sentence) > MAX_WORDS_PER_SENTENCE) {
+        // Process sentences - avoid intermediate list allocations
+        val result = ArrayList<String>(sentences.size)
+        for (sentence in sentences) {
+            val trimmed = sentence.trim()
+            if (trimmed.isEmpty()) continue
+            
+            if (countWordsInternal(trimmed) > MAX_WORDS_PER_SENTENCE) {
                 // Split long sentences by commas
-                val parts = sentence.split(Regex("(?<=[,，])"))
-                    .map { it.trim() }
-                    .filter { it.isNotBlank() }
-                if (parts.size > 1) parts else listOf(sentence)
+                val parts = trimmed.split(COMMA_PATTERN)
+                var addedAny = false
+                for (part in parts) {
+                    val partTrimmed = part.trim()
+                    if (partTrimmed.isNotEmpty()) {
+                        result.add(partTrimmed)
+                        addedAny = true
+                    }
+                }
+                if (!addedAny) result.add(trimmed)
             } else {
-                listOf(sentence)
+                result.add(trimmed)
             }
         }
         
-        return result.ifEmpty { listOf(text.trim()) }
+        return if (result.isEmpty()) listOf(text.trim()) else result
     }
     
-    private fun countWords(text: String): Int {
-        return text.split(Regex("\\s+")).filter { it.isNotBlank() }.size
-    }
-    
-    private fun splitByWordCount(text: String, maxWords: Int): List<String> {
-        val words = text.split(Regex("\\s+"))
-        val chunks = mutableListOf<String>()
-        var currentChunk = StringBuilder()
-        var wordCount = 0
-        
-        for (word in words) {
-            if (wordCount >= maxWords && currentChunk.isNotEmpty()) {
-                chunks.add(currentChunk.toString().trim())
-                currentChunk = StringBuilder()
-                wordCount = 0
+    // Internal word count - avoids creating intermediate list
+    private fun countWordsInternal(text: String): Int {
+        if (text.isEmpty()) return 0
+        var count = 0
+        var inWord = false
+        for (char in text) {
+            if (char.isWhitespace()) {
+                inWord = false
+            } else if (!inWord) {
+                inWord = true
+                count++
             }
-            if (currentChunk.isNotEmpty()) currentChunk.append(" ")
-            currentChunk.append(word)
-            wordCount++
         }
-        
-        if (currentChunk.isNotEmpty()) {
-            chunks.add(currentChunk.toString().trim())
-        }
-        
-        return chunks
+        return count
     }
     
     /**
      * Count total words in a text
      */
-    fun countTotalWords(text: String): Int = countWords(text)
+    fun countTotalWords(text: String): Int = countWordsInternal(text)
     
     /**
      * Calculate calibrated words per minute based on first paragraph timing
@@ -334,54 +436,65 @@ fun TTSContentDisplay(
     val paragraphIndentDp = remember(paragraphIndent) { paragraphIndent.dp }
     val paragraphDistanceDp = remember(paragraphDistance) { paragraphDistance.dp }
     
-    // Sentence highlighting state - only active for current paragraph when playing
-    // Use derivedStateOf to ensure proper recomputation when paragraph changes
-    val currentParagraphText by remember(displayContent, state.currentReadingParagraph) {
-        derivedStateOf { displayContent.getOrNull(state.currentReadingParagraph) ?: "" }
+    // Only compute sentence highlighting when enabled - skip all processing when disabled
+    val highlightEnabled = state.sentenceHighlightEnabled
+    
+    // Sentence highlighting state - only active for current paragraph when playing AND enabled
+    val currentParagraphText by remember(displayContent, state.currentReadingParagraph, highlightEnabled) {
+        derivedStateOf { 
+            if (highlightEnabled) displayContent.getOrNull(state.currentReadingParagraph) ?: "" 
+            else "" 
+        }
     }
     
-    // Memoize sentences for current paragraph to avoid re-splitting
-    val currentSentences = remember(currentParagraphText) {
-        SentenceHighlighter.splitIntoSentences(currentParagraphText)
+    // Memoize sentences for current paragraph - empty when disabled
+    val currentSentences = remember(currentParagraphText, highlightEnabled) {
+        if (highlightEnabled && currentParagraphText.isNotEmpty()) {
+            SentenceHighlighter.splitIntoSentences(currentParagraphText)
+        } else emptyList()
     }
     
-    // Calculate word counts for each chunk (for proportional timing)
-    val chunkWordCounts = remember(currentSentences) {
-        currentSentences.map { SentenceHighlighter.countTotalWords(it) }
+    // Calculate total words only when highlighting is enabled
+    val totalWords = remember(currentSentences) {
+        if (currentSentences.isEmpty()) 1
+        else currentSentences.sumOf { SentenceHighlighter.countTotalWords(it) }.coerceAtLeast(1)
     }
-    val totalWords = remember(chunkWordCounts) { chunkWordCounts.sum().coerceAtLeast(1) }
     
     // Time-based sentence index
     var currentSentenceIndex by remember { mutableStateOf(0) }
-    var highlightStartTime by remember { mutableStateOf(System.currentTimeMillis()) }
+    var highlightStartTime by remember { mutableStateOf(0L) }
     
-    // Store isPlaying in a ref that can be read in coroutine
-    val isPlayingRef = rememberUpdatedState(state.isPlaying)
+    // Store refs for coroutine - only update when highlighting is enabled
+    val isPlayingRef = rememberUpdatedState(state.isPlaying && highlightEnabled)
     val sentencesRef = rememberUpdatedState(currentSentences)
     val totalWordsRef = rememberUpdatedState(totalWords)
     val calibratedWPMRef = rememberUpdatedState(state.calibratedWPM)
     val speechSpeedRef = rememberUpdatedState(state.speechSpeed)
     
-    // Reset when paragraph changes
-    LaunchedEffect(state.currentReadingParagraph) {
-        currentSentenceIndex = 0
-        highlightStartTime = System.currentTimeMillis()
-    }
-    
-    // Reset start time when playback starts
-    LaunchedEffect(state.isPlaying) {
-        if (state.isPlaying) {
+    // Reset when paragraph changes - only if highlighting enabled
+    LaunchedEffect(state.currentReadingParagraph, highlightEnabled) {
+        if (highlightEnabled) {
+            currentSentenceIndex = 0
             highlightStartTime = System.currentTimeMillis()
         }
     }
     
-    // Main highlighting loop
-    LaunchedEffect(Unit) {
+    // Reset start time when playback starts - only if highlighting enabled
+    LaunchedEffect(state.isPlaying, highlightEnabled) {
+        if (state.isPlaying && highlightEnabled) {
+            highlightStartTime = System.currentTimeMillis()
+        }
+    }
+    
+    // Main highlighting loop - only runs when highlighting is enabled
+    LaunchedEffect(highlightEnabled) {
+        if (!highlightEnabled) return@LaunchedEffect
+        
         while (true) {
             if (isPlayingRef.value) {
                 val sentences = sentencesRef.value
                 if (sentences.isNotEmpty()) {
-                    val words = totalWordsRef.value.coerceAtLeast(1)
+                    val words = totalWordsRef.value
                     val wpm = ((calibratedWPMRef.value ?: 170f) * speechSpeedRef.value).coerceAtLeast(50f)
                     val durationMs = ((words.toFloat() / wpm) * 60000).toLong().coerceIn(2000, 120000)
                     
@@ -394,7 +507,7 @@ fun TTSContentDisplay(
                     }
                 }
             }
-            delay(100)
+            delay(150) // Slightly longer delay for better battery life
         }
     }
     
@@ -482,8 +595,10 @@ fun TTSContentDisplay(
  * Extracted paragraph item with sentence-level highlighting support.
  * Each paragraph only recomposes when its specific state changes.
  * 
- * Sentence highlighting is time-based and doesn't require additional TTS API calls.
- * The current sentence is estimated based on speech speed and word count.
+ * Optimizations:
+ * - Pre-computed colors and modifiers
+ * - Minimal branching in composition
+ * - Stable modifier chains
  */
 @Composable
 private fun TTSParagraphItemWithSentenceHighlight(
@@ -510,20 +625,23 @@ private fun TTSParagraphItemWithSentenceHighlight(
     fontWeight: Int,
     onParagraphClick: (Int) -> Unit
 ) {
-    // Memoize alpha values to avoid repeated calculations
+    // Pre-compute colors once
     val textAlpha = if (isCurrentParagraph) 1f else 0.6f
-    val translatedAlpha = if (isCurrentParagraph) 0.85f else 0.5f
-    
-    // Determine if we should show sentence highlighting
-    // Show for current paragraph when playing and sentences are available
-    // Also show when paused on current paragraph to maintain visual continuity
-    // NOTE: sentenceHighlightEnabled is checked at the call site (TTSContentDisplay)
+    val displayTextColor = remember(textColor, textAlpha) { textColor.copy(alpha = textAlpha) }
     val showSentenceHighlight = isCurrentParagraph && sentences.isNotEmpty()
+    
+    // Pre-compute modifier to avoid recreation
+    val textModifier = remember(paragraphIndent) {
+        Modifier.fillMaxWidth().padding(horizontal = paragraphIndent)
+    }
+    
+    // Memoize click handler
+    val onClick = remember(index, onParagraphClick) { { onParagraphClick(index) } }
     
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onParagraphClick(index) }
+            .clickable(onClick = onClick)
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.Top
     ) {
@@ -541,19 +659,15 @@ private fun TTSParagraphItemWithSentenceHighlight(
                         lineHeight = lineHeight,
                         textAlignment = textAlignment,
                         fontWeight = fontWeight,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = paragraphIndent)
+                        modifier = textModifier
                     )
                 } else {
                     Text(
                         text = originalText,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = paragraphIndent),
+                        modifier = textModifier,
                         fontSize = fontSize,
                         textAlign = textAlignment,
-                        color = textColor.copy(alpha = textAlpha),
+                        color = displayTextColor,
                         lineHeight = lineHeight,
                         fontWeight = FontWeight(fontWeight)
                     )
@@ -561,19 +675,27 @@ private fun TTSParagraphItemWithSentenceHighlight(
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                // Translated text with different styling
+                // Translated text - pre-compute colors
+                val translatedColor = remember(textColor, isCurrentParagraph) {
+                    textColor.copy(alpha = if (isCurrentParagraph) 0.85f else 0.5f)
+                }
+                val bgColor = remember(textColor) { textColor.copy(alpha = 0.05f) }
+                val translatedWeight = remember(fontWeight) { 
+                    FontWeight((fontWeight - 100).coerceAtLeast(100)) 
+                }
+                
                 Text(
                     text = translatedText,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = paragraphIndent)
-                        .background(textColor.copy(alpha = 0.05f))
+                        .background(bgColor)
                         .padding(4.dp),
                     fontSize = smallerFontSize,
                     textAlign = textAlignment,
-                    color = textColor.copy(alpha = translatedAlpha),
+                    color = translatedColor,
                     lineHeight = lineHeight,
-                    fontWeight = FontWeight((fontWeight - 100).coerceAtLeast(100))
+                    fontWeight = translatedWeight
                 )
             } else {
                 // Single text display with sentence highlighting
@@ -587,21 +709,18 @@ private fun TTSParagraphItemWithSentenceHighlight(
                         lineHeight = lineHeight,
                         textAlignment = textAlignment,
                         fontWeight = fontWeight,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = paragraphIndent)
+                        modifier = textModifier
                     )
                 } else {
+                    val weight = if (isCurrentParagraph) FontWeight.Bold else FontWeight(fontWeight)
                     Text(
                         text = text,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = paragraphIndent),
+                        modifier = textModifier,
                         fontSize = fontSize,
                         textAlign = textAlignment,
-                        color = textColor.copy(alpha = textAlpha),
+                        color = displayTextColor,
                         lineHeight = lineHeight,
-                        fontWeight = if (isCurrentParagraph) FontWeight.Bold else FontWeight(fontWeight)
+                        fontWeight = weight
                     )
                 }
             }
@@ -622,9 +741,10 @@ private fun TTSParagraphItemWithSentenceHighlight(
  * Text component with sentence-level highlighting using AnnotatedString.
  * Highlights the current sentence being read while dimming others.
  * 
- * This is optimized to minimize recompositions:
+ * Optimizations:
+ * - Pre-computed SpanStyles to avoid object allocation per recomposition
  * - AnnotatedString is built only when currentSentenceIndex changes
- * - Uses SpanStyle for efficient text styling
+ * - Cached highlight color to avoid repeated Color creation
  */
 @Composable
 private fun SentenceHighlightedText(
@@ -641,49 +761,30 @@ private fun SentenceHighlightedText(
     // Ensure currentSentenceIndex is valid
     val safeIndex = currentSentenceIndex.coerceIn(0, sentences.lastIndex.coerceAtLeast(0))
     
+    // Pre-compute styles to avoid repeated object creation
+    val highlightBgColor = remember { Color(0xFFFFEB3B).copy(alpha = 0.5f) }
+    val currentStyle = remember(textColor, highlightBgColor) {
+        SpanStyle(color = textColor, fontWeight = FontWeight.Bold, background = highlightBgColor)
+    }
+    val readStyle = remember(textColor, fontWeight) {
+        SpanStyle(color = textColor.copy(alpha = 0.4f), fontWeight = FontWeight(fontWeight))
+    }
+    val upcomingStyle = remember(textColor, fontWeight) {
+        SpanStyle(color = textColor.copy(alpha = 0.35f), fontWeight = FontWeight(fontWeight))
+    }
+    
     // Build annotated string with highlighted current chunk
-    val annotatedText = remember(sentences, safeIndex, textColor, highlightColor) {
+    val annotatedText = remember(sentences, safeIndex, currentStyle, readStyle, upcomingStyle) {
         buildAnnotatedString {
+            val lastIdx = sentences.lastIndex
             sentences.forEachIndexed { index, chunk ->
-                val isCurrentChunk = index == safeIndex
-                
-                if (isCurrentChunk) {
-                    // Current chunk - full opacity, bold, with bright yellow background
-                    withStyle(
-                        SpanStyle(
-                            color = textColor,
-                            fontWeight = FontWeight.Bold,
-                            background = Color(0xFFFFEB3B).copy(alpha = 0.5f) // Bright yellow highlight
-                        )
-                    ) {
-                        append(chunk)
-                    }
-                } else if (index < safeIndex) {
-                    // Already read chunks - more dimmed to make current stand out
-                    withStyle(
-                        SpanStyle(
-                            color = textColor.copy(alpha = 0.4f),
-                            fontWeight = FontWeight(fontWeight)
-                        )
-                    ) {
-                        append(chunk)
-                    }
-                } else {
-                    // Upcoming chunks - even more dimmed
-                    withStyle(
-                        SpanStyle(
-                            color = textColor.copy(alpha = 0.35f),
-                            fontWeight = FontWeight(fontWeight)
-                        )
-                    ) {
-                        append(chunk)
-                    }
+                val style = when {
+                    index == safeIndex -> currentStyle
+                    index < safeIndex -> readStyle
+                    else -> upcomingStyle
                 }
-                
-                // Add space between chunks (except for last one)
-                if (index < sentences.lastIndex) {
-                    append(" ")
-                }
+                withStyle(style) { append(chunk) }
+                if (index < lastIdx) append(" ")
             }
         }
     }

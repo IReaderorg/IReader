@@ -67,10 +67,15 @@ object NavigationRoutes {
         "tts/$bookId/$chapterId/$sourceId/$readingParagraph"
     fun sourceDetail(sourceId: Long) = "sourceDetail/$sourceId"
     
-    // Constants for Android compatibility
+    // Route patterns for popUpTo operations
     const val MAIN = "main"
+    const val main = "main"
     const val READER = "reader/{bookId}/{chapterId}"
     const val BOOK_DETAIL = "bookDetail/{bookId}"
     const val TTS = "tts/{bookId}/{chapterId}/{sourceId}/{readingParagraph}"
     const val DOWNLOADER = "downloader"
+    const val EXPLORE = "explore/{sourceId}"
+    const val SOURCE_DETAIL = "sourceDetail/{sourceId}"
+    const val SOURCE_MIGRATION = "sourceMigration/{sourceId}"
+    const val GLOBAL_SEARCH = "globalSearch"
 }

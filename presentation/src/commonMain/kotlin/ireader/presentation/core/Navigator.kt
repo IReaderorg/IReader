@@ -3,8 +3,11 @@ package ireader.presentation.core
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import ireader.presentation.core.NavigationRoutes.repositoryAdd
 import ireader.presentation.core.ui.BookDetailScreenSpec
 import ireader.presentation.core.ui.ChatGptLoginScreenSpec
@@ -13,6 +16,30 @@ import ireader.presentation.core.ui.ExploreScreenSpec
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.RepositoryAddScreenSpec
+
+/**
+ * Reusable navigation options to avoid lambda allocation on every navigation call.
+ * These are pre-built NavOptionsBuilder configurations for common patterns.
+ */
+@Stable
+object NavOptions {
+    /** Standard single-top navigation without back stack clearing */
+    val singleTop: NavOptionsBuilder.() -> Unit = {
+        launchSingleTop = true
+    }
+    
+    /** Navigation that clears the entire back stack */
+    val clearAll: NavOptionsBuilder.() -> Unit = {
+        popUpTo(0) { inclusive = true }
+        launchSingleTop = true
+    }
+    
+    /** Navigation to main screen, clearing intermediate screens */
+    val toMain: NavOptionsBuilder.() -> Unit = {
+        popUpTo(NavigationRoutes.MAIN) { inclusive = false }
+        launchSingleTop = true
+    }
+}
 
 /**
  * CompositionLocal that provides access to the NavHostController throughout the app.
@@ -60,18 +87,33 @@ fun ProvideNavigator(
 
 /**
  * Extension function to pop the back stack until only the root destination remains.
- * 
- * This is useful for "pop to root" navigation patterns, such as when navigating
- * from a deep link back to the main screen.
+ * Optimized to use graph-based popUpTo instead of iterative popping.
  */
 fun NavHostController.popUntilRoot() {
-    // Keep popping until we reach the start destination
-    // Use currentBackStackEntry to check if we can pop
-    while (previousBackStackEntry != null) {
-        if (!popBackStack()) {
-            break
-        }
+    graph.startDestinationRoute?.let { startRoute ->
+        popBackStack(startRoute, inclusive = false)
     }
+}
+
+/**
+ * Check if navigation to a route would be redundant (already at that destination).
+ * Prevents unnecessary navigation and recomposition.
+ */
+fun NavHostController.isCurrentRoute(route: String): Boolean {
+    return currentBackStackEntry?.destination?.route == route
+}
+
+/**
+ * Safe navigation that checks if already at destination before navigating.
+ * Returns true if navigation was performed, false if already at destination.
+ */
+inline fun NavHostController.navigateIfNotCurrent(
+    route: String,
+    noinline builder: NavOptionsBuilder.() -> Unit = NavOptions.singleTop
+): Boolean {
+    if (isCurrentRoute(route)) return false
+    navigate(route, builder)
+    return true
 }
 
 
@@ -81,76 +123,165 @@ fun NavHostController.popUntilRoot() {
  */
 
 /**
- * Optimized navigation with launchSingleTop to prevent duplicate destinations
- * and reduce recomposition overhead.
+ * Optimized navigation with launchSingleTop and popUpTo to prevent duplicate destinations,
+ * reduce recomposition overhead, and manage back stack efficiently.
+ * 
+ * Uses pre-built NavOptions where possible to reduce lambda allocations.
  */
 fun NavHostController.navigateTo(spec: BookDetailScreenSpec) {
-    navigate(NavigationRoutes.bookDetail(spec.bookId)) {
-        launchSingleTop = true
-    }
+    val route = NavigationRoutes.bookDetail(spec.bookId)
+    // Skip if already viewing this book
+    if (isCurrentRoute(route)) return
+    navigate(route, NavOptions.singleTop)
 }
 
 fun NavHostController.navigateTo(spec: ReaderScreenSpec) {
-    navigate("reader/${spec.bookId}/${spec.chapterId}") {
+    val route = NavigationRoutes.reader(spec.bookId, spec.chapterId)
+    // Skip if already reading this chapter
+    if (isCurrentRoute(route)) return
+    navigate(route) {
         launchSingleTop = true
+        // Clear any existing reader screens to prevent deep reader stack
+        popUpTo(NavigationRoutes.READER) { inclusive = true }
     }
 }
 
 fun NavHostController.navigateTo(spec: ExploreScreenSpec) {
-    navigate("explore/${spec.sourceId}") {
+    val route = NavigationRoutes.explore(spec.sourceId)
+    if (isCurrentRoute(route)) return
+    navigate(route) {
         launchSingleTop = true
+        popUpTo(NavigationRoutes.EXPLORE) { inclusive = true }
     }
 }
 
 fun NavHostController.navigateTo(spec: RepositoryAddScreenSpec) {
-    navigate(repositoryAdd) {
-        launchSingleTop = true
-    }
+    if (isCurrentRoute(repositoryAdd)) return
+    navigate(repositoryAdd, NavOptions.singleTop)
 }
 
 fun NavHostController.navigateTo(spec: GlobalSearchScreenSpec) {
     val query = spec.query?.let { "?query=${java.net.URLEncoder.encode(it, "UTF-8")}" } ?: ""
-    navigate("globalSearch$query") {
+    val route = "${NavigationRoutes.GLOBAL_SEARCH}$query"
+    navigate(route) {
         launchSingleTop = true
+        popUpTo(NavigationRoutes.GLOBAL_SEARCH) { inclusive = true }
     }
 }
 
 fun NavHostController.navigateTo(spec: ChatGptLoginScreenSpec) {
+    if (isCurrentRoute("chatGptLogin")) return
     navigate("chatGptLogin") {
         launchSingleTop = true
+        popUpTo("chatGptLogin") { inclusive = true }
     }
 }
 
 fun NavHostController.navigateTo(spec: DeepSeekLoginScreenSpec) {
+    if (isCurrentRoute("deepSeekLogin")) return
     navigate("deepSeekLogin") {
         launchSingleTop = true
+        popUpTo("deepSeekLogin") { inclusive = true }
     }
 }
 
 fun NavHostController.navigateTo(spec: ireader.presentation.ui.home.sources.extension.SourceDetailScreen) {
-    navigate("sourceDetail/${spec.catalog.sourceId}") {
+    val route = NavigationRoutes.sourceDetail(spec.catalog.sourceId)
+    if (isCurrentRoute(route)) return
+    navigate(route) {
         launchSingleTop = true
+        popUpTo(NavigationRoutes.SOURCE_DETAIL) { inclusive = true }
     }
 }
 
 fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.SourceMigrationScreenSpec) {
-    navigate("sourceMigration/${spec.sourceId}") {
+    val route = "sourceMigration/${spec.sourceId}"
+    if (isCurrentRoute(route)) return
+    navigate(route) {
         launchSingleTop = true
+        popUpTo(NavigationRoutes.SOURCE_MIGRATION) { inclusive = true }
     }
 }
 
 fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.BrowseSettingsScreenSpec) {
-    navigate("browseSettings") {
-        launchSingleTop = true
-    }
+    if (isCurrentRoute(NavigationRoutes.browseSettings)) return
+    navigate(NavigationRoutes.browseSettings, NavOptions.singleTop)
 }
 
 // Expect functions for platform-specific screen specs
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.WebViewScreenSpec)
 
-// TTSScreenSpec is now a common class, so we can define the navigation directly
+// TTSScreenSpec navigation - clears existing TTS to prevent audio conflicts
 fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSScreenSpec) {
-    navigate("tts/${spec.bookId}/${spec.chapterId}/${spec.sourceId}/${spec.readingParagraph}") {
+    val route = NavigationRoutes.tts(spec.bookId, spec.chapterId, spec.sourceId, spec.readingParagraph)
+    if (isCurrentRoute(route)) return
+    navigate(route) {
+        launchSingleTop = true
+        popUpTo(NavigationRoutes.TTS) { inclusive = true }
+    }
+}
+
+/**
+ * Navigation convenience functions for common patterns.
+ * Uses pre-built NavOptions to minimize allocations.
+ */
+
+/** Navigate and clear entire back stack. Use for logout/reset. */
+fun NavHostController.navigateAndClearAll(route: String) {
+    navigate(route, NavOptions.clearAll)
+}
+
+/** Navigate to main screen, clearing intermediate screens. */
+fun NavHostController.navigateToMain() {
+    if (isCurrentRoute(NavigationRoutes.MAIN)) return
+    navigate(NavigationRoutes.MAIN, NavOptions.toMain)
+}
+
+/** Navigate to reader, clearing other reader sessions. */
+fun NavHostController.navigateToReaderAndClearOthers(bookId: Long, chapterId: Long) {
+    val route = NavigationRoutes.reader(bookId, chapterId)
+    if (isCurrentRoute(route)) return
+    navigate(route) {
+        popUpTo(NavigationRoutes.READER) { inclusive = true }
         launchSingleTop = true
     }
+}
+
+/** Navigate to settings screen. */
+fun NavHostController.navigateToSettings(settingsRoute: String) {
+    if (isCurrentRoute(settingsRoute)) return
+    navigate(settingsRoute, NavOptions.singleTop)
+}
+
+/**
+ * Batch navigation helper - navigate to multiple screens efficiently.
+ * Useful for deep linking scenarios.
+ */
+fun NavHostController.navigateDeepLink(vararg routes: String) {
+    routes.forEachIndexed { index, route ->
+        navigate(route) {
+            if (index == routes.lastIndex) {
+                launchSingleTop = true
+            }
+        }
+    }
+}
+
+/**
+ * Navigate back with result - pops back stack and can trigger result handling.
+ * Returns true if pop was successful.
+ */
+fun NavHostController.navigateBack(): Boolean {
+    return if (previousBackStackEntry != null) {
+        popBackStack()
+    } else {
+        false
+    }
+}
+
+/**
+ * Navigate back to a specific route, clearing everything above it.
+ */
+fun NavHostController.navigateBackTo(route: String, inclusive: Boolean = false): Boolean {
+    return popBackStack(route, inclusive)
 }
