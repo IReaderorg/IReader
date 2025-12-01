@@ -1,8 +1,11 @@
 package ireader.presentation.ui.reader
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -497,12 +500,27 @@ private fun ReadingScreenContent(
                             )
                         }
                         
-                        // Reader controls bottom bar (non-modal)
-                        if (!vm.isReaderModeEnable) {
+                        // Reader controls bottom bar (non-modal) with modal sheet animation
+                        AnimatedVisibility(
+                            visible = !vm.isReaderModeEnable,
+                            enter = slideInVertically(
+                                initialOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = androidx.compose.animation.core.FastOutSlowInEasing
+                                )
+                            ),
+                            exit = slideOutVertically(
+                                targetOffsetY = { fullHeight -> fullHeight },
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = androidx.compose.animation.core.FastOutLinearInEasing
+                                )
+                            ),
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                        ) {
                             Surface(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
                                 contentColor = MaterialTheme.colorScheme.onSurface,
