@@ -2062,4 +2062,9 @@
     <string name="your_review_will_appear_as">Your review will appear as:</string>
     <string name="your_username">Your Username</string>
     <string name="youve_reached_the_end">You've reached the end!</string>
+    
+    <!-- Chapter navigation and reviews -->
+    <string name="chapter_completed">Chapter Completed</string>
+    <string name="view_chapter_reviews">View Chapter Reviews</string>
+    <string name="hide_reviews">Hide Reviews</string>
 </resources>
