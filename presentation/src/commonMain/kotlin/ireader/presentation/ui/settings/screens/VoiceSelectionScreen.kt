@@ -1,23 +1,43 @@
 package ireader.presentation.ui.settings.screens
 
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.all
+import ireader.i18n.resources.back
+import ireader.i18n.resources.dismiss
+import ireader.i18n.resources.search_voices
+import ireader.i18n.resources.select_voice
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.VoiceCard
 import ireader.presentation.ui.settings.viewmodels.VoiceSelectionViewModel
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
 
 /**
  * Voice selection screen for choosing TTS voices
@@ -69,7 +89,7 @@ fun VoiceSelectionContent(
                 title = { Text(localizeHelper.localize(Res.string.select_voice)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 }
             )

@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.outlined.Info
@@ -55,10 +55,29 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.domain.models.donation.CryptoType
-import kotlinx.coroutines.launch
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.i18n.resources.back
+import ireader.i18n.resources.card_payment
+import ireader.i18n.resources.close
+import ireader.i18n.resources.copy
+import ireader.i18n.resources.cryptocurrency_donations_are_non_refundable
+import ireader.i18n.resources.cryptocurrency_wallets
+import ireader.i18n.resources.donate_now
+import ireader.i18n.resources.donate_via_card_1
+import ireader.i18n.resources.failed_to_generate_qr_code
+import ireader.i18n.resources.important_disclaimer
+import ireader.i18n.resources.ireader_is_a_free_open
+import ireader.i18n.resources.open_in_wallet
+import ireader.i18n.resources.qr_code
+import ireader.i18n.resources.scan_this_qr_code_with_your_crypto_wallet_app
+import ireader.i18n.resources.support_development
+import ireader.i18n.resources.support_the_project_with_a
+import ireader.i18n.resources.thank_you_for_your_support
+import ireader.i18n.resources.wallet_address
+import ireader.i18n.resources.why_donate
+import ireader.i18n.resources.your_contribution_helps_keep_ireader
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,7 +115,7 @@ fun DonationScreen(
                 navigationIcon = {
                     IconButton(onClick = onPopBackStack) {
                         Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
+                            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }

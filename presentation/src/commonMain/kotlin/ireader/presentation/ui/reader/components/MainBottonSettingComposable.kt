@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,11 +15,13 @@ import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.drawer
+import ireader.i18n.resources.play
+import ireader.i18n.resources.settings
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,24 +76,6 @@ fun MainBottomSettingComposable(
             contentDescription = localize(Res.string.play),
             onClick = { onPlay() }
         )
-        
-        // Chapter Reviews button
-        if (onReviews != null) {
-            AppIconButton(
-                imageVector = androidx.compose.material.icons.Icons.Default.RateReview,
-                contentDescription = localizeHelper.localize(Res.string.chapter_reviews),
-                onClick = { onReviews() }
-            )
-        }
-        
-        // Auto-scroll toggle button
-        if (onAutoScrollToggle != null) {
-            AppIconButton(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = localizeHelper.localize(Res.string.auto_scroll),
-                onClick = { onAutoScrollToggle() }
-            )
-        }
 
         AppIconButton(
             imageVector = Icons.Default.Settings,

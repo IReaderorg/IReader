@@ -1,22 +1,45 @@
 package ireader.presentation.ui.leaderboard
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.i18n.LocalizeHelper
-import kotlinx.coroutines.launch
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.i18n.resources.back
+import ireader.i18n.resources.refresh
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import kotlinx.coroutines.launch
 
 enum class LeaderboardTab(val title: String, val icon: @Composable () -> Unit) {
     READING(
@@ -68,7 +91,7 @@ fun CombinedLeaderboardScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {

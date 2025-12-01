@@ -1,10 +1,27 @@
 package ireader.presentation.ui.community
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -12,9 +29,41 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,11 +74,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.remote.PopularBook
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.back
+import ireader.i18n.resources.book_cover_1
+import ireader.i18n.resources.error_occurred
+import ireader.i18n.resources.in_library_1
+import ireader.i18n.resources.loading_more_books
+import ireader.i18n.resources.loading_popular_books
+import ireader.i18n.resources.no_popular_books_yet
+import ireader.i18n.resources.open_in_browser
+import ireader.i18n.resources.open_site
+import ireader.i18n.resources.please_wait_a_moment_before_loading_more
+import ireader.i18n.resources.refresh
+import ireader.i18n.resources.retry
+import ireader.i18n.resources.start_reading_to_see_trending_books
+import ireader.i18n.resources.these_are_all_the_popular_books
+import ireader.i18n.resources.trending_now
+import ireader.i18n.resources.youve_reached_the_end
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.AsyncImage
 import kotlinx.coroutines.launch
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,7 +151,7 @@ fun PopularBooksScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {

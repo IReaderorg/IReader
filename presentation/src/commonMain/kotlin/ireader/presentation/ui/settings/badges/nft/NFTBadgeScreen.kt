@@ -1,42 +1,92 @@
 package ireader.presentation.ui.settings.badges.nft
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.remote.Badge
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.badge_granted_immediately_upon_successful
+import ireader.i18n.resources.cache_expires
+import ireader.i18n.resources.contract_address
+import ireader.i18n.resources.dont_have_an_ireader_nft
+import ireader.i18n.resources.enter_your_ethereum_wallet_address_1
+import ireader.i18n.resources.last_verified
+import ireader.i18n.resources.navigate_back
+import ireader.i18n.resources.nft_badge
+import ireader.i18n.resources.nft_information
+import ireader.i18n.resources.no_nft_found
+import ireader.i18n.resources.purchase_from_our_official_marketplace
+import ireader.i18n.resources.this_wallet_does_not_own_an_ireader_nft
+import ireader.i18n.resources.verification_details
+import ireader.i18n.resources.verification_is_automatic_and_takes_a_few_seconds
+import ireader.i18n.resources.verification_is_cached_for_24
+import ireader.i18n.resources.verifying_nft_ownership
+import ireader.i18n.resources.visit_marketplace
+import ireader.i18n.resources.wallet_address
+import ireader.i18n.resources.wallet_placeholder
+import ireader.i18n.resources.you_own_an_ireader_nft
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.badges.BadgeIcon
-import ireader.presentation.ui.component.components.TitleToolbar
-import kotlin.time.Instant
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +120,7 @@ fun NFTBadgeScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = localizeHelper.localize(Res.string.navigate_back)
                         )
                     }

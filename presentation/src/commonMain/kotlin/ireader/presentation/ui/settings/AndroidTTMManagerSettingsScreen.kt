@@ -1,22 +1,50 @@
 package ireader.presentation.ui.settings
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.back
+import ireader.i18n.resources.for_more_powerful_and_natural
+import ireader.i18n.resources.high_quality_neural_voicesn_works
+import ireader.i18n.resources.ireader_uses_your_devices_built
+import ireader.i18n.resources.native_android_tts
+import ireader.i18n.resources.once_installed_go_to_android
+import ireader.i18n.resources.online_tts_engines
+import ireader.i18n.resources.recommended_sherpa_tts_app
+import ireader.i18n.resources.system_integration_multiple_engines_supported
+import ireader.i18n.resources.tts_engine_manager
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.GradioConfigEditDialog
 import ireader.presentation.ui.settings.components.GradioTTSSection
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +63,7 @@ fun AndroidTTSMManagerSettingsScreen(
                 title = { Text(localizeHelper.localize(Res.string.tts_engine_manager)) },
                 navigationIcon = {
                     AppIconButton(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = localizeHelper.localize(Res.string.back),
                         onClick = onBackPressed
                     )

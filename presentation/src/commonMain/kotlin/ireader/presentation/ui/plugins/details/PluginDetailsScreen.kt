@@ -1,23 +1,61 @@
 package ireader.presentation.ui.plugins.details
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.presentation.ui.plugins.details.components.*
-import ireader.presentation.ui.plugins.details.components.ResourceUsageSection
-import ireader.presentation.ui.plugins.details.components.ResourceUsageHistoryGraph
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.i18n.resources.back
+import ireader.i18n.resources.cancel
+import ireader.i18n.resources.download_notifier_title_error
+import ireader.i18n.resources.enable_continue
+import ireader.i18n.resources.enable_plugin_feature
+import ireader.i18n.resources.javascript_plugins_are_currently_disabled
+import ireader.i18n.resources.loading_plugin_details
+import ireader.i18n.resources.retry
+import ireader.i18n.resources.to_use_lnreader_compatible_plugins
+import ireader.i18n.resources.would_you_like_to_enable_it_now
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.plugins.details.components.DescriptionSection
+import ireader.presentation.ui.plugins.details.components.DeveloperInfoSection
+import ireader.presentation.ui.plugins.details.components.EmptyReviewsState
+import ireader.presentation.ui.plugins.details.components.InstallButton
+import ireader.presentation.ui.plugins.details.components.PermissionsSection
+import ireader.presentation.ui.plugins.details.components.PluginHeader
+import ireader.presentation.ui.plugins.details.components.PluginScreenshots
+import ireader.presentation.ui.plugins.details.components.PurchaseDialog
+import ireader.presentation.ui.plugins.details.components.ResourceUsageHistoryGraph
+import ireader.presentation.ui.plugins.details.components.ResourceUsageSection
+import ireader.presentation.ui.plugins.details.components.ReviewItem
+import ireader.presentation.ui.plugins.details.components.ReviewsSectionHeader
+import ireader.presentation.ui.plugins.details.components.SuccessMessageDialog
+import ireader.presentation.ui.plugins.details.components.WriteReviewDialog
 
 /**
  * Plugin Details screen showing comprehensive plugin information
@@ -41,7 +79,7 @@ fun PluginDetailsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }

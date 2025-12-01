@@ -1,26 +1,55 @@
 package ireader.presentation.ui.plugins.marketplace
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.all_plugins
+import ireader.i18n.resources.back
+import ireader.i18n.resources.close_search
+import ireader.i18n.resources.download_notifier_title_error
+import ireader.i18n.resources.filter
+import ireader.i18n.resources.loading_plugins
+import ireader.i18n.resources.plugin_marketplace
+import ireader.i18n.resources.retry
+import ireader.i18n.resources.search
+import ireader.i18n.resources.search_plugins
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.plugins.marketplace.components.FeaturedPluginsSection
 import ireader.presentation.ui.plugins.marketplace.components.FilterBottomSheet
 import ireader.presentation.ui.plugins.marketplace.components.PluginCard
 import ireader.presentation.ui.plugins.marketplace.components.PluginCategoryTabs
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
 
 /**
  * Plugin Marketplace screen for discovering and installing plugins
@@ -56,7 +85,7 @@ fun PluginMarketplaceScreen(
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = localizeHelper.localize(Res.string.back)
                             )
                         }
@@ -238,7 +267,7 @@ private fun SearchTopBar(
         navigationIcon = {
             IconButton(onClick = onCloseSearch) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = localizeHelper.localize(Res.string.close_search)
                 )
             }

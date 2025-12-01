@@ -1,31 +1,89 @@
 package ireader.presentation.ui.home.sources.migration
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.migration.MigrationMatch
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
-import ireader.presentation.ui.migration.MigrationResult
+import ireader.i18n.resources.back
+import ireader.i18n.resources.cancel
+import ireader.i18n.resources.choose_where_to_migrate_your_books
+import ireader.i18n.resources.done
+import ireader.i18n.resources.loading_novels
+import ireader.i18n.resources.looking_in_target_source
+import ireader.i18n.resources.migrate
+import ireader.i18n.resources.migrating_book
+import ireader.i18n.resources.migration_complete
+import ireader.i18n.resources.no_matches_found
+import ireader.i18n.resources.no_novels_found
+import ireader.i18n.resources.searching_for_matches
+import ireader.i18n.resources.select_books_to_migrate
+import ireader.i18n.resources.select_target_source
+import ireader.i18n.resources.selected
+import ireader.i18n.resources.skip
+import ireader.i18n.resources.the_book_could_not_be_found_in_the_target_source
+import ireader.i18n.resources.there_are_no_novels_in_this_source_to_migrate
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
@@ -286,7 +344,7 @@ private fun ModernMigrationTopBar(
         navigationIcon = {
             IconButton(onClick = onBackPressed) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = localizeHelper.localize(Res.string.back)
                 )
             }

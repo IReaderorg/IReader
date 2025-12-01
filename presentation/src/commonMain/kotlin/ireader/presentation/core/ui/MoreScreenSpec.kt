@@ -12,11 +12,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import ireader.i18n.discord
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.more
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.MainSettingScreenViewModel
 import ireader.presentation.ui.settings.MoreScreen
 
@@ -38,15 +37,7 @@ object MoreScreenSpec {
         val vm: MainSettingScreenViewModel = getIViewModel()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         
-        IScaffold(
-            topBar = { scrollBehavior ->
-                TitleToolbar(
-                    title = localize(Res.string.more),
-                    scrollBehavior = scrollBehavior,
-                    popBackStack = null,
-                )
-            }
-        ) { padding ->
+        IScaffold { padding ->
             MoreScreen(
                 modifier = Modifier.padding(padding),
                 vm = vm,

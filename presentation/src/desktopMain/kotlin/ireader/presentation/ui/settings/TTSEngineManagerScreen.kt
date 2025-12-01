@@ -188,7 +188,7 @@ fun TTSEngineManagerScreen(
                 title = { Text(localizeHelper.localize(Res.string.tts_engine_manager)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 }
             )

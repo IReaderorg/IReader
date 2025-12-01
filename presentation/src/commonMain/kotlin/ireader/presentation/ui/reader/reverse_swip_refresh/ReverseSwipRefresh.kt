@@ -236,11 +236,12 @@ fun MultiSwipeRefresh(
         swipeEnabled: Boolean = true,
         refreshTriggerDistance: Dp = 80.dp,
         indicators: List<ISwipeRefreshIndicator>,
-    // indicatorAlignment: Alignment = Alignment.TopCenter,
         indicatorPadding: PaddingValues = PaddingValues(0.dp),
         clipIndicatorToPadding: Boolean = true,
         content: @Composable () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val refreshTriggerPx = with(LocalDensity.current) { refreshTriggerDistance.toPx() }
 
     // Our LaunchedEffect, which animates the indicator to its resting position
     LaunchedEffect(state.isSwipeInProgress) {
@@ -250,44 +251,48 @@ fun MultiSwipeRefresh(
         }
     }
 
-    indicators.forEach { indicator ->
-        val coroutineScope = rememberCoroutineScope()
-        val refreshTriggerPx = with(LocalDensity.current) { refreshTriggerDistance.toPx() }
+    // Find the first enabled indicator to use for nested scroll
+    val enabledIndicators = indicators.filter { it.enable }
+    
+    // Create nested scroll connections for all enabled indicators
+    val nestedScrollConnections = enabledIndicators.map { indicator ->
         val updatedOnRefresh = rememberUpdatedState(indicator.onRefresh)
-        if (indicator.enable) {
-            // Our nested scroll connection, which updates our state.
-            val nestedScrollConnection = remember(state, coroutineScope) {
-                SwipeRefreshNestedScrollConnection(
-                    state = state,
-                    coroutineScope = coroutineScope,
-                    onRefresh = {
-                        // On refresh, re-dispatch to the update onRefresh block
-                        updatedOnRefresh.value.invoke()
-                    },
-                    scrollFromTop = (indicator.alignment as BiasAlignment).verticalBias != 1f
-                )
-            }.apply {
-                this.enabled = swipeEnabled
-                this.refreshTrigger = refreshTriggerPx
-            }
+        remember(state, coroutineScope, indicator.alignment) {
+            SwipeRefreshNestedScrollConnection(
+                state = state,
+                coroutineScope = coroutineScope,
+                onRefresh = {
+                    updatedOnRefresh.value.invoke()
+                },
+                scrollFromTop = (indicator.alignment as BiasAlignment).verticalBias != 1f
+            )
+        }.apply {
+            this.enabled = swipeEnabled
+            this.refreshTrigger = refreshTriggerPx
+        }
+    }
 
-            Box(modifier.nestedScroll(connection = nestedScrollConnection)) {
-                content()
+    // Apply all nested scroll connections to a single Box
+    var boxModifier = modifier
+    nestedScrollConnections.forEach { connection ->
+        boxModifier = boxModifier.nestedScroll(connection = connection)
+    }
 
-                Box(
-                    Modifier
-                        // If we're not clipping to the padding, we use clipToBounds() before the padding()
-                        // modifier.
-                        .let { if (!clipIndicatorToPadding) it.clipToBounds() else it }
-                        .padding(indicatorPadding)
-                        .matchParentSize()
-                        // Else, if we're are clipping to the padding, we use clipToBounds() after
-                        // the padding() modifier.
-                        .let { if (clipIndicatorToPadding) it.clipToBounds() else it }
-                ) {
-                    Box(Modifier.align(indicator.alignment)) {
-                        indicator.indicator(state, refreshTriggerDistance)
-                    }
+    Box(boxModifier) {
+        // Content is rendered only once
+        content()
+
+        // Render all enabled indicators
+        enabledIndicators.forEach { indicator ->
+            Box(
+                Modifier
+                    .let { if (!clipIndicatorToPadding) it.clipToBounds() else it }
+                    .padding(indicatorPadding)
+                    .matchParentSize()
+                    .let { if (clipIndicatorToPadding) it.clipToBounds() else it }
+            ) {
+                Box(Modifier.align(indicator.alignment)) {
+                    indicator.indicator(state, refreshTriggerDistance)
                 }
             }
         }

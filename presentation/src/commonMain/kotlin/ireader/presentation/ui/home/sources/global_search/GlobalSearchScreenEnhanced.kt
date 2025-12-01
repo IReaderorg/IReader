@@ -114,7 +114,7 @@
 //        navigationIcon = {
 //            IconButton(onClick = onPopBackStack) {
 //                Icon(
-//                    imageVector = Icons.Default.ArrowBack,
+//                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
 //                    contentDescription = localize(Res.string.go_back)
 //                )
 //            }

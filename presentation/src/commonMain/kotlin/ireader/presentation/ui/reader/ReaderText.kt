@@ -1604,7 +1604,6 @@ private fun ChapterVoidSpace(
                     text = "View Comments",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = fgd
                 )
             }
             
