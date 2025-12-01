@@ -1,30 +1,24 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.core.source.CatalogSource
@@ -33,12 +27,11 @@ import ireader.domain.models.entities.Book
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.i18n.localize
-import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 import ireader.i18n.resources.no_chapter_is_available
 import ireader.i18n.resources.resume
 import ireader.i18n.resources.source_not_available
 import ireader.i18n.resources.start
-import ireader.i18n.resources.success
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
@@ -56,7 +49,6 @@ import ireader.presentation.ui.core.utils.isScrolledToEnd
 import ireader.presentation.ui.core.utils.isScrollingUp
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
-import ireader.i18n.resources.Res
 
 data class BookDetailScreenSpec constructor(
     val bookId: Long,
@@ -64,9 +56,8 @@ data class BookDetailScreenSpec constructor(
 
     
     @OptIn(
-        ExperimentalMaterialApi::class,
         ExperimentalMaterial3Api::class,
-        ExperimentalFoundationApi::class,
+        ExperimentalFoundationApi::class
     )
     @Composable
     fun Content(
@@ -104,12 +95,7 @@ data class BookDetailScreenSpec constructor(
             }
         }
         val refreshing = vm.detailIsLoading || vm.chapterIsLoading
-        val swipeRefreshState =
-            rememberPullRefreshState(refreshing = refreshing, onRefresh = {
-                scope.launch {
-                    vm.getRemoteChapterDetail(book, catalog)
-                }
-            })
+        val pullToRefreshState = rememberPullToRefreshState()
         val topbarState = rememberTopAppBarState()
         val snackBarHostState = SnackBarListener(vm)
         
@@ -119,7 +105,16 @@ data class BookDetailScreenSpec constructor(
         // Handle back button to close modal sheet instead of closing screen
         // BackHandler removed - Android-specific, implement in androidMain if needed
         
-        Box(modifier = Modifier.fillMaxSize()) {
+        PullToRefreshBox(
+            isRefreshing = refreshing,
+            onRefresh = {
+                scope.launch {
+                    vm.getRemoteChapterDetail(book, catalog)
+                }
+            },
+            state = pullToRefreshState,
+            modifier = Modifier.fillMaxSize()
+        ) {
         IModalSheets(
             sheetContent = {
                 val detailState = vm.state
@@ -197,7 +192,6 @@ data class BookDetailScreenSpec constructor(
             }
             TransparentStatusBar {
                 IScaffold(
-                    modifier = Modifier.pullRefresh(swipeRefreshState),
                     topBarScrollBehavior = scrollBehavior,
                     snackbarHostState = snackbarHostState,
                     topBar = { scrollBehavior ->
@@ -432,15 +426,6 @@ data class BookDetailScreenSpec constructor(
                 }
                 }
             }
-            if (refreshing) {
-                PullRefreshIndicator(
-                    refreshing,
-                    swipeRefreshState,
-                    Modifier.align(Alignment.TopCenter),
-
-                    )
-            }
-
         }
         
         // End of Life Options Dialog

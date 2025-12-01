@@ -18,27 +18,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +40,6 @@ import coil3.compose.LocalPlatformContext
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.core.toComposeColor
-import ireader.presentation.ui.core.ui.Colour.Transparent
 import ireader.presentation.ui.reader.components.AutoScrollSpeedControl
 import ireader.presentation.ui.reader.components.BrightnessControl
 import ireader.presentation.ui.reader.components.FindInChapterBar
@@ -60,7 +51,6 @@ import ireader.presentation.ui.reader.components.QuickFontSizeAdjuster
 import ireader.presentation.ui.reader.components.ReaderSettingsBottomSheet
 import ireader.presentation.ui.reader.components.ReadingTimeEstimator
 import ireader.presentation.ui.reader.components.ReportBrokenChapterDialog
-import ireader.presentation.ui.reader.components.TranslationBadge
 import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
@@ -84,7 +74,7 @@ private object ReaderScreenModifiers {
 
 @ExperimentalAnimationApi
 @OptIn(
-    ExperimentalMaterialApi::class,
+
     ExperimentalMaterial3Api::class
 )
 @Composable
@@ -109,16 +99,6 @@ fun ReadingScreen(
         onNavigateToTranslationSettings: () -> Unit
 ) {
 
-    val modalBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        animationSpec = tween(durationMillis = 250)
-    )
-
-    DisposableEffect(key1 = modalBottomSheetState.hashCode()) {
-        vm.modalBottomSheetState = modalBottomSheetState
-        onDispose { }
-    }
-    
     val scope = rememberCoroutineScope()
     val context = LocalPlatformContext.current
     val chapter = vm.stateChapter
@@ -147,7 +127,6 @@ fun ReadingScreen(
             onChapterShown = onChapterShown,
             paddingValues = paddingValues,
             onNavigateToTranslationSettings = onNavigateToTranslationSettings,
-            modalBottomSheetState = modalBottomSheetState,
             scope = scope,
             chapter = chapter,
             showChapterReviews = showChapterReviews
@@ -157,7 +136,7 @@ fun ReadingScreen(
 
 @ExperimentalAnimationApi
 @OptIn(
-    ExperimentalMaterialApi::class,
+
     ExperimentalMaterial3Api::class
 )
 @Composable
@@ -178,7 +157,6 @@ private fun ReadingScreenContent(
         onChapterShown: (chapter: Chapter) -> Unit,
         paddingValues: PaddingValues,
         onNavigateToTranslationSettings: () -> Unit,
-        modalBottomSheetState: androidx.compose.material.ModalBottomSheetState,
         scope: kotlinx.coroutines.CoroutineScope,
         chapter: Chapter?,
         showChapterReviews: androidx.compose.runtime.MutableState<Boolean>
@@ -208,88 +186,8 @@ private fun ReadingScreenContent(
         }
     }
 
-    // Initialize the modal sheet state based on reader mode
-    LaunchedEffect(key1 = vm.isReaderModeEnable) {
-        // Ensure that on initialization, the bottom sheet state is set correctly
-        // Only show on first composition if reader mode is disabled
-        if (!vm.isReaderModeEnable && !vm.initialized) {
-            modalBottomSheetState.show()
-        }
-    }
-    
-    // Track if we're currently syncing to prevent feedback loops
-    var isSyncing by remember { mutableStateOf(false) }
-    
-    // Handle changes from modal sheet to reader mode
-    LaunchedEffect(key1 = modalBottomSheetState.targetValue, key2 = vm.initialized) {
-        // Only sync state after initialization and when not already syncing
-        if (vm.initialized && !isSyncing) {
-            when (modalBottomSheetState.targetValue) {
-                ModalBottomSheetValue.Expanded -> {
-                    if (vm.isReaderModeEnable) {
-                        isSyncing = true
-                        try {
-                            vm.isReaderModeEnable = false
-                            // Wait for layout to stabilize before releasing sync lock
-                            kotlinx.coroutines.delay(300)
-                        } finally {
-                            isSyncing = false
-                        }
-                    }
-                }
-                ModalBottomSheetValue.Hidden -> {
-                    if (!vm.isReaderModeEnable) {
-                        isSyncing = true
-                        try {
-                            vm.isReaderModeEnable = true
-                            // Wait for layout to stabilize before releasing sync lock
-                            kotlinx.coroutines.delay(300)
-                        } finally {
-                            isSyncing = false
-                        }
-                    }
-                }
-                else -> {}
-            }
-        }
-    }
-    
-    // Handle changes from reader mode to modal sheet
-    LaunchedEffect(key1 = vm.isReaderModeEnable, key2 = vm.initialized) {
-        // Only sync state after initialization and when not already syncing
-        if (vm.initialized && !isSyncing) {
-            when (vm.isReaderModeEnable) {
-                false -> {
-                    if (modalBottomSheetState.targetValue != ModalBottomSheetValue.Expanded) {
-                        isSyncing = true
-                        try {
-                            modalBottomSheetState.show()
-                            // Wait for animation to complete
-                            kotlinx.coroutines.delay(300)
-                        } catch (e: Exception) {
-                            ireader.core.log.Log.error("Error showing modal sheet", e)
-                        } finally {
-                            isSyncing = false
-                        }
-                    }
-                }
-                true -> {
-                    if (modalBottomSheetState.targetValue != ModalBottomSheetValue.Hidden) {
-                        isSyncing = true
-                        try {
-                            modalBottomSheetState.hide()
-                            // Wait for animation to complete
-                            kotlinx.coroutines.delay(300)
-                        } catch (e: Exception) {
-                            ireader.core.log.Log.error("Error hiding modal sheet", e)
-                        } finally {
-                            isSyncing = false
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // No complex syncing needed - Material3 ModalBottomSheet is controlled by boolean condition
+    // The sheet visibility is controlled by !vm.isReaderModeEnable
     
     Box(
         modifier = ReaderScreenModifiers.fillMaxSize
@@ -328,49 +226,7 @@ private fun ReadingScreenContent(
                     }
                 }
                 else -> {
-                    ModalBottomSheetLayout(
-                        modifier = Modifier.fillMaxSize(),
-                        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-                        // Removed transparency hack - performance is now optimized via debounced preferences
-                        sheetBackgroundColor = MaterialTheme.colorScheme.surface.copy(ContentAlpha.high),
-                        sheetContentColor = MaterialTheme.colorScheme.onSurface,
-                        scrimColor = Color.Black.copy(alpha = 0.32f),
-                        sheetElevation = 16.dp,
-                        sheetState = modalBottomSheetState,
-                        sheetContent = {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .navigationBarsPadding()
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Box(
-                                    modifier = ReaderScreenModifiers.bottomSheetHandle
-                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-                                        .align(Alignment.CenterHorizontally)
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                MainBottomSettingComposable(
-                                    scope = scope,
-                                    drawerState = drawerState,
-                                    chapter = chapter,
-                                    chapters = vm.stateChapters,
-                                    currentChapterIndex = vm.currentChapterIndex,
-                                    onSetting = { vm.showSettingsBottomSheet = true },
-                                    onNext = onNextWithReset,
-                                    onPrev = onPrevWithReset,
-                                    onSliderChange = onSliderChange,
-                                    onSliderFinished = onSliderFinished,
-                                    onPlay = onReaderPlay,
-                                    onAutoScrollToggle = { vm.toggleAutoScroll() },
-                                    onReviews = if (vm.book != null && vm.stateChapter != null) {
-                                        { showChapterReviews.value = true }
-                                    } else null
-                                )
-                            }
-                        },
-                    ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -382,11 +238,15 @@ private fun ReadingScreenContent(
                                 swipeState = swipeState,
                                 onPrev = onPrevWithoutReset,
                                 scrollState = scrollState,
-                                modalState = modalBottomSheetState,
                                 toggleReaderMode = toggleReaderMode,
                                 uiState = vm,
                                 lazyListState = lazyListState,
-                                onChapterShown = onChapterShown
+                                onChapterShown = onChapterShown,
+                                onShowComments = {
+                                    if (vm.book != null && vm.stateChapter != null) {
+                                        showChapterReviews.value = true
+                                    }
+                                }
                             )
                             
                             // Settings Bottom Sheet
@@ -636,10 +496,54 @@ private fun ReadingScreenContent(
                                 onDismiss = { vm.dismissReadingBreakDialog() }
                             )
                         }
+                        
+                        // Reader controls bottom bar (non-modal)
+                        if (!vm.isReaderModeEnable) {
+                            Surface(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth(),
+                                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                shadowElevation = 16.dp,
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .navigationBarsPadding()
+                                        .padding(horizontal = 16.dp)
+                                ) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(40.dp)
+                                            .height(4.dp)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                                            .align(Alignment.CenterHorizontally)
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    MainBottomSettingComposable(
+                                        scope = scope,
+                                        drawerState = drawerState,
+                                        chapter = chapter,
+                                        chapters = vm.stateChapters,
+                                        currentChapterIndex = vm.currentChapterIndex,
+                                        onSetting = { vm.showSettingsBottomSheet = true },
+                                        onNext = onNextWithReset,
+                                        onPrev = onPrevWithReset,
+                                        onSliderChange = onSliderChange,
+                                        onSliderFinished = onSliderFinished,
+                                        onPlay = onReaderPlay,
+                                        onAutoScrollToggle = { vm.toggleAutoScroll() },
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    }
+    }}
 

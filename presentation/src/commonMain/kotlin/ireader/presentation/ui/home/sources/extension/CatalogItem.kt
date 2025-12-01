@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PushPin
@@ -186,7 +185,7 @@ private fun CatalogButtons(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(modifier = modifier) {
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium()) {
+        CompositionLocalProvider(LocalContentColor provides LocalContentColor.current.copy(alpha = ContentAlpha.medium())) {
             // Show login button if source requires authentication
             if (sourceStatus is SourceStatus.LoginRequired && onLogin != null) {
                 MidSizeTextComposable(

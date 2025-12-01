@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ExperimentalMaterialApi
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -55,7 +55,7 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryState
 import kotlinx.coroutines.launch
 
 @OptIn(
-    ExperimentalMaterialApi::class, 
+
     ExperimentalMaterial3Api::class,
     ExperimentalAnimationApi::class
 )
@@ -122,7 +122,7 @@ fun LibraryScreenTopBar(
 }
 
 @OptIn(
-    ExperimentalMaterialApi::class, 
+
     ExperimentalComposeUiApi::class,
     ExperimentalMaterial3Api::class
 )

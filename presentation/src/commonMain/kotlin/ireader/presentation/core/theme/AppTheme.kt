@@ -4,13 +4,17 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.unit.LayoutDirection
 import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.rememberPlatformPerformanceConfig
 import ireader.presentation.ui.core.theme.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.LocalIsRtl
+import ireader.presentation.ui.core.utils.getLayoutDirectionForLanguage
 import ireader.presentation.core.toComposeColor
 import kotlinx.coroutines.CoroutineScope
 import org.koin.compose.koinInject
@@ -103,6 +107,14 @@ fun AppTheme(
     // Get performance config - uses platform-specific detection when available
     val performanceConfig = rememberPlatformPerformanceConfig()
     
+    // Determine layout direction based on current language
+    // This enables RTL support for Arabic, Hebrew, Persian, etc.
+    val currentLanguage = mainLocalizeHelper.getCurrentLanguageCode()
+    val layoutDirection = remember(currentLanguage) {
+        getLayoutDirectionForLanguage(currentLanguage)
+    }
+    val isRtl = layoutDirection == LayoutDirection.Rtl
+    
     AppColors(
         materialColors = materialColors,
         extraColors = customColors,
@@ -110,6 +122,8 @@ fun AppTheme(
         shape = Shapes
     ) {
         CompositionLocalProvider(
+            LocalLayoutDirection provides layoutDirection,
+            LocalIsRtl provides isRtl,
             LocalLocalizeHelper provides mainLocalizeHelper,
             LocalGlobalCoroutineScope provides scope,
             LocalPerformanceConfig provides performanceConfig,

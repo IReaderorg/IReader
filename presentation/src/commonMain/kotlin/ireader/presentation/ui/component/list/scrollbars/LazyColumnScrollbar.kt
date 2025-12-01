@@ -25,6 +25,13 @@ expect fun LazyColumnScrollbar(
         selectionMode: PreferenceValues.ScrollbarSelectionMode,
         content: @Composable () -> Unit,
 )
+/**
+ * RTL-aware LazyColumn scrollbar wrapper.
+ * In RTL layouts, the scrollbar position is automatically mirrored unless explicitly set.
+ * 
+ * @param rightSide If true, scrollbar appears on the right in LTR and left in RTL.
+ *                  If false, scrollbar appears on the left in LTR and right in RTL.
+ */
 @Composable
 fun ILazyColumnScrollbar(
         listState: LazyListState,
@@ -39,4 +46,11 @@ fun ILazyColumnScrollbar(
         enable: Boolean = true,
         selectionMode: PreferenceValues.ScrollbarSelectionMode = PreferenceValues.ScrollbarSelectionMode.Thumb,
         content: @Composable () -> Unit,
-) = LazyColumnScrollbar(listState, rightSide, thickness, padding, thumbMinHeight, thumbColor, thumbSelectedColor, indicatorContent, thumbShape, enable, selectionMode, content)
+) {
+    // RTL support: Mirror scrollbar position in RTL layouts
+    val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
+    val isRtl = layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl
+    val adjustedRightSide = if (isRtl) !rightSide else rightSide
+    
+    LazyColumnScrollbar(listState, adjustedRightSide, thickness, padding, thumbMinHeight, thumbColor, thumbSelectedColor, indicatorContent, thumbShape, enable, selectionMode, content)
+}

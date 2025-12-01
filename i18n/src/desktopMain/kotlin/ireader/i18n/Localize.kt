@@ -66,5 +66,8 @@ actual class LocalizeHelper {
        return "NOT SUPPORTED"
     }
 
+    actual fun getCurrentLanguageCode(): String {
+        return java.util.Locale.getDefault().language
+    }
 
 }

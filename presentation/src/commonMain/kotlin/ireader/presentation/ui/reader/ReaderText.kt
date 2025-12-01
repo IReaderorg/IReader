@@ -32,24 +32,16 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.RateReview
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -81,19 +73,12 @@ import coil3.toUri
 import ireader.core.source.model.ImageUrl
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
-import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.chapter_completed
-import ireader.i18n.resources.hide_reviews
 import ireader.i18n.resources.image
-import ireader.i18n.resources.next_chapter
-import ireader.i18n.resources.previous_chapter
-import ireader.i18n.resources.this_is_last_chapter
-import ireader.i18n.resources.view_chapter_reviews
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeFontFamily
 import ireader.presentation.core.toComposeTextAlign
@@ -102,7 +87,6 @@ import ireader.presentation.ui.component.list.scrollbars.IColumnScrollbar
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
 import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.reader.components.ChapterReviewSection
 import ireader.presentation.ui.reader.components.SelectableTranslatableText
 import ireader.presentation.ui.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import ireader.presentation.ui.reader.reverse_swip_refresh.MultiSwipeRefresh
@@ -111,7 +95,6 @@ import ireader.presentation.ui.reader.viewmodel.ReaderScreenState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ReaderText(
     modifier: Modifier = Modifier,
@@ -122,9 +105,9 @@ fun ReaderText(
     swipeState: SwipeRefreshState,
     scrollState: ScrollState,
     lazyListState: LazyListState,
-    modalState: ModalBottomSheetState,
     toggleReaderMode: () -> Unit,
     onChapterShown: (chapter: Chapter) -> Unit,
+    onShowComments: (chapter: Chapter) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
@@ -277,7 +260,8 @@ fun ReaderText(
                                     maxHeight = maxHeight,
                                     onNext = onNext,
                                     onPrev = onPrev,
-                                    toggleReaderMode = debouncedToggleReaderMode
+                                    toggleReaderMode = debouncedToggleReaderMode,
+                                    onShowComments = onShowComments
                                 )
                             }
 
@@ -290,7 +274,8 @@ fun ReaderText(
                                     onNext = onNext,
                                     onPrev = onPrev,
                                     toggleReaderMode = debouncedToggleReaderMode,
-                                    onChapterShown = onChapterShown
+                                    onChapterShown = onChapterShown,
+                                    onShowComments = onShowComments
                                 )
                             }
                         }
@@ -340,7 +325,8 @@ private fun PagedReaderText(
     maxHeight: Float,
     onPrev: () -> Unit,
     onNext: () -> Unit,
-    toggleReaderMode: () -> Unit
+    toggleReaderMode: () -> Unit,
+    onShowComments: (chapter: Chapter) -> Unit,
 ) {
     // Use optimized LazyColumn-based implementation for better performance
     OptimizedPagedReaderText(
@@ -351,7 +337,8 @@ private fun PagedReaderText(
         maxHeight = maxHeight,
         onPrev = onPrev,
         onNext = onNext,
-        toggleReaderMode = toggleReaderMode
+        toggleReaderMode = toggleReaderMode,
+        onShowComments = onShowComments
     )
 }
 
@@ -373,7 +360,8 @@ private fun OptimizedPagedReaderText(
     maxHeight: Float,
     onPrev: () -> Unit,
     onNext: () -> Unit,
-    toggleReaderMode: () -> Unit
+    toggleReaderMode: () -> Unit,
+    onShowComments: (chapter: Chapter) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     
@@ -436,8 +424,7 @@ private fun OptimizedPagedReaderText(
     val hasNextChapter = currentIndex < chapters.lastIndex
     val prevChapterName = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1)?.name else null
     val nextChapterName = if (hasNextChapter) chapters.getOrNull(currentIndex + 1)?.name else null
-    
-    var showCommentsSheet by remember { mutableStateOf(false) }
+
     val prevChapter = if (hasPrevChapter) chapters.getOrNull(currentIndex - 1) else null
     
     Box(modifier = Modifier.fillMaxSize()) {
@@ -492,7 +479,7 @@ private fun OptimizedPagedReaderText(
                         isLast = !hasNextChapter,
                         textColor = vm.textColor.value.toComposeColor(),
                         backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                        onShowComments = { showCommentsSheet = true },
+                        onShowComments = { vm.stateChapter?.let { onShowComments(it) } },
                         onNextChapter = onNext,
                         isLoading = vm.isLoading
                     )
@@ -501,20 +488,7 @@ private fun OptimizedPagedReaderText(
         }
     }
     
-    // Comments bottom sheet
-    if (showCommentsSheet && vm.stateChapter != null) {
-        androidx.compose.material3.ModalBottomSheet(
-            onDismissRequest = { showCommentsSheet = false },
-            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
-        ) {
-            ChapterReviewSection(
-                reviews = emptyList(),
-                averageRating = 0f,
-                onWriteReview = { _, _ -> },
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
+
 }
 
 /**
@@ -751,7 +725,7 @@ private fun StyleText(
             fontWeight = FontWeight(vm.textWeight.lazyValue)
         )
     } else if (enableBioReading) {
-        Text(
+        androidx.compose.material3.Text(
             text = buildAnnotatedString {
                 var currentCursorIndex = 0
                 originalText.split(" ")
@@ -963,9 +937,9 @@ private fun ContinuesReaderPage(
     onNext: () -> Unit,
     toggleReaderMode: () -> Unit,
     onChapterShown: (chapter: Chapter) -> Unit,
+    onShowComments: (chapter: Chapter) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var showCommentsForChapter by remember { mutableStateOf<Chapter?>(null) }
     
     // Track current chapter for state updates
     var lastChapterId: Chapter? by remember { mutableStateOf(null) }
@@ -1118,28 +1092,12 @@ private fun ContinuesReaderPage(
                         isLast = isLastChapter && !hasNextChapter,
                         textColor = vm.textColor.value.toComposeColor(),
                         backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                        onShowComments = { showCommentsForChapter = chapter },
+                        onShowComments = { onShowComments(chapter) },
                         onNextChapter = onNext,
                         isLoading = vm.isLoading
                     )
                 }
             }
-        }
-    }
-    
-    // Comments bottom sheet
-    if (showCommentsForChapter != null) {
-        val chapter = showCommentsForChapter!!
-        androidx.compose.material3.ModalBottomSheet(
-            onDismissRequest = { showCommentsForChapter = null },
-            containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
-        ) {
-            ChapterReviewSection(
-                reviews = emptyList(),
-                averageRating = 0f,
-                onWriteReview = { _, _ -> },
-                modifier = Modifier.padding(16.dp)
-            )
         }
     }
 }
@@ -1607,9 +1565,13 @@ private fun ReaderHorizontalScreen(
     toggleReaderMode: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    // RTL support: In RTL layouts, swap left/right tap zones for natural reading direction
+    val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
+    val isRtl = layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl
+    
     if (!vm.verticalScrolling.value) {
         Row(modifier = Modifier.fillMaxSize()) {
-
+            // Left zone: Previous in LTR, Next in RTL
             Box(
                 Modifier
                     .fillMaxSize()
@@ -1619,15 +1581,26 @@ private fun ReaderHorizontalScreen(
                         indication = null
                     ) {
                         scope.launch {
-                            if (scrollState.value != 0) {
-                                scrollState.scrollBy(-maxHeight)
+                            if (isRtl) {
+                                // RTL: Left tap goes to next page/chapter
+                                if (scrollState.value != scrollState.maxValue) {
+                                    scrollState.scrollBy(maxHeight)
+                                } else {
+                                    onNext()
+                                }
                             } else {
-                                onPrev()
+                                // LTR: Left tap goes to previous page/chapter
+                                if (scrollState.value != 0) {
+                                    scrollState.scrollBy(-maxHeight)
+                                } else {
+                                    onPrev()
+                                }
                             }
                         }
                     }
             ) {
             }
+            // Center zone: Toggle reader mode (same for both directions)
             Box(
                 Modifier
                     .fillMaxSize()
@@ -1640,6 +1613,7 @@ private fun ReaderHorizontalScreen(
                     }
             ) {
             }
+            // Right zone: Next in LTR, Previous in RTL
             Box(
                 Modifier
                     .fillMaxSize()
@@ -1649,10 +1623,20 @@ private fun ReaderHorizontalScreen(
                         indication = null
                     ) {
                         scope.launch {
-                            if (scrollState.value != scrollState.maxValue) {
-                                scrollState.scrollBy(maxHeight)
+                            if (isRtl) {
+                                // RTL: Right tap goes to previous page/chapter
+                                if (scrollState.value != 0) {
+                                    scrollState.scrollBy(-maxHeight)
+                                } else {
+                                    onPrev()
+                                }
                             } else {
-                                onNext()
+                                // LTR: Right tap goes to next page/chapter
+                                if (scrollState.value != scrollState.maxValue) {
+                                    scrollState.scrollBy(maxHeight)
+                                } else {
+                                    onNext()
+                                }
                             }
                         }
                     }
@@ -1731,192 +1715,4 @@ private fun setText(
     }
     
     return stringBuilder.toString()
-}
-
-/**
- * Chapter end section displayed after all chapter content.
- * Shows chapter completion status, navigation buttons, and comments section.
- */
-@Composable
-private fun ChapterEndSection(
-    chapterName: String,
-    hasPrevChapter: Boolean,
-    hasNextChapter: Boolean,
-    prevChapterName: String?,
-    nextChapterName: String?,
-    onPrevChapter: () -> Unit,
-    onNextChapter: () -> Unit,
-    textColor: Color,
-    backgroundColor: Color,
-    book: Book?,
-    chapter: Chapter?,
-    modifier: Modifier = Modifier
-) {
-    val localizeHelper = LocalLocalizeHelper.current
-    var showReviewSection by remember { mutableStateOf(false) }
-    
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Chapter completion indicator
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth(0.6f)
-                .padding(vertical = 16.dp),
-            color = textColor.copy(alpha = 0.3f)
-        )
-        
-        // Completion message
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
-                tint = textColor.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = localizeHelper?.localize(Res.string.chapter_completed) ?: "Chapter Completed",
-                color = textColor.copy(alpha = 0.7f),
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Chapter navigation buttons
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            // Previous chapter button
-            OutlinedButton(
-                onClick = onPrevChapter,
-                enabled = hasPrevChapter,
-                modifier = Modifier.weight(1f).padding(end = 8.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = textColor
-                ),
-                border = BorderStroke(1.dp, textColor.copy(alpha = if (hasPrevChapter) 0.5f else 0.2f))
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(
-                        text = localizeHelper?.localize(Res.string.previous_chapter) ?: "Previous",
-                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall
-                    )
-                    if (prevChapterName != null) {
-                        Text(
-                            text = prevChapterName.take(20) + if (prevChapterName.length > 20) "..." else "",
-                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-            
-            // Next chapter button
-            Button(
-                onClick = onNextChapter,
-                enabled = hasNextChapter,
-                modifier = Modifier.weight(1f).padding(start = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = textColor.copy(alpha = 0.9f),
-                    contentColor = backgroundColor
-                )
-            ) {
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = localizeHelper?.localize(Res.string.next_chapter) ?: "Next",
-                        style = androidx.compose.material3.MaterialTheme.typography.labelSmall
-                    )
-                    if (nextChapterName != null) {
-                        Text(
-                            text = nextChapterName.take(20) + if (nextChapterName.length > 20) "..." else "",
-                            style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                            maxLines = 1
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // View comments button
-        if (book != null && chapter != null) {
-            OutlinedButton(
-                onClick = { showReviewSection = !showReviewSection },
-                modifier = Modifier.fillMaxWidth(0.8f),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = textColor
-                ),
-                border = BorderStroke(1.dp, textColor.copy(alpha = 0.3f))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.RateReview,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (showReviewSection) 
-                        (localizeHelper?.localize(Res.string.hide_reviews) ?: "Hide Reviews")
-                    else 
-                        (localizeHelper?.localize(Res.string.view_chapter_reviews) ?: "View Chapter Reviews"),
-                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium
-                )
-            }
-            
-            // Reviews section (expandable)
-            if (showReviewSection) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = backgroundColor.copy(alpha = 0.5f)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    ChapterReviewSection(
-                        reviews = emptyList(), // TODO: Load actual reviews from ViewModel
-                        averageRating = 0f,
-                        onWriteReview = { rating, text ->
-                            // TODO: Submit review through ViewModel
-                        },
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-        }
-        
-        // End of chapter indicator
-        if (!hasNextChapter) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = localizeHelper?.localize(Res.string.this_is_last_chapter) ?: "This is the last chapter",
-                color = textColor.copy(alpha = 0.5f),
-                style = androidx.compose.material3.MaterialTheme.typography.bodySmall
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(48.dp))
-    }
 }

@@ -73,5 +73,8 @@ actual class LocalizeHelper(
         org.jetbrains.compose.resources.getPluralString(resource, quantity, *args)
     }
 
+    actual fun getCurrentLanguageCode(): String {
+        return context.resources.configuration.locales[0].language
+    }
 
 }

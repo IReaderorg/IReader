@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.ExperimentalMaterialApi
+
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.SheetValue
@@ -61,7 +61,7 @@ import org.koin.core.parameter.parametersOf
 import ireader.i18n.resources.Res
 
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn( ExperimentalMaterial3Api::class)
 data class ReaderScreenSpec(
     val bookId: Long,
     val chapterId: Long
@@ -70,7 +70,7 @@ data class ReaderScreenSpec(
     
     @OptIn(
         ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class
+         ExperimentalMaterial3Api::class
     )
     @Composable
     fun Content() {

@@ -37,5 +37,10 @@ expect class LocalizeHelper {
 
      fun localizePlural(resource: PluralStringResource, quantity: Int, vararg args: Any): String
 
+     /**
+      * Returns the current language code (e.g., "en", "ar", "fa", "he").
+      * Used for RTL layout direction detection.
+      */
+     fun getCurrentLanguageCode(): String
 
 }

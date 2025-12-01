@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Source
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +39,17 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.CatalogLocal
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.add
+import ireader.i18n.resources.add_repository
+import ireader.i18n.resources.cancel
+import ireader.i18n.resources.enter_the_repository_url
+import ireader.i18n.resources.examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader
+import ireader.i18n.resources.explore_screen_label
+import ireader.i18n.resources.migrate
+import ireader.i18n.resources.no_sources_available_for_migration
+import ireader.i18n.resources.please_enter_a_valid_repository
+import ireader.i18n.resources.repository_url
+import ireader.i18n.resources.select_a_source_to_migrate_books_from
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
@@ -65,7 +73,6 @@ object ExtensionScreenSpec {
 
     @OptIn(
         ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class,
         ExperimentalMaterial3Api::class
     )
     @Composable
@@ -76,9 +83,7 @@ object ExtensionScreenSpec {
         val focusManager = LocalFocusManager.current
         val snackBarHostState = SnackBarListener(vm)
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
-        val swipeState = rememberPullRefreshState(vm.isRefreshing, onRefresh = {
-            vm.refreshCatalogs()
-        })
+        val pullToRefreshState = rememberPullToRefreshState()
 
         // Migration source selection dialog
         if (showMigrationSourceDialog) {
@@ -92,9 +97,14 @@ object ExtensionScreenSpec {
             )
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        PullToRefreshBox(
+            isRefreshing = vm.isRefreshing,
+            onRefresh = { vm.refreshCatalogs() },
+            state = pullToRefreshState,
+            modifier = Modifier.fillMaxSize()
+        ) {
             IScaffold(
-                modifier = Modifier.fillMaxSize().pullRefresh(swipeState, vm.currentPagerPage == 1),
+                modifier = Modifier.fillMaxSize(),
                 topBar = { scrollBehavior ->
                     ExtensionScreenTopAppBar(
                         searchMode = searchMode,
@@ -155,11 +165,6 @@ object ExtensionScreenSpec {
                     scaffoldPadding = scaffoldPadding,
                 )
             }
-            PullRefreshIndicator(
-                vm.isRefreshing,
-                swipeState,
-                Modifier.align(Alignment.TopCenter)
-            )
         }
     }
 }

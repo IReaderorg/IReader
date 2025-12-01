@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -58,8 +57,6 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
-
-@ExperimentalMaterialApi
 @Composable
 fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pager.PagerState) {
     val scope = rememberCoroutineScope()
@@ -82,7 +79,6 @@ fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pag
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-@ExperimentalMaterialApi
 @Composable
 fun ScrollableTabs(
     modifier: Modifier = Modifier,

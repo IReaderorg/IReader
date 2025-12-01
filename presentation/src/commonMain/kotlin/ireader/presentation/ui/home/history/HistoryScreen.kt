@@ -1,34 +1,88 @@
 package ireader.presentation.ui.home.history
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutQuad
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissState
-import androidx.compose.material.DismissValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.rememberDismissState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -42,19 +96,42 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.all_time
+import ireader.i18n.resources.cancel
+import ireader.i18n.resources.clear
+import ireader.i18n.resources.close
+import ireader.i18n.resources.confirm
+import ireader.i18n.resources.delete_all_histories
+import ireader.i18n.resources.filter
+import ireader.i18n.resources.go_to_chapter
+import ireader.i18n.resources.group_by_novel
+import ireader.i18n.resources.history
+import ireader.i18n.resources.more_options_1
+import ireader.i18n.resources.no_matches_found_in_search
+import ireader.i18n.resources.nothing_read_recently
+import ireader.i18n.resources.past_7_days
+import ireader.i18n.resources.recently
+import ireader.i18n.resources.relative_time_today
+import ireader.i18n.resources.remove_from_history
+import ireader.i18n.resources.resume
+import ireader.i18n.resources.search
+import ireader.i18n.resources.search_history
+import ireader.i18n.resources.view_novel_details
+import ireader.i18n.resources.weekly
+import ireader.i18n.resources.yesterday
 import ireader.presentation.ui.component.BookListItemImage
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
 import ireader.presentation.ui.core.coil.rememberBookCover
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.history.viewmodel.DateFilter
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 /**
  * Stable holder for history item click handlers to prevent recomposition
@@ -609,7 +686,7 @@ fun HistoryTimeHeader(title: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HistoryItem(
     history: HistoryWithRelations,
@@ -629,9 +706,9 @@ fun HistoryItem(
     // Keep track of whether an alert is active to prevent multiple dismisses
     val alertShowing = remember { mutableStateOf(false) }
     
-    val dismissState = rememberDismissState(
-        confirmStateChange = {
-            if (it == DismissValue.DismissedToStart && !alertShowing.value) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart && !alertShowing.value) {
                 alertShowing.value = true
                 // Call delete handler immediately (not in coroutine) to show dialog
                 onHistoryDelete(history)
@@ -654,7 +731,7 @@ fun HistoryItem(
     
     // Also reset dismiss state if it's not in default position
     LaunchedEffect(key1 = dismissState.currentValue) {
-        if (dismissState.currentValue != DismissValue.Default) {
+        if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
             // Small delay to allow the swipe animation to complete
             delay(100)
             dismissState.reset()
@@ -683,12 +760,14 @@ fun HistoryItem(
     val scale by animatedProgress.asState()
     val alpha by animatedProgress.asState()
     
-    SwipeToDismiss(
+    SwipeToDismissBox(
         state = dismissState,
-        background = {
+        backgroundContent = {
             DismissBackground(dismissState = dismissState)
         },
-        dismissContent = {
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
+        content = {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -812,8 +891,7 @@ fun HistoryItem(
                     }
                 }
             }
-        },
-        directions = setOf(DismissDirection.EndToStart)
+        }
     )
     
     // Context menu
@@ -865,35 +943,36 @@ fun HistoryItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DismissBackground(dismissState: DismissState) {
-    val color = when (dismissState.dismissDirection) {
-        DismissDirection.EndToStart -> MaterialTheme.colorScheme.errorContainer
-        DismissDirection.StartToEnd -> MaterialTheme.colorScheme.primaryContainer
-        null -> Color.Transparent
+private fun DismissBackground(dismissState: androidx.compose.material3.SwipeToDismissBoxState) {
+    val direction = dismissState.dismissDirection
+    val color = when (direction) {
+        SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.errorContainer
+        SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primaryContainer
+        SwipeToDismissBoxValue.Settled -> Color.Transparent
     }
     
-    val alignment = when (dismissState.dismissDirection) {
-        DismissDirection.EndToStart -> Alignment.CenterEnd
-        DismissDirection.StartToEnd -> Alignment.CenterStart
-        null -> Alignment.Center
+    val alignment = when (direction) {
+        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+        SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+        SwipeToDismissBoxValue.Settled -> Alignment.Center
     }
     
-    val icon = when (dismissState.dismissDirection) {
-        DismissDirection.EndToStart -> Icons.Default.Delete
-        DismissDirection.StartToEnd -> Icons.Default.PlayArrow
-        null -> Icons.Default.Clear
+    val icon = when (direction) {
+        SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
+        SwipeToDismissBoxValue.StartToEnd -> Icons.Default.PlayArrow
+        SwipeToDismissBoxValue.Settled -> Icons.Default.Clear
     }
     
-    val iconTint = when (dismissState.dismissDirection) {
-        DismissDirection.EndToStart -> MaterialTheme.colorScheme.onErrorContainer
-        DismissDirection.StartToEnd -> MaterialTheme.colorScheme.onPrimaryContainer
-        null -> MaterialTheme.colorScheme.onSurface
+    val iconTint = when (direction) {
+        SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.onErrorContainer
+        SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.onPrimaryContainer
+        SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.onSurface
     }
     
     val scale by animateFloatAsState(
-        if (dismissState.targetValue == DismissValue.Default) 0.8f else 1.2f
+        if (dismissState.targetValue == SwipeToDismissBoxValue.Settled) 0.8f else 1.2f
     )
     
     Box(

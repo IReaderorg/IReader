@@ -19,12 +19,14 @@ import ireader.domain.models.prefs.PreferenceValues
 @Composable
 actual fun LazyColumnScrollbar(listState: LazyListState, rightSide: Boolean, thickness: Dp, padding: Dp, thumbMinHeight: Float, thumbColor: Color, thumbSelectedColor: Color, indicatorContent: @Composable ((index: Int, isThumbSelected: Boolean) -> Unit)?, thumbShape: Shape, enable: Boolean, selectionMode: PreferenceValues.ScrollbarSelectionMode, content: @Composable () -> Unit) {
     val adapter = rememberScrollbarAdapter(listState)
+    // RTL support: Position scrollbar based on rightSide parameter
+    val alignment = if (rightSide) Alignment.CenterEnd else Alignment.CenterStart
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         VerticalScrollbar(
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier.align(alignment)
                 .fillMaxHeight(),
             adapter = adapter,
             style = ScrollbarStyle(minimalHeight = thumbMinHeight.dp,thickness = thickness, shape = thumbShape, unhoverColor = thumbColor, hoverColor = thumbSelectedColor, hoverDurationMillis = 500

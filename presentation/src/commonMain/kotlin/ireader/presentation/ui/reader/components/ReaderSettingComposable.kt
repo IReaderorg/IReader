@@ -18,9 +18,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Tab
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatAlignCenter
 import androidx.compose.material.icons.filled.FormatAlignJustify
@@ -31,15 +28,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.models.prefs.PreferenceValues
@@ -50,11 +47,79 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.alignment
+import ireader.i18n.resources.auto_translate_next_chapter
+import ireader.i18n.resources.auto_translate_next_chapter_summary
+import ireader.i18n.resources.autoscroll
+import ireader.i18n.resources.background_webview_mode
+import ireader.i18n.resources.bilingual_layout
+import ireader.i18n.resources.bionic_reading
+import ireader.i18n.resources.bottom
+import ireader.i18n.resources.bypass_bot_detection_invisibly_without
+import ireader.i18n.resources.colors
+import ireader.i18n.resources.content_padding
+import ireader.i18n.resources.continues
+import ireader.i18n.resources.custom_brightness
+import ireader.i18n.resources.default_reading_mode_for_new_books
+import ireader.i18n.resources.delete_custom_theme
+import ireader.i18n.resources.disable
+import ireader.i18n.resources.enable_bilingual_mode
+import ireader.i18n.resources.font
+import ireader.i18n.resources.font_size
+import ireader.i18n.resources.font_weight
+import ireader.i18n.resources.full
+import ireader.i18n.resources.general
+import ireader.i18n.resources.horizontal
+import ireader.i18n.resources.immersive_mode
+import ireader.i18n.resources.interval
+import ireader.i18n.resources.left
+import ireader.i18n.resources.letter
+import ireader.i18n.resources.line
+import ireader.i18n.resources.line_height
+import ireader.i18n.resources.manage_glossary
+import ireader.i18n.resources.margins
+import ireader.i18n.resources.offset
+import ireader.i18n.resources.origin_language
+import ireader.i18n.resources.padding
+import ireader.i18n.resources.page
+import ireader.i18n.resources.paragraph
+import ireader.i18n.resources.paragraph_distance
+import ireader.i18n.resources.paragraph_indent
+import ireader.i18n.resources.paragraph_translation_menu
+import ireader.i18n.resources.partial
+import ireader.i18n.resources.reader
+import ireader.i18n.resources.reading_mode
+import ireader.i18n.resources.right
+import ireader.i18n.resources.save_custom_theme
+import ireader.i18n.resources.screen_always_on
+import ireader.i18n.resources.scrollIndicator
+import ireader.i18n.resources.scroll_mode
+import ireader.i18n.resources.scrollbar_mode
+import ireader.i18n.resources.selectable_mode
+import ireader.i18n.resources.show_reading_time
+import ireader.i18n.resources.show_scrollbar
+import ireader.i18n.resources.show_webView_during_fetching
+import ireader.i18n.resources.target_language
+import ireader.i18n.resources.text_align
+import ireader.i18n.resources.text_align_center
+import ireader.i18n.resources.text_align_justify
+import ireader.i18n.resources.text_align_left
+import ireader.i18n.resources.text_align_right
+import ireader.i18n.resources.theme_was_deleted
+import ireader.i18n.resources.theme_was_saved
+import ireader.i18n.resources.top
+import ireader.i18n.resources.translate_now
+import ireader.i18n.resources.translating
+import ireader.i18n.resources.translation_engine
+import ireader.i18n.resources.translation_settings
+import ireader.i18n.resources.tts_with_translated_text
+import ireader.i18n.resources.use_translated_text_for_text
+import ireader.i18n.resources.vertical
+import ireader.i18n.resources.volume_key_navigation
+import ireader.i18n.resources.width
 import ireader.presentation.ui.component.components.Build
 import ireader.presentation.ui.component.components.ChipChoicePreference
 import ireader.presentation.ui.component.components.ChipPreference
-import ireader.presentation.ui.component.components.ColorPreference
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.PreferenceRow
 import ireader.presentation.ui.component.components.SwitchPreference
@@ -62,15 +127,10 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.ReaderTheme
-import ireader.presentation.ui.core.ui.PreferenceMutableState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
-import ireader.presentation.core.toComposeColor
-import ireader.presentation.core.toDomainColor
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReaderSettingMainLayout(
         modifier: Modifier = Modifier,
@@ -799,7 +859,6 @@ data class TabItem(
 
 
 @OptIn(ExperimentalFoundationApi::class)
-@ExperimentalMaterialApi
 @Composable
 fun Tabs(libraryTabs: List<TabItem>, pagerState: androidx.compose.foundation.pager.PagerState) {
     val scope = rememberCoroutineScope()

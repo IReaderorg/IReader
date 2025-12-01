@@ -15,9 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material3.SheetState
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Fullscreen
@@ -28,16 +27,17 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,19 +54,26 @@ import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.services.tts_service.TTSState
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.cached
+import ireader.i18n.resources.next_chapter
+import ireader.i18n.resources.next_paragraph
+import ireader.i18n.resources.pause
+import ireader.i18n.resources.play
+import ireader.i18n.resources.previous_chapter
+import ireader.i18n.resources.previous_paragraph
+import ireader.i18n.resources.translated
+import ireader.presentation.core.toComposeAlignment
+import ireader.presentation.core.toComposeColor
+import ireader.presentation.core.toComposeFontFamily
+import ireader.presentation.core.toComposeTextAlign
 import ireader.presentation.ui.component.components.ShowLoading
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.SuperSmallTextComposable
 import ireader.presentation.ui.core.modifier.clickableNoIndication
-import ireader.presentation.core.toComposeColor
-import ireader.presentation.core.toComposeAlignment
-import ireader.presentation.core.toComposeFontFamily
-import ireader.presentation.core.toComposeTextAlign
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn( ExperimentalMaterial3Api::class)
 @Composable
 fun TTSScreen(
         modifier: Modifier = Modifier,
@@ -141,7 +148,7 @@ fun TTSScreen(
                     // Show bilingual text if enabled and translation available
                     if (vm.bilingualMode && hasTranslation && translatedText != null) {
                         // Original text
-                        androidx.compose.material.Text(
+                        Text(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = vm.paragraphsIndent.value.dp),
@@ -160,7 +167,7 @@ fun TTSScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         
                         // Translated text with different styling
-                        androidx.compose.material.Text(
+                        androidx.compose.material3.Text(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = vm.paragraphsIndent.value.dp)
@@ -188,7 +195,7 @@ fun TTSScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.Top
                         ) {
-                            androidx.compose.material.Text(
+                            androidx.compose.material3.Text(
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(horizontal = vm.paragraphsIndent.value.dp),

@@ -1,8 +1,6 @@
 package ireader.presentation.ui.reader.viewmodel
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -21,8 +19,6 @@ open class ReaderScreenStateImpl: ReaderScreenState {
     override var isLoading by mutableStateOf<Boolean>(false)
 
     override var readerScrollState by mutableStateOf<ScrollState?>(null)
-    @ExperimentalMaterialApi
-    override var modalBottomSheetState by mutableStateOf<ModalBottomSheetState?>(null)
     override var isDrawerAsc by mutableStateOf<Boolean>(true)
     override var drawerChapters: State<List<Chapter>> = derivedStateOf { if (isDrawerAsc) stateChapters else stateChapters.reversed() }
     override var isReaderModeEnable by mutableStateOf<Boolean>(true)
@@ -72,7 +68,6 @@ interface ReaderScreenState {
     fun getCurrentContent(): List<Page>
 
     var readerScrollState: ScrollState?
-    @OptIn(ExperimentalMaterialApi::class) var modalBottomSheetState: ModalBottomSheetState?
 }
 
 open class ReaderScreenPreferencesStateImpl() : ReaderScreenPreferencesState {

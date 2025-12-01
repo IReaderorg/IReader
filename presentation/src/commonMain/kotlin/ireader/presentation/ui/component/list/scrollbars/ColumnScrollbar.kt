@@ -25,6 +25,13 @@ expect fun ColumnScrollbar(
         content: @Composable () -> Unit
 )
 
+/**
+ * RTL-aware Column scrollbar wrapper.
+ * In RTL layouts, the scrollbar position is automatically mirrored unless explicitly set.
+ * 
+ * @param rightSide If true, scrollbar appears on the right in LTR and left in RTL.
+ *                  If false, scrollbar appears on the left in LTR and right in RTL.
+ */
 @Composable
 fun IColumnScrollbar(
         state: ScrollState,
@@ -39,4 +46,11 @@ fun IColumnScrollbar(
         selectionMode: PreferenceValues.ScrollbarSelectionMode = PreferenceValues.ScrollbarSelectionMode.Thumb,
         indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
         content: @Composable () -> Unit
-) = ColumnScrollbar(state, rightSide, thickness, padding, thumbMinHeight, thumbColor, thumbSelectedColor, thumbShape, enabled, selectionMode, indicatorContent, content)
+) {
+    // RTL support: Mirror scrollbar position in RTL layouts
+    val layoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
+    val isRtl = layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl
+    val adjustedRightSide = if (isRtl) !rightSide else rightSide
+    
+    ColumnScrollbar(state, adjustedRightSide, thickness, padding, thumbMinHeight, thumbColor, thumbSelectedColor, thumbShape, enabled, selectionMode, indicatorContent, content)
+}

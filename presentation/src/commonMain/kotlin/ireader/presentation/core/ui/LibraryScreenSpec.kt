@@ -1,29 +1,25 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.localize
-import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.i18n.resources.library_screen_label
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.MainStarterScreen
@@ -50,7 +46,6 @@ object LibraryScreenSpec {
 
     @OptIn(
         ExperimentalMaterial3Api::class,
-        ExperimentalMaterialApi::class,
         ExperimentalFoundationApi::class
     )
     @Composable
@@ -72,9 +67,7 @@ object LibraryScreenSpec {
             }
         }
 
-        val swipeRefreshState = rememberPullRefreshState(vm.isBookRefreshing, onRefresh = {
-            vm.refreshUpdate()
-        })
+        val pullToRefreshState = rememberPullToRefreshState()
 
         IModalSheets(
             bottomSheetState = sheetState,
@@ -107,7 +100,6 @@ object LibraryScreenSpec {
             }
         ) {
             IScaffold(
-                modifier = Modifier.pullRefresh(swipeRefreshState),
                 topBar = { scrollBehavior ->
                     LibraryScreenTopBar(
                         state = vm,
@@ -161,7 +153,11 @@ object LibraryScreenSpec {
                 }
             ) { scaffoldPadding ->
 
-                Box(Modifier) {
+                PullToRefreshBox(
+                    isRefreshing = vm.isBookRefreshing,
+                    onRefresh = { vm.refreshUpdate() },
+                    state = pullToRefreshState
+                ) {
                     LibraryController(
                         modifier = Modifier,
                         vm = vm,
@@ -187,11 +183,6 @@ object LibraryScreenSpec {
                                 MainStarterScreen.showBottomNav(!vm.selectionMode)
                             }
                         }
-                    )
-                    PullRefreshIndicator(
-                        vm.isBookRefreshing,
-                        swipeRefreshState,
-                        Modifier.align(Alignment.TopCenter)
                     )
                 }
             }
