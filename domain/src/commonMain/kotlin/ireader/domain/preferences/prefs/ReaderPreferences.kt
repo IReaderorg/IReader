@@ -665,6 +665,11 @@ class ReaderPreferences constructor(
     fun ttsTextAlignment(): Preference<PreferenceValues.PreferenceTextAlignment> {
         return preferenceStore.getEnum("tts_text_alignment", PreferenceValues.PreferenceTextAlignment.Left)
     }
+    
+    // Sentence-level highlighting for TTS (time-based estimation)
+    fun ttsSentenceHighlight(): Preference<Boolean> {
+        return preferenceStore.getBoolean("tts_sentence_highlight", true)
+    }
 }
 
 enum class ReadingMode {

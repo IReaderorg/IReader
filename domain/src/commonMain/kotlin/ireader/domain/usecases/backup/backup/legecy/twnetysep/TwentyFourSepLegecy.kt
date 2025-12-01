@@ -79,6 +79,7 @@ internal fun ByteArray.dumpTwentySepLegacyBackup(): Backup {
     ).toBackup()
 }
 
+@ExperimentalSerializationApi
 @Serializable
 private data class LegacyBookProto @OptIn(ExperimentalSerializationApi::class) constructor(
     @ProtoNumber(1) val sourceId: Long,

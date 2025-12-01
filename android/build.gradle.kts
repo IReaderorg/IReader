@@ -3,7 +3,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Properties
 import java.util.TimeZone
-import java.util.concurrent.TimeUnit
 
 plugins {
     id("com.android.application")
@@ -292,6 +291,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.ui.text)
+    implementation(libs.androidx.work.testing)
     add("coreLibraryDesugaring", libs.desugarJdkLibs)
     implementation(androidx.emoji)
     implementation(androidx.appCompat)

@@ -18,15 +18,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
@@ -57,6 +61,17 @@ private class ChapterClickHandlers(
     val onLongItemClick: (Chapter) -> Unit
 )
 
+/**
+ * Immutable data class for chapter display configuration
+ * Helps reduce recomposition by grouping related display settings
+ */
+@Immutable
+private data class ChapterDisplayConfig(
+    val showNumber: Boolean,
+    val dividerColor: Color,
+    val lastReadId: Long?
+)
+
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalComposeUiApi::class,
@@ -84,24 +99,23 @@ fun BookDetailScreen(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     
-    // Collect appearance preferences
+    // Collect appearance preferences with stable initial values
     val hideBackdrop by uiPreferences.hideNovelBackdrop().changes().collectAsState(initial = false)
     val useFab by uiPreferences.useFabInNovelInfo().changes().collectAsState(initial = false)
     
-    // Check if we're on a tablet for responsive design
+    // Cache tablet check - computed once per composition
     val isTablet = isTableUi()
     
-    // Pre-compute modifiers to avoid recreation
-    val fillMaxSizeModifier = remember { Modifier.fillMaxSize() }
+    // Pre-compute static modifiers to avoid recreation on each recomposition
     val dividerModifier = remember { Modifier.padding(horizontal = 16.dp) }
     val searchFieldModifier = remember { Modifier.padding(horizontal = 16.dp, vertical = 8.dp) }
     
-    // Memoize chapter click handlers
+    // Memoize chapter click handlers - stable reference
     val chapterClickHandlers = remember(onItemClick, onLongItemClick) {
         ChapterClickHandlers(onItemClick, onLongItemClick)
     }
     
-    // Memoize reversed chapters list to avoid recalculation on each recomposition
+    // Derive chapter list efficiently - only recompute when chapters change
     val reversedChapters by remember(chapters) {
         derivedStateOf { chapters.value.reversed() }
     }
@@ -111,15 +125,20 @@ fun BookDetailScreen(
         derivedStateOf { chapters.value.size }
     }
     
-    // Derive show number flag
-    val showChapterNumber by remember(vm.layout) {
-        derivedStateOf { 
-            vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default 
+    // Create immutable display config to reduce recomposition
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    val displayConfig by remember(vm.layout, vm.lastRead, dividerColor) {
+        derivedStateOf {
+            ChapterDisplayConfig(
+                showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default,
+                dividerColor = dividerColor,
+                lastReadId = vm.lastRead
+            )
         }
     }
     
-    // Divider color - memoized
-    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    // Pre-compute selection set for O(1) lookup instead of O(n) list contains
+    val selectionSet by remember { derivedStateOf { vm.selection.toSet() } }
 
     // All dialogs
     if (vm.showDialog) {
@@ -328,22 +347,25 @@ fun BookDetailScreen(
                         key = { chapter -> chapter.id },
                         contentType = { "chapter_item" }
                     ) { chapter ->
-                        // Use memoized click handlers
-                        val itemClickHandler = remember(chapter) { { chapterClickHandlers.onItemClick(chapter) } }
-                        val longClickHandler = remember(chapter) { { chapterClickHandlers.onLongItemClick(chapter) } }
+                        // Use stable click handlers with chapter reference
+                        val itemClickHandler = remember(chapter.id) { { chapterClickHandlers.onItemClick(chapter) } }
+                        val longClickHandler = remember(chapter.id) { { chapterClickHandlers.onLongItemClick(chapter) } }
+                        
+                        // Use pre-computed selection set for O(1) lookup
+                        val isSelected = chapter.id in selectionSet
                         
                         ChapterRow(
                             modifier = Modifier.animateItem(),
                             chapter = chapter,
                             onItemClick = itemClickHandler,
-                            isLastRead = chapter.id == vm.lastRead,
-                            isSelected = chapter.id in vm.selection,
+                            isLastRead = chapter.id == displayConfig.lastReadId,
+                            isSelected = isSelected,
                             onLongClick = longClickHandler,
-                            showNumber = showChapterNumber
+                            showNumber = displayConfig.showNumber
                         )
                         HorizontalDivider(
                             modifier = dividerModifier,
-                            color = dividerColor,
+                            color = displayConfig.dividerColor,
                             thickness = 0.5.dp
                         )
                     }
@@ -459,6 +481,7 @@ private fun BookInfoPanel(
 
 /**
  * Chapter list panel for tablet layout - shows chapters on the right side
+ * Optimized for low-end devices with memoized callbacks and efficient state derivation
  */
 @Composable
 private fun ChapterListPanel(
@@ -472,27 +495,50 @@ private fun ChapterListPanel(
     focusManager: androidx.compose.ui.focus.FocusManager,
     keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?
 ) {
-    // Pre-compute modifiers
+    // Pre-compute static modifiers - created once
     val dividerModifier = remember { Modifier.padding(horizontal = 16.dp) }
     val searchFieldModifier = remember { Modifier.padding(horizontal = 16.dp, vertical = 8.dp) }
     
-    // Memoize reversed chapters
+    // Memoize reversed chapters - only recompute when chapters change
     val reversedChapters = remember(chapters) { chapters.reversed() }
     
-    // Memoize click handlers
+    // Memoize click handlers - stable reference
     val chapterClickHandlers = remember(onItemClick, onLongItemClick) {
         ChapterClickHandlers(onItemClick, onLongItemClick)
     }
     
-    // Derive show number flag
-    val showChapterNumber by remember(vm.layout) {
-        derivedStateOf { 
-            vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default 
+    // Create immutable display config for efficient chapter rendering
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    val displayConfig by remember(vm.layout, vm.lastRead, dividerColor) {
+        derivedStateOf {
+            ChapterDisplayConfig(
+                showNumber = vm.layout == ChapterDisplayMode.ChapterNumber || vm.layout == ChapterDisplayMode.Default,
+                dividerColor = dividerColor,
+                lastReadId = vm.lastRead
+            )
         }
     }
     
-    // Divider color - memoized
-    val dividerColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    // Pre-compute selection set for O(1) lookup
+    val selectionSet by remember { derivedStateOf { vm.selection.toSet() } }
+    
+    // Memoize filter toggle callback
+    val onToggleFilterCallback = remember { { filterType: ireader.presentation.ui.book.viewmodel.ChaptersFilters.Type -> vm.toggleFilter(filterType) } }
+    
+    // Memoize search callbacks
+    val onQueryChangeCallback = remember { { query: String -> vm.query = query } }
+    val onSearchConfirmCallback = remember(keyboardController, focusManager) {
+        {
+            vm.searchMode = false
+            vm.query = null
+            keyboardController?.hide()
+            focusManager.clearFocus()
+        }
+    }
+    
+    // Memoize source switching callbacks
+    val onMigrateCallback = remember { { vm.migrateToSource() } }
+    val onDismissBannerCallback = remember { { vm.dismissSourceSwitchingBanner() } }
     
     IVerticalFastScroller(listState = scrollState) {
         LazyColumn(
@@ -501,7 +547,7 @@ private fun ChapterListPanel(
             state = scrollState,
             contentPadding = PaddingValues(top = 72.dp)
         ) {
-            item {
+            item(key = "chapter_bar") {
                 ChapterBar(
                     vm = vm,
                     chapters = chapters,
@@ -510,45 +556,36 @@ private fun ChapterListPanel(
                 )
             }
             
-            // Source switching banner
+            // Source switching banner - only compose when needed
             if (vm.sourceSwitchingState.showBanner) {
                 val sourceName = vm.sourceSwitchingState.betterSourceName
                 val comparison = vm.sourceSwitchingState.sourceComparison
                 if (sourceName != null && comparison != null) {
-                    item {
+                    item(key = "source_banner") {
                         ireader.presentation.ui.component.SourceSwitchingBanner(
                             sourceName = sourceName,
                             chapterDifference = comparison.chapterDifference,
-                            onSwitch = { vm.migrateToSource() },
-                            onDismiss = { vm.dismissSourceSwitchingBanner() }
+                            onSwitch = onMigrateCallback,
+                            onDismiss = onDismissBannerCallback
                         )
                     }
                 }
             }
             
-            item {
+            item(key = "filter_bar") {
                 ChapterListFilterBar(
                     filters = vm.filters.value,
-                    onToggleFilter = { filterType ->
-                        vm.toggleFilter(filterType)
-                    }
+                    onToggleFilter = onToggleFilterCallback
                 )
             }
             
             if (vm.searchMode) {
-                item {
+                item(key = "search_field") {
                     AppTextField(
                         modifier = searchFieldModifier,
                         query = vm.query ?: "",
-                        onValueChange = { query ->
-                            vm.query = query
-                        },
-                        onConfirm = {
-                            vm.searchMode = false
-                            vm.query = null
-                            keyboardController?.hide()
-                            focusManager.clearFocus()
-                        },
+                        onValueChange = onQueryChangeCallback,
+                        onConfirm = onSearchConfirmCallback,
                     )
                 }
             }
@@ -558,22 +595,25 @@ private fun ChapterListPanel(
                 key = { chapter -> chapter.id },
                 contentType = { "chapter_item" }
             ) { chapter ->
-                // Use memoized click handlers
-                val itemClickHandler = remember(chapter) { { chapterClickHandlers.onItemClick(chapter) } }
-                val longClickHandler = remember(chapter) { { chapterClickHandlers.onLongItemClick(chapter) } }
+                // Use stable click handlers with chapter id as key
+                val itemClickHandler = remember(chapter.id) { { chapterClickHandlers.onItemClick(chapter) } }
+                val longClickHandler = remember(chapter.id) { { chapterClickHandlers.onLongItemClick(chapter) } }
+                
+                // Use pre-computed selection set for O(1) lookup
+                val isSelected = chapter.id in selectionSet
                 
                 ChapterRow(
                     modifier = Modifier.animateItem(),
                     chapter = chapter,
                     onItemClick = itemClickHandler,
-                    isLastRead = chapter.id == vm.lastRead,
-                    isSelected = chapter.id in vm.selection,
+                    isLastRead = chapter.id == displayConfig.lastReadId,
+                    isSelected = isSelected,
                     onLongClick = longClickHandler,
-                    showNumber = showChapterNumber
+                    showNumber = displayConfig.showNumber
                 )
                 HorizontalDivider(
                     modifier = dividerModifier,
-                    color = dividerColor,
+                    color = displayConfig.dividerColor,
                     thickness = 0.5.dp
                 )
             }

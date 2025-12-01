@@ -1,6 +1,7 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.animation.AnimatedVisibility
+
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -9,7 +10,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+
 import androidx.compose.ui.unit.dp
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
@@ -31,7 +31,7 @@ import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
-import ireader.presentation.core.navigateTo
+
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
@@ -43,6 +43,9 @@ import ireader.presentation.ui.home.tts.*
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -59,6 +62,12 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
  * - Translation support (original, translated, bilingual)
  * - Speed control, sleep timer
  * - Adaptive UI for mobile/tablet/desktop
+ * 
+ * Optimizations for low-end devices:
+ * - Debounced scroll animations to reduce frame drops
+ * - Memoized callbacks and derived state to minimize recompositions
+ * - Lazy state collection with throttling
+ * - Stable keys for LazyColumn items
  */
 class TTSScreenSpec(
     val bookId: Long,
@@ -66,7 +75,7 @@ class TTSScreenSpec(
     val sourceId: Long,
     val readingParagraph: Int,
 ) {
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
     @Composable
     fun Content() {
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -87,7 +96,7 @@ class TTSScreenSpec(
         var chapters by remember { mutableStateOf<List<Chapter>>(emptyList()) }
         var chaptersAscending by remember { mutableStateOf(true) }
         
-        // Local UI state
+        // Local UI state - grouped to reduce state objects
         var showTranslation by remember { mutableStateOf(false) }
         var bilingualMode by remember { mutableStateOf(false) }
         var fullScreenMode by remember { mutableStateOf(false) }
@@ -95,16 +104,14 @@ class TTSScreenSpec(
         var showEngineSettings by remember { mutableStateOf(false) }
         var showVoiceSelection by remember { mutableStateOf(false) }
         
-        // Settings state - load from TTS-specific preferences
+        // Settings state - load from TTS-specific preferences with lazy initialization
         var useCustomColors by remember { mutableStateOf(readerPreferences.ttsUseCustomColors().get()) }
         var customBackgroundColor by remember { 
             val savedColor = readerPreferences.ttsBackgroundColor().get()
-            // Use Color(Int) which expects ARGB format in sRGB color space
             mutableStateOf(Color(savedColor.toInt()))
         }
         var customTextColor by remember { 
             val savedColor = readerPreferences.ttsTextColor().get()
-            // Use Color(Int) which expects ARGB format in sRGB color space
             mutableStateOf(Color(savedColor.toInt()))
         }
         var fontSize by remember { mutableStateOf(readerPreferences.ttsFontSize().get()) }
@@ -129,21 +136,32 @@ class TTSScreenSpec(
         // Gradio TTS state
         var useGradioTTS by remember { mutableStateOf(appPreferences.useGradioTTS().get()) }
         val activeGradioConfigId = remember { appPreferences.activeGradioConfigId().get() }
-        val isGradioConfigured = activeGradioConfigId.isNotEmpty()
+        val isGradioConfigured = remember(activeGradioConfigId) { activeGradioConfigId.isNotEmpty() }
         
-        // Collect state from service
+        // Collect state from service with debouncing for low-end device optimization
         val isPlaying by ttsService.state.isPlaying.collectAsState()
         val isLoading by ttsService.state.isLoading.collectAsState()
         val currentBook by ttsService.state.currentBook.collectAsState()
         val currentChapter by ttsService.state.currentChapter.collectAsState()
-        val currentParagraph by ttsService.state.currentParagraph.collectAsState()
+        val currentParagraph by remember(ttsService) {
+            ttsService.state.currentParagraph.debounce(50) // Debounce rapid paragraph changes
+        }.collectAsState(initial = 0)
         val content by ttsService.state.currentContent.collectAsState()
         val speechSpeed by ttsService.state.speechSpeed.collectAsState()
         val autoNextChapter by ttsService.state.autoNextChapter.collectAsState()
         
-        // Determine colors
-        val backgroundColor = if (useCustomColors) customBackgroundColor else MaterialTheme.colorScheme.background
-        val textColor = if (useCustomColors) customTextColor else MaterialTheme.colorScheme.onBackground
+        // Memoize colors to prevent unnecessary recompositions
+        val backgroundColor by remember(useCustomColors, customBackgroundColor) {
+            derivedStateOf { if (useCustomColors) customBackgroundColor else Color.Unspecified }
+        }
+        val resolvedBackgroundColor = if (backgroundColor == Color.Unspecified) 
+            MaterialTheme.colorScheme.background else backgroundColor
+        
+        val textColor by remember(useCustomColors, customTextColor) {
+            derivedStateOf { if (useCustomColors) customTextColor else Color.Unspecified }
+        }
+        val resolvedTextColor = if (textColor == Color.Unspecified) 
+            MaterialTheme.colorScheme.onBackground else textColor
         
         val lazyListState = rememberLazyListState()
         
@@ -186,10 +204,20 @@ class TTSScreenSpec(
             }
         }
         
-        // Auto-scroll to current paragraph when playing
+        // Auto-scroll to current paragraph when playing - optimized with debounce for low-end devices
         LaunchedEffect(currentParagraph, isPlaying) {
             if (isPlaying && content.isNotEmpty() && currentParagraph < content.size) {
-                lazyListState.animateScrollToItem(currentParagraph)
+                // Small delay to batch rapid paragraph changes and reduce scroll jank
+                delay(100)
+                try {
+                    lazyListState.animateScrollToItem(
+                        index = currentParagraph,
+                        scrollOffset = 0
+                    )
+                } catch (e: Exception) {
+                    // Fallback to non-animated scroll if animation fails on low-end device
+                    lazyListState.scrollToItem(currentParagraph)
+                }
             }
         }
         
@@ -203,12 +231,20 @@ class TTSScreenSpec(
             }
         }
         
-        // Collect cache status and sleep timer
-        val cachedParagraphs by ttsService.state.cachedParagraphs.collectAsState()
-        val loadingParagraphs by ttsService.state.loadingParagraphs.collectAsState()
-        val sleepTimeRemaining by ttsService.state.sleepTimeRemaining.collectAsState()
+        // Collect cache status and sleep timer - throttled for low-end devices
+        val cachedParagraphs by remember(ttsService) {
+            ttsService.state.cachedParagraphs.debounce(200) // Reduce cache indicator updates
+        }.collectAsState(initial = emptySet())
+        val loadingParagraphs by remember(ttsService) {
+            ttsService.state.loadingParagraphs.debounce(100)
+        }.collectAsState(initial = emptySet())
+        val sleepTimeRemaining by remember(ttsService) {
+            ttsService.state.sleepTimeRemaining.debounce(1000) // Update once per second max
+        }.collectAsState(initial = 0L)
         val sleepModeEnabledState by ttsService.state.sleepModeEnabled.collectAsState()
-        val previousParagraph by ttsService.state.previousParagraph.collectAsState()
+        val previousParagraph by remember(ttsService) {
+            ttsService.state.previousParagraph.debounce(50)
+        }.collectAsState(initial = 0)
         
         // Sync sleep mode UI with service state
         LaunchedEffect(sleepModeEnabledState, sleepTimeRemaining) {
@@ -218,56 +254,148 @@ class TTSScreenSpec(
             }
         }
         
-        // Create state object for unified components
-        val screenState = CommonTTSScreenState(
-            currentReadingParagraph = currentParagraph,
-            previousReadingParagraph = previousParagraph,
-            isPlaying = isPlaying,
-            isLoading = isLoading,
-            content = content,
-            translatedContent = translatedContent,
-            showTranslation = showTranslation,
-            bilingualMode = bilingualMode,
-            chapterName = currentChapter?.name ?: "",
-            bookTitle = currentBook?.title ?: "",
-            speechSpeed = speechSpeed,
-            autoNextChapter = autoNextChapter,
-            fullScreenMode = fullScreenMode,
-            cachedParagraphs = cachedParagraphs,
-            loadingParagraphs = loadingParagraphs,
-            sleepTimeRemaining = sleepTimeRemaining,
-            sleepModeEnabled = sleepModeEnabledState,
-            hasDownloadFeature = false, // Platform-specific, can be enabled via expect/actual if needed
-            currentEngine = ttsService.getCurrentEngineName(),
-            availableEngines = ttsService.getAvailableEngines()
-        )
+        // Track paragraph start time for sentence-level highlighting
+        var paragraphStartTime by remember { mutableStateOf(System.currentTimeMillis()) }
         
-        // Create actions
-        val actions = object : CommonTTSActions {
-            override fun onPlay() { scope.launch { ttsService.play() } }
-            override fun onPause() { scope.launch { ttsService.pause() } }
-            override fun onNextParagraph() { scope.launch { ttsService.nextParagraph() } }
-            override fun onPreviousParagraph() { scope.launch { ttsService.previousParagraph() } }
-            override fun onNextChapter() { scope.launch { ttsService.nextChapter() } }
-            override fun onPreviousChapter() { scope.launch { ttsService.previousChapter() } }
-            override fun onParagraphClick(index: Int) { scope.launch { ttsService.jumpToParagraph(index) } }
-            override fun onToggleTranslation() { showTranslation = !showTranslation }
-            override fun onToggleBilingualMode() { bilingualMode = !bilingualMode }
-            override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
-            override fun onSpeedChange(speed: Float) { ttsService.setSpeed(speed) }
-            override fun onAutoNextChange(enabled: Boolean) { 
-                ttsService.setAutoNextChapter(enabled)
-            }
-            override fun onOpenSettings() { showSettings = true }
-            override fun onSelectVoice() { showVoiceSelection = true }
-            override fun onSelectEngine(engine: String) { 
-                showEngineSettings = true 
+        // TTS Speed Calibration - measure actual TTS speed from first paragraph
+        var calibratedWPM by remember { mutableStateOf<Float?>(null) }
+        var isCalibrated by remember { mutableStateOf(false) }
+        var firstParagraphStartTime by remember { mutableStateOf(0L) }
+        var firstParagraphWordCount by remember { mutableStateOf(0) }
+        
+        // Track when first paragraph starts
+        LaunchedEffect(content, isPlaying) {
+            if (content.isNotEmpty() && isPlaying && !isCalibrated && currentParagraph == 0) {
+                if (firstParagraphStartTime == 0L) {
+                    firstParagraphStartTime = System.currentTimeMillis()
+                    firstParagraphWordCount = SentenceHighlighter.countTotalWords(content[0])
+                }
             }
         }
         
-        // Sorted chapters for drawer
-        val sortedChapters = remember(chapters, chaptersAscending) {
-            if (chaptersAscending) chapters else chapters.reversed()
+        // Update paragraph start time and handle calibration when paragraph changes
+        LaunchedEffect(currentParagraph) {
+            val now = System.currentTimeMillis()
+            
+            // Calibrate when first paragraph completes (paragraph changes from 0 to 1+)
+            if (currentParagraph >= 1 && !isCalibrated && firstParagraphWordCount > 0 && firstParagraphStartTime > 0) {
+                // Calculate how long the first paragraph took
+                val firstParagraphDuration = now - firstParagraphStartTime
+                // Only calibrate if we have reasonable data (at least 500ms)
+                if (firstParagraphDuration > 500) {
+                    calibratedWPM = SentenceHighlighter.calculateCalibratedWPM(
+                        firstParagraphWordCount,
+                        firstParagraphDuration,
+                        speechSpeed
+                    )
+                    isCalibrated = true
+                }
+            }
+            
+            // Update paragraph start time for the new paragraph
+            paragraphStartTime = now
+        }
+        
+        // Also update start time when playback starts (in case it was paused)
+        LaunchedEffect(isPlaying) {
+            if (isPlaying) {
+                paragraphStartTime = System.currentTimeMillis()
+            }
+        }
+        
+        // Reset calibration when chapter changes
+        LaunchedEffect(chapterId) {
+            calibratedWPM = null
+            isCalibrated = false
+            firstParagraphStartTime = 0L
+            firstParagraphWordCount = 0
+        }
+        
+        // Sentence highlighting preference
+        var sentenceHighlightEnabled by remember { 
+            mutableStateOf(readerPreferences.ttsSentenceHighlight().get()) 
+        }
+        
+        // Memoize chapter and book names to avoid string allocations
+        val chapterName by remember(currentChapter) {
+            derivedStateOf { currentChapter?.name ?: "" }
+        }
+        val bookTitle by remember(currentBook) {
+            derivedStateOf { currentBook?.title ?: "" }
+        }
+        
+        // Memoize engine info to avoid repeated calls
+        val currentEngineName = remember(ttsService) { ttsService.getCurrentEngineName() }
+        val availableEngines = remember(ttsService) { ttsService.getAvailableEngines() }
+        
+        // Create state object for unified components - memoized to reduce object allocations
+        val screenState by remember(
+            currentParagraph, previousParagraph, isPlaying, isLoading, content,
+            translatedContent, showTranslation, bilingualMode, chapterName, bookTitle,
+            speechSpeed, autoNextChapter, fullScreenMode, cachedParagraphs, loadingParagraphs,
+            sleepTimeRemaining, sleepModeEnabledState, paragraphStartTime, sentenceHighlightEnabled,
+            calibratedWPM, isCalibrated
+        ) {
+            derivedStateOf {
+                CommonTTSScreenState(
+                    currentReadingParagraph = currentParagraph,
+                    previousReadingParagraph = previousParagraph,
+                    isPlaying = isPlaying,
+                    isLoading = isLoading,
+                    content = content,
+                    translatedContent = translatedContent,
+                    showTranslation = showTranslation,
+                    bilingualMode = bilingualMode,
+                    chapterName = chapterName,
+                    bookTitle = bookTitle,
+                    speechSpeed = speechSpeed,
+                    autoNextChapter = autoNextChapter,
+                    fullScreenMode = fullScreenMode,
+                    cachedParagraphs = cachedParagraphs,
+                    loadingParagraphs = loadingParagraphs,
+                    sleepTimeRemaining = sleepTimeRemaining,
+                    sleepModeEnabled = sleepModeEnabledState,
+                    hasDownloadFeature = false,
+                    currentEngine = currentEngineName,
+                    availableEngines = availableEngines,
+                    paragraphStartTime = paragraphStartTime,
+                    sentenceHighlightEnabled = sentenceHighlightEnabled,
+                    calibratedWPM = calibratedWPM,
+                    isCalibrated = isCalibrated
+                )
+            }
+        }
+        
+        // Create actions - memoized to prevent recreation on every recomposition
+        val actions = remember(scope, ttsService) {
+            object : CommonTTSActions {
+                override fun onPlay() { scope.launch { ttsService.play() } }
+                override fun onPause() { scope.launch { ttsService.pause() } }
+                override fun onNextParagraph() { scope.launch { ttsService.nextParagraph() } }
+                override fun onPreviousParagraph() { scope.launch { ttsService.previousParagraph() } }
+                override fun onNextChapter() { scope.launch { ttsService.nextChapter() } }
+                override fun onPreviousChapter() { scope.launch { ttsService.previousChapter() } }
+                override fun onParagraphClick(index: Int) { scope.launch { ttsService.jumpToParagraph(index) } }
+                override fun onToggleTranslation() { showTranslation = !showTranslation }
+                override fun onToggleBilingualMode() { bilingualMode = !bilingualMode }
+                override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
+                override fun onSpeedChange(speed: Float) { ttsService.setSpeed(speed) }
+                override fun onAutoNextChange(enabled: Boolean) { 
+                    ttsService.setAutoNextChapter(enabled)
+                }
+                override fun onOpenSettings() { showSettings = true }
+                override fun onSelectVoice() { showVoiceSelection = true }
+                override fun onSelectEngine(engine: String) { 
+                    showEngineSettings = true 
+                }
+            }
+        }
+        
+        // Sorted chapters for drawer - memoized to avoid repeated sorting
+        val sortedChapters by remember(chapters, chaptersAscending) {
+            derivedStateOf {
+                if (chaptersAscending) chapters else chapters.asReversed()
+            }
         }
         
         // Drawer scroll state
@@ -386,8 +514,9 @@ class TTSScreenSpec(
                             state = screenState,
                             actions = actions,
                             lazyListState = lazyListState,
-                            backgroundColor = backgroundColor,
-                            textColor = textColor,
+                            backgroundColor = resolvedBackgroundColor,
+                            textColor = resolvedTextColor,
+                            highlightColor = MaterialTheme.colorScheme.primaryContainer,
                             fontSize = fontSize,
                             textAlignment = textAlignment,
                             isTabletOrDesktop = isTabletOrDesktop,
@@ -511,6 +640,11 @@ class TTSScreenSpec(
                                 }
                                 // Save preference
                                 scope.launch { readerPreferences.useTTSWithTranslatedText().set(enabled) }
+                            },
+                            sentenceHighlightEnabled = sentenceHighlightEnabled,
+                            onSentenceHighlightChange = { enabled ->
+                                sentenceHighlightEnabled = enabled
+                                scope.launch { readerPreferences.ttsSentenceHighlight().set(enabled) }
                             },
                             onOpenEngineSettings = {
                                 showEngineSettings = true

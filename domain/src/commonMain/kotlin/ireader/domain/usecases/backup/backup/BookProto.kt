@@ -2,9 +2,11 @@
 
 package ireader.domain.usecases.backup.backup
 import ireader.domain.models.entities.Book
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
+@ExperimentalSerializationApi
 @Serializable
 internal data class BookProto(
     @ProtoNumber(1) val sourceId: Long,

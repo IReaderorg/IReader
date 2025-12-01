@@ -23,17 +23,12 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import kotlinx.coroutines.withContext
-import org.koin.compose.koinInject
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,10 +36,11 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.asRelativeTimeString
 import ireader.domain.utils.extensions.toLocalDate
-import ireader.presentation.ui.core.theme.ContentAlpha
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.i18n.resources.bookmarked
+import ireader.i18n.resources.cached
+import ireader.i18n.resources.chapter_background
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -69,15 +65,20 @@ fun ChapterRow(
         chapter.content.isNotEmpty()
     }
     
-    // Animated background color for last read chapter
+    // Animated background color for chapter rows
+    // Use surface color as base to ensure opacity over backdrop images
     val backgroundColor by animateColorAsState(
         targetValue = when {
             isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                .compositeOver(MaterialTheme.colorScheme.surface)
             isLastRead -> MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-            else -> MaterialTheme.colorScheme.surface
+                .compositeOver(MaterialTheme.colorScheme.surface)
+            chapter.read -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                .compositeOver(MaterialTheme.colorScheme.surface) // Gray background for read chapters
+            else -> MaterialTheme.colorScheme.surface // Use opaque surface color to prevent backdrop bleed-through
         },
         animationSpec = spring(),
-        label = localizeHelper.localize(Res.string.chapter_background)
+        label = localizeHelper.localize(Res.string.chapter_background),
     )
     
     // Cache text color calculations
@@ -130,7 +131,7 @@ fun ChapterRow(
                 fontWeight = if (isLastRead) FontWeight.SemiBold else FontWeight.Normal,
                 color = when {
                     isLastRead -> MaterialTheme.colorScheme.primary
-                    chapter.read -> LocalContentColor.current.copy(alpha = ContentAlpha.disabled())
+                    chapter.read -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) // Gray text for read chapters
                     else -> LocalContentColor.current
                 },
                 maxLines = 2
@@ -154,9 +155,11 @@ fun ChapterRow(
                 Text(
                     subtitleStr,
                     style = MaterialTheme.typography.labelMedium,
-                    color = LocalContentColor.current.copy(
-                        alpha = if (chapter.read) ContentAlpha.disabled() else ContentAlpha.medium()
-                    )
+                    color = if (chapter.read) {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) // Gray text for read chapters
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant // Normal subtitle color
+                    }
                 )
             }
         }

@@ -86,5 +86,14 @@ sealed class AppTab(
             More.route -> More
             else -> Library
         }
+        
+        fun fromIndex(index: Int): AppTab = when (index) {
+            0 -> Library
+            1 -> Updates
+            2 -> History
+            3 -> Extensions
+            4 -> More
+            else -> Library
+        }
     }
 }

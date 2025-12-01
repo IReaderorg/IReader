@@ -1,19 +1,21 @@
 package ireader.presentation.core
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -21,7 +23,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.delay
 import ireader.presentation.core.ui.AppTab
+import ireader.presentation.ui.component.ExtensionsShimmerLoading
+import ireader.presentation.ui.component.HistoryShimmerLoading
+import ireader.presentation.ui.component.LibraryShimmerLoading
+import ireader.presentation.ui.component.SettingsShimmerLoading
+import ireader.presentation.ui.component.UpdatesShimmerLoading
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.getIViewModel
@@ -40,15 +49,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 object MainStarterScreen {
-    private const val TabFadeDuration = 200
     private val showBottomNavEvent = Channel<Boolean>()
-    
-    // Event channel for library filter sheet (consumed by LibraryScreenSpec)
     private val libraryFilterSheetEvent = Channel<Boolean>()
     
-    /**
-     * Flow to observe library filter sheet requests
-     */
     fun libraryFilterSheetFlow() = libraryFilterSheetEvent.receiveAsFlow()
 
     @OptIn(ExperimentalLayoutApi::class)
@@ -59,58 +62,81 @@ object MainStarterScreen {
         val libraryVm: LibraryViewModel = getIViewModel(key = "library")
         val scope = rememberCoroutineScope()
         
-        // Track current tab using rememberSaveable for state preservation
-        var currentTab by rememberSaveable { mutableStateOf(AppTab.Library.route) }
-        val selectedTab = AppTab.fromRoute(currentTab)
+        // Use Int index for faster comparison
+        var currentTabIndex by rememberSaveable { mutableIntStateOf(0) }
         
-        // Double-tap handlers for each tab
+        // Track visited tabs - once visited, tab stays in memory
+        var visitedTabs by rememberSaveable { mutableStateOf(setOf(0)) }
+        
+        // Mark current tab as visited
+        if (currentTabIndex !in visitedTabs) {
+            visitedTabs = visitedTabs + currentTabIndex
+        }
+        
+        // Pre-initialize all tabs in background after first frame
+        // This makes subsequent tab switches instant
+        LaunchedEffect(Unit) {
+            // Wait for first frame to render
+            delay(100)
+            // Pre-initialize remaining tabs one by one with small delays
+            // to avoid blocking the main thread
+            listOf(3, 4, 1, 2).forEach { tabIndex ->
+                if (tabIndex !in visitedTabs) {
+                    delay(50) // Small delay between each tab
+                    visitedTabs = visitedTabs + tabIndex
+                }
+            }
+        }
+        
+        // Stable click handlers
+        val tabClickHandlers = remember {
+            TabClickHandlers(
+                onLibraryClick = { currentTabIndex = 0 },
+                onUpdatesClick = { currentTabIndex = 1 },
+                onHistoryClick = { currentTabIndex = 2 },
+                onExtensionsClick = { currentTabIndex = 3 },
+                onMoreClick = { currentTabIndex = 4 }
+            )
+        }
+        
+        // Double-tap handlers - must return Unit, not Job
         val onLibraryDoubleTap: () -> Unit = remember {
             {
-                // Navigate to Library tab, then request filter sheet
-                currentTab = AppTab.Library.route
-                scope.launch {
-                    libraryFilterSheetEvent.send(true)
-                }
+                currentTabIndex = 0
+                scope.launch { libraryFilterSheetEvent.send(true) }
+                Unit
             }
         }
         
         val onHistoryDoubleTap: () -> Unit = remember(libraryVm) {
             {
-                // Navigate to History tab first, then go to last read chapter
-                currentTab = AppTab.History.route
+                currentTabIndex = 2
                 scope.launch {
                     libraryVm.lastReadInfo?.let { info ->
-                        navController.navigateTo(
-                            ReaderScreenSpec(
-                                bookId = info.novelId,
-                                chapterId = info.chapterId
-                            )
-                        )
+                        navController.navigateTo(ReaderScreenSpec(info.novelId, info.chapterId))
                     }
                 }
+                Unit
             }
         }
         
         val onExtensionsDoubleTap: () -> Unit = remember {
             {
-                // Navigate to Extensions tab first, then go to global search
-                currentTab = AppTab.Extensions.route
+                currentTabIndex = 3
                 navController.navigateTo(GlobalSearchScreenSpec())
             }
         }
         
         val onMoreDoubleTap: () -> Unit = remember {
             {
-                // Navigate to More tab first, then go to settings
-                currentTab = AppTab.More.route
+                currentTabIndex = 4
                 navController.navigate(NavigationRoutes.settings)
             }
         }
         
         val onUpdatesDoubleTap: () -> Unit = remember {
             {
-                // Navigate to Updates tab first, then go to downloader
-                currentTab = AppTab.Updates.route
+                currentTabIndex = 1
                 navController.navigate(NavigationRoutes.downloader)
             }
         }
@@ -133,36 +159,34 @@ object MainStarterScreen {
                             ) {
                                 NavigationRailTabItem(
                                     tab = AppTab.Library,
-                                    isSelected = selectedTab == AppTab.Library,
-                                    onClick = { currentTab = AppTab.Library.route },
+                                    isSelected = currentTabIndex == 0,
+                                    onClick = tabClickHandlers.onLibraryClick,
                                     onDoubleClick = onLibraryDoubleTap
                                 )
                                 if (vm.showUpdate.value) {
                                     NavigationRailTabItem(
                                         tab = AppTab.Updates,
-                                        isSelected = selectedTab == AppTab.Updates,
-                                        onClick = { currentTab = AppTab.Updates.route },
+                                        isSelected = currentTabIndex == 1,
+                                        onClick = tabClickHandlers.onUpdatesClick,
                                         onDoubleClick = onUpdatesDoubleTap
                                     )
-                                }
-                                if (vm.showUpdate.value) {
                                     NavigationRailTabItem(
                                         tab = AppTab.History,
-                                        isSelected = selectedTab == AppTab.History,
-                                        onClick = { currentTab = AppTab.History.route },
+                                        isSelected = currentTabIndex == 2,
+                                        onClick = tabClickHandlers.onHistoryClick,
                                         onDoubleClick = onHistoryDoubleTap
                                     )
                                 }
                                 NavigationRailTabItem(
                                     tab = AppTab.Extensions,
-                                    isSelected = selectedTab == AppTab.Extensions,
-                                    onClick = { currentTab = AppTab.Extensions.route },
+                                    isSelected = currentTabIndex == 3,
+                                    onClick = tabClickHandlers.onExtensionsClick,
                                     onDoubleClick = onExtensionsDoubleTap
                                 )
                                 NavigationRailTabItem(
                                     tab = AppTab.More,
-                                    isSelected = selectedTab == AppTab.More,
-                                    onClick = { currentTab = AppTab.More.route },
+                                    isSelected = currentTabIndex == 4,
+                                    onClick = tabClickHandlers.onMoreClick,
                                     onDoubleClick = onMoreDoubleTap
                                 )
                             }
@@ -185,36 +209,34 @@ object MainStarterScreen {
                             ) {
                                 BottomNavTabItem(
                                     tab = AppTab.Library,
-                                    isSelected = selectedTab == AppTab.Library,
-                                    onClick = { currentTab = AppTab.Library.route },
+                                    isSelected = currentTabIndex == 0,
+                                    onClick = tabClickHandlers.onLibraryClick,
                                     onDoubleClick = onLibraryDoubleTap
                                 )
                                 if (vm.showUpdate.value) {
                                     BottomNavTabItem(
                                         tab = AppTab.Updates,
-                                        isSelected = selectedTab == AppTab.Updates,
-                                        onClick = { currentTab = AppTab.Updates.route },
+                                        isSelected = currentTabIndex == 1,
+                                        onClick = tabClickHandlers.onUpdatesClick,
                                         onDoubleClick = onUpdatesDoubleTap
                                     )
-                                }
-                                if (vm.showUpdate.value) {
                                     BottomNavTabItem(
                                         tab = AppTab.History,
-                                        isSelected = selectedTab == AppTab.History,
-                                        onClick = { currentTab = AppTab.History.route },
+                                        isSelected = currentTabIndex == 2,
+                                        onClick = tabClickHandlers.onHistoryClick,
                                         onDoubleClick = onHistoryDoubleTap
                                     )
                                 }
                                 BottomNavTabItem(
                                     tab = AppTab.Extensions,
-                                    isSelected = selectedTab == AppTab.Extensions,
-                                    onClick = { currentTab = AppTab.Extensions.route },
+                                    isSelected = currentTabIndex == 3,
+                                    onClick = tabClickHandlers.onExtensionsClick,
                                     onDoubleClick = onExtensionsDoubleTap
                                 )
                                 BottomNavTabItem(
                                     tab = AppTab.More,
-                                    isSelected = selectedTab == AppTab.More,
-                                    onClick = { currentTab = AppTab.More.route },
+                                    isSelected = currentTabIndex == 4,
+                                    onClick = tabClickHandlers.onMoreClick,
                                     onDoubleClick = onMoreDoubleTap
                                 )
                             }
@@ -225,29 +247,133 @@ object MainStarterScreen {
                 Box(
                     modifier = Modifier
                         .padding(contentPadding)
-                        .consumeWindowInsets(contentPadding),
+                        .consumeWindowInsets(contentPadding)
+                        .fillMaxSize(),
                 ) {
-                    // Use Crossfade for smooth tab transitions
-                    Crossfade(
-                        targetState = selectedTab,
-                        label = "TabContent"
-                    ) { tab ->
-                        tab.Content()
-                    }
+                    // Optimized tab container with lazy init + memory retention
+                    PersistentTabContainer(
+                        currentTabIndex = currentTabIndex,
+                        visitedTabs = visitedTabs,
+                        showUpdates = vm.showUpdate.value
+                    )
                 }
             }
             
-            // Back handler to return to Library tab
-            val goToLibraryTab = { currentTab = AppTab.Library.route }
             IBackHandler(
-                enabled = selectedTab != AppTab.Library,
-                onBack = goToLibraryTab,
+                enabled = currentTabIndex != 0,
+                onBack = { currentTabIndex = 0 },
             )
         }
     }
 
     suspend fun showBottomNav(show: Boolean) {
         showBottomNavEvent.send(show)
+    }
+}
+
+private class TabClickHandlers(
+    val onLibraryClick: () -> Unit,
+    val onUpdatesClick: () -> Unit,
+    val onHistoryClick: () -> Unit,
+    val onExtensionsClick: () -> Unit,
+    val onMoreClick: () -> Unit
+)
+
+/**
+ * Persistent tab container - tabs are initialized on first visit and kept in memory.
+ * Shows shimmer loading while tab content is being initialized.
+ */
+@Composable
+private fun PersistentTabContainer(
+    currentTabIndex: Int,
+    visitedTabs: Set<Int>,
+    showUpdates: Boolean
+) {
+    // Library tab (index 0) - always initialized
+    TabSlot(
+        tabIndex = 0,
+        isVisible = currentTabIndex == 0,
+        isInitialized = 0 in visitedTabs,
+        shimmerContent = { LibraryShimmerLoading() }
+    ) {
+        AppTab.Library.Content()
+    }
+    
+    // Updates tab (index 1)
+    if (showUpdates) {
+        TabSlot(
+            tabIndex = 1,
+            isVisible = currentTabIndex == 1,
+            isInitialized = 1 in visitedTabs,
+            shimmerContent = { UpdatesShimmerLoading() }
+        ) {
+            AppTab.Updates.Content()
+        }
+    }
+    
+    // History tab (index 2)
+    if (showUpdates) {
+        TabSlot(
+            tabIndex = 2,
+            isVisible = currentTabIndex == 2,
+            isInitialized = 2 in visitedTabs,
+            shimmerContent = { HistoryShimmerLoading() }
+        ) {
+            AppTab.History.Content()
+        }
+    }
+    
+    // Extensions tab (index 3)
+    TabSlot(
+        tabIndex = 3,
+        isVisible = currentTabIndex == 3,
+        isInitialized = 3 in visitedTabs,
+        shimmerContent = { ExtensionsShimmerLoading() }
+    ) {
+        AppTab.Extensions.Content()
+    }
+    
+    // More tab (index 4)
+    TabSlot(
+        tabIndex = 4,
+        isVisible = currentTabIndex == 4,
+        isInitialized = 4 in visitedTabs,
+        shimmerContent = { SettingsShimmerLoading() }
+    ) {
+        AppTab.More.Content()
+    }
+}
+
+/**
+ * Individual tab slot - lazy initialization with shimmer loading.
+ * Shows shimmer while content is being initialized, then fades to actual content.
+ * Hidden tabs are moved off-screen to prevent touch interception.
+ */
+@Composable
+private inline fun TabSlot(
+    @Suppress("UNUSED_PARAMETER") tabIndex: Int, // Used for debugging/logging if needed
+    isVisible: Boolean,
+    isInitialized: Boolean,
+    crossinline shimmerContent: @Composable () -> Unit,
+    crossinline content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                // Visible: normal rendering
+                // Hidden: move off-screen to prevent touch interception
+                alpha = if (isVisible) 1f else 0f
+                translationX = if (isVisible) 0f else 10000f
+            }
+    ) {
+        if (isVisible && !isInitialized) {
+            // Show shimmer while waiting for initialization
+            shimmerContent()
+        } else if (isInitialized) {
+            // Show actual content
+            content()
+        }
     }
 }
 

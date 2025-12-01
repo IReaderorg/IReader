@@ -18,7 +18,12 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.core.source.CatalogSource
@@ -47,8 +52,22 @@ import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.core.utils.isScrolledToEnd
 import ireader.presentation.ui.core.utils.isScrollingUp
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
+
+/**
+ * Stable holder for navigation callbacks to prevent recomposition
+ */
+@Stable
+private class NavigationCallbacks(
+    val onNavigateToReader: (bookId: Long, chapterId: Long) -> Unit,
+    val onNavigateToGlobalSearch: (query: String) -> Unit,
+    val onNavigateToWebView: (url: String, sourceId: Long, bookId: Long) -> Unit,
+    val onPopBackStack: () -> Unit
+)
 
 data class BookDetailScreenSpec constructor(
     val bookId: Long,
@@ -57,35 +76,76 @@ data class BookDetailScreenSpec constructor(
     
     @OptIn(
         ExperimentalMaterial3Api::class,
-        ExperimentalFoundationApi::class
+        ExperimentalFoundationApi::class,
+        FlowPreview::class
     )
     @Composable
     fun Content(
     ) {
+        
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val vm: BookDetailViewModel = getIViewModel(
             key = bookId,
             parameters = { parametersOf(BookDetailViewModel.Param(bookId)) }
         )
+        
+        // Memoize navigation callbacks to prevent recomposition
+        val navigationCallbacks = remember(navController) {
+            NavigationCallbacks(
+                onNavigateToReader = { bookId, chapterId ->
+                    navController.navigateTo(ReaderScreenSpec(bookId = bookId, chapterId = chapterId))
+                },
+                onNavigateToGlobalSearch = { query ->
+                    try {
+                        navController.navigateTo(GlobalSearchScreenSpec(query = query))
+                    } catch (_: Throwable) {}
+                },
+                onNavigateToWebView = { url, sourceId, bookId ->
+                    navController.navigateTo(
+                        WebViewScreenSpec(
+                            url = url,
+                            sourceId = sourceId,
+                            bookId = bookId,
+                            chapterId = null,
+                            enableChaptersFetch = true,
+                            enableBookFetch = true,
+                            enableChapterFetch = false
+                        )
+                    )
+                },
+                onPopBackStack = { navController.popBackStack() }
+            )
+        }
+        
         val snackbarHostState = SnackBarListener(vm = vm)
-        val state = vm
-        val book = state.booksState.book
-        val source = state.catalogSource?.source
-        val catalog = state.catalogSource
+        
+        // Use derivedStateOf for computed values to reduce recomposition
+        val book by remember { derivedStateOf { vm.booksState.book } }
+        val source by remember { derivedStateOf { vm.catalogSource?.source } }
+        val catalog by remember { derivedStateOf { vm.catalogSource } }
+        
         val scope = rememberCoroutineScope()
         val chapters = vm.getChapters(book?.id)
+        
+        // Lazy scroll state initialization with saved position
         val scrollState = rememberLazyListState(
             initialFirstVisibleItemIndex = vm.savedScrollIndex,
             initialFirstVisibleItemScrollOffset = vm.savedScrollOffset
         )
-        val sheetState = rememberModalBottomSheetState()
         
-        // Save scroll position when it changes
-        androidx.compose.runtime.LaunchedEffect(scrollState.firstVisibleItemIndex, scrollState.firstVisibleItemScrollOffset) {
-            vm.saveScrollPosition(
-                scrollState.firstVisibleItemIndex,
-                scrollState.firstVisibleItemScrollOffset
-            )
+        // Lazy sheet state - only created when needed
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        
+        // Debounced scroll position saving - reduces frequent state updates on low-end devices
+        androidx.compose.runtime.LaunchedEffect(scrollState) {
+            snapshotFlow { 
+                scrollState.firstVisibleItemIndex to scrollState.firstVisibleItemScrollOffset 
+            }
+            .debounce(300L) // Debounce to reduce frequent updates
+            .distinctUntilChanged()
+            .collect { (index, offset) ->
+                vm.saveScrollPosition(index, offset)
+            }
         }
         
         // Reset scroll position when screen is disposed
@@ -94,220 +154,234 @@ data class BookDetailScreenSpec constructor(
                 vm.resetScrollPosition()
             }
         }
-        val refreshing = vm.detailIsLoading || vm.chapterIsLoading
+        
+        // Derive refreshing state to avoid multiple property accesses
+        val refreshing by remember { derivedStateOf { vm.detailIsLoading || vm.chapterIsLoading } }
         val pullToRefreshState = rememberPullToRefreshState()
         val topbarState = rememberTopAppBarState()
         val snackBarHostState = SnackBarListener(vm)
         
-        // EPUB export now uses the export dialog with options
-        // The old createEpub flow has been removed in favor of exportBookAsEpubUseCase
-        
-        // Handle back button to close modal sheet instead of closing screen
-        // BackHandler removed - Android-specific, implement in androidMain if needed
-        
-        PullToRefreshBox(
-            isRefreshing = refreshing,
-            onRefresh = {
+        // Memoize refresh callback
+        val onRefresh = remember(book, catalog) {
+            {
                 scope.launch {
                     vm.getRemoteChapterDetail(book, catalog)
                 }
-            },
+                Unit
+            }
+        }
+        
+        PullToRefreshBox(
+            isRefreshing = refreshing,
+            onRefresh = onRefresh,
             state = pullToRefreshState,
             modifier = Modifier.fillMaxSize()
         ) {
         IModalSheets(
-            sheetContent = {
+            sheetContent = { sheetModifier ->
+                // Use local variables to avoid repeated property access
                 val detailState = vm.state
-                val book = vm.booksState.book
-                val catalog = vm.catalogSource
+                val currentBook = vm.booksState.book
+                val currentCatalog = vm.catalogSource
+                val currentSource = detailState.source
 
-                detailState.source.let { source ->
-                    if (vm.chapterMode) {
-                        val pagerState = rememberPagerState(
-                            initialPage = 0,
-                            initialPageOffsetFraction = 0f,
-                            pageCount = {
-                                3
+                if (vm.chapterMode) {
+                    // Lazy pager state - only created when sheet is shown
+                    val pagerState = rememberPagerState(
+                        initialPage = 0,
+                        initialPageOffsetFraction = 0f,
+                        pageCount = { 3 }
+                    )
+                    
+                    // Memoize callbacks to prevent recomposition
+                    val toggleFilterCallback = remember { { filter: ireader.presentation.ui.book.viewmodel.ChaptersFilters -> vm.toggleFilter(filter.type) } }
+                    val onSortCallback = remember { { sort: ireader.presentation.ui.book.viewmodel.ChapterSort -> vm.toggleSort(sort.type) } }
+                    val onLayoutCallback = remember { { layout: ireader.domain.preferences.prefs.ChapterDisplayMode -> vm.layout = layout } }
+                    
+                    ChapterScreenBottomTabComposable(
+                        modifier = sheetModifier,
+                        pagerState = pagerState,
+                        filters = vm.filters.value,
+                        toggleFilter = toggleFilterCallback,
+                        onSortSelected = onSortCallback,
+                        sortType = vm.sorting.value,
+                        isSortDesc = vm.isAsc,
+                        onLayoutSelected = onLayoutCallback,
+                        layoutType = vm.layout,
+                        vm = vm
+                    )
+                } else {
+                    if (currentSource is CatalogSource) {
+                        // Memoize callbacks
+                        val onFetchCallback = remember(currentBook, currentCatalog) {
+                            {
+                                vm.scope.launch {
+                                    if (currentBook != null) {
+                                        vm.getRemoteChapterDetail(
+                                            currentBook,
+                                            currentCatalog,
+                                            vm.modifiedCommands.filter { !it.isDefaultValue() }
+                                        )
+                                    }
+                                }
+                                Unit
                             }
-                        )
-                        ChapterScreenBottomTabComposable(
-                            modifier = it,
-                            pagerState = pagerState,
-                            filters = vm.filters.value,
-                            toggleFilter = {
-                                vm.toggleFilter(it.type)
-                            },
-                            onSortSelected = {
-                                vm.toggleSort(it.type)
-                            },
-                            sortType = vm.sorting.value,
-                            isSortDesc = vm.isAsc,
-                            onLayoutSelected = { layout ->
-                                vm.layout = layout
-                            },
-                            layoutType = vm.layout,
-                            vm = vm
-                        )
-                    } else {
-                        if (source is CatalogSource) {
-                            ChapterCommandBottomSheet(
-                                modifier = it,
-                                onFetch = {
-                                    source.let { source ->
-                                        vm.scope.launch {
-                                            if (book != null) {
-                                                vm.getRemoteChapterDetail(
-                                                    book,
-                                                    catalog,
-                                                    vm.modifiedCommands.filter { !it.isDefaultValue() }
-                                                )
-                                            }
-                                        }
-                                    }
-                                },
-                                onReset = {
-                                    source.let { source ->
-                                        vm.modifiedCommands = source.getCommands()
-                                    }
-                                },
-                                onUpdate = {
-                                    vm.modifiedCommands = it
-                                },
-                                detailState.modifiedCommands
-                            )
                         }
+                        val onResetCallback = remember(currentSource) {
+                            { vm.modifiedCommands = currentSource.getCommands() }
+                        }
+                        val onUpdateCallback = remember { { commands: ireader.core.source.model.CommandList -> vm.modifiedCommands = commands } }
+                        
+                        ChapterCommandBottomSheet(
+                            modifier = sheetModifier,
+                            onFetch = onFetchCallback,
+                            onReset = onResetCallback,
+                            onUpdate = onUpdateCallback,
+                            detailState.modifiedCommands
+                        )
                     }
-
                 }
             },
             bottomSheetState = sheetState
         ) {
-            val scrollBehavior = if (isTableUi()) {
-                TopAppBarDefaults.pinnedScrollBehavior()
+            // Cache tablet check to avoid repeated computation
+            val isTablet = isTableUi()
+            
+            // Use simpler scroll behavior on low-end devices (pinned is less expensive)
+            // Note: These are @Composable functions, so we can't use remember here
+            val scrollBehavior = if (isTablet) {
+                TopAppBarDefaults.pinnedScrollBehavior(topbarState)
             } else {
                 TopAppBarDefaults.enterAlwaysScrollBehavior(
                     state = topbarState,
                     canScroll = { true }
                 )
             }
+            
+            // Pre-compute stable values for top bar
+            val isArchived by remember { derivedStateOf { book?.isArchived ?: false } }
+            
             TransparentStatusBar {
                 IScaffold(
                     topBarScrollBehavior = scrollBehavior,
                     snackbarHostState = snackbarHostState,
                     topBar = { scrollBehavior ->
-                        val scope = rememberCoroutineScope()
-
-                        BookDetailTopAppBar(
-                            scrollBehavior = scrollBehavior,
-                            onRefresh = {
+                        // Memoize all top bar callbacks to prevent recomposition
+                        val onRefreshCallback = remember(book, catalog) {
+                            {
                                 scope.launch {
                                     if (book != null) {
                                         vm.getRemoteBookDetail(book, source = catalog)
                                         vm.getRemoteChapterDetail(book, catalog)
                                     }
                                 }
-                            },
-                            onPopBackStack = {
-                                navController.popBackStack()
-                            },
-                            source = vm.source,
-                            onCommand = {
-                                scope.launch {
-                                    sheetState.show()
-                                }
-                            },
-                            state = vm,
-                            onSelectBetween = {
-                                val ids: List<Long> =
-                                    vm.chapters.map { it.id }
-                                        .filter { it in vm.selection }.distinct().sortedBy { it }
-                                        .let {
-                                            val list = mutableListOf<Long>()
-                                            val min = it.minOrNull() ?: 0
-                                            val max = it.maxOrNull() ?: 0
-                                            for (id in min..max) {
-                                                list.add(id)
-                                            }
-                                            list
-                                        }
-                                vm.selection.clear()
-                                vm.selection.addAll(ids)
-                            },
-                            onClickSelectAll = {
-                                vm.selection.clear()
-                                vm.selection.addAll(vm.chapters.map { it.id })
-                                vm.selection.distinct()
-                            },
-                            onClickInvertSelection = {
-                                val ids: List<Long> =
-                                    vm.chapters.map { it.id }
-                                        .filterNot { it in vm.selection }.distinct()
-                                vm.selection.clear()
-                                vm.selection.addAll(ids)
-                            },
-                            onClickCancelSelection = {
-                                vm.selection.clear()
-                            },
-                            paddingValues = PaddingValues(0.dp),
-                            onDownload = {
-                                if (book != null) {
-                                    vm.startDownloadService(book = book)
-                                }
-                            },
-                            onInfo = {
-                                vm.showDialog = true
-                            },
-                            onArchive = {
-                                book?.let { vm.archiveBook(it) }
-                            },
-                            onUnarchive = {
-                                book?.let { vm.unarchiveBook(it) }
-                            },
-                            isArchived = book?.isArchived ?: false,
-                            onShareBook = {
-                                vm.shareBook()
-                            },
-                            onExportEpub = {
-                                vm.showEpubExportDialog = true
+                                Unit
                             }
+                        }
+                        
+                        val onCommandCallback = remember(sheetState) {
+                            { scope.launch { sheetState.show() }; Unit }
+                        }
+                        
+                        // Optimized selection callbacks - avoid creating new lists on each call
+                        val onSelectBetweenCallback = remember {
+                            {
+                                val selectedIds = vm.selection.toSet()
+                                val chapterIds = vm.chapters.map { it.id }
+                                val filteredIds = chapterIds.filter { it in selectedIds }.sorted()
+                                if (filteredIds.isNotEmpty()) {
+                                    val min = filteredIds.first()
+                                    val max = filteredIds.last()
+                                    vm.selection.clear()
+                                    vm.selection.addAll((min..max).toList())
+                                }
+                                Unit
+                            }
+                        }
+                        
+                        val onSelectAllCallback = remember {
+                            {
+                                vm.selection.clear()
+                                vm.selection.addAll(vm.chapters.map { it.id }.distinct())
+                                Unit
+                            }
+                        }
+                        
+                        val onInvertSelectionCallback = remember {
+                            {
+                                val selectedIds = vm.selection.toSet()
+                                val invertedIds = vm.chapters.map { it.id }.filterNot { it in selectedIds }.distinct()
+                                vm.selection.clear()
+                                vm.selection.addAll(invertedIds)
+                                Unit
+                            }
+                        }
+                        
+                        val onCancelSelectionCallback: () -> Unit = remember { { vm.selection.clear() } }
+                        val onDownloadCallback: () -> Unit = remember(book) { { book?.let { vm.startDownloadService(book = it) }; Unit } }
+                        val onInfoCallback: () -> Unit = remember { { vm.showDialog = true } }
+                        val onArchiveCallback: () -> Unit = remember(book) { { book?.let { vm.archiveBook(it) }; Unit } }
+                        val onUnarchiveCallback: () -> Unit = remember(book) { { book?.let { vm.unarchiveBook(it) }; Unit } }
+                        val onShareCallback: () -> Unit = remember { { vm.shareBook() } }
+                        val onExportCallback: () -> Unit = remember { { vm.showEpubExportDialog = true } }
+
+                        BookDetailTopAppBar(
+                            scrollBehavior = scrollBehavior,
+                            onRefresh = onRefreshCallback,
+                            onPopBackStack = navigationCallbacks.onPopBackStack,
+                            source = vm.source,
+                            onCommand = onCommandCallback,
+                            state = vm,
+                            onSelectBetween = onSelectBetweenCallback,
+                            onClickSelectAll = onSelectAllCallback,
+                            onClickInvertSelection = onInvertSelectionCallback,
+                            onClickCancelSelection = onCancelSelectionCallback,
+                            paddingValues = PaddingValues(0.dp),
+                            onDownload = onDownloadCallback,
+                            onInfo = onInfoCallback,
+                            onArchive = onArchiveCallback,
+                            onUnarchive = onUnarchiveCallback,
+                            isArchived = isArchived,
+                            onShareBook = onShareCallback,
+                            onExportEpub = onExportCallback
                         )
                     },
                     floatingActionButton = {
-                        if (!vm.hasSelection) {
-                            ExtendedFloatingActionButton(
-                                text = {
-                                    val id = if (chapters.value.any { it.read }) {
-                                        Res.string.resume
-                                    } else {
-                                        Res.string.start
-                                    }
-                                    Text(text = localize(id))
-                                },
-                                icon = {
-                                    Icon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = null
-                                    )
-                                },
-                                onClick = {
-                                    if (catalog != null && book != null) {
-                                        if (vm.chapters.any { it.read } && vm.chapters.isNotEmpty()) {
-                                            navController.navigateTo(
-                                                ReaderScreenSpec(
-                                                    bookId = book.id,
-                                                    chapterId = LAST_CHAPTER,
-                                                )
-                                            )
-                                        } else if (vm.chapters.isNotEmpty()) {
-                                            navController.navigateTo(
-                                                ReaderScreenSpec(
-                                                    bookId = book.id,
-                                                    chapterId = vm.chapters.first().id,
-                                                )
-                                            )
-                                        } else {
-                                            scope.launch {
-                                                vm.showSnackBar(UiText.MStringResource(Res.string.no_chapter_is_available))
+                        // Derive hasSelection to avoid repeated property access
+                        val hasSelection by remember { derivedStateOf { vm.hasSelection } }
+                        
+                        if (!hasSelection) {
+                            // Derive FAB text resource to avoid recomputation
+                            val fabTextRes by remember(chapters) {
+                                derivedStateOf {
+                                    if (chapters.value.any { it.read }) Res.string.resume else Res.string.start
+                                }
+                            }
+                            
+                            // FAB expanded state - these are @Composable functions
+                            val isScrollingUp = scrollState.isScrollingUp()
+                            val isScrolledToEnd = scrollState.isScrolledToEnd()
+                            val isExpanded = isScrollingUp || isScrolledToEnd
+                            
+                            // Capture book value for use in callback
+                            val currentBook = book
+                            
+                            // Memoize FAB click handler
+                            val onFabClick: () -> Unit = remember(catalog, currentBook, vm.chapters) {
+                                {
+                                    if (catalog != null && currentBook != null) {
+                                        val vmChapters = vm.chapters
+                                        when {
+                                            vmChapters.any { it.read } && vmChapters.isNotEmpty() -> {
+                                                navigationCallbacks.onNavigateToReader(currentBook.id, LAST_CHAPTER)
+                                            }
+                                            vmChapters.isNotEmpty() -> {
+                                                navigationCallbacks.onNavigateToReader(currentBook.id, vmChapters.first().id)
+                                            }
+                                            else -> {
+                                                scope.launch {
+                                                    vm.showSnackBar(UiText.MStringResource(Res.string.no_chapter_is_available))
+                                                }
                                             }
                                         }
                                     } else {
@@ -315,129 +389,148 @@ data class BookDetailScreenSpec constructor(
                                             vm.showSnackBar(UiText.MStringResource(Res.string.source_not_available))
                                         }
                                     }
+                                }
+                            }
+                            
+                            ExtendedFloatingActionButton(
+                                text = { Text(text = localize(fabTextRes)) },
+                                icon = {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null
+                                    )
                                 },
-                                expanded = scrollState.isScrollingUp() || scrollState.isScrolledToEnd(),
+                                onClick = onFabClick,
+                                expanded = isExpanded,
                                 modifier = Modifier,
                                 shape = CircleShape
-
                             )
                         }
                     }
                 ) { scaffoldPadding ->
-
-                    BookDetailScreen(
-                        onSummaryExpand = {
-                            vm.expandedSummary = !vm.expandedSummary
-                        },
-                        book = book ?: Book(key = "", sourceId = 0, title = ""),
-                        vm = vm,
-                        onTitle = {
-                            try {
-                                navController.navigateTo(
-                                    GlobalSearchScreenSpec(
-                                        query = it
-                                    )
-                                )
-                            } catch (e: Throwable) {
-                            }
-                        },
-                        isSummaryExpanded = vm.expandedSummary,
-                        source = vm.source,
-                        appbarPadding = scaffoldPadding.calculateTopPadding(),
-                        onItemClick = { chapter ->
+                    // Pre-compute stable values to avoid recomputation
+                    val appbarPadding = scaffoldPadding.calculateTopPadding()
+                    val defaultBook = remember { Book(key = "", sourceId = 0, title = "") }
+                    val displayBook = book ?: defaultBook
+                    
+                    // Capture book for callbacks
+                    val currentBookForCallbacks = book
+                    val currentSourceForCallbacks = source
+                    
+                    // Memoize all callbacks to prevent recomposition in BookDetailScreen
+                    val onSummaryExpandCallback: () -> Unit = remember { { vm.expandedSummary = !vm.expandedSummary } }
+                    
+                    val onTitleCallback: (String) -> Unit = remember(navigationCallbacks) {
+                        { title: String -> navigationCallbacks.onNavigateToGlobalSearch(title) }
+                    }
+                    
+                    val onItemClickCallback: (ireader.domain.models.entities.Chapter) -> Unit = remember(currentBookForCallbacks, navigationCallbacks) {
+                        { chapter: ireader.domain.models.entities.Chapter ->
                             if (vm.selection.isEmpty()) {
-                                if (book != null) {
-                                            navController.navigateTo(
-                                                ReaderScreenSpec(
-                                                    bookId = book.id,
-                                                    chapterId = chapter.id,
-                                                )
-                                            )
-
+                                currentBookForCallbacks?.let { b ->
+                                    navigationCallbacks.onNavigateToReader(b.id, chapter.id)
                                 }
                             } else {
-                                when (chapter.id) {
-                                    in vm.selection -> {
-                                        vm.selection.remove(chapter.id)
-                                    }
-                                    else -> {
-                                        vm.selection.add(chapter.id)
-                                    }
-                                }
-                            }
-                        },
-                        onLongItemClick = { chapter ->
-                            when (chapter.id) {
-                                in vm.selection -> {
+                                if (chapter.id in vm.selection) {
                                     vm.selection.remove(chapter.id)
-                                }
-                                else -> {
+                                } else {
                                     vm.selection.add(chapter.id)
                                 }
                             }
-                        },
-                        onSortClick = {
+                        }
+                    }
+                    
+                    val onLongItemClickCallback: (ireader.domain.models.entities.Chapter) -> Unit = remember {
+                        { chapter: ireader.domain.models.entities.Chapter ->
+                            if (chapter.id in vm.selection) {
+                                vm.selection.remove(chapter.id)
+                            } else {
+                                vm.selection.add(chapter.id)
+                            }
+                            Unit
+                        }
+                    }
+                    
+                    val onSortClickCallback: () -> Unit = remember(sheetState) {
+                        {
                             scope.launch {
                                 vm.chapterMode = true
                                 sheetState.show()
                             }
-                        },
-                        chapters = chapters,
-                        scrollState = scrollState,
-                        onMap = {
+                            Unit
+                        }
+                    }
+                    
+                    val onMapCallback: () -> Unit = remember(scrollState) {
+                        {
                             scope.launch {
                                 try {
-                                    scrollState?.scrollToItem(
-                                        vm.getLastChapterIndex(),
-                                        -scrollState.layoutInfo.viewportEndOffset / 2
-                                    )
-                                } catch (e: Throwable) {
-                                }
+                                    val index = vm.getLastChapterIndex()
+                                    val offset = -scrollState.layoutInfo.viewportEndOffset / 2
+                                    scrollState.scrollToItem(index, offset)
+                                } catch (_: Throwable) {}
                             }
-                        },
-                        onWebView = {
-                            if (source != null && source is HttpSource && book != null) {
-                                // Ensure URL is absolute before passing to WebView
-                                val absoluteUrl = ensureAbsoluteUrlForWebView(book.key, source)
-                                navController.navigateTo(
-                                    WebViewScreenSpec(
-                                        url = absoluteUrl,
-                                        sourceId = book.sourceId,
-                                        bookId = book.id,
-                                        chapterId = null,
-                                        enableChaptersFetch = true,
-                                        enableBookFetch = true,
-                                        enableChapterFetch = false
-                                    )
-                                )
+                            Unit
+                        }
+                    }
+                    
+                    val onWebViewCallback: () -> Unit = remember(currentSourceForCallbacks, currentBookForCallbacks, navigationCallbacks) {
+                        {
+                            val s = currentSourceForCallbacks
+                            val b = currentBookForCallbacks
+                            if (s != null && s is HttpSource && b != null) {
+                                val absoluteUrl = ensureAbsoluteUrlForWebView(b.key, s)
+                                navigationCallbacks.onNavigateToWebView(absoluteUrl, b.sourceId, b.id)
                             }
-                        },
-                        onFavorite = {
-                            if (book != null) {
-                                vm.toggleInLibrary(book = book)
-                            }
-                        },
-                        onCopyTitle = {
-                            vm.copyToClipboard(it, it)
-                        },
+                        }
+                    }
+                    
+                    val onFavoriteCallback: () -> Unit = remember(currentBookForCallbacks) {
+                        { currentBookForCallbacks?.let { vm.toggleInLibrary(book = it) }; Unit }
+                    }
+                    
+                    val onCopyTitleCallback: (String) -> Unit = remember {
+                        { title: String -> vm.copyToClipboard(title, title) }
+                    }
 
+                    BookDetailScreen(
+                        onSummaryExpand = onSummaryExpandCallback,
+                        book = displayBook,
+                        vm = vm,
+                        onTitle = onTitleCallback,
+                        isSummaryExpanded = vm.expandedSummary,
+                        source = vm.source,
+                        appbarPadding = appbarPadding,
+                        onItemClick = onItemClickCallback,
+                        onLongItemClick = onLongItemClickCallback,
+                        onSortClick = onSortClickCallback,
+                        chapters = chapters,
+                        scrollState = scrollState,
+                        onMap = onMapCallback,
+                        onWebView = onWebViewCallback,
+                        onFavorite = onFavoriteCallback,
+                        onCopyTitle = onCopyTitleCallback,
                     )
-
                 }
                 }
             }
         }
         
-        // End of Life Options Dialog
-        if (vm.showEndOfLifeDialog) {
+        // End of Life Options Dialog - only compose when needed
+        val showEndOfLifeDialog by remember { derivedStateOf { vm.showEndOfLifeDialog } }
+        if (showEndOfLifeDialog) {
+            // Capture book for callback
+            val currentBookForDialog = book
+            
+            // Memoize dialog callbacks
+            val onDismissDialog: () -> Unit = remember { { vm.hideEndOfLifeOptionsDialog() } }
+            val onArchiveDialog: () -> Unit = remember(currentBookForDialog) { { currentBookForDialog?.let { vm.archiveBook(it) }; Unit } }
+            val onExportDialog: () -> Unit = remember { { vm.showEpubExportDialog = true } }
+            
             ireader.presentation.ui.book.components.EndOfLifeOptionsDialog(
-                onDismiss = { vm.hideEndOfLifeOptionsDialog() },
-                onArchive = {
-                    book?.let { vm.archiveBook(it) }
-                },
-                onExportEpub = {
-                    vm.showEpubExportDialog = true
-                }
+                onDismiss = onDismissDialog,
+                onArchive = onArchiveDialog,
+                onExportEpub = onExportDialog
             )
         }
     }

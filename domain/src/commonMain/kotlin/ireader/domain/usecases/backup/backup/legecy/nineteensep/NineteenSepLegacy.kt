@@ -122,6 +122,7 @@ internal  fun ByteArray.dumpNineteenSepLegacyBackup() : Backup {
     return ProtoBuf.decodeFromByteArray<LegacyBackupProto>(this).toBackup()
 }
 
+@ExperimentalSerializationApi
 @Serializable
 private data class LegacyBookProto(
     @ProtoNumber(1) val sourceId: Long,
