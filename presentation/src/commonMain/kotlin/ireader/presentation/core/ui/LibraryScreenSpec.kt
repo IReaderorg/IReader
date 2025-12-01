@@ -34,6 +34,7 @@ import ireader.presentation.ui.home.library.LibraryScreenTopBar
 import ireader.presentation.ui.home.library.components.BottomTabComposable
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import ireader.presentation.ui.settings.advance.OnShowImportEpub
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -61,6 +62,15 @@ object LibraryScreenSpec {
         val sheetState = rememberModalBottomSheetState()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scope = rememberCoroutineScope()
+
+        // Listen for filter sheet requests from double-tap on Library tab
+        LaunchedEffect(Unit) {
+            MainStarterScreen.libraryFilterSheetFlow().collectLatest { show ->
+                if (show) {
+                    sheetState.show()
+                }
+            }
+        }
 
         val swipeRefreshState = rememberPullRefreshState(vm.isBookRefreshing, onRefresh = {
             vm.refreshUpdate()

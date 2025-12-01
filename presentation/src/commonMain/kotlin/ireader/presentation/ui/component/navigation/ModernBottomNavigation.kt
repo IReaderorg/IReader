@@ -3,6 +3,8 @@ package ireader.presentation.ui.component.navigation
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,6 +70,7 @@ fun ModernBottomNavigationBar(
 
 /**
  * Modern navigation item with enhanced animations and visual design
+ * Supports both single tap and double tap gestures
  */
 @Composable
 fun RowScope.ModernNavigationItem(
@@ -77,7 +80,8 @@ fun RowScope.ModernNavigationItem(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    alwaysShowLabel: Boolean = true
+    alwaysShowLabel: Boolean = true,
+    onDoubleClick: (() -> Unit)? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedScale by animateFloatAsState(
@@ -98,14 +102,37 @@ fun RowScope.ModernNavigationItem(
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
     val onSurface = MaterialTheme.colorScheme.onSurface
+    
+    // Fast double-tap detection without delaying single tap
+    var lastClickTime by remember { mutableStateOf(0L) }
+    val doubleTapTimeout = 300L
+    
+    val handleClick: () -> Unit = remember(onClick, onDoubleClick) {
+        {
+            val currentTime = System.currentTimeMillis()
+            if (onDoubleClick != null && currentTime - lastClickTime < doubleTapTimeout) {
+                // Double tap detected
+                onDoubleClick()
+                lastClickTime = 0L // Reset to prevent triple-tap
+            } else {
+                // Single tap - execute immediately
+                onClick()
+                lastClickTime = currentTime
+            }
+        }
+    }
 
     Surface(
-        onClick = onClick,
         modifier = modifier
             .weight(1f)
             .fillMaxHeight()
-            .scale(animatedScale),
-        enabled = enabled,
+            .scale(animatedScale)
+            .clickable(
+                enabled = enabled,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = handleClick
+            ),
         shape = RoundedCornerShape(16.dp),
         color = Color.Transparent
     ) {
@@ -188,6 +215,7 @@ fun RowScope.ModernNavigationItem(
 
 /**
  * Compact modern navigation item for tablets/navigation rail
+ * Supports both single tap and double tap gestures
  */
 @Composable
 fun ModernNavigationRailItem(
@@ -197,7 +225,8 @@ fun ModernNavigationRailItem(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    alwaysShowLabel: Boolean = true
+    alwaysShowLabel: Boolean = true,
+    onDoubleClick: (() -> Unit)? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedScale by animateFloatAsState(
@@ -211,13 +240,36 @@ fun ModernNavigationRailItem(
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val onSurface = MaterialTheme.colorScheme.onSurface
+    
+    // Fast double-tap detection without delaying single tap
+    var lastClickTime by remember { mutableStateOf(0L) }
+    val doubleTapTimeout = 300L
+    
+    val handleClick: () -> Unit = remember(onClick, onDoubleClick) {
+        {
+            val currentTime = System.currentTimeMillis()
+            if (onDoubleClick != null && currentTime - lastClickTime < doubleTapTimeout) {
+                // Double tap detected
+                onDoubleClick()
+                lastClickTime = 0L // Reset to prevent triple-tap
+            } else {
+                // Single tap - execute immediately
+                onClick()
+                lastClickTime = currentTime
+            }
+        }
+    }
 
     Surface(
-        onClick = onClick,
         modifier = modifier
             .padding(vertical = 4.dp, horizontal = 8.dp)
-            .scale(animatedScale),
-        enabled = enabled,
+            .scale(animatedScale)
+            .clickable(
+                enabled = enabled,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = handleClick
+            ),
         shape = RoundedCornerShape(16.dp),
         color = if (selected) primaryColor.copy(alpha = 0.15f) else Color.Transparent
     ) {
