@@ -44,6 +44,11 @@ fun ArrowIndicator(
     val trigger = with(LocalDensity.current) { refreshTriggerDistance.toPx() }
     val progress = (swipeRefreshState.indicatorOffset / trigger).coerceIn(0f, 1f)
     
+    // Only render when there's actual drag progress (> 5% to avoid flickering)
+    if (progress < 0.05f) {
+        return
+    }
+    
     // Smooth bounce animation when fully pulled
     val infiniteTransition = rememberInfiniteTransition(label = "bounce")
     val bounceOffset by infiniteTransition.animateFloat(
@@ -83,8 +88,8 @@ fun ArrowIndicator(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height((progress * 140).dp.coerceAtLeast(0.dp))
-            .alpha(progress.coerceAtLeast(0.1f))
+            .height((progress * 140).dp)
+            .alpha(progress)
             .background(
                 Brush.verticalGradient(
                     colors = if (isTop) {

@@ -85,8 +85,11 @@ def translate_batch(strings: Dict[str, str], target_lang: str, batch_num: int = 
     
     print(f"    [Batch {batch_num}/{total_batches}] Translating {len(input_data)} strings to {lang_name}...")
     
-    prompt = f"""Translate to {lang_name}. Return JSON only.
-Keep %1$s %d etc. Output: {{"key":"translation",...}}
+    prompt = f"""You are translating UI strings for IReader, an Android novel/book reader app.
+Context: This app lets users read novels, manage their library, browse book sources, customize reading settings (fonts, themes, scroll modes), and track reading progress. Terms like "chapter", "source", "library", "bookmark" refer to book/novel reading features.
+
+Translate to {lang_name}. Return JSON only.
+Keep %1$s %d etc placeholders unchanged. Output: {{"key":"translation",...}}
 Input: {json.dumps(input_data, ensure_ascii=False)}"""
 
     for attempt in range(MAX_RETRIES):

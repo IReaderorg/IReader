@@ -43,7 +43,7 @@ fun LogoHeader() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 25.dp), // Increased vertical spacing
+                    .padding(vertical = 50.dp), // Increased vertical spacing
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

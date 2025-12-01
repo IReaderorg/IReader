@@ -37,7 +37,7 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -1298,9 +1298,8 @@ private fun InfiniteChapterHeader(
 }
 
 /**
- * Premium void space between chapters with cinematic floating elements.
- * Creates an immersive effect with professional animations.
- * Colors are based on reader text/background colors for consistency.
+ * Clean void space between chapters with smooth animations.
+ * Colors are fully based on reader text/background colors for consistency.
  */
 @Composable
 private fun ChapterVoidSpace(
@@ -1315,148 +1314,63 @@ private fun ChapterVoidSpace(
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "void")
     
-    // Determine if background is dark or light for color adaptation
-    val isDarkBackground = remember(backgroundColor) {
-        (backgroundColor.red * 0.299f + backgroundColor.green * 0.587f + backgroundColor.blue * 0.114f) < 0.5f
-    }
-    
     // Smooth floating animation
     val floatOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = 12f,
+        targetValue = 8f,
         animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = FastOutSlowInEasing),
+            animation = tween(3000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "float"
     )
     
-    // Secondary float for parallax effect
-    val floatOffset2 by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = -6f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "float2"
-    )
-    
     // Breathing glow effect
     val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.1f,
-        targetValue = 0.4f,
+        initialValue = 0.2f,
+        targetValue = 0.5f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2500, easing = FastOutSlowInEasing),
+            animation = tween(2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "glow"
     )
     
-    // Secondary glow for depth
-    val glowAlpha2 by infiniteTransition.animateFloat(
-        initialValue = 0.2f,
-        targetValue = 0.5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(3500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "glow2"
-    )
-    
     // Pulse for the continue button
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.08f,
+        targetValue = 1.05f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1800, easing = FastOutSlowInEasing),
+            animation = tween(1500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulse"
     )
     
-    // Rotation for decorative elements
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(20000, easing = androidx.compose.animation.core.LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "rotation"
-    )
-    
-    // Dynamic void colors based on reader background
-    val voidDeep = if (isDarkBackground) Color(0xFF020204) else Color(0xFFF8F8F8)
-    val voidMid = if (isDarkBackground) Color(0xFF0A0A10) else Color(0xFFEEEEEE)
-    val voidLight = if (isDarkBackground) Color(0xFF12121A) else Color(0xFFE0E0E0)
-    
-    // Accent colors that work on both light and dark backgrounds
-    val accentPrimary = if (isDarkBackground) Color(0xFF3D5AFE) else Color(0xFF1565C0)
-    val accentSecondary = if (isDarkBackground) Color(0xFF7C4DFF) else Color(0xFF6A1B9A)
-    val accentGold = if (isDarkBackground) Color(0xFFFFD54F) else Color(0xFFFF8F00)
-    
-    // Content text color based on reader text color
+    // Use reader colors directly - no hardcoded colors
     val contentTextColor = textColor
     val contentTextColorMuted = textColor.copy(alpha = 0.6f)
-    val contentTextColorSubtle = textColor.copy(alpha = 0.4f)
+    val contentTextColorSubtle = textColor.copy(alpha = 0.35f)
+    val accentColor = textColor.copy(alpha = 0.8f)
     
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(450.dp)
+            .height(380.dp)
+            .background(backgroundColor)
     ) {
-        // Multi-layer gradient background for depth
+        // Subtle glow orb using text color
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            backgroundColor,
-                            voidLight.copy(alpha = 0.5f),
-                            voidMid.copy(alpha = 0.8f),
-                            voidDeep,
-                            voidDeep,
-                            voidDeep,
-                            voidMid.copy(alpha = 0.8f),
-                            voidLight.copy(alpha = 0.5f),
-                            backgroundColor
-                        )
-                    )
-                )
-        )
-        
-        // Primary ambient glow orb
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .align(Alignment.Center)
-                .graphicsLayer { translationY = floatOffset2 }
-                .alpha(glowAlpha)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            accentPrimary.copy(alpha = 0.2f),
-                            accentSecondary.copy(alpha = 0.08f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
-        
-        // Secondary glow for depth
-        Box(
-            modifier = Modifier
-                .size(120.dp)
+                .size(150.dp)
                 .align(Alignment.Center)
                 .graphicsLayer { translationY = floatOffset }
-                .alpha(glowAlpha2)
+                .alpha(glowAlpha * 0.3f)
                 .background(
                     Brush.radialGradient(
                         colors = listOf(
-                            textColor.copy(alpha = 0.1f),
-                            accentPrimary.copy(alpha = 0.03f),
+                            textColor.copy(alpha = 0.15f),
+                            textColor.copy(alpha = 0.05f),
                             Color.Transparent
                         )
                     )
@@ -1471,139 +1385,88 @@ private fun ChapterVoidSpace(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Top decorative element - animated line
+            // Top decorative line
             Box(
                 modifier = Modifier
-                    .width(60.dp)
-                    .height(2.dp)
-                    .graphicsLayer { 
-                        scaleX = 0.5f + (glowAlpha * 1.5f)
-                    }
+                    .width(50.dp)
+                    .height(1.dp)
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                accentPrimary.copy(alpha = 0.6f),
-                                contentTextColor.copy(alpha = 0.5f),
-                                accentPrimary.copy(alpha = 0.6f),
+                                contentTextColorSubtle,
                                 Color.Transparent
                             )
-                        ),
-                        shape = RoundedCornerShape(1.dp)
+                        )
                     )
             )
             
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
-            // Floating chapter completion card
-            Card(
+            // Floating chapter completion content (no card, just text)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .graphicsLayer { 
-                        translationY = floatOffset
-                        shadowElevation = 20f
-                    }
-                    .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (isDarkBackground) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.03f)
-                ),
-                shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(
-                    1.dp,
-                    Brush.linearGradient(
-                        colors = listOf(
-                            contentTextColor.copy(alpha = 0.1f),
-                            accentPrimary.copy(alpha = 0.3f),
-                            contentTextColor.copy(alpha = 0.08f)
-                        )
-                    )
-                )
+                    .graphicsLayer { translationY = floatOffset }
+                    .padding(horizontal = 16.dp)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp)
-                ) {
-                    // Checkmark icon with glow
-                    Box(contentAlignment = Alignment.Center) {
-                        // Glow behind icon
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .alpha(glowAlpha)
-                                .background(
-                                    Brush.radialGradient(
-                                        colors = listOf(
-                                            accentGold.copy(alpha = 0.4f),
-                                            Color.Transparent
-                                        )
-                                    )
-                                )
-                        )
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = accentGold,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Text(
-                        text = "CHAPTER COMPLETE",
-                        color = contentTextColorMuted,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 4.sp
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    Text(
-                        text = chapter.name,
-                        color = contentTextColor.copy(alpha = 0.95f),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                // Checkmark icon
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(28.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "CHAPTER COMPLETE",
+                    color = contentTextColorMuted,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 3.sp
+                )
+                
+                Spacer(modifier = Modifier.height(10.dp))
+                
+                Text(
+                    text = chapter.name,
+                    color = contentTextColor.copy(alpha = 0.9f),
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
             
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
             
-            // Comment button with premium glass effect - uses reader text color
-            Button(
+            // Comment button - uses reader text color
+            OutlinedButton(
                 onClick = onShowComments,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isDarkBackground) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.05f),
+                colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = contentTextColor
                 ),
-                shape = RoundedCornerShape(28.dp),
-                border = BorderStroke(
-                    1.dp,
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            accentSecondary.copy(alpha = 0.3f),
-                            accentPrimary.copy(alpha = 0.5f),
-                            accentSecondary.copy(alpha = 0.3f)
-                        )
-                    )
-                ),
+                border = BorderStroke(1.dp, contentTextColorSubtle),
+                shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
-                    .height(48.dp)
-                    .widthIn(min = 160.dp)
+                    .height(44.dp)
+                    .widthIn(min = 150.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.RateReview,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp),
+                    tint = contentTextColorSubtle,
                 )
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "View Comments",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = contentTextColorSubtle,
                 )
             }
             
@@ -1611,167 +1474,121 @@ private fun ChapterVoidSpace(
             if (isLoading) {
                 Spacer(modifier = Modifier.height(24.dp))
                 androidx.compose.material3.CircularProgressIndicator(
-                    modifier = Modifier.size(32.dp),
-                    color = accentPrimary,
-                    strokeWidth = 3.dp
+                    modifier = Modifier.size(28.dp),
+                    color = accentColor,
+                    strokeWidth = 2.dp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Loading next chapter...",
+                    text = "Loading...",
                     color = contentTextColorMuted,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 12.sp
                 )
             }
             
             // Next chapter section
             if (!isLast && !isLoading) {
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(32.dp))
                 
-                // Animated decorative dots
+                // Decorative dots
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     repeat(3) { index ->
                         val dotAlpha by infiniteTransition.animateFloat(
-                            initialValue = 0.2f,
+                            initialValue = 0.3f,
                             targetValue = 0.8f,
                             animationSpec = infiniteRepeatable(
-                                animation = tween(800, delayMillis = index * 200, easing = FastOutSlowInEasing),
+                                animation = tween(600, delayMillis = index * 150, easing = FastOutSlowInEasing),
                                 repeatMode = RepeatMode.Reverse
                             ),
                             label = "dot$index"
                         )
                         Box(
                             modifier = Modifier
-                                .size(6.dp)
+                                .size(5.dp)
                                 .alpha(dotAlpha)
-                                .background(accentPrimary, RoundedCornerShape(3.dp))
+                                .background(contentTextColorMuted, RoundedCornerShape(2.5.dp))
                         )
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 
-                // Continue button with pulse and glow
-                Box(
-                    contentAlignment = Alignment.Center,
+                // Continue button with pulse
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .clickable { onNextChapter() }
-                        .padding(16.dp)
-                ) {
-                    // Glow behind button
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .alpha(glowAlpha * 0.6f)
-                            .graphicsLayer { 
-                                scaleX = pulseScale
-                                scaleY = pulseScale
-                            }
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        accentPrimary.copy(alpha = 0.3f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
-                    )
-                    
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.graphicsLayer { 
+                        .graphicsLayer { 
                             scaleX = pulseScale
                             scaleY = pulseScale
                         }
-                    ) {
-                        Text(
-                            text = "Continue Reading",
-                            color = contentTextColor.copy(alpha = 0.7f),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 1.sp
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Next chapter",
-                            tint = accentPrimary,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .graphicsLayer { translationY = floatOffset * 0.4f }
-                        )
-                    }
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = "Continue Reading",
+                        color = contentTextColorMuted,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Next chapter",
+                        tint = accentColor,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .graphicsLayer { translationY = floatOffset * 0.3f }
+                    )
                 }
             } else if (isLast) {
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(28.dp))
                 
-                // End of book indicator - premium style
+                // End of book indicator
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.graphicsLayer { translationY = floatOffset }
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Box(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .alpha(glowAlpha)
-                                .background(
-                                    Brush.radialGradient(
-                                        colors = listOf(
-                                            accentGold.copy(alpha = 0.3f),
-                                            Color.Transparent
-                                        )
-                                    )
-                                )
-                        )
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = accentGold,
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "THE END",
                         color = contentTextColorMuted,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 4.sp
+                        letterSpacing = 3.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "You've completed this story",
                         color = contentTextColorSubtle,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Light
+                        fontSize = 12.sp
                     )
                 }
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             
-            // Bottom decorative element
+            // Bottom decorative line
             Box(
                 modifier = Modifier
-                    .width(60.dp)
-                    .height(2.dp)
-                    .graphicsLayer { 
-                        scaleX = 0.5f + (glowAlpha * 1.5f)
-                    }
+                    .width(50.dp)
+                    .height(1.dp)
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                accentSecondary.copy(alpha = 0.6f),
-                                contentTextColor.copy(alpha = 0.5f),
-                                accentSecondary.copy(alpha = 0.6f),
+                                contentTextColorSubtle,
                                 Color.Transparent
                             )
-                        ),
-                        shape = RoundedCornerShape(1.dp)
+                        )
                     )
             )
         }
@@ -2034,7 +1851,7 @@ private fun ChapterEndSection(
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )

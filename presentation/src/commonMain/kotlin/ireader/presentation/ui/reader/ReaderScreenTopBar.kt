@@ -71,9 +71,9 @@ val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocaliz
                     maxLines = 1
                 )
             },
-            backgroundColor = MaterialTheme.colorScheme.surface.copy(ContentAlpha.disabled),
+            backgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
             contentColor = MaterialTheme.colorScheme.onSurface,
-            elevation = 0.dp,
+            elevation = 4.dp,
             navigationIcon = {
                 TopAppBarBackButton(
                     onClick = { onPopBackStack() }
