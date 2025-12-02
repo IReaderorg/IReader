@@ -75,36 +75,42 @@ compose.desktop {
     application {
         mainClass = "ireader.desktop.MainKt"
         
-        // Supabase configuration - Multi-endpoint support
+        // 7-Project Supabase configuration
         // Load from properties files with fallback chain: env vars -> local.properties -> config.properties
-        val supabaseUrl = getConfigProperty("SUPABASE_URL", "supabase.url")
-        val supabaseAnonKey = getConfigProperty("SUPABASE_ANON_KEY", "supabase.anon.key")
-        val supabaseBooksUrl = getConfigProperty("SUPABASE_BOOKS_URL", "supabase.books.url")
-        val supabaseBooksKey = getConfigProperty("SUPABASE_BOOKS_KEY", "supabase.books.key")
-        val supabaseProgressUrl = getConfigProperty("SUPABASE_PROGRESS_URL", "supabase.progress.url")
-        val supabaseProgressKey = getConfigProperty("SUPABASE_PROGRESS_KEY", "supabase.progress.key")
-        val supabaseReviewsUrl = getConfigProperty("SUPABASE_REVIEWS_URL", "supabase.reviews.url")
-        val supabaseReviewsKey = getConfigProperty("SUPABASE_REVIEWS_KEY", "supabase.reviews.key")
-        val supabaseCommunityUrl = getConfigProperty("SUPABASE_COMMUNITY_URL", "supabase.community.url")
-        val supabaseCommunityKey = getConfigProperty("SUPABASE_COMMUNITY_KEY", "supabase.community.key")
-        val supabaseLeaderboardUrl = getConfigProperty("SUPABASE_LEADERBOARD_URL", "supabase.leaderboard.url")
-        val supabaseLeaderboardKey = getConfigProperty("SUPABASE_LEADERBOARD_KEY", "supabase.leaderboard.key")
+        // Environment variable names match the GitHub Actions workflow secrets
+        val supabaseAuthUrl = getConfigProperty("SUPABASE_AUTH_URL", "supabase.auth.url")
+        val supabaseAuthKey = getConfigProperty("SUPABASE_AUTH_KEY", "supabase.auth.key")
+        val supabaseReadingUrl = getConfigProperty("SUPABASE_READING_URL", "supabase.reading.url")
+        val supabaseReadingKey = getConfigProperty("SUPABASE_READING_KEY", "supabase.reading.key")
+        val supabaseLibraryUrl = getConfigProperty("SUPABASE_LIBRARY_URL", "supabase.library.url")
+        val supabaseLibraryKey = getConfigProperty("SUPABASE_LIBRARY_KEY", "supabase.library.key")
+        val supabaseBookReviewsUrl = getConfigProperty("SUPABASE_BOOK_REVIEWS_URL", "supabase.book_reviews.url")
+        val supabaseBookReviewsKey = getConfigProperty("SUPABASE_BOOK_REVIEWS_KEY", "supabase.book_reviews.key")
+        val supabaseChapterReviewsUrl = getConfigProperty("SUPABASE_CHAPTER_REVIEWS_URL", "supabase.chapter_reviews.url")
+        val supabaseChapterReviewsKey = getConfigProperty("SUPABASE_CHAPTER_REVIEWS_KEY", "supabase.chapter_reviews.key")
+        val supabaseBadgesUrl = getConfigProperty("SUPABASE_BADGES_URL", "supabase.badges.url")
+        val supabaseBadgesKey = getConfigProperty("SUPABASE_BADGES_KEY", "supabase.badges.key")
+        val supabaseAnalyticsUrl = getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url")
+        val supabaseAnalyticsKey = getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key")
         
         jvmArgs += listOf(
             "-Xmx2G",  // Increase JVM memory
             "-noverify",  // Disable bytecode verification for dex2jar converted extensions
-            "-Dsupabase.url=$supabaseUrl",
-            "-Dsupabase.anon.key=$supabaseAnonKey",
-            "-Dsupabase.books.url=$supabaseBooksUrl",
-            "-Dsupabase.books.key=$supabaseBooksKey",
-            "-Dsupabase.progress.url=$supabaseProgressUrl",
-            "-Dsupabase.progress.key=$supabaseProgressKey",
-            "-Dsupabase.reviews.url=$supabaseReviewsUrl",
-            "-Dsupabase.reviews.key=$supabaseReviewsKey",
-            "-Dsupabase.community.url=$supabaseCommunityUrl",
-            "-Dsupabase.community.key=$supabaseCommunityKey",
-            "-Dsupabase.leaderboard.url=$supabaseLeaderboardUrl",
-            "-Dsupabase.leaderboard.key=$supabaseLeaderboardKey"
+            // 7-Project Supabase JVM args - these are baked into the packaged app
+            "-Dsupabase.auth.url=$supabaseAuthUrl",
+            "-Dsupabase.auth.key=$supabaseAuthKey",
+            "-Dsupabase.reading.url=$supabaseReadingUrl",
+            "-Dsupabase.reading.key=$supabaseReadingKey",
+            "-Dsupabase.library.url=$supabaseLibraryUrl",
+            "-Dsupabase.library.key=$supabaseLibraryKey",
+            "-Dsupabase.book_reviews.url=$supabaseBookReviewsUrl",
+            "-Dsupabase.book_reviews.key=$supabaseBookReviewsKey",
+            "-Dsupabase.chapter_reviews.url=$supabaseChapterReviewsUrl",
+            "-Dsupabase.chapter_reviews.key=$supabaseChapterReviewsKey",
+            "-Dsupabase.badges.url=$supabaseBadgesUrl",
+            "-Dsupabase.badges.key=$supabaseBadgesKey",
+            "-Dsupabase.analytics.url=$supabaseAnalyticsUrl",
+            "-Dsupabase.analytics.key=$supabaseAnalyticsKey"
         )
         
         nativeDistributions {
