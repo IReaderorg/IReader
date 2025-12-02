@@ -549,9 +549,7 @@ class LibraryViewModel(
     
     @Composable
     fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
-        val composableScope = rememberCoroutineScope()
-        
-        // Collect state reactively to get searchQuery updates
+        // Collect state reactively to get categories
         val currentState by state.collectAsState()
         val currentCategories = currentState.categories
         
@@ -562,7 +560,8 @@ class LibraryViewModel(
         }
 
         // Create a flow that combines library data with search query
-        val booksFlow = remember(sorting.value, filters.value, categoryId, showArchivedBooks.value) {
+        // Use produceState to properly handle the flow collection
+        return androidx.compose.runtime.produceState(initialValue = emptyList<BookItem>(), categoryId, sorting.value, filters.value, showArchivedBooks.value) {
             getLibraryCategory.subscribe(categoryId, sorting.value, filters.value, showArchivedBooks.value)
                 .map { list ->
                     _state.update { it.copy(books = list.toImmutableList()) }
@@ -578,11 +577,8 @@ class LibraryViewModel(
                     }
                 }
                 .onEach { loadedManga[categoryId] = it }
-                .onCompletion { loadedManga.remove(categoryId) }
-                .stateIn(composableScope, SharingStarted.WhileSubscribed(1000), emptyList())
+                .collect { value = it }
         }
-        
-        return booksFlow.collectAsState()
     }
     
     fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {

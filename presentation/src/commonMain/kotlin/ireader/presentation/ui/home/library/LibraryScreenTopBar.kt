@@ -27,11 +27,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -151,7 +153,16 @@ private fun RegularTopBar(
     // Collect state reactively
     val screenState by vm.state.collectAsState()
     val inSearchMode = screenState.inSearchMode
-    val searchQuery = screenState.searchQuery
+    
+    // Use local state for immediate text field updates
+    var localSearchQuery by remember { mutableStateOf("") }
+    
+    // Sync local state when search mode changes (e.g., when cleared)
+    LaunchedEffect(inSearchMode) {
+        if (!inSearchMode) {
+            localSearchQuery = ""
+        }
+    }
     
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -177,10 +188,10 @@ private fun RegularTopBar(
                     )
                 } else {
                     AppTextField(
-                        query = searchQuery ?: "",
+                        query = localSearchQuery,
                         onValueChange = { query ->
+                            localSearchQuery = query
                             vm.searchInLibrary(query)
-                            onSearch()
                         },
                         onConfirm = {
                             // Just hide keyboard, keep search active with results
