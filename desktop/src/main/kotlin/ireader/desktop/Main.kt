@@ -160,11 +160,22 @@ fun main() {
                         )
                     }
                     val coroutineScope = rememberCoroutineScope()
+                    
+                    // Get download service for notification overlay
+                    val downloadService: ireader.domain.services.common.DownloadService = koinInject()
+                    
                     AppTheme(coroutineScope) {
                         val navController = androidx.navigation.compose.rememberNavController()
                         ireader.presentation.core.ProvideNavigator(navController) {
-                            CommonNavHost(navController)
-
+                            // Wrap content with download notification overlay
+                            ireader.presentation.ui.component.DesktopDownloadNotificationOverlay(
+                                downloadService = downloadService,
+                                onNavigateToDownloads = {
+                                    navController.navigate(ireader.presentation.core.NavigationRoutes.downloader)
+                                }
+                            ) {
+                                CommonNavHost(navController)
+                            }
                         }
                     }
                 }
