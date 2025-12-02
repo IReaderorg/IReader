@@ -89,7 +89,6 @@ fun ExtensionScreen(
     ) {
         ExtensionContent(
             vm = vm,
-            state = vm,
             onClickCatalog = onClickCatalog,
             onClickInstall = onClickInstall,
             onClickTogglePinned = onClickTogglePinned,
@@ -132,7 +131,6 @@ fun SourceHeader(
 private fun ExtensionContent(
     pages: List<String>,
     modifier: Modifier = Modifier,
-    state: CatalogsState,
     onClickCatalog: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
     vm: ExtensionViewModel,
@@ -151,14 +149,13 @@ private fun ExtensionContent(
     }
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {
-            vm.currentPagerPage = pagerState.currentPage
+            vm.setCurrentPagerPage(pagerState.currentPage)
         }
     }
     ExtensionTabs(pagerState = pagerState, pages = pages)
     ExtensionPager(
         pagerState = pagerState,
         vm = vm,
-        state = vm,
         onClickCatalog = onClickCatalog,
         onClickInstall = onClickInstall,
         onClickTogglePinned = onClickTogglePinned,
@@ -176,7 +173,6 @@ private fun ExtensionPager(
     pagerState: androidx.compose.foundation.pager.PagerState,
     pages: List<String>,
     modifier: Modifier = Modifier,
-    state: CatalogsState,
     onClickCatalog: (Catalog) -> Unit,
     onClickTogglePinned: (Catalog) -> Unit,
     vm: ExtensionViewModel,

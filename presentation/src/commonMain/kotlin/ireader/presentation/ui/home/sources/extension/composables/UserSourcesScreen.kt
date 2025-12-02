@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,11 +71,11 @@ fun UserSourcesScreen(
         )
     }
 
-    val usersSources = remember {
-        derivedStateOf {
-            vm.userSources.mapIndexed { index, sourceUiModel ->
-                Pair((vm.userSources.size - index).toLong(), sourceUiModel)
-            }
+    val state by vm.state.collectAsState()
+    
+    val usersSources = remember(vm.userSources) {
+        vm.userSources.mapIndexed { index, sourceUiModel ->
+            Pair((vm.userSources.size - index).toLong(), sourceUiModel)
         }
     }
     LazyColumn(
@@ -86,9 +87,9 @@ fun UserSourcesScreen(
             ) {
         item(key = "language_filter") {
             LanguageChipGroup(
-                choices = vm.languageChoices,
-                selected = vm.selectedUserSourceLanguage,
-                onClick = { vm.selectedUserSourceLanguage = it },
+                choices = state.languageChoices,
+                selected = state.selectedUserSourceLanguage,
+                onClick = { vm.setUserSourceLanguage(it) },
                 isVisible = vm.showLanguageFilter.value,
                 onToggleVisibility = { visible ->
                     vm.uiPreferences.showLanguageFilter().set(visible)
@@ -97,7 +98,7 @@ fun UserSourcesScreen(
         }
 
         items(
-                items = usersSources.value,
+                items = usersSources,
                 contentType = {
                     return@items when (val uiModel = it.second) {
                         is SourceUiModel.Header -> "header"
@@ -124,7 +125,7 @@ fun UserSourcesScreen(
                 is SourceUiModel.Item -> CatalogItem(
                         modifier = Modifier.animateItem(),
                         catalog = catalogItem.source,
-                        installStep = if (catalogItem.source is CatalogInstalled) vm.installSteps[catalogItem.source.pkgName] else null,
+                        installStep = if (catalogItem.source is CatalogInstalled) state.installSteps[catalogItem.source.pkgName] else null,
                         onClick = { onClickCatalog(catalogItem.source) },
                         onPinToggle = { onClickTogglePinned(catalogItem.source) },
                         onShowDetails = onShowDetails?.let { { it(catalogItem.source) } },

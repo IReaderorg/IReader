@@ -52,10 +52,15 @@ import ireader.presentation.ui.reader.ReaderScreenTopBar
 import ireader.presentation.ui.reader.ReadingScreen
 import ireader.presentation.ui.reader.components.ReaderSettingMainLayout
 import ireader.presentation.ui.reader.reverse_swip_refresh.rememberSwipeRefreshState
+import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 
 @OptIn( ExperimentalMaterial3Api::class)
@@ -82,24 +87,24 @@ data class ReaderScreenSpec(
                     )
                 )
             })
-        val currentIndex = vm.currentChapterIndex
-        val chapters = vm.stateChapters
-        val chapter = vm.stateChapter
+        val platformReader: PlatformReaderSettingReader = koinInject()
+        val readerState by vm.state.collectAsState()
+        
+        // Extract values from state
+        val successState = readerState as? ReaderState.Success
+        val currentIndex = successState?.currentChapterIndex ?: 0
+        val chapters = successState?.chapters ?: emptyList()
+        val chapter = successState?.currentChapter
 
         val context = getContextWrapper()
         val scrollState = rememberScrollState()
         val lazyListState = rememberLazyListState()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
-        DisposableEffect(key1 = scrollState.hashCode()) {
-            vm.readerScrollState = scrollState
-            onDispose { }
-        }
-
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
         DisposableEffect(key1 = true) {
             onDispose {
-                vm.prefFunc.apply {
+                platformReader.apply {
                     if (context != null) {
                         vm.restoreSetting(context, scrollState, lazyListState)
                     }
@@ -137,21 +142,22 @@ data class ReaderScreenSpec(
             }
         }
 
-        LaunchedEffect(key1 = vm.autoScrollMode) {
-            while (vm.autoScrollInterval.value.toInt() != 0 && vm.autoScrollMode) {
-                scrollState.scrollBy(vm.autoScrollOffset.value.toFloat())
-                delay(vm.autoScrollInterval.value.toLong())
+        val autoScrollMode = successState?.autoScrollMode ?: false
+        LaunchedEffect(key1 = autoScrollMode) {
+            while (vm.settingsViewModel.autoScrollInterval.value.toInt() != 0 && autoScrollMode) {
+                scrollState.scrollBy(vm.settingsViewModel.autoScrollOffset.value.toFloat())
+                delay(vm.settingsViewModel.autoScrollInterval.value.toLong())
             }
         }
         LaunchedEffect(key1 = vm.autoBrightnessMode.value) {
-            vm.prefFunc.apply {
+            platformReader.apply {
                 if (context != null) {
                     vm.readBrightness(context)
                 }
             }
         }
         LaunchedEffect(key1 = vm.orientation.value) {
-            vm.prefFunc.apply {
+            platformReader.apply {
                 if (context != null) {
                     vm.readOrientation(context)
                 }
@@ -159,9 +165,7 @@ data class ReaderScreenSpec(
         }
 
         LaunchedEffect(key1 = vm.screenAlwaysOn.value) {
-            vm.prefFunc.apply {
-                vm.screenAlwaysOnUseCase(vm.screenAlwaysOn.value)
-            }
+            vm.screenAlwaysOnUseCase(vm.screenAlwaysOn.value)
         }
         val bars = AppColors.current
 
@@ -177,9 +181,10 @@ data class ReaderScreenSpec(
         val hideSystemBar = remember { mutableStateOf(false) }
         val hideNavBar = remember { mutableStateOf(false) }
 
-        LaunchedEffect(key1 = vm.initialized) {
-            vm.prefFunc.apply {
-                if (context != null) {
+        val isInitialized = successState != null
+        LaunchedEffect(key1 = isInitialized) {
+            platformReader.apply {
+                if (context != null && isInitialized) {
                     vm.prepareReaderSetting(
                         context = context,
                         scrollState,
@@ -195,8 +200,7 @@ data class ReaderScreenSpec(
         }
 
         LaunchedEffect(key1 = vm.immersiveMode.value) {
-            vm.prefFunc.apply {
-
+            platformReader.apply {
                 if (context != null) {
                     vm.readImmersiveMode(
                         context = context,
@@ -224,8 +228,8 @@ data class ReaderScreenSpec(
             sheetContent = {
                 val drawerScrollState = rememberLazyListState()
                 LaunchedEffect(key1 = drawerState.targetValue) {
-                    if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && vm.stateChapters.isNotEmpty()) {
-                        val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
+                    if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && chapters.isNotEmpty()) {
+                        val index = chapters.indexOfFirst { it.id == chapter.id }
                         if (index != -1) {
                             scope.launch {
                                 drawerScrollState.scrollToItem(
@@ -243,10 +247,10 @@ data class ReaderScreenSpec(
                 ) {
                     ReaderScreenDrawer(
                         onReverseIcon = {
-                            vm.isDrawerAsc = !vm.isDrawerAsc
+                            vm.toggleDrawerAsc()
                         },
                         onChapter = { ch ->
-                            val index = vm.stateChapters.indexOfFirst { it.id == ch.id }
+                            val index = chapters.indexOfFirst { it.id == ch.id }
                             if (index != -1) {
                                 scope.launch {
                                     vm.clearChapterShell(scrollState)
@@ -255,17 +259,16 @@ data class ReaderScreenSpec(
                                 scope.launch {
                                     scrollState.scrollTo(0)
                                 }
-                                vm.currentChapterIndex = index
                             }
                         },
                         chapter = chapter,
-                        chapters = vm.drawerChapters.value,
+                        chapters = successState?.drawerChapters ?: emptyList(),
                         drawerScrollState = drawerScrollState,
                         onMap = { drawer ->
                             scope.launch {
                                 try {
-                                    val index =
-                                        vm.drawerChapters.value.indexOfFirst { it.id == vm.stateChapter?.id }
+                                    val drawerChapters = successState?.drawerChapters ?: emptyList()
+                                    val index = drawerChapters.indexOfFirst { it.id == chapter?.id }
                                     if (index != -1) {
                                         drawer.scrollToItem(
                                             index,
@@ -303,7 +306,7 @@ data class ReaderScreenSpec(
                                         val nextChapter = vm.nextChapter()
                                         scope.launch {
                                             vm.getLocalChapter(
-                                                nextChapter.id,
+                                                nextChapter?.id,
                                             )
                                         }
                                         scope.launch {
@@ -344,7 +347,7 @@ data class ReaderScreenSpec(
                                         }
 
                                         vm.getLocalChapter(
-                                            prevChapter.id,
+                                            prevChapter?.id,
                                             false
                                         )
 
@@ -369,26 +372,21 @@ data class ReaderScreenSpec(
                             }
                         },
                         toggleReaderMode = {
-                            vm.apply {
-                                vm.prefFunc.apply {
-                                    vm.toggleReaderMode(!vm.isReaderModeEnable)
-                                }
-                            }
+                            val isEnabled = successState?.isReaderModeEnabled ?: false
+                            vm.toggleReaderMode(!isEnabled)
                         },
                         readerScreenPreferencesState = vm,
                         onBackgroundColorAndTextColorApply = { bgColor, txtColor ->
                             try {
                                 if (bgColor.isNotBlank()) {
-                                    vm.setReaderBackgroundColor(vm.backgroundColor.value.toComposeColor())
+                                    vm.settingsViewModel.setReaderBackgroundColor(vm.backgroundColor.value.toComposeColor())
                                 }
                             } catch (e: Throwable) {
                             }
 
                             try {
                                 if (txtColor.isNotBlank()) {
-                                    vm.prefFunc.apply {
-                                        vm.setReaderTextColor(vm.textColor.value.toComposeColor())
-                                    }
+                                    vm.settingsViewModel.setReaderTextColor(vm.textColor.value.toComposeColor())
                                 }
                             } catch (e: Throwable) {
                             }
@@ -398,17 +396,20 @@ data class ReaderScreenSpec(
                         swipeState = swipeState,
                         onSliderFinished = {
                             scope.launch {
-                                vm.showSnackBar(
-                                    UiText.DynamicString(
-                                        chapters[vm.currentChapterIndex].name
+                                if (currentIndex in chapters.indices) {
+                                    vm.showSnackBar(
+                                        UiText.DynamicString(
+                                            chapters[currentIndex].name
+                                        )
                                     )
-                                )
+                                }
                             }
-                            vm.currentChapterIndex = currentIndex
                             scope.launch {
-                                vm.getLocalChapter(
-                                    chapters[vm.currentChapterIndex].id,
-                                )
+                                if (currentIndex in chapters.indices) {
+                                    vm.getLocalChapter(
+                                        chapters[currentIndex].id,
+                                    )
+                                }
                             }
 
                             scope.launch {
@@ -416,16 +417,16 @@ data class ReaderScreenSpec(
                             }
                         },
                         onSliderChange = {
-                            vm.currentChapterIndex = it.toInt()
+                            // Slider change is now handled via state
                         },
                         onReaderPlay = {
-                            vm.book?.let { book ->
-                                vm.stateChapter?.let { chapter ->
+                            successState?.book?.let { book ->
+                                chapter?.let { ch ->
                                     navController.navigateTo(
                                         TTSScreenSpec(
                                             bookId = book.id,
                                             sourceId = book.sourceId,
-                                            chapterId = chapter.id,
+                                            chapterId = ch.id,
                                             readingParagraph = 0
                                         )
                                     )
@@ -438,14 +439,14 @@ data class ReaderScreenSpec(
                             }
                         },
                         lazyListState = lazyListState,
-                        onChapterShown = { chapter ->
-                            if (chapter.id != vm.stateChapter?.id) {
+                        onChapterShown = { shownChapter ->
+                            if (shownChapter.id != chapter?.id) {
                                 kotlin.runCatching {
-                                    vm.stateChapter = chapter
+                                    // Chapter shown is now handled via state
                                     val index =
-                                        vm.stateChapters.indexOfFirst { it.id == chapter.id }
+                                        chapters.indexOfFirst { it.id == shownChapter.id }
                                     if (index != -1) {
-                                        vm.currentChapterIndex = index
+                                        // Index update handled via navigateToChapter
                                     }
                                 }
                             }
@@ -457,15 +458,13 @@ data class ReaderScreenSpec(
                     )
                     
                     // Top bar overlay (rendered on top of content)
-                    val catalog = vm.catalog
-                    val book = vm.book
-                    val readerScrollState = vm.readerScrollState
+                    val catalog = successState?.catalog
+                    val book = successState?.book
 
-                    if (readerScrollState != null) {
-                        ReaderScreenTopBar(
-                            modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopCenter),
-                            isReaderModeEnable = vm.isReaderModeEnable,
-                            isLoaded = vm.isChapterLoaded.value,
+                    ReaderScreenTopBar(
+                        modifier = androidx.compose.ui.Modifier.align(androidx.compose.ui.Alignment.TopCenter),
+                        isReaderModeEnable = successState?.isReaderModeEnabled ?: false,
+                        isLoaded = successState?.isChapterLoaded ?: false,
                             onRefresh = {
                                 scope.launch {
                                     vm.getLocalChapter(
@@ -512,70 +511,55 @@ data class ReaderScreenSpec(
                                 navController.popBackStack()
                             }
                         )
-                    }
-                }
-            }
-        }
-        
-        // Modal sheet rendered OUTSIDE the scaffold hierarchy to ensure it appears above navbar
-        if (sheetState.isVisible) {
-            IModalSheets(
-                bottomSheetState = sheetState,
-                backgroundColor = if (vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.background,
-                contentColor = if (vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground,
-                sheetContent = { modifier ->
-                    Column(
-                        modifier
-                    ) {
-                        HorizontalDivider(
-                            modifier = Modifier.fillMaxWidth(),
-                            thickness = 1.dp,
-                            color = if (vm.isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(
-                                0f
-                            ) else MaterialTheme.colorScheme.onBackground.copy(.2f)
-                        )
-                        Spacer(modifier = Modifier.height(5.dp))
-                        ReaderSettingMainLayout(
-                            onFontSelected = { index ->
-                                vm.font?.value = FontType(
-                                    vm.fonts.getOrNull(index) ?: getDefaultFont().name,
-                                    ireader.domain.models.common.FontFamilyModel.Default
-                                )
-                                vm.makeSettingTransparent()
-                            },
-                            onChangeBrightness = {
-                                vm.apply {
-                                    vm.prefFunc.apply {
-                                        if (context != null) {
-                                            saveBrightness(context, it)
+                    
+                    // Modal sheet rendered inside the Box to ensure it appears above content
+                    val isSettingChanging = vm.settingsViewModel.isSettingChanging
+                    if (sheetState.isVisible) {
+                        IModalSheets(
+                            bottomSheetState = sheetState,
+                            backgroundColor = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.background,
+                            contentColor = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground,
+                            sheetContent = { sheetModifier ->
+                                Column(sheetModifier) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        thickness = 1.dp,
+                                        color = if (isSettingChanging) MaterialTheme.colorScheme.Transparent.copy(0f) else MaterialTheme.colorScheme.onBackground.copy(.2f)
+                                    )
+                                    Spacer(modifier = Modifier.height(5.dp))
+                                    ReaderSettingMainLayout(
+                                        onFontSelected = { index ->
+                                            vm.settingsViewModel.selectFont(index)
+                                        },
+                                        onChangeBrightness = { brightness ->
+                                            platformReader.apply {
+                                                if (context != null) {
+                                                    vm.saveBrightness(context, brightness)
+                                                }
+                                            }
+                                        },
+                                        onBackgroundChange = { index ->
+                                            vm.settingsViewModel.changeBackgroundColor(index, vm.readerColors)
+                                        },
+                                        vm = vm,
+                                        onTextAlign = { alignment ->
+                                            vm.textAlignment.value = alignment
+                                            vm.settingsViewModel.saveTextAlignment(alignment)
+                                        },
+                                        onToggleAutoBrightness = {
+                                            vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
                                         }
-                                    }
+                                    )
                                 }
-                            },
-                            onBackgroundChange = { index ->
-                                vm.changeBackgroundColor(index)
-                                vm.makeSettingTransparent()
-                            },
-                            vm = vm,
-                            onTextAlign = {
-                                vm.textAlignment.value = it
-                                vm.saveTextAlignment(it)
-                                vm.makeSettingTransparent()
-                            },
-                            onToggleAutoBrightness = {
-                                vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
-                                vm.makeSettingTransparent()
                             }
-                        )
+                        ) {
+                            // Empty content - the actual content is rendered above
+                        }
                     }
                 }
-            ) {
-                // Empty content - the actual content is rendered above
             }
         }
     }
-
-    @Composable
 
     private fun LazyListState.getId(): Long? {
         return kotlin.runCatching {

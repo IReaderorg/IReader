@@ -8,14 +8,11 @@ import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
-import ireader.presentation.ui.home.sources.browse.BrowseSettingsViewModel
-import ireader.presentation.ui.home.sources.extension.CatalogsStateImpl
+import ireader.presentation.ui.home.sources.settings.BrowseSettingsViewModel
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchStateImpl
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
-import ireader.presentation.ui.reader.viewmodel.ReaderScreenPreferencesStateImpl
-import ireader.presentation.ui.reader.viewmodel.ReaderScreenStateImpl
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderStatisticsViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderTTSViewModel
@@ -51,7 +48,6 @@ val PresentationModules = module {
 
 
     // State objects removed - ViewModels now use Mihon-style MutableStateFlow internally
-    factory<CatalogsStateImpl> { CatalogsStateImpl() }
     factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
 
@@ -109,11 +105,11 @@ val PresentationModules = module {
             localizeHelper = get()
         )
     }
-    factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
+    factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     
     // Browse Settings ViewModel
-    factory { BrowseSettingsViewModel(get()) }
+    factory { BrowseSettingsViewModel(get(), get()) }
     
     // Migration ViewModel
     factory { ireader.presentation.ui.home.sources.migration.MigrationViewModel(get(), get(), get()) }
@@ -207,34 +203,54 @@ val PresentationModules = module {
     }
 
 
-    factory <ReaderScreenStateImpl> { ReaderScreenStateImpl() }
-    factory <ReaderScreenPreferencesStateImpl> { ReaderScreenPreferencesStateImpl() }
-
     // Reader sub-viewmodels
+    factory { ireader.presentation.ui.reader.viewmodel.ReaderSettingsViewModel(get(), get(), get(), get(), get(), get()) }
     factory { ReaderTranslationViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ReaderTTSViewModel(get(), get()) }
     factory { ReaderStatisticsViewModel(get(), get()) }
 
-    factory< ReaderScreenViewModel>  { (params: ReaderScreenViewModel.Param) -> ReaderScreenViewModel(
-        get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
-        get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),
-        // Translation use cases
-        get(),get(),get(),get(),get(),get(),get(),get(),
-        // Statistics use case
-        get(),
-        // Report use case
-        get(),
-        // Font management use case
-        get(),
-        // Font use case
-        get(),
-        // Chapter health
-        get(),get(),get(),
-        // Params
-        params,
-        // Platform services and sub-viewmodels
-        get(),get(),get(),get(),get(),
-    ) }
+    factory<ReaderScreenViewModel> { (params: ReaderScreenViewModel.Param) -> 
+        ReaderScreenViewModel(
+            getBookUseCases = get(),
+            getChapterUseCase = get(),
+            remoteUseCases = get(),
+            historyUseCase = get(),
+            getLocalCatalog = get(),
+            readerUseCases = get(),
+            insertUseCases = get(),
+            readerPreferences = get(),
+            androidUiPreferences = get(),
+            platformUiPreferences = get(),
+            uiPreferences = get(),
+            screenAlwaysOnUseCase = get(),
+            webViewManger = get(),
+            readerThemeRepository = get(),
+            bookMarkChapterUseCase = get(),
+            translationEnginesManager = get(),
+            preloadChapterUseCase = get(),
+            translateChapterWithStorageUseCase = get(),
+            translateParagraphUseCase = get(),
+            getTranslatedChapterUseCase = get(),
+            getGlossaryByBookIdUseCase = get(),
+            saveGlossaryEntryUseCase = get(),
+            deleteGlossaryEntryUseCase = get(),
+            exportGlossaryUseCase = get(),
+            importGlossaryUseCase = get(),
+            trackReadingProgressUseCase = get(),
+            reportBrokenChapterUseCase = get(),
+            fontManagementUseCase = get(),
+            fontUseCase = get(),
+            chapterHealthChecker = get(),
+            chapterHealthRepository = get(),
+            autoRepairChapterUseCase = get(),
+            params = params,
+            systemInteractionService = get(),
+            settingsViewModel = get(),
+            translationViewModel = get(),
+            ttsViewModel = get(),
+            statisticsViewModel = get(),
+        )
+    }
 
     // New StateScreenModel implementations following Mihon's pattern
     includes(screenModelModule)

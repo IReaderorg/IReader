@@ -10,10 +10,16 @@ import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import kotlinx.coroutines.CancellationException
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.util.concurrent.TimeoutException
 fun exceptionHandler(e: Throwable): UiText? {
+    // Silently ignore cancellation exceptions - these are expected during navigation
+    if (e is CancellationException || e is java.util.concurrent.CancellationException) {
+        return null
+    }
+    
     Log.error(e, "exceptionHandler catch an exception")
 
     return when (e) {
@@ -24,6 +30,9 @@ fun exceptionHandler(e: Throwable): UiText? {
             UiText.MStringResource(Res.string.noInternetError)
         }
         is java.util.concurrent.CancellationException -> {
+            null
+        }
+        is CancellationException -> {
             null
         }
         is org.jsoup.select.Selector.SelectorParseException -> {

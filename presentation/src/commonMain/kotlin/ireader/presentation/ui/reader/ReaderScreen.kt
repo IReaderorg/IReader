@@ -58,9 +58,6 @@ import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
-import ireader.presentation.ui.reader.viewmodel.dismissRepairBanner
-import ireader.presentation.ui.reader.viewmodel.dismissRepairSuccessBanner
-import ireader.presentation.ui.reader.viewmodel.repairChapter
 import kotlinx.coroutines.launch
 
 /**
@@ -341,7 +338,7 @@ private fun ReadingScreenContent(
                                 visible = vm.showRepairBanner,
                                 message = vm.chapterBreakReason ?: "This chapter appears to be broken",
                                 isRepairing = vm.isRepairing,
-                                onRepairClick = { vm.repairChapter(vm.autoRepairChapterUseCase) },
+                                onRepairClick = { vm.repairChapter() },
                                 onDismiss = { vm.dismissRepairBanner() },
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)

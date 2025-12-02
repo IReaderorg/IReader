@@ -281,6 +281,12 @@ class ExploreViewModel(
      * Process error result
      */
     private fun processErrorResult(error: Throwable) {
+        // Silently ignore cancellation exceptions - these are expected during navigation
+        if (error is kotlinx.coroutines.CancellationException || 
+            error is java.util.concurrent.CancellationException) {
+            return
+        }
+        
         Log.error { "[ExploreViewModel] Error loading books: ${error.message}" }
         
         val errorText = exceptionHandler(error)
@@ -337,21 +343,27 @@ class ExploreViewModel(
     }
     
     private fun exitSearchMode() {
-        val query = _state.value.searchQuery
+        // Clear search state and reset to default listing
+        seenBooks.clear()
+        
+        // Get the default listing from source
+        val defaultListing = source?.getListings()?.firstOrNull()
+        
         _state.update { 
             it.copy(
                 searchQuery = "",
+                appliedFilters = null,
+                currentListing = defaultListing,
                 isLoading = false,
-                error = null
+                error = null,
+                endReached = false,
+                page = 1,
+                books = emptyList()
             )
         }
         
-        if (!query.isNullOrBlank()) {
-            _state.update { 
-                it.copy(appliedFilters = listOf(Filter.Title().apply { this.value = query }))
-            }
-            loadItems()
-        }
+        // Reload with default listing
+        loadItems(reset = true)
     }
     
     /**

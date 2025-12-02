@@ -42,6 +42,9 @@ class ReaderSettingsViewModel(
     val autoBrightnessMode = readerPreferences.autoBrightness().asState()
     var showBrightnessControl by mutableStateOf(false)
     
+    // Setting change indicator for UI transparency effects
+    var isSettingChanging by mutableStateOf(false)
+    
     // Font settings - debounced for sliders
     val fontSize = readerPreferences.fontSize().asStateDebounced()
     val font = platformUiPreferences.font()?.asState()
@@ -192,6 +195,17 @@ class ReaderSettingsViewModel(
      */
     fun toggleFontSizeAdjuster() {
         showFontSizeAdjuster = !showFontSizeAdjuster
+    }
+    
+    /**
+     * Select a font by index from the fonts list
+     */
+    fun selectFont(index: Int) {
+        val fontName = fonts.getOrNull(index) ?: return
+        font?.value = ireader.domain.preferences.models.FontType(
+            name = fontName,
+            fontFamily = ireader.domain.models.common.FontFamilyModel.Custom(fontName)
+        )
     }
     
     /**

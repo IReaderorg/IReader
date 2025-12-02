@@ -45,7 +45,6 @@ import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.reader.viewmodel.ReaderScreenState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +53,7 @@ fun ReaderScreenTopBar(
     modifier: Modifier = Modifier,
     isReaderModeEnable: Boolean,
     vm: ReaderScreenViewModel,
-    state: ReaderScreenState,
+    state: ReaderScreenViewModel, // Using ViewModel directly for state access
     chapter: Chapter?,
     onRefresh: () -> Unit,
     onWebView: () -> Unit,

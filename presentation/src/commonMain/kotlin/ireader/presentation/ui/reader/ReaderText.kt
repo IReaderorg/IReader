@@ -91,7 +91,6 @@ import ireader.presentation.ui.reader.components.SelectableTranslatableText
 import ireader.presentation.ui.reader.reverse_swip_refresh.ISwipeRefreshIndicator
 import ireader.presentation.ui.reader.reverse_swip_refresh.MultiSwipeRefresh
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
-import ireader.presentation.ui.reader.viewmodel.ReaderScreenState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
 
@@ -99,7 +98,7 @@ import kotlinx.coroutines.launch
 fun ReaderText(
     modifier: Modifier = Modifier,
     vm: ReaderScreenViewModel,
-    uiState: ReaderScreenState,
+    uiState: ReaderScreenViewModel, // Using ViewModel directly for state access
     onNext: () -> Unit,
     onPrev: () -> Unit,
     swipeState: SwipeRefreshState,
@@ -950,11 +949,7 @@ private fun ContinuesReaderPage(
     LaunchedEffect(key1 = lastChapterId) {
         lastChapterId?.let { chapter ->
             onChapterShown(chapter)
-            // Update the current chapter index in ViewModel
-            val index = vm.stateChapters.indexOfFirst { it.id == chapter.id }
-            if (index != -1 && index != vm.currentChapterIndex) {
-                vm.currentChapterIndex = index
-            }
+            // Chapter index is managed by the ViewModel state
         }
     }
     

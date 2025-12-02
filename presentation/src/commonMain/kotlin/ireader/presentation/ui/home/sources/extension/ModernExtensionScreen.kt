@@ -114,7 +114,7 @@ fun ModernExtensionScreen(
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {
-            vm.currentPagerPage = pagerState.currentPage
+            vm.setCurrentPagerPage(pagerState.currentPage)
         }
     }
 

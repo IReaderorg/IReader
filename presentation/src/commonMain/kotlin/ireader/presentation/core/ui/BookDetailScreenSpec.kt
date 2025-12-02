@@ -53,7 +53,7 @@ import ireader.presentation.ui.book.viewmodel.BookDetailEvent
 import ireader.presentation.ui.book.viewmodel.BookDetailState
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.component.LoadingScreen
+import ireader.presentation.ui.book.components.BookDetailShimmerLoading
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.utils.isScrolledToEnd
@@ -157,7 +157,7 @@ data class BookDetailScreenSpec constructor(
         
         when (val s = state) {
             BookDetailState.Loading -> {
-                LoadingScreen()
+                BookDetailShimmerLoading()
             }
             
             is BookDetailState.Success -> {

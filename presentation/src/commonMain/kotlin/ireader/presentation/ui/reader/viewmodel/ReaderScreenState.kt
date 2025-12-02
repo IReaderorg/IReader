@@ -1,174 +1,183 @@
 package ireader.presentation.ui.reader.viewmodel
 
-import androidx.compose.foundation.ScrollState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import ireader.core.source.Source
 import ireader.core.source.model.Page
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
+import ireader.i18n.UiText
 
-
-open class ReaderScreenStateImpl: ReaderScreenState {
-    override var isLoading by mutableStateOf<Boolean>(false)
-
-    override var readerScrollState by mutableStateOf<ScrollState?>(null)
-    override var isDrawerAsc by mutableStateOf<Boolean>(true)
-    override var drawerChapters: State<List<Chapter>> = derivedStateOf { if (isDrawerAsc) stateChapters else stateChapters.reversed() }
-    override var isReaderModeEnable by mutableStateOf<Boolean>(true)
-    override var isSettingModeEnable by mutableStateOf<Boolean>(false)
-    override var isMainBottomModeEnable by mutableStateOf<Boolean>(false)
-    override var showSettingsBottomSheet by mutableStateOf<Boolean>(false)
-    override var currentChapterIndex: Int by mutableStateOf<Int>(0)
-    override var maxScrollstate: Int by mutableStateOf<Int>(0)
-    override val source: Source? by derivedStateOf { catalog?.source }
-    override var catalog: CatalogLocal? by mutableStateOf<CatalogLocal?>(null)
-    override var stateChapters: List<Chapter> by mutableStateOf<List<Chapter>>(emptyList())
-    override var stateChapter: Chapter? by mutableStateOf<Chapter?>(null)
-    override var isChapterLoaded: State<Boolean> = derivedStateOf { stateChapter?.isEmpty() == false }
-
-    override var book: Book? by mutableStateOf<Book?>(null)
-
-    override val chapterShell: SnapshotStateList<Chapter> = mutableStateListOf()
-    override val stateContent: List<Page> by derivedStateOf { stateChapter?.content  ?: emptyList() }
+/**
+ * Sealed interface representing the overall reader screen state.
+ * 
+ * This provides clear Loading/Success/Error states for the reader screen.
+ */
+sealed interface ReaderState {
     
-    // Function to get content (will be overridden in ViewModel to support translation)
-    override fun getCurrentContent(): List<Page> = stateContent
+    @Immutable
+    data object Loading : ReaderState
+    
+    @Immutable
+    data class Success(
+        // Book and chapter data
+        val book: Book,
+        val currentChapter: Chapter,
+        val chapters: List<Chapter>,
+        val catalog: CatalogLocal?,
+        
+        // Content
+        val content: List<Page> = emptyList(),
+        val translatedContent: List<Page> = emptyList(),
+        
+        // Navigation state
+        val currentChapterIndex: Int = 0,
+        val chapterShell: List<Chapter> = emptyList(),
+        
+        // Loading states
+        val isLoadingContent: Boolean = false,
+        val isRefreshing: Boolean = false,
+        val isPreloading: Boolean = false,
+        val isNavigating: Boolean = false,
+        
+        // Translation state
+        val isTranslating: Boolean = false,
+        val translationProgress: Float = 0f,
+        val hasTranslation: Boolean = false,
+        val showTranslatedContent: Boolean = false,
+        
+        // UI state
+        val isReaderModeEnabled: Boolean = true,
+        val isSettingModeEnabled: Boolean = false,
+        val isMainBottomModeEnabled: Boolean = false,
+        val showSettingsBottomSheet: Boolean = false,
+        val isDrawerAsc: Boolean = true,
+        
+        // Find in chapter
+        val showFindInChapter: Boolean = false,
+        val findQuery: String = "",
+        val findMatches: List<IntRange> = emptyList(),
+        val currentFindMatchIndex: Int = 0,
+        
+        // Chapter health
+        val isChapterBroken: Boolean = false,
+        val chapterBreakReason: String? = null,
+        val showRepairBanner: Boolean = false,
+        val isRepairing: Boolean = false,
+        val showRepairSuccess: Boolean = false,
+        val repairSuccessSourceName: String? = null,
+        
+        // Reading time estimation
+        val showReadingTime: Boolean = false,
+        val estimatedReadingMinutes: Int = 0,
+        val wordsRemaining: Int = 0,
+        val totalWords: Int = 0,
+        
+        // Dialogs
+        val showReportDialog: Boolean = false,
+        val showParagraphTranslationDialog: Boolean = false,
+        val paragraphToTranslate: String = "",
+        val translatedParagraph: String? = null,
+        val isParagraphTranslating: Boolean = false,
+        val paragraphTranslationError: String? = null,
+        val showTranslationApiKeyPrompt: Boolean = false,
+        val showReadingBreakDialog: Boolean = false,
+        
+        // Auto scroll
+        val autoScrollMode: Boolean = false,
+        
+        // Quick controls
+        val showBrightnessControl: Boolean = false,
+        val showFontSizeAdjuster: Boolean = false,
+        val showFontPicker: Boolean = false,
+    ) : ReaderState {
+        
+        /**
+         * Get the source from catalog
+         */
+        @Stable
+        val source: Source?
+            get() = catalog?.source
+        
+        /**
+         * Check if chapter has content
+         */
+        @Stable
+        val isChapterLoaded: Boolean
+            get() = content.isNotEmpty()
+        
+        /**
+         * Get drawer chapters (respects sort order)
+         */
+        @Stable
+        val drawerChapters: List<Chapter>
+            get() = if (isDrawerAsc) chapters else chapters.reversed()
+        
+        /**
+         * Get current content (original or translated based on preference)
+         */
+        @Stable
+        val currentContent: List<Page>
+            get() = if (showTranslatedContent && hasTranslation && translatedContent.isNotEmpty()) {
+                translatedContent
+            } else {
+                content
+            }
+        
+        /**
+         * Check if initial loading (no content yet)
+         */
+        @Stable
+        val isInitialLoading: Boolean
+            get() = isLoadingContent && content.isEmpty()
+    }
+    
+    @Immutable
+    data class Error(
+        val message: UiText,
+        val bookId: Long? = null,
+        val chapterId: Long? = null,
+    ) : ReaderState
 }
 
-interface ReaderScreenState {
-    var isLoading: Boolean
-    var isDrawerAsc: Boolean
-    var drawerChapters: State<List<Chapter>>
+/**
+ * Reader preferences state (separate from main state for performance)
+ */
+@Immutable
+data class ReaderPreferencesState(
+    val isAsc: Boolean = true,
+    val isChaptersReversed: Boolean = false,
+    val isChapterReversingInProgress: Boolean = false,
+    val initialized: Boolean = false,
+    val searchQuery: String = "",
+    val currentViewingSearchResultIndex: Int = 0,
+    val expandTopMenu: Boolean = false,
+    val scrollMode: Boolean = false,
+)
 
-    var isReaderModeEnable: Boolean
-
-    var isSettingModeEnable: Boolean
-    var isMainBottomModeEnable: Boolean
-    var showSettingsBottomSheet: Boolean
-
-    var currentChapterIndex: Int
-    var maxScrollstate: Int
-    val source: Source?
-    var catalog: CatalogLocal?
-    var stateChapters: List<Chapter>
-    var stateChapter: Chapter?
-    var isChapterLoaded: State<Boolean>
-    var book: Book?
-    val stateContent: List<Page>
-    val chapterShell: SnapshotStateList<Chapter>
-    
-    // Function to get content (can be overridden to support translation)
-    fun getCurrentContent(): List<Page>
-
-    var readerScrollState: ScrollState?
+/**
+ * Sealed interface for reader dialogs
+ */
+sealed interface ReaderDialog {
+    data object None : ReaderDialog
+    data object Settings : ReaderDialog
+    data object ChapterList : ReaderDialog
+    data object Glossary : ReaderDialog
+    data object ReportBroken : ReaderDialog
+    data class ParagraphTranslation(val paragraph: String) : ReaderDialog
+    data object TranslationApiKeyPrompt : ReaderDialog
+    data object ReadingBreak : ReaderDialog
+    data object ChapterReviews : ReaderDialog
 }
 
-open class ReaderScreenPreferencesStateImpl() : ReaderScreenPreferencesState {
-    override var isAsc by mutableStateOf<Boolean>(true)
-
-    override var isChaptersReversed by mutableStateOf<Boolean>(false)
-
-    override var isChapterReversingInProgress by mutableStateOf<Boolean>(false)
-
-    override var autoScrollMode: Boolean by mutableStateOf<Boolean>(false)
-
-    override var initialized by mutableStateOf<Boolean>(false)
-
-    override var searchQuery by mutableStateOf<String>("")
-    override var currentViewingSearchResultIndex by mutableStateOf<Int>(0)
-    override var expandTopMenu by mutableStateOf<Boolean>(false)
-
-    override var scrollMode by mutableStateOf<Boolean>(false)
-    
-    // Find in chapter state
-    override var showFindInChapter by mutableStateOf<Boolean>(false)
-    override var findQuery by mutableStateOf<String>("")
-    override var findMatches by mutableStateOf<List<IntRange>>(emptyList())
-    override var currentFindMatchIndex by mutableStateOf<Int>(0)
-    
-    // Report broken chapter state
-    override var showReportDialog by mutableStateOf<Boolean>(false)
-    
-    // Reading time estimation state
-    override var showReadingTime by mutableStateOf<Boolean>(false)
-    override var estimatedReadingMinutes by mutableStateOf<Int>(0)
-    override var wordsRemaining by mutableStateOf<Int>(0)
-    override var totalWords by mutableStateOf<Int>(0)
-    
-    // Paragraph translation state
-    override var showParagraphTranslationDialog by mutableStateOf<Boolean>(false)
-    override var paragraphToTranslate by mutableStateOf<String>("")
-    override var translatedParagraph by mutableStateOf<String?>(null)
-    override var isParagraphTranslating by mutableStateOf<Boolean>(false)
-    override var paragraphTranslationError by mutableStateOf<String?>(null)
-    override var showTranslationApiKeyPrompt by mutableStateOf<Boolean>(false)
-    
-    // Reading break reminder state
-    override var showReadingBreakDialog by mutableStateOf<Boolean>(false)
-    
-    // Chapter health and repair state
-    override var isChapterBroken by mutableStateOf<Boolean>(false)
-    override var chapterBreakReason by mutableStateOf<String?>(null)
-    override var showRepairBanner by mutableStateOf<Boolean>(false)
-    override var isRepairing by mutableStateOf<Boolean>(false)
-    override var showRepairSuccess by mutableStateOf<Boolean>(false)
-    override var repairSuccessSourceName by mutableStateOf<String?>(null)
-}
-
-interface ReaderScreenPreferencesState {
-    var isAsc: Boolean
-
-    var isChaptersReversed: Boolean
-    var isChapterReversingInProgress: Boolean
-
-    var autoScrollMode: Boolean
-
-    var initialized: Boolean
-    var expandTopMenu: Boolean
-    var searchQuery: String
-    var currentViewingSearchResultIndex: Int
-
-    var scrollMode: Boolean
-    
-    // Find in chapter state
-    var showFindInChapter: Boolean
-    var findQuery: String
-    var findMatches: List<IntRange>
-    var currentFindMatchIndex: Int
-    
-    // Report broken chapter state
-    var showReportDialog: Boolean
-    
-    // Reading time estimation state
-    var showReadingTime: Boolean
-    var estimatedReadingMinutes: Int
-    var wordsRemaining: Int
-    var totalWords: Int
-    
-    // Paragraph translation state
-    var showParagraphTranslationDialog: Boolean
-    var paragraphToTranslate: String
-    var translatedParagraph: String?
-    var isParagraphTranslating: Boolean
-    var paragraphTranslationError: String?
-    var showTranslationApiKeyPrompt: Boolean
-    
-    // Reading break reminder state
-    var showReadingBreakDialog: Boolean
-    
-    // Chapter health and repair state
-    var isChapterBroken: Boolean
-    var chapterBreakReason: String?
-    var showRepairBanner: Boolean
-    var isRepairing: Boolean
-    var showRepairSuccess: Boolean
-    var repairSuccessSourceName: String?
-    //  val isVerticalScrolling : Boolean
+/**
+ * Sealed class for reader events (one-time events)
+ */
+sealed class ReaderEvent {
+    data class ShowSnackbar(val message: UiText) : ReaderEvent()
+    data class NavigateToChapter(val chapterId: Long) : ReaderEvent()
+    data object NavigateBack : ReaderEvent()
+    data class ScrollToPosition(val position: Int) : ReaderEvent()
+    data class ScrollToMatch(val matchIndex: Int) : ReaderEvent()
 }

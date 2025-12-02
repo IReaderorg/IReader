@@ -64,42 +64,34 @@ fun ModernRemoteSourcesScreen(
         )
     }
 
-    val allCatalogs = remember {
-        derivedStateOf { vm.pinnedCatalogs + vm.unpinnedCatalogs }
+    val state by vm.state.collectAsState()
+    
+    val allCatalogs = remember(state.pinnedCatalogs, state.unpinnedCatalogs) {
+        state.pinnedCatalogs + state.unpinnedCatalogs
     }
     
-    val remotesCatalogs = remember {
-        derivedStateOf { vm.remoteCatalogs }
+    val installed = remember(allCatalogs) {
+        listOf(SourceUiModel.Header(SourceKeys.INSTALLED_KEY)) + 
+        allCatalogs.map { SourceUiModel.Item(it, SourceState.Installed) }
     }
     
-    val installed = remember {
-        derivedStateOf {
-            listOf(SourceUiModel.Header(SourceKeys.INSTALLED_KEY)) + 
-            allCatalogs.value.map { SourceUiModel.Item(it, SourceState.Installed) }
-        }
-    }
-    
-    val remotes = remember {
-        derivedStateOf {
-            val groupedByLanguage = remotesCatalogs.value.groupBy { it.lang }
-            val sortedGroups = groupedByLanguage.entries.sortedBy { it.key }
-            
-            buildList {
-                sortedGroups.forEach { (lang, catalogs) ->
-                    add(SourceUiModel.Header(lang))
-                    addAll(catalogs.sortedBy { it.name }.map { 
-                        SourceUiModel.Item(it, SourceState.Remote) 
-                    })
-                }
+    val remotes = remember(state.remoteCatalogs) {
+        val groupedByLanguage = state.remoteCatalogs.groupBy { it.lang }
+        val sortedGroups = groupedByLanguage.entries.sortedBy { it.key }
+        
+        buildList {
+            sortedGroups.forEach { (lang, catalogs) ->
+                add(SourceUiModel.Header(lang))
+                addAll(catalogs.sortedBy { it.name }.map { 
+                    SourceUiModel.Item(it, SourceState.Remote) 
+                })
             }
         }
     }
 
-    val remoteSources = remember {
-        derivedStateOf {
-            (installed.value + remotes.value).mapIndexed { index, sourceUiModel -> 
-                Pair(index, sourceUiModel) 
-            }
+    val remoteSources = remember(installed, remotes) {
+        (installed + remotes).mapIndexed { index, sourceUiModel -> 
+            Pair(index, sourceUiModel) 
         }
     }
     
@@ -113,28 +105,28 @@ fun ModernRemoteSourcesScreen(
         verticalArrangement = Arrangement.Top,
     ) {
         items(
-            items = remoteSources.value,
-            contentType = {
-                return@items when (it.second) {
+            items = remoteSources,
+            contentType = { pair ->
+                when (pair.second) {
                     is SourceUiModel.Header -> "header"
                     is SourceUiModel.Item -> "item"
                 }
             },
-            key = {
-                when (val catalog: SourceUiModel = it.second) {
-                    is SourceUiModel.Header -> it.second.hashCode()
+            key = { pair ->
+                when (val catalog: SourceUiModel = pair.second) {
+                    is SourceUiModel.Header -> pair.second.hashCode()
                     is SourceUiModel.Item -> catalog.source.key(
-                        catalog.state, it.first.toLong(), vm.defaultRepo.value
+                        catalog.state, pair.first.toLong(), vm.defaultRepo.value
                     )
                 }
             },
-        ) { catalog ->
-            val catalogItem = remember { catalog.second }
+        ) { pair ->
+            val catalogItem = pair.second
             
             when (catalogItem) {
                 is SourceUiModel.Header -> {
                     CleanSourceHeader(
-                        modifier = Modifier.animateItem(),
+                        modifier = Modifier,
                         language = catalogItem.language,
                     )
                 }
@@ -142,15 +134,15 @@ fun ModernRemoteSourcesScreen(
                     when (catalogItem.source) {
                         is CatalogLocal -> {
                             CleanCatalogCard(
-                                modifier = Modifier.animateItem(),
+                                modifier = Modifier,
                                 catalog = catalogItem.source,
                                 installStep = if (catalogItem.source is CatalogInstalled) 
-                                    vm.installSteps[catalogItem.source.pkgName] else null,
+                                    state.installSteps[catalogItem.source.pkgName] else null,
                                 onInstall = { onClickInstall(catalogItem.source) }
                                     .takeIf { catalogItem.source.hasUpdate },
                                 onUninstall = { onClickUninstall(catalogItem.source) }
                                     .takeIf { catalogItem.source is CatalogInstalled },
-                                onCancelInstaller = onCancelInstaller?.let { { it(catalogItem.source) } },
+                                onCancelInstaller = onCancelInstaller?.let { cancel -> { cancel(catalogItem.source) } },
                                 sourceStatus = vm.getSourceStatus(catalogItem.source.sourceId),
                                 onLogin = {
                                     loginSourceId = catalogItem.source.sourceId
@@ -161,12 +153,12 @@ fun ModernRemoteSourcesScreen(
                         }
                         is CatalogRemote -> {
                             CleanCatalogCard(
-                                modifier = Modifier.animateItem(),
+                                modifier = Modifier,
                                 catalog = catalogItem.source,
-                                installStep = vm.installSteps[catalogItem.source.pkgName],
+                                installStep = state.installSteps[catalogItem.source.pkgName],
                                 onInstall = { onClickInstall(catalogItem.source) },
                                 onClick = { onClickInstall(catalogItem.source) },
-                                onCancelInstaller = onCancelInstaller?.let { { it(catalogItem.source) } },
+                                onCancelInstaller = onCancelInstaller?.let { cancel -> { cancel(catalogItem.source) } },
                             )
                         }
                     }

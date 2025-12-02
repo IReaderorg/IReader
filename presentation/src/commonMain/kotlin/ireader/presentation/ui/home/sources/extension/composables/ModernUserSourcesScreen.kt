@@ -67,11 +67,11 @@ fun ModernUserSourcesScreen(
         )
     }
 
-    val usersSources = remember {
-        derivedStateOf {
-            vm.userSources.mapIndexed { index, sourceUiModel ->
-                Pair((vm.userSources.size - index).toLong(), sourceUiModel)
-            }
+    val state by vm.state.collectAsState()
+    
+    val usersSources = remember(vm.userSources) {
+        vm.userSources.mapIndexed { index, sourceUiModel ->
+            Pair((vm.userSources.size - index).toLong(), sourceUiModel)
         }
     }
 
@@ -81,7 +81,7 @@ fun ModernUserSourcesScreen(
         verticalArrangement = Arrangement.Top,
     ) {
         items(
-            items = usersSources.value,
+            items = usersSources,
             contentType = {
                 return@items when (val uiModel = it.second) {
                     is SourceUiModel.Header -> "header"
@@ -108,7 +108,7 @@ fun ModernUserSourcesScreen(
                     modifier = Modifier.animateItem(),
                     catalog = catalogItem.source,
                     installStep = if (catalogItem.source is CatalogInstalled) 
-                        vm.installSteps[catalogItem.source.pkgName] else null,
+                        state.installSteps[catalogItem.source.pkgName] else null,
                     onClick = { onClickCatalog(catalogItem.source) },
                     onPinToggle = { onClickTogglePinned(catalogItem.source) },
                     onShowDetails = onShowDetails?.let { { it(catalogItem.source) } },

@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,29 +77,28 @@ fun RemoteSourcesScreen(
             }
         )
     }
+    val state by vm.state.collectAsState()
+    
     // Optimize derived state chain to avoid unnecessary recompositions
-    val remoteSources = remember {
-        derivedStateOf {
-            val allCatalogs = vm.pinnedCatalogs + vm.unpinnedCatalogs
-            val remotesCatalogs = vm.remoteCatalogs
-            
-            val installed = listOf(SourceUiModel.Header(SourceKeys.INSTALLED_KEY)) + 
-                allCatalogs.map { SourceUiModel.Item(it, SourceState.Installed) }
-            
-            // Group remote catalogs by language and sort
-            val groupedByLanguage = remotesCatalogs.groupBy { it.lang }
-            val sortedGroups = groupedByLanguage.entries.sortedBy { it.key }
-            
-            // Build the list with headers for each language
-            val remotes = buildList {
-                sortedGroups.forEach { (lang, catalogs) ->
-                    add(SourceUiModel.Header(lang))
-                    addAll(catalogs.sortedBy { it.name }.map { SourceUiModel.Item(it, SourceState.Remote) })
-                }
+    val remoteSources = remember(state.pinnedCatalogs, state.unpinnedCatalogs, state.remoteCatalogs) {
+        val allCatalogs = state.pinnedCatalogs + state.unpinnedCatalogs
+        
+        val installed = listOf(SourceUiModel.Header(SourceKeys.INSTALLED_KEY)) + 
+            allCatalogs.map { SourceUiModel.Item(it, SourceState.Installed) }
+        
+        // Group remote catalogs by language and sort
+        val groupedByLanguage = state.remoteCatalogs.groupBy { it.lang }
+        val sortedGroups = groupedByLanguage.entries.sortedBy { it.key }
+        
+        // Build the list with headers for each language
+        val remotes = buildList {
+            sortedGroups.forEach { (lang, catalogs) ->
+                add(SourceUiModel.Header(lang))
+                addAll(catalogs.sortedBy { it.name }.map { SourceUiModel.Item(it, SourceState.Remote) })
             }
-            
-            (installed + remotes).mapIndexed { index, sourceUiModel -> Pair(index, sourceUiModel) }
         }
+        
+        (installed + remotes).mapIndexed { index, sourceUiModel -> Pair(index, sourceUiModel) }
     }
     
     // Save scroll state across navigation with proper key
@@ -118,9 +117,9 @@ fun RemoteSourcesScreen(
     ) {
         item(key = "language_filter") {
             LanguageChipGroup(
-                choices = vm.languageChoices,
-                selected = vm.selectedLanguage,
-                onClick = { vm.selectedLanguage = it },
+                choices = state.languageChoices,
+                selected = state.selectedLanguage,
+                onClick = { vm.setSelectedLanguage(it) },
                 isVisible = vm.showLanguageFilter.value,
                 onToggleVisibility = { visible ->
                     vm.uiPreferences.showLanguageFilter().set(visible)
@@ -129,7 +128,7 @@ fun RemoteSourcesScreen(
         }
 
         items(
-                items = remoteSources.value,
+                items = remoteSources,
                 contentType = {
                     return@items when (it.second) {
                         is SourceUiModel.Header -> "header"
@@ -143,34 +142,34 @@ fun RemoteSourcesScreen(
                     }
                 },
         ) { catalog ->
-            val catalog = remember {
+            val catalogItem = remember {
                 catalog.second
             }
-            when (catalog) {
+            when (catalogItem) {
                 is SourceUiModel.Header -> {
                     SourceHeader(
                             modifier = Modifier.animateItem(),
-                            language = catalog.language,
+                            language = catalogItem.language,
                     )
                 }
                 is SourceUiModel.Item -> {
-                    when (catalog.source) {
+                    when (catalogItem.source) {
                         is CatalogLocal -> {
                             CatalogItem(
                                     modifier = Modifier.fillMaxSize(),
-                                    catalog = catalog.source,
-                                    installStep = if (catalog.source is CatalogInstalled) vm.installSteps[catalog.source.pkgName] else null,
-                                    onInstall = { onClickInstall(catalog.source) }.takeIf { catalog.source.hasUpdate },
-                                    onUninstall = { onClickUninstall(catalog.source) }.takeIf { catalog.source is CatalogInstalled },
+                                    catalog = catalogItem.source,
+                                    installStep = if (catalogItem.source is CatalogInstalled) state.installSteps[catalogItem.source.pkgName] else null,
+                                    onInstall = { onClickInstall(catalogItem.source) }.takeIf { catalogItem.source.hasUpdate },
+                                    onUninstall = { onClickUninstall(catalogItem.source) }.takeIf { catalogItem.source is CatalogInstalled },
                                     onCancelInstaller = {
                                         if (onCancelInstaller != null) {
                                             onCancelInstaller(it)
                                         }
                                     },
-                                    sourceStatus = vm.getSourceStatus(catalog.source.sourceId),
+                                    sourceStatus = vm.getSourceStatus(catalogItem.source.sourceId),
                                     onLogin = {
-                                        loginSourceId = catalog.source.sourceId
-                                        loginSourceName = catalog.source.name
+                                        loginSourceId = catalogItem.source.sourceId
+                                        loginSourceName = catalogItem.source.name
                                         showLoginDialog = true
                                     },
                             )
@@ -178,10 +177,10 @@ fun RemoteSourcesScreen(
                         is CatalogRemote -> {
                             CatalogItem(
                                     modifier = Modifier.fillMaxSize(),
-                                    catalog = catalog.source,
-                                    installStep = vm.installSteps[catalog.source.pkgName],
-                                    onInstall = { onClickInstall(catalog.source) },
-                                    onClick = { onClickInstall(catalog.source) },
+                                    catalog = catalogItem.source,
+                                    installStep = state.installSteps[catalogItem.source.pkgName],
+                                    onInstall = { onClickInstall(catalogItem.source) },
+                                    onClick = { onClickInstall(catalogItem.source) },
                                     onCancelInstaller = {
                                         if (onCancelInstaller != null) {
                                             onCancelInstaller(it)

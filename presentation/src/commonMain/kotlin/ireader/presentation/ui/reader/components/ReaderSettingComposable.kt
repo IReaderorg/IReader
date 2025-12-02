@@ -1021,9 +1021,10 @@ fun FontPickerTab(
     
     // Determine the currently selected font ID
     // Check both the selectedFontId (for custom fonts) and the font preference (for Google Fonts)
-    val currentSelectedId = remember(vm.selectedFontId.value, vm.font!!.value) {
+    val fontPref = vm.font
+    val currentSelectedId = remember(vm.selectedFontId.value, fontPref?.value) {
         val customFontId = vm.selectedFontId.value
-        val googleFontName = vm.font.value.name
+        val googleFontName = fontPref?.value?.name
         
         when {
             customFontId.isNotEmpty() -> customFontId

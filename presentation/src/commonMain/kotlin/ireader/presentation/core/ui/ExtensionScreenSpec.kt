@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +79,7 @@ object ExtensionScreenSpec {
     @Composable
     fun TabContent() {
         val vm: ExtensionViewModel = getIViewModel()
+        val state by vm.state.collectAsState()
         var searchMode by remember { mutableStateOf(false) }
         var showMigrationSourceDialog by remember { mutableStateOf(false) }
         val focusManager = LocalFocusManager.current
@@ -88,7 +90,7 @@ object ExtensionScreenSpec {
         // Migration source selection dialog
         if (showMigrationSourceDialog) {
             MigrationSourceSelectionDialog(
-                sources = vm.pinnedCatalogs + vm.unpinnedCatalogs,
+                sources = state.pinnedCatalogs + state.unpinnedCatalogs,
                 onSourceSelected = { sourceId ->
                     showMigrationSourceDialog = false
                     navController.navigateTo(SourceMigrationScreenSpec(sourceId))
@@ -98,7 +100,7 @@ object ExtensionScreenSpec {
         }
 
         PullToRefreshBox(
-            isRefreshing = vm.isRefreshing,
+            isRefreshing = state.isRefreshing,
             onRefresh = { vm.refreshCatalogs() },
             state = pullToRefreshState,
             modifier = Modifier.fillMaxSize()
@@ -108,17 +110,17 @@ object ExtensionScreenSpec {
                 topBar = { scrollBehavior ->
                     ExtensionScreenTopAppBar(
                         searchMode = searchMode,
-                        query = vm.searchQuery ?: "",
-                        onValueChange = { vm.searchQuery = it },
+                        query = state.searchQuery ?: "",
+                        onValueChange = { vm.setSearchQuery(it) },
                         onConfirm = { focusManager.clearFocus() },
-                        currentPage = vm.currentPagerPage,
+                        currentPage = state.currentPagerPage,
                         onClose = {
                             searchMode = false
-                            vm.searchQuery = ""
+                            vm.setSearchQuery(null)
                         },
                         onSearchDisable = {
                             searchMode = false
-                            vm.searchQuery = ""
+                            vm.setSearchQuery(null)
                         },
                         onRefresh = { vm.refreshCatalogs() },
                         onSearchEnable = { searchMode = true },

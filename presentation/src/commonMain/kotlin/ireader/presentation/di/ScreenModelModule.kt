@@ -47,7 +47,6 @@ val screenModelModule = module {
         ireader.presentation.ui.home.sources.settings.BrowseSettingsViewModel(
             browsePreferences = get(),
             getCatalogsByType = get(),
-            get()
         )
     }
     

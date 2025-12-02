@@ -39,52 +39,52 @@ fun AnimatedNavHost(
             startDestination = startDestination,
             modifier = Modifier.fillMaxSize(),
             enterTransition = {
-                // Faster fade-in with subtle slide for smoother transitions
+                // Fast fade-in with minimal slide for snappy forward navigation
                 fadeIn(
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 150,
+                        easing = LinearOutSlowInEasing
                     )
                 ) + slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                    initialOffset = { it / 10 }, // Subtle slide
+                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                    initialOffset = { it / 20 }, // Minimal upward slide
                     animationSpec = tween(
-                        durationMillis = 300,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 150,
+                        easing = LinearOutSlowInEasing
                     )
                 )
             },
             exitTransition = {
-                // Quick fade-out to maintain previous screen visibility
+                // Instant fade-out for snappy feel
                 fadeOut(
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 100,
+                        easing = FastOutLinearInEasing
                     )
                 )
             },
             popEnterTransition = {
-                // Smooth fade-in when returning
+                // Fast fade-in when returning
                 fadeIn(
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 150,
+                        easing = LinearOutSlowInEasing
                     )
                 )
             },
             popExitTransition = {
-                // Fade-out with subtle slide when going back
+                // Fast fade + minimal slide for back navigation
                 fadeOut(
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 150,
+                        easing = FastOutLinearInEasing
                     )
                 ) + slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                    targetOffset = { it / 10 }, // Subtle slide
+                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                    targetOffset = { it / 20 }, // Minimal downward slide
                     animationSpec = tween(
-                        durationMillis = 300,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 150,
+                        easing = FastOutLinearInEasing
                     )
                 )
             },

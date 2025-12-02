@@ -4,24 +4,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import ireader.domain.catalogs.interactor.GetCatalogsByType
-import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.preferences.prefs.BrowsePreferences
 import ireader.i18n.UiText
-import ireader.i18n.resources.language_added
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
-import ireader.presentation.ui.home.sources.extension.Language
-import ireader.presentation.ui.home.sources.extension.LanguageChoice
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.i18n.resources.language_added
 
 class BrowseSettingsViewModel(
     private val browsePreferences: BrowsePreferences,
     private val getCatalogsByType: GetCatalogsByType,
-    private val extensionViewModel: ExtensionViewModel
 ) : BaseViewModel() {
 
     var state by mutableStateOf(BrowseSettingsState())
@@ -72,20 +66,7 @@ class BrowseSettingsViewModel(
         }
     }
 
-    private fun updateExtensionViewModelLanguages(selectedLanguages: Set<String>) {
-        val choice = when {
-            selectedLanguages.isEmpty() -> LanguageChoice.All
-            selectedLanguages.size == 1 -> {
-                LanguageChoice.One(Language(selectedLanguages.first()))
-            }
-            else -> {
-                val languages = selectedLanguages.map { Language(it) }
-                LanguageChoice.Others(languages)
-            }
-        }
-        extensionViewModel.selectedUserSourceLanguage = choice
-        extensionViewModel.selectedLanguage = choice
-    }
+    // Language preferences are now stored in BrowsePreferences and observed by ExtensionViewModel
 
     fun toggleLanguage(languageCode: String) {
         scope.launch {
@@ -94,12 +75,10 @@ class BrowseSettingsViewModel(
                 current.remove(languageCode)
                 // If empty after removal, it means "all languages"
                 browsePreferences.selectedLanguages().set(current)
-                updateExtensionViewModelLanguages(current)
                 showSnackBar(UiText.DynamicString(if (current.isEmpty()) "All languages selected" else "Language removed"))
             } else {
                 current.add(languageCode)
                 browsePreferences.selectedLanguages().set(current)
-                updateExtensionViewModelLanguages(current)
                 showSnackBar(UiText.MStringResource(ireader.i18n.resources.Res.string.language_added))
             }
         }
@@ -109,7 +88,6 @@ class BrowseSettingsViewModel(
         scope.launch {
             val allLanguages = state.availableLanguages.toSet()
             browsePreferences.selectedLanguages().set(allLanguages)
-            updateExtensionViewModelLanguages(allLanguages)
             showSnackBar(UiText.DynamicString("All languages selected"))
         }
     }
@@ -119,7 +97,6 @@ class BrowseSettingsViewModel(
             // Empty set means "all languages"
             val allLanguages = emptySet<String>()
             browsePreferences.selectedLanguages().set(allLanguages)
-            updateExtensionViewModelLanguages(allLanguages)
             showSnackBar(UiText.DynamicString("All languages selected"))
         }
     }
