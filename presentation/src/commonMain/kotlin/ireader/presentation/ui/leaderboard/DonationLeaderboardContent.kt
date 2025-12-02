@@ -30,7 +30,7 @@ import ireader.i18n.resources.Res
 
 @Composable
 fun DonationLeaderboardContent(
-    state: DonationLeaderboardState,
+    state: DonationLeaderboardScreenState,
     onToggleRealtime: (Boolean) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier

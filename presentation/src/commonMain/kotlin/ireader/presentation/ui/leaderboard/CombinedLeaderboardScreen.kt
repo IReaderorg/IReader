@@ -29,6 +29,8 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,8 +63,8 @@ fun CombinedLeaderboardScreen(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val readingState = readingVm.state
-    val donationState = donationVm.state
+    val readingState by readingVm.state.collectAsState()
+    val donationState by donationVm.state.collectAsState()
     
     val pagerState = rememberPagerState(pageCount = { LeaderboardTab.entries.size })
     val coroutineScope = rememberCoroutineScope()

@@ -69,7 +69,12 @@ fun ModernUserSourcesScreen(
 
     val state by vm.state.collectAsState()
     
-    val usersSources = remember(vm.userSources) {
+    // Recompute usersSources when state changes (pinnedCatalogs, unpinnedCatalogs, or language filter)
+    val usersSources = remember(
+        state.pinnedCatalogs,
+        state.unpinnedCatalogs,
+        state.selectedUserSourceLanguage
+    ) {
         vm.userSources.mapIndexed { index, sourceUiModel ->
             Pair((vm.userSources.size - index).toLong(), sourceUiModel)
         }

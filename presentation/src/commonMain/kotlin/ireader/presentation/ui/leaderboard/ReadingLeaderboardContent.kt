@@ -33,7 +33,7 @@ import ireader.i18n.resources.Res
 
 @Composable
 fun ReadingLeaderboardContent(
-    state: LeaderboardState,
+    state: LeaderboardScreenState,
     onSync: () -> Unit,
     onToggleRealtime: (Boolean) -> Unit,
     onClearError: () -> Unit,
@@ -129,7 +129,7 @@ private fun EmptyReadingLeaderboardState(onSync: () -> Unit, isSyncing: Boolean)
 
 @Composable
 private fun ReadingLeaderboardList(
-    state: LeaderboardState,
+    state: LeaderboardScreenState,
     onSync: () -> Unit,
     onToggleRealtime: (Boolean) -> Unit
 ) {
@@ -208,7 +208,7 @@ private fun ReadingLeaderboardList(
 }
 
 @Composable
-private fun ShowErrors(state: LeaderboardState, onClearError: () -> Unit) {
+private fun ShowErrors(state: LeaderboardScreenState, onClearError: () -> Unit) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     state.error?.let { error ->
         Snackbar(

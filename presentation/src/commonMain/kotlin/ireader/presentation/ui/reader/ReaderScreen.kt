@@ -497,20 +497,20 @@ private fun ReadingScreenContent(
                             )
                         }
                         
-                        // Reader controls bottom bar (non-modal) with modal sheet animation
+                        // Reader controls bottom bar (non-modal) with fast animation
                         AnimatedVisibility(
                             visible = !vm.isReaderModeEnable,
                             enter = slideInVertically(
                                 initialOffsetY = { fullHeight -> fullHeight },
                                 animationSpec = tween(
-                                    durationMillis = 300,
+                                    durationMillis = 150,
                                     easing = androidx.compose.animation.core.FastOutSlowInEasing
                                 )
                             ),
                             exit = slideOutVertically(
                                 targetOffsetY = { fullHeight -> fullHeight },
                                 animationSpec = tween(
-                                    durationMillis = 250,
+                                    durationMillis = 100,
                                     easing = androidx.compose.animation.core.FastOutLinearInEasing
                                 )
                             ),

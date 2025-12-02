@@ -6,19 +6,33 @@ import ireader.i18n.LocalizeHelper
 import ireader.presentation.core.theme.IUseController
 import kotlinx.coroutines.CoroutineScope
 
+/**
+ * Composable that enables transparent status bar while in composition.
+ * 
+ * Uses reference counting to handle nested usage correctly - the status bar
+ * stays transparent as long as at least one TransparentStatusBar is active.
+ */
 @Composable
 fun TransparentStatusBar(content: @Composable () -> Unit) {
-
     val state = LocalTransparentStatusBar.current
+    
     DisposableEffect(Unit) {
-        state.enabled = true
+        state.acquire()
         onDispose {
-            state.enabled = false
+            state.release()
         }
     }
+    
     content()
 }
 
+/**
+ * Composable that sets custom system bar colors while in composition.
+ * 
+ * @param enable Whether to apply custom colors
+ * @param statusBar Color for the status bar
+ * @param navigationBar Color for the navigation bar
+ */
 @Composable
 fun CustomSystemColor(
     enable: Boolean = false,
@@ -26,33 +40,31 @@ fun CustomSystemColor(
     navigationBar: Color,
     content: @Composable () -> Unit
 ) {
-    if (enable) {
-        val state = LocalCustomSystemColor.current
-        LaunchedEffect(key1 = statusBar, key2 = navigationBar) {
-            state.statusBar = statusBar
-            state.navigationBar = navigationBar
+    val state = LocalCustomSystemColor.current
+    
+    DisposableEffect(enable, statusBar, navigationBar) {
+        if (enable) {
+            state.acquire(statusBar, navigationBar)
         }
-        DisposableEffect(Unit) {
-            state.enabled = true
-
-            onDispose {
-                state.enabled = false
+        onDispose {
+            if (enable) {
+                state.release()
             }
         }
     }
+    
     content()
 }
 
-val LocalTransparentStatusBar = staticCompositionLocalOf { TransparentStatusBar(false) }
-val LocalISystemUIController: ProvidableCompositionLocal<IUseController?> = staticCompositionLocalOf { IUseController() }
-val LocalCustomSystemColor = staticCompositionLocalOf { CustomStatusBar(false) }
-val LocalLocalizeHelper: ProvidableCompositionLocal<LocalizeHelper?> = staticCompositionLocalOf {
-    null
-}
+// ==================== CompositionLocals ====================
 
-val LocalGlobalCoroutineScope: ProvidableCompositionLocal<CoroutineScope?> = staticCompositionLocalOf {
-    null
-}
+val LocalTransparentStatusBar = staticCompositionLocalOf { TransparentStatusBarState() }
+val LocalISystemUIController: ProvidableCompositionLocal<IUseController?> = staticCompositionLocalOf { IUseController() }
+val LocalCustomSystemColor = staticCompositionLocalOf { CustomSystemColorState() }
+val LocalLocalizeHelper: ProvidableCompositionLocal<LocalizeHelper?> = staticCompositionLocalOf { null }
+val LocalGlobalCoroutineScope: ProvidableCompositionLocal<CoroutineScope?> = staticCompositionLocalOf { null }
+
+// ==================== Extension Properties ====================
 
 /**
  * Extension properties for safe access to CompositionLocals
@@ -67,12 +79,98 @@ val ProvidableCompositionLocal<LocalizeHelper?>.currentOrThrow: LocalizeHelper
 val ProvidableCompositionLocal<CoroutineScope?>.currentOrThrow: CoroutineScope
     get() = this.current ?: error("LocalGlobalCoroutineScope not provided")
 
-class TransparentStatusBar(enabled: Boolean) {
-    var enabled by mutableStateOf(enabled)
+// ==================== State Classes ====================
+
+/**
+ * State holder for transparent status bar with reference counting.
+ * 
+ * Multiple composables can request transparent status bar simultaneously.
+ * The status bar stays transparent as long as refCount > 0.
+ */
+@Stable
+class TransparentStatusBarState {
+    private var refCount by mutableIntStateOf(0)
+    
+    /**
+     * Whether transparent status bar is currently enabled.
+     * True when at least one composable has acquired it.
+     */
+    val enabled: Boolean
+        get() = refCount > 0
+    
+    /**
+     * Request transparent status bar. Call [release] when done.
+     */
+    fun acquire() {
+        refCount++
+    }
+    
+    /**
+     * Release transparent status bar request.
+     */
+    fun release() {
+        refCount = maxOf(0, refCount - 1)
+    }
 }
 
-class CustomStatusBar(enabled: Boolean) {
-    var enabled by mutableStateOf(enabled)
-    var statusBar by mutableStateOf(Color.White)
-    var navigationBar by mutableStateOf(Color.White)
+/**
+ * State holder for custom system bar colors with reference counting.
+ * 
+ * Supports stacking - the most recent acquire() colors are used.
+ * When released, falls back to previous colors or defaults.
+ */
+@Stable
+class CustomSystemColorState {
+    private var refCount by mutableIntStateOf(0)
+    private val colorStack = mutableStateListOf<Pair<Color, Color>>()
+    
+    /**
+     * Whether custom colors are currently enabled.
+     */
+    val enabled: Boolean
+        get() = refCount > 0
+    
+    /**
+     * Current status bar color (or default if not enabled).
+     */
+    val statusBar: Color
+        get() = colorStack.lastOrNull()?.first ?: Color.Transparent
+    
+    /**
+     * Current navigation bar color (or default if not enabled).
+     */
+    val navigationBar: Color
+        get() = colorStack.lastOrNull()?.second ?: Color.Transparent
+    
+    /**
+     * Request custom system colors. Call [release] when done.
+     */
+    fun acquire(statusBarColor: Color, navigationBarColor: Color) {
+        colorStack.add(statusBarColor to navigationBarColor)
+        refCount++
+    }
+    
+    /**
+     * Release custom system colors request.
+     */
+    fun release() {
+        if (colorStack.isNotEmpty()) {
+            colorStack.removeAt(colorStack.lastIndex)
+        }
+        refCount = maxOf(0, refCount - 1)
+    }
 }
+
+// ==================== Deprecated Aliases (for backward compatibility) ====================
+
+@Deprecated(
+    message = "Use TransparentStatusBarState instead",
+    replaceWith = ReplaceWith("TransparentStatusBarState")
+)
+typealias TransparentStatusBar = TransparentStatusBarState
+
+@Deprecated(
+    message = "Use CustomSystemColorState instead", 
+    replaceWith = ReplaceWith("CustomSystemColorState")
+)
+typealias CustomStatusBar = CustomSystemColorState

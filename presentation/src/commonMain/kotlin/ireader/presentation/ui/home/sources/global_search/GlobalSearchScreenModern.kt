@@ -34,9 +34,10 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.list.layouts.BookImage
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchScreenState
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import ireader.presentation.ui.home.sources.global_search.viewmodel.SearchItem
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Modern Global Search Screen with Material Design 3
@@ -61,7 +62,8 @@ fun GlobalSearchScreenModern(
     modifier: Modifier = Modifier,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    var searchQuery by remember { mutableStateOf(vm.query) }
+    val state by vm.screenState.collectAsState()
+    var searchQuery by remember { mutableStateOf(state.query) }
     
     // Function to trigger search
     val triggerSearch = {
@@ -98,27 +100,27 @@ fun GlobalSearchScreenModern(
         ) {
             when {
                 // Initial loading state - search started and waiting for first result
-                vm.isLoading -> {
+                state.isLoading -> {
                     InitialLoadingState()
                 }
                 
                 // Empty state - no search performed yet
-                vm.query.isBlank() && vm.withResult.isEmpty() && 
-                vm.inProgress.isEmpty() && vm.noResult.isEmpty() -> {
+                state.query.isBlank() && state.withResult.isEmpty() && 
+                state.inProgress.isEmpty() && state.noResult.isEmpty() -> {
                     EmptySearchState()
                 }
                 
                 // All sources finished with no results
-                vm.query.isNotBlank() && vm.withResult.isEmpty() && 
-                vm.inProgress.isEmpty() && vm.noResult.isNotEmpty() -> {
-                    NoResultsState(query = vm.query)
+                state.query.isNotBlank() && state.withResult.isEmpty() && 
+                state.inProgress.isEmpty() && state.noResult.isNotEmpty() -> {
+                    NoResultsState(query = state.query)
                 }
                 
                 // Show results list when there are results, sources in progress, or sources with no results
                 // This ensures we show the loading cards for sources still searching
-                vm.query.isNotBlank() && (vm.withResult.isNotEmpty() || vm.inProgress.isNotEmpty() || vm.noResult.isNotEmpty()) -> {
+                state.query.isNotBlank() && (state.withResult.isNotEmpty() || state.inProgress.isNotEmpty() || state.noResult.isNotEmpty()) -> {
                     SearchResultsList(
-                        vm = vm,
+                        state = state,
                         onBook = onBook,
                         onGoToExplore = onGoToExplore
                     )
@@ -233,7 +235,7 @@ private fun ModernSearchTopBar(
 
 @Composable
 private fun SearchResultsList(
-    vm: GlobalSearchViewModel,
+    state: GlobalSearchScreenState,
     onBook: (Book) -> Unit,
     onGoToExplore: (SearchItem) -> Unit,
 ) {
@@ -244,8 +246,8 @@ private fun SearchResultsList(
     ) {
         // Results with books
         items(
-            items = vm.withResult,
-            key = { item -> "result-${item.source.getSourceKey()}-${vm.numberOfTries}" }
+            items = state.withResult,
+            key = { item -> "result-${item.source.getSourceKey()}-${state.numberOfTries}" }
         ) { item ->
             ModernSourceResultCard(
                 item = item,
@@ -257,8 +259,8 @@ private fun SearchResultsList(
         
         // Loading sources
         items(
-            items = vm.inProgress,
-            key = { item -> "loading-${item.source.getSourceKey()}-${vm.numberOfTries}" }
+            items = state.inProgress,
+            key = { item -> "loading-${item.source.getSourceKey()}-${state.numberOfTries}" }
         ) { item ->
             ModernSourceResultCard(
                 item = item,
@@ -270,8 +272,8 @@ private fun SearchResultsList(
         
         // Sources with no results
         items(
-            items = vm.noResult,
-            key = { item -> "empty-${item.source.getSourceKey()}-${vm.numberOfTries}" }
+            items = state.noResult,
+            key = { item -> "empty-${item.source.getSourceKey()}-${state.numberOfTries}" }
         ) { item ->
             ModernSourceResultCard(
                 item = item,

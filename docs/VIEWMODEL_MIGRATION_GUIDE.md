@@ -292,13 +292,52 @@ val state by viewModel.state.collectAsStateWithLifecycle()
 
 ## Priority Order for Migration
 
-1. **BookDetailViewModel** - Most impactful, navigation freezing
-2. **LibraryViewModel** - Main screen, affects first impression
-3. **ReaderViewModel** - Core reading experience
-4. **ExploreViewModel** - Browse functionality
-5. **HistoryViewModel** - History screen
-6. **UpdatesViewModel** - Updates screen
-7. **SourcesViewModel** - Sources list
+### ✅ Completed Migrations
+
+1. **BookDetailViewModel** ✅ - Most impactful, navigation freezing
+2. **LibraryViewModel** ✅ - Main screen, affects first impression
+3. **ReaderScreenViewModel** ✅ - Core reading experience
+4. **ExploreViewModel** ✅ - Browse functionality
+5. **HistoryViewModel** ✅ - History screen
+6. **UpdatesViewModel** ✅ - Updates screen
+7. **ExtensionViewModel** ✅ - Sources/Extensions list
+8. **PopularBooksViewModel** ✅ - Community popular books
+9. **AllReviewsViewModel** ✅ - Community reviews
+10. **LeaderboardViewModel** ✅ - Reading leaderboard
+11. **DonationLeaderboardViewModel** ✅ - Donation leaderboard
+12. **GlobalSearchViewModel** ✅ - Global search
+
+### Already Using StateViewModel Pattern
+
+- **AITTSSettingsViewModel** - Uses StateViewModel base class
+- **GradioTTSSettingsViewModel** - Uses StateViewModel base class
+- **VoiceSelectionViewModel** - Uses StateViewModel base class
+- **AuthViewModel** - Uses StateViewModel base class
+- **ProfileViewModel** - Uses StateViewModel base class
+- **DonationViewModel** - Uses StateViewModel base class
+- **StatisticsViewModel** - Uses MutableStateFlow with sealed SyncState
+
+### Using Simple mutableStateOf (Acceptable for Settings)
+
+These ViewModels use `mutableStateOf` for simple dialog visibility flags or settings state.
+This is acceptable for settings screens where the state is simple and doesn't require
+complex loading/success/error handling:
+
+- **AdvanceSettingViewModel** - Simple settings state
+- **ReaderSettingScreenViewModel** - Reader preferences
+- **SettingsReaderViewModel** - Dialog visibility flags
+- **SettingsTrackingViewModel** - Dialog visibility flags
+- **SettingsSecurityViewModel** - Dialog visibility flags
+- **SettingsNotificationViewModel** - Dialog visibility flags
+- **SettingsLibraryViewModel** - Dialog visibility flags
+- **SettingsDownloadViewModel** - Dialog visibility flags
+- **SettingsDataViewModel** - Dialog visibility flags
+- **CategoryScreenViewModel** - Simple category list
+- **BackupScreenViewModel** - Simple backup state
+- **FontScreenViewModel** - Font preview state
+- **TranslationSettingsViewModel** - Translation test state
+- **SourceRepositoryViewModel** - Repository dialog state
+- **DonationTriggerViewModel** - Donation prompt state
 
 ---
 

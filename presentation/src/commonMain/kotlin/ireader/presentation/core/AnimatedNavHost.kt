@@ -39,54 +39,17 @@ fun AnimatedNavHost(
             startDestination = startDestination,
             modifier = Modifier.fillMaxSize(),
             enterTransition = {
-                // Fast fade-in with minimal slide for snappy forward navigation
-                fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 150,
-                        easing = LinearOutSlowInEasing
-                    )
-                ) + slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                    initialOffset = { it / 20 }, // Minimal upward slide
-                    animationSpec = tween(
-                        durationMillis = 150,
-                        easing = LinearOutSlowInEasing
-                    )
-                )
+                // Simple crossfade
+                fadeIn(animationSpec = tween(200))
             },
             exitTransition = {
-                // Instant fade-out for snappy feel
-                fadeOut(
-                    animationSpec = tween(
-                        durationMillis = 100,
-                        easing = FastOutLinearInEasing
-                    )
-                )
+                fadeOut(animationSpec = tween(200))
             },
             popEnterTransition = {
-                // Fast fade-in when returning
-                fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 150,
-                        easing = LinearOutSlowInEasing
-                    )
-                )
+                fadeIn(animationSpec = tween(200))
             },
             popExitTransition = {
-                // Fast fade + minimal slide for back navigation
-                fadeOut(
-                    animationSpec = tween(
-                        durationMillis = 150,
-                        easing = FastOutLinearInEasing
-                    )
-                ) + slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
-                    targetOffset = { it / 20 }, // Minimal downward slide
-                    animationSpec = tween(
-                        durationMillis = 150,
-                        easing = FastOutLinearInEasing
-                    )
-                )
+                fadeOut(animationSpec = tween(200))
             },
             builder = builder
         )

@@ -372,8 +372,9 @@ data class ReaderScreenSpec(
                             }
                         },
                         toggleReaderMode = {
-                            val isEnabled = successState?.isReaderModeEnabled ?: false
-                            vm.toggleReaderMode(!isEnabled)
+                            // Use toggleReaderMode without parameter to let ViewModel toggle internally
+                            // This avoids stale state capture issues
+                            vm.toggleReaderMode()
                         },
                         readerScreenPreferencesState = vm,
                         onBackgroundColorAndTextColorApply = { bgColor, txtColor ->

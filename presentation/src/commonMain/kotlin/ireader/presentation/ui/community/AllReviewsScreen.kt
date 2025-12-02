@@ -37,7 +37,7 @@ fun AllReviewsScreen(
     onBackPressed: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val state = vm.state
+    val state by vm.state.collectAsState()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     
@@ -135,7 +135,7 @@ fun AllReviewsScreen(
                     }
                     state.error != null -> {
                         ErrorView(
-                            message = state.error,
+                            message = state.error ?: "",
                             onRetry = { vm.refresh() }
                         )
                     }

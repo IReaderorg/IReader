@@ -83,45 +83,48 @@ class ExtensionViewModel(
     
     /**
      * User sources list with headers (Last Used, Pinned, by Language)
+     * This is now a computed property that reads from the current state.
+     * The UI should collect state and this will be recalculated on each recomposition.
      */
-    val userSources: List<SourceUiModel> by derivedStateOf {
-        val currentState = _state.value
-        val filteredPinned = currentState.pinnedCatalogs.filteredByLanguageChoice(currentState.selectedUserSourceLanguage)
-        val filteredUnpinned = currentState.unpinnedCatalogs.filteredByLanguageChoice(currentState.selectedUserSourceLanguage)
+    val userSources: List<SourceUiModel>
+        get() {
+            val currentState = _state.value
+            val filteredPinned = currentState.pinnedCatalogs.filteredByLanguageChoice(currentState.selectedUserSourceLanguage)
+            val filteredUnpinned = currentState.unpinnedCatalogs.filteredByLanguageChoice(currentState.selectedUserSourceLanguage)
 
-        val list = mutableListOf<SourceUiModel>()
-        
-        // Last used source
-        if (lastUsedSource.value != -1L) {
-            (currentState.pinnedCatalogs + currentState.unpinnedCatalogs).firstOrNull {
-                it.sourceId == lastUsedSource.value
-            }?.let { c ->
-                if (c.matchesLanguageChoice(currentState.selectedUserSourceLanguage)) {
-                    list.add(SourceUiModel.Header(SourceKeys.LAST_USED_KEY))
-                    list.add(SourceUiModel.Item(c, SourceState.LastUsed))
+            val list = mutableListOf<SourceUiModel>()
+            
+            // Last used source
+            if (lastUsedSource.value != -1L) {
+                (currentState.pinnedCatalogs + currentState.unpinnedCatalogs).firstOrNull {
+                    it.sourceId == lastUsedSource.value
+                }?.let { c ->
+                    if (c.matchesLanguageChoice(currentState.selectedUserSourceLanguage)) {
+                        list.add(SourceUiModel.Header(SourceKeys.LAST_USED_KEY))
+                        list.add(SourceUiModel.Item(c, SourceState.LastUsed))
+                    }
                 }
             }
-        }
 
-        // Pinned sources
-        if (filteredPinned.isNotEmpty()) {
-            list.add(SourceUiModel.Header(SourceKeys.PINNED_KEY))
-            list.addAll(filteredPinned.map { SourceUiModel.Item(it, SourceState.Pinned) })
+            // Pinned sources
+            if (filteredPinned.isNotEmpty()) {
+                list.add(SourceUiModel.Header(SourceKeys.PINNED_KEY))
+                list.addAll(filteredPinned.map { SourceUiModel.Item(it, SourceState.Pinned) })
+            }
+            
+            // Unpinned sources grouped by language
+            if (filteredUnpinned.isNotEmpty()) {
+                list.addAll(
+                    filteredUnpinned.groupBy { it.source?.lang ?: "others" }
+                        .flatMap { (lang, sources) ->
+                            listOf(SourceUiModel.Header(lang)) + 
+                                sources.map { SourceUiModel.Item(it, SourceState.UnPinned) }
+                        }
+                )
+            }
+            
+            return list
         }
-        
-        // Unpinned sources grouped by language
-        if (filteredUnpinned.isNotEmpty()) {
-            list.addAll(
-                filteredUnpinned.groupBy { it.source?.lang ?: "others" }
-                    .flatMap { (lang, sources) ->
-                        listOf(SourceUiModel.Header(lang)) + 
-                            sources.map { SourceUiModel.Item(it, SourceState.UnPinned) }
-                    }
-            )
-        }
-        
-        list
-    }
     
     // ==================== Jobs ====================
     

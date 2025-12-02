@@ -10,7 +10,6 @@ import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import ireader.presentation.ui.home.sources.settings.BrowseSettingsViewModel
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
-import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchStateImpl
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
@@ -51,7 +50,6 @@ val PresentationModules = module {
     factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
 
-    factory <GlobalSearchStateImpl> { GlobalSearchStateImpl() }
     factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }
     factory <DownloadStateImpl> { DownloadStateImpl() }
     factory <FontScreenStateImpl> { FontScreenStateImpl() }
@@ -106,7 +104,15 @@ val PresentationModules = module {
         )
     }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
-    factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
+    factory { (param: GlobalSearchViewModel.Param) ->
+        GlobalSearchViewModel(
+            catalogStore = get(),
+            insertUseCases = get(),
+            getInstalledCatalog = get(),
+            remoteUseCases = get(),
+            param = param
+        )
+    }
     
     // Browse Settings ViewModel
     factory { BrowseSettingsViewModel(get(), get()) }

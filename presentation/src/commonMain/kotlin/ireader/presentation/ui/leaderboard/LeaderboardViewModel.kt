@@ -1,22 +1,33 @@
 package ireader.presentation.ui.leaderboard
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import ireader.domain.models.entities.LeaderboardEntry
+import androidx.compose.runtime.Stable
 import ireader.domain.usecases.leaderboard.LeaderboardUseCases
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for the Reading Leaderboard screen following Mihon's StateScreenModel pattern.
+ * 
+ * Uses a single immutable StateFlow<LeaderboardScreenState> instead of mutableStateOf.
+ * This provides:
+ * - Single source of truth for UI state
+ * - Atomic state updates
+ * - Better Compose performance with @Immutable state
+ */
+@Stable
 class LeaderboardViewModel(
     private val leaderboardUseCases: LeaderboardUseCases
 ) : BaseViewModel() {
     
-    var state by mutableStateOf(LeaderboardState())
-        private set
+    private val _state = MutableStateFlow(LeaderboardScreenState())
+    val state: StateFlow<LeaderboardScreenState> = _state.asStateFlow()
     
     private var realtimeJob: Job? = null
     
@@ -32,20 +43,24 @@ class LeaderboardViewModel(
     
     fun loadLeaderboard() {
         scope.launch {
-            state = state.copy(isLoading = true, error = null)
+            _state.update { it.copy(isLoading = true, error = null) }
             
             leaderboardUseCases.getLeaderboard(limit = 100)
                 .onSuccess { entries ->
-                    state = state.copy(
-                        leaderboard = entries,
-                        isLoading = false
-                    )
+                    _state.update { current ->
+                        current.copy(
+                            leaderboard = entries,
+                            isLoading = false
+                        )
+                    }
                 }
                 .onFailure { error ->
-                    state = state.copy(
-                        error = error.message ?: "Failed to load leaderboard",
-                        isLoading = false
-                    )
+                    _state.update { current ->
+                        current.copy(
+                            error = error.message ?: "Failed to load leaderboard",
+                            isLoading = false
+                        )
+                    }
                 }
         }
     }
@@ -54,26 +69,28 @@ class LeaderboardViewModel(
         scope.launch {
             leaderboardUseCases.getUserRank()
                 .onSuccess { entry ->
-                    state = state.copy(userRank = entry)
+                    _state.update { it.copy(userRank = entry) }
                 }
                 .onFailure {
                     // User might not be on leaderboard yet
-                    state = state.copy(userRank = null)
+                    _state.update { it.copy(userRank = null) }
                 }
         }
     }
     
     fun syncUserStats() {
         scope.launch {
-            state = state.copy(isSyncing = true, syncError = null)
+            _state.update { it.copy(isSyncing = true, syncError = null) }
             
             leaderboardUseCases.syncCurrentUserStats()
                 .onSuccess {
-                    state = state.copy(
-                        isSyncing = false,
-                        lastSyncTime = System.currentTimeMillis(),
-                        syncError = null // Clear any previous errors
-                    )
+                    _state.update { current ->
+                        current.copy(
+                            isSyncing = false,
+                            lastSyncTime = System.currentTimeMillis(),
+                            syncError = null // Clear any previous errors
+                        )
+                    }
                     // Reload to get updated rank
                     loadUserRank()
                     loadLeaderboard()
@@ -101,19 +118,23 @@ class LeaderboardViewModel(
                     
                     // If it's a duplicate key error, treat it as success
                     if (error.message?.contains("duplicate key", ignoreCase = true) == true) {
-                        state = state.copy(
-                            isSyncing = false,
-                            lastSyncTime = System.currentTimeMillis(),
-                            syncError = null
-                        )
+                        _state.update { current ->
+                            current.copy(
+                                isSyncing = false,
+                                lastSyncTime = System.currentTimeMillis(),
+                                syncError = null
+                            )
+                        }
                         // Reload to get updated rank
                         loadUserRank()
                         loadLeaderboard()
                     } else {
-                        state = state.copy(
-                            syncError = userFriendlyMessage,
-                            isSyncing = false
-                        )
+                        _state.update { current ->
+                            current.copy(
+                                syncError = userFriendlyMessage,
+                                isSyncing = false
+                            )
+                        }
                     }
                 }
         }
@@ -121,7 +142,7 @@ class LeaderboardViewModel(
     
     fun toggleRealtimeUpdates(enabled: Boolean) {
         leaderboardUseCases.setRealtimeEnabled(enabled)
-        state = state.copy(isRealtimeEnabled = enabled)
+        _state.update { it.copy(isRealtimeEnabled = enabled) }
         
         if (enabled) {
             startRealtimeUpdates()
@@ -135,15 +156,17 @@ class LeaderboardViewModel(
         realtimeJob = scope.launch {
             leaderboardUseCases.observeLeaderboard(limit = 100)
                 .catch { error ->
-                    state = state.copy(
-                        error = "Realtime updates failed: ${error.message}"
-                    )
+                    _state.update { current ->
+                        current.copy(error = "Realtime updates failed: ${error.message}")
+                    }
                 }
                 .collectLatest { entries ->
-                    state = state.copy(
-                        leaderboard = entries,
-                        isLoading = false
-                    )
+                    _state.update { current ->
+                        current.copy(
+                            leaderboard = entries,
+                            isLoading = false
+                        )
+                    }
                 }
         }
     }
@@ -154,7 +177,7 @@ class LeaderboardViewModel(
     }
     
     fun clearError() {
-        state = state.copy(error = null, syncError = null)
+        _state.update { it.copy(error = null, syncError = null) }
     }
     
     override fun onCleared() {
@@ -162,14 +185,3 @@ class LeaderboardViewModel(
         stopRealtimeUpdates()
     }
 }
-
-data class LeaderboardState(
-    val leaderboard: List<LeaderboardEntry> = emptyList(),
-    val userRank: LeaderboardEntry? = null,
-    val isLoading: Boolean = false,
-    val isSyncing: Boolean = false,
-    val error: String? = null,
-    val syncError: String? = null,
-    val lastSyncTime: Long = 0,
-    val isRealtimeEnabled: Boolean = false
-)

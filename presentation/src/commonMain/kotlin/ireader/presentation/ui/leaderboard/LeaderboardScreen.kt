@@ -40,7 +40,7 @@ fun LeaderboardScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val state = vm.state
+    val state by vm.state.collectAsState()
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current)
     
     Scaffold(

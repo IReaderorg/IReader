@@ -63,21 +63,21 @@ fun ReaderScreenTopBar(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
-    // Main top bar with animation (shown when reader mode is disabled)
+    // Main top bar with instant animation (shown when reader mode is disabled)
     AnimatedVisibility(
         visible = !isReaderModeEnable && isLoaded,
         enter = slideInVertically(
             initialOffsetY = { fullHeight -> -fullHeight },
             animationSpec = tween(
-                durationMillis = 300,
-                easing = androidx.compose.animation.core.FastOutSlowInEasing
+                durationMillis = 100,
+                easing = androidx.compose.animation.core.LinearEasing
             )
         ),
         exit = slideOutVertically(
             targetOffsetY = { fullHeight -> -fullHeight },
             animationSpec = tween(
-                durationMillis = 250,
-                easing = androidx.compose.animation.core.FastOutLinearInEasing
+                durationMillis = 50,
+                easing = androidx.compose.animation.core.LinearEasing
             )
         ),
         modifier = modifier

@@ -353,6 +353,9 @@ class ReaderScreenViewModel(
             listOf(chapter)
         }
 
+        // Preserve UI state from previous Success state
+        val previousSuccessState = currentState as? ReaderState.Success
+        
         _state.value = ReaderState.Success(
             book = book,
             currentChapter = chapter,
@@ -362,6 +365,12 @@ class ReaderScreenViewModel(
             currentChapterIndex = if (chapterIndex != -1) chapterIndex else 0,
             chapterShell = newChapterShell,
             isLoadingContent = chapter.isEmpty() && catalog?.source != null,
+            // Preserve UI state from previous state
+            isReaderModeEnabled = previousSuccessState?.isReaderModeEnabled ?: true,
+            isSettingModeEnabled = previousSuccessState?.isSettingModeEnabled ?: false,
+            isMainBottomModeEnabled = previousSuccessState?.isMainBottomModeEnabled ?: false,
+            showSettingsBottomSheet = previousSuccessState?.showSettingsBottomSheet ?: false,
+            isDrawerAsc = previousSuccessState?.isDrawerAsc ?: true,
         )
 
         // Fetch remote content if needed

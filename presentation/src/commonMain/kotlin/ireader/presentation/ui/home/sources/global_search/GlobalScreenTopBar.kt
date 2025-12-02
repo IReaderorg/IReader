@@ -15,7 +15,7 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
-import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchState
+import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchScreenState
 
 
 @OptIn(ExperimentalComposeUiApi::class,
@@ -23,9 +23,11 @@ import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearch
 )
 @Composable
 fun GlobalScreenTopBar(
+        query: String,
+        onQueryChange: (String) -> Unit,
         onSearch: (String) -> Unit,
         onPop: () -> Unit,
-        state: GlobalSearchState,
+        onSearchModeChange: (Boolean) -> Unit,
         scrollBehavior: TopAppBarScrollBehavior?
 ) {
 
@@ -35,12 +37,10 @@ fun GlobalScreenTopBar(
         scrollBehavior = scrollBehavior,
         title = {
             AppTextField(
-                query = state.query,
-                onValueChange = {
-                    state.query = it
-                },
+                query = query,
+                onValueChange = onQueryChange,
                 onConfirm = {
-                    onSearch(state.query)
+                    onSearch(query)
                     keyboardController?.hide()
                     focusManager.clearFocus()
                 },
@@ -51,7 +51,7 @@ fun GlobalScreenTopBar(
                 imageVector = Icons.Default.Search,
                 contentDescription = localize(Res.string.search),
                 onClick = {
-                    state.searchMode = true
+                    onSearchModeChange(true)
                 },
             )
         },

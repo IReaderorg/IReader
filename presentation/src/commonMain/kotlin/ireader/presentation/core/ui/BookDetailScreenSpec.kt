@@ -47,13 +47,13 @@ import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
+import ireader.presentation.ui.book.components.BookDetailShimmerLoading
 import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
 import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.presentation.ui.book.viewmodel.BookDetailEvent
 import ireader.presentation.ui.book.viewmodel.BookDetailState
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.book.components.BookDetailShimmerLoading
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.core.theme.TransparentStatusBar
 import ireader.presentation.ui.core.utils.isScrolledToEnd
@@ -155,25 +155,28 @@ data class BookDetailScreenSpec constructor(
             )
         }
         
-        when (val s = state) {
-            BookDetailState.Loading -> {
-                BookDetailShimmerLoading()
-            }
-            
-            is BookDetailState.Success -> {
-                BookDetailContent(
-                    vm = vm,
-                    state = s,
-                    snackbarHostState = snackbarHostState,
-                    navigationCallbacks = navigationCallbacks,
-                )
-            }
-            
-            is BookDetailState.Error -> {
-                ErrorContent(
-                    message = s.message,
-                    onBack = { navController.popBackStack() }
-                )
+        // Wrap entire screen with TransparentStatusBar to prevent UI jump during transition
+        TransparentStatusBar {
+            when (val s = state) {
+                BookDetailState.Loading -> {
+                    BookDetailShimmerLoading()
+                }
+                
+                is BookDetailState.Success -> {
+                    BookDetailContent(
+                        vm = vm,
+                        state = s,
+                        snackbarHostState = snackbarHostState,
+                        navigationCallbacks = navigationCallbacks,
+                    )
+                }
+                
+                is BookDetailState.Error -> {
+                    ErrorContent(
+                        message = s.message,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -293,8 +296,7 @@ data class BookDetailScreenSpec constructor(
                     )
                 }
                 
-                TransparentStatusBar {
-                    IScaffold(
+                IScaffold(
                         topBarScrollBehavior = scrollBehavior,
                         snackbarHostState = snackbarHostState,
                         topBar = { scrollBehavior ->
@@ -478,7 +480,6 @@ data class BookDetailScreenSpec constructor(
                     }
                 }
             }
-        }
         
         // Dialogs
         if (vm.showMigrationDialog) {

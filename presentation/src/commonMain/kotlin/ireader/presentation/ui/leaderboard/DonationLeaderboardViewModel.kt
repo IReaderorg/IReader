@@ -1,22 +1,33 @@
 package ireader.presentation.ui.leaderboard
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import ireader.domain.models.entities.DonationLeaderboardEntry
+import androidx.compose.runtime.Stable
 import ireader.domain.usecases.leaderboard.DonationLeaderboardUseCases
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for the Donation Leaderboard screen following Mihon's StateScreenModel pattern.
+ * 
+ * Uses a single immutable StateFlow<DonationLeaderboardScreenState> instead of mutableStateOf.
+ * This provides:
+ * - Single source of truth for UI state
+ * - Atomic state updates
+ * - Better Compose performance with @Immutable state
+ */
+@Stable
 class DonationLeaderboardViewModel(
     private val donationLeaderboardUseCases: DonationLeaderboardUseCases
 ) : BaseViewModel() {
     
-    var state by mutableStateOf(DonationLeaderboardState())
-        private set
+    private val _state = MutableStateFlow(DonationLeaderboardScreenState())
+    val state: StateFlow<DonationLeaderboardScreenState> = _state.asStateFlow()
     
     private var realtimeJob: Job? = null
     
@@ -32,20 +43,24 @@ class DonationLeaderboardViewModel(
     
     fun loadDonationLeaderboard() {
         scope.launch {
-            state = state.copy(isLoading = true, error = null)
+            _state.update { it.copy(isLoading = true, error = null) }
             
             donationLeaderboardUseCases.getDonationLeaderboard(limit = 100)
                 .onSuccess { entries ->
-                    state = state.copy(
-                        leaderboard = entries,
-                        isLoading = false
-                    )
+                    _state.update { current ->
+                        current.copy(
+                            leaderboard = entries,
+                            isLoading = false
+                        )
+                    }
                 }
                 .onFailure { error ->
-                    state = state.copy(
-                        error = error.message ?: "Failed to load donation leaderboard",
-                        isLoading = false
-                    )
+                    _state.update { current ->
+                        current.copy(
+                            error = error.message ?: "Failed to load donation leaderboard",
+                            isLoading = false
+                        )
+                    }
                 }
         }
     }
@@ -54,18 +69,18 @@ class DonationLeaderboardViewModel(
         scope.launch {
             donationLeaderboardUseCases.getUserDonationRank()
                 .onSuccess { entry ->
-                    state = state.copy(userRank = entry)
+                    _state.update { it.copy(userRank = entry) }
                 }
                 .onFailure {
                     // User might not be on leaderboard yet
-                    state = state.copy(userRank = null)
+                    _state.update { it.copy(userRank = null) }
                 }
         }
     }
     
     fun toggleRealtimeUpdates(enabled: Boolean) {
         donationLeaderboardUseCases.setRealtimeEnabled(enabled)
-        state = state.copy(isRealtimeEnabled = enabled)
+        _state.update { it.copy(isRealtimeEnabled = enabled) }
         
         if (enabled) {
             startRealtimeUpdates()
@@ -79,15 +94,17 @@ class DonationLeaderboardViewModel(
         realtimeJob = scope.launch {
             donationLeaderboardUseCases.observeDonationLeaderboard(limit = 100)
                 .catch { error ->
-                    state = state.copy(
-                        error = "Realtime updates failed: ${error.message}"
-                    )
+                    _state.update { current ->
+                        current.copy(error = "Realtime updates failed: ${error.message}")
+                    }
                 }
                 .collectLatest { entries ->
-                    state = state.copy(
-                        leaderboard = entries,
-                        isLoading = false
-                    )
+                    _state.update { current ->
+                        current.copy(
+                            leaderboard = entries,
+                            isLoading = false
+                        )
+                    }
                 }
         }
     }
@@ -98,7 +115,7 @@ class DonationLeaderboardViewModel(
     }
     
     fun clearError() {
-        state = state.copy(error = null)
+        _state.update { it.copy(error = null) }
     }
     
     override fun onCleared() {
@@ -106,11 +123,3 @@ class DonationLeaderboardViewModel(
         stopRealtimeUpdates()
     }
 }
-
-data class DonationLeaderboardState(
-    val leaderboard: List<DonationLeaderboardEntry> = emptyList(),
-    val userRank: DonationLeaderboardEntry? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val isRealtimeEnabled: Boolean = false
-)

@@ -60,6 +60,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -105,7 +106,7 @@ fun PopularBooksScreen(
     onOpenExternalUrl: (String) -> Unit = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val state = vm.state
+    val state by vm.state.collectAsState()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
@@ -187,7 +188,7 @@ fun PopularBooksScreen(
                 }
                 state.error != null && state.books.isEmpty() -> {
                     ErrorView(
-                        message = state.error,
+                        message = state.error ?: "",
                         onRetry = { vm.refresh() }
                     )
                 }
