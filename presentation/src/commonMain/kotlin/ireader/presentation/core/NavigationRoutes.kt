@@ -38,6 +38,9 @@ object NavigationRoutes {
     const val repository = "repository"
     const val webView = "webView"
     const val browseSettings = "browseSettings"
+    const val readingBuddy = "readingBuddy"
+    const val adminQuoteVerification = "adminQuoteVerification"
+    const val communityHub = "communityHub"
     
     // Routes with parameters
     fun bookDetail(bookId: Long) = "bookDetail/$bookId"

@@ -20,15 +20,33 @@ import kotlinx.collections.immutable.toImmutableList
  * 
  * This provides clear loading/success/error states and enables
  * Compose compiler optimizations through @Immutable annotations.
+ * 
+ * OPTIMIZATION: Instead of showing shimmer loading, we show a Placeholder
+ * state with minimal book info immediately, then progressively update to
+ * Success state as data loads. This provides instant visual feedback.
  */
 @Stable
 sealed interface BookDetailState {
     
     /**
-     * Initial loading state - shown when screen first loads
+     * Initial loading state - only shown briefly before Placeholder
+     * In practice, we skip this and go directly to Placeholder
      */
     @Immutable
     data object Loading : BookDetailState
+    
+    /**
+     * Placeholder state - shows immediately with minimal book info
+     * while full data loads in background. This eliminates perceived lag.
+     */
+    @Immutable
+    data class Placeholder(
+        val bookId: Long,
+        val title: String = "Loading...",
+        val cover: String? = null,
+        val author: String? = null,
+        val isLoading: Boolean = true,
+    ) : BookDetailState
     
     /**
      * Success state with all book detail data

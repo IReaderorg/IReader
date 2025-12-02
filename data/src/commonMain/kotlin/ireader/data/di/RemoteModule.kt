@@ -196,4 +196,18 @@ val remoteModule = module {
             )
         }
     }
+    
+    // Quote repository for Reading Buddy feature
+    single<ireader.domain.data.repository.QuoteRepository> {
+        val provider = get<SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.quote.NoOpQuoteRepository()
+        } else {
+            val supabaseClient = (provider as MultiSupabaseClientProvider).authClient
+            ireader.data.quote.SupabaseQuoteRepository(
+                supabaseClient = supabaseClient,
+                backendService = get()
+            )
+        }
+    }
 }

@@ -65,26 +65,11 @@ object MoreScreenSpec {
                 onWeb3Profile = {
                     navController.navigate(NavigationRoutes.profile)
                 },
-                onBadgeStore = {
-                    navController.navigate(NavigationRoutes.badgeStore)
+                onCommunityHub = {
+                    navController.navigate(NavigationRoutes.communityHub)
                 },
-                onNFTBadge = {
-                    navController.navigate(NavigationRoutes.nftBadge)
-                },
-                onBadgeManagement = {
-                    navController.navigate(NavigationRoutes.badgeManagement)
-                },
-                onAdminBadgeVerification = {
-                    navController.navigate(NavigationRoutes.adminBadgeVerification)
-                },
-                onLeaderboard = {
-                    navController.navigate(NavigationRoutes.leaderboard)
-                },
-                onPopularBooks = {
-                    navController.navigate(NavigationRoutes.popularBooks)
-                },
-                onAllReviews = {
-                    navController.navigate(NavigationRoutes.allReviews)
+                onReadingBuddy = {
+                    navController.navigate(NavigationRoutes.readingBuddy)
                 },
             )
         }

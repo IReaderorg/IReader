@@ -1,4 +1,2169 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
+    <string name="aa">Aa</string>
+    <string name="aborted">نجاح</string>
+    <string name="about">حول</string>
+    <string name="about_google_drive_backup">حول النسخ الاحتياطي في Google Drive</string>
+    <string name="about_gradio_tts">حول Gradio TTS</string>
+    <string name="about_this_goal">حول هذا الهدف</string>
+    <string name="academic">أكاديمي</string>
+    <string name="accents_select_parts_of_the_ui">تحديد الأجزاء البارزة من واجهة المستخدم</string>
+    <string name="accessibility">إمكانية الوصول</string>
+    <string name="account">الحساب</string>
+    <string name="achievement_badges">شارات الإنجاز</string>
+    <string name="achievement_unlocked">تم فتح الإنجاز!</string>
+    <string name="achievements">الإنجازات</string>
+    <string name="action_cannot_be_undone">لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="actions">إجراءات</string>
+    <string name="active_downloads">نشط</string>
+    <string name="adapt_colors_from_your_wallpaper_android_12">تكييف الألوان من خلفية الشاشة (Android 12+)</string>
+    <string name="add">إضافة</string>
+    <string name="add_as_new">جديد</string>
+    <string name="add_custom_tts_engine">إضافة محرك تحويل النص إلى كلام مخصص</string>
+    <string name="add_entry">إضافة إدخال</string>
+    <string name="add_glossary_entry">إضافة إدخال للمسرد</string>
+    <string name="add_novels_to_library_only">إضافة الروايات إلى المكتبة فقط عند العثور عليها في نتائج البحث</string>
+    <string name="add_parameter">إضافة معامل</string>
+    <string name="add_repository">إضافة مستودع</string>
+    <string name="add_to_category">أضف إلى الفئة</string>
+    <string name="add_to_library">أضف إلى المكتبة</string>
+    <string name="added_to_library">تمت الإضافة إلى المكتبة</string>
+    <string name="additional_details">تفاصيل إضافية:</string>
+    <string name="additional_details_optional">تفاصيل إضافية (اختياري)</string>
+    <string name="adjust_brightness">ضبط السطوع</string>
+    <string name="admin">المسؤول</string>
+    <string name="adult_content_lock">قفل المحتوى للبالغين</string>
+    <string name="adult_content_warning">تحذير بشأن المحتوى للبالغين</string>
+    <string name="advance_commands">أوامر متقدمة</string>
+    <string name="advance_setting">إعدادات متقدمة</string>
+    <string name="advanced">متقدم</string>
+    <string name="advanced_features">ميزات متقدمة</string>
+    <string name="advanced_filters">مرشحات متقدمة</string>
+    <string name="advanced_options">خيارات متقدمة</string>
+    <string name="advanced_security">أمان متقدم</string>
+    <string name="advanced_settings">إعدادات متقدمة</string>
+    <string name="alignment">محاذاة</string>
+    <string name="all">الكل</string>
+    <string name="all_categories">جميع الفئات</string>
+    <string name="all_category">الكل</string>
+    <string name="all_chapters">جميع الفصول</string>
+    <string name="all_chapters_already_downloaded">تم تنزيل جميع الفصول بالفعل</string>
+    <string name="all_data_collection_is_optional">جمع البيانات اختياري بالكامل ويمكن تعطيله في أي وقت.</string>
+    <string name="all_donors">جميع المتبرعين</string>
+    <string name="all_extensions_up_to_date">جميع الملحقات محدثة</string>
+    <string name="all_google_fonts">جميع خطوط Google</string>
+    <string name="all_lang">الكل</string>
+    <string name="all_languages">جميع اللغات</string>
+    <string name="all_languages_selected">تم تحديد جميع اللغات</string>
+    <string name="all_payment_proofs_have_been_reviewed">تمت مراجعة جميع إثباتات الدفع</string>
+    <string name="all_plugins">جميع الملحقات</string>
+    <string name="all_plugins_updated_successfully">تم تحديث جميع المكونات الإضافية بنجاح</string>
+    <string name="all_quotes">جميع الاقتباسات</string>
+    <string name="all_rankings">جميع التصنيفات</string>
+    <string name="all_status">جميع الحالات</string>
+    <string name="all_time">كل الأوقات</string>
+    <string name="allow_loading_lnreader_compatible_javascript">السماح بتحميل ملحقات JavaScript المتوافقة مع LNReader</string>
+    <string name="alpha">ألفا</string>
+    <string name="alphaanimation">alphaAnimation</string>
+    <string name="an_image">صورة</string>
+    <string name="analytics">تحليلات</string>
+    <string name="anonymous_tracking">تتبع مجهول</string>
+    <string name="api_key">مفتاح API</string>
+    <string name="api_key_optional">مفتاح API (اختياري)</string>
+    <string name="api_key_required">مفتاح API مطلوب</string>
+    <string name="api_keys">مفاتيح API</string>
+    <string name="api_name">اسم API</string>
+    <string name="api_rate_limit_exceeded">تم تجاوز الحد الأقصى لمعدل API</string>
+    <string name="api_response_error">لم تنجح استجابة Api</string>
+    <string name="api_settings">إعدادات API</string>
+    <string name="app_crashed">تعطل التطبيق</string>
+    <string name="app_lock">قفل التطبيق</string>
+    <string name="app_ui_font">خط واجهة مستخدم التطبيق</string>
+    <string name="app_updates">تحديثات التطبيق</string>
+    <string name="app_updates_display">تحديثات التطبيق والشاشة</string>
+    <string name="appearance">المظهر</string>
+    <string name="appearance_settings">المظهر والإعدادات</string>
+    <string name="appearance_theme">المظهر والسمة</string>
+    <string name="apply">تطبيق</string>
+    <string name="apply_filters">تطبيق الفلاتر</string>
+    <string name="approve">موافقة</string>
+    <string name="archive">أرشيف</string>
+    <string name="archive_option_description">نقل إلى الفئة المؤرشفة، مخفي من المكتبة الرئيسية</string>
+    <string name="archive_option_title">أرشيف</string>
+    <string name="archived">مؤرشف</string>
+    <string name="archived_1">مؤرشف</string>
+    <string name="are_you_sure_you_want">هل أنت متأكد أنك تريد حذف هذا النسخ الاحتياطي؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="ascending">تصاعدي</string>
+    <string name="audio_output_index">فهرس إخراج الصوت</string>
+    <string name="authenticate">مصادقة</string>
+    <string name="authenticate_to_confirm_change">المصادقة لتأكيد التغيير</string>
+    <string name="authenticate_with_biometric">المصادقة باستخدام المقاييس الحيوية</string>
+    <string name="authenticating">جارٍ المصادقة...</string>
+    <string name="authentication">المصادقة</string>
+    <string name="authentication_is_required_to_access_this_source">المصادقة مطلوبة للوصول إلى هذا المصدر.</string>
+    <string name="authentication_optional">المصادقة (اختيارية)</string>
+    <string name="author">المؤلف</string>
+    <string name="author_optional">المؤلف (اختياري)</string>
+    <string name="authors">المؤلفون</string>
+    <string name="auto">تلقائي</string>
+    <string name="auto_backup">نسخ احتياطي تلقائي</string>
+    <string name="auto_cleanup">تنظيف تلقائي</string>
+    <string name="auto_delete">حذف تلقائي</string>
+    <string name="auto_delete_chapters">حذف الفصول تلقائيًا</string>
+    <string name="auto_download">تحميل تلقائي</string>
+    <string name="auto_installer">التثبيت التلقائي</string>
+    <string name="auto_installer_subtitle">تثبيت تحديثات الملحقات تلقائيًا عند توفرها</string>
+    <string name="auto_next">تلقائي التالي</string>
+    <string name="auto_next_chapter">الفصل التالي تلقائيًا</string>
+    <string name="auto_next_chapter_1">تلقائي الفصل التالي</string>
+    <string name="auto_preload_next_chapter">التحميل المسبق التلقائي للفصل التالي</string>
+    <string name="auto_preload_next_chapter_summary">قم بتنزيل الفصل التالي تلقائيًا في الخلفية للقراءة الفورية</string>
+    <string name="auto_rotate">تدوير تلقائي</string>
+    <string name="auto_scroll">التمرير التلقائي</string>
+    <string name="auto_scrolling">التمرير التلقائي</string>
+    <string name="auto_sort_chapters_in_db">الفرز التلقائي للفصول في قاعدة البيانات</string>
+    <string name="auto_sync">مزامنة تلقائية</string>
+    <string name="auto_sync_1">مزامنة تلقائية</string>
+    <string name="auto_translate_next_chapter">ترجمة تلقائية للفصل التالي</string>
+    <string name="auto_translate_next_chapter_summary">ترجمة الفصل التالي تلقائيًا عند التنقل باستخدام محرك الترجمة المحدد</string>
+    <string name="auto_update">تحديث تلقائي</string>
+    <string name="auto_update_1">تحديث تلقائي</string>
+    <string name="auto_update_2">تحديث تلقائي</string>
+    <string name="auto_update_library">تحديث المكتبة تلقائيًا</string>
+    <string name="auto_update_plugins">تحديث الملحقات تلقائيًا</string>
+    <string name="auto_update_progress">تحديث التقدم تلقائيًا</string>
+    <string name="auto_update_score">تحديث الدرجة تلقائيًا</string>
+    <string name="auto_update_status">تحديث الحالة تلقائيًا</string>
+    <string name="automatic_backup">نسخ احتياطي تلقائي</string>
+    <string name="automatic_downloads">تنزيلات تلقائية</string>
+    <string name="automatic_error_reporting">الإبلاغ التلقائي عن الأخطاء</string>
+    <string name="automatically_check_for_and_install_plugin_updates">التحقق من تحديثات الإضافات وتثبيتها تلقائيًا</string>
+    <string name="automatically_download_newly_detected_chapters">تنزيل الفصول المكتشفة حديثًا في الخلفية تلقائيًا</string>
+    <string name="automatically_play_next_chapter_when_current_ends">تشغيل الفصل التالي تلقائيًا عند انتهاء الفصل الحالي</string>
+    <string name="automatically_refresh_leaderboard_when_other">تحديث قائمة المتصدرين تلقائيًا عند مزامنة المستخدمين الآخرين (يستخدم المزيد من البيانات)</string>
+    <string name="automatically_stop_playback_after_set_time">إيقاف التشغيل تلقائيًا بعد وقت محدد</string>
+    <string name="automatically_sync_reading_progress">مزامنة تقدم القراءة تلقائيًا</string>
+    <string name="autoscroll">التمرير التلقائي</string>
+    <string name="available">متاح</string>
+    <string name="available_backups">النسخ الاحتياطية المتاحة</string>
+    <string name="available_engines">المحركات المتاحة</string>
+    <string name="available_for_download">متاح للتنزيل</string>
+    <string name="available_kokoro_voices">أصوات Kokoro المتاحة:</string>
+    <string name="available_languages">اللغات المتاحة:</string>
+    <string name="average_reading_speed">متوسط سرعة القراءة</string>
+    <string name="avg_cpu">متوسط وحدة المعالجة المركزية</string>
+    <string name="avg_response_time">متوسط ​​وقت الاستجابة</string>
+    <string name="back">رجوع</string>
+    <string name="background_color">لون الخلفية</string>
+    <string name="background_webview_mode">وضع Background WebView</string>
+    <string name="backup">نسخ احتياطي</string>
+    <string name="backup_all">نسخ احتياطي للكل</string>
+    <string name="backup_and_restore">النسخ الاحتياطي والاستعادة</string>
+    <string name="backup_and_restore_your_custom_themes">نسخ واستعادة السمات المخصصة الخاصة بك</string>
+    <string name="backup_and_restore_your_library_to_google_drive">نسخ واستعادة مكتبتك إلى Google Drive</string>
+    <string name="backup_cancelled">تم إلغاء النسخ الاحتياطي</string>
+    <string name="backup_created_successfully">تم إنشاء نسخة احتياطية بنجاح</string>
+    <string name="backup_error">خطأ في النسخ الاحتياطي: %1$s</string>
+    <string name="backup_restore">نسخ احتياطي واستعادة</string>
+    <string name="backup_restored_successfully">تمت استعادة النسخة الاحتياطية بنجاح</string>
+    <string name="backup_to_google_drive_or_dropbox">النسخ الاحتياطي إلى Google Drive أو Dropbox</string>
+    <string name="badge">شارة</string>
+    <string name="badge_granted_immediately_upon_successful">• يتم منح الشارة فور التحقق الناجح</string>
+    <string name="badge_placeholder">عنصر نائب للشارة</string>
+    <string name="badge_store">متجر الشارات</string>
+    <string name="badge_verification">التحقق من الشارة</string>
+    <string name="badges">شارات</string>
+    <string name="badges_achievements">الشارات والإنجازات</string>
+    <string name="badges_achievements_desc">اربح واعرض الشارات على ملفك الشخصي</string>
+    <string name="badges_customization">الشارات والتخصيص</string>
+    <string name="badges_owned">الشارات المملوكة</string>
+    <string name="batch_update_failed">فشل التحديث المجمع: %1$s</string>
+    <string name="be_first_to_submit">كن أول من يرسل اقتباس!</string>
+    <string name="be_the_first_to_review">كن أول من يراجع!</string>
+    <string name="be_the_first_to_share_your_thoughts">كن أول من يشارك أفكارك</string>
+    <string name="be_the_first_to_support_the_app">كن أول من يدعم التطبيق!</string>
+    <string name="be_the_first_to_sync_your_reading_stats">كن أول من يقوم بمزامنة إحصائيات القراءة الخاصة بك!</string>
+    <string name="benefits_of_signing_in">فوائد تسجيل الدخول</string>
+    <string name="best_practices">أفضل الممارسات</string>
+    <string name="best_streak">أفضل سلسلة</string>
+    <string name="better_source_available">مصدر أفضل متاح</string>
+    <string name="bilingual">ثنائي اللغة</string>
+    <string name="bilingual_layout">تخطيط ثنائي اللغة</string>
+    <string name="bilingual_mode">وضع ثنائي اللغة</string>
+    <string name="biometric_authentication">المصادقة البيومترية</string>
+    <string name="bionic_reading">وضع القراءة الأيونية</string>
+    <string name="block">حظر</string>
+    <string name="block_screenshots_and_screen_recording">حظر لقطات الشاشة وتسجيل الشاشة</string>
+    <string name="blur_library_covers_until_tapped">تمويه أغلفة المكتبة حتى يتم النقر عليها</string>
+    <string name="book_added_to_library">تمت إضافة الكتاب \'%1$s\' إلى المكتبة</string>
+    <string name="book_archived">تم أرشفة %1$s</string>
+    <string name="book_cover">غلاف الكتاب</string>
+    <string name="book_cover_1">غلاف الكتاب</string>
+    <string name="book_name">اسم الكتاب</string>
+    <string name="book_not_found">الكتاب غير موجود</string>
+    <string name="book_queued_for_download">تمت إضافة الكتاب إلى قائمة انتظار التنزيل</string>
+    <string name="book_reviews">مراجعات الكتب</string>
+    <string name="book_title">عنوان الكتاب</string>
+    <string name="book_unarchived">تم إلغاء أرشفة %1$s</string>
+    <string name="bookmark">علامة مرجعية</string>
+    <string name="bookmarked">تمت إضافة إشارة مرجعية</string>
+    <string name="bookmarks">الإشارات المرجعية</string>
+    <string name="books">الكتب</string>
+    <string name="books_completed">الكتب المكتملة</string>
+    <string name="books_endpoint">نقطة نهاية الكتب</string>
+    <string name="books_queued_for_download">تمت إضافة %1$s كتب إلى قائمة التنزيل</string>
+    <string name="books_read">الكتب المقروءة</string>
+    <string name="bottom">أسفل</string>
+    <string name="bottom_content_padding">حشو المحتوى السفلي</string>
+    <string name="bottom_left">أسفل اليسار</string>
+    <string name="bottom_navigation">التنقل السفلي</string>
+    <string name="brightness">السطوع</string>
+    <string name="broken_chapter_detected">تم الكشف عن فصل تالف</string>
+    <string name="browse">تصفح</string>
+    <string name="browse_settings">تصفح الإعدادات</string>
+    <string name="browse_settings_updated">تم تحديث إعدادات التصفح</string>
+    <string name="bug_fixes">إصلاحات الأخطاء</string>
+    <string name="build_time">وقت الإنشاء</string>
+    <string name="build_type">نوع الإنشاء</string>
+    <string name="built_in">مدمج</string>
+    <string name="by">بواسطة</string>
+    <string name="by_bookmark">حسب العلامة المرجعية</string>
+    <string name="by_chapter_number">حسب رقم الفصل</string>
+    <string name="by_date_fetched">حسب تاريخ الجلب</string>
+    <string name="by_date_read">حسب تاريخ القراءة</string>
+    <string name="by_date_uploaded">حسب تاريخ الرفع</string>
+    <string name="by_name">حسب الاسم</string>
+    <string name="by_source">حسب المصدر</string>
+    <string name="bypass_bot_detection_invisibly_without">تجاوز الكشف عن الروبوت بشكل غير مرئي دون إظهار WebView</string>
+    <string name="cache_cleared">تم مسح ذاكرة التخزين المؤقت.</string>
+    <string name="cache_expires">انتهاء صلاحية ذاكرة التخزين المؤقت:</string>
+    <string name="cache_management">إدارة ذاكرة التخزين المؤقت</string>
+    <string name="cached">مخزن مؤقتًا</string>
+    <string name="cancel">إلغاء</string>
+    <string name="cancel_all">إلغاء الكل</string>
+    <string name="cancel_all_for_this_series">"إلغاء الكل لهذه السلسلة</string>
+    <string name="cancel_export">إلغاء التصدير</string>
+    <string name="cancel_export_confirmation">هل أنت متأكد أنك تريد إلغاء التصدير؟</string>
+    <string name="cancel_import">إلغاء الاستيراد</string>
+    <string name="cancel_import_confirmation">هل أنت متأكد أنك تريد إلغاء الاستيراد؟</string>
+    <string name="cancel_migration">إلغاء الترحيل</string>
+    <string name="cancel_translation">إلغاء الترجمة</string>
+    <string name="cant_get_content">لا يمكن الحصول على محتوى الفصل.</string>
+    <string name="card_elevation">ارتفاع البطاقة</string>
+    <string name="card_payment">الدفع بالبطاقة</string>
+    <string name="card_scale">مقياس البطاقة</string>
+    <string name="card_style">نمط البطاقة</string>
+    <string name="card_title">عنوان البطاقة</string>
+    <string name="casual">غير رسمي</string>
+    <string name="catalog_not_found_error">لا يمكن العثور على أي ملحقات.</string>
+    <string name="catalog_settings">إعدادات الكتالوج</string>
+    <string name="category">التصنيفات</string>
+    <string name="category_already_exists">الفئة \'%1$s\' موجودة بالفعل</string>
+    <string name="category_hint">اسم…</string>
+    <string name="category_management">إدارة الفئات</string>
+    <string name="category_name">اسم الفئة</string>
+    <string name="category_name_empty">لا يمكن أن يكون اسم الفئة فارغًا</string>
+    <string name="category_not_found">الفئة غير موجودة</string>
+    <string name="category_renamed">تمت إعادة تسمية الفئة إلى \'%1$s\'</string>
+    <string name="center">المركز</string>
+    <string name="change_category">تغيير الفئة</string>
+    <string name="change_category_1">تغيير الفئة</string>
+    <string name="changelog">سجل التغييرات</string>
+    <string name="channel_app_updates">تحديثات التطبيق</string>
+    <string name="channel_common">عام</string>
+    <string name="channel_complete">اكتمل</string>
+    <string name="channel_crash_logs">سجلات الأعطال</string>
+    <string name="channel_errors">أخطاء</string>
+    <string name="channel_ext_updates">تحديثات الإضافات</string>
+    <string name="channel_new_chapters">تحديثات الفصول</string>
+    <string name="channel_progress">التقدم</string>
+    <string name="chapter">الفصل</string>
+    <string name="chapter_audio_downloaded">تم تنزيل صوت الفصل بنجاح!</string>
+    <string name="chapter_background">خلفية الفصل</string>
+    <string name="chapter_cache">ذاكرة التخزين المؤقت للفصل</string>
+    <string name="chapter_completed">تم إكمال الفصل</string>
+    <string name="chapter_content_extracted">تم استخراج محتوى الفصل باستخدام %1$s</string>
+    <string name="chapter_filters">فلاتر الفصل</string>
+    <string name="chapter_heading_size">حجم عنوان الفصل</string>
+    <string name="chapter_number">رقم الفصل</string>
+    <string name="chapter_optional">الفصل (اختياري)</string>
+    <string name="chapter_repaired_successfully">تم إصلاح الفصل بنجاح من %1$s</string>
+    <string name="chapter_reported_successfully">تم الإبلاغ عن الفصل بنجاح. شكرا لك على ملاحظاتك!</string>
+    <string name="chapter_reviews">مراجعات الفصول</string>
+    <string name="chapter_selection">تحديد الفصل</string>
+    <string name="chapters">الفصول</string>
+    <string name="chapters_queued_download">تمت إضافة %1$s فصلًا إلى قائمة انتظار التنزيل</string>
+    <string name="chapters_queued_for_download">تمت إضافة %1$s فصول إلى قائمة التنزيل</string>
+    <string name="chapters_read">الفصول المقروءة</string>
+    <string name="chapters_was_cleared">تم مسح الفصول</string>
+    <string name="chatgpt_login_required">تسجيل الدخول إلى ChatGPT مطلوب</string>
+    <string name="chatgpt_translation">ترجمة ChatGPT</string>
+    <string name="check_back_later_for_new_badges">تحقق مرة أخرى لاحقًا للحصول على شارات جديدة!</string>
+    <string name="check_for_updates">التحقق من وجود تحديثات</string>
+    <string name="check_permissions">التحقق من الأذونات</string>
+    <string name="check_the_update">تحقق من التحديث</string>
+    <string name="checking_for_updates">جارٍ التحقق من وجود تحديثات…</string>
+    <string name="checking_for_updates_1">جارٍ التحقق من وجود تحديثات...</string>
+    <string name="chip_bg">chip_bg</string>
+    <string name="chip_content">chip_content</string>
+    <string name="chip_scale">chip_scale</string>
+    <string name="choose_a_name_for_your_profile">اختر اسمًا لملفك الشخصي</string>
+    <string name="choose_folder">اختر مجلدًا</string>
+    <string name="choose_where_to_migrate_your_books">اختر المكان الذي تريد ترحيل كتبك إليه</string>
+    <string name="choose_which_tts_settings_to_open">اختر إعدادات تحويل النص إلى كلام التي تريد فتحها:</string>
+    <string name="choose_your_languages">اختر لغاتك</string>
+    <string name="choose_your_preferred_theme">اختر المظهر المفضل لديك</string>
+    <string name="cleanup_interval">فترة التنظيف</string>
+    <string name="clear">مسح</string>
+    <string name="clear_1">مسح</string>
+    <string name="clear_all_cache">مسح جميع ذاكرة التخزين المؤقت</string>
+    <string name="clear_all_cache_confirmation">سيؤدي هذا إلى إزالة جميع الصور والفصول وبيانات الشبكة المخزنة مؤقتًا. لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="clear_all_cached_data_to_free_up_storage_space">امسح جميع البيانات المخزنة مؤقتًا لتحرير مساحة التخزين</string>
+    <string name="clear_all_chapters">مسح جميع الفصول</string>
+    <string name="clear_all_cover_cache">مسح جميع ذاكرة التخزين المؤقت للغلاف</string>
+    <string name="clear_all_database">مسح جميع قواعد البيانات</string>
+    <string name="clear_auth_data_confirmation">سيؤدي هذا إلى إزالة جميع رموز وبيانات جلسات المصادقة المحفوظة. ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى المصادر المحمية.</string>
+    <string name="clear_authentication_data">مسح بيانات المصادقة</string>
+    <string name="clear_cache">مسح ذاكرة التخزين المؤقت</string>
+    <string name="clear_cache_on_low_storage">مسح ذاكرة التخزين المؤقت في حالة انخفاض مساحة التخزين</string>
+    <string name="clear_cached_book_cover_images_to_free_up_storage">امسح صور أغلفة الكتب المخزنة مؤقتًا لتحرير مساحة التخزين</string>
+    <string name="clear_completed">مسح المكتمل</string>
+    <string name="clear_download_cache">مسح ذاكرة التخزين المؤقتة للتنزيل</string>
+    <string name="clear_download_cache_confirmation">سيؤدي هذا إلى إزالة جميع ملفات التنزيل المؤقتة. لن تتأثر الفصول التي تم تنزيلها.</string>
+    <string name="clear_filters">مسح الفلاتر</string>
+    <string name="clear_not_in_library_books">مسح جميع الكتب غير الموجودة في المكتبة</string>
+    <string name="clear_search">مسح البحث</string>
+    <string name="clear_sync_data">مسح بيانات المزامنة</string>
+    <string name="clear_sync_data_confirmation">سيؤدي هذا إلى إزالة جميع بيانات التتبع وتسجيل الخروج من جميع الخدمات. ستحتاج إلى إعادة تسجيل الدخول وإعادة تتبع كتبك.</string>
+    <string name="click_the_donation_button_below">انقر فوق زر التبرع أدناه</string>
+    <string name="clickable_card">بطاقة قابلة للنقر</string>
+    <string name="clipboard_copy_error">لا يمكن نسخ هذا النص</string>
+    <string name="close">إغلاق</string>
+    <string name="close_search">إغلاق البحث</string>
+    <string name="cloud_backup">نسخ احتياطي سحابي</string>
+    <string name="cloud_backup_setup">إعداد النسخ الاحتياطي السحابي</string>
+    <string name="cloud_features">ميزات السحابة</string>
+    <string name="cloud_features_description">يمكن لـ IReader الاتصال بالخدمات السحابية للحصول على ميزات محسنة. يمكنك تعطيل هذا إذا كنت تفضل تجربة غير متصلة بالإنترنت تمامًا.</string>
+    <string name="cloud_storage">التخزين السحابي</string>
+    <string name="cloud_storage_provider">مزود التخزين السحابي</string>
+    <string name="color_customization">تخصيص الألوان</string>
+    <string name="color_filters">فلاتر الألوان</string>
+    <string name="color_primary">اللون الأساسي</string>
+    <string name="color_secondary">اللون الثانوي</string>
+    <string name="color_selected">تم اختيار اللون</string>
+    <string name="color_theme">موضوع اللون</string>
+    <string name="colors">الألوان</string>
+    <string name="columns">أعمدة</string>
+    <string name="comfortable_grid_layout_description">3 أعمدة في شبكة مع صور غلاف أكبر
+    </string>
+    <string name="comfortable_layout">شبكة مريحة</string>
+    <string name="commit">التأكيد</string>
+    <string name="community">المجتمع</string>
+    <string name="community_endpoint">نقطة نهاية المجتمع</string>
+    <string name="community_leaderboard">المجتمع وقائمة المتصدرين</string>
+    <string name="community_reviews">مراجعات المجتمع</string>
+    <string name="community_reviews_desc">قراءة وكتابة المراجعات للكتب والفصول</string>
+    <string name="compact_grid_layout_description">عمودان في شبكة مع صور غلاف أصغر
+    </string>
+    <string name="compact_layout">تخطيط مضغوط</string>
+    <string name="complete">اكتمل</string>
+    <string name="complete_captcha">أكمل اختبار CAPTCHA للمتابعة</string>
+    <string name="complete_your_donation">أكمل تبرعك</string>
+    <string name="completed">مكتمل</string>
+    <string name="completed_downloads">مكتمل</string>
+    <string name="completion">الإنجاز</string>
+    <string name="completion_rate">معدل الإنجاز</string>
+    <string name="compress_images">ضغط الصور</string>
+    <string name="concurrent_searches">عمليات البحث المتزامنة</string>
+    <string name="configure">تكوين</string>
+    <string name="configure_advanced_options">تكوين الخيارات المتقدمة</string>
+    <string name="configure_androids_built_in_text_to_speech_engine">تكوين محرك تحويل النص إلى كلام المدمج في Android</string>
+    <string name="configure_gradio_based_tts_coqui">تكوين Gradio-based TTS (Coqui, Edge TTS, Persian TTS، إلخ.)</string>
+    <string name="configure_gradio_tts">تكوين Gradio TTS</string>
+    <string name="configure_js_plugins_and_enable">تكوين إضافات JS وتمكين مصادر متوافقة مع LNReader</string>
+    <string name="configure_oauth2_credentials_in">1. قم بتكوين بيانات اعتماد OAuth2 في Google Cloud Console\n</string>
+    <string name="confirm">تأكيد</string>
+    <string name="confirm_exit">تأكيد الخروج</string>
+    <string name="confirm_exit_message">اضغط مرة أخرى للخروج</string>
+    <string name="confirm_password">تأكيد كلمة المرور</string>
+    <string name="confirm_pin">تأكيد رمز PIN</string>
+    <string name="connect_to_google_drive">الاتصال بـ Google Drive</string>
+    <string name="connect_with_us">تواصل معنا</string>
+    <string name="connected">متصل</string>
+    <string name="content">محتوى</string>
+    <string name="content_padding">تباعد المحتوى</string>
+    <string name="content_restrictions">قيود المحتوى</string>
+    <string name="content_type">نوع المحتوى</string>
+    <string name="contents">المحتويات</string>
+    <string name="contents_detail">تفاصيل المحتويات</string>
+    <string name="continue_reading">متابعة القراءة</string>
+    <string name="continue_reading_button">زر متابعة القراءة</string>
+    <string name="continues">متابعة</string>
+    <string name="contract_address">عنوان العقد:</string>
+    <string name="controls_how_many_audio_files">يتحكم في عدد الملفات الصوتية التي يمكن إنشاؤها في وقت واحد لمحركات Kokoro و Maya. القيم الأعلى = توليد أسرع ولكن استخدام المزيد من وحدة المعالجة المركزية / الذاكرة.</string>
+    <string name="conversation">محادثة</string>
+    <string name="copied_to_clipboard">تم النسخ إلى الحافظة</string>
+    <string name="copy">نسخ</string>
+    <string name="copy_version_info">نسخ معلومات الإصدار</string>
+    <string name="copy_your_transaction_id">انسخ معرف المعاملة الخاص بك</string>
+    <string name="could_not_extract_book_info">تعذر استخراج معلومات الكتاب من هذه الصفحة.</string>
+    <string name="cover">الغلاف</string>
+    <string name="cover_cache_cleared">تم مسح ذاكرة التخزين المؤقت للغلاف.</string>
+    <string name="cover_only_layout">شبكة الغلاف فقط</string>
+    <string name="cover_only_layout_description">عمودان من صور الغلاف فقط (بدون نص)</string>
+    <string name="cover_url_must_start_with_http_https_or_file">يجب أن يبدأ عنوان URL للغلاف بـ http:// أو https:// أو file://</string>
+    <string name="cpu">وحدة المعالجة المركزية</string>
+    <string name="crash_reporting">الإبلاغ عن الأعطال</string>
+    <string name="crashes">الأعطال</string>
+    <string name="create_backup">إنشاء نسخة احتياطية</string>
+    <string name="create_backup_1">إنشاء نسخة احتياطية</string>
+    <string name="create_your_first_backup_using_the_button_below">أنشئ أول نسخة احتياطية لك باستخدام الزر أدناه</string>
+    <string name="creating_backup">يتم إنشاء نسخة احتياطية...</string>
+    <string name="creating_backup_1">جارٍ إنشاء نسخة احتياطية...</string>
+    <string name="cross_device_sync">مزامنة عبر الأجهزة</string>
+    <string name="cryptocurrency_donations_are_non_refundable">التبرعات بالعملات المشفرة غير قابلة للاسترداد. يرجى التحقق من عنوان المحفظة قبل الإرسال. لا يقوم IReader بتخزين أو الوصول إلى مفاتيحك الخاصة.</string>
+    <string name="cryptocurrency_wallets">محافظ العملات المشفرة</string>
+    <string name="current_chapter">الفصل الحالي</string>
+    <string name="current_engine">المحرك الحالي</string>
+    <string name="current_location">الموقع الحالي:</string>
+    <string name="current_progress">التقدم الحالي</string>
+    <string name="currently_reading">أقرأ حاليا</string>
+    <string name="currently_viewing_a_plugin_screen">أنت تعرض حاليًا شاشة ملحق</string>
+    <string name="custom">مخصص</string>
+    <string name="custom_brightness">سطوع مخصص</string>
+    <string name="custom_cover">غلاف مخصص</string>
+    <string name="custom_fonts">خطوط مخصصة</string>
+    <string name="customize_individual_colors_to_create">خصص الألوان الفردية لإنشاء المظهر الخاص بك</string>
+    <string name="cutout_area_behavior">سلوك منطقة القطع</string>
+    <string name="daily">يوميًا</string>
+    <string name="daily_quote">اقتباس اليوم</string>
+    <string name="danger_zone">منطقة الخطر</string>
+    <string name="dark">الوضع الداكن</string>
+    <string name="dark_1">داكن</string>
+    <string name="dark_mode">الوضع الداكن</string>
+    <string name="dark_plugin_themes">سمات المكونات الإضافية الداكنة</string>
+    <string name="dark_themes">السمات الداكنة</string>
+    <string name="data">البيانات</string>
+    <string name="data_backup">البيانات والنسخ الاحتياطي</string>
+    <string name="data_storage">تخزين البيانات</string>
+    <string name="data_transferred">البيانات المنقولة</string>
+    <string name="data_usage">استخدام البيانات</string>
+    <string name="data_usage_statistics">إحصائيات استخدام البيانات</string>
+    <string name="database_deleted">تم حذف قاعدة البيانات.</string>
+    <string name="database_error">تم الكشف عن خطأ في قاعدة البيانات. يرجى تجربة أحد الإجراءات التالية: 1) إعادة تشغيل التطبيق 2) حذف ملفات قاعدة البيانات في %LOCALAPPDATA%\\IReader\\cache 3) التشغيل مع المعلمة --repair-database</string>
+    <string name="database_maintenance">صيانة قاعدة البيانات</string>
+    <string name="database_repair_failed">فشل إصلاح قاعدة البيانات: %1$s</string>
+    <string name="database_schema">مخطط قاعدة البيانات</string>
+    <string name="database_was_cleared">تم مسح قاعدة البيانات.</string>
+    <string name="date_added">تاريخ الإضافة</string>
+    <string name="date_fetched">تاريخ الجلب</string>
+    <string name="date_format">تنسيق التاريخ</string>
+    <string name="date_time">التاريخ والوقت</string>
+    <string name="days">ساعة</string>
+    <string name="debug_mode">وضع التصحيح</string>
+    <string name="decrease">تقليل</string>
+    <string name="decrease_font_size">تصغير حجم الخط</string>
+    <string name="decrease_speed">تقليل السرعة</string>
+    <string name="deepseek_api_key">مفتاح DeepSeek API</string>
+    <string name="deepseek_api_key_invalid">مفتاح DeepSeek api غير صالح</string>
+    <string name="deepseek_api_key_not_set">لم يتم تعيين مفتاح DeepSeek API. يرجى تكوينه في
+        الإعدادات.
+    </string>
+    <string name="deepseek_login_required">تسجيل الدخول إلى DeepSeek مطلوب</string>
+    <string name="deepseek_payment_required">مطلوب دفع DeepSeek أو تجاوز حصة API</string>
+    <string name="default_chapter_sort">الترتيب الافتراضي للفصل</string>
+    <string name="default_reading_mode">وضع القراءة الافتراضي</string>
+    <string name="default_reading_mode_for_new_books">وضع القراءة الافتراضي للكتب الجديدة</string>
+    <string name="default_sort">الترتيب الافتراضي</string>
+    <string name="default_sorting_method_for_chapter_lists">طريقة الفرز الافتراضية لقوائم الفصول</string>
+    <string name="default_value">القيمة الافتراضية</string>
+    <string name="delay_between_chapter_downloads_to">التأخير بين تنزيلات الفصول لتجنب حظر IP</string>
+    <string name="delete">حذف</string>
+    <string name="delete_all_database">حذف جميع قواعد البيانات</string>
+    <string name="delete_all_downloads">حذف جميع التنزيلات</string>
+    <string name="delete_all_histories">حذف جميع السجلات</string>
+    <string name="delete_backup">حذف النسخة الاحتياطية؟</string>
+    <string name="delete_category">حذف الفئة؟</string>
+    <string name="delete_custom_theme">حذف مظهر مخصص</string>
+    <string name="delete_failed">فشل الحذف: %1$s</string>
+    <string name="delete_font">حذف الخط</string>
+    <string name="delete_font_1">حذف الخط</string>
+    <string name="delete_update">حذف التحديث</string>
+    <string name="delete_voice">حذف الصوت</string>
+    <string name="delete_voice_model">حذف نموذج الصوت</string>
+    <string name="delete_voice_model_confirmation">هل أنت متأكد أنك تريد حذف %1$s؟ سيؤدي هذا إلى تحرير %2$s من مساحة التخزين.</string>
+    <string name="delete_voice_not_supported">حذف الصوت غير مدعوم حتى الآن</string>
+    <string name="descending">تنازلي</string>
+    <string name="describe_the_issue">صف المشكلة...</string>
+    <string name="description">الوصف</string>
+    <string name="description_placeholder">لا يوجد وصف</string>
+    <string name="detailed_chapter_by_chapter_feedback">ملاحظات تفصيلية فصلًا بفصل</string>
+    <string name="developer">مطور</string>
+    <string name="diagnostic_data">بيانات التشخيص</string>
+    <string name="diagnostic_report">تقرير التشخيص</string>
+    <string name="dialog_remove_chapter_book_description">سيؤدي هذا إلى إزالة تاريخ قراءة هذا
+        الكتاب. هل أنت متأكد؟
+    </string>
+    <string name="dialog_remove_chapter_books_description">سيؤدي هذا إلى إزالة تاريخ قراءة كل
+        الكتب. هل أنت متأكد؟
+    </string>
+    <string name="dialog_remove_chapter_history_description">سيؤدي هذا إلى إزالة تاريخ قراءة هذا
+        الفصل. هل أنت متأكد؟
+    </string>
+    <string name="did_not_get_anything">لم أحصل على أي شيء.</string>
+    <string name="disable">تعطيل</string>
+    <string name="disable_haptic_feedback">تعطيل ردود الفعل اللمسية</string>
+    <string name="disable_loading_animations">تعطيل الرسوم المتحركة للتحميل</string>
+    <string name="disable_privacy_mode">تعطيل وضع الخصوصية</string>
+    <string name="disabled">معطل</string>
+    <string name="disabled_feature">ميزة معطلة</string>
+    <string name="disabled_navigation">تعطيل التنقل</string>
+    <string name="disabled_option">خيار معطل</string>
+    <string name="disabled_preference">تفضيل معطل</string>
+    <string name="disabled_state">حالة معطلة</string>
+    <string name="disconnect">قطع الاتصال</string>
+    <string name="discord">ديسكورد</string>
+    <string name="dismiss">رفض</string>
+    <string name="display">عرض</string>
+    <string name="display_auto_populated_categories_like">عرض الفئات التي يتم ملؤها تلقائيًا مثل أضيفت مؤخرًا، وأقرأ حاليًا، إلخ.</string>
+    <string name="display_mode">وضع العرض</string>
+    <string name="display_settings">إعدادات العرض</string>
+    <string name="display_when_each_novel_was">عرض آخر مرة تم فيها التحقق من وجود تحديثات لكل رواية</string>
+    <string name="displayed_most_frequently_across_your_app">يتم عرضه بشكل متكرر عبر تطبيقك</string>
+    <string name="donate_now">تبرع الآن</string>
+    <string name="donate_via_card">تبرع عبر البطاقة</string>
+    <string name="donate_via_card_1">💳 تبرع عبر البطاقة</string>
+    <string name="donations">التبرعات</string>
+    <string name="done">تم</string>
+    <string name="dont_have_an_ireader_nft">ليس لديك IReader NFT؟</string>
+    <string name="dots_collision">تصادم النقاط</string>
+    <string name="dots_elastic">مرونة النقاط</string>
+    <string name="dots_flashing">وميض النقاط</string>
+    <string name="dots_pulsing">نبض النقاط</string>
+    <string name="dots_typing">كتابة النقاط</string>
+    <string name="double_tap_to_zoom">النقر المزدوج للتكبير</string>
+    <string name="download">تنزيل</string>
+    <string name="download_all">تنزيل الكل</string>
+    <string name="download_all_un_downloaded">تنزيل الكل غير المنزل</string>
+    <string name="download_all_unread">تنزيل الكل غير المقروء</string>
+    <string name="download_badge">تنزيل الشارة</string>
+    <string name="download_behavior">سلوك التنزيل</string>
+    <string name="download_categories">تنزيل الفئات</string>
+    <string name="download_chapters">تنزيل الفصول</string>
+    <string name="download_complete">اكتمل التنزيل</string>
+    <string name="download_completed">اكتمل التنزيل</string>
+    <string name="download_completed_at">اكتمل في</string>
+    <string name="download_delay">تأخير التنزيل</string>
+    <string name="download_failed">فشل التنزيل: %1$s</string>
+    <string name="download_failed_title">فشل التنزيل</string>
+    <string name="download_location">موقع التحميل</string>
+    <string name="download_new_chapters">تنزيل فصول جديدة</string>
+    <string name="download_notifications">تنزيل الإشعارات</string>
+    <string name="download_notifier_download_finish">اكتمل التنزيل</string>
+    <string name="download_notifier_download_paused">تم إيقاف التنزيل مؤقتًا</string>
+    <string name="download_notifier_downloader_title">أداة التنزيل</string>
+    <string name="download_notifier_no_network">لا يوجد اتصال شبكة متاح</string>
+    <string name="download_notifier_text_only_wifi">لا يوجد اتصال Wi-Fi متاح</string>
+    <string name="download_notifier_title_error">خطأ</string>
+    <string name="download_notifier_unknown_error">تعذر تنزيل الفصل بسبب خطأ غير متوقع
+</string>
+    <string name="download_of">تنزيل </string>
+    <string name="download_only_over_wifi">تنزيل عبر شبكة WiFi فقط</string>
+    <string name="download_progress">تقدم التنزيل</string>
+    <string name="download_progress_1">download_progress</string>
+    <string name="download_queue">قائمة انتظار التنزيل</string>
+    <string name="download_settings">إعدادات التنزيل</string>
+    <string name="download_unread">تنزيل غير المقروء</string>
+    <string name="download_unread_1">تنزيل غير المقروءة</string>
+    <string name="download_update">تنزيل التحديث</string>
+    <string name="downloaded">تم التنزيل</string>
+    <string name="downloaded_chapters">الفصول التي تم تنزيلها</string>
+    <string name="downloading">جارٍ التنزيل</string>
+    <string name="downloading_1">جارٍ التنزيل...</string>
+    <string name="downloading_chapter_audio">يتم تنزيل صوت الفصل</string>
+    <string name="downloading_chapters">جارٍ تنزيل %1$s فصلًا</string>
+    <string name="downloading_unread_chapters">جارٍ تنزيل %1$s فصلًا غير مقروء</string>
+    <string name="downloading_update">جارٍ تنزيل التحديث</string>
+    <string name="downloading_voice">يتم تنزيل الصوت...</string>
+    <string name="downloads">التنزيلات</string>
+    <string name="downloads_paused">التنزيلات متوقفة مؤقتًا</string>
+    <string name="downloads_queue">قائمة انتظار التنزيلات</string>
+    <string name="downloads_queued">التنزيلات في قائمة الانتظار</string>
+    <string name="downloads_started">بدأت التنزيلات</string>
+    <string name="downloads_stopped">توقفت التنزيلات</string>
+    <string name="downloads_was_cancelled">تم إلغاء تنزيل </string>
+    <string name="drag_to_reorder">اسحب لإعادة الترتيب</string>
+    <string name="drawer">درج</string>
+    <string name="dropdown">قائمة منسدلة</string>
+    <string name="earned_through_reading_and_app_usage">تم الحصول عليها من خلال القراءة واستخدام التطبيق</string>
+    <string name="edit">تعديل</string>
+    <string name="edit_category">تعديل التصنيفات</string>
+    <string name="edit_glossary_entry">تعديل إدخال المسرد</string>
+    <string name="edit_info">تعديل المعلومات</string>
+    <string name="eg_source_not_loading_broken">مثال: المصدر لا يتم تحميله، البحث معطل، المحتوى مفقود...</string>
+    <string name="eighteen">+18</string>
+    <string name="eighteen_source_lock">قفل مصدر +18</string>
+    <string name="email">البريد الإلكتروني</string>
+    <string name="empty_library">لا يوجد كتاب في المكتبة ، يمكنك إضافة كتب في شاشة الاستكشاف.
+</string>
+    <string name="empty_response">تم تلقي استجابة فارغة من خدمة الترجمة.</string>
+    <string name="enable">تمكين</string>
+    <string name="enable_app_lock">تمكين قفل التطبيق</string>
+    <string name="enable_auto_sync">تمكين المزامنة التلقائية</string>
+    <string name="enable_bilingual_mode">تمكين الوضع ثنائي اللغة</string>
+    <string name="enable_book_cover">تمكين غلاف الكتاب</string>
+    <string name="enable_cloud_features">تمكين ميزات السحابة</string>
+    <string name="enable_cloud_features_subtitle">المزامنة والمراجعات والشارات ولوحة المتصدرين</string>
+    <string name="enable_continue">تمكين ومتابعة</string>
+    <string name="enable_detailed_logging_for_troubleshooting">تمكين التسجيل التفصيلي لاستكشاف الأخطاء وإصلاحها</string>
+    <string name="enable_javascript_plugins">تمكين إضافات JavaScript</string>
+    <string name="enable_notifications">تمكين الإشعارات</string>
+    <string name="enable_plugin">تمكين الملحق</string>
+    <string name="enable_plugin_feature">تمكين ميزة المكون الإضافي</string>
+    <string name="enable_privacy_mode">تمكين وضع الخصوصية</string>
+    <string name="enable_privacy_mode_question">تفعيل وضع الخصوصية؟</string>
+    <string name="enable_quiet_hours">تمكين ساعات الهدوء</string>
+    <string name="enable_reminders">تمكين التذكيرات</string>
+    <string name="enable_sleep_timer">وضع السكون</string>
+    <string name="enable_sleep_timer_1">تمكين مؤقت النوم</string>
+    <string name="enable_streaming">تمكين البث</string>
+    <string name="enable_to_use_your_own">تمكين استخدام مثيل Supabase الخاص بك بدلاً من الواجهة الخلفية الافتراضية</string>
+    <string name="enabled">مفعل</string>
+    <string name="enabled_preference">تفضيل مُفعَّل</string>
+    <string name="enabled_state">الحالة المُفعَّلة</string>
+    <string name="end_of_life_options_description">ماذا ترغب أن تفعل بهذه الرواية المكتملة؟</string>
+    <string name="end_of_life_options_title">اكتملت الرواية</string>
+    <string name="end_time">وقت الانتهاء</string>
+    <string name="engine_settings">إعدادات المحرك</string>
+    <string name="enter_a_4_6_digit_pin_to_secure_your_app">أدخل رقم PIN مكونًا من 4-6 أرقام لتأمين تطبيقك</string>
+    <string name="enter_a_password_to_secure">أدخل كلمة مرور لتأمين تطبيقك (الحد الأدنى 4 أحرف)</string>
+    <string name="enter_a_query_to_search_across_all_your_sources">أدخل استعلامًا للبحث في جميع مصادرك</string>
+    <string name="enter_author_name">أدخل اسم المؤلف...</string>
+    <string name="enter_book_title">أدخل عنوان الكتاب...</string>
+    <string name="enter_chapter_name">أدخل اسم الفصل...</string>
+    <string name="enter_font_name">أدخل اسم الخط</string>
+    <string name="enter_gemini_api_key">أدخل مفتاح واجهة برمجة تطبيقات Gemini الخاص بك</string>
+    <string name="enter_query_and_tap_search">أدخل استعلامًا وانقر على بحث للعثور على الكتب</string>
+    <string name="enter_quote_text">أدخل نص الاقتباس...</string>
+    <string name="enter_the_repository_url">أدخل عنوان URL للمستودع:</string>
+    <string name="enter_the_url_of_the">أدخل عنوان URL للمستودع الذي تريد إضافته. يجب أن يحتوي المستودع على ملف index.min.json مع المصادر المتاحة.</string>
+    <string name="enter_your_ethereum_wallet_address">أدخل عنوان محفظة Ethereum الخاص بك. سيتم استخدام هذا كمفتاح API للوصول إلى ميزات الخادم.</string>
+    <string name="enter_your_ethereum_wallet_address_1">أدخل عنوان محفظة Ethereum الخاص بك للتحقق من ملكية NFT</string>
+    <string name="enter_your_transaction_id">أدخل مُعرّف المعاملة الخاص بك</string>
+    <string name="epub">Epub</string>
+    <string name="epub_exported_successfully">تم تصدير EPUB بنجاح إلى Downloads/IReader/</string>
+    <string name="error">خطأ</string>
+    <string name="error_account_not_found">لم يتم العثور على حساب</string>
+    <string name="error_account_not_found_message">لم يتم العثور على حساب بهذا البريد الإلكتروني. يرجى الاشتراك أو التحقق من عنوان بريدك الإلكتروني.</string>
+    <string name="error_adding_repository">خطأ في إضافة المستودع: %1$s</string>
+    <string name="error_applying_theme">خطأ في تطبيق المظهر: %1$s. يتم استخدام المظهر الافتراضي.</string>
+    <string name="error_details">تفاصيل الخطأ</string>
+    <string name="error_email_exists">البريد الإلكتروني مسجل بالفعل</string>
+    <string name="error_email_exists_message">يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل. يرجى تسجيل الدخول أو استخدام بريد إلكتروني مختلف.</string>
+    <string name="error_failed_to_fetch_chapter">خطأ: %1$s</string>
+    <string name="error_invalid_credentials">بيانات اعتماد غير صالحة</string>
+    <string name="error_invalid_credentials_message">البريد الإلكتروني أو كلمة المرور التي أدخلتها غير صحيحة. يرجى المحاولة مرة أخرى.</string>
+    <string name="error_loading_image">خطأ في تحميل الصورة</string>
+    <string name="error_loading_reviews">خطأ في تحميل المراجعات</string>
+    <string name="error_message">رسالة الخطأ:</string>
+    <string name="error_network">خطأ في الاتصال</string>
+    <string name="error_network_message">غير قادر على الاتصال. يرجى التحقق من اتصالك بالإنترنت وحاول مرة أخرى.</string>
+    <string name="error_notifications">إشعارات الخطأ</string>
+    <string name="error_occurred">حدث خطأ</string>
+    <string name="error_server">خطأ في الخادم</string>
+    <string name="error_server_message">حدث خطأ ما من جانبنا. يرجى المحاولة مرة أخرى لاحقًا.</string>
+    <string name="error_service_unavailable">الخدمة غير متوفرة</string>
+    <string name="error_service_unavailable_message">خدمة المصادقة غير متوفرة مؤقتًا. يرجى المحاولة مرة أخرى لاحقًا.</string>
+    <string name="error_session_expired">انتهت صلاحية الجلسة</string>
+    <string name="error_session_expired_message">انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.</string>
+    <string name="error_tap_to_retry">خطأ - انقر لإعادة المحاولة</string>
+    <string name="error_too_many_attempts">محاولات كثيرة جدًا</string>
+    <string name="error_too_many_attempts_message">عدد كبير جدًا من محاولات تسجيل الدخول. يرجى الانتظار بضع دقائق وحاول مرة أخرى.</string>
+    <string name="error_unknown">حدث خطأ غير معروف.</string>
+    <string name="error_user_not_authenticated">غير مسجل الدخول</string>
+    <string name="error_user_not_authenticated_message">تحتاج إلى تسجيل الدخول للوصول إلى هذه الميزة.</string>
+    <string name="error_user_not_found">لم يتم العثور على حساب</string>
+    <string name="error_user_not_found_message">تعذر علينا العثور على حسابك. يرجى تسجيل الدخول مرة أخرى للمتابعة.</string>
+    <string name="estimated_time_remaining">الوقت المقدر المتبقي</string>
+    <string name="eth_wallet_address_api_key">عنوان محفظة ETH (مفتاح API)</string>
+    <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">مثال: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
+    <string name="example_url">عنوان URL للمثال:</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">أمثلة:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="exclude_categories">استبعاد الفئات</string>
+    <string name="excluded"> (مستبعد)</string>
+    <string name="exclusive">حصري</string>
+    <string name="exclusive_designs">تصاميم حصرية</string>
+    <string name="execution_timeout">مهلة التنفيذ</string>
+    <string name="exit_fullscreen">الخروج من وضع ملء الشاشة</string>
+    <string name="exit_search_mode">الخروج من وضع البحث</string>
+    <string name="expand_menu">توسيع القائمة</string>
+    <string name="explore_screen">شاشة الاستكشاف</string>
+    <string name="explore_screen_label">المصادر</string>
+    <string name="export">تصدير</string>
+    <string name="export_another">تصدير آخر</string>
+    <string name="export_as_epub">تصدير كـ ePub</string>
+    <string name="export_book_as_epub">تصدير الكتاب كـ Epub</string>
+    <string name="export_cancelled">تم إلغاء التصدير</string>
+    <string name="export_diagnostics">تصدير التشخيصات</string>
+    <string name="export_epub">تصدير ePub</string>
+    <string name="export_epub_option_description">تنزيل كملف ePub للقراءة في وضع عدم الاتصال</string>
+    <string name="export_epub_option_title">تصدير كملف ePub</string>
+    <string name="export_failed">فشل التصدير</string>
+    <string name="export_failed_error">فشل التصدير: %1$s</string>
+    <string name="export_successful">تم التصدير بنجاح</string>
+    <string name="export_theme">تصدير السمات</string>
+    <string name="exporting_epub">يتم تصدير ePub</string>
+    <string name="extension_added">تمت إضافة ملحق: %1$s</string>
+    <string name="extension_installed_successfully">تم تثبيت الملحق بنجاح</string>
+    <string name="extension_management">إدارة الإضافات</string>
+    <string name="extension_removed">تمت إزالة ملحق: %1$s</string>
+    <string name="extension_repositories">مستودعات الإضافات</string>
+    <string name="extension_updates">تحديثات الإضافات</string>
+    <string name="extensions">إضافة</string>
+    <string name="extensions_1">الإضافات</string>
+    <string name="extensions_sources">الإضافات والمصادر</string>
+    <string name="eyjhbgcioijiuzi1niisinr5cci6ikpxvcj9">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</string>
+    <string name="failed">فشل</string>
+    <string name="failed_files">الملفات الفاشلة</string>
+    <string name="failed_imports">عمليات الاستيراد الفاشلة</string>
+    <string name="failed_to_add_entry">فشل إضافة إدخال: %1$s</string>
+    <string name="failed_to_add_repository">فشل إضافة المستودع: %1$s</string>
+    <string name="failed_to_apply_plugin_theme">فشل تطبيق مظهر المكون الإضافي: %1$s. يتم استخدام المظهر الافتراضي.</string>
+    <string name="failed_to_check_updates">فشل التحقق من وجود تحديثات</string>
+    <string name="failed_to_copy">فشل النسخ: %1$s</string>
+    <string name="failed_to_create_backup">فشل إنشاء نسخة احتياطية: %1$s</string>
+    <string name="failed_to_delete_entry">فشل حذف إدخال: %1$s</string>
+    <string name="failed_to_disable_plugin">فشل تعطيل الملحق</string>
+    <string name="failed_to_download">فشل التنزيل</string>
+    <string name="failed_to_enable_plugin">فشل تمكين الملحق</string>
+    <string name="failed_to_export_theme">فشل تصدير المظهر</string>
+    <string name="failed_to_extract_content">فشل استخراج المحتوى: %1$s</string>
+    <string name="failed_to_fetch_book_details">فشل جلب تفاصيل الكتاب. يرجى التأكد من أنك في صفحة تفاصيل الكتاب وحاول مرة أخرى.</string>
+    <string name="failed_to_fetch_chapters">فشل جلب الفصول. يرجى التأكد من أنك على الصفحة الصحيحة وحاول مرة أخرى.</string>
+    <string name="failed_to_generate_qr_code">فشل إنشاء رمز QR</string>
+    <string name="failed_to_get_content">فشل في الحصول على المحتوى.</string>
+    <string name="failed_to_import_theme">فشل استيراد المظهر: %1$s</string>
+    <string name="failed_to_load_font">فشل تحميل الخط: %1$s</string>
+    <string name="failed_to_load_novels">فشل تحميل الروايات: %1$s</string>
+    <string name="failed_to_load_page">فشل تحميل الصفحة</string>
+    <string name="failed_to_load_plugins">فشل تحميل الملحقات</string>
+    <string name="failed_to_load_sources">فشل تحميل المصادر: %1$s</string>
+    <string name="failed_to_open_plugin">فشل فتح الملحق</string>
+    <string name="failed_to_rename">فشل في إعادة التسمية: %1$s</string>
+    <string name="failed_to_repair_categories">فشل إصلاح الفئات: %1$s</string>
+    <string name="failed_to_report_chapter">فشل الإبلاغ عن الفصل: %1$s</string>
+    <string name="failed_to_reset_categories">فشل إعادة تعيين الفئات: %1$s</string>
+    <string name="failed_to_restore">فشل الاستعادة: %1$s</string>
+    <string name="failed_to_search">فشل البحث</string>
+    <string name="failed_to_select_save_location">فشل تحديد موقع الحفظ: %1$s</string>
+    <string name="failed_to_set_brightness">فشل ضبط السطوع: %1$s</string>
+    <string name="failed_to_set_keep_screen_on">فشل ضبط خاصية إبقاء الشاشة قيد التشغيل: %1$s</string>
+    <string name="failed_to_set_secure_screen">فشل تعيين شاشة آمنة: %1$s</string>
+    <string name="failed_to_share">فشل المشاركة: %1$s</string>
+    <string name="failed_to_start_trial">فشل بدء النسخة التجريبية</string>
+    <string name="failed_to_submit_review">فشل إرسال المراجعة</string>
+    <string name="failed_to_uninstall_plugin">فشل إلغاء تثبيت الملحق</string>
+    <string name="failed_to_update_entry">فشل تحديث إدخال: %1$s</string>
+    <string name="failed_to_update_plugin">فشل تحديث المكون الإضافي</string>
+    <string name="failed_to_update_plugins">فشل تحديث الملحقات</string>
+    <string name="failed_to_update_trust_level">فشل تحديث مستوى الثقة: %1$s</string>
+    <string name="fatal_error">خطأ فادح لـ</string>
+    <string name="favorite">مفضل</string>
+    <string name="favorite_genres">الأنواع المفضلة</string>
+    <string name="favorited">مفضل</string>
+    <string name="featured_badges">شارات مميزة</string>
+    <string name="featured_badges_for_profile">شارات مميزة (للملف الشخصي)</string>
+    <string name="featured_plugins">إضافات مميزة</string>
+    <string name="features">الميزات</string>
+    <string name="fetch">جلب</string>
+    <string name="fetch_actions">جلب الإجراءات</string>
+    <string name="fetch_all_chapters">جلب جميع الفصول</string>
+    <string name="fetch_book">جلب الكتاب</string>
+    <string name="fetch_book_details">جلب تفاصيل الكتاب</string>
+    <string name="fetch_chapter">جلب الفصل</string>
+    <string name="fetch_chapters">جلب الفصول</string>
+    <string name="fetch_current_chapter">جلب الفصل الحالي</string>
+    <string name="fetching_from_rhasspygithubio">يتم الجلب من rhasspy.github.io</string>
+    <string name="fifteen_min">15 دقيقة</string>
+    <string name="file_format">صيغة الملف</string>
+    <string name="file_name">اسم الملف</string>
+    <string name="file_not_found_error">خطأ في عدم العثور على ملف</string>
+    <string name="file_size">حجم الملف</string>
+    <string name="files">الملفات</string>
+    <string name="fill_all_projects">املأ جميع المشاريع</string>
+    <string name="filter">تصفية</string>
+    <string name="filter_and_sort">تصفية وترتيب</string>
+    <string name="filter_by_category">تصفية حسب الفئة</string>
+    <string name="filter_your_library_with_advanced_criteria">تصفية مكتبتك بمعايير متقدمة</string>
+    <string name="filters">الفلاتر</string>
+    <string name="find_current_chapter">البحث عن الفصل الحالي</string>
+    <string name="find_in_chapter">بحث في الفصل</string>
+    <string name="fingerprint_optional">بصمة الإصبع (اختياري)</string>
+    <string name="fingerprint_verification_adds_an_extra">يضيف التحقق من بصمة الإصبع طبقة إضافية من الأمان</string>
+    <string name="first_launch_intro">لنقم بإعداد بعض الأشياء لتبدأ. يمكنك دائمًا تغيير هذه الإعدادات لاحقًا.</string>
+    <string name="first_launch_privacy_note">يمكنك تغيير هذا الإعداد في أي وقت في الإعدادات → متقدم. تظل بيانات القراءة الخاصة بك على جهازك ما لم تقم بتمكين ميزات السحابة.</string>
+    <string name="five_min">5 دقائق</string>
+    <string name="fix_book_category_assignments">إصلاح تعيينات فئة الكتاب</string>
+    <string name="fix_database_structure_and_integrity_issues">إصلاح مشكلات هيكل قاعدة البيانات وسلامتها</string>
+    <string name="flash_on_page_change">وميض عند تغيير الصفحة</string>
+    <string name="follow_system_settings">اتبع إعدادات النظام</string>
+    <string name="font">الخط</string>
+    <string name="font_customization">تخصيص الخط</string>
+    <string name="font_deleted_successfully">تم حذف الخط بنجاح</string>
+    <string name="font_imported_successfully">تم استيراد الخط بنجاح</string>
+    <string name="font_name">اسم الخط</string>
+    <string name="font_size">حجم الخط</string>
+    <string name="font_used_for_all_app">الخط المستخدم لجميع عناصر واجهة التطبيق (وليس القارئ)</string>
+    <string name="font_weight">وزن الخط</string>
+    <string name="font_weight_1">font_weight</string>
+    <string name="fonts">الخطوط</string>
+    <string name="for_more_powerful_and_natural">للحصول على أصوات أكثر قوة وطبيعية على Android، قم بتثبيت تطبيق Sherpa TTS من متجر Play أو F-Droid.</string>
+    <string name="for_private_spaces">للمساحات الخاصة</string>
+    <string name="formal">رسمي</string>
+    <string name="formatting">تنسيق</string>
+    <string name="forward">إلى الأمام</string>
+    <string name="free">مجاني</string>
+    <string name="freemium">مجاني مع ميزات مدفوعة</string>
+    <string name="full">كامل</string>
+    <string name="fullscreen">ملء الشاشة</string>
+    <string name="fund_a_feature">تمويل ميزة</string>
+    <string name="gb_total_storage_7_500mb">إجمالي مساحة التخزين 3.5 جيجابايت (7 × 500 ميجابايت) - قم بتكوين كل مشروع أو استخدم نفس عنوان URL للجميع</string>
+    <string name="gemini_api_information">معلومات عن Gemini API</string>
+    <string name="gemini_api_key">مفتاح Gemini API</string>
+    <string name="gemini_api_key_not_set">لم يتم تعيين مفتاح Gemini API. يرجى تكوينه في
+        الإعدادات.
+    </string>
+    <string name="gemini_model">نموذج Gemini</string>
+    <string name="gemini_payment_required">لقد تجاوزت حصتك الحالية لـ Gemini API. يرجى التحقق من خطتك وتفاصيل الدفع على https://ai.google.dev/gemini-api/docs/rate-limits</string>
+    <string name="gender">النوع</string>
+    <string name="general">عام</string>
+    <string name="general_settings">إعدادات عامة</string>
+    <string name="generating_audio_for_entire_chapter">يتم إنشاء صوت للفصل بأكمله...</string>
+    <string name="genreprogress">genreProgress</string>
+    <string name="genres">الأنواع</string>
+    <string name="get_gentle_reminders_to_rest_your_eyes">احصل على تذكيرات لطيفة لإراحة عينيك</string>
+    <string name="get_started">ابدأ</string>
+    <string name="github">جيت هاب</string>
+    <string name="github_1">GitHub</string>
+    <string name="global_search">بحث عالمي</string>
+    <string name="glossary">المسرد</string>
+    <string name="glossary_entry_added">تمت إضافة إدخال في المسرد</string>
+    <string name="glossary_entry_deleted">تم حذف إدخال في المسرد</string>
+    <string name="glossary_entry_updated">تم تحديث إدخال في المسرد</string>
+    <string name="glossary_exported">تم تصدير المسرد</string>
+    <string name="glossary_exported_successfully">تم تصدير المسرد بنجاح</string>
+    <string name="glossary_imported">تم استيراد المسرد: %1$s إدخالات</string>
+    <string name="glow_alpha">glow_alpha</string>
+    <string name="go">اذهب</string>
+    <string name="go_back">الرجوع</string>
+    <string name="go_forward">التقدم للأمام</string>
+    <string name="go_to_badge_store">اذهب إلى متجر الشارات</string>
+    <string name="go_to_chapter">اذهب إلى الفصل</string>
+    <string name="go_to_last_chapter">اذهب إلى الفصل الأخير</string>
+    <string name="go_to_settings_generaln2_toggle">1. اذهب إلى الإعدادات ← عام\n2. قم بتبديل \</string>
+    <string name="goal_reached">تم تحقيق الهدف</string>
+    <string name="goal_reached_1">تم تحقيق الهدف!</string>
+    <string name="goal_reached_thank_you">تم تحقيق الهدف! شكرا لك!</string>
+    <string name="google_drive">Google Drive</string>
+    <string name="google_drive_authentication">مصادقة Google Drive</string>
+    <string name="google_drive_backup">نسخ احتياطي في Google Drive</string>
+    <string name="googles_gemini_api_provides_high">توفر واجهة برمجة تطبيقات Gemini من Google ترجمات عالية الجودة من خلال منصة الذكاء الاصطناعي الخاصة بها. لاستخدام هذه الميزة، تحتاج إلى الحصول على مفتاح API من Google AI Studio (https://aistudio.google.com).</string>
+    <string name="got_it">فهمت</string>
+    <string name="gradio">Gradio</string>
+    <string name="gradio_tts_connects_to_hugging">يرتبط Gradio TTS بـ Hugging Face Spaces لتجميع الكلام. يتطلب اتصالاً بالإنترنت.</string>
+    <string name="gradio_tts_online">Gradio TTS (عبر الإنترنت)</string>
+    <string name="gradio_tts_uses_a_huggingface">يستخدم Gradio TTS مساحة HuggingFace لتجميع الكلام. يمكنك استخدام المساحة الافتراضية أو نشر المساحة الخاصة بك.</string>
+    <string name="grid">شبكة</string>
+    <string name="group_by_novel">تجميع حسب الرواية</string>
+    <string name="group_notifications">تجميع الإشعارات</string>
+    <string name="has_unread_chapters">لديه فصول غير مقروءة</string>
+    <string name="header_alpha">header_alpha</string>
+    <string name="hello_this_is_a_test">مرحباً، هذا اختبار.</string>
+    <string name="help">مساعدة</string>
+    <string name="help_us_improve">ساعدنا في التحسين \</string>
+    <string name="helpful">مفيد</string>
+    <string name="hide">إخفاء</string>
+    <string name="hide_backdrop">إخفاء الخلفية</string>
+    <string name="hide_background_images_on_novel">إخفاء صور الخلفية على شاشات تفاصيل الرواية للحصول على مظهر أنظف وأداء أفضل</string>
+    <string name="hide_content">إخفاء المحتوى</string>
+    <string name="hide_duplicates">إخفاء التكرارات</string>
+    <string name="hide_language_filter">إخفاء فلتر اللغة</string>
+    <string name="hide_notification_content">إخفاء محتوى الإشعار</string>
+    <string name="hide_read">إخفاء المقروء</string>
+    <string name="hide_reviews">إخفاء المراجعات</string>
+    <string name="high_brightness">سطوع عالٍ</string>
+    <string name="high_performance_neural_tts_with">TTS عصبي عالي الأداء مع أكثر من 100 صوت (مجمعة)</string>
+    <string name="high_quality_neural_voicesn_works">✓ أصوات عصبية عالية الجودة \n✓ تعمل دون اتصال بالإنترنت \n✓ لغات متعددة \n✓ تتكامل مع Android TTS</string>
+    <string name="high_quality_offline_neural_voices">أصوات عصبية عالية الجودة دون اتصال بالإنترنت. تصفح وتنزيل وإدارة أكثر من 100 صوت في أكثر من 30 لغة.</string>
+    <string name="hint">…</string>
+    <string name="history">سجل</string>
+    <string name="history_screen_label">سجل</string>
+    <string name="horizontal">أفقي</string>
+    <string name="hour">يوم</string>
+    <string name="hours">ساعات</string>
+    <string name="how_it_appears_on_your_profile">كيف يظهر على ملفك الشخصي:</string>
+    <string name="how_it_appears_on_your_reviews">كيف يظهر في مراجعاتك:</string>
+    <string name="how_to_purchase">كيفية الشراء</string>
+    <string name="huggingface_space_url">عنوان URL لمساحة HuggingFace</string>
+    <string name="humorous">فكاهي</string>
+    <string name="if_a_captcha_appears_you">إذا ظهر اختبار CAPTCHA، فستحتاج إلى إكماله يدويًا.</string>
+    <string name="image">صورة</string>
+    <string name="image_cache">ذاكرة التخزين المؤقت للصور</string>
+    <string name="image_quality">جودة الصورة</string>
+    <string name="image_scaling">تحجيم الصورة</string>
+    <string name="image_settings">إعدادات الصورة</string>
+    <string name="immersive_mode">وضع ملء الشاشة</string>
+    <string name="import_action">استيراد</string>
+    <string name="import_complete">اكتمل الاستيراد</string>
+    <string name="import_epub">استيراد EPUB</string>
+    <string name="import_epub_files_into_your_library">استيراد ملفات EPUB إلى مكتبتك</string>
+    <string name="import_failed">فشل الاستيراد: %1$s</string>
+    <string name="import_font">استيراد خط</string>
+    <string name="import_from_lnreader">استيراد من LNReader</string>
+    <string name="import_from_lnreader_desc">استيراد المكتبة من نسخة LNReader الاحتياطية (.zip)</string>
+    <string name="import_from_other_apps">استيراد من تطبيقات أخرى</string>
+    <string name="import_theme">استيراد سمة</string>
+    <string name="important_disclaimer">⚠️ إخلاء مسؤولية هام</string>
+    <string name="important_you_need_to_enable">هام: تحتاج إلى تمكين ميزة البرنامج المساعد JS في الشاشة العامة</string>
+    <string name="importing_epub_files">يتم استيراد ملفات ePub</string>
+    <string name="in_library">في المكتبة</string>
+    <string name="in_library_1">في المكتبة</string>
+    <string name="in_progress">قيد التقدم</string>
+    <string name="include_cover_image">تضمين صورة الغلاف</string>
+    <string name="included"> (مضمن)</string>
+    <string name="incognito_mode">وضع التصفح المتخفي</string>
+    <string name="increase">زيادة</string>
+    <string name="increase_font_size">تكبير حجم الخط</string>
+    <string name="increase_speed">زيادة السرعة</string>
+    <string name="info">معلومات</string>
+    <string name="information">معلومات</string>
+    <string name="information_cloudflare_bypass_failure">لا يمكن تجاوز cloudflare</string>
+    <string name="information_support">المعلومات والدعم</string>
+    <string name="information_webview_outdated">webview قديم.</string>
+    <string name="information_webview_required">تحتاج إلى webview لعرض هذا المحتوى</string>
+    <string name="install">تثبيت</string>
+    <string name="install_and_configure_text_to">تثبيت وتكوين محركات تحويل النص إلى كلام للقراءة دون اتصال بالإنترنت</string>
+    <string name="install_extensions_to_add_sources">تثبيت الإضافات لإضافة مصادر</string>
+    <string name="install_free_with_in_app_purchases">تثبيت (مجاني مع عمليات شراء داخل التطبيق)</string>
+    <string name="install_now">تثبيت الآن</string>
+    <string name="install_source">تثبيت المصدر</string>
+    <string name="installation_complete">اكتمل التثبيت</string>
+    <string name="installation_error">خطأ أثناء (إلغاء) تثبيت الحزمة</string>
+    <string name="installation_error_Storage">PackageManger: مساحة تخزين غير كافية</string>
+    <string name="installation_error_aborted">PackageManger: تم الإلغاء</string>
+    <string name="installation_error_blocked">PackageManger: تم حظر المثبت</string>
+    <string name="installation_error_conflicted">PackageManger: يتعارض مع الحزمة المثبتة
+</string>
+    <string name="installation_error_incompatible">PackageManger: غير متوافق مع الحزمة المثبتة
+</string>
+    <string name="installation_error_invalid">PackageManger: يوجد تطبيق آخر مثبت بإصدار أعلى من هذه الحزمة
+</string>
+    <string name="installation_failed">فشل التثبيت: %1$s</string>
+    <string name="installation_failed_generic">فشل التثبيت</string>
+    <string name="installation_in_progress_this_may">التثبيت قيد التقدم... قد يستغرق هذا عدة دقائق.</string>
+    <string name="installation_log">سجل التثبيت</string>
+    <string name="installation_successful">تم التثبيت بنجاح.</string>
+    <string name="installed">مثبت</string>
+    <string name="installed_plugins">الملحقات المثبتة</string>
+    <string name="installer_mode">وضع المثبت</string>
+    <string name="installing">جارٍ التثبيت</string>
+    <string name="installing_1">جارٍ التثبيت...</string>
+    <string name="interval">الفاصل الزمني</string>
+    <string name="invert_selection">عكس التحديد</string>
+    <string name="invert_tapping">عكس النقر</string>
+    <string name="ireader_is_a_free_open">IReader هو تطبيق مجاني ومفتوح المصدر بدون إعلانات. تساعد تبرعاتك في تغطية:</string>
+    <string name="ireader_logo">شعار IReader</string>
+    <string name="ireader_uses_your_devices_built">يستخدم IReader محرك تحويل النص إلى كلام المدمج في جهازك. يمكنك تكوين الأصوات في إعدادات Android → إمكانية الوصول → تحويل النص إلى كلام.</string>
+    <string name="issue_category">فئة المشكلة:</string>
+    <string name="issues">المشكلات:</string>
+    <string name="javascript_plugin_settings">إعدادات البرنامج المساعد JavaScript</string>
+    <string name="javascript_plugins_are_currently_disabled">البرامج المساعدة JavaScript معطلة حاليًا في إعداداتك.</string>
+    <string name="js_plugins_enabled">تم تمكين مكونات JavaScript الإضافية. يمكنك الآن تمكين المكونات الإضافية.</string>
+    <string name="js_plugins_enabled_active">تم تمكين مكونات JavaScript الإضافية. المكون الإضافي نشط الآن.</string>
+    <string name="justify">تنسيق</string>
+    <string name="keep_it_going">استمر!</string>
+    <string name="keep_reading_to_level_up">استمر في القراءة لرفع المستوى!</string>
+    <string name="keep_screen_on">إبقاء الشاشة قيد التشغيل</string>
+    <string name="keep_the_original_writing_style_when_translating">حافظ على أسلوب الكتابة الأصلي عند الترجمة</string>
+    <string name="label_backup">استعادة من النسخ الاحتياطي</string>
+    <string name="label_library">جارٍ التحقق من المكتبة</string>
+    <string name="label_more">تحميل المزيد</string>
+    <string name="label_recent_updates">آخر التحديثات</string>
+    <string name="label_text_reader">قارئ النص</string>
+    <string name="landscape">أفقي</string>
+    <string name="landscape_zoom">تكبير أفقي</string>
+    <string name="lang">اللغة</string>
+    <string name="language">لغة</string>
+    <string name="language_added">تمت إضافة لغة</string>
+    <string name="language_badge">شارة اللغة</string>
+    <string name="language_filter">فلتر اللغة</string>
+    <string name="language_preferences">تفضيلات اللغة</string>
+    <string name="language_translation">اللغة والترجمة</string>
+    <string name="languages">اللغات</string>
+    <string name="large">كبير</string>
+    <string name="last_7_days">آخر 7 أيام</string>
+    <string name="last_read">آخر قراءة</string>
+    <string name="last_sync">آخر مزامنة</string>
+    <string name="last_update">آخر تحديث</string>
+    <string name="last_used_source">آخر استخدام</string>
+    <string name="last_verified">آخر تحقق:</string>
+    <string name="latest_book">الأحدث</string>
+    <string name="layout">تخطيط</string>
+    <string name="layout_description_comfortable">3 أعمدة في شبكة مع صور غلاف أكبر
+    </string>
+    <string name="layout_description_compact">عمودان في شبكة مع صور غلاف أصغر</string>
+    <string name="layout_description_cover_only">عمودان من صور الغلاف فقط (بدون نص)</string>
+    <string name="layout_description_list">يتم عرض الكتب في قائمة رأسية</string>
+    <string name="leaderboard">لوحة المتصدرين</string>
+    <string name="leaderboard_desc">تنافس مع القراء الآخرين على لوحة المتصدرين</string>
+    <string name="leaderboard_realtime_updates">تحديثات لوحة المتصدرين في الوقت الفعلي</string>
+    <string name="learn_about_security_features_and_best_practices">تعرف على ميزات الأمان وأفضل الممارسات</string>
+    <string name="led_light">ضوء LED</string>
+    <string name="left">يسار</string>
+    <string name="less_brightness">سطوع أقل</string>
+    <string name="letter">حرف</string>
+    <string name="level">المستوى</string>
+    <string name="library">المكتبة</string>
+    <string name="library_is_out_of_date">المكتبة قديمة.</string>
+    <string name="library_management">إدارة المكتبة</string>
+    <string name="library_notifications">إشعارات المكتبة</string>
+    <string name="library_overview">نظرة عامة على المكتبة</string>
+    <string name="library_screen_label">المكتبة</string>
+    <string name="library_settings">إعدادات المكتبة</string>
+    <string name="library_statistics">إحصائيات المكتبة</string>
+    <string name="library_update_progress">تقدم تحديث المكتبة</string>
+    <string name="library_updates_notification">تحديثات المكتبة</string>
+    <string name="libretranslate">LibreTranslate</string>
+    <string name="libretranslate_api_key">مفتاح LibreTranslate API</string>
+    <string name="libretranslate_api_key_invalid">مفتاح LibreTranslate api غير صالح</string>
+    <string name="libretranslate_info">ترجمة آلية مجانية ومفتوحة المصدر. لا حاجة لمفتاح API.</string>
+    <string name="light">الوضع الفاتح</string>
+    <string name="light_plugin_themes">سمات البرنامج المساعد الفاتحة</string>
+    <string name="light_themes">سمات فاتحة</string>
+    <string name="line">السطر</string>
+    <string name="line_height">الارتفاع</string>
+    <string name="list">قائمة</string>
+    <string name="list_layout">تخطيط قائمة</string>
+    <string name="list_layout_description">يتم عرض الكتب في قائمة رأسية</string>
+    <string name="listofn">listOf(\n</string>
+    <string name="literary">أدبي</string>
+    <string name="lnreader">LNReader</string>
+    <string name="lnreader_error_category_failed">فشل استيراد الفئة \"%1$s\": %2$s</string>
+    <string name="lnreader_error_chapter_failed">فشل استيراد الفصول لـ \"%1$s\": %2$s</string>
+    <string name="lnreader_error_corrupted_backup">يبدو أن ملف النسخ الاحتياطي تالف أو غير مكتمل.</string>
+    <string name="lnreader_error_database_failed">خطأ في قاعدة البيانات أثناء الاستيراد: %1$s</string>
+    <string name="lnreader_error_empty_backup">لا يحتوي ملف النسخ الاحتياطي على روايات لاستيرادها.</string>
+    <string name="lnreader_error_file_not_found">لم يتم العثور على ملف النسخ الاحتياطي أو لا يمكن الوصول إليه.</string>
+    <string name="lnreader_error_invalid_backup">ملف النسخ الاحتياطي لـ LNReader غير صالح. يرجى تحديد ملف .zip تم تصديره من LNReader.</string>
+    <string name="lnreader_error_novel_failed">فشل استيراد الرواية \"%1$s\": %2$s</string>
+    <string name="lnreader_error_out_of_memory">لا توجد ذاكرة كافية لمعالجة هذه النسخة الاحتياطية. حاول إغلاق التطبيقات الأخرى.</string>
+    <string name="lnreader_error_parse_failed">فشل تحليل بيانات النسخ الاحتياطي: %1$s</string>
+    <string name="lnreader_error_permission_denied">تم رفض إذن التخزين. يرجى منح الإذن للوصول إلى الملفات.</string>
+    <string name="lnreader_error_read_failed">فشل قراءة ملف النسخ الاحتياطي: %1$s</string>
+    <string name="lnreader_error_source_not_found">لم يتم العثور على مصدر للملحق: %1$s. سيتم استيراد الرواية كمحلية.</string>
+    <string name="lnreader_error_unknown">حدث خطأ غير متوقع: %1$s</string>
+    <string name="lnreader_import_cancelled">تم إلغاء الاستيراد</string>
+    <string name="lnreader_import_categories">استيراد التصنيفات: %1$d/%2$d</string>
+    <string name="lnreader_import_complete">اكتمل الاستيراد: %1$d رواية، %2$d فصل، %3$d تصنيف تم استيرادها</string>
+    <string name="lnreader_import_complete_with_errors">اكتمل الاستيراد مع %1$d أخطاء. %2$d رواية، %3$d فصل تم استيرادها.</string>
+    <string name="lnreader_import_failed">فشل الاستيراد: %1$s</string>
+    <string name="lnreader_import_not_available">استيراد LNReader غير متاح</string>
+    <string name="lnreader_import_novels">استيراد الروايات: %1$d/%2$d - %3$s</string>
+    <string name="lnreader_import_parsing">تحليل بيانات النسخ الاحتياطي…</string>
+    <string name="lnreader_import_reading_backup">قراءة ملف النسخ الاحتياطي…</string>
+    <string name="lnreader_import_starting">بدء استيراد LNReader…</string>
+    <string name="lnreader_repositories_require_javascript_plugins">تتطلب مستودعات LNReader تمكين برامج JavaScript المساعدة.</string>
+    <string name="lnreader_warning_partial_import">تعذر استيراد بعض العناصر. تحقق من سجل الأخطاء للحصول على التفاصيل.</string>
+    <string name="lnreader_warning_skipped_novels">تم تخطي %1$d من الروايات (موجودة بالفعل في المكتبة)</string>
+    <string name="lnreader_warning_unmapped_sources">%1$d من الروايات لديها مصادر غير معينة وتم استيرادها كمحلية</string>
+    <string name="loading">جارٍ التحميل</string>
+    <string name="loading_1">جارٍ التحميل...</string>
+    <string name="loading_badges">جارٍ تحميل الشارات...</string>
+    <string name="loading_fonts">جارٍ تحميل الخطوط...</string>
+    <string name="loading_more_books">جارٍ تحميل المزيد من الكتب...</string>
+    <string name="loading_more_reviews">جارٍ تحميل المزيد من المراجعات...</string>
+    <string name="loading_novels">جارٍ تحميل الروايات...</string>
+    <string name="loading_plugin_details">جارٍ تحميل تفاصيل البرنامج المساعد...</string>
+    <string name="loading_plugins">جارٍ تحميل البرامج المساعدة...</string>
+    <string name="loading_popular_books">جارٍ تحميل الكتب الشائعة...</string>
+    <string name="loading_reviews">جارٍ تحميل المراجعات...</string>
+    <string name="loading_sources">جارٍ تحميل المصادر</string>
+    <string name="loading_voice_catalog">جارٍ تحميل كتالوج الأصوات...</string>
+    <string name="local">محلي</string>
+    <string name="local_badge">شارة محلية</string>
+    <string name="local_installer">المثبت المحلي</string>
+    <string name="local_manga">مانجا محلية</string>
+    <string name="lock_after_inactivity">القفل بعد الخمول</string>
+    <string name="lock_always">دائمًا</string>
+    <string name="lock_method">طريقة القفل</string>
+    <string name="lock_never">أبدًا</string>
+    <string name="lock_when_idle">قفل عند الخمول بعد</string>
+    <string name="logged_out_successfully">تم تسجيل الخروج بنجاح</string>
+    <string name="login">تسجيل الدخول</string>
+    <string name="login_failed">فشل تسجيل الدخول: %1$s</string>
+    <string name="login_successful">تم تسجيل الدخول بنجاح</string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="logout_failed">فشل تسجيل الخروج: %1$s</string>
+    <string name="long_press_on_any_preference">اضغط لفترة طويلة على أي تفضيل لرؤية خيارات إضافية.</string>
+    <string name="looking_in_target_source">البحث في المصدر المستهدف</string>
+    <string name="low_brightness">سطوع منخفض</string>
+    <string name="lvl">LVL</string>
+    <string name="maintenance">صيانة</string>
+    <string name="manage_badges">إدارة الشارات</string>
+    <string name="manage_glossary">إدارة المسرد</string>
+    <string name="manage_notification">إدارة الإشعارات</string>
+    <string name="manage_notification_settings">إدارة إعدادات الإشعارات</string>
+    <string name="manage_piper_voices">إدارة أصوات Piper</string>
+    <string name="manage_tts_engines">إدارة محركات TTS</string>
+    <string name="manual_sync">مزامنة يدوية</string>
+    <string name="margins">الهوامش</string>
+    <string name="mark_as_not_read">وضع علامة كغير مقروء</string>
+    <string name="mark_as_read">وضع علامة كمقروء</string>
+    <string name="mark_as_read_1">وضع علامة كمقروء</string>
+    <string name="mark_as_unread">وضع علامة كغير مقروء</string>
+    <string name="mark_as_unread_1">وضع علامة كغير مقروء</string>
+    <string name="mark_previous_as_read">وضع علامة على السابق كمقروء</string>
+    <string name="material_you_dynamic_colors">Material You (ألوان ديناميكية)</string>
+    <string name="max_cache_size">الحد الأقصى لحجم ذاكرة التخزين المؤقت</string>
+    <string name="max_concurrent_downloads">الحد الأقصى لعمليات التنزيل المتزامنة</string>
+    <string name="max_performance_mode">وضع الأداء الأقصى</string>
+    <string name="max_performance_mode_subtitle">تعطيل جميع الرسوم المتحركة والمؤثرات لتحقيق أسرع عرض. موصى به للأجهزة القديمة.</string>
+    <string name="max_results_per_source">الحد الأقصى للنتائج لكل مصدر</string>
+    <string name="maximum_backups">الحد الأقصى للنسخ الاحتياطية</string>
+    <string name="maximum_concurrent_processes">الحد الأقصى للعمليات المتزامنة</string>
+    <string name="maximum_memory_per_plugin_mb">الحد الأقصى للذاكرة لكل برنامج مساعد (ميجابايت)</string>
+    <string name="maximum_number_of_results_to">الحد الأقصى لعدد النتائج التي سيتم عرضها من كل مصدر</string>
+    <string name="maximum_time_for_plugin_operations_seconds">الحد الأقصى لوقت عمليات البرنامج المساعد (ثوانٍ)</string>
+    <string name="maximum_time_to_wait_for">الحد الأقصى للوقت للانتظار لنتائج البحث من كل مصدر</string>
+    <string name="maybe_later">ربما لاحقًا</string>
+    <string name="medium">متوسط</string>
+    <string name="memory">الذاكرة</string>
+    <string name="memory_information">معلومات الذاكرة</string>
+    <string name="memory_limit">حد الذاكرة</string>
+    <string name="menu">قائمة</string>
+    <string name="migrate">ترحيل</string>
+    <string name="migrate_from_source">الترحيل من المصدر</string>
+    <string name="migrating_book">ترحيل الكتاب</string>
+    <string name="migrating_source">ترحيل المصدر</string>
+    <string name="migration_complete">اكتمل الترحيل!</string>
+    <string name="migration_completed_successfully">اكتمل الترحيل بنجاح</string>
+    <string name="migration_failed">فشل الترحيل: %1$s</string>
+    <string name="migration_failed_error">فشل الترحيل: %1$s</string>
+    <string name="migration_options">خيارات الترحيل</string>
+    <string name="minimum_rating">الحد الأدنى للتقييم</string>
+    <string name="minutes">دقيقة</string>
+    <string name="model_to_use_for_translation_eg_mistral_llama2">النموذج المستخدم للترجمة (مثل، mistral، llama2)</string>
+    <string name="monthly">شهريا</string>
+    <string name="monthly_goal">هدف شهري</string>
+    <string name="monthly_recurring_goal">🔄 هدف شهري متكرر</string>
+    <string name="more">المزيد</string>
+    <string name="more_brightness">سطوع أكثر</string>
+    <string name="more_filters">المزيد من الفلاتر</string>
+    <string name="more_info">مزيد من المعلومات</string>
+    <string name="more_languages">المزيد من اللغات</string>
+    <string name="more_options">خيارات إضافية</string>
+    <string name="more_options_1">المزيد من الخيارات</string>
+    <string name="multi_endpoint_configuration">تكوين متعدد النقاط الطرفية</string>
+    <string name="name">الاسم</string>
+    <string name="native_android_tts">Native Android TTS</string>
+    <string name="navigate">تنقل</string>
+    <string name="navigate_back">الرجوع للخلف</string>
+    <string name="navigation_controls">عناصر التحكم في التنقل</string>
+    <string name="navigation_mode">وضع التنقل</string>
+    <string name="navigation_rail">شريط التنقل</string>
+    <string name="navigation_style">نمط التنقل</string>
+    <string name="navigation_styles_showcase">عرض أنماط التنقل</string>
+    <string name="need_help">تحتاج مساعدة؟</string>
+    <string name="network">شبكة</string>
+    <string name="network_cache">ذاكرة التخزين المؤقت للشبكة</string>
+    <string name="network_settings">إعدادات الشبكة</string>
+    <string name="neutral">محايد</string>
+    <string name="new_chapter_notifications">إشعارات الفصول الجديدة</string>
+    <string name="new_components">مكونات جديدة</string>
+    <string name="new_updates">تحديثات جديدة</string>
+    <string name="next">التالي</string>
+    <string name="next_chapter">الفصل التالي</string>
+    <string name="next_chapter_1">الفصل التالي</string>
+    <string name="next_match">التالي</string>
+    <string name="next_paragraph">الفقرة التالية</string>
+    <string name="next_result">النتيجة التالية</string>
+    <string name="nft_badge">شارة NFT</string>
+    <string name="nft_glow">توهج NFT</string>
+    <string name="nft_information">معلومات NFT</string>
+    <string name="night_mode">وضع الليل</string>
+    <string name="nine_forty_one">9:41</string>
+    <string name="nnn">\n\n\n</string>
+    <string name="no">لا</string>
+    <string name="noInternetError">تعذر قراءة الخادم ، تحقق من اتصالك بالإنترنت.</string>
+    <string name="no_achievement_badges_yet_keep">لا توجد شارات إنجاز حتى الآن. استمر في القراءة لفتحها!</string>
+    <string name="no_active_downloads">لا توجد تنزيلات نشطة</string>
+    <string name="no_active_downloads_subtitle">ستظهر التنزيلات هنا عند البدء في تنزيل الفصول</string>
+    <string name="no_active_funding_goals_at_the_moment">لا توجد أهداف تمويل نشطة في الوقت الحالي</string>
+    <string name="no_alternative_sources_available">لا توجد مصادر بديلة متاحة. إجمالي المصادر: %1$s، المصدر الحالي: %2$s</string>
+    <string name="no_alternative_sources_available_1">لا توجد مصادر بديلة متاحة</string>
+    <string name="no_app_was_found_to_lauch">حدث خطأ ما. ليس لديك المطلوب
+        التطبيق.
+    </string>
+    <string name="no_backups_found">لم يتم العثور على نسخ احتياطية</string>
+    <string name="no_badge">لا توجد شارة</string>
+    <string name="no_badges_available">لا توجد شارات متاحة</string>
+    <string name="no_badges_yet_earn_badges">لا توجد شارات حتى الآن. اربح شارات عن طريق شرائها أو امتلاك IReader NFTs!</string>
+    <string name="no_book_found_error">لا يوجد كتاب بهذا المعرف.</string>
+    <string name="no_categories_found">لم يتم العثور على فئات</string>
+    <string name="no_chapter_found_error">لا يوجد فصل بهذا الاسم.</string>
+    <string name="no_chapter_is_available">لا يوجد فصل متاح.</string>
+    <string name="no_chapters_available">لا توجد فصول متاحة</string>
+    <string name="no_chapters_found">لم يتم العثور على فصول. تأكد من أنك في صفحة قائمة الفصول.</string>
+    <string name="no_chapters_found_error">لا توجد فصول هنا.</string>
+    <string name="no_cloud_backups_found">لم يتم العثور على نسخ احتياطية سحابية</string>
+    <string name="no_completed_downloads">لا توجد تنزيلات مكتملة</string>
+    <string name="no_completed_downloads_subtitle">ستظهر التنزيلات المكتملة هنا</string>
+    <string name="no_content_available">لا يوجد محتوى متاح</string>
+    <string name="no_custom_theme_selected">لم يتم تحديد مظهر مخصص</string>
+    <string name="no_data_found_error">لم يتم العثور على بيانات.</string>
+    <string name="no_donors_yet">لا يوجد متبرعون حتى الآن</string>
+    <string name="no_error">لا يوجد خطأ</string>
+    <string name="no_featured_badges_selected">لم يتم تحديد شارات مميزة</string>
+    <string name="no_filter_applied">لم يتم تطبيق أي عامل تصفية.</string>
+    <string name="no_icon_just_text">لا يوجد رمز، مجرد نص</string>
+    <string name="no_languages_found">لم يتم العثور على لغات</string>
+    <string name="no_matches_found">لم يتم العثور على تطابقات</string>
+    <string name="no_matches_found_in_search">لم يتم العثور على تطابقات</string>
+    <string name="no_models_available">لا توجد نماذج متاحة</string>
+    <string name="no_new_update_available">لا توجد تحديثات جديدة متاحة</string>
+    <string name="no_nft_found">لم يتم العثور على NFT</string>
+    <string name="no_novels_found">لم يتم العثور على روايات</string>
+    <string name="no_novels_found_in_this_source">لم يتم العثور على روايات في هذا المصدر</string>
+    <string name="no_pending_verifications">لا توجد عمليات تحقق معلقة</string>
+    <string name="no_performance_data_available_yet">لا تتوفر بيانات الأداء حتى الآن</string>
+    <string name="no_plugins_installed">لم يتم تثبيت أي ملحقات</string>
+    <string name="no_popular_books_yet">لا توجد كتب شائعة حتى الآن</string>
+    <string name="no_primary_badge_selected">لم يتم تحديد شارة أساسية</string>
+    <string name="no_quotes_yet">لا توجد اقتباسات حتى الآن</string>
+    <string name="no_rankings_yet">لا توجد تصنيفات حتى الآن</string>
+    <string name="no_reliable_content_found">لم يتم العثور على محتوى موثوق. جرب صفحة أو مصدر مختلف.</string>
+    <string name="no_repositories_added">لم تتم إضافة أي مستودعات</string>
+    <string name="no_repositories_added_subtitle">أضف مستودعًا للوصول إلى مصادر إضافية</string>
+    <string name="no_repositories_configured">لم يتم تكوين أي مستودعات</string>
+    <string name="no_results_for">لا توجد نتائج لـ \</string>
+    <string name="no_results_found">لم يتم العثور على نتائج</string>
+    <string name="no_results_found_1">لم يتم العثور على نتائج</string>
+    <string name="no_reviews">لا توجد مراجعات</string>
+    <string name="no_reviews_for_this_chapter_yet">لا توجد مراجعات لهذا الفصل حتى الآن.</string>
+    <string name="no_reviews_for_this_chapter_yet_1">لا توجد مراجعات لهذا الفصل حتى الآن</string>
+    <string name="no_reviews_yet">لا توجد مراجعات حتى الآن</string>
+    <string name="no_reviews_yet_be_the_first_to_review">لا توجد مراجعات حتى الآن. كن أول من يراجع!</string>
+    <string name="no_settings_found">لم يتم العثور على إعدادات</string>
+    <string name="no_sources_available">لا توجد مصادر متاحة</string>
+    <string name="no_sources_available_for_migration">لا توجد مصادر متاحة للترحيل</string>
+    <string name="no_text_to_read">لا يوجد نص للقراءة</string>
+    <string name="no_text_to_translate">لا يوجد نص متاح للترجمة</string>
+    <string name="no_unread_chapters_to_download">لا توجد فصول غير مقروءة لتنزيلها</string>
+    <string name="no_updates_hint">تحقق من وجود تحديثات لرؤية فصول جديدة من مكتبتك</string>
+    <string name="no_usage_data_available_yet">لا تتوفر بيانات الاستخدام حتى الآن</string>
+    <string name="no_voice_models_available">لا توجد نماذج صوتية متاحة</string>
+    <string name="no_voices_available">لا توجد أصوات متاحة</string>
+    <string name="none">لا شيء</string>
+    <string name="not_implemented_yet">لم يتم التنفيذ بعد</string>
+    <string name="not_installed">غير مثبت</string>
+    <string name="note_cloud_backup_integration_requires">ملاحظة: يتطلب تكامل النسخ الاحتياطي السحابي بيانات اعتماد API.</string>
+    <string name="note_google_drive_backup_integration">ملاحظة: يتطلب تكامل النسخ الاحتياطي في Google Drive بيانات اعتماد API وإعداد OAuth2.</string>
+    <string name="note_if_a_models_quota">ملاحظة: إذا تم تجاوز حصة نموذج، فسيحاول التطبيق تلقائيًا نماذج أخرى.</string>
+    <string name="note_some_engines_require_installation">ملاحظة: تتطلب بعض المحركات التثبيت. استخدم مدير تحويل النص إلى كلام الكامل في الإعدادات لخيارات التثبيت.</string>
+    <string name="notes_optional">ملاحظات (اختياري)</string>
+    <string name="nothing_read_recently">لا يوجد شيء تمت قراءته مؤخرًا</string>
+    <string name="notification_behavior">سلوك الإشعارات</string>
+    <string name="notification_channels">قنوات الإشعارات</string>
+    <string name="notifications">الإشعارات</string>
+    <string name="novel_info">معلومات الرواية</string>
+    <string name="number_of_sources_to_search">عدد المصادر المراد البحث فيها في وقت واحد. القيم الأعلى أسرع ولكنها تستهلك المزيد من الموارد.</string>
+    <string name="of">من</string>
+    <string name="off">إيقاف</string>
+    <string name="offline_mode">وضع عدم الاتصال</string>
+    <string name="offline_mode_description">سيعمل التطبيق بشكل كامل في وضع عدم الاتصال. لن يتم إرسال أي بيانات إلى الخوادم السحابية. سيتم إخفاء ميزات المجتمع.</string>
+    <string name="offset">الإزاحة</string>
+    <string name="ok">موافق</string>
+    <string name="ollama_information">معلومات Ollama</string>
+    <string name="ollama_is_a_local_llm">Ollama هو خادم LLM محلي للترجمات. تأكد من تثبيت Ollama وتشغيله على جهازك أو شبكتك. تحتاج إلى سحب النموذج أولاً باستخدام 'ollama pull modelname'.</string>
+    <string name="ollama_model">نموذج Ollama</string>
+    <string name="ollama_server_url_not_set">لم يتم تعيين عنوان url لخادم OLLAMA</string>
+    <string name="ollama_url">عنوان URL لـ Ollama</string>
+    <string name="on">تشغيل</string>
+    <string name="once_installed_go_to_android">بمجرد التثبيت، انتقل إلى إعدادات Android → إمكانية الوصول → تحويل النص إلى كلام → المحرك المفضل وحدد Sherpa TTS.</string>
+    <string name="online_tts_engines">محركات تحويل النص إلى كلام عبر الإنترنت</string>
+    <string name="only_update_on_finding_novel">تحديث فقط عند العثور على رواية</string>
+    <string name="open">فتح</string>
+    <string name="open_explore">فتح الاستكشاف</string>
+    <string name="open_in_browser">فتح في المتصفح</string>
+    <string name="open_in_wallet">فتح في المحفظة</string>
+    <string name="open_in_webView">افتح في WebView</string>
+    <string name="open_last_chapter">فتح الفصل الأخير</string>
+    <string name="open_local_folder">فتح مجلد محلي</string>
+    <string name="open_location">فتح الموقع</string>
+    <string name="open_random">فتح عشوائي</string>
+    <string name="open_site">فتح الموقع</string>
+    <string name="open_tts_manager">فتح مدير TTS</string>
+    <string name="open_tts_screen">عرض</string>
+    <string name="open_tts_settings">فتح إعدادات تحويل النص إلى كلام</string>
+    <string name="openai_api_key">مفتاح OpenAI API</string>
+    <string name="openai_api_key_invalid">مفتاح Openai api غير صالح</string>
+    <string name="openai_api_key_not_set">لم يتم تعيين مفتاح OpenAI API. يرجى تكوينه في
+        الإعدادات.
+    </string>
+    <string name="openai_quota_exceeded">تجاوزت حصة Openai</string>
+    <string name="optimize">تحسين</string>
+    <string name="optimize_database">تحسين قاعدة البيانات</string>
+    <string name="optimizes_translation_for_specific_content">يحسن الترجمة لمحتوى معين</string>
+    <string name="option_1">الخيار 1</string>
+    <string name="option_2">الخيار 2</string>
+    <string name="option_3">الخيار 3</string>
+    <string name="option_4">الخيار 4</string>
+    <string name="optional_information">معلومات اختيارية</string>
+    <string name="or">أو</string>
+    <string name="orientation">اتجاه</string>
+    <string name="orientation_layout">التوجيه والتخطيط</string>
+    <string name="origin_language">لغة الأصل</string>
+    <string name="original">الأصلي</string>
+    <string name="original_term">المصطلح الأصلي</string>
+    <string name="other_source">آخرون</string>
+    <string name="overall_progress">التقدم الكلي</string>
+    <string name="owner">المالك</string>
+    <string name="package_installer_failed_to_install_packages">فشل مثبت الحزمة في تثبيت الحزم: رمز الحالة:
+</string>
+    <string name="package_manager">مدير الحزم</string>
+    <string name="package_name">اسم الحزمة</string>
+    <string name="padding">تباعد</string>
+    <string name="page">صفحة</string>
+    <string name="page_transitions">انتقالات الصفحة</string>
+    <string name="paragraph">فقرة</string>
+    <string name="paragraph_distance">المسافة</string>
+    <string name="paragraph_indent">مسافة بادئة</string>
+    <string name="paragraph_spacing">تباعد الفقرات</string>
+    <string name="paragraph_translation_menu">قائمة ترجمة الفقرة</string>
+    <string name="parameters">المعلمات</string>
+    <string name="partial">جزئي</string>
+    <string name="password">كلمة المرور</string>
+    <string name="past_7_days">آخر 7 أيام</string>
+    <string name="paste_json_here">ألصق JSON هنا...</string>
+    <string name="paste_the_theme_json_below">ألصق JSON الخاص بالسمة أدناه:</string>
+    <string name="pause">إيقاف مؤقت</string>
+    <string name="pause_all">إيقاف الكل مؤقتًا</string>
+    <string name="paused">متوقف مؤقتًا</string>
+    <string name="payment_method">طريقة الدفع</string>
+    <string name="pending">قيد الانتظار</string>
+    <string name="pending_verifications">عمليات التحقق المعلقة</string>
+    <string name="percentile">النسبة المئوية</string>
+    <string name="performance">أداء</string>
+    <string name="performance_metrics">مقاييس الأداء</string>
+    <string name="performance_monitoring">مراقبة الأداء</string>
+    <string name="permanently_delete_entire_database">⚠️ حذف قاعدة البيانات بأكملها بشكل دائم</string>
+    <string name="permission_not_given">لم يتم منح الإذن الكافي ، يرجى التحقق من
+        إذنك
+    </string>
+    <string name="permission_required">إذن مطلوب</string>
+    <string name="permissions">الأذونات</string>
+    <string name="pill_offset">إزاحة الشريط</string>
+    <string name="pin">تثبيت</string>
+    <string name="pin_1">رقم التعريف الشخصي</string>
+    <string name="pin_to_top">تثبيت في الأعلى</string>
+    <string name="pinned_sources">مثبت</string>
+    <string name="pinned_to_top">مثبت في الأعلى</string>
+    <string name="piper_requires_native_libraries_provided">• يتطلب Piper مكتبات أصلية (مقدمة في الإصدارات)\n</string>
+    <string name="piper_tts">Piper TTS</string>
+    <string name="piper_tts_voices">أصوات Piper TTS</string>
+    <string name="piper_voice_catalog">كتالوج صوت Piper</string>
+    <string name="piper_voice_selection">اختيار صوت Piper</string>
+    <string name="pitch">حدة الصوت</string>
+    <string name="play">تشغيل</string>
+    <string name="playback">تشغيل</string>
+    <string name="please_click_refresh_available_models">الرجاء النقر فوق 'تحديث النماذج المتاحة' أعلاه لتحميل النماذج من Google Gemini API.</string>
+    <string name="please_describe_the_issue">الرجاء وصف المشكلة:</string>
+    <string name="please_download_and_select_a">الرجاء تنزيل وتحديد نموذج صوت لتمكين TTS</string>
+    <string name="please_enter_a_valid_repository">الرجاء إدخال عنوان URL لمستودع صالح ينتهي بـ .json</string>
+    <string name="please_enter_a_valid_repository_url">الرجاء إدخال عنوان URL صالح للمستودع</string>
+    <string name="please_enter_a_valid_url">الرجاء إدخال عنوان URL صالح</string>
+    <string name="please_provide_more_details_about_the_issue">يرجى تقديم المزيد من التفاصيل حول المشكلة...</string>
+    <string name="please_select_at_least_one_novel">الرجاء تحديد رواية واحدة على الأقل</string>
+    <string name="please_select_target_source">الرجاء تحديد مصدر الهدف</string>
+    <string name="please_wait_a_moment_before_loading_more">الرجاء الانتظار لحظة قبل تحميل المزيد...</string>
+    <string name="please_wait_while_we_connect_to_google_drive">الرجاء الانتظار بينما نتصل بـ Google Drive</string>
+    <string name="plugin_already_enabled">المكون الإضافي ممكّن بالفعل</string>
+    <string name="plugin_based_translation">ترجمة قائمة على الملحقات</string>
+    <string name="plugin_configuration">تكوين الملحقات</string>
+    <string name="plugin_disabled_successfully">تم تعطيل المكون الإضافي بنجاح</string>
+    <string name="plugin_enabled">تم تمكين المكون الإضافي</string>
+    <string name="plugin_enabled_successfully">تم تمكين المكون الإضافي بنجاح</string>
+    <string name="plugin_error">خطأ في الملحق</string>
+    <string name="plugin_features">ميزات الملحقات</string>
+    <string name="plugin_marketplace">سوق الملحقات</string>
+    <string name="plugin_performance_metrics">مقاييس أداء الملحقات</string>
+    <string name="plugin_repositories">مستودعات الملحقات</string>
+    <string name="plugin_theme_unavailable">مظهر المكون الإضافي غير متوفر بعد الآن. تم الرجوع إلى المظهر الافتراضي.</string>
+    <string name="plugin_themes">سمات الملحقات</string>
+    <string name="plugin_uninstalled_successfully">تم إلغاء تثبيت المكون الإضافي بنجاح</string>
+    <string name="plugin_update_started">بدأ تحديث المكون الإضافي</string>
+    <string name="plugin_updated_successfully">تم تحديث المكون الإضافي بنجاح</string>
+    <string name="poetry">شعر</string>
+    <string name="popular_book">الأكثر شهرة</string>
+    <string name="popular_books">الكتب الشائعة</string>
+    <string name="popular_fonts">الخطوط الشائعة</string>
+    <string name="portrait">عمودي</string>
+    <string name="potential_matches">تطابقات محتملة</string>
+    <string name="pre_installed">✓ مثبت مسبقًا</string>
+    <string name="predict_or_synthesize_speech">/توقع أو /توليف_الكلام</string>
+    <string name="pref_incognito_mode">وضع التصفح المتخفي</string>
+    <string name="pref_incognito_mode_summary">إيقاف سجل القراءة مؤقتًا</string>
+    <string name="pref_relative_format">طوابع زمنية نسبية</string>
+    <string name="pref_relative_time_long">طويل (قصير + ، قبل ن أيام)</string>
+    <string name="pref_relative_time_short">قصير (اليوم ، أمس)</string>
+    <string name="preload_next_chapter">تحميل الفصل التالي مسبقًا</string>
+    <string name="preload_only_on_wifi">التحميل المسبق فقط على شبكة WiFi</string>
+    <string name="preload_only_on_wifi_summary">اقتصر على التحميل المسبق التلقائي على اتصالات WiFi فقط</string>
+    <string name="preload_previous_chapter">تحميل الفصل السابق مسبقًا</string>
+    <string name="preload_settings">التحميل المسبق للفصول</string>
+    <string name="preloading">التحميل المسبق</string>
+    <string name="preloading_next_chapter">يتم تحميل الفصل التالي مسبقًا...</string>
+    <string name="preparing_epub_export">جارٍ إعداد تصدير EPUB...</string>
+    <string name="presents">يقدم</string>
+    <string name="preserve_style">الحفاظ على الأسلوب</string>
+    <string name="presets">الإعدادات المسبقة</string>
+    <string name="preview">معاينة</string>
+    <string name="preview_voice">معاينة الصوت</string>
+    <string name="previous_chapter">الفصل السابق</string>
+    <string name="previous_chapter_1">الفصل السابق</string>
+    <string name="previous_match">السابق</string>
+    <string name="previous_paragraph">الفقرة السابقة</string>
+    <string name="previous_result">النتيجة السابقة</string>
+    <string name="price">السعر</string>
+    <string name="price_1">السعر:</string>
+    <string name="primary">أساسي</string>
+    <string name="primary_badge">شارة أساسية</string>
+    <string name="primary_badge_for_reviews">شارة أساسية (للمراجعات)</string>
+    <string name="primary_button">زر أساسي</string>
+    <string name="privacy">الخصوصية</string>
+    <string name="privacy_mode">وضع الخصوصية</string>
+    <string name="privacy_mode_description">سيؤدي هذا إلى تعطيل جميع ميزات جمع البيانات بما في ذلك التحليلات وإعداد تقارير الأعطال والتشخيص.</string>
+    <string name="privacy_settings">إعدادات الخصوصية</string>
+    <string name="pro_tip">نصيحة احترافية</string>
+    <string name="professional">احترافي</string>
+    <string name="profile">الملف الشخصي</string>
+    <string name="profile_sync">المزامنة والملف الشخصي</string>
+    <string name="progress">التقدم</string>
+    <string name="progress_1">التقدم</string>
+    <string name="progress_endpoint">نقطة نهاية التقدم</string>
+    <string name="progress_overview">نظرة عامة على التقدم</string>
+    <string name="project_1_auth">المشروع 1 - المصادقة</string>
+    <string name="project_2_reading">المشروع 2 - القراءة</string>
+    <string name="project_3_library">المشروع 3 - المكتبة</string>
+    <string name="project_4_book_reviews">المشروع 4 - مراجعات الكتب</string>
+    <string name="project_5_chapter_reviews">المشروع 5 - مراجعات الفصول</string>
+    <string name="project_6_badges">المشروع 6 - الشارات</string>
+    <string name="project_7_analytics">المشروع 7 - التحليلات</string>
+    <string name="protect_with_a_4_6_digit_pin">الحماية برقم تعريف شخصي مكون من 4-6 أرقام</string>
+    <string name="protect_with_a_password">الحماية بكلمة مرور</string>
+    <string name="protect_your_privacy_and_secure">احمِ خصوصيتك وقم بتأمين تجربة القراءة الخاصة بك باستخدام هذه الميزات:</string>
+    <string name="publisher">الناشر</string>
+    <string name="pulseanimation">pulseAnimation</string>
+    <string name="purchase">شراء</string>
+    <string name="purchase_exclusive_badges_to_support">اشترِ شارات حصرية لدعم التطوير وتخصيص ملفك الشخصي.</string>
+    <string name="purchase_exclusive_badges_to_support_1">اشترِ شارات حصرية لدعم التطوير وتخصيص ملفك الشخصي</string>
+    <string name="purchase_failed">فشل الشراء</string>
+    <string name="purchase_from_our_official_marketplace">اشترِ من سوقنا الرسمي لفتح شارة NFT الحصرية</string>
+    <string name="pure_black_backgrounds_for_power">خلفيات سوداء نقية لتوفير الطاقة على شاشات AMOLED</string>
+    <string name="pxs">بكسل/ثانية</string>
+    <string name="qr_code">رمز الاستجابة السريعة</string>
+    <string name="quality">الجودة</string>
+    <string name="query_must_not_be_empty">يجب ألا يكون الاستعلام فارغًا.</string>
+    <string name="queue_failed">فشل الانتظار في الصف</string>
+    <string name="queued">في الانتظار</string>
+    <string name="quick_add_popular_repositories">إضافة سريعة للمستودعات الشائعة</string>
+    <string name="quick_add_repository">إضافة مستودع سريع</string>
+    <string name="quick_fill_same_url_for_all_projects">ملء سريع (نفس عنوان URL لجميع المشاريع)</string>
+    <string name="quickly_disable_all_data_collection_features">تعطيل سريع لجميع ميزات جمع البيانات</string>
+    <string name="quiet_hours">ساعات الهدوء</string>
+    <string name="quiet_hours_end">نهاية ساعات الهدوء</string>
+    <string name="quiet_hours_start">بداية ساعات الهدوء</string>
+    <string name="quote_approved">تمت الموافقة على الاقتباس!</string>
+    <string name="quote_rejected">تم رفض الاقتباس</string>
+    <string name="quote_submitted">تم إرسال الاقتباس للمراجعة!</string>
+    <string name="quote_text">اقتباس</string>
+    <string name="quotes_reviewed_by_admins">ستتم مراجعة الاقتباسات من قبل المسؤولين قبل ظهورها للجمهور</string>
+    <string name="rating">تقييم</string>
+    <string name="read">قراءة</string>
+    <string name="read_chapters">الفصول المقروءة</string>
+    <string name="read_translated_text">قراءة النص المترجم</string>
+    <string name="reader">قارئ</string>
+    <string name="reader_settings_reset">تمت إعادة تعيين إعدادات القارئ.</string>
+    <string name="reading">قراءة</string>
+    <string name="reading_activity">نشاط القراءة</string>
+    <string name="reading_analytics">تحليلات القراءة</string>
+    <string name="reading_break">استراحة قراءة</string>
+    <string name="reading_break_reminder">تذكير بفترة راحة القراءة</string>
+    <string name="reading_buddy">رفيق القراءة</string>
+    <string name="reading_buddy_description">رفيقك الأرنب اللطيف والاقتباسات اليومية</string>
+    <string name="reading_buddy_quotes">رفيق القراءة والاقتباسات</string>
+    <string name="reading_experience">تجربة القراءة</string>
+    <string name="reading_mode">وضع القراءة</string>
+    <string name="reading_progress">تقدم القراءة</string>
+    <string name="reading_progress_sync">مزامنة تقدم القراءة</string>
+    <string name="reading_progress_sync_desc">مزامنة تقدم القراءة عبر الأجهزة</string>
+    <string name="reading_speed">سرعة القراءة</string>
+    <string name="reading_speed_wpm">كلمة في الدقيقة</string>
+    <string name="reading_statistics">إحصائيات القراءة</string>
+    <string name="reading_stats">إحصائيات القراءة</string>
+    <string name="reading_streak">سلسلة القراءة</string>
+    <string name="reading_time">وقت القراءة</string>
+    <string name="realtime_updates">تحديثات في الوقت الحقيقي</string>
+    <string name="recent_sessions">الجلسات الأخيرة</string>
+    <string name="recently">مؤخرًا</string>
+    <string name="recommendations">توصيات:</string>
+    <string name="recommended_for_you">موصى به لك</string>
+    <string name="recommended_sherpa_tts_app">موصى به: تطبيق Sherpa TTS</string>
+    <string name="refresh">تحديث</string>
+    <string name="refresh_covers_too">تحديث الأغلفة أيضًا</string>
+    <string name="refresh_metrics">تحديث المقاييس</string>
+    <string name="refreshed">تم التحديث</string>
+    <string name="refreshing">جارٍ التحديث</string>
+    <string name="refreshing_1">تحديث...</string>
+    <string name="reject">رفض</string>
+    <string name="relative_time_today">اليوم</string>
+    <string name="release">إصدار</string>
+    <string name="reload">إعادة تحميل</string>
+    <string name="reload_plugin_themes">إعادة تحميل سمات الملحقات</string>
+    <string name="remaining">المتبقي</string>
+    <string name="remind_me_again_in">ذكرني مرة أخرى بعد:</string>
+    <string name="reminder_interval">الفاصل الزمني للتذكير</string>
+    <string name="remove">إزالة</string>
+    <string name="remove_after_marked_as_read">إزالة بعد وضع علامة كمقروء</string>
+    <string name="remove_after_reading">إزالة بعد القراءة</string>
+    <string name="remove_all_books_and_chapters">إزالة جميع الكتب والفصول</string>
+    <string name="remove_all_custom_themes">إزالة جميع السمات المخصصة</string>
+    <string name="remove_all_downloaded_chapters">إزالة جميع الفصول التي تم تنزيلها</string>
+    <string name="remove_books_not_in_library">إزالة الكتب غير الموجودة في المكتبة</string>
+    <string name="remove_filter">إزالة المرشح</string>
+    <string name="remove_from_history">إزالة من السجل</string>
+    <string name="remove_repository">إزالة المستودع؟</string>
+    <string name="rename_category">إعادة تسمية الفئة</string>
+    <string name="repair">إصلاح</string>
+    <string name="repair_categories">إصلاح الفئات</string>
+    <string name="repair_database">إصلاح قاعدة البيانات</string>
+    <string name="repair_failed">فشل الإصلاح: %1$s</string>
+    <string name="replace_standard_action_buttons_with">استبدال أزرار الإجراءات القياسية بزر عائم</string>
+    <string name="replace_toolbar_buttons_with_floating">استبدال أزرار شريط الأدوات بزر عائم</string>
+    <string name="report">إبلاغ</string>
+    <string name="report_as_broken">الإبلاغ عن عطل</string>
+    <string name="report_broken_chapter">الإبلاغ عن فصل معطوب</string>
+    <string name="report_broken_chapter_1">الإبلاغ عن فصل معطوب</string>
+    <string name="report_source_as_broken">الإبلاغ عن المصدر على أنه معطل</string>
+    <string name="report_source_issue">الإبلاغ عن مشكلة في المصدر</string>
+    <string name="repository">مستودع</string>
+    <string name="repository_added_successfully">تمت إضافة المستودع بنجاح</string>
+    <string name="repository_adding_a_new">إضافة مستودع جديد</string>
+    <string name="repository_example_url">مثال: https://github.com/username/repo/raw/main/index.json</string>
+    <string name="repository_explanation">المستودع عبارة عن مجموعة من الملحقات المستضافة عبر الإنترنت. يمكنك إضافة مستودعات مخصصة للوصول إلى مصادر إضافية للكتب والروايات.</string>
+    <string name="repository_name">اسم المستودع</string>
+    <string name="repository_type">نوع المستودع</string>
+    <string name="repository_url">عنوان URL للمستودع</string>
+    <string name="require_authentication_for_adult_sources">تتطلب المصادقة لمصادر المحتوى للبالغين</string>
+    <string name="require_authentication_to_open_the_app">تتطلب المصادقة لفتح التطبيق</string>
+    <string name="required">مطلوب</string>
+    <string name="required_for_deepseek_translations">مطلوب لترجمات DeepSeek</string>
+    <string name="required_for_google_gemini_translations">مطلوب لترجمات Google Gemini</string>
+    <string name="required_for_openai_translations">مطلوب لترجمات OpenAI</string>
+    <string name="required_information">معلومات مطلوبة</string>
+    <string name="required_tables">الجداول المطلوبة:</string>
+    <string name="reset">إعادة تعيين</string>
+    <string name="reset_categories">إعادة ضبط الفئات</string>
+    <string name="reset_data_settings">إعادة تعيين إعدادات البيانات</string>
+    <string name="reset_reader_screen_settings">إعادة ضبط إعدادات شاشة القراءة</string>
+    <string name="reset_setting">إعادة ضبط الإعدادات</string>
+    <string name="reset_themes">إعادة ضبط السمات</string>
+    <string name="reset_to_defaults">إعادة التعيين إلى الإعدادات الافتراضية</string>
+    <string name="resource_usage">استخدام الموارد</string>
+    <string name="restart_app">إعادة تشغيل التطبيق</string>
+    <string name="restore">استعادة</string>
+    <string name="restore_backup">استعادة النسخة الاحتياطية</string>
+    <string name="restore_backup_1">استعادة النسخ الاحتياطي؟</string>
+    <string name="restore_cancelled">تم إلغاء الاستعادة</string>
+    <string name="restore_default_categories">استعادة الفئات الافتراضية</string>
+    <string name="restore_default_reader_settings">استعادة إعدادات القارئ الافتراضية</string>
+    <string name="restore_error">خطأ في الاستعادة: %1$s</string>
+    <string name="restoredSuccessfully">تم استعادة النسخة الاحتياطية بنجاح.</string>
+    <string name="restoring_backup">يتم استعادة النسخة الاحتياطية...</string>
+    <string name="restoring_backup_1">استعادة النسخة الاحتياطية...</string>
+    <string name="results">نتائج</string>
+    <string name="results_found">تم العثور على نتائج</string>
+    <string name="resume">استئناف</string>
+    <string name="resume_all">استئناف الكل</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="retry_failed">إعادة المحاولة للفاشلة</string>
+    <string name="retry_loading">إعادة محاولة التحميل</string>
+    <string name="retrying_download">إعادة محاولة التنزيل</string>
+    <string name="return_to_previous_screen">العودة إلى الشاشة السابقة</string>
+    <string name="reverse">عكس</string>
+    <string name="reverse_chapter_in_db">عكس الفصول في قاعدة البيانات</string>
+    <string name="review">مراجعة</string>
+    <string name="review_chapter">مراجعة الفصل</string>
+    <string name="review_submitted_successfully">تم إرسال المراجعة بنجاح</string>
+    <string name="reviews">المراجعات</string>
+    <string name="reviews_endpoint">نقطة نهاية المراجعات</string>
+    <string name="reviews_written">المراجعات المكتوبة</string>
+    <string name="right">يمين</string>
+    <string name="rotate_screen_automatically">تدوير الشاشة تلقائيًا</string>
+    <string name="rotation">تدوير</string>
+    <string name="run_health_check">تشغيل فحص السلامة</string>
+    <string name="sample_text">نص تجريبي</string>
+    <string name="save">حفظ</string>
+    <string name="save_backup">حفظ نسخة احتياطية</string>
+    <string name="save_chapters_as_cbz">حفظ الفصول كـ CBZ</string>
+    <string name="save_configuration">حفظ التكوين</string>
+    <string name="save_custom_theme">حفظ مظهر مخصص</string>
+    <string name="save_epub">حفظ EPUB</string>
+    <string name="save_multi_endpoint_configuration">حفظ تكوين النقاط المتعددة</string>
+    <string name="saved_local_source_location">تم حفظ المصادر في ذاكرة التخزين المؤقت</string>
+    <string name="scale">مقياس</string>
+    <string name="scaleanimation">scaleAnimation</string>
+    <string name="scan_this_qr_code_with_your_crypto_wallet_app">امسح رمز الاستجابة السريعة هذا باستخدام تطبيق محفظة العملات المشفرة الخاص بك</string>
+    <string name="screen_always_on">الشاشة قيد التشغيل دائمًا</string>
+    <string name="screen_security">أمان الشاشة</string>
+    <string name="scrollIndicator">شريط التمرير</string>
+    <string name="scroll_mode">وضع التمرير</string>
+    <string name="scrollbar_color">لون شريط التمرير</string>
+    <string name="scrollbar_draggable">شريط التمرير قابل للسحب</string>
+    <string name="scrollbar_mode">وضع شريط التمرير</string>
+    <string name="search">بحث</string>
+    <string name="search_across_all_sources">البحث في جميع المصادر</string>
+    <string name="search_across_all_sources_1">البحث في جميع المصادر...</string>
+    <string name="search_fonts">البحث عن الخطوط...</string>
+    <string name="search_glossary">البحث في المسرد...</string>
+    <string name="search_hint">بحث…</string>
+    <string name="search_history">سجل البحث</string>
+    <string name="search_languages">البحث عن اللغات...</string>
+    <string name="search_performance">أداء البحث</string>
+    <string name="search_plugins">البحث عن الملحقات...</string>
+    <string name="search_settings">إعدادات البحث...</string>
+    <string name="search_timeout">مهلة البحث</string>
+    <string name="search_voices">البحث عن الأصوات...</string>
+    <string name="search_voices_by_name_language">البحث عن الأصوات بالاسم واللغة...</string>
+    <string name="searching">جارٍ البحث…</string>
+    <string name="searching_1">جارٍ البحث...</string>
+    <string name="searching_for_matches">جارٍ البحث عن تطابقات...</string>
+    <string name="searching_for_matches_in_target_source">جارٍ البحث عن تطابقات في المصدر الهدف...</string>
+    <string name="second">ثانية</string>
+    <string name="secondary">ثانوي</string>
+    <string name="secondary_button">زر ثانوي</string>
+    <string name="secure_private">آمن وخاص</string>
+    <string name="secure_screen">شاشة آمنة</string>
+    <string name="security">الأمان</string>
+    <string name="security_audit">تدقيق أمني</string>
+    <string name="security_best_practices">أفضل الممارسات الأمنية</string>
+    <string name="security_features">ميزات الأمان</string>
+    <string name="security_guide">دليل الأمان</string>
+    <string name="security_privacy">الأمان والخصوصية</string>
+    <string name="security_scan_complete">اكتمل الفحص الأمني</string>
+    <string name="security_scan_failed">فشل الفحص الأمني: %1$s</string>
+    <string name="security_warnings">تحذيرات الأمان</string>
+    <string name="select">اختر</string>
+    <string name="select_a_preset_tts_engine">حدد محرك تحويل النص إلى كلام مُعد مسبقًا أو قم بتكوين مساحة Gradio مخصصة.</string>
+    <string name="select_a_source_to_migrate_books_from">حدد مصدرًا لترحيل الكتب منه:</string>
+    <string name="select_a_source_to_migrate_to">حدد مصدرًا لترحيل الكتب إليه:</string>
+    <string name="select_all">اختر الكل</string>
+    <string name="select_backup_file">حدد ملف النسخ الاحتياطي</string>
+    <string name="select_between">اختر بين</string>
+    <string name="select_books_to_migrate">حدد الكتب المراد ترحيلها</string>
+    <string name="select_chapters">تحديد الفصول</string>
+    <string name="select_cloud_provider">تحديد موفر خدمة سحابية</string>
+    <string name="select_engine">تحديد المحرك</string>
+    <string name="select_epub_files_to_import">حدد ملفات EPUB المراد استيرادها</string>
+    <string name="select_inverted">تحديد معكوس</string>
+    <string name="select_issue_type">حدد نوع المشكلة:</string>
+    <string name="select_language">اختر اللغة</string>
+    <string name="select_lnreader_backup">حدد نسخة احتياطية لـ LNReader</string>
+    <string name="select_match">حدد التطابق</string>
+    <string name="select_navigation_style">حدد نمط التنقل</string>
+    <string name="select_source_to_migrate_to">حدد المصدر المراد الترحيل إليه</string>
+    <string name="select_target_source">حدد المصدر الهدف</string>
+    <string name="select_the_languages_you_want">حدد اللغات التي تريد رؤيتها عند تصفح المحتوى والبحث عنه. يمكنك تحديد لغات متعددة.</string>
+    <string name="select_the_languages_you_want_1">حدد اللغات التي تريد رؤيتها عند تصفح المصادر. يتم عرض اللغات التي لديها مصادر متاحة فقط.</string>
+    <string name="select_time">اختر الوقت:</string>
+    <string name="select_up_to_3_badges">حدد ما يصل إلى 3 شارات لعرضها بشكل بارز في ملفك الشخصي</string>
+    <string name="select_voice">تحديد الصوت</string>
+    <string name="select_voice_language_and_speech_rate">حدد الصوت واللغة ومعدل الكلام</string>
+    <string name="select_wallet_app">حدد تطبيق المحفظة</string>
+    <string name="select_what_data_to_transfer">حدد البيانات المراد نقلها</string>
+    <string name="select_when_automatic_updates_are_allowed">حدد متى يُسمح بالتحديثات التلقائية:</string>
+    <string name="select_which_gemini_model_to_use_for_translation">حدد نموذج Gemini الذي تريد استخدامه للترجمة</string>
+    <string name="select_your_preferred_translation_engine">حدد محرك الترجمة المفضل لديك وقم بتكوين إعداداته. تتطلب المحركات التي تعمل بالذكاء الاصطناعي (OpenAI و DeepSeek) مفاتيح API وتقدم ميزات أكثر تقدمًا.</string>
+    <string name="selectable_mode">وضع التحديد</string>
+    <string name="selected">محدد</string>
+    <string name="selected_languages">اللغات المحددة</string>
+    <string name="selected_scrollbar_color">لون شريط التمرير المحدد</string>
+    <string name="selectionanimation">selectionAnimation</string>
+    <string name="set_eth_wallet_address">تعيين عنوان محفظة ETH</string>
+    <string name="set_name">تعيين الاسم</string>
+    <string name="sets_the_tone_of_translated_text">يحدد نبرة النص المترجم</string>
+    <string name="setting_screen_label">الإعدادات</string>
+    <string name="settings">إعدادات</string>
+    <string name="settings_reset_to_defaults">تمت إعادة تعيين الإعدادات إلى الافتراضية</string>
+    <string name="sha_256_fingerprint">بصمة SHA-256</string>
+    <string name="share">مشاركة</string>
+    <string name="share_favorite_quotes">شارك اقتباساتك المفضلة مع المجتمع!</string>
+    <string name="share_report">مشاركة التقرير</string>
+    <string name="share_your_experience_with_this_plugin">شارك تجربتك مع هذا الملحق...</string>
+    <string name="shared_via_ireader">تمت المشاركة عبر IReader</string>
+    <string name="shimmer">وميض</string>
+    <string name="shimmeranimation">shimmerAnimation</string>
+    <string name="shimmertransition">shimmerTransition</string>
+    <string name="show_all_category_tab">إظهار علامة تبويب الفئة "الكل"</string>
+    <string name="show_archived">إظهار المؤرشفة</string>
+    <string name="show_archived_books">إظهار الكتب المؤرشفة</string>
+    <string name="show_category_tabs">إظهار علامات تبويب الفئات</string>
+    <string name="show_completed">إظهار المكتمل</string>
+    <string name="show_continue_reading_bar">إظهار شريط متابعة القراءة</string>
+    <string name="show_count_in_category_tab">إظهار العدد في علامة تبويب الفئة</string>
+    <string name="show_downloaded_only">إظهار المحمل فقط</string>
+    <string name="show_empty_categories">إظهار الفئات الفارغة</string>
+    <string name="show_error_details">إظهار تفاصيل الخطأ</string>
+    <string name="show_failed">إظهار الفاشلة</string>
+    <string name="show_history">تمكين سجل القراءة</string>
+    <string name="show_in_folder">إظهار في المجلد</string>
+    <string name="show_language_filter">إظهار فلتر اللغة</string>
+    <string name="show_last_update_time">إظهار آخر وقت تحديث</string>
+    <string name="show_local_catalogs">إظهار الملحقات المحلية</string>
+    <string name="show_local_catalogs_subtitle">عرض الملحقات المثبتة من الملفات المحلية</string>
+    <string name="show_navigation_bar">إظهار شريط التنقل</string>
+    <string name="show_original">إظهار الأصل</string>
+    <string name="show_page_number">إظهار رقم الصفحة</string>
+    <string name="show_reading_time">إظهار وقت القراءة</string>
+    <string name="show_resume_card">إظهار بطاقة الاستئناف</string>
+    <string name="show_scrollbar">إظهار شريط التمرير</string>
+    <string name="show_smart_categories">إظهار الفئات الذكية</string>
+    <string name="show_status_bar">إظهار شريط الحالة</string>
+    <string name="show_system_catalogs">إظهار ملحقات النظام</string>
+    <string name="show_system_catalogs_subtitle">عرض الملحقات المضمنة التي تأتي مع التطبيق</string>
+    <string name="show_translation">إظهار الترجمة</string>
+    <string name="show_update">إظهار إشعارات تحديث التطبيق</string>
+    <string name="show_webView_during_fetching">تكامل WebView</string>
+    <string name="shows_value">يظهر القيمة</string>
+    <string name="sign_in">تسجيل الدخول</string>
+    <string name="sign_in_again">تسجيل الدخول مرة أخرى</string>
+    <string name="sign_in_sign_up">تسجيل الدخول / تسجيل الاشتراك</string>
+    <string name="sign_in_to_chatgpt">تسجيل الدخول إلى ChatGPT</string>
+    <string name="sign_in_to_deepseek">تسجيل الدخول إلى DeepSeek</string>
+    <string name="sign_in_to_sync">تسجيل الدخول للمزامنة</string>
+    <string name="sign_in_to_sync_your">سجل الدخول لمزامنة تقدم القراءة عبر جميع أجهزتك</string>
+    <string name="sign_out">تسجيل الخروج</string>
+    <string name="signature_hash">تجزئة التوقيع</string>
+    <string name="simple_row">صف بسيط</string>
+    <string name="simulation_mode_does_not_use_real_voices">وضع المحاكاة لا يستخدم أصواتًا حقيقية.</string>
+    <string name="skip">تخطي</string>
+    <string name="skip_backward_10_seconds">تخطي للخلف 10 ثوانٍ</string>
+    <string name="skip_forward_10_seconds">تخطي للأمام 10 ثوانٍ</string>
+    <string name="skip_this_book">تخطي هذا الكتاب</string>
+    <string name="skip_titles_without_chapters">تخطي العناوين بدون فصول</string>
+    <string name="skip_to_content">تخط إلى المحتوى</string>
+    <string name="sleep">نوم</string>
+    <string name="sleep_timer">مؤقت النوم</string>
+    <string name="small">صغير</string>
+    <string name="snooze">تأجيل</string>
+    <string name="snooze_reminder">تأجيل التذكير</string>
+    <string name="something_is_wrong_with_this_book">هناك خطأ ما في هذا الكتاب.</string>
+    <string name="something_is_wrong_with_this_chapter">هناك خطأ ما في هذا الفصل.
+    </string>
+    <string name="something_went_wrong">حدث خطأ ما</string>
+    <string name="something_wrong_with_book">هناك خطأ ما في هذا الكتاب</string>
+    <string name="sort">ترتيب</string>
+    <string name="sort_by">ترتيب حسب</string>
+    <string name="sort_direction">اتجاه الفرز</string>
+    <string name="sound">صوت</string>
+    <string name="source">المصدر</string>
+    <string name="source_browse_latest">تصفح الأحدث</string>
+    <string name="source_extension_not_installed">لم يتم تثبيت ملحق المصدر</string>
+    <string name="source_id">معرف المصدر</string>
+    <string name="source_not_available">هذا المصدر غير متوفر في جهازك.</string>
+    <string name="source_title">عنوان المصدر</string>
+    <string name="sources">تصفح</string>
+    <string name="space_url">عنوان URL للمساحة</string>
+    <string name="speech_rate">معدل الكلام</string>
+    <string name="speed">السرعة</string>
+    <string name="split_tall_images">تقسيم الصور الطويلة</string>
+    <string name="start">ابدأ</string>
+    <string name="start_reading_to_see_trending_books">ابدأ القراءة لرؤية الكتب الرائجة</string>
+    <string name="start_reading_to_unlock">ابدأ القراءة لفتح الإنجازات!</string>
+    <string name="start_time">وقت البدء</string>
+    <string name="start_trial">بدء النسخة التجريبية</string>
+    <string name="statistics">الإحصائيات</string>
+    <string name="statistics_and_analytics">الإحصائيات والتحليلات</string>
+    <string name="stats">إحصائيات</string>
+    <string name="status">الحالة</string>
+    <string name="stop">إيقاف</string>
+    <string name="storage">التخزين</string>
+    <string name="storage_permission_required_explanation">تفسير إذن التخزين المطلوب
+    </string>
+    <string name="storage_usage">استخدام التخزين</string>
+    <string name="storage_used">التخزين المستخدم</string>
+    <string name="style_features">ميزات النمط</string>
+    <string name="submit">إرسال</string>
+    <string name="submit_for_review">إرسال للمراجعة</string>
+    <string name="submit_for_verification">إرسال للتحقق</string>
+    <string name="submit_quote">إرسال اقتباس</string>
+    <string name="submit_report">إرسال التقرير</string>
+    <string name="submitted">تم الإرسال</string>
+    <string name="success">نجاح</string>
+    <string name="successful_imports">عمليات الاستيراد الناجحة</string>
+    <string name="successfully_migrated_to">تم الترحيل بنجاح إلى %1$s</string>
+    <string name="supabase_configuration">تكوين Supabase</string>
+    <string name="supabase_url">عنوان URL لـ Supabase</string>
+    <string name="support">دعم</string>
+    <string name="support_collect">الدعم والتحصيل</string>
+    <string name="support_development">دعم التطوير</string>
+    <string name="support_for_any_gradio_based_tts_engine">دعم أي محرك تحويل النص إلى كلام قائم على Gradio</string>
+    <string name="support_the_app_to_appear_on_the_leaderboard">ادعم التطبيق للظهور على لوحة المتصدرين!</string>
+    <string name="support_the_project_with_a">ادعم المشروع بالتبرع ببطاقة ائتمان/خصم</string>
+    <string name="support_the_project_with_a_donation">ادعم المشروع بالتبرع</string>
+    <string name="supporter">⭐ داعم</string>
+    <string name="surface_variant">متغير السطح</string>
+    <string name="switch">تبديل</string>
+    <string name="switch_preference">تبديل التفضيل</string>
+    <string name="switch_to_an_ai_powered">قم بالتبديل إلى محرك يعمل بالذكاء الاصطناعي (OpenAI أو DeepSeek) للوصول إلى إعدادات الترجمة المتقدمة مثل نوع المحتوى والتحكم في النبرة والحفاظ على النمط.</string>
+    <string name="sync">مزامنة</string>
+    <string name="sync_history">سجل المزامنة</string>
+    <string name="sync_interval">فترة المزامنة</string>
+    <string name="sync_my_stats">مزامنة إحصائياتي</string>
+    <string name="sync_now">مزامنة الآن</string>
+    <string name="sync_only_over_wifi">المزامنة عبر شبكة WiFi فقط</string>
+    <string name="sync_only_when_connected_to_wifi">المزامنة فقط عند الاتصال بشبكة WiFi</string>
+    <string name="sync_remote">مزامنة عن بعد</string>
+    <string name="sync_settings">إعدادات المزامنة</string>
+    <string name="sync_stats">مزامنة الإحصائيات</string>
+    <string name="sync_with_cloud">مزامنة مع السحابة</string>
+    <string name="sync_your_stats_to_appear_on_the_leaderboard">قم بمزامنة إحصائياتك للظهور على لوحة المتصدرين</string>
+    <string name="syncing_with_cloud">جارٍ المزامنة مع السحابة...</string>
+    <string name="synopsis">ملخص</string>
+    <string name="system_default">افتراضي</string>
+    <string name="system_diagnostics">تشخيصات النظام</string>
+    <string name="system_health">صحة النظام</string>
+    <string name="system_information">معلومات النظام</string>
+    <string name="system_integration_multiple_engines_supported">✓ تكامل النظام • ✓ دعم محركات متعددة • ✓ لا حاجة إلى تنزيلات</string>
+    <string name="system_notifications">النظام والإشعارات</string>
+    <string name="system_notifications_1">إشعارات النظام</string>
+    <string name="system_tts_settings">إعدادات نظام تحويل النص إلى كلام</string>
+    <string name="tab_content">tab_content</string>
+    <string name="tabs">علامات التبويب</string>
+    <string name="tags">العلامات</string>
+    <string name="take_a_break">خذ استراحة</string>
+    <string name="tap_the_eye_icon_to_preview_fonts">انقر فوق رمز العين لمعاينة الخطوط</string>
+    <string name="tap_the_update_icon_in">انقر فوق رمز التحديث في شريط الأدوات لتحديث جميع المكونات الإضافية</string>
+    <string name="tap_to_cycle_include_exclude_none">انقر للتنقل: تضمين ← استبعاد ← لا شيء</string>
+    <string name="tap_to_install_and_restart">انقر للتثبيت وإعادة التشغيل</string>
+    <string name="tap_to_reveal">انقر للكشف</string>
+    <string name="tap_zones">مناطق النقر</string>
+    <string name="target_language">اللغة المستهدفة</string>
+    <string name="technical">تقني</string>
+    <string name="ten_min">10 دقائق</string>
+    <string name="test">اختبار</string>
+    <string name="test_connection">اختبار الاتصال</string>
+    <string name="test_coqui_tts">اختبار Coqui TTS</string>
+    <string name="test_notifications">اختبار الإشعارات</string>
+    <string name="testing_connection">يتم اختبار الاتصال...</string>
+    <string name="testing_connection_1">اختبار الاتصال...</string>
+    <string name="text_align">محاذاة النص</string>
+    <string name="text_align_center">محاذاة النص إلى المنتصف</string>
+    <string name="text_align_justify">محاذاة النص</string>
+    <string name="text_align_left">محاذاة النص إلى اليسار</string>
+    <string name="text_align_right">محاذاة النص إلى اليمين</string>
+    <string name="text_alignment">محاذاة النص</string>
+    <string name="text_color">لون النص</string>
+    <string name="text_color_1">لون النص</string>
+    <string name="text_does_not_match">النص غير متطابق</string>
+    <string name="text_to_speech">تحويل النص إلى كلام</string>
+    <string name="text_trailing">نهاية النص</string>
+    <string name="thank_you_for_your_support">شكرا لدعمكم!</string>
+    <string name="the_app_encountered_an_unexpected">واجه التطبيق خطأ غير متوقع ويحتاج إلى إعادة التشغيل.</string>
+    <string name="the_book_could_not_be_found_in_the_target_source">لم يتم العثور على الكتاب في المصدر الهدف</string>
+    <string name="the_downloads_was_cancelled">تم إلغاء التنزيلات</string>
+    <string name="the_downloads_was_interrupted">تمت مقاطعة التنزيلات</string>
+    <string name="the_plugin_has_been_successfully">تم تثبيت المكون الإضافي بنجاح. يمكنك الآن تمكينه وتكوينه.</string>
+    <string name="the_quick_brown_fox_jumps">الثعلب البني السريع يقفز فوق الكلب الكسول. لوريم إيبسوم دولار سيت أميت، كونسيكتيتور أديبيسكينج إيليت، سيد دو إيوسمود تيمبور إينسيديدونت أوت لابور إي دولور ماجنا أليكوا.</string>
+    <string name="the_quick_brown_fox_jumps_over_the_lazy_dog">الثعلب البني السريع يقفز فوق الكلب الكسول</string>
+    <string name="the_source_is_not_found">لم يتم العثور على المصدر.</string>
+    <string name="theme">مظهر</string>
+    <string name="theme_exported_successfully">تم تصدير المظهر بنجاح</string>
+    <string name="theme_imported_successfully">تم استيراد المظهر بنجاح</string>
+    <string name="theme_management">إدارة السمات</string>
+    <string name="theme_plugin_errors">أخطاء مكونات السمات الإضافية</string>
+    <string name="theme_was_deleted">تم حذف المظهر</string>
+    <string name="theme_was_not_valid">المظهر ليس جزءًا من السمات الأساسية</string>
+    <string name="theme_was_saved">تم حفظ المظهر</string>
+    <string name="themes">السمات</string>
+    <string name="there_are_no_novels_in_this_source_to_migrate">لا توجد روايات في هذا المصدر لترحيلها</string>
+    <string name="there_is_no_chapter">لا يوجد فصل.</string>
+    <string name="there_was_a_problem_in_getting_chapter">كانت هناك مشكلة في الحصول على
+        الفصل.
+    </string>
+    <string name="these_actions_are_destructive_and">هذه الإجراءات مدمرة ولا يمكن التراجع عنها. تابع بحذر.</string>
+    <string name="these_are_all_the_popular_books">هذه هي جميع الكتب المشهورة</string>
+    <string name="these_are_all_the_reviews">هذه هي جميع المراجعات</string>
+    <string name="thirty_min">30 دقيقة</string>
+    <string name="this_badge_will_appear_next">ستظهر هذه الشارة بجوار اسم المستخدم الخاص بك في جميع مراجعاتك</string>
+    <string name="this_card_can_be_clicked">يمكن النقر فوق هذه البطاقة.</string>
+    <string name="this_feature_is_currently_in">هذه الميزة قيد التطوير حاليًا وتتطلب إعدادًا إضافيًا.</string>
+    <string name="this_feature_is_not_available">هذه الميزة غير متاحة</string>
+    <string name="this_is_a_preview_of">هذه معاينة لكيفية ظهور النص في البطاقات بهذه السمة.</string>
+    <string name="this_is_a_recurring_monthly">هذا هدف شهري متكرر. بمجرد الوصول إليه ، ستتم إعادة تعيينه تلقائيًا للشهر التالي لضمان الدعم المستمر.</string>
+    <string name="this_is_a_sample_review">هذا نص مراجعة عينة يوضح كيف ستظهر الشارة بجوار اسم المستخدم الخاص بك عند كتابة المراجعات.</string>
+    <string name="this_is_a_very_long">هذا عنوان فرعي طويل جدًا يوضح كيف يتعامل المكون مع تجاوز النص والتفاف النص عندما يكون المحتوى طويلاً جدًا بحيث لا يتناسب مع سطر واحد</string>
+    <string name="this_is_an_example_of">هذا مثال على بطاقة محسنة مع تصميم Material Design 3.</string>
+    <string name="this_is_disabled">هذا معطل</string>
+    <string name="this_is_enabled">هذا ممكن</string>
+    <string name="this_is_first_chapter">هذا هو الفصل الأول</string>
+    <string name="this_is_last_chapter">هذا هو الفصل الأخير</string>
+    <string name="this_may_take_a_few_minutes_for_long_chapters">قد يستغرق هذا بضع دقائق للفصول الطويلة...</string>
+    <string name="this_option_is_currently_disabled">هذا الخيار معطل حاليًا</string>
+    <string name="this_option_is_disabled">هذا الخيار معطل</string>
+    <string name="this_plugin_does_not_provide_custom_settings">لا يوفر هذا المكون الإضافي إعدادات مخصصة.</string>
+    <string name="this_purchase_will_be_synced">ستتم مزامنة هذا الشراء عبر جميع أجهزتك.</string>
+    <string name="this_source_requires_authentication_please">يتطلب هذا المصدر مصادقة. يرجى إدخال بيانات الاعتماد الخاصة بك.</string>
+    <string name="this_translation_engine_uses_a">يستخدم محرك الترجمة هذا WebView للوصول إلى ChatGPT مباشرة. تحتاج إلى تسجيل الدخول إلى ChatGPT بحسابك لاستخدام هذه الميزة. سيحفظ التطبيق ملفات تعريف الارتباط الخاصة بك للترجمات المستقبلية.</string>
+    <string name="this_translation_engine_uses_a_1">يستخدم محرك الترجمة هذا WebView للوصول إلى DeepSeek مباشرة. تحتاج إلى تسجيل الدخول إلى DeepSeek بحسابك لاستخدام هذه الميزة. سيحفظ التطبيق ملفات تعريف الارتباط الخاصة بك للترجمات المستقبلية.</string>
+    <string name="this_wallet_does_not_own_an_ireader_nft">لا تمتلك هذه المحفظة IReader NFT</string>
+    <string name="this_will_compact_the_database">سيؤدي هذا إلى ضغط قاعدة البيانات وقد يحسن الأداء. قد تستغرق العملية بضع دقائق.</string>
+    <string name="this_will_reset_all_data">سيؤدي هذا إلى إعادة تعيين جميع إعدادات البيانات والتخزين إلى قيمها الافتراضية.</string>
+    <string name="time_for_a_break">حان وقت الاستراحة!</string>
+    <string name="time_out_exception">انتهت مهلة الطلب.</string>
+    <string name="time_to_stretch_your_eyes_and_rest_a_bit">حان الوقت لتمديد عينيك والراحة قليلاً! 👀</string>
+    <string name="tip_check_the_api_tab">نصيحة: تحقق من علامة التبويب API في صفحة Hugging Face Space للعثور على اسم API الصحيح.</string>
+    <string name="title">العنوان</string>
+    <string name="title_cannot_be_empty">لا يمكن أن يكون العنوان فارغًا</string>
+    <string name="title_copied_to_clipboard">تم نسخ العنوان إلى الحافظة</string>
+    <string name="to_enable_google_drive_backup_you_need_to">لتمكين النسخ الاحتياطي في Google Drive ، تحتاج إلى:</string>
+    <string name="to_enable_js_plugins">لتمكين مكونات JS الإضافية:</string>
+    <string name="to_use_lnreader_compatible_plugins">لاستخدام المكونات الإضافية المتوافقة مع LNReader، تحتاج إلى تمكين ميزة المكون الإضافي في الإعدادات العامة.</string>
+    <string name="todays_quote">اقتباس اليوم</string>
+    <string name="toggle_in_library">تبديل في المكتبة</string>
+    <string name="toggle_search_mode_off">إيقاف تشغيل وضع البحث</string>
+    <string name="toggle_this_option">تبديل هذا الخيار</string>
+    <string name="toggle_translation">تبديل الترجمة</string>
+    <string name="tone_type">النغمة</string>
+    <string name="toolbar">شريط الأدوات</string>
+    <string name="toolbar_color">لون شريط الأدوات</string>
+    <string name="top">أعلى</string>
+    <string name="top_authors">أفضل المؤلفين</string>
+    <string name="top_content_padding">حشو المحتوى العلوي</string>
+    <string name="top_genres">أفضل الأنواع</string>
+    <string name="top_left">أعلى اليسار</string>
+    <string name="top_readers">أفضل القراء</string>
+    <string name="top_supporters">أفضل الداعمين</string>
+    <string name="total_books">إجمالي الكتب</string>
+    <string name="total_cache_size">إجمالي حجم ذاكرة التخزين المؤقت</string>
+    <string name="total_chapter">إجمالي الفصول</string>
+    <string name="total_donated">إجمالي التبرعات</string>
+    <string name="total_memory">إجمالي الذاكرة</string>
+    <string name="total_reading_time">إجمالي وقت القراءة</string>
+    <string name="touch_the_fingerprint_sensor_or">المس مستشعر بصمة الإصبع أو استخدم التعرف على الوجه لفتح القفل</string>
+    <string name="tracker">متتبع</string>
+    <string name="tracking">تتبع</string>
+    <string name="tracking_services">خدمات التتبع</string>
+    <string name="transaction_id">معرف المعاملة</string>
+    <string name="translate_action">ترجمة</string>
+    <string name="translate_now">ترجمة الآن</string>
+    <string name="translated">مترجم</string>
+    <string name="translating">جارٍ الترجمة... قد يستغرق هذا بعض الوقت.</string>
+    <string name="translation">الترجمة</string>
+    <string name="translation_complete">اكتملت الترجمة.</string>
+    <string name="translation_engine">محرك الترجمة</string>
+    <string name="translation_engines_refreshed">تم تحديث محركات الترجمة</string>
+    <string name="translation_error">خطأ في الترجمة</string>
+    <string name="translation_plugins_extend_ireader_with">تعمل مكونات الترجمة الإضافية على توسيع IReader بخدمات ترجمة إضافية</string>
+    <string name="translation_progress">التقدم في الترجمة</string>
+    <string name="translation_settings">إعدادات الترجمة</string>
+    <string name="translations">ترجمة</string>
+    <string name="trending_now">الرائج الآن</string>
+    <string name="troubleshooting_steps">خطوات استكشاف الأخطاء وإصلاحها:</string>
+    <string name="trust">ثقة</string>
+    <string name="trust_level">مستوى الثقة</string>
+    <string name="trust_level_updated">تم تحديث مستوى الثقة</string>
+    <string name="try_a_different_search_term">جرب مصطلح بحث مختلف</string>
+    <string name="try_again">حاول مرة أخرى</string>
+    <string name="try_alternative_url">جرب عنوان URL بديل</string>
+    <string name="try_another_search">جرب بحثًا آخر</string>
+    <string name="try_different_search">جرب مصطلح بحث مختلف</string>
+    <string name="trying_in_few_second">حاول مرة أخرى في بضع ثوان.</string>
+    <string name="trying_to_fetch">جارٍ محاولة الجلب…</string>
+    <string name="trying_to_fetch_chapters_content">جارٍ محاولة جلب محتوى الفصل…</string>
+    <string name="tts">TTS</string>
+    <string name="tts_engine">محرك تحويل النص إلى كلام</string>
+    <string name="tts_engine_manager">إدارة محرك TTS</string>
+    <string name="tts_engine_settings">إعدادات محرك تحويل النص إلى كلام</string>
+    <string name="tts_error">خطأ TTS: %1$s</string>
+    <string name="tts_performance_settings">إعدادات أداء TTS</string>
+    <string name="tts_settings">إعدادات تحويل النص إلى كلام</string>
+    <string name="tts_with_translated_text">TTS مع النص المترجم</string>
+    <string name="turn_off_vibration_feedback_for_interactions">إيقاف تشغيل ملاحظات الاهتزاز للتفاعلات</string>
+    <string name="type">النوع</string>
+    <string name="type_1">النوع \</string>
+    <string name="typography">الطباعة</string>
+    <string name="ui_improvements">تحسينات واجهة المستخدم</string>
+    <string name="unable_to_get_package_version">غير قادر على الحصول على إصدار الحزمة</string>
+    <string name="unable_to_open_link">غير قادر على فتح الرابط</string>
+    <string name="unarchive">إلغاء الأرشفة</string>
+    <string name="uncategorized">غير مصنف</string>
+    <string name="uncategorized_category">افتراضي</string>
+    <string name="undo">تراجع</string>
+    <string name="uninstall">إلغاء التثبيت</string>
+    <string name="uninstall_plugin">إلغاء تثبيت الملحق</string>
+    <string name="uninstalled">تم إلغاء التثبيت</string>
+    <string name="uninstalled_failed">فشل إلغاء التثبيت</string>
+    <string name="unknown">غير معروف</string>
+    <string name="unknown_error">خطأ غير معروف</string>
+    <string name="unlock_app">فتح</string>
+    <string name="unlock_ireader">فتح IReader</string>
+    <string name="unlock_with_fingerprint_or_face">فتح باستخدام بصمة الإصبع أو الوجه</string>
+    <string name="unpin">إلغاء التثبيت</string>
+    <string name="unread">غير مقروء</string>
+    <string name="unread_badge">شارة غير مقروءة</string>
+    <string name="unread_chapters">الفصول غير المقروءة</string>
+    <string name="unselected_scrollbar_color">لون شريط التمرير غير المحدد</string>
+    <string name="upcoming">القادمة</string>
+    <string name="upcoming_releases">الإصدارات القادمة</string>
+    <string name="update">تحديث</string>
+    <string name="update_all">تحديث الكل</string>
+    <string name="update_available">تحديث متوفر</string>
+    <string name="update_available_1">التحديث متاح</string>
+    <string name="update_category">تحديث الفئة</string>
+    <string name="update_check_failed">فشل التحقق من التحديث: %1$s</string>
+    <string name="update_filters">تحديث الفلاتر</string>
+    <string name="update_history">سجل التحديث</string>
+    <string name="update_interval">فترة التحديث</string>
+    <string name="update_library">تحديث المكتبة</string>
+    <string name="update_notification">تحديثات التطبيق</string>
+    <string name="update_only_completed">تحديث المكتمل فقط</string>
+    <string name="update_only_non_completed">تحديث غير المكتمل فقط</string>
+    <string name="update_ready">التحديث جاهز</string>
+    <string name="update_restrictions">قيود التحديث</string>
+    <string name="update_selected">تحديث المحدد</string>
+    <string name="updated_extensions">تم تحديث %1$s/%2$s من الملحقات</string>
+    <string name="updater_is_enable">المحدث</string>
+    <string name="updates_available">%1$s تحديثات متوفرة</string>
+    <string name="updates_screen_label">تحديثات</string>
+    <string name="updating">جارٍ التحديث...</string>
+    <string name="updating_all_plugins">جارٍ تحديث جميع المكونات الإضافية...</string>
+    <string name="updating_favorite_status">جارٍ تحديث حالة المفضلة...</string>
+    <string name="upload_backup">تحميل نسخة احتياطية</string>
+    <string name="upload_your_first_backup_using_the_button_below">قم بتحميل النسخة الاحتياطية الأولى باستخدام الزر أدناه</string>
+    <string name="url">عنوان URL</string>
+    <string name="url_1">عنوان URL</string>
+    <string name="url_is_invalid">عنوان URL غير صالح</string>
+    <string name="url_of_your_ollama_api_server">عنوان URL لخادم Ollama API الخاص بك</string>
+    <string name="usage_count">عدد مرات الاستخدام</string>
+    <string name="usage_history_last_hour">سجل الاستخدام (الساعة الأخيرة)</string>
+    <string name="usage_statistics">إحصائيات الاستخدام</string>
+    <string name="use_a_strong_pin_6_digits_or_passwordn">• استخدم رمز PIN قوي (6 أرقام) أو كلمة مرور\n</string>
+    <string name="use_a_strong_pin_or">• استخدم رمز PIN قوي أو كلمة مرور\n• قم بتمكين المصادقة البيومترية للراحة\n• قم بتمكين الشاشة الآمنة في الأماكن العامة\n• استخدم قفل مصدر 18+ لمزيد من الخصوصية</string>
+    <string name="use_auth">طلب إلغاء القفل</string>
+    <string name="use_biometric">استخدام القياسات الحيوية</string>
+    <string name="use_coqui_tts">استخدام Coqui TTS</string>
+    <string name="use_custom_colors">استخدام ألوان مخصصة</string>
+    <string name="use_custom_supabase">استخدام Supabase مخصص</string>
+    <string name="use_default_image_loader">استخدم محمل الصور الافتراضي</string>
+    <string name="use_fab_in_library">استخدام FAB في المكتبة</string>
+    <string name="use_fab_instead_of_buttons">استخدام زر الإجراء العائم بدلاً من الأزرار</string>
+    <string name="use_local_cache">استخدام ذاكرة التخزين المؤقت المحلية</string>
+    <string name="use_online_tts_engines_from_hugging_face_spaces">استخدام محركات تحويل النص إلى كلام عبر الإنترنت من Hugging Face Spaces</string>
+    <string name="use_password">استخدام كلمة المرور</string>
+    <string name="use_pin">استخدام رمز PIN</string>
+    <string name="use_pinpassword_instead">استخدام رقم التعريف الشخصي/كلمة المرور بدلاً من ذلك</string>
+    <string name="use_separate_supabase_projects_for">استخدام مشاريع Supabase منفصلة لتحسين قابلية التوسع</string>
+    <string name="use_static_indicators_instead_of_animated_ones">استخدام مؤشرات ثابتة بدلاً من المؤشرات المتحركة</string>
+    <string name="use_translated_text_for_text">استخدام النص المترجم لتحويل النص إلى كلام عند توفره</string>
+    <string name="use_true_black_amoled">استخدام اللون الأسود الحقيقي (AMOLED)</string>
+    <string name="use_your_fingerprint_or_face">استخدام بصمة إصبعك أو وجهك لفتح التطبيق. لا يزال بإمكانك استخدام رمز PIN الخاص بجهازك كبديل.</string>
+    <string name="user_interface">واجهة المستخدم</string>
+    <string name="username">اسم المستخدم</string>
+    <string name="verification_details">تفاصيل التحقق</string>
+    <string name="verification_is_automatic_and_takes_a_few_seconds">• التحقق تلقائي ويستغرق بضع ثوان</string>
+    <string name="verification_is_cached_for_24">يتم تخزين التحقق مؤقتًا لمدة 24 ساعة. تظل الشارة نشطة لمدة 7 أيام إذا فشل إعادة التحقق.</string>
+    <string name="verified">تم التحقق</string>
+    <string name="verified_supporter">داعم تم التحقق منه</string>
+    <string name="verifying_nft_ownership">التحقق من ملكية NFT...</string>
+    <string name="version">الإصدار</string>
+    <string name="version_code">رمز الإصدار</string>
+    <string name="version_name">اسم الإصدار</string>
+    <string name="vertical">عمودي</string>
+    <string name="very_long_title_that_might">عنوان طويل جدًا قد يلتف إلى أسطر متعددة في بعض الحالات</string>
+    <string name="vibration">اهتزاز</string>
+    <string name="view_all_reviews">عرض جميع المراجعات</string>
+    <string name="view_book">عرض الكتاب</string>
+    <string name="view_chapter_reviews">عرض مراجعات الفصل</string>
+    <string name="view_library">عرض المكتبة</string>
+    <string name="view_novel_details">عرض تفاصيل الرواية</string>
+    <string name="view_payment_proof">عرض إثبات الدفع</string>
+    <string name="view_version_history_and_new_features">عرض سجل الإصدار والميزات الجديدة</string>
+    <string name="visit_marketplace">زيارة السوق</string>
+    <string name="visit_the_badge_store_to_purchase_your_first_badge">تفضل بزيارة متجر الشارات لشراء أول شارة لك</string>
+    <string name="visit_the_plugin_marketplace_to">تفضل بزيارة سوق الإضافات لاكتشاف وتثبيت الإضافات</string>
+    <string name="visual_effects">تأثيرات بصرية</string>
+    <string name="voice">صوت</string>
+    <string name="voice_downloaded">تم تنزيل الصوت</string>
+    <string name="voice_model_settings">إعدادات نموذج الصوت</string>
+    <string name="voice_models">نماذج الصوت</string>
+    <string name="voice_selection">تحديد الصوت</string>
+    <string name="voice_selection_is_managed_through">تتم إدارة اختيار الصوت من خلال إعدادات تحويل النص إلى كلام في Android.</string>
+    <string name="voice_settings">إعدادات الصوت</string>
+    <string name="voices">أصوات</string>
+    <string name="volume">مستوى الصوت</string>
+    <string name="volume_key_navigation">التنقل بمفتاح الصوت</string>
+    <string name="wait">يرجى الانتظار</string>
+    <string name="wallet_address">عنوان المحفظة</string>
+    <string name="wallet_placeholder">0x...</string>
+    <string name="warning">تحذير</string>
+    <string name="warnings">تحذيرات:</string>
+    <string name="was_cancelled">تم الإلغاء</string>
+    <string name="webView">عرض الويب</string>
+    <string name="website">IReader</string>
+    <string name="website_1">الموقع الإلكتروني</string>
+    <string name="webview_is_not_available_on_this_device">WebView غير متاح على هذا الجهاز.</string>
+    <string name="weekly">أسبوعيًا</string>
+    <string name="weeks">أسبوع</string>
+    <string name="welcome_to_ireader">مرحبًا بك في IReader!</string>
+    <string name="well_remind_you_again_in_30_days">سنذكرك مرة أخرى في غضون 30 يومًا</string>
+    <string name="what_is_repository">ما هو المستودع؟</string>
+    <string name="what_readers_think_about_these_books">ماذا يعتقد القراء حول هذه الكتب</string>
+    <string name="whats_new">ما الجديد</string>
+    <string name="whats_new_1">ما الجديد</string>
+    <string name="whats_new_2">ما الجديد:</string>
+    <string name="while_charging">أثناء الشحن</string>
+    <string name="why_donate">لماذا تتبرع؟</string>
+    <string name="width">عرض</string>
+    <string name="width_1">عرض</string>
+    <string name="wifi_only">Wi-Fi فقط</string>
+    <string name="with_trailing_content">مع محتوى لاحق</string>
+    <string name="words_read">الكلمات المقروءة</string>
+    <string name="would_you_like_to_enable_it_now">هل ترغب في تمكينه الآن؟</string>
+    <string name="write_a_review">اكتب مراجعة</string>
+    <string name="write_review">اكتب مراجعة</string>
+    <string name="xpprogress">xpProgress</string>
+    <string name="yes">نعم</string>
+    <string name="yesterday">أمس</string>
+    <string name="you">(أنت)</string>
+    <string name="you_1">أنت</string>
+    <string name="you_are_about_to_report">أنت على وشك الإبلاغ عن \</string>
+    <string name="you_are_on_latest_version">أنت تستخدم أحدث إصدار</string>
+    <string name="you_dont_have_any_badges_yet">ليس لديك أي شارات حتى الآن</string>
+    <string name="you_own_an_ireader_nft">أنت تمتلك IReader NFT!</string>
+    <string name="youll_receive_a_gentle_reminder">ستتلقى تذكيرًا لطيفًا بعد القراءة المستمرة للمدة المحددة.</string>
+    <string name="your_badges">شاراتك</string>
+    <string name="your_contribution_helps_keep_ireader">تساعد مساهمتك في الحفاظ على IReader مجانيًا وخاليًا من الإعلانات للجميع.</string>
+    <string name="your_donation_rank">ترتيب تبرعك</string>
+    <string name="your_personal_book_reading_companion">رفيقك الشخصي في قراءة الكتب</string>
+    <string name="your_privacy_matters">خصوصيتك مهمة</string>
+    <string name="your_rank">رتبتك</string>
+    <string name="your_rating">تقييمك</string>
+    <string name="your_reading_journey">رحلتك في القراءة</string>
+    <string name="your_report_will_be_stored_locally_for_review">سيتم تخزين تقريرك محليًا للمراجعة.</string>
+    <string name="your_report_will_help_improve">سيساعد تقريرك في تحسين المصدر لجميع المستخدمين.</string>
+    <string name="your_review_optional">مراجعتك (اختياري)</string>
+    <string name="your_review_will_appear_as">ستظهر مراجعتك كالتالي:</string>
+    <string name="your_username">اسم المستخدم الخاص بك</string>
+    <string name="youve_reached_the_end">لقد وصلت إلى النهاية!</string>
 </resources>

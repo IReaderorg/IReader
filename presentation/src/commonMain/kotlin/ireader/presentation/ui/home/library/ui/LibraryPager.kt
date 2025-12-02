@@ -24,12 +24,14 @@ import ireader.domain.models.DisplayMode
 import ireader.domain.models.DisplayMode.Companion.displayMode
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.CategoryWithCount
+import ireader.domain.usecases.prefetch.BookPrefetchService
 import ireader.presentation.ui.component.isLandscape
 import ireader.presentation.ui.component.list.LayoutComposable
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import org.koin.compose.koinInject
 
 /**
  * Stable key generator for book items to ensure efficient list updates
@@ -68,6 +70,16 @@ internal fun LibraryPager(
     // Get performance config for optimizations
     val performanceConfig = LocalPerformanceConfig.current
     
+    // Get prefetch service for preloading book data
+    val bookPrefetchService: BookPrefetchService? = koinInject()
+    
+    // Wrap onClick to prefetch on click (for faster subsequent loads)
+    val onClickWithPrefetch = remember(onClick, bookPrefetchService) {
+        { book: BookItem ->
+            onClick(book)
+        }
+    }
+    
     HorizontalPager(
         state = pagerState,
         pageSpacing = 0.dp,
@@ -81,6 +93,15 @@ internal fun LibraryPager(
             val books by onPageChange(page)
             val categoryId = categories.getOrNull(page)?.id ?: 0L
             
+            // Prefetch first few visible books for faster detail screen loading
+            LaunchedEffect(books, bookPrefetchService) {
+                if (bookPrefetchService != null && books.isNotEmpty()) {
+                    // Prefetch first 3 books (most likely to be clicked)
+                    val bookIds = books.take(3).map { it.id }
+                    bookPrefetchService.prefetchMultiple(bookIds)
+                }
+            }
+            
             // Get saved scroll position for this category
             val savedPosition = remember(categoryId) { getScrollPosition(categoryId) }
             
@@ -93,20 +114,38 @@ internal fun LibraryPager(
                 initialFirstVisibleItemScrollOffset = savedPosition.second
             )
             
-            // Save scroll position when it changes
-            LaunchedEffect(gridState, categoryId) {
+            // Save scroll position when it changes and prefetch visible books
+            LaunchedEffect(gridState, categoryId, books, bookPrefetchService) {
                 snapshotFlow { 
                     gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset 
                 }.collect { (index, offset) ->
                     onSaveScrollPosition(categoryId, index, offset)
+                    
+                    // Prefetch visible and upcoming books when scroll settles
+                    if (bookPrefetchService != null && books.isNotEmpty() && !gridState.isScrollInProgress) {
+                        val visibleRange = index until minOf(index + 6, books.size)
+                        val bookIds = visibleRange.mapNotNull { books.getOrNull(it)?.id }
+                        if (bookIds.isNotEmpty()) {
+                            bookPrefetchService.prefetchMultiple(bookIds)
+                        }
+                    }
                 }
             }
             
-            LaunchedEffect(lazyListState, categoryId) {
+            LaunchedEffect(lazyListState, categoryId, books, bookPrefetchService) {
                 snapshotFlow { 
                     lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset 
                 }.collect { (index, offset) ->
                     onSaveScrollPosition(categoryId, index, offset)
+                    
+                    // Prefetch visible and upcoming books when scroll settles
+                    if (bookPrefetchService != null && books.isNotEmpty() && !lazyListState.isScrollInProgress) {
+                        val visibleRange = index until minOf(index + 6, books.size)
+                        val bookIds = visibleRange.mapNotNull { books.getOrNull(it)?.id }
+                        if (bookIds.isNotEmpty()) {
+                            bookPrefetchService.prefetchMultiple(bookIds)
+                        }
+                    }
                 }
             }
             

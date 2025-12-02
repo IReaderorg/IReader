@@ -14,6 +14,7 @@ import ireader.domain.usecases.migration.MigrateBookUseCase
 import ireader.domain.usecases.migration.BatchMigrationUseCase
 import ireader.domain.usecases.migration.SearchMigrationTargetsUseCase
 import ireader.domain.usecases.notification.NotificationManagerUseCase
+import ireader.domain.usecases.prefetch.BookPrefetchService
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -187,4 +188,7 @@ val useCaseModule = module {
             uiPreferences = get()
         )
     }
+    
+    // Book Prefetch Service - for faster book detail loading
+    singleOf(::BookPrefetchService)
 }

@@ -47,6 +47,7 @@ import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
+import ireader.presentation.ui.book.components.BookDetailPlaceholder
 import ireader.presentation.ui.book.components.BookDetailShimmerLoading
 import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
 import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
@@ -159,7 +160,23 @@ data class BookDetailScreenSpec constructor(
         TransparentStatusBar {
             when (val s = state) {
                 BookDetailState.Loading -> {
-                    BookDetailShimmerLoading()
+                    // Show placeholder instead of shimmer for instant feedback
+                    BookDetailPlaceholder(
+                        bookId = bookId,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                
+                is BookDetailState.Placeholder -> {
+                    // Show placeholder with minimal info - progressively updates
+                    BookDetailPlaceholder(
+                        bookId = s.bookId,
+                        title = s.title,
+                        cover = s.cover,
+                        author = s.author,
+                        isLoading = s.isLoading,
+                        onBack = { navController.popBackStack() }
+                    )
                 }
                 
                 is BookDetailState.Success -> {

@@ -14,4 +14,5 @@ val preferencesInjectModule = module {
     single<ireader.domain.preferences.prefs.SupabasePreferences> { ireader.domain.preferences.prefs.SupabasePreferences(get()) }
     single<LibraryPreferences> { LibraryPreferences(get()) }
     single<BrowsePreferences> { BrowsePreferences(get()) }
+    single<ireader.domain.preferences.prefs.ReadingBuddyPreferences> { ireader.domain.preferences.prefs.ReadingBuddyPreferences(get()) }
 }

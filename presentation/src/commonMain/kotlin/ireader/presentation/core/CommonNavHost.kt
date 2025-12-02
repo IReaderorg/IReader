@@ -121,6 +121,20 @@ fun CommonNavHost(
             ireader.presentation.core.ui.AllReviewsScreenSpec().Content()
         }
         
+        // Reading Buddy & Quotes
+        composable(NavigationRoutes.readingBuddy) {
+            ireader.presentation.core.ui.ReadingBuddyScreenSpec().Content()
+        }
+        
+        composable(NavigationRoutes.adminQuoteVerification) {
+            ireader.presentation.core.ui.AdminQuoteVerificationScreenSpec().Content()
+        }
+        
+        // Community Hub - parent screen for all community features
+        composable(NavigationRoutes.communityHub) {
+            ireader.presentation.core.ui.CommunityHubScreenSpec().Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }

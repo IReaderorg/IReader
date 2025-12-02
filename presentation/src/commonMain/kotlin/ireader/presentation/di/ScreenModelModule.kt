@@ -139,6 +139,19 @@ val screenModelModule = module {
         )
     }
     
+    // Reading Buddy & Quotes ViewModel
+    factory {
+        ireader.presentation.ui.readingbuddy.ReadingBuddyViewModel(
+            quoteRepository = get(),
+            readingBuddyUseCases = get(),
+            preferences = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            }
+        )
+    }
+    
     // Note: ReaderScreenViewModel is NOT registered in Koin to avoid circular dependencies
     // It should be created manually where needed with all its dependencies
 }

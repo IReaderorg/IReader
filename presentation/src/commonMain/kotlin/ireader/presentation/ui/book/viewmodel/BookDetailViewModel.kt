@@ -32,6 +32,7 @@ import ireader.domain.usecases.local.DeleteUseCase
 import ireader.domain.usecases.local.LocalGetBookUseCases
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.local.LocalInsertUseCases
+import ireader.domain.usecases.prefetch.BookPrefetchService
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.source.CheckSourceAvailabilityUseCase
 import ireader.domain.usecases.source.MigrateToSourceUseCase
@@ -48,6 +49,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -98,6 +100,7 @@ class BookDetailViewModel(
     private val clipboardService: ClipboardService,
     private val shareService: ShareService,
     private val platformHelper: PlatformHelper,
+    private val bookPrefetchService: BookPrefetchService? = null,
     val insertUseCases: LocalInsertUseCases = localInsertUseCases,
 ) : BaseViewModel() {
 
@@ -151,6 +154,7 @@ class BookDetailViewModel(
     val catalogSource: CatalogLocal? get() = (_state.value as? BookDetailState.Success)?.catalogSource
     val lastRead: Long? get() = (_state.value as? BookDetailState.Success)?.lastReadChapterId
     val detailIsLoading: Boolean get() = _state.value is BookDetailState.Loading || 
+        _state.value is BookDetailState.Placeholder ||
         (_state.value as? BookDetailState.Success)?.isRefreshingBook == true
     val chapterIsLoading: Boolean get() = (_state.value as? BookDetailState.Success)?.isRefreshingChapters == true
     val expandedSummary: Boolean get() = (_state.value as? BookDetailState.Success)?.isSummaryExpanded == true
@@ -159,6 +163,8 @@ class BookDetailViewModel(
     init {
         val bookId = param.bookId
         if (bookId != null) {
+            // OPTIMIZATION: Show placeholder immediately - no shimmer needed
+            _state.value = BookDetailState.Placeholder(bookId = bookId)
             initializeBook(bookId)
         } else {
             _state.value = BookDetailState.Error("Invalid book ID")
@@ -171,25 +177,27 @@ class BookDetailViewModel(
     // ==================== Initialization ====================
     
     private fun initializeBook(bookId: Long) {
-        scope.launch {
+        // OPTIMIZATION: Use immediate dispatcher for first frame
+        // This ensures the book data is shown as fast as possible
+        scope.launch(kotlinx.coroutines.Dispatchers.Main.immediate) {
             try {
-                // First, try to get the book directly for immediate display
-                val book = getBookUseCases.findBookById(bookId)
-                val sourceId = book?.sourceId
+                // OPTIMIZATION: Check prefetch cache first for instant display
+                val prefetchedData = bookPrefetchService?.getPrefetchedData(bookId)
                 
-                val catalogSource = if (sourceId != null) {
-                    try {
-                        getLocalCatalog.get(sourceId)
+                if (prefetchedData != null) {
+                    // Use prefetched data for instant display
+                    Log.info { "Using prefetched data for book $bookId" }
+                    val book = prefetchedData.book
+                    val chapters = prefetchedData.chapters
+                    val lastReadChapterId = prefetchedData.lastReadChapterId
+                    
+                    // Get catalog source (fast, usually cached)
+                    val catalogSource = try {
+                        getLocalCatalog.get(book.sourceId)
                     } catch (e: Exception) {
-                        Log.error("Failed to get catalog for source $sourceId", e)
+                        Log.error("Failed to get catalog for source ${book.sourceId}", e)
                         null
                     }
-                } else null
-                
-                // If book exists, immediately show it (don't wait for subscription)
-                if (book != null) {
-                    val chapters = getChapterUseCase.findChaptersByBookId(bookId)
-                    val history = historyUseCase.findHistoryByBookId(bookId)
                     
                     val source = catalogSource?.source
                     val commands = try {
@@ -200,7 +208,93 @@ class BookDetailViewModel(
                         persistentListOf()
                     }
                     
-                    // Set initial state immediately
+                    // Set initial state immediately from prefetch cache
+                    val initialState = BookDetailState.Success(
+                        book = book,
+                        chapters = chapters.toImmutableList(),
+                        source = source,
+                        catalogSource = catalogSource,
+                        lastReadChapterId = lastReadChapterId,
+                        commands = commands,
+                        modifiedCommands = commands,
+                    )
+                    _state.value = initialState
+                    Log.info { "BookDetailState.Success (prefetched): book=${book.title}, chapters=${chapters.size}" }
+                    
+                    // Subscribe for updates in background
+                    subscribeToBookAndChapters(bookId, catalogSource)
+                    
+                    // Trigger remote fetch if book needs updating or has no chapters
+                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
+                    if (needsRemoteFetch) {
+                        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            if (book.lastUpdate < 1L) {
+                                getRemoteBookDetailSilent(book, catalogSource)
+                            }
+                            getRemoteChapterDetailSilent(book, catalogSource)
+                        }
+                    }
+                    
+                    // Check source availability in background
+                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                        checkSourceAvailability(bookId)
+                    }
+                    return@launch
+                }
+                
+                // No prefetch data - load from database
+                // First, try to get the book directly for immediate display
+                // Use withContext(IO) only for the actual DB call
+                val book = withIOContext { getBookUseCases.findBookById(bookId) }
+                val sourceId = book?.sourceId
+                
+                // OPTIMIZATION: Update placeholder with book info immediately
+                if (book != null) {
+                    _state.value = BookDetailState.Placeholder(
+                        bookId = bookId,
+                        title = book.title,
+                        cover = book.cover,
+                        author = book.author,
+                        isLoading = true
+                    )
+                }
+                
+                // Get catalog source in parallel with chapters if possible
+                val catalogSourceDeferred = if (sourceId != null) {
+                    scope.async(kotlinx.coroutines.Dispatchers.IO) {
+                        try {
+                            getLocalCatalog.get(sourceId)
+                        } catch (e: Exception) {
+                            Log.error("Failed to get catalog for source $sourceId", e)
+                            null
+                        }
+                    }
+                } else null
+                
+                // If book exists, immediately show it (don't wait for subscription)
+                if (book != null) {
+                    // Parallel fetch of chapters and history for faster initial display
+                    val chaptersDeferred = scope.async(kotlinx.coroutines.Dispatchers.IO) {
+                        getChapterUseCase.findChaptersByBookId(bookId)
+                    }
+                    val historyDeferred = scope.async(kotlinx.coroutines.Dispatchers.IO) {
+                        historyUseCase.findHistoryByBookId(bookId)
+                    }
+                    
+                    val catalogSource = catalogSourceDeferred?.await()
+                    val chapters = chaptersDeferred.await()
+                    val history = historyDeferred.await()
+                    
+                    val source = catalogSource?.source
+                    val commands = try {
+                        if (source is CatalogSource) {
+                            source.getCommands().toImmutableList()
+                        } else persistentListOf()
+                    } catch (e: Exception) {
+                        persistentListOf()
+                    }
+                    
+                    // Set initial state immediately - this triggers UI update
                     val initialState = BookDetailState.Success(
                         book = book,
                         chapters = chapters.toImmutableList(),
@@ -213,18 +307,36 @@ class BookDetailViewModel(
                     _state.value = initialState
                     Log.info { "BookDetailState.Success (immediate): book=${book.title}, chapters=${chapters.size}" }
                     
-                    // Trigger initial fetch if book needs updating (BEFORE subscribing)
-                    if (book.lastUpdate < 1L && catalogSource?.source != null) {
-                        // Don't show loading indicator for initial fetch
-                        getRemoteBookDetailSilent(book, catalogSource)
-                        getRemoteChapterDetailSilent(book, catalogSource)
+                    // Subscribe for updates AFTER initial state is set
+                    // This runs in background and won't block UI
+                    subscribeToBookAndChapters(bookId, catalogSource)
+                    
+                    // Trigger initial fetch if book needs updating (AFTER subscribing)
+                    // Fetch remote data if:
+                    // 1. Book has never been updated (lastUpdate < 1L), OR
+                    // 2. Book has no chapters yet
+                    // This runs in background and won't block UI
+                    val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
+                    if (needsRemoteFetch) {
+                        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            // Fetch book details if never updated
+                            if (book.lastUpdate < 1L) {
+                                getRemoteBookDetailSilent(book, catalogSource)
+                            }
+                            // Always fetch chapters if empty or book never updated
+                            getRemoteChapterDetailSilent(book, catalogSource)
+                        }
                     }
+                } else {
+                    // Book not found - subscribe and wait
+                    val catalogSource = catalogSourceDeferred?.await()
+                    subscribeToBookAndChapters(bookId, catalogSource)
                 }
                 
-                // Subscribe for updates AFTER initial state is set
-                subscribeToBookAndChapters(bookId, catalogSource)
-                
-                checkSourceAvailability(bookId)
+                // Check source availability in background
+                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    checkSourceAvailability(bookId)
+                }
                 
             } catch (e: Exception) {
                 Log.error("Error initializing book", e)
@@ -258,7 +370,9 @@ class BookDetailViewModel(
     }
     
     private suspend fun getRemoteChapterDetailSilent(book: Book, catalog: CatalogLocal?) {
-        updateSuccessState { it.copy(isRefreshingChapters = true) }
+        withUIContext {
+            updateSuccessState { it.copy(isRefreshingChapters = true) }
+        }
         getChapterDetailJob?.cancel()
         getChapterDetailJob = scope.launch {
             remoteUseCases.getRemoteChapters(
@@ -371,6 +485,9 @@ class BookDetailViewModel(
                 is BookDetailState.Loading -> {
                     Log.info { "BookDetailState.Loading" }
                 }
+                is BookDetailState.Placeholder -> {
+                    Log.info { "BookDetailState.Placeholder: bookId=${newState.bookId}" }
+                }
                 is BookDetailState.Error -> {
                     Log.error { "BookDetailState.Error: ${newState.message}" }
                 }
@@ -387,6 +504,7 @@ class BookDetailViewModel(
         _state.update { current ->
             when (current) {
                 is BookDetailState.Loading -> current
+                is BookDetailState.Placeholder -> current
                 is BookDetailState.Success -> update(current)
                 is BookDetailState.Error -> current
             }

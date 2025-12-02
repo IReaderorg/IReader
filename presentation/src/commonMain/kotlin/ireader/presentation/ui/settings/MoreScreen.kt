@@ -8,11 +8,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,13 +57,8 @@ fun MoreScreen(
     onHelp: () -> Unit,
     onDonation: () -> Unit = {},
     onWeb3Profile: () -> Unit = {},
-    onBadgeStore: () -> Unit = {},
-    onNFTBadge: () -> Unit = {},
-    onBadgeManagement: () -> Unit = {},
-    onAdminBadgeVerification: () -> Unit = {},
-    onLeaderboard: () -> Unit = {},
-    onPopularBooks: () -> Unit = {},
-    onAllReviews: () -> Unit = {},
+    onCommunityHub: () -> Unit = {},
+    onReadingBuddy: () -> Unit = {},
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
@@ -212,63 +210,7 @@ fun MoreScreen(
             )
         }
         
-        // Badges & Customization Section (only visible when Supabase is enabled)
-        if (vm.supabaseEnabled.value) {
-            item {
-                SettingsSectionHeader(
-                    title = localizeHelper.localize(Res.string.badges_customization),
-                    icon = Icons.Filled.Star
-                )
-            }
-            
-            item {
-                SettingsItem(
-                    title = localizeHelper.localize(Res.string.badge_store),
-                    description = "Purchase unique badges to customize your profile",
-                    icon = Icons.Outlined.AccountBalanceWallet,
-                    onClick = onBadgeStore
-                )
-            }
-            
-            item {
-                SettingsItem(
-                    title = localizeHelper.localize(Res.string.nft_badge),
-                    description = "Verify NFT ownership to unlock exclusive badge",
-                    icon = Icons.Filled.Star,
-                    onClick = onNFTBadge
-                )
-            }
-            
-            item {
-                SettingsItem(
-                    title = localizeHelper.localize(Res.string.manage_badges),
-                    description = "Customize which badges appear on your profile and reviews",
-                    icon = Icons.Outlined.Settings,
-                    onClick = onBadgeManagement
-                )
-            }
-            
-            // Admin Section (only visible to admins when Supabase is enabled)
-            if (vm.isAdmin.value) {
-                item {
-                    SettingsSectionHeader(
-                        title = localizeHelper.localize(Res.string.admin),
-                        icon = Icons.Filled.AdminPanelSettings
-                    )
-                }
-                
-                item {
-                    SettingsItem(
-                        title = localizeHelper.localize(Res.string.badge_verification),
-                        description = "Review and approve badge purchase requests",
-                        icon = Icons.Outlined.VerifiedUser,
-                        onClick = onAdminBadgeVerification
-                    )
-                }
-            }
-        }
-        
-        // Community Section (only visible when Supabase is enabled)
+        // Community Hub Section (only visible when Supabase is enabled)
         if (vm.supabaseEnabled.value) {
             item {
                 SettingsSectionHeader(
@@ -279,30 +221,29 @@ fun MoreScreen(
             
             item {
                 SettingsItem(
-                    title = localizeHelper.localize(Res.string.leaderboard),
-                    description = "Compete with other readers based on reading time",
-                    icon = Icons.Filled.EmojiEvents,
-                    onClick = onLeaderboard
+                    title = localizeHelper.localize(Res.string.community),
+                    description = "Leaderboards, reviews, badges, and more",
+                    icon = Icons.Filled.People,
+                    onClick = onCommunityHub
                 )
             }
-            
-            item {
-                SettingsItem(
-                    title = localizeHelper.localize(Res.string.popular_books),
-                    description = "Discover what the community is reading",
-                    icon = Icons.Filled.TrendingUp,
-                    onClick = onPopularBooks
-                )
-            }
-            
-            item {
-                SettingsItem(
-                    title = localizeHelper.localize(Res.string.community_reviews),
-                    description = "Read reviews from other readers",
-                    icon = Icons.Filled.RateReview,
-                    onClick = onAllReviews
-                )
-            }
+        }
+        
+        // Reading Buddy Section
+        item {
+            SettingsSectionHeader(
+                title = "Reading Buddy",
+                icon = Icons.Filled.Pets
+            )
+        }
+        
+        item {
+            SettingsItem(
+                title = "Reading Buddy & Quotes",
+                description = "Your cute rabbit companion and daily quotes",
+                icon = Icons.Filled.Pets,
+                onClick = onReadingBuddy
+            )
         }
         
         // Library Management Section

@@ -2153,4 +2153,38 @@
     <string name="offline_mode">Offline Mode</string>
     <string name="offline_mode_description">The app will work completely offline. No data will be sent to cloud servers. Community features will be hidden.</string>
     <string name="first_launch_privacy_note">You can change this setting anytime in Settings → Advanced. Your reading data stays on your device unless you enable cloud features.</string>
+    
+    <!-- Reading Buddy & Daily Quotes -->
+    <string name="reading_buddy">Reading Buddy</string>
+    <string name="reading_buddy_quotes">Reading Buddy &amp; Quotes</string>
+    <string name="reading_buddy_description">Your cute rabbit companion and daily quotes</string>
+    <string name="daily_quote">Daily Quote</string>
+    <string name="todays_quote">Today\'s Quote</string>
+    <string name="all_quotes">All Quotes</string>
+    <string name="submit_quote">Submit Quote</string>
+    <string name="submit_for_review">Submit for Review</string>
+    <string name="quote_submitted">Quote submitted for review!</string>
+    <string name="quote_approved">Quote approved!</string>
+    <string name="quote_rejected">Quote rejected</string>
+    <string name="no_quotes_yet">No quotes yet</string>
+    <string name="be_first_to_submit">Be the first to submit a quote!</string>
+    <string name="share_favorite_quotes">Share your favorite quotes with the community!</string>
+    <string name="quotes_reviewed_by_admins">Quotes will be reviewed by admins before appearing publicly</string>
+    <string name="card_style">Card Style</string>
+    <string name="reading_stats">Reading Stats</string>
+    <string name="books_read">Books Read</string>
+    <string name="best_streak">Best Streak</string>
+    <string name="level">Level</string>
+    <string name="keep_reading_to_level_up">Keep reading to level up!</string>
+    <string name="achievement_unlocked">Achievement Unlocked!</string>
+    <string name="start_reading_to_unlock">Start reading to unlock achievements!</string>
+    <string name="quote_text">Quote</string>
+    <string name="book_title">Book Title</string>
+    <string name="chapter_optional">Chapter (optional)</string>
+    <string name="author_optional">Author (optional)</string>
+    <string name="enter_quote_text">Enter the quote text...</string>
+    <string name="enter_book_title">Enter the book title...</string>
+    <string name="enter_author_name">Enter the author name...</string>
+    <string name="enter_chapter_name">Enter the chapter name...</string>
+    <string name="shared_via_ireader">Shared via IReader</string>
 </resources>
