@@ -70,3 +70,37 @@ actual fun OnShowBackup(
         }
     }
 }
+
+
+@Composable
+actual fun OnShowLNReaderImport(
+    show: Boolean,
+    onFileSelected: suspend (Uri?) -> Unit
+) {
+    val globalScope = requireNotNull(LocalGlobalCoroutineScope.current) { "LocalGlobalCoroutineScope not provided" }
+    val onImport =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
+            if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
+                val uri = resultIntent.data!!.data!!
+                globalScope.launchIO {
+                    onFileSelected(Uri(uri))
+                }
+            } else {
+                globalScope.launchIO {
+                    onFileSelected(null)
+                }
+            }
+        }
+    LaunchedEffect(show) {
+        if (show) {
+            val mimeTypes = arrayOf("application/zip", "application/x-zip-compressed")
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                .addCategory(Intent.CATEGORY_OPENABLE)
+                .setType("application/zip")
+                .putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            onImport.launch(intent)
+        }
+    }
+}

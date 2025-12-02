@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -204,6 +205,12 @@ fun GeneralSettingScreen(
                         text = localizeHelper.localize(Res.string.user_interface),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.DisplaySettings
+                ),
+                Components.Switch(
+                        preference = vm.maxPerformanceMode,
+                        title = localizeHelper.localize(Res.string.max_performance_mode),
+                        subtitle = localizeHelper.localize(Res.string.max_performance_mode_subtitle),
+                        icon = Icons.Filled.Speed
                 ),
                 Components.Switch(
                         preference = vm.disableHapticFeedback,
@@ -498,6 +505,7 @@ class GeneralSettingScreenViewModel(
     val autoDownloadNewChapters = uiPreferences.autoDownloadNewChapters().asStateIn(scope)
     
     // User interface preferences
+    val maxPerformanceMode = uiPreferences.maxPerformanceMode().asStateIn(scope)
     val disableHapticFeedback = uiPreferences.disableHapticFeedback().asStateIn(scope)
     val disableLoadingAnimations = uiPreferences.disableLoadingAnimations().asStateIn(scope)
     

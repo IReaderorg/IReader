@@ -47,8 +47,29 @@ data class PerformanceConfig(
     companion object {
         val Default = PerformanceConfig()
         
+        /**
+         * Maximum performance mode - disables all animations and effects
+         * for the fastest possible rendering. Use when user explicitly
+         * wants maximum performance over visual polish.
+         */
+        val MaxPerformance = PerformanceConfig(
+            animationDurationMs = 0,
+            crossfadeDurationMs = 0,
+            prefetchDistance = 1,
+            maxConcurrentImageLoads = 6, // More concurrent loads for faster initial display
+            enableComplexAnimations = false,
+            enableBlurEffects = false,
+            enableShadows = false,
+            maxImageSize = 512,
+            thumbnailSize = 192,
+            enableImageCrossfade = false, // Instant image display
+            useRgb565 = false,
+            enableImagePlaceholder = false, // No placeholder, show image immediately
+            deferImageLoadingOnScroll = false
+        )
+        
         val LowEnd = PerformanceConfig(
-            animationDurationMs = 100,
+            animationDurationMs = 0, // No animations for low-end
             crossfadeDurationMs = 0, // Disable crossfade for instant display
             prefetchDistance = 1,
             maxConcurrentImageLoads = 2,
@@ -64,18 +85,18 @@ data class PerformanceConfig(
         )
         
         val Medium = PerformanceConfig(
-            animationDurationMs = 200,
-            crossfadeDurationMs = 100,
+            animationDurationMs = 150,
+            crossfadeDurationMs = 0, // Disable crossfade for faster display
             prefetchDistance = 2,
-            maxConcurrentImageLoads = 3,
-            enableComplexAnimations = true,
+            maxConcurrentImageLoads = 4,
+            enableComplexAnimations = false, // Disable for better scroll
             enableBlurEffects = false,
-            enableShadows = true,
+            enableShadows = false, // Disable shadows for performance
             maxImageSize = 512,
             thumbnailSize = 192,
-            enableImageCrossfade = true,
+            enableImageCrossfade = false,
             useRgb565 = false,
-            enableImagePlaceholder = true,
+            enableImagePlaceholder = false,
             deferImageLoadingOnScroll = false
         )
     }

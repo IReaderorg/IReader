@@ -101,7 +101,7 @@ fun LayoutComposable(
                 showInLibraryBadge = showInLibraryBadge,
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
-                columns = columns ?: 2,
+                columns = columns ?: 3, // Default 3 columns for better display
                 keys = keys
             )
         }
@@ -121,7 +121,7 @@ fun LayoutComposable(
                 showInLibraryBadge = showInLibraryBadge,
                 showReadBadge = showReadBadge,
                 showUnreadBadge = showUnreadBadge,
-                columns = columns ?: 2,
+                columns = columns ?: 3, // Default 3 columns for better display
                 keys = keys
             )
         }

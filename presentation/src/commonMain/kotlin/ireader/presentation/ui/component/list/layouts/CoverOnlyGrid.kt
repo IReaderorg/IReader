@@ -45,7 +45,7 @@ fun CoverOnlyGrid(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
-    columns: Int = 2,
+    columns: Int = 3, // Default 3 columns for better phone display, tablets use adaptive
     header: ((url: String) -> okhttp3.Headers?)? = null,
     keys: ((item: BookItem) -> Any)
 ) {
@@ -53,11 +53,17 @@ fun CoverOnlyGrid(
     val performanceConfig = LocalPerformanceConfig.current
     val isScrollingFast = rememberIsGridScrollingFast(scrollState)
     
+    // Pre-compute selection set for O(1) lookup instead of O(n) list contains
+    val selectionSet = remember(selection) { selection.toSet() }
+    
     Box(modifier = Modifier.fillMaxSize()) {
-        val cells = if (columns > 1) {
-            GridCells.Fixed(columns)
-        } else {
-            GridCells.Adaptive(160.dp)
+        // Cache cells calculation to avoid recreation
+        val cells = remember(columns) {
+            if (columns > 1) {
+                GridCells.Fixed(columns)
+            } else {
+                GridCells.Adaptive(160.dp)
+            }
         }
 
         LazyVerticalGrid(
@@ -82,7 +88,7 @@ fun CoverOnlyGrid(
                         onClick = { onClick(book) },
                         book = book,
                         ratio = 2f / 3f,
-                        selected = book.id in selection,
+                        selected = book.id in selectionSet, // Use set for O(1) lookup
                         header = header,
                         onlyCover = true,
                         onLongClick = { onLongClick(book) },

@@ -64,6 +64,9 @@ import ireader.presentation.core.popUntilRoot
 import ireader.presentation.core.theme.AppTheme
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.component.LocalPerformanceConfig
+import ireader.presentation.ui.component.PerformanceConfig
+import ireader.presentation.ui.component.getPerformanceConfigForDevice
 import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.core.ui.asStateIn
 import kotlinx.coroutines.channels.awaitClose
@@ -128,6 +131,18 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         setContent {
             val context = LocalContext.current
             
+            // Check if user has enabled max performance mode
+            val maxPerformanceEnabled = uiPreferences.maxPerformanceMode().get()
+            
+            // Get performance config - use MaxPerformance if user enabled it, otherwise device-based
+            val performanceConfig = remember(maxPerformanceEnabled) { 
+                if (maxPerformanceEnabled) {
+                    PerformanceConfig.MaxPerformance
+                } else {
+                    getPerformanceConfigForDevice(this@MainActivity)
+                }
+            }
+            
             SetDefaultTheme()
             KoinContext {
                 setSingletonImageLoaderFactory { context ->
@@ -135,11 +150,15 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                         context = context
                     )
                 }
-                AppTheme(this.lifecycleScope) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    ) {
+                // Provide performance config to entire app for device-appropriate optimizations
+                androidx.compose.runtime.CompositionLocalProvider(
+                    LocalPerformanceConfig provides performanceConfig
+                ) {
+                    AppTheme(this.lifecycleScope) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        ) {
                         val navController = rememberNavController()
                         
                         ProvideNavigator(navController) {
@@ -162,6 +181,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             HandleOnNewIntent(this, navController)
                         }
                     }
+                }
                 }
             }
         }

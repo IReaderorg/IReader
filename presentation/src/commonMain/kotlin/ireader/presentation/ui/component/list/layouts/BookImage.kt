@@ -45,6 +45,16 @@ fun BookImage(
     // Cache the BookCover to prevent recreation on every recomposition
     val bookCover = remember(book.id, book.cover) { BookCover.from(book) }
     
+    // Pre-compute border color to avoid recalculation during recomposition
+    val borderColor = if (selected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onBackground.copy(alpha = .1f)
+    }
+    
+    // Use crossfade duration from performance config (0 when max performance is enabled)
+    val crossfadeDuration = if (isScrollingFast) 0 else performanceConfig.crossfadeDurationMs
+    
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -53,21 +63,13 @@ fun BookImage(
             modifier = modifier
                 .fillMaxSize()
                 .padding(2.dp)
-                // Apply layer promotion for better scroll performance
-                .optimizedForList(enableLayerPromotion = performanceConfig.enableComplexAnimations)
                 .combinedClickable(
                     onClick = { onClick(book) },
                     onLongClick = { onLongClick(book) }
                 )
-                .border(
-                    2.dp,
-                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
-                        alpha = .1f
-                    )
-                ),
+                .border(2.dp, borderColor),
         ) {
-            // Always render the image composable to maintain proper caching and state
-            // The image loader handles caching internally, so images won't disappear on scroll
+            // Always render the image composable - no conditional rendering
             IBookImageComposable(
                 modifier = Modifier
                     .aspectRatio(ratio)
@@ -78,20 +80,21 @@ fun BookImage(
                 headers = header,
                 contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                 alignment = Alignment.Center,
-                // Use faster crossfade during fast scrolling for better performance
-                crossfadeDurationMs = if (isScrollingFast) 0 else performanceConfig.crossfadeDurationMs
+                crossfadeDurationMs = crossfadeDuration
             )
             if (!onlyCover) {
+                // Use remember for the gradient to avoid recreation
+                val gradient = remember {
+                    Brush.verticalGradient(
+                        colors = listOf(Color.Transparent, Color.Black),
+                        startY = 3f,
+                        endY = 80F
+                    )
+                }
                 Box(
                     Modifier
                         .height(50.dp)
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black),
-                                startY = 3f, // 1/3
-                                endY = 80F
-                            )
-                        )
+                        .background(gradient)
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
                 ) {
@@ -106,6 +109,7 @@ fun BookImage(
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center,
                         color = Color.White,
+                        maxLines = 1 // Limit to 1 line for faster text layout
                     )
                 }
             }
@@ -123,7 +127,6 @@ fun BookImage(
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
-
             )
         }
     }

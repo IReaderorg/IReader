@@ -49,15 +49,21 @@ fun ComfortableGridLayout(
     keys: ((item: BookItem) -> Any)
 
 ) {
-    val cells = if (columns > 1) {
-        GridCells.Fixed(columns)
-    } else {
-        GridCells.Adaptive(130.dp)
+    // Cache cells calculation to avoid recreation
+    val cells = remember(columns) {
+        if (columns > 1) {
+            GridCells.Fixed(columns)
+        } else {
+            GridCells.Adaptive(130.dp)
+        }
     }
     
     // Performance optimization: track fast scrolling to defer expensive operations
     val performanceConfig = LocalPerformanceConfig.current
     val isScrollingFast = rememberIsGridScrollingFast(scrollState)
+    
+    // Pre-compute selection set for O(1) lookup instead of O(n) list contains
+    val selectionSet = remember(selection) { selection.toSet() }
     
     Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
@@ -80,7 +86,7 @@ fun ComfortableGridLayout(
                         onClick = { onClick(book) },
                         book = book,
                         ratio = 2f / 3f,
-                        selected = book.id in selection,
+                        selected = book.id in selectionSet, // Use set for O(1) lookup
                         header = headers,
                         onlyCover = true,
                         comfortableMode = true,

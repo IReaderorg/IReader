@@ -199,6 +199,43 @@
     <string name="create_backup">Create Backup</string>
     <string name="backup_created_successfully">Create Backup Successfully</string>
     <string name="restore_backup">Restore Backup</string>
+    
+    <!-- LNReader Import -->
+    <string name="import_from_other_apps">Import from Other Apps</string>
+    <string name="import_from_lnreader">Import from LNReader</string>
+    <string name="import_from_lnreader_desc">Import library from LNReader backup (.zip)</string>
+    <string name="lnreader_import_starting">Starting LNReader import…</string>
+    <string name="lnreader_import_parsing">Parsing backup data…</string>
+    <string name="lnreader_import_reading_backup">Reading backup file…</string>
+    <string name="lnreader_import_novels">Importing novels: %1$d/%2$d - %3$s</string>
+    <string name="lnreader_import_categories">Importing categories: %1$d/%2$d</string>
+    <string name="lnreader_import_complete">Import complete: %1$d novels, %2$d chapters, %3$d categories imported</string>
+    <string name="lnreader_import_complete_with_errors">Import completed with %1$d errors. %2$d novels, %3$d chapters imported.</string>
+    <string name="lnreader_import_failed">Import failed: %1$s</string>
+    <string name="lnreader_import_cancelled">Import cancelled</string>
+    <string name="lnreader_import_not_available">LNReader import not available</string>
+    <string name="select_lnreader_backup">Select LNReader Backup</string>
+    
+    <!-- LNReader Import Error Messages -->
+    <string name="lnreader_error_invalid_backup">Not a valid LNReader backup file. Please select a .zip file exported from LNReader.</string>
+    <string name="lnreader_error_corrupted_backup">The backup file appears to be corrupted or incomplete.</string>
+    <string name="lnreader_error_empty_backup">The backup file contains no novels to import.</string>
+    <string name="lnreader_error_read_failed">Failed to read backup file: %1$s</string>
+    <string name="lnreader_error_parse_failed">Failed to parse backup data: %1$s</string>
+    <string name="lnreader_error_novel_failed">Failed to import novel \"%1$s\": %2$s</string>
+    <string name="lnreader_error_category_failed">Failed to import category \"%1$s\": %2$s</string>
+    <string name="lnreader_error_chapter_failed">Failed to import chapters for \"%1$s\": %2$s</string>
+    <string name="lnreader_error_source_not_found">Source not found for plugin: %1$s. Novel will be imported as local.</string>
+    <string name="lnreader_error_database_failed">Database error during import: %1$s</string>
+    <string name="lnreader_error_permission_denied">Storage permission denied. Please grant permission to access files.</string>
+    <string name="lnreader_error_file_not_found">Backup file not found or inaccessible.</string>
+    <string name="lnreader_error_out_of_memory">Not enough memory to process this backup. Try closing other apps.</string>
+    <string name="lnreader_error_unknown">An unexpected error occurred: %1$s</string>
+    
+    <!-- LNReader Import Warnings -->
+    <string name="lnreader_warning_skipped_novels">%1$d novels were skipped (already in library)</string>
+    <string name="lnreader_warning_unmapped_sources">%1$d novels have unmapped sources and were imported as local</string>
+    <string name="lnreader_warning_partial_import">Some items could not be imported. Check the error log for details.</string>
     <string name="author">Author</string>
     <string name="download">Download</string>
     <string name="bookmark">Bookmark</string>
@@ -1355,6 +1392,8 @@
     <string name="diagnostic_report">Diagnostic Report</string>
     <string name="disable_haptic_feedback">Disable Haptic Feedback</string>
     <string name="disable_loading_animations">Disable Loading Animations</string>
+    <string name="max_performance_mode">Max Performance Mode</string>
+    <string name="max_performance_mode_subtitle">Disable all animations and effects for fastest rendering. Recommended for older devices.</string>
     <string name="disabled_feature">Disabled Feature</string>
     <string name="disabled_navigation">Disabled Navigation</string>
     <string name="disabled_option">Disabled Option</string>
@@ -2068,4 +2107,33 @@
     <string name="chapter_completed">Chapter Completed</string>
     <string name="view_chapter_reviews">View Chapter Reviews</string>
     <string name="hide_reviews">Hide Reviews</string>
+
+    <!-- User/Auth Error Messages -->
+    <string name="error_user_not_found">Account Not Found</string>
+    <string name="error_user_not_found_message">We couldn\'t find your account. Please sign in again to continue.</string>
+    <string name="error_user_not_authenticated">Not Signed In</string>
+    <string name="error_user_not_authenticated_message">You need to sign in to access this feature.</string>
+    <string name="error_session_expired">Session Expired</string>
+    <string name="error_session_expired_message">Your session has expired. Please sign in again.</string>
+    <string name="error_network">Connection Error</string>
+    <string name="error_network_message">Unable to connect. Please check your internet connection and try again.</string>
+    <string name="error_server">Server Error</string>
+    <string name="error_server_message">Something went wrong on our end. Please try again later.</string>
+    <string name="error_invalid_credentials">Invalid Credentials</string>
+    <string name="error_invalid_credentials_message">The email or password you entered is incorrect. Please try again.</string>
+    <string name="error_account_not_found">No Account Found</string>
+    <string name="error_account_not_found_message">No account found with this email. Please sign up or check your email address.</string>
+    <string name="error_email_exists">Email Already Registered</string>
+    <string name="error_email_exists_message">An account with this email already exists. Please sign in or use a different email.</string>
+    <string name="error_too_many_attempts">Too Many Attempts</string>
+    <string name="error_too_many_attempts_message">Too many login attempts. Please wait a few minutes and try again.</string>
+    <string name="error_service_unavailable">Service Unavailable</string>
+    <string name="error_service_unavailable_message">The authentication service is temporarily unavailable. Please try again later.</string>
+    <string name="sign_in_again">Sign In Again</string>
+    
+    <!-- Settings Search -->
+    <string name="search_settings">Search settings…</string>
+    <string name="no_settings_found">No settings found</string>
+    <string name="try_different_search">Try a different search term</string>
+    <string name="clear_search">Clear search</string>
 </resources>

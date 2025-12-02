@@ -45,13 +45,64 @@ object BadgeErrorMapper {
     /**
      * Converts a generic Throwable to a user-friendly error message.
      */
-    fun toUserMessage(throwable: Throwable): String = when {
-        throwable is BadgeError -> toUserMessage(throwable)
-        throwable is UnsupportedOperationException && 
-            (throwable.message?.contains("Supabase", ignoreCase = true) == true ||
-             throwable.message?.contains("not configured", ignoreCase = true) == true) ->
-            "Badges are not available. Please configure Supabase in Settings."
-        else -> "An unexpected error occurred: ${throwable.message ?: "Unknown error"}"
+    fun toUserMessage(throwable: Throwable): String {
+        val message = throwable.message?.lowercase() ?: ""
+        
+        return when {
+            throwable is BadgeError -> toUserMessage(throwable)
+            
+            // Supabase not configured
+            throwable is UnsupportedOperationException && 
+                (message.contains("supabase") || message.contains("not configured")) ->
+                "Badges are not available. Please configure Supabase in Settings."
+            
+            // User not authenticated
+            message.contains("not authenticated") ||
+            message.contains("unauthenticated") ||
+            message.contains("sign in") ||
+            message.contains("login required") ->
+                "You're not signed in. Please sign in to manage your badges."
+            
+            // User not found
+            message.contains("user not found") ||
+            message.contains("account not found") ->
+                "Account not found. Please sign in again."
+            
+            // Session expired
+            message.contains("session expired") ||
+            message.contains("token expired") ||
+            message.contains("jwt expired") ->
+                "Your session has expired. Please sign in again."
+            
+            // Network errors
+            message.contains("network") ||
+            message.contains("connection") ||
+            message.contains("timeout") ||
+            message.contains("unreachable") ||
+            message.contains("failed to connect") ->
+                "Unable to connect. Please check your internet connection and try again."
+            
+            // Server errors
+            message.contains("server") ||
+            message.contains("500") ||
+            message.contains("502") ||
+            message.contains("503") ||
+            message.contains("internal error") ->
+                "Our servers are having issues. Please try again in a few minutes."
+            
+            // Service unavailable
+            message.contains("service") && message.contains("unavailable") ||
+            message.contains("temporarily unavailable") ||
+            message.contains("maintenance") ->
+                "This service is temporarily unavailable. Please try again later."
+            
+            // Badge ownership errors
+            message.contains("does not own") ->
+                "You don't own this badge. Please select a badge you own."
+            
+            // Default - show a friendly message
+            else -> "Something went wrong. Please try again."
+        }
     }
 }
 

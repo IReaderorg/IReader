@@ -47,7 +47,7 @@ val PresentationModules = module {
 
 
     // State objects removed - ViewModels now use Mihon-style MutableStateFlow internally
-    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
 
     factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }

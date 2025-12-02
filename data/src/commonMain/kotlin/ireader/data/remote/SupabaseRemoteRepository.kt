@@ -148,7 +148,7 @@ class SupabaseRemoteRepository(
             
             val userDto = queryResult.firstOrNull()?.let {
                 json.decodeFromJsonElement(UserDto.serializer(), it)
-            } ?: throw Exception("User not found")
+            } ?: throw Exception("User not found. Please sign in again to continue.")
             
             val user = userDto.toDomain()
             currentUser = user

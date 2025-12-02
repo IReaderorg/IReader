@@ -165,7 +165,12 @@ fun BadgeManagementScreen(
                     }
                 }
                 state.error != null -> {
-                    // Error state
+                    // Error state with beautiful error display
+                    val userError = ireader.presentation.ui.component.components.UserError.fromMessage(state.error)
+                    val needsSignIn = userError is ireader.presentation.ui.component.components.UserError.NotFound ||
+                                     userError is ireader.presentation.ui.component.components.UserError.NotAuthenticated ||
+                                     userError is ireader.presentation.ui.component.components.UserError.SessionExpired
+                    
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -173,13 +178,36 @@ fun BadgeManagementScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
+                        // Error icon
+                        Icon(
+                            imageVector = userError.icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // Error title
                         Text(
-                            text = state.error ?: "An error occurred",
-                            style = MaterialTheme.typography.bodyLarge,
+                            text = userError.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.error,
                             textAlign = TextAlign.Center
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Error message
+                        Text(
+                            text = userError.message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
                         
                         // Desktop hover effect for retry button
                         val retryButtonInteractionSource = remember { MutableInteractionSource() }
@@ -366,7 +394,7 @@ private fun BadgeSelector(
         modifier = Modifier.heightIn(max = 400.dp)
     ) {
         // "None" option to clear selection
-        item {
+        item(key = "selector_none") {
             SelectableBadgeCard(
                 badge = null,
                 isSelected = selectedBadgeId == null,
@@ -375,7 +403,10 @@ private fun BadgeSelector(
         }
         
         // Badge options
-        items(badges) { badge ->
+        items(
+            items = badges,
+            key = { badge -> "selector_${badge.id}" }
+        ) { badge ->
             SelectableBadgeCard(
                 badge = badge,
                 isSelected = badge.id == selectedBadgeId,
@@ -409,7 +440,10 @@ private fun BadgeMultiSelector(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.heightIn(max = 400.dp)
         ) {
-            items(badges) { badge ->
+            items(
+                items = badges,
+                key = { badge -> "multi_${badge.id}" }
+            ) { badge ->
                 val isSelected = badge.id in selectedBadgeIds
                 val isDisabled = !isSelected && selectedBadgeIds.size >= maxSelection
                 

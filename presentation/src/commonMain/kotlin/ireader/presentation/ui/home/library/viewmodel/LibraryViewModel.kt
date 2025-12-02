@@ -287,6 +287,7 @@ class LibraryViewModel(
         }
         
         filters.value = newFilters
+        invalidateCategoryCache() // Clear cache when filters change
         _state.update { current ->
             current.copy(
                 filters = newFilters.toImmutableList(),
@@ -311,6 +312,7 @@ class LibraryViewModel(
         }
         
         filters.value = newFilters
+        invalidateCategoryCache() // Clear cache when filters change
         _state.update { it.copy(
             filters = newFilters.toImmutableList(),
             activeFilters = newActive.toImmutableSet()
@@ -327,6 +329,7 @@ class LibraryViewModel(
             currentSort.copy(type = type)
         }
         sorting.value = newSort
+        invalidateCategoryCache() // Clear cache when sorting changes
         _state.update { it.copy(sort = newSort) }
         scope.launch { libraryPreferences.sorting().set(newSort) }
     }
@@ -334,6 +337,7 @@ class LibraryViewModel(
     fun toggleSortDirection() {
         val newSort = sorting.value.copy(isAscending = !sorting.value.isAscending)
         sorting.value = newSort
+        invalidateCategoryCache() // Clear cache when sorting changes
         _state.update { it.copy(sort = newSort) }
         scope.launch { libraryPreferences.sorting().set(newSort) }
     }
@@ -555,6 +559,9 @@ class LibraryViewModel(
 
     // ==================== Library Data ====================
     
+    // Cache for category flows to avoid recreating them
+    private val categoryFlowCache = mutableMapOf<Long, kotlinx.coroutines.flow.Flow<List<BookItem>>>()
+    
     @Composable
     fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
         // Collect state reactively to get categories
@@ -570,26 +577,45 @@ class LibraryViewModel(
         // Use cached data as initial value for instant display when returning to screen
         val cachedData = loadedManga[categoryId] ?: emptyList()
         
-        // Create a flow that combines library data with search query
-        // Use produceState with cached initial value for instant display
-        return androidx.compose.runtime.produceState(initialValue = cachedData, categoryId, sorting.value, filters.value, showArchivedBooks.value) {
-            getLibraryCategory.subscribe(categoryId, sorting.value, filters.value, showArchivedBooks.value)
-                .map { list ->
-                    _state.update { it.copy(books = list.toImmutableList()) }
-                    list.mapIndexed { index, libraryBook ->
-                        libraryBook.toBookItem().copy(column = index.toLong())
+        // Get or create cached flow for this category - avoids recreating flow on every recomposition
+        val categoryFlow = remember(categoryId, sorting.value, filters.value, showArchivedBooks.value) {
+            categoryFlowCache.getOrPut(categoryId) {
+                getLibraryCategory.subscribe(categoryId, sorting.value, filters.value, showArchivedBooks.value)
+                    .map { list ->
+                        // Update state in a single batch to minimize recompositions
+                        list.mapIndexed { index, libraryBook ->
+                            libraryBook.toBookItem().copy(column = index.toLong())
+                        }
                     }
-                }
-                .combine(searchQueryFlow) { mangas, query ->
-                    if (query.isBlank()) {
-                        mangas
-                    } else {
-                        mangas.filter { it.title.contains(query, true) }
+                    .combine(searchQueryFlow) { mangas, query ->
+                        if (query.isBlank()) {
+                            mangas
+                        } else {
+                            // Use sequence for efficient filtering of large lists
+                            mangas.asSequence()
+                                .filter { it.title.contains(query, true) }
+                                .toList()
+                        }
                     }
-                }
-                .onEach { loadedManga[categoryId] = it }
-                .collect { value = it }
+                    .onEach { items ->
+                        loadedManga[categoryId] = items
+                        // Batch state update - only update isLoading, books state is managed separately
+                        _state.update { it.copy(isLoading = false) }
+                    }
+                    // Share the flow to avoid multiple subscriptions
+                    .shareIn(scope, SharingStarted.WhileSubscribed(5000), replay = 1)
+            }
         }
+        
+        // Use produceState with cached initial value for instant display
+        return androidx.compose.runtime.produceState(initialValue = cachedData, categoryFlow) {
+            categoryFlow.collect { value = it }
+        }
+    }
+    
+    // Clear category flow cache when filters/sorting change
+    private fun invalidateCategoryCache() {
+        categoryFlowCache.clear()
     }
     
     fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {

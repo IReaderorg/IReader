@@ -48,3 +48,22 @@ actual fun OnShowBackup(
 
 
 }
+
+@
+Composable
+actual fun OnShowLNReaderImport(
+    show: Boolean,
+    onFileSelected: suspend (Uri?) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    FilePicker(
+        show = show,
+        initialDirectory = BackupDir.absolutePath,
+        fileExtensions = listOf("zip"),
+        onFileSelected = { uri ->
+            scope.launchIO {
+                onFileSelected(uri)
+            }
+        }
+    )
+}

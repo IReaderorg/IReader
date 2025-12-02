@@ -119,9 +119,9 @@ data class LibraryScreenState(
     // Sync
     val isSyncAvailable: Boolean = false,
     
-    // Column settings
-    val columnsInPortrait: Int = 2,
-    val columnsInLandscape: Int = 3
+    // Column settings - defaults optimized for phones, tablets/desktop use adaptive sizing
+    val columnsInPortrait: Int = 3,
+    val columnsInLandscape: Int = 5
 ) {
     @Stable
     val selectionMode: Boolean get() = selectedBookIds.isNotEmpty()

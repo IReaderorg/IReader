@@ -3,14 +3,18 @@ package ireader.presentation.ui.settings.backups
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
@@ -34,6 +38,11 @@ fun BackUpAndRestoreScreen(
     val scope = rememberCoroutineScope()
     val onShowRestore = remember { mutableStateOf(false) }
     val onShowBackup = remember { mutableStateOf(false) }
+    val onShowLNReaderImport = remember { mutableStateOf(false) }
+    
+    // LNReader import progress
+    val lnReaderProgress by vm.lnReaderImportProgress.collectAsState()
+    val lnReaderResult by vm.lnReaderImportResult.collectAsState()
     OnShowRestore(onShowRestore.value, onFileSelected = {
         it?.let {files ->
             scope.launchIO {
@@ -87,7 +96,28 @@ fun BackUpAndRestoreScreen(
 //                }
 //            }
 //        }
-    val items = remember {
+    // LNReader import file picker
+    OnShowLNReaderImport(onShowLNReaderImport.value, onFileSelected = { uri ->
+        uri?.let {
+            vm.importLNReaderBackupFromUri(it)
+        }
+        onShowLNReaderImport.value = false
+    })
+    
+    // Get import progress text
+    val importProgressText = when (val progress = lnReaderProgress) {
+        is ImportLNReaderBackup.ImportProgress.Starting -> localizeHelper.localize(Res.string.lnreader_import_starting)
+        is ImportLNReaderBackup.ImportProgress.Parsing -> progress.message
+        is ImportLNReaderBackup.ImportProgress.ImportingNovels -> 
+            "Importing novels: ${progress.current}/${progress.total} - ${progress.novelName}"
+        is ImportLNReaderBackup.ImportProgress.ImportingCategories -> 
+            "Importing categories: ${progress.current}/${progress.total}"
+        is ImportLNReaderBackup.ImportProgress.Complete -> null
+        is ImportLNReaderBackup.ImportProgress.Error -> null
+        null -> null
+    }
+    
+    val items = remember(importProgressText, localizeHelper) {
         listOf<Components>(
             Components.Row(
                 localizeHelper.localize(Res.string.create_backup), onClick = {
@@ -99,6 +129,17 @@ fun BackUpAndRestoreScreen(
                 localizeHelper.localize(Res.string.restore), onClick = {
                     onShowRestore.value = true
 
+                }
+            ),
+            Components.Header(localizeHelper.localize(Res.string.import_from_other_apps)),
+            Components.Row(
+                title = localizeHelper.localize(Res.string.import_from_lnreader),
+                subtitle = if (importProgressText != null) importProgressText else localizeHelper.localize(Res.string.import_from_lnreader_desc),
+                icon = Icons.Filled.FileDownload,
+                onClick = {
+                    if (importProgressText == null) {
+                        onShowLNReaderImport.value = true
+                    }
                 }
             ),
             Components.Header("Cloud Backup"),

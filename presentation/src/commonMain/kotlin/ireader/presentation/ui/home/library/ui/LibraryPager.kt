@@ -27,6 +27,7 @@ import ireader.domain.models.entities.CategoryWithCount
 import ireader.presentation.ui.component.isLandscape
 import ireader.presentation.ui.component.list.LayoutComposable
 import ireader.presentation.ui.component.list.scrollbars.ILazyColumnScrollbar
+import ireader.presentation.ui.component.LocalPerformanceConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -64,6 +65,9 @@ internal fun LibraryPager(
     // Pre-compute stable key function to avoid lambda recreation
     val stableKeyFunction = remember { { book: BookItem -> stableBookKey(book) } }
     
+    // Get performance config for optimizations
+    val performanceConfig = LocalPerformanceConfig.current
+    
     HorizontalPager(
         state = pagerState,
         pageSpacing = 0.dp,
@@ -71,6 +75,7 @@ internal fun LibraryPager(
         reverseLayout = false,
         contentPadding = PaddingValues(0.dp),
         pageSize = PageSize.Fill,
+        beyondViewportPageCount = performanceConfig.prefetchDistance.coerceAtMost(2), // Limit prefetch based on device
         key = { page -> categories.getOrNull(page)?.id ?: page },
         pageContent = { page ->
             val books by onPageChange(page)

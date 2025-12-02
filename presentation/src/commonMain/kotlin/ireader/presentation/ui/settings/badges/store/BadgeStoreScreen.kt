@@ -1,13 +1,28 @@
 package ireader.presentation.ui.settings.badges.store
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -20,15 +35,39 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Diamond
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material.icons.outlined.Wallet
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -36,7 +75,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
@@ -46,16 +89,36 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.BadgeRarity
 import ireader.domain.models.remote.PaymentProof
 import ireader.domain.models.remote.PaymentProofStatus
-import ireader.presentation.ui.component.IScaffold
-import ireader.presentation.ui.core.ui.AsyncImage
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.i18n.resources.back
+import ireader.i18n.resources.badge_store
+import ireader.i18n.resources.check_back_later_for_new_badges
+import ireader.i18n.resources.click_the_donation_button_below
+import ireader.i18n.resources.complete_your_donation
+import ireader.i18n.resources.copy_your_transaction_id
+import ireader.i18n.resources.enter_your_transaction_id
+import ireader.i18n.resources.exclusive
+import ireader.i18n.resources.exclusive_designs
+import ireader.i18n.resources.featured_badges
+import ireader.i18n.resources.how_to_purchase
+import ireader.i18n.resources.loading_badges
+import ireader.i18n.resources.no_badges_available
+import ireader.i18n.resources.purchase_exclusive_badges_to_support
+import ireader.i18n.resources.purchase_exclusive_badges_to_support_1
+import ireader.i18n.resources.submit_for_verification
+import ireader.i18n.resources.support_collect
+import ireader.i18n.resources.support_development
+import ireader.i18n.resources.transaction_id
+import ireader.i18n.resources.try_again
+import ireader.i18n.resources.verified
+import ireader.i18n.resources.verified_supporter
+import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.ui.AsyncImage
 
 private const val DONATION_URL = "https://reymit.ir/kazemcodes"
 
@@ -65,10 +128,10 @@ private val rareColors = listOf(Color(0xFF1976D2), Color(0xFF42A5F5))
 private val epicColors = listOf(Color(0xFF7B1FA2), Color(0xFFAB47BC))
 private val legendaryColors = listOf(Color(0xFFFF8F00), Color(0xFFFFD54F))
 
-// Desktop breakpoints
-private val COMPACT_WIDTH = 600.dp
-private val MEDIUM_WIDTH = 900.dp
-private val EXPANDED_WIDTH = 1200.dp
+// Responsive breakpoints
+private val COMPACT_WIDTH = 480.dp  // Mobile phones
+private val MEDIUM_WIDTH = 720.dp   // Tablets portrait
+private val EXPANDED_WIDTH = 1024.dp // Tablets landscape / small desktop
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,19 +219,19 @@ fun BadgeStoreScreen(
             val isExpanded = screenWidth >= MEDIUM_WIDTH && screenWidth < EXPANDED_WIDTH
             val isLarge = screenWidth >= EXPANDED_WIDTH
 
-            // Responsive values
+            // Responsive values - optimized for mobile
             val horizontalPadding = when {
                 isLarge -> 48.dp
                 isExpanded -> 32.dp
-                isMedium -> 24.dp
-                else -> 16.dp
+                isMedium -> 16.dp
+                else -> 12.dp  // Smaller padding on mobile
             }
             
             val gridMinSize = when {
                 isLarge -> 220.dp
                 isExpanded -> 200.dp
-                isMedium -> 180.dp
-                else -> 160.dp
+                isMedium -> 160.dp
+                else -> 140.dp  // Smaller cards on mobile to fit 2 per row
             }
             
             val contentMaxWidth = when {
@@ -176,6 +239,8 @@ fun BadgeStoreScreen(
                 isExpanded -> 1200.dp
                 else -> screenWidth
             }
+            
+            val verticalPadding = if (isCompact) 16.dp else 24.dp
 
             when {
                 state.isLoading -> LoadingState()
@@ -194,10 +259,10 @@ fun BadgeStoreScreen(
                             modifier = Modifier.widthIn(max = contentMaxWidth),
                             contentPadding = PaddingValues(
                                 horizontal = horizontalPadding,
-                                vertical = 24.dp
+                                vertical = verticalPadding
                             ),
-                            horizontalArrangement = Arrangement.spacedBy(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(20.dp)
+                            horizontalArrangement = Arrangement.spacedBy(if (isCompact) 12.dp else 20.dp),
+                            verticalArrangement = Arrangement.spacedBy(if (isCompact) 12.dp else 20.dp)
                         ) {
                             // Hero Section
                             item(span = { GridItemSpan(maxLineSpan) }) {
@@ -210,7 +275,13 @@ fun BadgeStoreScreen(
                                     FeaturedBadgesSection(
                                         badges = featuredBadges,
                                         onBadgeClick = { viewModel.onBadgeClick(it) },
-                                        cardWidth = if (isLarge) 280.dp else if (isExpanded) 240.dp else 200.dp
+                                        cardWidth = when {
+                                            isLarge -> 280.dp
+                                            isExpanded -> 240.dp
+                                            isMedium -> 200.dp
+                                            else -> 160.dp  // Smaller featured cards on mobile
+                                        },
+                                        isCompact = isCompact
                                     )
                                 }
                             }
@@ -259,7 +330,10 @@ fun BadgeStoreScreen(
                             }
 
                             // Badge Grid
-                            items(filteredBadges) { badge ->
+                            items(
+                                items = filteredBadges,
+                                key = { badge -> "grid_${badge.id}" }
+                            ) { badge ->
                                 ModernBadgeCard(
                                     badge = badge,
                                     onClick = { viewModel.onBadgeClick(badge) },
@@ -380,7 +454,6 @@ private fun HeroSection(isWideScreen: Boolean = false) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         FeatureChip(icon = Icons.Outlined.Verified, text = localizeHelper.localize(Res.string.verified))
                         FeatureChip(icon = Icons.Outlined.Diamond, text = localizeHelper.localize(Res.string.exclusive))
-                        FeatureChip(icon = Icons.Outlined.Wallet, text = localizeHelper.localize(Res.string.support))
                     }
                 }
             }
@@ -421,7 +494,8 @@ private fun FeatureChip(
 private fun FeaturedBadgesSection(
     badges: List<Badge>,
     onBadgeClick: (Badge) -> Unit,
-    cardWidth: Dp = 200.dp
+    cardWidth: Dp = 200.dp,
+    isCompact: Boolean = false
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column {
@@ -430,25 +504,29 @@ private fun FeaturedBadgesSection(
                 imageVector = Icons.Filled.Star,
                 contentDescription = null,
                 tint = Color(0xFFFFD700),
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(if (isCompact) 22.dp else 28.dp)
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(if (isCompact) 8.dp else 10.dp))
             Text(
                 text = localizeHelper.localize(Res.string.featured_badges),
-                style = MaterialTheme.typography.headlineSmall,
+                style = if (isCompact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(if (isCompact) 12.dp else 16.dp))
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(end = 16.dp)
+            horizontalArrangement = Arrangement.spacedBy(if (isCompact) 12.dp else 20.dp),
+            contentPadding = PaddingValues(end = if (isCompact) 8.dp else 16.dp)
         ) {
-            items(badges) { badge ->
+            items(
+                items = badges,
+                key = { badge -> "featured_${badge.id}" }
+            ) { badge ->
                 FeaturedBadgeCard(
                     badge = badge,
                     onClick = { onBadgeClick(badge) },
-                    cardWidth = cardWidth
+                    cardWidth = cardWidth,
+                    isCompact = isCompact
                 )
             }
         }
@@ -461,12 +539,17 @@ private fun FeaturedBadgesSection(
 private fun FeaturedBadgeCard(
     badge: Badge,
     onClick: () -> Unit,
-    cardWidth: Dp = 200.dp
+    cardWidth: Dp = 200.dp,
+    isCompact: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val scale by animateFloatAsState(if (isHovered) 1.05f else 1f)
     val gradientColors = getRarityGradient(badge.badgeRarity)
+    
+    val imageSize = if (isCompact) 64.dp else 100.dp
+    val cardPadding = if (isCompact) 12.dp else 20.dp
+    val cornerRadius = if (isCompact) 16.dp else 24.dp
 
     Card(
         modifier = Modifier
@@ -475,7 +558,7 @@ private fun FeaturedBadgeCard(
             .hoverable(interactionSource)
             .pointerHoverIcon(PointerIcon.Hand)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(cornerRadius),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isHovered) 16.dp else 8.dp
         )
@@ -486,16 +569,16 @@ private fun FeaturedBadgeCard(
                 .background(brush = Brush.verticalGradient(gradientColors))
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(cardPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Badge Image
                 Box(
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(imageSize)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.2f))
-                        .border(3.dp, Color.White.copy(alpha = 0.5f), CircleShape),
+                        .border(if (isCompact) 2.dp else 3.dp, Color.White.copy(alpha = 0.5f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     if (badge.imageUrl.isNotEmpty()) {
@@ -511,42 +594,45 @@ private fun FeaturedBadgeCard(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(if (isCompact) 10.dp else 16.dp))
 
                 Text(
                     text = badge.name,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = if (isCompact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(if (isCompact) 4.dp else 6.dp))
 
-                RarityBadge(rarity = badge.badgeRarity)
+                RarityBadge(rarity = badge.badgeRarity, compact = isCompact)
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(if (isCompact) 8.dp else 12.dp))
 
                 badge.price?.let { price ->
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(if (isCompact) 12.dp else 16.dp),
                         color = Color.White
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                            modifier = Modifier.padding(
+                                horizontal = if (isCompact) 12.dp else 20.dp,
+                                vertical = if (isCompact) 6.dp else 10.dp
+                            ),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.ShoppingCart,
                                 contentDescription = null,
                                 tint = gradientColors.first(),
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(if (isCompact) 14.dp else 18.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(if (isCompact) 4.dp else 8.dp))
                             Text(
                                 text = "${"%.2f".format(price)} USD",
-                                style = MaterialTheme.typography.titleMedium,
+                                style = if (isCompact) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = gradientColors.first()
                             )
@@ -565,7 +651,7 @@ private fun CategoryFilter(
     onCategorySelected: (String?) -> Unit
 ) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        item {
+        item(key = "category_all") {
             FilterChip(
                 selected = selectedCategory == null,
                 onClick = { onCategorySelected(null) },
@@ -581,7 +667,10 @@ private fun CategoryFilter(
                 )
             )
         }
-        items(categories) { category ->
+        items(
+            items = categories,
+            key = { category -> "category_$category" }
+        ) { category ->
             FilterChip(
                 selected = selectedCategory == category,
                 onClick = { onCategorySelected(category) },
@@ -819,6 +908,9 @@ private fun LoadingState() {
 
 @Composable
 private fun ErrorState(error: String, onRetry: () -> Unit) {
+    val localizeHelper = LocalLocalizeHelper.current
+    val userError = ireader.presentation.ui.component.components.UserError.fromMessage(error)
+    
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -836,10 +928,24 @@ private fun ErrorState(error: String, onRetry: () -> Unit) {
                 modifier = Modifier.padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "😕", fontSize = 56.sp)
-                Spacer(modifier = Modifier.height(20.dp))
+                // Use appropriate icon based on error type
+                Icon(
+                    imageVector = userError.icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(56.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = error,
+                    text = userError.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = userError.message,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     textAlign = TextAlign.Center
@@ -852,7 +958,7 @@ private fun ErrorState(error: String, onRetry: () -> Unit) {
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Try Again", style = MaterialTheme.typography.labelLarge)
+                    Text(localizeHelper?.localize(Res.string.try_again) ?: "Try Again", style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
@@ -904,7 +1010,8 @@ private fun ModernPurchaseDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier
-            .widthIn(min = 400.dp, max = 560.dp)
+            .fillMaxWidth(0.95f)  // Use percentage for mobile compatibility
+            .widthIn(max = 560.dp)  // Cap max width for desktop
             .onKeyEvent { keyEvent ->
                 if (keyEvent.key == Key.Escape && keyEvent.type == KeyEventType.KeyDown) {
                     onDismiss()
@@ -913,214 +1020,289 @@ private fun ModernPurchaseDialog(
             }
     ) {
         Card(
-            shape = RoundedCornerShape(32.dp),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Header with gradient
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(brush = Brush.horizontalGradient(gradientColors))
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        // Badge Preview
-                        Box(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.2f))
-                                .border(4.dp, Color.White.copy(alpha = 0.6f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (badge.imageUrl.isNotEmpty()) {
-                                AsyncImage(
-                                    model = badge.imageUrl,
-                                    contentDescription = badge.name,
-                                    modifier = Modifier.fillMaxSize().clip(CircleShape),
-                                    contentScale = ContentScale.Crop,
-                                    error = {
-                                        Text(
-                                            text = badge.name.take(2).uppercase(),
-                                            style = MaterialTheme.typography.displaySmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
-                                    }
-                                )
-                            } else {
-                                Text(
-                                    text = badge.name.take(2).uppercase(),
-                                    style = MaterialTheme.typography.displaySmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = badge.name,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        RarityBadge(rarity = badge.badgeRarity)
-
-                        badge.price?.let { price ->
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Surface(
-                                shape = RoundedCornerShape(20.dp),
-                                color = Color.White
-                            ) {
-                                Text(
-                                    text = "${"%.2f".format(price)} USD",
-                                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = gradientColors.first()
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Content
+            BoxWithConstraints {
+                val currentMaxWidth = maxWidth // Capture maxWidth in a local variable
+                val isCompactDialog = currentMaxWidth < 400.dp
+                val isVeryCompactDialog = currentMaxWidth < 320.dp // For vertical button layout
+                val headerPadding = if (isCompactDialog) 20.dp else 32.dp
+                val contentPadding = if (isCompactDialog) 16.dp else 28.dp
+                val badgeImageSize = if (isCompactDialog) 80.dp else 120.dp
+                val buttonHeight = if (isCompactDialog) 44.dp else 52.dp
+                
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(28.dp)
+                        .verticalScroll(rememberScrollState())  // Make dialog scrollable on small screens
                 ) {
-                    Text(
-                        text = badge.description,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Purchase Steps
-                    Card(
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        )
+                    // Header with gradient
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(brush = Brush.horizontalGradient(gradientColors))
+                            .padding(headerPadding),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            Text(
-                                text = localizeHelper.localize(Res.string.how_to_purchase),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            PurchaseStep(number = "1", text = localizeHelper.localize(Res.string.click_the_donation_button_below))
-                            PurchaseStep(number = "2", text = localizeHelper.localize(Res.string.complete_your_donation))
-                            PurchaseStep(number = "3", text = localizeHelper.localize(Res.string.copy_your_transaction_id))
-                            PurchaseStep(number = "4", text = localizeHelper.localize(Res.string.submit_for_verification))
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Donation Button
-                    Button(
-                        onClick = onOpenDonationLink,
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Wallet,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text("Open Donation Page", style = MaterialTheme.typography.titleSmall)
-                    }
-
-                    Text(
-                        text = DONATION_URL,
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    // Transaction ID Input
-                    OutlinedTextField(
-                        value = transactionId,
-                        onValueChange = { transactionId = it },
-                        label = { Text(localizeHelper.localize(Res.string.transaction_id)) },
-                        placeholder = { Text(localizeHelper.localize(Res.string.enter_your_transaction_id)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        enabled = !isSubmitting,
-                        shape = RoundedCornerShape(14.dp),
-                        textStyle = MaterialTheme.typography.bodyLarge
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Action Buttons
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = onDismiss,
-                            modifier = Modifier.weight(1f).height(52.dp),
-                            enabled = !isSubmitting,
-                            shape = RoundedCornerShape(14.dp)
-                        ) {
-                            Text("Cancel", style = MaterialTheme.typography.titleSmall)
-                        }
-
-                        Button(
-                            onClick = {
-                                val proof = PaymentProof(
-                                    id = "",
-                                    userId = "",
-                                    badgeId = badge.id,
-                                    transactionId = transactionId,
-                                    paymentMethod = "Reymit Donation",
-                                    proofImageUrl = null,
-                                    status = PaymentProofStatus.PENDING,
-                                    submittedAt = ""
-                                )
-                                onSubmitProof(proof)
-                            },
-                            modifier = Modifier.weight(1f).height(52.dp),
-                            enabled = !isSubmitting && transactionId.isNotBlank(),
-                            shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = gradientColors.first()
-                            )
-                        ) {
-                            if (isSubmitting) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    strokeWidth = 2.dp,
-                                    color = Color.White
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            // Badge Preview
+                            Box(
+                                modifier = Modifier
+                                    .size(badgeImageSize)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.2f))
+                                    .border(if (isCompactDialog) 2.dp else 4.dp, Color.White.copy(alpha = 0.6f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (badge.imageUrl.isNotEmpty()) {
+                                    AsyncImage(
+                                        model = badge.imageUrl,
+                                        contentDescription = badge.name,
+                                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                        contentScale = ContentScale.Crop,
+                                        error = {
+                                            Text(
+                                                text = badge.name.take(2).uppercase(),
+                                                style = if (isCompactDialog) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displaySmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        }
+                                    )
+                                } else {
+                                    Text(
+                                        text = badge.name.take(2).uppercase(),
+                                        style = if (isCompactDialog) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displaySmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
                             }
+
+                            Spacer(modifier = Modifier.height(if (isCompactDialog) 12.dp else 16.dp))
+
                             Text(
-                                if (isSubmitting) "Submitting..." else "Submit",
-                                style = MaterialTheme.typography.titleSmall
+                                text = badge.name,
+                                style = if (isCompactDialog) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                textAlign = TextAlign.Center
                             )
+
+                            Spacer(modifier = Modifier.height(if (isCompactDialog) 6.dp else 8.dp))
+
+                            RarityBadge(rarity = badge.badgeRarity, compact = isCompactDialog)
+
+                            badge.price?.let { price ->
+                                Spacer(modifier = Modifier.height(if (isCompactDialog) 12.dp else 16.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(if (isCompactDialog) 14.dp else 20.dp),
+                                    color = Color.White
+                                ) {
+                                    Text(
+                                        text = "${"%.2f".format(price)} USD",
+                                        modifier = Modifier.padding(
+                                            horizontal = if (isCompactDialog) 16.dp else 24.dp,
+                                            vertical = if (isCompactDialog) 8.dp else 12.dp
+                                        ),
+                                        style = if (isCompactDialog) MaterialTheme.typography.titleMedium else MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = gradientColors.first()
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Content
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(contentPadding)
+                    ) {
+                        Text(
+                            text = badge.description,
+                            style = if (isCompactDialog) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(modifier = Modifier.height(if (isCompactDialog) 16.dp else 24.dp))
+
+                        // Purchase Steps
+                        Card(
+                            shape = RoundedCornerShape(if (isCompactDialog) 14.dp else 20.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Column(modifier = Modifier.padding(if (isCompactDialog) 14.dp else 20.dp)) {
+                                Text(
+                                    text = localizeHelper.localize(Res.string.how_to_purchase),
+                                    style = if (isCompactDialog) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(if (isCompactDialog) 10.dp else 16.dp))
+                                PurchaseStep(number = "1", text = localizeHelper.localize(Res.string.click_the_donation_button_below), isCompact = isCompactDialog)
+                                PurchaseStep(number = "2", text = localizeHelper.localize(Res.string.complete_your_donation), isCompact = isCompactDialog)
+                                PurchaseStep(number = "3", text = localizeHelper.localize(Res.string.copy_your_transaction_id), isCompact = isCompactDialog)
+                                PurchaseStep(number = "4", text = localizeHelper.localize(Res.string.submit_for_verification), isCompact = isCompactDialog)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(if (isCompactDialog) 14.dp else 20.dp))
+
+                        // Donation Button
+                        Button(
+                            onClick = onOpenDonationLink,
+                            modifier = Modifier.fillMaxWidth().height(buttonHeight),
+                            shape = RoundedCornerShape(if (isCompactDialog) 10.dp else 14.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Wallet,
+                                contentDescription = null,
+                                modifier = Modifier.size(if (isCompactDialog) 16.dp else 20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(if (isCompactDialog) 6.dp else 10.dp))
+                            Text(
+                                "Open Donation Page",
+                                style = if (isCompactDialog) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleSmall
+                            )
+                        }
+
+                        Text(
+                            text = DONATION_URL,
+                            modifier = Modifier.fillMaxWidth().padding(top = if (isCompactDialog) 4.dp else 8.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Spacer(modifier = Modifier.height(if (isCompactDialog) 14.dp else 20.dp))
+
+                        // Transaction ID Input
+                        OutlinedTextField(
+                            value = transactionId,
+                            onValueChange = { transactionId = it },
+                            label = { Text(localizeHelper.localize(Res.string.transaction_id)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.enter_your_transaction_id)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            enabled = !isSubmitting,
+                            shape = RoundedCornerShape(if (isCompactDialog) 10.dp else 14.dp),
+                            textStyle = if (isCompactDialog) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge
+                        )
+
+                        Spacer(modifier = Modifier.height(if (isCompactDialog) 16.dp else 24.dp))
+
+                        // Action Buttons - Stack vertically on very small screens
+                        if (isCompactDialog && isVeryCompactDialog) {
+                            // Vertical button layout for very small screens
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = {
+                                        val proof = PaymentProof(
+                                            id = "",
+                                            userId = "",
+                                            badgeId = badge.id,
+                                            transactionId = transactionId,
+                                            paymentMethod = "Reymit Donation",
+                                            proofImageUrl = null,
+                                            status = PaymentProofStatus.PENDING,
+                                            submittedAt = ""
+                                        )
+                                        onSubmitProof(proof)
+                                    },
+                                    modifier = Modifier.fillMaxWidth().height(buttonHeight),
+                                    enabled = !isSubmitting && transactionId.isNotBlank(),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = gradientColors.first()
+                                    )
+                                ) {
+                                    if (isSubmitting) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            strokeWidth = 2.dp,
+                                            color = Color.White
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                    }
+                                    Text(
+                                        if (isSubmitting) "Submitting..." else "Submit",
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
+                                OutlinedButton(
+                                    onClick = onDismiss,
+                                    modifier = Modifier.fillMaxWidth().height(buttonHeight),
+                                    enabled = !isSubmitting,
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text("Cancel", style = MaterialTheme.typography.labelLarge)
+                                }
+                            }
+                        } else {
+                            // Horizontal button layout
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(if (isCompactDialog) 10.dp else 16.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = onDismiss,
+                                    modifier = Modifier.weight(1f).height(buttonHeight),
+                                    enabled = !isSubmitting,
+                                    shape = RoundedCornerShape(if (isCompactDialog) 10.dp else 14.dp)
+                                ) {
+                                    Text("Cancel", style = if (isCompactDialog) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleSmall)
+                                }
+
+                                Button(
+                                    onClick = {
+                                        val proof = PaymentProof(
+                                            id = "",
+                                            userId = "",
+                                            badgeId = badge.id,
+                                            transactionId = transactionId,
+                                            paymentMethod = "Reymit Donation",
+                                            proofImageUrl = null,
+                                            status = PaymentProofStatus.PENDING,
+                                            submittedAt = ""
+                                        )
+                                        onSubmitProof(proof)
+                                    },
+                                    modifier = Modifier.weight(1f).height(buttonHeight),
+                                    enabled = !isSubmitting && transactionId.isNotBlank(),
+                                    shape = RoundedCornerShape(if (isCompactDialog) 10.dp else 14.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = gradientColors.first()
+                                    )
+                                ) {
+                                    if (isSubmitting) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(if (isCompactDialog) 16.dp else 20.dp),
+                                            strokeWidth = 2.dp,
+                                            color = Color.White
+                                        )
+                                        Spacer(modifier = Modifier.width(if (isCompactDialog) 6.dp else 10.dp))
+                                    }
+                                    Text(
+                                        if (isSubmitting) "Submitting..." else "Submit",
+                                        style = if (isCompactDialog) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleSmall
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1130,29 +1312,29 @@ private fun ModernPurchaseDialog(
 }
 
 @Composable
-private fun PurchaseStep(number: String, text: String) {
+private fun PurchaseStep(number: String, text: String, isCompact: Boolean = false) {
     Row(
-        modifier = Modifier.padding(vertical = 6.dp),
+        modifier = Modifier.padding(vertical = if (isCompact) 4.dp else 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier.size(if (isCompact) 22.dp else 28.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Text(
                     text = number,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
-        Spacer(modifier = Modifier.width(14.dp))
+        Spacer(modifier = Modifier.width(if (isCompact) 10.dp else 14.dp))
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
+            style = if (isCompact) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }

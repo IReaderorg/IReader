@@ -273,9 +273,9 @@ class CrossProjectRepository(private val multiClient: MultiSupabaseClient) {
         return try {
             // Get user info from auth project
             val userId = multiClient.getCurrentUserId() 
-                ?: return Result.failure(Exception("User not authenticated"))
+                ?: return Result.failure(Exception("User not authenticated. Please sign in to continue."))
             val username = multiClient.getCurrentUsername() 
-                ?: return Result.failure(Exception("Username not found"))
+                ?: return Result.failure(Exception("User not found. Please update your profile with a username."))
             
             // Insert review in book reviews project
             multiClient.bookReviewsClient.postgrest["book_reviews"].insert(
@@ -306,9 +306,9 @@ class CrossProjectRepository(private val multiClient: MultiSupabaseClient) {
         return try {
             // Get user info from auth project
             val userId = multiClient.getCurrentUserId() 
-                ?: return Result.failure(Exception("User not authenticated"))
+                ?: return Result.failure(Exception("User not authenticated. Please sign in to continue."))
             val username = multiClient.getCurrentUsername() 
-                ?: return Result.failure(Exception("Username not found"))
+                ?: return Result.failure(Exception("User not found. Please update your profile with a username."))
             
             // Insert review in chapter reviews project
             multiClient.chapterReviewsClient.postgrest["chapter_reviews"].insert(
@@ -340,9 +340,9 @@ class CrossProjectRepository(private val multiClient: MultiSupabaseClient) {
         return try {
             // Get user info from auth project
             val userId = multiClient.getCurrentUserId() 
-                ?: return Result.failure(Exception("User not authenticated"))
+                ?: return Result.failure(Exception("User not authenticated. Please sign in to continue."))
             val username = multiClient.getCurrentUsername() 
-                ?: return Result.failure(Exception("Username not found"))
+                ?: return Result.failure(Exception("User not found. Please update your profile with a username."))
             
             // Upsert leaderboard entry in analytics project
             multiClient.analyticsClient.postgrest["leaderboard"].upsert(

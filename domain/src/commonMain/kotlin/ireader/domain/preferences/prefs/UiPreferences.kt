@@ -396,4 +396,19 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun donationLeaderboardRealtimeEnabled(): Preference<Boolean> {
         return preferenceStore.getBoolean("donation_leaderboard_realtime_enabled", false)
     }
+    
+    // ============================================================================
+    // Performance Settings
+    // ============================================================================
+    
+    /**
+     * Whether to enable maximum performance mode.
+     * When enabled, all animations and visual effects are disabled for fastest possible rendering.
+     * This includes: crossfade animations, loading placeholders, shadows, blur effects.
+     * Recommended for older devices or users who prefer instant response over visual polish.
+     * Default: false (normal mode with animations)
+     */
+    fun maxPerformanceMode(): Preference<Boolean> {
+        return preferenceStore.getBoolean("max_performance_mode", false)
+    }
 }

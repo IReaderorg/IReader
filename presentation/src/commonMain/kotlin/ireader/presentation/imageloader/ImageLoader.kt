@@ -163,14 +163,14 @@ fun ImageLoaderImage(
         if (performanceConfig.enableImageCrossfade) {
             minOf(crossfadeDurationMs, performanceConfig.crossfadeDurationMs)
         } else {
-            0 // Disable crossfade on low-end devices
+            0 // Disable crossfade when max performance is enabled
         }
     }
     
-    // Use lower filter quality on low-end devices for faster rendering
+    // Use lower filter quality when max performance is enabled
     val effectiveFilterQuality = remember(filterQuality, performanceConfig) {
         if (!performanceConfig.enableComplexAnimations) {
-            FilterQuality.Low // Faster rendering on low-end
+            FilterQuality.Low // Faster rendering
         } else {
             filterQuality
         }

@@ -69,15 +69,26 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getBoolean("show_count_in_category", true)
     }
 
+    /**
+     * Default columns for portrait mode.
+     * - Phone: 3 columns (better than 2 for most content)
+     * - Tablet/Desktop: Will be overridden by adaptive logic in UI
+     */
     fun columnsInPortrait(): Preference<Int> {
-        return preferenceStore.getInt("columns_portrait", 2)
+        return preferenceStore.getInt("columns_portrait", 3)
     }
 
+    /**
+     * Default columns for landscape mode.
+     * - Phone landscape: 5 columns
+     * - Tablet/Desktop: Will be overridden by adaptive logic in UI
+     */
     fun columnsInLandscape(): Preference<Int> {
-        return preferenceStore.getInt("columns_landscape", 4)
+        return preferenceStore.getInt("columns_landscape", 5)
     }
+    
     fun columnsInPortraitCompact(): Preference<Int> {
-        return preferenceStore.getInt("columns_portrait_compact", 2)
+        return preferenceStore.getInt("columns_portrait_compact", 3)
     }
 
     // Badge preferences

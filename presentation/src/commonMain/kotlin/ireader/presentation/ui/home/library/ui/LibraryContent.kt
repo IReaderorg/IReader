@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.BookItem
@@ -35,7 +36,9 @@ internal fun LibraryContent(
     val selectedBooks = state.selectedBookIds
     val layout = state.layout
     
-    if (categories.isEmpty()) return
+    // Early return for empty categories - but remember the check to avoid recomposition
+    val hasCategories = remember(categories) { categories.isNotEmpty() }
+    if (!hasCategories) return
     val horizontalPager =
         rememberPagerState(
             initialPage = selectedCategoryIndex,

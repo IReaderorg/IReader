@@ -68,3 +68,12 @@ expect fun OnShowRestore(show:Boolean, onFileSelected: suspend (Uri) -> Unit)
 )
 @Composable
 expect fun OnShowBackup(show:Boolean, onFileSelected: suspend (Uri) -> Unit)
+
+/**
+ * File picker for LNReader backup import (.zip files)
+ * 
+ * This composable shows a file picker for selecting LNReader backup files.
+ * LNReader backups are ZIP files containing novels, chapters, categories, and settings.
+ */
+@Composable
+expect fun OnShowLNReaderImport(show: Boolean, onFileSelected: suspend (Uri?) -> Unit)

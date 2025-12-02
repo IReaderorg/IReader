@@ -90,6 +90,22 @@ val DomainServices = module {
             )
         )
     }
+    
+    // LNReader Backup Import - lazy loaded when user imports LNReader backup
+    factory { ireader.domain.usecases.backup.lnreader.LNReaderBackupParser() }
+    factory { ireader.domain.usecases.backup.lnreader.LNReaderSourceMapper(get()) }
+    factory {
+        ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup(
+            parser = get(),
+            sourceMapper = get(),
+            bookRepository = get(),
+            chapterRepository = get(),
+            categoryRepository = get(),
+            bookCategoryRepository = get(),
+            transactions = get(),
+            fileSaver = get()
+        )
+    }
     factory  { CategoriesUseCases(get(), get(), get(), get()) }
     factory  { CreateCategoryWithName(get()) }
     factory  { ReorderCategory(get()) }

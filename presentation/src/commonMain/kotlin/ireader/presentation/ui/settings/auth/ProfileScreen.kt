@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Security
@@ -60,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.component.components.Toolbar
+import ireader.presentation.ui.component.components.SimpleUserErrorCard
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
@@ -183,10 +185,64 @@ class ProfileScreen  {
             )
         }
         
-        state.error?.let { error ->
-            LaunchedEffect(error) {
-                viewModel.clearError()
-            }
+        // Show beautiful error dialog for user errors
+        if (state.error != null) {
+            val userError = ireader.presentation.ui.component.components.UserError.fromMessage(state.error)
+            val needsSignIn = userError is ireader.presentation.ui.component.components.UserError.NotFound ||
+                             userError is ireader.presentation.ui.component.components.UserError.NotAuthenticated ||
+                             userError is ireader.presentation.ui.component.components.UserError.SessionExpired ||
+                             state.requiresSignIn
+            
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { viewModel.clearError() },
+                confirmButton = {
+                    if (needsSignIn) {
+                        Button(
+                            onClick = {
+                                viewModel.clearError()
+                                viewModel.signOut()
+                                navController.navigate(NavigationRoutes.auth)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Login,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(localizeHelper.localize(Res.string.sign_in_again))
+                        }
+                    } else {
+                        TextButton(onClick = { viewModel.clearError() }) {
+                            Text(localizeHelper.localize(Res.string.dismiss))
+                        }
+                    }
+                },
+                dismissButton = if (needsSignIn) {
+                    {
+                        TextButton(onClick = { viewModel.clearError() }) {
+                            Text(localizeHelper.localize(Res.string.dismiss))
+                        }
+                    }
+                } else null,
+                icon = {
+                    Icon(
+                        imageVector = userError.icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(48.dp)
+                    )
+                },
+                title = {
+                    Text(
+                        text = userError.title,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(text = userError.message)
+                }
+            )
         }
     }
 }

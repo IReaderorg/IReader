@@ -81,7 +81,13 @@ class ProfileViewModel(
             
             val userId = currentState.currentUser?.id
             if (userId == null) {
-                updateState { it.copy(isLoading = false, error = "User not found") }
+                updateState { 
+                    it.copy(
+                        isLoading = false, 
+                        error = "user not found",  // Will be parsed by UserError.fromMessage
+                        requiresSignIn = true
+                    ) 
+                }
                 return@launch
             }
             
@@ -93,7 +99,9 @@ class ProfileViewModel(
                     updateState { 
                         it.copy(
                             error = error.message ?: "Failed to update username", 
-                            isLoading = false
+                            isLoading = false,
+                            requiresSignIn = error.message?.contains("not found", ignoreCase = true) == true ||
+                                           error.message?.contains("unauthorized", ignoreCase = true) == true
                         ) 
                     }
                 }
@@ -107,7 +115,13 @@ class ProfileViewModel(
             
             val userId = currentState.currentUser?.id
             if (userId == null) {
-                updateState { it.copy(isLoading = false, error = "User not found") }
+                updateState { 
+                    it.copy(
+                        isLoading = false, 
+                        error = "user not found",  // Will be parsed by UserError.fromMessage
+                        requiresSignIn = true
+                    ) 
+                }
                 return@launch
             }
             
@@ -119,7 +133,9 @@ class ProfileViewModel(
                     updateState { 
                         it.copy(
                             error = error.message ?: "Failed to update wallet", 
-                            isLoading = false
+                            isLoading = false,
+                            requiresSignIn = error.message?.contains("not found", ignoreCase = true) == true ||
+                                           error.message?.contains("unauthorized", ignoreCase = true) == true
                         ) 
                     }
                 }
@@ -128,7 +144,7 @@ class ProfileViewModel(
     }
     
     fun clearError() {
-        updateState { it.copy(error = null) }
+        updateState { it.copy(error = null, requiresSignIn = false) }
     }
     
     private fun loadFeaturedBadges() {
@@ -218,6 +234,7 @@ data class ProfileState(
     val currentUser: User? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
+    val requiresSignIn: Boolean = false,  // Indicates if error requires user to sign in again
     val connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED,
     val lastSyncTime: Long? = null,
     val showUsernameDialog: Boolean = false,

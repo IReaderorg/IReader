@@ -17,6 +17,7 @@ local.properties
 github.properties
 .kiro
 mihon-main
+lnreader-master
 
 # Gradle files
 .gradle/

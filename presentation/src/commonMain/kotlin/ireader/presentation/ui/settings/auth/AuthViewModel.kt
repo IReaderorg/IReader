@@ -115,7 +115,25 @@ class AuthViewModel(
             message.contains("network") || 
             message.contains("connection") ||
             message.contains("timeout") ||
-            message.contains("unreachable") -> AuthError.NetworkError
+            message.contains("unreachable") ||
+            message.contains("failed to connect") ||
+            message.contains("no internet") ||
+            message.contains("offline") -> AuthError.NetworkError
+            
+            // User not found - check this BEFORE invalid credentials
+            message.contains("user not found") ||
+            message.contains("account not found") ||
+            message.contains("does not exist") ||
+            message.contains("no user") ||
+            message.contains("user does not exist") -> AuthError.UserNotFound
+            
+            // Not authenticated
+            message.contains("not authenticated") ||
+            message.contains("unauthenticated") ||
+            message.contains("sign in required") ||
+            message.contains("login required") ||
+            message.contains("session expired") ||
+            message.contains("token expired") -> AuthError.NotAuthenticated
             
             // Invalid credentials
             message.contains("invalid") && (message.contains("credential") || message.contains("password") || message.contains("email")) ||
@@ -124,28 +142,31 @@ class AuthViewModel(
             message.contains("unauthorized") ||
             message.contains("401") -> AuthError.InvalidCredentials
             
-            // User not found
-            message.contains("user not found") ||
-            message.contains("account not found") ||
-            message.contains("does not exist") -> AuthError.UserNotFound
-            
             // Email already exists
             message.contains("already exists") ||
             message.contains("already registered") ||
-            message.contains("email taken") -> AuthError.EmailAlreadyExists
+            message.contains("email taken") ||
+            message.contains("duplicate") -> AuthError.EmailAlreadyExists
             
             // Server errors
             message.contains("server") ||
             message.contains("500") ||
             message.contains("502") ||
-            message.contains("503") -> AuthError.ServerError
+            message.contains("503") ||
+            message.contains("internal error") -> AuthError.ServerError
+            
+            // Service unavailable
+            message.contains("service") ||
+            message.contains("unavailable") ||
+            message.contains("maintenance") -> AuthError.ServiceUnavailable
             
             // Rate limiting
             message.contains("too many") ||
-            message.contains("rate limit") -> AuthError.TooManyAttempts
+            message.contains("rate limit") ||
+            message.contains("throttle") -> AuthError.TooManyAttempts
             
-            // Default to unknown
-            else -> AuthError.Unknown(error.message ?: "An unexpected error occurred")
+            // Default - show the actual error message for debugging
+            else -> AuthError.Unknown(error.message ?: "Something went wrong. Please try again.")
         }
     }
 }
@@ -159,6 +180,7 @@ sealed class AuthError {
     object ServerError : AuthError()
     object ServiceUnavailable : AuthError()
     object UserNotFound : AuthError()
+    object NotAuthenticated : AuthError()
     object EmailAlreadyExists : AuthError()
     object TooManyAttempts : AuthError()
     data class Unknown(val message: String) : AuthError()
@@ -168,12 +190,13 @@ sealed class AuthError {
      */
     fun toUserMessage(): String = when (this) {
         is InvalidCredentials -> "Invalid email or password. Please check your credentials and try again."
-        is NetworkError -> "No internet connection. Please check your network and try again."
-        is ServerError -> "Server error occurred. Please try again later."
-        is ServiceUnavailable -> "Authentication service is not available. Please try again later."
+        is NetworkError -> "Unable to connect. Please check your internet connection and try again."
+        is ServerError -> "Our servers are having issues. Please try again in a few minutes."
+        is ServiceUnavailable -> "Sign-in service is temporarily unavailable. Please try again later."
         is UserNotFound -> "No account found with this email. Please sign up or check your email address."
+        is NotAuthenticated -> "You're not signed in. Please sign in to continue."
         is EmailAlreadyExists -> "An account with this email already exists. Please sign in or use a different email."
-        is TooManyAttempts -> "Too many login attempts. Please wait a few minutes and try again."
+        is TooManyAttempts -> "Too many attempts. Please wait a few minutes before trying again."
         is Unknown -> message
     }
 }

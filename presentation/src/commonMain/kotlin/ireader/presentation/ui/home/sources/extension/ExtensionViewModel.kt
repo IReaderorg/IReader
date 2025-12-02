@@ -185,8 +185,10 @@ class ExtensionViewModel(
                             allPinnedCatalogs = catalogs.pinned,
                             allUnpinnedCatalogs = catalogs.unpinned,
                             allRemoteCatalogs = catalogs.remote,
-                            pinnedCatalogs = catalogs.pinned.filteredByQuery(state.searchQuery),
-                            unpinnedCatalogs = catalogs.unpinned.filteredByQuery(state.searchQuery),
+                            pinnedCatalogs = catalogs.pinned.filteredByQuery(state.searchQuery)
+                                .filteredByLanguageChoice(state.selectedLanguage),
+                            unpinnedCatalogs = catalogs.unpinned.filteredByQuery(state.searchQuery)
+                                .filteredByLanguageChoice(state.selectedLanguage),
                             remoteCatalogs = catalogs.remote.filteredByQuery(state.searchQuery)
                                 .filteredByChoice(state.selectedLanguage),
                             languageChoices = languageChoices
@@ -233,8 +235,10 @@ class ExtensionViewModel(
         updateState { state ->
             state.copy(
                 searchQuery = query,
-                pinnedCatalogs = state.allPinnedCatalogs.filteredByQuery(query),
-                unpinnedCatalogs = state.allUnpinnedCatalogs.filteredByQuery(query),
+                pinnedCatalogs = state.allPinnedCatalogs.filteredByQuery(query)
+                    .filteredByLanguageChoice(state.selectedLanguage),
+                unpinnedCatalogs = state.allUnpinnedCatalogs.filteredByQuery(query)
+                    .filteredByLanguageChoice(state.selectedLanguage),
                 remoteCatalogs = state.allRemoteCatalogs.filteredByQuery(query)
                     .filteredByChoice(state.selectedLanguage)
             )
@@ -248,6 +252,10 @@ class ExtensionViewModel(
         updateState { state ->
             state.copy(
                 selectedLanguage = choice,
+                pinnedCatalogs = state.allPinnedCatalogs.filteredByQuery(state.searchQuery)
+                    .filteredByLanguageChoice(choice),
+                unpinnedCatalogs = state.allUnpinnedCatalogs.filteredByQuery(state.searchQuery)
+                    .filteredByLanguageChoice(choice),
                 remoteCatalogs = state.allRemoteCatalogs.filteredByQuery(state.searchQuery)
                     .filteredByChoice(choice)
             )
@@ -680,17 +688,19 @@ class ExtensionViewModel(
             .then(InstalledLanguagesComparator(local))
             .thenBy { it.code }
 
-        remote.asSequence()
-            .map { Language(it.lang) }
+        // Combine languages from both remote and local sources
+        val allLanguages = (remote.asSequence().map { Language(it.lang) } +
+            local.asSequence().mapNotNull { it.source?.lang }.map { Language(it) })
             .distinct()
             .sortedWith(languageComparators)
-            .forEach { code ->
-                if (code.toEmoji() != null) {
-                    knownLanguages.add(LanguageChoice.One(code))
-                } else {
-                    unknownLanguages.add(code)
-                }
+        
+        allLanguages.forEach { code ->
+            if (code.toEmoji() != null) {
+                knownLanguages.add(LanguageChoice.One(code))
+            } else {
+                unknownLanguages.add(code)
             }
+        }
 
         val languages = mutableListOf<LanguageChoice>()
         languages.add(LanguageChoice.All)
