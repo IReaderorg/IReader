@@ -6,7 +6,10 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
@@ -15,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.DisplayMode.Companion.displayMode
@@ -54,8 +58,9 @@ internal fun LibraryPager(
     showLocalMangaBadge: Boolean = false,
     showLanguageBadge: Boolean = false,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
-
-    ) {
+    onSaveScrollPosition: (categoryId: Long, index: Int, offset: Int) -> Unit = { _, _, _ -> },
+    getScrollPosition: (categoryId: Long) -> Pair<Int, Int> = { 0 to 0 },
+) {
     // Pre-compute stable key function to avoid lambda recreation
     val stableKeyFunction = remember { { book: BookItem -> stableBookKey(book) } }
     
@@ -69,8 +74,36 @@ internal fun LibraryPager(
         key = { page -> categories.getOrNull(page)?.id ?: page },
         pageContent = { page ->
             val books by onPageChange(page)
-            val gridState = rememberLazyGridState()
-            val lazyListState = rememberLazyListState()
+            val categoryId = categories.getOrNull(page)?.id ?: 0L
+            
+            // Get saved scroll position for this category
+            val savedPosition = remember(categoryId) { getScrollPosition(categoryId) }
+            
+            val gridState = rememberLazyGridState(
+                initialFirstVisibleItemIndex = savedPosition.first,
+                initialFirstVisibleItemScrollOffset = savedPosition.second
+            )
+            val lazyListState = rememberLazyListState(
+                initialFirstVisibleItemIndex = savedPosition.first,
+                initialFirstVisibleItemScrollOffset = savedPosition.second
+            )
+            
+            // Save scroll position when it changes
+            LaunchedEffect(gridState, categoryId) {
+                snapshotFlow { 
+                    gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset 
+                }.collect { (index, offset) ->
+                    onSaveScrollPosition(categoryId, index, offset)
+                }
+            }
+            
+            LaunchedEffect(lazyListState, categoryId) {
+                snapshotFlow { 
+                    lazyListState.firstVisibleItemIndex to lazyListState.firstVisibleItemScrollOffset 
+                }.collect { (index, offset) ->
+                    onSaveScrollPosition(categoryId, index, offset)
+                }
+            }
             
             // Use derivedStateOf for display mode to minimize recompositions
             val displayMode by remember(page, categories) {

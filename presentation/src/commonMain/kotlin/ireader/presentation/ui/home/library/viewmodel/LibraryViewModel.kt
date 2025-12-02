@@ -250,6 +250,20 @@ class LibraryViewModel(
         }
     }
 
+    // ==================== Scroll Position ====================
+    
+    fun saveScrollPosition(categoryId: Long, index: Int, offset: Int) {
+        _state.update { current ->
+            current.copy(
+                categoryScrollPositions = current.categoryScrollPositions + (categoryId to (index to offset))
+            )
+        }
+    }
+    
+    fun getScrollPosition(categoryId: Long): Pair<Int, Int> {
+        return _state.value.categoryScrollPositions[categoryId] ?: (0 to 0)
+    }
+
     // ==================== Category Management ====================
     
     fun setSelectedPage(index: Int) {
@@ -445,12 +459,6 @@ class LibraryViewModel(
     
     fun toggleShowArchivedBooks(enabled: Boolean) {
         scope.launch { libraryPreferences.showArchivedBooks().set(enabled) }
-    }
-
-    // ==================== Scroll Position ====================
-    
-    fun saveScrollPosition(index: Int, offset: Int) {
-        _state.update { it.copy(savedScrollIndex = index, savedScrollOffset = offset) }
     }
 
     // ==================== Download Operations ====================

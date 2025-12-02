@@ -151,9 +151,15 @@ data class SentenceHighlightState(
  * 
  * Splits text into sentences (not smaller chunks) for natural reading flow
  * 
- * CALIBRATION: The first paragraph is used to measure actual TTS speed.
- * After the first paragraph completes, we calculate the real words-per-minute
- * and use that for accurate highlighting of subsequent paragraphs.
+ * ADAPTIVE CALIBRATION STRATEGY:
+ * Instead of relying on a single calibration from the first paragraph, we use
+ * a rolling average of actual paragraph durations to continuously improve accuracy.
+ * 
+ * Key improvements:
+ * 1. Higher default WPM (200) to avoid lagging behind
+ * 2. Lead factor (1.08x) to stay slightly ahead of speech
+ * 3. Rolling calibration that improves with each paragraph
+ * 4. Minimum duration reduced for short paragraphs
  * 
  * Optimizations:
  * - Pre-compiled regex patterns (static)
@@ -162,7 +168,13 @@ data class SentenceHighlightState(
  */
 object SentenceHighlighter {
     // Default words per minute for TTS at 1.0x speed
-    private const val DEFAULT_WORDS_PER_MINUTE = 170f
+    // Set to 200 WPM - most TTS engines read at 180-220 WPM
+    // Better to be slightly ahead than behind the actual speech
+    private const val DEFAULT_WORDS_PER_MINUTE = 200f
+    
+    // Lead factor to keep highlighter ahead of actual speech
+    // 1.08 = 8% faster, which provides a comfortable buffer
+    const val LEAD_FACTOR = 1.08f
     
     // Maximum words per sentence before splitting (keep sentences reasonably sized)
     private const val MAX_WORDS_PER_SENTENCE = 50
@@ -173,8 +185,24 @@ object SentenceHighlighter {
     private val WHITESPACE_PATTERN = Regex("\\s+")
     
     /**
+     * Check if a string contains only punctuation/whitespace (no actual words)
+     * TTS engines skip these, so they shouldn't affect timing
+     */
+    private fun isPunctuationOnly(text: String): Boolean {
+        if (text.isBlank()) return true
+        // Check if text has any letter or CJK character
+        for (char in text) {
+            if (char.isLetter() || char.code in 0x4E00..0x9FFF || char.code in 0x3040..0x30FF) {
+                return false
+            }
+        }
+        return true
+    }
+    
+    /**
      * Split text into sentences for highlighting
      * Only splits on sentence endings to keep chunks larger and more natural
+     * Filters out punctuation-only chunks that TTS engines skip
      */
     fun splitIntoSentences(text: String): List<String> {
         if (text.isBlank()) return emptyList()
@@ -186,15 +214,21 @@ object SentenceHighlighter {
         val result = ArrayList<String>(sentences.size)
         for (sentence in sentences) {
             val trimmed = sentence.trim()
-            if (trimmed.isEmpty()) continue
+            // Skip empty or punctuation-only chunks
+            if (trimmed.isEmpty() || isPunctuationOnly(trimmed)) continue
             
-            if (countWordsInternal(trimmed) > MAX_WORDS_PER_SENTENCE) {
+            val wordCount = countWordsInternal(trimmed)
+            // Skip chunks with no actual words
+            if (wordCount == 0) continue
+            
+            if (wordCount > MAX_WORDS_PER_SENTENCE) {
                 // Split long sentences by commas
                 val parts = trimmed.split(COMMA_PATTERN)
                 var addedAny = false
                 for (part in parts) {
                     val partTrimmed = part.trim()
-                    if (partTrimmed.isNotEmpty()) {
+                    // Only add parts that have actual words
+                    if (partTrimmed.isNotEmpty() && !isPunctuationOnly(partTrimmed) && countWordsInternal(partTrimmed) > 0) {
                         result.add(partTrimmed)
                         addedAny = true
                     }
@@ -208,18 +242,33 @@ object SentenceHighlighter {
         return if (result.isEmpty()) listOf(text.trim()) else result
     }
     
-    // Internal word count - avoids creating intermediate list
+    // Internal word count - counts only actual words, not punctuation
+    // A "word" must contain at least one letter or CJK character
     private fun countWordsInternal(text: String): Int {
         if (text.isEmpty()) return 0
         var count = 0
         var inWord = false
+        var hasLetterInCurrentWord = false
+        
         for (char in text) {
             if (char.isWhitespace()) {
+                // End of potential word - only count if it had letters
+                if (inWord && hasLetterInCurrentWord) {
+                    count++
+                }
                 inWord = false
-            } else if (!inWord) {
+                hasLetterInCurrentWord = false
+            } else {
                 inWord = true
-                count++
+                // Check if this character is a letter or CJK character (actual word content)
+                if (char.isLetter() || char.code in 0x4E00..0x9FFF || char.code in 0x3040..0x30FF) {
+                    hasLetterInCurrentWord = true
+                }
             }
+        }
+        // Don't forget the last word
+        if (inWord && hasLetterInCurrentWord) {
+            count++
         }
         return count
     }
@@ -248,16 +297,37 @@ object SentenceHighlighter {
      * @param chunk The text chunk to estimate
      * @param speechSpeed Current speech speed setting (e.g., 1.0, 1.5, 2.0)
      * @param calibratedWPM Calibrated words per minute (null = use default)
+     * 
+     * PUNCTUATION HANDLING:
+     * - Uses countWordsInternal which only counts actual words (not punctuation)
+     * - Adds small pauses for punctuation marks that TTS engines pause on
+     * - Sentence-ending punctuation gets longer pauses than mid-sentence punctuation
      */
     fun estimateSentenceDuration(chunk: String, speechSpeed: Float, calibratedWPM: Float? = null): Long {
-        val wordCount = countWords(chunk).coerceAtLeast(1)
-        // Use calibrated WPM if available, otherwise use default
+        // Use internal word count that ignores punctuation-only tokens
+        val wordCount = countWordsInternal(chunk).coerceAtLeast(1)
+        
+        // Use calibrated WPM if available, otherwise use default (200 WPM)
+        // Apply LEAD_FACTOR to keep highlighting slightly ahead of speech
         val baseWPM = calibratedWPM ?: DEFAULT_WORDS_PER_MINUTE
-        val wordsPerMinute = baseWPM * speechSpeed
+        val wordsPerMinute = baseWPM * speechSpeed * LEAD_FACTOR
         val durationMinutes = wordCount / wordsPerMinute
-        // Minimal pause between chunks
-        val pauseMs = if (chunk.endsWith(".") || chunk.endsWith("!") || chunk.endsWith("?") ||
-            chunk.endsWith("。") || chunk.endsWith("！") || chunk.endsWith("？")) 30 else 10
+        
+        // Calculate pause time based on punctuation
+        // TTS engines add pauses for punctuation, but we want to stay ahead
+        // so we use minimal pause estimates (divided by speechSpeed for faster speech)
+        val basePauseMs = when {
+            // Sentence-ending punctuation - longer pause
+            chunk.endsWith(".") || chunk.endsWith("!") || chunk.endsWith("?") ||
+            chunk.endsWith("。") || chunk.endsWith("！") || chunk.endsWith("？") -> 12
+            // Mid-sentence punctuation (comma, semicolon, colon) - shorter pause
+            chunk.contains(",") || chunk.contains("，") || 
+            chunk.contains(";") || chunk.contains("；") ||
+            chunk.contains(":") || chunk.contains("：") -> 5
+            else -> 2
+        }
+        val pauseMs = (basePauseMs / speechSpeed).toLong().coerceAtLeast(1)
+        
         return (durationMinutes * 60 * 1000).toLong() + pauseMs
     }
     
@@ -475,10 +545,14 @@ fun TTSContentDisplay(
     val speechSpeedRef = rememberUpdatedState(state.speechSpeed)
     val paragraphStartTimeRef = rememberUpdatedState(paragraphStartTime)
     
-    // ULTIMATE BRILLIANT FIX: Use paragraphStartTime as a CHANGE SIGNAL
+    // BRILLIANT SYNC STRATEGY: Paragraph-boundary correction
     // When it changes, we know TTS has started speaking - capture local time at that moment
     var localStartTime by remember { mutableStateOf(0L) }
     var lastSignal by remember { mutableStateOf(0L) }
+    // Track the last paragraph we were on to detect paragraph completion
+    var lastParagraphIndex by remember { mutableStateOf(-1) }
+    // Dynamic speed multiplier - increases when we detect we're falling behind
+    var dynamicSpeedBoost by remember { mutableStateOf(1.0f) }
     
     // This is the KEY: Reset local timer when paragraphStartTime changes (TTS.onStart fired)
     // paragraphStartTime is updated in TTSService.onStart() - the exact moment TTS begins speaking
@@ -487,19 +561,33 @@ fun TTSContentDisplay(
             currentSentenceIndex = 0
             localStartTime = System.currentTimeMillis()  // Capture LOCAL time NOW
             lastSignal = paragraphStartTime
+            dynamicSpeedBoost = 1.0f  // Reset speed boost for new paragraph
         }
     }
     
-    // Also reset when paragraph changes (for manual navigation)
+    // BRILLIANT: Detect when paragraph changes and use it to correct our timing
+    // If we weren't at the last sentence when paragraph changed, we were too slow
     LaunchedEffect(state.currentReadingParagraph) {
-        if (highlightEnabled) {
+        if (highlightEnabled && lastParagraphIndex >= 0 && lastParagraphIndex != state.currentReadingParagraph) {
+            val sentences = sentencesRef.value
+            // If we weren't at the last sentence, increase speed boost for next paragraph
+            if (sentences.isNotEmpty() && currentSentenceIndex < sentences.lastIndex) {
+                // We were behind! Increase speed boost (up to 1.3x)
+                dynamicSpeedBoost = (dynamicSpeedBoost * 1.1f).coerceAtMost(1.3f)
+            } else if (currentSentenceIndex >= sentences.lastIndex) {
+                // We were on track or ahead, slightly reduce boost
+                dynamicSpeedBoost = (dynamicSpeedBoost * 0.95f).coerceAtLeast(1.0f)
+            }
             currentSentenceIndex = 0
-            // Only reset local time if we're playing (TTS will send signal via paragraphStartTime)
-            // If not playing, we don't need timing
         }
+        lastParagraphIndex = state.currentReadingParagraph
     }
     
-    // Main highlighting loop
+    // Main highlighting loop with ADAPTIVE SPEED
+    // Key innovations:
+    // 1. LEAD_FACTOR keeps us slightly ahead
+    // 2. dynamicSpeedBoost corrects based on actual paragraph completion timing
+    // 3. Accelerated catch-up when approaching paragraph end
     LaunchedEffect(highlightEnabled) {
         if (!highlightEnabled) return@LaunchedEffect
         
@@ -508,11 +596,27 @@ fun TTSContentDisplay(
                 val sentences = sentencesRef.value
                 if (sentences.isNotEmpty()) {
                     val words = totalWordsRef.value
-                    val wpm = ((calibratedWPMRef.value ?: 170f) * speechSpeedRef.value).coerceAtLeast(50f)
-                    val durationMs = ((words.toFloat() / wpm) * 60000).toLong().coerceIn(2000, 120000)
+                    // Use calibrated WPM if available, otherwise use default (200 WPM)
+                    // Apply LEAD_FACTOR + dynamicSpeedBoost for adaptive timing
+                    val baseWpm = calibratedWPMRef.value ?: 200f
+                    val effectiveLeadFactor = SentenceHighlighter.LEAD_FACTOR * dynamicSpeedBoost
+                    val wpm = (baseWpm * speechSpeedRef.value * effectiveLeadFactor).coerceAtLeast(100f)
+                    
+                    // Calculate expected duration with reduced minimum for short paragraphs
+                    val minDuration = if (words < 10) 400L else 600L
+                    val durationMs = ((words.toFloat() / wpm) * 60000).toLong().coerceIn(minDuration, 120000)
                     
                     val elapsed = System.currentTimeMillis() - localStartTime
-                    val progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 0.99f)
+                    var progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 0.999f)
+                    
+                    // CATCH-UP ACCELERATION: If we're past 70% of estimated time but not past 70% of sentences,
+                    // accelerate to catch up (this handles cases where TTS is faster than expected)
+                    val sentenceProgress = currentSentenceIndex.toFloat() / sentences.size.coerceAtLeast(1)
+                    if (progress > 0.7f && sentenceProgress < 0.6f) {
+                        // We're behind! Boost progress to catch up
+                        progress = (progress * 1.15f).coerceAtMost(0.999f)
+                    }
+                    
                     val newIndex = (progress * sentences.size).toInt().coerceIn(0, sentences.lastIndex)
                     
                     if (newIndex != currentSentenceIndex) {
@@ -520,7 +624,7 @@ fun TTSContentDisplay(
                     }
                 }
             }
-            delay(100)
+            delay(60)  // Faster polling (60ms) for smoother, more responsive highlighting
         }
     }
     

@@ -95,9 +95,8 @@ data class LibraryScreenState(
     // Error
     val error: UiText? = null,
     
-    // Scroll position
-    val savedScrollIndex: Int = 0,
-    val savedScrollOffset: Int = 0,
+    // Scroll positions per category (categoryId -> (index, offset))
+    val categoryScrollPositions: Map<Long, Pair<Int, Int>> = emptyMap(),
     
     // Dialog state
     val dialog: LibraryDialog? = null,

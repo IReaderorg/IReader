@@ -80,7 +80,12 @@ internal fun LibraryContent(
             showLocalMangaBadge = vm.showLocalMangaBadge.value,
             showLanguageBadge = vm.showLanguageBadge.value,
             getColumnsForOrientation = getColumnsForOrientation,
-
+            onSaveScrollPosition = { categoryId, index, offset ->
+                vm.saveScrollPosition(categoryId, index, offset)
+            },
+            getScrollPosition = { categoryId ->
+                vm.getScrollPosition(categoryId)
+            }
         )
     }
 }

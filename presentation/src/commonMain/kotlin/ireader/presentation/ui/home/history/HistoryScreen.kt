@@ -83,6 +83,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -172,8 +173,21 @@ fun HistoryScreen(
     val dateFilter = state.dateFilter
     
     val scope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
+    // Restore scroll position from ViewModel
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = state.savedScrollIndex,
+        initialFirstVisibleItemScrollOffset = state.savedScrollOffset
+    )
     val searchFocusRequester = remember { FocusRequester() }
+    
+    // Save scroll position when it changes
+    LaunchedEffect(listState) {
+        snapshotFlow { 
+            listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset 
+        }.collect { (index, offset) ->
+            vm.saveScrollPosition(index, offset)
+        }
+    }
     val localizeHelper = requireNotNull<ireader.i18n.LocalizeHelper>(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
     // Memoize click handlers to prevent unnecessary recompositions
@@ -762,17 +776,10 @@ fun HistoryItem(
         )
     )
 
-    // Animation for entering items
-    val animatedProgress = remember { Animatable(initialValue = 0f) }
-    LaunchedEffect(key1 = history.id) {
-        animatedProgress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(300, easing = EaseOutQuad)
-        )
-    }
-    
-    val scale by animatedProgress.asState()
-    val alpha by animatedProgress.asState()
+    // No entry animation - items appear instantly for better performance
+    // when navigating back to this screen
+    val scale = 1f
+    val alpha = 1f
     
     SwipeToDismissBox(
         state = dismissState,

@@ -159,16 +159,11 @@ fun LibraryScreen(
                 )
             }
             
-            // Screen state rendering
-            Crossfade(
-                targetState = screenState,
-                animationSpec = tween(durationMillis = 300)
-            ) { currentState ->
-                when (currentState) {
-                    ScreenState.Loading -> LoadingScreen()
-                    ScreenState.Empty -> EmptyScreen(text = localize(Res.string.empty_library))
-                    ScreenState.Content -> { /* Content rendered above */ }
-                }
+            // Screen state rendering - no animation for instant display when navigating back
+            when (screenState) {
+                ScreenState.Loading -> LoadingScreen()
+                ScreenState.Empty -> EmptyScreen(text = localize(Res.string.empty_library))
+                ScreenState.Content -> { /* Content rendered above */ }
             }
 
             // Selection bar

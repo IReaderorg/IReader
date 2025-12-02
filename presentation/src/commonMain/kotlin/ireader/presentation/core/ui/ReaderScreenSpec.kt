@@ -351,11 +351,16 @@ data class ReaderScreenSpec(
                                             false
                                         )
 
-                                        if (vm.readingMode.value == ReadingMode.Page && !reset) {
-                                            scrollState.scrollTo(scrollState.maxValue)
-                                        }
-                                        if (vm.readingMode.value == ReadingMode.Continues) {
-                                            lazyListState.scrollToItem(1)
+                                        // Always scroll to end of previous chapter (last part)
+                                        when (vm.readingMode.value) {
+                                            ReadingMode.Page -> {
+                                                // Wait for content to load then scroll to end
+                                                delay(100)
+                                                scrollState.scrollTo(scrollState.maxValue)
+                                            }
+                                            ReadingMode.Continues -> {
+                                                lazyListState.scrollToItem(1)
+                                            }
                                         }
                                     }
                                 } else {

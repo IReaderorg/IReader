@@ -260,37 +260,45 @@ class TTSScreenSpec(
             }
         }
         
-        // TTS Speed Calibration - measure actual TTS speed from first paragraph
+        // TTS Speed Calibration - ROLLING AVERAGE approach
+        // Instead of calibrating once, we continuously improve accuracy with each paragraph
         var calibratedWPM by remember { mutableStateOf<Float?>(null) }
         var isCalibrated by remember { mutableStateOf(false) }
-        var firstParagraphStartTime by remember { mutableStateOf(0L) }
-        var firstParagraphWordCount by remember { mutableStateOf(0) }
+        var lastParagraphStartTime by remember { mutableStateOf(0L) }
+        var lastParagraphWordCount by remember { mutableStateOf(0) }
+        var lastParagraphIndex by remember { mutableStateOf(-1) }
+        // Rolling average: keep last 3 WPM measurements for stability
+        var wpmHistory by remember { mutableStateOf(listOf<Float>()) }
         
-        // Track when first paragraph starts for calibration
-        LaunchedEffect(paragraphSpeakingStartTime, isPlaying) {
-            if (content.isNotEmpty() && isPlaying && !isCalibrated && currentParagraph == 0 && paragraphSpeakingStartTime > 0) {
-                if (firstParagraphStartTime == 0L) {
-                    firstParagraphStartTime = paragraphSpeakingStartTime
-                    firstParagraphWordCount = SentenceHighlighter.countTotalWords(content[0])
+        // Track when each paragraph starts for calibration
+        LaunchedEffect(paragraphSpeakingStartTime, currentParagraph, isPlaying) {
+            if (content.isNotEmpty() && isPlaying && paragraphSpeakingStartTime > 0) {
+                // When a new paragraph starts, calculate WPM from the previous one
+                if (lastParagraphIndex >= 0 && lastParagraphIndex != currentParagraph && 
+                    lastParagraphStartTime > 0 && lastParagraphWordCount > 0) {
+                    
+                    val paragraphDuration = paragraphSpeakingStartTime - lastParagraphStartTime
+                    // Only use measurements from paragraphs that took reasonable time
+                    if (paragraphDuration > 300 && paragraphDuration < 60000) {
+                        val measuredWPM = SentenceHighlighter.calculateCalibratedWPM(
+                            lastParagraphWordCount,
+                            paragraphDuration,
+                            speechSpeed
+                        )
+                        // Add to history, keep last 3 measurements
+                        wpmHistory = (wpmHistory + measuredWPM).takeLast(3)
+                        // Use average of measurements for stability
+                        calibratedWPM = wpmHistory.average().toFloat()
+                        isCalibrated = true
+                    }
                 }
-            }
-        }
-        
-        // Handle calibration when paragraph changes
-        LaunchedEffect(currentParagraph, paragraphSpeakingStartTime) {
-            // Calibrate when first paragraph completes (paragraph changes from 0 to 1+)
-            if (currentParagraph >= 1 && !isCalibrated && firstParagraphWordCount > 0 && firstParagraphStartTime > 0) {
-                // Calculate how long the first paragraph took using the actual speaking start time
-                val firstParagraphDuration = paragraphSpeakingStartTime - firstParagraphStartTime
-                // Only calibrate if we have reasonable data (at least 500ms)
-                if (firstParagraphDuration > 500) {
-                    calibratedWPM = SentenceHighlighter.calculateCalibratedWPM(
-                        firstParagraphWordCount,
-                        firstParagraphDuration,
-                        speechSpeed
-                    )
-                    isCalibrated = true
-                }
+                
+                // Record current paragraph info for next calibration
+                lastParagraphIndex = currentParagraph
+                lastParagraphStartTime = paragraphSpeakingStartTime
+                lastParagraphWordCount = if (currentParagraph < content.size) {
+                    SentenceHighlighter.countTotalWords(content[currentParagraph])
+                } else 0
             }
         }
         
@@ -298,8 +306,10 @@ class TTSScreenSpec(
         LaunchedEffect(chapterId) {
             calibratedWPM = null
             isCalibrated = false
-            firstParagraphStartTime = 0L
-            firstParagraphWordCount = 0
+            lastParagraphStartTime = 0L
+            lastParagraphWordCount = 0
+            lastParagraphIndex = -1
+            wpmHistory = emptyList()
         }
         
         // Sentence highlighting preference

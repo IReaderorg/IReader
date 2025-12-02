@@ -20,6 +20,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.key
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -282,6 +284,9 @@ private class TabClickHandlers(
 /**
  * Persistent tab container - tabs are initialized on first visit and kept in memory.
  * Shows shimmer loading while tab content is being initialized.
+ * 
+ * Uses movableContentOf to preserve composition state across recompositions,
+ * which helps maintain scroll positions and loaded content when navigating back.
  */
 @Composable
 private fun PersistentTabContainer(
@@ -289,65 +294,85 @@ private fun PersistentTabContainer(
     visitedTabs: Set<Int>,
     showUpdates: Boolean
 ) {
+    // Create movable content for each tab - this preserves state across recompositions
+    val libraryContent = remember { movableContentOf { AppTab.Library.Content() } }
+    val updatesContent = remember { movableContentOf { AppTab.Updates.Content() } }
+    val historyContent = remember { movableContentOf { AppTab.History.Content() } }
+    val extensionsContent = remember { movableContentOf { AppTab.Extensions.Content() } }
+    val moreContent = remember { movableContentOf { AppTab.More.Content() } }
+    
     // Library tab (index 0) - always initialized
-    TabSlot(
-        tabIndex = 0,
-        isVisible = currentTabIndex == 0,
-        isInitialized = 0 in visitedTabs,
-        shimmerContent = { LibraryShimmerLoading() }
-    ) {
-        AppTab.Library.Content()
+    key("tab_library") {
+        TabSlot(
+            tabIndex = 0,
+            isVisible = currentTabIndex == 0,
+            isInitialized = 0 in visitedTabs,
+            shimmerContent = { LibraryShimmerLoading() }
+        ) {
+            libraryContent()
+        }
     }
     
     // Updates tab (index 1)
     if (showUpdates) {
-        TabSlot(
-            tabIndex = 1,
-            isVisible = currentTabIndex == 1,
-            isInitialized = 1 in visitedTabs,
-            shimmerContent = { UpdatesShimmerLoading() }
-        ) {
-            AppTab.Updates.Content()
+        key("tab_updates") {
+            TabSlot(
+                tabIndex = 1,
+                isVisible = currentTabIndex == 1,
+                isInitialized = 1 in visitedTabs,
+                shimmerContent = { UpdatesShimmerLoading() }
+            ) {
+                updatesContent()
+            }
         }
     }
     
     // History tab (index 2)
     if (showUpdates) {
-        TabSlot(
-            tabIndex = 2,
-            isVisible = currentTabIndex == 2,
-            isInitialized = 2 in visitedTabs,
-            shimmerContent = { HistoryShimmerLoading() }
-        ) {
-            AppTab.History.Content()
+        key("tab_history") {
+            TabSlot(
+                tabIndex = 2,
+                isVisible = currentTabIndex == 2,
+                isInitialized = 2 in visitedTabs,
+                shimmerContent = { HistoryShimmerLoading() }
+            ) {
+                historyContent()
+            }
         }
     }
     
     // Extensions tab (index 3)
-    TabSlot(
-        tabIndex = 3,
-        isVisible = currentTabIndex == 3,
-        isInitialized = 3 in visitedTabs,
-        shimmerContent = { ExtensionsShimmerLoading() }
-    ) {
-        AppTab.Extensions.Content()
+    key("tab_extensions") {
+        TabSlot(
+            tabIndex = 3,
+            isVisible = currentTabIndex == 3,
+            isInitialized = 3 in visitedTabs,
+            shimmerContent = { ExtensionsShimmerLoading() }
+        ) {
+            extensionsContent()
+        }
     }
     
     // More tab (index 4)
-    TabSlot(
-        tabIndex = 4,
-        isVisible = currentTabIndex == 4,
-        isInitialized = 4 in visitedTabs,
-        shimmerContent = { SettingsShimmerLoading() }
-    ) {
-        AppTab.More.Content()
+    key("tab_more") {
+        TabSlot(
+            tabIndex = 4,
+            isVisible = currentTabIndex == 4,
+            isInitialized = 4 in visitedTabs,
+            shimmerContent = { SettingsShimmerLoading() }
+        ) {
+            moreContent()
+        }
     }
 }
 
 /**
  * Individual tab slot - lazy initialization with shimmer loading.
  * Shows shimmer while content is being initialized, then fades to actual content.
- * Hidden tabs are moved off-screen to prevent touch interception.
+ * Hidden tabs use alpha=0 and are disabled for touch to prevent interaction.
+ * 
+ * Key optimization: Content is always composed once initialized (not removed from tree)
+ * to preserve scroll positions, loaded images, and other UI state.
  */
 @Composable
 private inline fun TabSlot(
@@ -357,22 +382,41 @@ private inline fun TabSlot(
     crossinline shimmerContent: @Composable () -> Unit,
     crossinline content: @Composable () -> Unit
 ) {
+    // Only compose content if initialized - this is the key optimization
+    // Once initialized, content stays in composition tree (just hidden)
+    if (!isInitialized && !isVisible) {
+        // Not initialized and not visible - don't compose anything
+        return
+    }
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
             .graphicsLayer {
-                // Visible: normal rendering
-                // Hidden: move off-screen to prevent touch interception
+                // Use alpha for visibility - keeps content in composition tree
                 alpha = if (isVisible) 1f else 0f
-                translationX = if (isVisible) 0f else 10000f
             }
+            // Disable touch when hidden (more reliable than translationX)
+            .then(
+                if (!isVisible) {
+                    Modifier.graphicsLayer { 
+                        // Move slightly off-screen to prevent any touch issues
+                        translationY = -10000f 
+                    }
+                } else {
+                    Modifier
+                }
+            )
     ) {
-        if (isVisible && !isInitialized) {
-            // Show shimmer while waiting for initialization
-            shimmerContent()
-        } else if (isInitialized) {
-            // Show actual content
-            content()
+        when {
+            isVisible && !isInitialized -> {
+                // Show shimmer while waiting for initialization
+                shimmerContent()
+            }
+            isInitialized -> {
+                // Show actual content - this stays composed even when hidden
+                content()
+            }
         }
     }
 }
