@@ -91,6 +91,9 @@ sealed interface ReaderState {
         val showBrightnessControl: Boolean = false,
         val showFontSizeAdjuster: Boolean = false,
         val showFontPicker: Boolean = false,
+        
+        // Scroll target when chapter changes (null = start, true = end)
+        val scrollToEndOnChapterChange: Boolean = false,
     ) : ReaderState {
         
         /**

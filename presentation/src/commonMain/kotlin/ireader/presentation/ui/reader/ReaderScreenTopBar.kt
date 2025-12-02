@@ -13,14 +13,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BrightnessHigh
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,9 +31,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.aa
 import ireader.i18n.resources.bookmark
-import ireader.i18n.resources.brightness
 import ireader.i18n.resources.expand_menu
 import ireader.i18n.resources.find_in_chapter
 import ireader.i18n.resources.refresh
@@ -141,22 +137,6 @@ fun ReaderScreenTopBar(
                             contentDescription = localizeHelper.localize(Res.string.report_broken_chapter),
                             onClick = { vm.toggleReportDialog() }
                         )
-                        AppIconButton(
-                            imageVector = Icons.Default.BrightnessHigh,
-                            contentDescription = localizeHelper.localize(Res.string.brightness),
-                            onClick = { vm.showBrightnessControl = !vm.showBrightnessControl }
-                        )
-                        // Font size quick adjuster button
-                        IconButton(
-                            onClick = { vm.showFontSizeAdjuster = !vm.showFontSizeAdjuster }
-                        ) {
-                            Text(
-                                text = localizeHelper.localize(Res.string.aa),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
                         if (!vm.webViewIntegration.value) {
                             AppIconButton(
                                 imageVector = Icons.Default.Public,

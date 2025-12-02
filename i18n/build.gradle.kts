@@ -81,11 +81,18 @@ val buildTime: Provider<String> = provider {
     df.format(Date())
 }
 
+// Detect if this is a release build based on Gradle task names
+val isReleaseBuild: Boolean = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("release", ignoreCase = true) || 
+    taskName.contains("Release") ||
+    taskName.contains("assemble") && !taskName.contains("debug", ignoreCase = true)
+}
+
 buildkonfig {
     packageName = "ireader.i18n"
     exposeObjectWithName = "BuildKonfig"
     defaultConfigs {
-        buildConfigField(BOOLEAN, "DEBUG", "true")
+        buildConfigField(BOOLEAN, "DEBUG", isReleaseBuild.not().toString())
         buildConfigField(STRING, "COMMIT_COUNT", "\"${commitCount.get()}\"")
         buildConfigField(STRING, "COMMIT_SHA", "\"${gitSha.get()}\"")
         buildConfigField(STRING, "BUILD_TIME", "\"${buildTime.get()}\"")

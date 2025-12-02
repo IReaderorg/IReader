@@ -286,12 +286,16 @@ fun MultiSwipeRefresh(
         enabledIndicators.forEach { indicator ->
             Box(
                 Modifier
-                    .let { if (!clipIndicatorToPadding) it.clipToBounds() else it }
+                    .clipToBounds()
                     .padding(indicatorPadding)
                     .matchParentSize()
-                    .let { if (clipIndicatorToPadding) it.clipToBounds() else it }
+                    .clipToBounds()
             ) {
-                Box(Modifier.align(indicator.alignment)) {
+                Box(
+                    Modifier
+                        .align(indicator.alignment)
+                        .clipToBounds()
+                ) {
                     indicator.indicator(state, refreshTriggerDistance)
                 }
             }

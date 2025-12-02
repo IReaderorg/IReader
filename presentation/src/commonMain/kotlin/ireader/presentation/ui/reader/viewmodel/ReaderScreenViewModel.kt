@@ -371,7 +371,11 @@ class ReaderScreenViewModel(
             isMainBottomModeEnabled = previousSuccessState?.isMainBottomModeEnabled ?: false,
             showSettingsBottomSheet = previousSuccessState?.showSettingsBottomSheet ?: false,
             isDrawerAsc = previousSuccessState?.isDrawerAsc ?: true,
+            // When navigating to previous chapter (next=false), scroll to end
+            scrollToEndOnChapterChange = !next,
         )
+        
+        Log.debug { "loadChapter: chapterId=${chapter.id}, next=$next, scrollToEndOnChapterChange=${!next}" }
 
         // Fetch remote content if needed
         val needsRemoteFetch = chapter.isEmpty() && catalog?.source != null
@@ -930,17 +934,14 @@ class ReaderScreenViewModel(
     val autoScrollOffset get() = settingsViewModel.autoScrollOffset
     val autoScrollInterval get() = settingsViewModel.autoScrollInterval
     
-    // Brightness delegations
-    var showBrightnessControl: Boolean
-        get() = settingsViewModel.showBrightnessControl
-        set(value) { settingsViewModel.showBrightnessControl = value }
-    var showFontSizeAdjuster: Boolean
-        get() = settingsViewModel.showFontSizeAdjuster
-        set(value) { settingsViewModel.showFontSizeAdjuster = value }
-    
     // UI state from sealed state
     val isReaderModeEnable: Boolean
         get() = (_state.value as? ReaderState.Success)?.isReaderModeEnabled ?: true
+    
+    // Scroll target when chapter changes (true = scroll to end, false = scroll to start)
+    var scrollToEndOnChapterChange: Boolean
+        get() = (_state.value as? ReaderState.Success)?.scrollToEndOnChapterChange ?: false
+        set(value) { updateSuccessState { it.copy(scrollToEndOnChapterChange = value) } }
     
     var showSettingsBottomSheet: Boolean
         get() = (_state.value as? ReaderState.Success)?.showSettingsBottomSheet ?: false

@@ -10,14 +10,12 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BrightnessHigh
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,14 +24,19 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
-import ireader.presentation.ui.component.components.Toolbar
+import ireader.i18n.resources.bookmark
+import ireader.i18n.resources.expand_menu
+import ireader.i18n.resources.find_in_chapter
+import ireader.i18n.resources.refresh
+import ireader.i18n.resources.report_broken_chapter
+import ireader.i18n.resources.webView
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.components.TTSButton
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Desktop-specific reader top bar with TTS button
@@ -112,26 +115,6 @@ fun DesktopReaderScreenTopBar(
                                 vm.toggleReportDialog()
                             }
                         )
-                        AppIconButton(
-                            imageVector = Icons.Default.BrightnessHigh,
-                            contentDescription = localizeHelper.localize(Res.string.brightness),
-                            onClick = {
-                                vm.showBrightnessControl = !vm.showBrightnessControl
-                            }
-                        )
-                        // Font size quick adjuster button
-                        IconButton(
-                            onClick = {
-                                vm.showFontSizeAdjuster = !vm.showFontSizeAdjuster
-                            }
-                        ) {
-                            Text(
-                                text = localizeHelper.localize(Res.string.aa),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
                         if (!vm.webViewIntegration.value) {
                             AppIconButton(
                                 imageVector = Icons.Default.Public,

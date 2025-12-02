@@ -82,6 +82,7 @@ fun GeneralSettingScreen(
                             title = localizeHelper.localize(
                                     Res.string.languages
                             ),
+                            icon = Icons.Filled.Language,
                             onValue = { value: String ->
                                 vm.language.value = value
                                 vm.localeHelper.updateLocal()

@@ -12,15 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
-import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -29,10 +26,10 @@ import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.RecordVoiceOver
@@ -48,7 +45,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -72,14 +68,34 @@ import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.DesktopTTSService
 import ireader.domain.services.tts_service.GradioTTSConfig
 import ireader.domain.services.tts_service.GradioTTSPresets
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.add_custom_tts_engine
+import ireader.i18n.resources.available_engines
+import ireader.i18n.resources.custom
+import ireader.i18n.resources.downloaded
+import ireader.i18n.resources.gradio_tts_online
+import ireader.i18n.resources.hello_this_is_a_test
+import ireader.i18n.resources.high_quality_offline_neural_voices
+import ireader.i18n.resources.install_and_configure_text_to
+import ireader.i18n.resources.installation_in_progress_this_may
+import ireader.i18n.resources.installation_log
+import ireader.i18n.resources.manage_piper_voices
+import ireader.i18n.resources.manage_tts_engines
+import ireader.i18n.resources.need_help
+import ireader.i18n.resources.performance
+import ireader.i18n.resources.piper_requires_native_libraries_provided
+import ireader.i18n.resources.piper_tts_voices
+import ireader.i18n.resources.support_for_any_gradio_based_tts_engine
+import ireader.i18n.resources.test
+import ireader.i18n.resources.tts_engine_manager
+import ireader.i18n.resources.uninstall
+import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
+import ireader.presentation.ui.core.modifier.supportDesktopScroll
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.GradioConfigEditDialog
-import ireader.presentation.ui.settings.components.GradioTTSSection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
 
 /**
  * TTS Engine Manager Screen

@@ -150,6 +150,10 @@ class DesktopTTSStateAdapter(
     override val previousParagraph: StateFlow<Int>
         get() = desktopState.previousReadingParagraph
     
+    // Timestamp when TTS actually starts speaking current paragraph (for highlighter sync)
+    private val _paragraphSpeakingStartTime = MutableStateFlow(0L)
+    override val paragraphSpeakingStartTime: StateFlow<Long> = _paragraphSpeakingStartTime.asStateFlow()
+    
     // Derived state flows
     private val _totalParagraphs = MutableStateFlow(0)
     override val totalParagraphs: StateFlow<Int> = _totalParagraphs.asStateFlow()

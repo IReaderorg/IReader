@@ -238,87 +238,35 @@ fun ImageLoaderImage(
                 }
             )
             
-            // On low-end devices, skip animation entirely for faster rendering
-            val useAnimation = animationSpec != null && performanceConfig.enableComplexAnimations
-            
-            if (useAnimation) {
-                Crossfade(loadingState, animationSpec = animationSpec!!) { state ->
-                    when (state) {
-                        ImageLoaderImageState.Loading -> {
-                            // Show placeholder on low-end, shimmer on high-end
-                            if (performanceConfig.enableImagePlaceholder && onLoading != null) {
-                                onLoading(progress.value)
-                            } else {
-                                // Simple color placeholder for low-end
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color(0x1F888888))
-                                )
-                            }
-                            // Still show the image during loading so it appears when cached
-                            Image(
-                                painter = painter,
-                                contentDescription = contentDescription,
-                                modifier = Modifier.fillMaxSize(),
-                                alignment = alignment,
-                                contentScale = contentScale,
-                                alpha = alpha,
-                                colorFilter = colorFilter,
-                            )
-                        }
-
-                        ImageLoaderImageState.Success -> {
-                            onSuccess()
-                            Image(
-                                painter = painter,
-                                contentDescription = contentDescription,
-                                modifier = Modifier.fillMaxSize(),
-                                alignment = alignment,
-                                contentScale = contentScale,
-                                alpha = alpha,
-                                colorFilter = colorFilter,
-                            )
-                        }
-
-                        ImageLoaderImageState.Failure -> {
-                            if (onFailure != null) {
-                                onFailure(error.value ?: return@Crossfade)
-                            }
-                        }
+            // Always render the image directly - no Crossfade animation
+            // This prevents the "loading" feel when navigating back to cached screens
+            when (loadingState) {
+                ImageLoaderImageState.Loading -> {
+                    // Show placeholder only if enabled
+                    if (performanceConfig.enableImagePlaceholder && onLoading != null) {
+                        onLoading(progress.value)
                     }
                 }
-            } else {
-                // No animation - direct rendering for low-end devices
-                when (loadingState) {
-                    ImageLoaderImageState.Loading -> {
-                        // Simple placeholder
-                        if (!performanceConfig.enableImagePlaceholder) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color(0x1F888888))
-                            )
-                        }
+                ImageLoaderImageState.Failure -> {
+                    if (onFailure != null) {
+                        onFailure(error.value ?: Exception("Unknown error"))
                     }
-                    ImageLoaderImageState.Failure -> {
-                        if (onFailure != null) {
-                            onFailure(error.value ?: Exception("Unknown error"))
-                        }
-                    }
-                    else -> {}
                 }
-                // Always render the image
-                Image(
-                    painter = painter,
-                    contentDescription = contentDescription,
-                    modifier = Modifier.fillMaxSize(),
-                    alignment = alignment,
-                    contentScale = contentScale,
-                    alpha = alpha,
-                    colorFilter = colorFilter
-                )
+                ImageLoaderImageState.Success -> {
+                    onSuccess()
+                }
             }
+            
+            // Always render the image - it will show immediately when cached
+            Image(
+                painter = painter,
+                contentDescription = contentDescription,
+                modifier = Modifier.fillMaxSize(),
+                alignment = alignment,
+                contentScale = contentScale,
+                alpha = alpha,
+                colorFilter = colorFilter
+            )
         }
     }
 }

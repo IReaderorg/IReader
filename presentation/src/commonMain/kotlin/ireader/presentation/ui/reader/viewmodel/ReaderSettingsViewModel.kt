@@ -240,6 +240,8 @@ class ReaderSettingsViewModel(
             val txtColor = theme.onTextColor
             setReaderBackgroundColor(bgColor.toComposeColor())
             setReaderTextColor(txtColor.toComposeColor())
+            // Update the readerTheme preference so the checkmark updates
+            androidUiPreferences.readerTheme().set(theme)
         }
     }
     

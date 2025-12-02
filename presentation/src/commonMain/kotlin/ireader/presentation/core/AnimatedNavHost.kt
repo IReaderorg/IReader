@@ -1,7 +1,13 @@
 package ireader.presentation.core
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -16,7 +23,7 @@ import androidx.navigation.compose.NavHost
 /**
  * Animated NavHost with beautiful transitions for both Android and Desktop platforms.
  * 
- * Provides consistent slide and fade animations across all navigation actions.
+ * Provides smooth slide-in animations combined with fade for polished navigation.
  * Enhanced with persistent background to eliminate white flashes.
  */
 @OptIn(ExperimentalAnimationApi::class)
@@ -28,6 +35,15 @@ fun AnimatedNavHost(
     backgroundColor: Color = MaterialTheme.colorScheme.background,
     builder: NavGraphBuilder.() -> Unit
 ) {
+    val slideAnimationSpec: FiniteAnimationSpec<IntOffset> = tween(
+        durationMillis = 300,
+        easing = FastOutSlowInEasing
+    )
+    val fadeAnimationSpec: FiniteAnimationSpec<Float> = tween(
+        durationMillis = 300,
+        easing = FastOutSlowInEasing
+    )
+    
     // Persistent background to prevent white flashes
     Box(
         modifier = modifier
@@ -39,17 +55,32 @@ fun AnimatedNavHost(
             startDestination = startDestination,
             modifier = Modifier.fillMaxSize(),
             enterTransition = {
-                // Simple crossfade
-                fadeIn(animationSpec = tween(200))
+                // Slide in from right + fade in
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth / 4 },
+                    animationSpec = slideAnimationSpec
+                ) + fadeIn(animationSpec = fadeAnimationSpec)
             },
             exitTransition = {
-                fadeOut(animationSpec = tween(200))
+                // Slide out to left + fade out
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> -fullWidth / 4 },
+                    animationSpec = slideAnimationSpec
+                ) + fadeOut(animationSpec = fadeAnimationSpec)
             },
             popEnterTransition = {
-                fadeIn(animationSpec = tween(200))
+                // Slide in from left + fade in (going back)
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> -fullWidth / 4 },
+                    animationSpec = slideAnimationSpec
+                ) + fadeIn(animationSpec = fadeAnimationSpec)
             },
             popExitTransition = {
-                fadeOut(animationSpec = tween(200))
+                // Slide out to right + fade out (going back)
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> fullWidth / 4 },
+                    animationSpec = slideAnimationSpec
+                ) + fadeOut(animationSpec = fadeAnimationSpec)
             },
             builder = builder
         )

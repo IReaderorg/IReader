@@ -25,7 +25,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -37,20 +36,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil3.compose.LocalPlatformContext
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.reader.components.AutoScrollSpeedControl
-import ireader.presentation.ui.reader.components.BrightnessControl
 import ireader.presentation.ui.reader.components.FindInChapterBar
 import ireader.presentation.ui.reader.components.FindInChapterState
 import ireader.presentation.ui.reader.components.GlossaryDialogWithFilePickers
 import ireader.presentation.ui.reader.components.MainBottomSettingComposable
 import ireader.presentation.ui.reader.components.PreloadIndicator
-import ireader.presentation.ui.reader.components.QuickFontSizeAdjuster
 import ireader.presentation.ui.reader.components.ReaderSettingsBottomSheet
 import ireader.presentation.ui.reader.components.ReadingTimeEstimator
 import ireader.presentation.ui.reader.components.ReportBrokenChapterDialog
@@ -96,7 +92,9 @@ fun ReadingScreen(
         onReaderPlay: () -> Unit,
         onChapterShown: (chapter: Chapter) -> Unit,
         paddingValues: PaddingValues,
-        onNavigateToTranslationSettings: () -> Unit
+        onNavigateToTranslationSettings: () -> Unit,
+        onChangeBrightness: (Float) -> Unit = {},
+        onToggleAutoBrightness: () -> Unit = {}
 ) {
 
     val scope = rememberCoroutineScope()
@@ -129,7 +127,9 @@ fun ReadingScreen(
             onNavigateToTranslationSettings = onNavigateToTranslationSettings,
             scope = scope,
             chapter = chapter,
-            showChapterReviews = showChapterReviews
+            showChapterReviews = showChapterReviews,
+            onChangeBrightness = onChangeBrightness,
+            onToggleAutoBrightness = onToggleAutoBrightness
         )
     }
 }
@@ -159,7 +159,9 @@ private fun ReadingScreenContent(
         onNavigateToTranslationSettings: () -> Unit,
         scope: kotlinx.coroutines.CoroutineScope,
         chapter: Chapter?,
-        showChapterReviews: androidx.compose.runtime.MutableState<Boolean>
+        showChapterReviews: androidx.compose.runtime.MutableState<Boolean>,
+        onChangeBrightness: (Float) -> Unit,
+        onToggleAutoBrightness: () -> Unit
 ) {
     // Pre-compute background color to avoid repeated conversions
     val backgroundColor = remember(vm.backgroundColor.value) { 
@@ -255,8 +257,8 @@ private fun ReadingScreenContent(
                                     vm = vm,
                                     onDismiss = { vm.showSettingsBottomSheet = false },
                                     onFontSelected = { /* Handle font selection */ },
-                                    onToggleAutoBrightness = { /* Handle brightness toggle */ },
-                                    onChangeBrightness = { /* Handle brightness change */ },
+                                    onToggleAutoBrightness = onToggleAutoBrightness,
+                                    onChangeBrightness = onChangeBrightness,
                                     onBackgroundChange = { themeId ->
                                         vm.changeBackgroundColor(themeId)
                                     },
@@ -353,33 +355,6 @@ private fun ReadingScreenContent(
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
                                     .padding(top = 16.dp)
-                            )
-                            
-                            // Brightness control
-                            BrightnessControl(
-                                visible = vm.showBrightnessControl,
-                                brightness = vm.brightness.value,
-                                onBrightnessChange = { newBrightness ->
-                                    vm.updateBrightness( newBrightness)
-                                },
-                                onDismiss = { vm.showBrightnessControl = false },
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 80.dp)
-                            )
-                            
-                            // Quick font size adjuster
-                            QuickFontSizeAdjuster(
-                                visible = vm.showFontSizeAdjuster,
-                                fontSize = vm.fontSize.value,
-                                onFontSizeChange = { newSize ->
-                                    vm.fontSize.value = newSize
-                                    vm.makeSettingTransparent()
-                                },
-                                onDismiss = { vm.showFontSizeAdjuster = false },
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 80.dp)
                             )
                             
                             // Autoscroll speed control

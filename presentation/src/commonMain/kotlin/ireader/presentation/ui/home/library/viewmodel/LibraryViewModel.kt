@@ -567,9 +567,12 @@ class LibraryViewModel(
             return remember { androidx.compose.runtime.mutableStateOf(emptyList<BookItem>()) }
         }
 
+        // Use cached data as initial value for instant display when returning to screen
+        val cachedData = loadedManga[categoryId] ?: emptyList()
+        
         // Create a flow that combines library data with search query
-        // Use produceState to properly handle the flow collection
-        return androidx.compose.runtime.produceState(initialValue = emptyList<BookItem>(), categoryId, sorting.value, filters.value, showArchivedBooks.value) {
+        // Use produceState with cached initial value for instant display
+        return androidx.compose.runtime.produceState(initialValue = cachedData, categoryId, sorting.value, filters.value, showArchivedBooks.value) {
             getLibraryCategory.subscribe(categoryId, sorting.value, filters.value, showArchivedBooks.value)
                 .map { list ->
                     _state.update { it.copy(books = list.toImmutableList()) }

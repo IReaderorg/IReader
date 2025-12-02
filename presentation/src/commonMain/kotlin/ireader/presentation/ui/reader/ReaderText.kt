@@ -44,6 +44,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -201,14 +202,17 @@ fun ReaderText(
                         enable = isAtTop && hasPrevChapter,
                         alignment = Alignment.TopCenter,
                         indicator = { state, _ ->
-                            ArrowIndicator(
-                                icon = Icons.Default.KeyboardArrowUp,
-                                swipeRefreshState = state,
-                                refreshTriggerDistance = 80.dp,
-                                color = vm.textColor.value.toComposeColor(),
-                                chapterName = prevChapterName,
-                                isTop = true
-                            )
+                            // Only render indicator when there's actual drag activity
+                            if (state.isSwipeInProgress || state.indicatorOffset > 0f) {
+                                ArrowIndicator(
+                                    icon = Icons.Default.KeyboardArrowUp,
+                                    swipeRefreshState = state,
+                                    refreshTriggerDistance = 80.dp,
+                                    color = vm.textColor.value.toComposeColor(),
+                                    chapterName = prevChapterName,
+                                    isTop = true
+                                )
+                            }
                         }, 
                         onRefresh = {
                             onPrev()
@@ -221,14 +225,17 @@ fun ReaderText(
                             onNext()
                         },
                         indicator = { state, _ ->
-                            ArrowIndicator(
-                                icon = Icons.Default.KeyboardArrowDown,
-                                swipeRefreshState = state,
-                                refreshTriggerDistance = 80.dp,
-                                color = vm.textColor.value.toComposeColor(),
-                                chapterName = nextChapterName,
-                                isTop = false
-                            )
+                            // Only render indicator when there's actual drag activity
+                            if (state.isSwipeInProgress || state.indicatorOffset > 0f) {
+                                ArrowIndicator(
+                                    icon = Icons.Default.KeyboardArrowDown,
+                                    swipeRefreshState = state,
+                                    refreshTriggerDistance = 80.dp,
+                                    color = vm.textColor.value.toComposeColor(),
+                                    chapterName = nextChapterName,
+                                    isTop = false
+                                )
+                            }
                         }
                     ),
                 ),
@@ -364,11 +371,53 @@ private fun OptimizedPagedReaderText(
 ) {
     val scope = rememberCoroutineScope()
     
-    // Scroll to top when chapter changes
-    LaunchedEffect(key1 = vm.stateChapter?.id) {
-        // Small delay to ensure content is loaded
-        kotlinx.coroutines.delay(50)
-        lazyListState.scrollToItem(0)
+    // Track the last chapter ID to detect chapter changes
+    var lastScrolledChapterId by remember { mutableStateOf<Long?>(null) }
+    
+    // Collect state from ViewModel's StateFlow for reliable observation
+    val readerState by vm.state.collectAsState()
+    val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
+    val currentChapterId = successState?.currentChapter?.id
+    
+    // Single LaunchedEffect to handle all chapter navigation scrolling
+    // Key on both chapter ID and scrollToEnd flag to catch all state changes
+    LaunchedEffect(key1 = currentChapterId, key2 = successState?.scrollToEndOnChapterChange) {
+        val chapterId = currentChapterId ?: return@LaunchedEffect
+        val shouldScrollToEnd = successState?.scrollToEndOnChapterChange ?: false
+        val contentSize = successState?.currentChapter?.content?.size ?: 0
+        
+        // Skip if same chapter and not a scroll-to-end request
+        if (chapterId == lastScrolledChapterId && !shouldScrollToEnd) return@LaunchedEffect
+        
+        if (shouldScrollToEnd && contentSize > 0) {
+            // Previous chapter navigation - scroll to end (void space)
+            // Structure: header (index 0) + content items (indices 1..N) + void (index N+1)
+            val voidIndex = contentSize + 1
+            
+            // Wait for LazyColumn to be populated, then scroll
+            repeat(20) { attempt ->
+                kotlinx.coroutines.delay(50)
+                val totalItems = lazyListState.layoutInfo.totalItemsCount
+                if (totalItems > voidIndex) {
+                    lazyListState.scrollToItem(voidIndex)
+                    lastScrolledChapterId = chapterId
+                    vm.scrollToEndOnChapterChange = false
+                    return@LaunchedEffect
+                }
+            }
+            // Fallback: scroll to last available item
+            val totalItems = lazyListState.layoutInfo.totalItemsCount
+            if (totalItems > 0) {
+                lazyListState.scrollToItem(totalItems - 1)
+            }
+            vm.scrollToEndOnChapterChange = false
+            lastScrolledChapterId = chapterId
+        } else if (chapterId != lastScrolledChapterId) {
+            // Next chapter navigation - scroll to start (top)
+            // Only scroll to top if it's a NEW chapter (not same chapter)
+            lazyListState.scrollToItem(0)
+            lastScrolledChapterId = chapterId
+        }
     }
     
     // Track scroll progress for reading time estimation
@@ -441,15 +490,7 @@ private fun OptimizedPagedReaderText(
                 modifier = modifier.fillMaxSize(),
                 state = lazyListState,
             ) {
-                // Chapter header (shown at top of content)
-                item(key = "${vm.stateChapter?.id ?: 0}-header") {
-                    InfiniteChapterHeader(
-                        chapter = vm.stateChapter ?: return@item,
-                        isFirst = true,
-                        textColor = vm.textColor.value.toComposeColor(),
-                        backgroundColor = vm.backgroundColor.value.toComposeColor()
-                    )
-                }
+
                 
                 // Chapter content items
                 items(
@@ -953,6 +994,31 @@ private fun ContinuesReaderPage(
         }
     }
     
+    // Scroll to appropriate position when navigating to previous chapter
+    LaunchedEffect(key1 = vm.stateChapter?.id, key2 = vm.scrollToEndOnChapterChange) {
+        if (vm.scrollToEndOnChapterChange) {
+            // For previous chapter navigation - scroll to end (void space)
+            val contentSize = vm.stateChapter?.content?.size ?: 0
+            if (contentSize > 0) {
+                // Structure: header (1) + content items (N) + void (1)
+                val voidIndex = contentSize + 1
+                
+                // Wait a bit for the LazyColumn to be populated
+                kotlinx.coroutines.delay(150)
+                
+                // Scroll to the void (end of chapter)
+                val totalItems = scrollState.layoutInfo.totalItemsCount
+                if (totalItems > voidIndex) {
+                    scrollState.scrollToItem(voidIndex)
+                } else if (totalItems > 0) {
+                    scrollState.scrollToItem(totalItems - 1)
+                }
+            }
+            // Reset the flag
+            vm.scrollToEndOnChapterChange = false
+        }
+    }
+    
     // Build items for infinite scroll with void spaces
     val items = remember(vm.chapterShell, vm.stateChapters, vm.currentChapterIndex) {
         buildInfiniteReaderItems(
@@ -1055,17 +1121,6 @@ private fun ContinuesReaderPage(
             vm.chapterShell.forEachIndexed { shellIndex, chapter ->
                 val isFirstChapter = shellIndex == 0
                 val isLastChapter = shellIndex == vm.chapterShell.lastIndex
-                
-                // Chapter header
-                item(key = "header-${chapter.id}") {
-                    InfiniteChapterHeader(
-                        chapter = chapter,
-                        isFirst = isFirstChapter,
-                        textColor = vm.textColor.value.toComposeColor(),
-                        backgroundColor = vm.backgroundColor.value.toComposeColor()
-                    )
-                }
-                
                 // Chapter content
                 val content = chapter.content ?: emptyList()
                 items(
@@ -1213,48 +1268,6 @@ private fun OverscrollPrevIndicator(
     }
 }
 
-/**
- * Chapter header with elegant styling.
- */
-@Composable
-private fun InfiniteChapterHeader(
-    chapter: Chapter,
-    isFirst: Boolean,
-    textColor: Color,
-    backgroundColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(backgroundColor)
-            .padding(horizontal = 16.dp, vertical = if (isFirst) 8.dp else 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (!isFirst) {
-            Box(
-                modifier = Modifier
-                    .width(50.dp)
-                    .height(2.dp)
-                    .background(textColor.copy(alpha = 0.15f), RoundedCornerShape(1.dp))
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-        
-        Text(
-            text = chapter.name,
-            color = textColor.copy(alpha = 0.75f),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
-        
-        Spacer(modifier = Modifier.height(20.dp))
-    }
-}
 
 /**
  * Clean void space between chapters with smooth animations.

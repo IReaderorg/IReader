@@ -346,22 +346,18 @@ data class ReaderScreenSpec(
                                             vm.clearChapterShell(scrollState)
                                         }
 
+                                        // Load the previous chapter (next=false triggers scrollToEndOnChapterChange)
                                         vm.getLocalChapter(
                                             prevChapter?.id,
                                             false
                                         )
 
-                                        // Always scroll to end of previous chapter (last part)
-                                        when (vm.readingMode.value) {
-                                            ReadingMode.Page -> {
-                                                // Wait for content to load then scroll to end
-                                                delay(100)
-                                                scrollState.scrollTo(scrollState.maxValue)
-                                            }
-                                            ReadingMode.Continues -> {
-                                                lazyListState.scrollToItem(1)
-                                            }
+                                        // For Page mode, also scroll to end
+                                        if (vm.readingMode.value == ReadingMode.Page) {
+                                            delay(100)
+                                            scrollState.scrollTo(scrollState.maxValue)
                                         }
+                                        // For Continues mode, scrolling is handled by LaunchedEffect in ReaderText
                                     }
                                 } else {
                                     scope.launch {
@@ -460,6 +456,16 @@ data class ReaderScreenSpec(
                         paddingValues = padding,
                         onNavigateToTranslationSettings = {
                             navController.navigate(NavigationRoutes.translationSettings)
+                        },
+                        onChangeBrightness = { brightness ->
+                            platformReader.apply {
+                                if (context != null) {
+                                    vm.saveBrightness(context, brightness)
+                                }
+                            }
+                        },
+                        onToggleAutoBrightness = {
+                            vm.autoBrightnessMode.value = !vm.autoBrightnessMode.value
                         }
                     )
                     

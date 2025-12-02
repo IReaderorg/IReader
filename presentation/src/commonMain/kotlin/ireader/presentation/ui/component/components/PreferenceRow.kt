@@ -821,6 +821,7 @@ fun <Key> ChoicePreference(
         choices: Map<Key, String>,
         title: String,
         subtitle: String? = null,
+        icon: ImageVector? = null,
         onValue: ((Key) -> Unit)? = null,
         confirmText: String = "",
         onConfirm: (() -> Unit)? = null,
@@ -851,6 +852,7 @@ fun <Key> ChoicePreference(
             },
             title = title,
             subtitle = if (subtitle == null) selectedValue else null,
+            icon = icon,
             onClick = {
                 onShowDialog()
                 showDialog = true
@@ -918,6 +920,7 @@ fun <Key> ChoicePreference(
         choices: Map<Key, String>,
         title: String,
         subtitle: String? = null,
+        icon: ImageVector? = null,
         onValue: ((Key) -> Unit)? = null,
         confirmText: String = "",
         onConfirm: (() -> Unit)? = null,
@@ -948,6 +951,7 @@ fun <Key> ChoicePreference(
             },
             title = title,
             subtitle = if (subtitle == null) selectedValue else null,
+            icon = icon,
             onClick = {
                 showDialog = true
                 onShowDialog()
@@ -1013,6 +1017,7 @@ fun <Key> ChoicePreference(
         choices: Map<Key, String>,
         title: String,
         subtitle: String? = null,
+        icon: ImageVector? = null,
         onValue: ((Key) -> Unit)? = null,
         confirmText: String = "",
         onConfirm: (() -> Unit)? = null,
@@ -1043,6 +1048,7 @@ fun <Key> ChoicePreference(
             },
             title = title,
             subtitle = if (subtitle == null) selectedValue else null,
+            icon = icon,
             onClick = {
                 showDialog = true
                 onShowDialog()

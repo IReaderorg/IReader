@@ -1,17 +1,31 @@
 package ireader.presentation.ui.reader
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -19,8 +33,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,11 +53,20 @@ fun ArrowIndicator(
     chapterName: String? = null,
     isTop: Boolean = true
 ) {
+    // Early exit: Don't render anything if there's no swipe activity
+    // This is the primary guard to prevent showing indicator without user interaction
+    val hasSwipeActivity = swipeRefreshState.isSwipeInProgress || 
+                           swipeRefreshState.indicatorOffset > 1f // Need at least 1px offset
+    
+    if (!hasSwipeActivity) {
+        return
+    }
+    
     val trigger = with(LocalDensity.current) { refreshTriggerDistance.toPx() }
     val progress = (swipeRefreshState.indicatorOffset / trigger).coerceIn(0f, 1f)
     
-    // Only render when there's actual drag progress (> 5% to avoid flickering)
-    if (progress < 0.05f) {
+    // Only render when there's meaningful drag progress (> 8% to avoid flickering)
+    if (progress < 0.08f) {
         return
     }
     
@@ -89,6 +110,7 @@ fun ArrowIndicator(
         modifier = Modifier
             .fillMaxWidth()
             .height((progress * 140).dp)
+            .clipToBounds() // Prevent any content from overflowing outside the box
             .alpha(progress)
             .background(
                 Brush.verticalGradient(
@@ -133,27 +155,26 @@ fun ArrowIndicator(
                 .graphicsLayer { translationY = bounceOffset * (if (isTop) 1f else -1f) }
                 .padding(12.dp)
         ) {
-            // Chapter info at top for bottom indicator
-            if (!isTop && chapterName != null && progress > 0.25f) {
+            // Chapter info at top for bottom indicator - only show when progress is high enough
+            if (!isTop && chapterName != null && progress > 0.5f) {
                 Text(
                     text = "NEXT CHAPTER",
                     color = color.copy(alpha = 0.6f * progress),
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
+                    letterSpacing = 2.sp,
+                    maxLines = 1
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                // Truncate chapter name to single line
+                val truncatedName = if (chapterName.length > 30) chapterName.take(30) + "..." else chapterName
                 Text(
-                    text = chapterName,
+                    text = truncatedName,
                     color = color.copy(alpha = 0.9f * progress),
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .widthIn(max = 220.dp)
+                    modifier = Modifier.padding(horizontal = 24.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -212,28 +233,27 @@ fun ArrowIndicator(
                 }
             }
             
-            // Chapter info at bottom for top indicator
-            if (isTop && chapterName != null && progress > 0.25f) {
+            // Chapter info at bottom for top indicator - only show when progress is high enough
+            if (isTop && chapterName != null && progress > 0.5f) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "PREVIOUS CHAPTER",
                     color = color.copy(alpha = 0.6f * progress),
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
+                    letterSpacing = 2.sp,
+                    maxLines = 1
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                // Truncate chapter name to single line
+                val truncatedName = if (chapterName.length > 30) chapterName.take(30) + "..." else chapterName
                 Text(
-                    text = chapterName,
+                    text = truncatedName,
                     color = color.copy(alpha = 0.9f * progress),
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .widthIn(max = 220.dp)
+                    modifier = Modifier.padding(horizontal = 24.dp)
                 )
             } else if (chapterName == null && progress > 0.3f) {
                 Spacer(modifier = Modifier.height(6.dp))
