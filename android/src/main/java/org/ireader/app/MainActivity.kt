@@ -48,8 +48,10 @@ import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
 import ireader.core.http.toast
 import ireader.domain.models.prefs.PreferenceValues
+import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
+import ireader.presentation.ui.settings.FirstLaunchDialog
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.Args
@@ -86,6 +88,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
     private val getSimpleStorage: AndroidGetSimpleStorage by inject()
     private val uiPreferences: UiPreferences by inject()
+    private val supabasePreferences: SupabasePreferences by inject()
     val initializers: AppInitializers by inject()
     private val automaticBackup: AutomaticBackup by inject()
     private val localeHelper: LocaleHelper by inject()
@@ -177,6 +180,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                 // Pass the application context to GetPermissions
                                 GetPermissions(uiPreferences, context = this@MainActivity)
                             }
+                            
+                            // First Launch Dialog
+                            FirstLaunchDialogHandler()
 
                             HandleOnNewIntent(this, navController)
                         }
@@ -386,6 +392,38 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                 toast.cancel()
                 waitingConfirmation = false
             }
+        }
+    }
+    
+    @Composable
+    private fun FirstLaunchDialogHandler() {
+        val scope = rememberCoroutineScope()
+        var hasCompletedFirstLaunch by remember { 
+            mutableStateOf(uiPreferences.hasCompletedFirstLaunch().get()) 
+        }
+        var supabaseEnabled by remember { 
+            mutableStateOf(supabasePreferences.supabaseEnabled().get()) 
+        }
+        
+        if (!hasCompletedFirstLaunch) {
+            FirstLaunchDialog(
+                supabaseEnabled = supabaseEnabled,
+                onSupabaseEnabledChange = { enabled ->
+                    supabaseEnabled = enabled
+                },
+                onDismiss = {
+                    // Save preferences and dismiss
+                    supabasePreferences.supabaseEnabled().set(supabaseEnabled)
+                    uiPreferences.hasCompletedFirstLaunch().set(true)
+                    hasCompletedFirstLaunch = true
+                },
+                onGetStarted = {
+                    // Save preferences and dismiss
+                    supabasePreferences.supabaseEnabled().set(supabaseEnabled)
+                    uiPreferences.hasCompletedFirstLaunch().set(true)
+                    hasCompletedFirstLaunch = true
+                }
+            )
         }
     }
 

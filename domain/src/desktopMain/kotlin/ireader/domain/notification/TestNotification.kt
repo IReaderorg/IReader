@@ -27,16 +27,8 @@ object TestNotification {
         
         if (manager == null) {
             Log.error { "TestNotification: Manager not set! Call setManager() first" }
-            println("═══════════════════════════════════════════════════════")
-            println("❌ ERROR: Notification manager not set")
-            println("═══════════════════════════════════════════════════════")
             return
         }
-        
-        Log.info { "TestNotification: Showing test notification" }
-        println("═══════════════════════════════════════════════════════")
-        println("🔔 Triggering test notification...")
-        println("═══════════════════════════════════════════════════════")
         
         manager.show(
             NotificationData(
@@ -47,12 +39,6 @@ object TestNotification {
                 priority = NotificationPriority.HIGH
             )
         )
-        
-        Log.info { "TestNotification: Notification triggered" }
-        println("═══════════════════════════════════════════════════════")
-        println("✅ Test notification triggered")
-        println("Check your system tray for a notification popup")
-        println("═══════════════════════════════════════════════════════")
     }
     
     /**
@@ -101,8 +87,5 @@ object TestNotification {
             )
         )
         
-        println("═══════════════════════════════════════════════════════")
-        println("✅ Three test notifications triggered")
-        println("═══════════════════════════════════════════════════════")
     }
 }

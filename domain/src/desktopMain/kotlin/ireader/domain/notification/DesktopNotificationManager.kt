@@ -72,14 +72,7 @@ class DesktopNotificationManager : PlatformNotificationManager {
             return
         }
         
-        // Fallback to console logging if no notification method available
-        Log.info { "NOTIFICATION: ${notification.title} - ${notification.content}" }
-        println("═══════════════════════════════════════════════════════")
-        println("📢 NOTIFICATION")
-        println("Title: ${notification.title}")
-        println("Content: ${notification.content}")
-        println("Priority: ${notification.priority}")
-        println("═══════════════════════════════════════════════════════")
+        // Fallback - notification methods not available
     }
     
     /**

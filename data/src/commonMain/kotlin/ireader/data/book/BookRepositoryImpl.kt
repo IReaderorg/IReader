@@ -337,10 +337,8 @@ class BookRepositoryImpl(
         try {
             // Insert categories for books
             bookCategoryRepository.insertAll(bookCategories)
-            println("Added ${ids.size} books to default category")
-        } catch (e: Exception) {
-            println("Failed to add books to default category: ${e.message}")
-            e.printStackTrace()
+        } catch (_: Exception) {
+            // Silently ignore category insertion errors
         }
 
         return ids

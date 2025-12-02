@@ -130,6 +130,7 @@ val PresentationModules = module {
     factory  { 
         MainSettingScreenViewModel(
             uiPreferences = get(),
+            supabasePreferences = get(),
             getCurrentUser = {
                 val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
                 getCurrentUserUseCase().getOrNull()

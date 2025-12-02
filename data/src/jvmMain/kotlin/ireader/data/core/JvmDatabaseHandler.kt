@@ -47,7 +47,6 @@ internal class JvmDatabaseHandler constructor(
   }
 
   override fun repairDatabase() {
-    println("Repairing database from AndroidDatabaseHandler")
     try {
       // Force create views
       DatabaseMigrations.forceViewReinit(driver)
@@ -61,9 +60,8 @@ internal class JvmDatabaseHandler constructor(
         },
         parameters = 0
       )
-    } catch (e: Exception) {
-      println("Error during database repair: ${e.message}")
-      e.printStackTrace()
+    } catch (_: Exception) {
+      // Silently ignore repair errors
     }
   }
 

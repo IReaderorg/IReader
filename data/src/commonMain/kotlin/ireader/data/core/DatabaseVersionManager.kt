@@ -19,25 +19,19 @@ class DatabaseVersionManager(
         val oldVersion = preferences.database_version().get()
         val newVersion = DatabaseMigrations.CURRENT_VERSION
         
-        println("Database Version: Current=$oldVersion, Target=$newVersion")
-        
         if (oldVersion < newVersion) {
-            println("Upgrading database from version $oldVersion to $newVersion")
             // Apply migrations to upgrade from oldVersion to newVersion
             DatabaseMigrations.migrate(driver, oldVersion)
             
             // Update the version in preferences
             preferences.database_version().set(newVersion)
-            println("Database upgrade completed successfully")
         } else {
             // Even if no migration is needed, always ensure views are initialized
-            println("No database upgrade needed, but ensuring views are initialized")
             DatabaseMigrations.initializeViewsDirectly(driver)
             
             // Check if the database structure is actually correct
             // If not, force a repair
             if (!validateDatabaseStructure()) {
-                println("Database structure validation failed. Running repair...")
                 repairDatabase()
             }
         }
@@ -63,7 +57,6 @@ class DatabaseVersionManager(
             )
             
             if (!translatedChapterExists) {
-                println("translated_chapter table is missing")
                 return false
             }
             
@@ -81,13 +74,11 @@ class DatabaseVersionManager(
             )
             
             if (!glossaryExists) {
-                println("glossary table is missing")
                 return false
             }
             
             return true
-        } catch (e: Exception) {
-            println("Error validating database structure: ${e.message}")
+        } catch (_: Exception) {
             return false
         }
     }
@@ -99,7 +90,6 @@ class DatabaseVersionManager(
      * This is a recovery mechanism for users facing database problems.
      */
     fun repairDatabase() {
-        println("Attempting database repair...")
         try {
             // Force migration to current version to ensure all tables exist
             DatabaseMigrations.migrate(driver, 2)
@@ -109,11 +99,8 @@ class DatabaseVersionManager(
             
             // Update version
             preferences.database_version().set(DatabaseMigrations.CURRENT_VERSION)
-            
-            println("Database repair completed")
-        } catch (e: Exception) {
-            println("Error during database repair: ${e.message}")
-            e.printStackTrace()
+        } catch (_: Exception) {
+            // Silently ignore repair errors
         }
     }
     

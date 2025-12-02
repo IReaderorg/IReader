@@ -48,9 +48,7 @@ class PiperSubprocessSynthesizer {
             currentConfigPath = configPath
             
             true
-        } catch (e: Exception) {
-            println("Failed to initialize Piper subprocess: ${e.message}")
-            e.printStackTrace()
+        } catch (_: Exception) {
             false
         }
     }
@@ -119,12 +117,6 @@ class PiperSubprocessSynthesizer {
             val exitCode = process.exitValue()
             if (exitCode != 0) {
                 val error = process.errorStream.bufferedReader().readText()
-                val stdout = process.inputStream.bufferedReader().readText()
-                println("Piper command: ${command.joinToString(" ")}")
-                println("Working dir: ${workingDir.absolutePath}")
-                println("Exit code: $exitCode")
-                println("Stderr: $error")
-                println("Stdout: $stdout")
                 throw RuntimeException("Piper failed with exit code $exitCode: $error")
             }
             

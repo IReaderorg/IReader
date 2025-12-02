@@ -374,12 +374,12 @@ class SupabaseRemoteRepository(
                             }
                             else -> {}
                         }
-                    } catch (e: Exception) {
-                        println("Error processing realtime event: ${e.message}")
+                    } catch (_: Exception) {
+                        // Silently ignore realtime event errors
                     }
                 }
-            } catch (e: Exception) {
-                println("Real-time subscription failed: ${e.message}, falling back to polling")
+            } catch (_: Exception) {
+                // Real-time subscription failed, falling back to polling
                 while (true) {
                     val progress = getReadingProgress(userId, bookId).getOrNull()
                     emit(progress)

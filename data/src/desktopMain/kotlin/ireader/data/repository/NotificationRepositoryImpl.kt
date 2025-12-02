@@ -28,8 +28,7 @@ class NotificationRepositoryImpl : NotificationRepository {
             } else {
                 null
             }
-        } catch (e: Exception) {
-            println("[NotificationRepository] System tray not available: ${e.message}")
+        } catch (_: Exception) {
             null
         }
     }
@@ -37,14 +36,12 @@ class NotificationRepositoryImpl : NotificationRepository {
     override suspend fun createNotificationChannels(channels: List<NotificationChannel>) {
         channels.forEach { channel ->
             createdChannels.add(channel.id)
-            logNotification("Channel created: ${channel.name} (${channel.id})")
         }
     }
 
     override suspend fun createNotificationGroups(groups: List<NotificationGroup>) {
         groups.forEach { group ->
             createdGroups.add(group.id)
-            logNotification("Group created: ${group.name} (${group.id})")
         }
     }
 
@@ -57,15 +54,15 @@ class NotificationRepositoryImpl : NotificationRepository {
     }
 
     override suspend fun cancelNotification(notificationId: Int) {
-        logNotification("Cancel notification [$notificationId]")
+        // No-op for desktop
     }
 
     override suspend fun cancelNotificationGroup(groupKey: String) {
-        logNotification("Cancel notification group: $groupKey")
+        // No-op for desktop
     }
 
     override suspend fun cancelAllNotifications() {
-        logNotification("Cancel all notifications")
+        // No-op for desktop
     }
 
     override suspend fun showDownloadProgressNotification(
@@ -165,14 +162,10 @@ class NotificationRepositoryImpl : NotificationRepository {
         trayIcon?.let {
             try {
                 it.displayMessage(title, content, messageType)
-            } catch (e: Exception) {
-                logNotification("$title: $content")
+            } catch (_: Exception) {
+                // Silently ignore notification display errors
             }
-        } ?: logNotification("$title: $content")
-    }
-
-    private fun logNotification(message: String) {
-        println("[NotificationRepository] $message")
+        }
     }
 
     private fun formatSpeed(bytesPerSecond: Float): String {

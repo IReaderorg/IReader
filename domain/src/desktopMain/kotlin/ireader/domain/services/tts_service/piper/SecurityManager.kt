@@ -422,21 +422,7 @@ class SecurityManager {
         securityEvents.add(event)
         
         // Print to console (in production, this should go to a proper logging system)
-        val severityPrefix = when (severity) {
-            SecurityEvent.Severity.INFO -> "ℹ"
-            SecurityEvent.Severity.WARNING -> "⚠"
-            SecurityEvent.Severity.ERROR -> "✗"
-            SecurityEvent.Severity.CRITICAL -> "🔥"
-        }
-        
-        println("$severityPrefix [SECURITY] $type: $message")
-        if (details.isNotEmpty()) {
-            details.forEach { (key, value) ->
-                println("    $key: $value")
-            }
-        }
-        
-        // In production, also write to security audit log
+        // In production, security events are logged silently
         // SecurityAuditLogger.log(event)
     }
     

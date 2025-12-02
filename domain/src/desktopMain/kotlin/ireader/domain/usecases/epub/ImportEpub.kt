@@ -43,7 +43,6 @@ actual class ImportEpub(
                 importEpub(uri)
             } catch (e: Exception) {
                 errors.add(uri.uriString to (e.message ?: "Unknown error"))
-                println("Failed to import ${uri.uriString}: ${e.message}")
             }
         }
         
@@ -98,7 +97,6 @@ actual class ImportEpub(
             }
             
             chapterRepository.insertChapters(chapters)
-            println("Successfully imported: $title (${chapters.size} chapters)")
         }
     }
     
@@ -151,8 +149,8 @@ actual class ImportEpub(
                     }
                 }
             }
-        } catch (e: Exception) {
-            println("Failed to extract cover: ${e.message}")
+        } catch (_: Exception) {
+            // Silently ignore cover extraction errors
         }
         
         return coverFile.absolutePath
@@ -198,8 +196,8 @@ actual class ImportEpub(
                         )
                     )
                 }
-            } catch (e: Exception) {
-                println("Failed to extract chapter $index: ${e.message}")
+            } catch (_: Exception) {
+                // Silently ignore chapter extraction errors
             }
         }
         

@@ -134,9 +134,6 @@ actual class JSPluginUpdateNotifier {
      * Logs updates to console as a fallback.
      */
     private fun logUpdatesToConsole(updates: List<PluginUpdate>) {
-        println("Plugin updates available: ${updates.size}")
-        updates.forEach { update ->
-            println("  ${update.pluginId}: ${update.currentVersion} → ${update.newVersion}")
-        }
+        // Silently ignore - no console logging in production
     }
 }

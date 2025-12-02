@@ -60,28 +60,22 @@ import kotlin.system.exitProcess
 )
 fun main() {
     try {
-        // Display Java version information to help with troubleshooting
-        println("Java Runtime Version: ${System.getProperty("java.runtime.version")}")
-        println("Java Home: ${System.getProperty("java.home")}")
-        println("Java Vendor: ${System.getProperty("java.vendor")}")
-        println("OS Name: ${System.getProperty("os.name")}")
-        println("OS Version: ${System.getProperty("os.version")}")
-
+        // Enable production logging (only warnings and errors)
+        ireader.core.log.Log.enableProductionLogging()
+        
         // Check and create app data directory if needed
         val appDataDir = File(System.getProperty("user.home"), "AppData\\Local\\IReader")
         val cacheDir = File(appDataDir, "cache")
         
         if (!appDataDir.exists()) {
-            println("Creating app data directory: ${appDataDir.absolutePath}")
             appDataDir.mkdirs()
         }
         
         if (!cacheDir.exists()) {
-            println("Creating cache directory: ${cacheDir.absolutePath}")
             cacheDir.mkdirs()
         }
 
-        // Verify critical resources exist to avoid runtime errors
+        // Verify critical resources exist to avoid runtime errors (silent check)
         val criticalResources = listOf(
             "drawable/ic_eternity_light.xml",
             "drawable/ic_eternity_dark.xml",
@@ -90,29 +84,10 @@ fun main() {
         
         for (resource in criticalResources) {
             try {
-                val resourceExists = Thread.currentThread().contextClassLoader.getResource(resource) != null
-                if (!resourceExists) {
-                    println("WARNING: Resource not found: $resource")
-                } else {
-                    println("Resource verified: $resource")
-                }
-            } catch (e: Exception) {
-                println("ERROR checking resource $resource: ${e.message}")
+                Thread.currentThread().contextClassLoader.getResource(resource)
+            } catch (_: Exception) {
+                // Silently ignore missing resources
             }
-        }
-        
-        // Attempt to delete any corrupted database files
-        try {
-            val dbFiles = cacheDir.listFiles { file -> file.name.endsWith(".db") }
-            dbFiles?.forEach { file ->
-                if (file.exists()) {
-                    println("Found database file: ${file.absolutePath}")
-                    val deleted = file.delete()
-                    println("Deleted database file: $deleted")
-                }
-            }
-        } catch (e: Exception) {
-            println("Error while trying to clean database files: ${e.message}")
         }
         
         val koinApp = startKoin {
@@ -145,20 +120,17 @@ fun main() {
             val systemFontsInitializer = koinApp.koin.get<ireader.domain.usecases.fonts.SystemFontsInitializer>()
             kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                 systemFontsInitializer.initializeSystemFonts()
-                println("System fonts initialized successfully")
             }
-        } catch (e: Exception) {
-            println("Failed to initialize system fonts: ${e.message}")
-            e.printStackTrace()
+        } catch (_: Exception) {
+            // Silently ignore font initialization errors
         }
         
         // Start auto-sync service if available
         try {
             val autoSyncService = koinApp.koin.getOrNull<AutoSyncService>()
             autoSyncService?.start()
-            println("Auto-sync service started successfully")
-        } catch (e: Exception) {
-            println("Auto-sync service not available or failed to start: ${e.message}")
+        } catch (_: Exception) {
+            // Silently ignore auto-sync service errors
         }
 
         //Dispatchers.setMain(StandardTestDispatcher())
@@ -199,89 +171,54 @@ fun main() {
             }
         }
     } catch (e: Exception) {
-        // Provide more specific error handling
+        // Handle critical errors silently with automatic repair attempts
         when {
             e.message?.contains("table history_new already exists") == true -> {
-                println("DATABASE ERROR: Migration issue with history_new table.")
-                println("This is commonly caused by an interrupted database migration.")
-                println("The application will attempt to fix this issue on next restart.")
-                
                 // Try to fix the issue by directly executing SQL to clean up
                 try {
                     val dbDir = File(System.getProperty("user.home"), "AppData\\Local\\IReader\\cache")
                     val dbFile = dbDir.listFiles { file -> file.name.endsWith(".db") }?.firstOrNull()
                     
                     if (dbFile != null) {
-                        println("Found database file: ${dbFile.absolutePath}")
-                        println("Creating backup before cleanup...")
-                        
-                        // Create backup
                         val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(java.util.Date())
                         val backupFile = File(dbFile.parentFile, "${dbFile.nameWithoutExtension}_backup_$timestamp.db")
-                        
                         dbFile.copyTo(backupFile, overwrite = true)
-                        println("Backup created at: ${backupFile.absolutePath}")
                         
-                        // Connect and fix the database
                         try {
                             Class.forName("org.sqlite.JDBC")
                             val connection = java.sql.DriverManager.getConnection("jdbc:sqlite:${dbFile.absolutePath}")
                             connection.use { conn ->
                                 conn.createStatement().use { stmt ->
-                                    // Drop problematic table
                                     stmt.execute("DROP TABLE IF EXISTS history_new;")
-                                    println("Successfully dropped history_new table.")
                                 }
                             }
-                            println("Database cleanup completed. Please restart the application.")
-                        } catch (sqlEx: Exception) {
-                            println("Could not fix database directly: ${sqlEx.message}")
-                        }
+                        } catch (_: Exception) { }
                     }
-                } catch (fixEx: Exception) {
-                    println("Error during direct database repair: ${fixEx.message}")
-                }
-                
-                println("If the issue persists, please delete all files in %LOCALAPPDATA%\\IReader\\cache")
+                } catch (_: Exception) { }
             }
             e.message?.contains("no such table: main.history") == true || 
             e.message?.contains("historyView") == true -> {
-                println("DATABASE ERROR: The history table is missing from the database.")
-                println("This may be due to a corrupted database file or incomplete migration.")
-                
                 // Try to fix the issue by directly creating the history table
                 try {
                     val dbDir = File(System.getProperty("user.home"), "AppData\\Local\\IReader\\cache")
                     val dbFile = dbDir.listFiles { file -> file.name.endsWith(".db") }?.firstOrNull()
                     
                     if (dbFile != null) {
-                        println("Found database file: ${dbFile.absolutePath}")
-                        println("Creating backup before attempting repair...")
-                        
-                        // Create backup
                         val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(java.util.Date())
                         val backupFile = File(dbFile.parentFile, "${dbFile.nameWithoutExtension}_backup_$timestamp.db")
-                        
                         dbFile.copyTo(backupFile, overwrite = true)
-                        println("Backup created at: ${backupFile.absolutePath}")
                         
-                        // Connect and fix the database
                         try {
                             Class.forName("org.sqlite.JDBC")
                             val connection = java.sql.DriverManager.getConnection("jdbc:sqlite:${dbFile.absolutePath}")
                             connection.use { conn ->
                                 conn.createStatement().use { stmt ->
-                                    // Drop the view if it exists to avoid conflicts
                                     stmt.execute("DROP VIEW IF EXISTS historyView;")
-                                    
-                                    // Check if history table exists
                                     val rs = stmt.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='history'")
                                     val historyExists = rs.next()
                                     rs.close()
                                     
                                     if (!historyExists) {
-                                        println("Creating history table...")
-                                        // Create the history table
                                         val createHistorySql = """
                                             CREATE TABLE IF NOT EXISTS history(
                                                 _id INTEGER NOT NULL PRIMARY KEY,
@@ -293,45 +230,22 @@ fun main() {
                                                 ON DELETE CASCADE
                                             );
                                         """.trimIndent()
-                                        
                                         stmt.execute(createHistorySql)
-                                        println("History table created successfully")
-                                        
-                                        // Create indexes
                                         stmt.execute("CREATE INDEX IF NOT EXISTS history_history_chapter_id_index ON history(chapter_id);")
                                         stmt.execute("CREATE INDEX IF NOT EXISTS idx_history_last_read ON history(last_read);")
                                         stmt.execute("CREATE INDEX IF NOT EXISTS idx_history_progress ON history(progress);")
-                                    } else {
-                                        println("History table already exists.")
                                     }
                                 }
                             }
-                            println("Database repair completed. Please restart the application.")
-                        } catch (sqlEx: Exception) {
-                            println("Could not fix database directly: ${sqlEx.message}")
-                            sqlEx.printStackTrace()
-                        }
+                        } catch (_: Exception) { }
                     }
-                } catch (fixEx: Exception) {
-                    println("Error during direct database repair: ${fixEx.message}")
-                    fixEx.printStackTrace()
-                }
-                
-                println("Please try one of the following solutions:")
-                println("1. Delete the database file at %LOCALAPPDATA%\\IReader\\cache and restart.")
+                } catch (_: Exception) { }
             }
             e.message?.contains("SQLite") == true -> {
-                println("SQLite ERROR: ${e.message}")
-                println("This might be a database corruption issue.")
-                
                 // Try to launch in safe mode with minimal features
                 try {
-                    println("Attempting to launch in safe mode with minimal functionality...")
-                    
-                    // Delete all database files to start fresh
                     val dbDir = File(System.getProperty("user.home"), "AppData\\Local\\IReader\\cache")
                     if (dbDir.exists()) {
-                        // Create backups first
                         val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(java.util.Date())
                         val backupDir = File(dbDir.parentFile, "backups/backup_$timestamp")
                         backupDir.mkdirs()
@@ -341,29 +255,16 @@ fun main() {
                                 if (file.name.endsWith(".db")) {
                                     val backupFile = File(backupDir, file.name)
                                     file.copyTo(backupFile, overwrite = true)
-                                    println("Created backup of ${file.name} at ${backupFile.absolutePath}")
-                                    
-                                    // Delete the original file
                                     file.delete()
-                                    println("Deleted ${file.name} for clean start")
                                 }
-                            } catch (e: Exception) {
-                                println("Error handling file ${file.name}: ${e.message}")
-                            }
+                            } catch (_: Exception) { }
                         }
-                        
-                        println("Database files backed up and removed for clean start.")
-                        println("Please restart the application to create a new database.")
                     }
-                } catch (e: Exception) {
-                    println("Failed to prepare safe mode: ${e.message}")
-                }
-                
-                println("Please try one of the following solutions:")
-                println("1. Delete the database files at %LOCALAPPDATA%\\IReader\\cache.")
+                } catch (_: Exception) { }
             }
-            else -> e.printStackTrace()
+            else -> { }
         }
+        System.err.println("Application error: ${e.message}")
         exitProcess(1)
     }
 }
@@ -453,7 +354,6 @@ private fun repairDatabase(cacheDir: File) {
         val dbFiles = cacheDir.listFiles { file -> file.name.endsWith(".db") }
         
         if (dbFiles == null || dbFiles.isEmpty()) {
-            println("No database files found to repair")
             return
         }
         
@@ -464,7 +364,6 @@ private fun repairDatabase(cacheDir: File) {
         
         // 4. Copy each database file to the backup folder
         dbFiles.forEach { dbFile ->
-            println("Backing up: ${dbFile.name}")
             val backupFile = File(backupFolder, dbFile.name)
             
             try {
@@ -473,20 +372,15 @@ private fun repairDatabase(cacheDir: File) {
                         input.copyTo(output)
                     }
                 }
-                println("  Backup created: ${backupFile.absolutePath}")
                 
                 // Delete the original file to force recreation
                 dbFile.delete()
-                println("  Original file deleted for recreation")
-            } catch (e: IOException) {
-                println("  Failed to backup file: ${e.message}")
+            } catch (_: IOException) {
+                // Silently ignore backup errors
             }
         }
         
-        println("Database backup complete. Files will be recreated on next start.")
-        
-    } catch (e: Exception) {
-        println("Error during database repair: ${e.message}")
-        e.printStackTrace()
+    } catch (_: Exception) {
+        // Silently ignore repair errors
     }
 }

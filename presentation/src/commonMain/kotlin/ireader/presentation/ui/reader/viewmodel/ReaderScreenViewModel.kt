@@ -356,6 +356,9 @@ class ReaderScreenViewModel(
         // Preserve UI state from previous Success state
         val previousSuccessState = currentState as? ReaderState.Success
         
+        // Calculate total words for reading time estimation
+        val totalWords = calculateTotalWords(chapter.content)
+        
         _state.value = ReaderState.Success(
             book = book,
             currentChapter = chapter,
@@ -373,6 +376,8 @@ class ReaderScreenViewModel(
             isDrawerAsc = previousSuccessState?.isDrawerAsc ?: true,
             // When navigating to previous chapter (next=false), scroll to end
             scrollToEndOnChapterChange = !next,
+            // Word count for reading time estimation
+            totalWords = totalWords,
         )
         
         Log.debug { "loadChapter: chapterId=${chapter.id}, next=$next, scrollToEndOnChapterChange=${!next}" }
@@ -389,8 +394,9 @@ class ReaderScreenViewModel(
         // Update last read time
         getChapterUseCase.updateLastReadTime(chapter)
 
-        // Track chapter open
-        statisticsViewModel.onChapterOpened(chapter)
+        // Track chapter open (pass isLast to track book completion when last chapter is finished)
+        val isLastChapter = chapterIndex != -1 && chapterIndex == chapters.lastIndex
+        statisticsViewModel.onChapterOpened(chapter, isLastChapter)
 
         // Trigger preload
         triggerPreloadNextChapter()
@@ -401,16 +407,31 @@ class ReaderScreenViewModel(
         return chapter
     }
 
+    /**
+     * Calculate total words from chapter content for reading time estimation
+     */
+    private fun calculateTotalWords(content: List<Page>): Int {
+        return content.filterIsInstance<Text>()
+            .sumOf { text ->
+                // Split by whitespace and count non-empty words
+                text.text.split(Regex("\\s+")).count { it.isNotBlank() }
+            }
+    }
+
     private suspend fun fetchRemoteChapter(book: Book, catalog: CatalogLocal?, chapter: Chapter) {
         remoteUseCases.getRemoteReadingContent(
             chapter,
             catalog,
             onSuccess = { result ->
+                // Calculate total words for reading time estimation
+                val totalWords = calculateTotalWords(result.content)
+                
                 updateSuccessState { state ->
                     state.copy(
                         currentChapter = result,
                         content = result.content,
-                        isLoadingContent = false
+                        isLoadingContent = false,
+                        totalWords = totalWords
                     )
                 }
 

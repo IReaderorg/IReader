@@ -10,6 +10,9 @@ class SupabasePreferences(
     private val preferenceStore: PreferenceStore,
 ) {
     companion object {
+        // Global Supabase enable/disable toggle
+        const val SUPABASE_ENABLED = "supabase_enabled"
+        
         // Custom configuration toggle
         const val USE_CUSTOM_SUPABASE = "use_custom_supabase"
         
@@ -47,6 +50,23 @@ class SupabasePreferences(
         const val AUTO_SYNC_ENABLED = "auto_sync_enabled"
         const val SYNC_ON_WIFI_ONLY = "sync_on_wifi_only"
         const val LAST_SYNC_TIME = "last_sync_time"
+    }
+    
+    /**
+     * Whether Supabase features are enabled globally.
+     * 
+     * When TRUE (default):
+     * - All Supabase features (sync, reviews, badges, leaderboard, etc.) are enabled
+     * - App makes remote requests to Supabase backend
+     * 
+     * When FALSE:
+     * - All Supabase features are disabled
+     * - No remote requests are made to Supabase
+     * - App works in fully offline mode
+     * - Community features (reviews, badges, leaderboard) are hidden
+     */
+    fun supabaseEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean(SUPABASE_ENABLED, true)
     }
     
     /**

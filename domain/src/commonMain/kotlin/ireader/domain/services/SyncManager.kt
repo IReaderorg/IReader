@@ -45,10 +45,22 @@ class SyncManager(
     }
     
     /**
+     * Check if Supabase features are globally enabled
+     */
+    private fun isSupabaseEnabled(): Boolean {
+        return supabasePreferences.supabaseEnabled().get()
+    }
+    
+    /**
      * Start automatic sync service
      * Reduced interval for more responsive syncing
      */
     fun startAutoSync() {
+        // Check global Supabase toggle first
+        if (!isSupabaseEnabled()) {
+            return
+        }
+        
         if (!supabasePreferences.autoSyncEnabled().get()) {
             return
         }
@@ -78,6 +90,11 @@ class SyncManager(
         chapterSlug: String,
         scrollPosition: Float
     ): Result<Unit> {
+        // Check global Supabase toggle first
+        if (!isSupabaseEnabled()) {
+            return Result.success(Unit)
+        }
+        
         if (!supabasePreferences.autoSyncEnabled().get()) {
             return Result.success(Unit)
         }
@@ -127,6 +144,11 @@ class SyncManager(
      * Sync a single book
      */
     suspend fun syncBook(userId: String, book: Book): Result<Unit> {
+        // Check global Supabase toggle first
+        if (!isSupabaseEnabled()) {
+            return Result.success(Unit)
+        }
+        
         if (!supabasePreferences.autoSyncEnabled().get()) {
             return Result.success(Unit)
         }
@@ -138,6 +160,11 @@ class SyncManager(
      * Sync multiple books
      */
     suspend fun syncBooks(userId: String, books: List<Book>): Result<Unit> {
+        // Check global Supabase toggle first
+        if (!isSupabaseEnabled()) {
+            return Result.success(Unit)
+        }
+        
         if (!supabasePreferences.autoSyncEnabled().get()) {
             return Result.success(Unit)
         }
@@ -161,6 +188,11 @@ class SyncManager(
      * Perform a full sync of all data
      */
     suspend fun performFullSync(userId: String, books: List<Book>): Result<Unit> {
+        // Check global Supabase toggle first
+        if (!isSupabaseEnabled()) {
+            return Result.success(Unit)
+        }
+        
         _isSyncing.value = true
         return try {
             // Sync all books (only essential metadata)

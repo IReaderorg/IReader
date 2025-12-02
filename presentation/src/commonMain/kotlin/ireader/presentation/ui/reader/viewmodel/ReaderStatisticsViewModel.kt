@@ -39,6 +39,12 @@ class ReaderStatisticsViewModel(
     var currentBookId by mutableStateOf<Long?>(null)
         private set
     
+    // Track if current chapter is the last one (for book completion tracking)
+    private var isLastChapter: Boolean = false
+    
+    // Track if book completion has been recorded for this book (to avoid duplicates)
+    private val completedBooks = mutableSetOf<Long>()
+    
     // Reading progress
     var currentProgress by mutableStateOf(0f)
         private set
@@ -82,19 +88,22 @@ class ReaderStatisticsViewModel(
     
     /**
      * Called when a chapter is opened
+     * @param chapter The chapter being opened
+     * @param isLast Whether this is the last chapter of the book
      */
-    fun onChapterOpened(chapter: Chapter) {
+    fun onChapterOpened(chapter: Chapter, isLast: Boolean = false) {
         chapterOpenTimestamp = System.currentTimeMillis()
         currentChapterId = chapter.id
         currentBookId = chapter.bookId
         currentProgress = 0f
+        isLastChapter = isLast
         
         // Start session if not already started
         if (sessionStartTime == null) {
             sessionStartTime = System.currentTimeMillis()
         }
         
-        Log.debug("Chapter opened: ${chapter.name}")
+        Log.debug("Chapter opened: ${chapter.name}, isLastChapter: $isLast")
     }
     
     /**
@@ -114,7 +123,7 @@ class ReaderStatisticsViewModel(
             chaptersRead = _sessionStats.chaptersRead + 1
         )
         
-        // Save to preferences
+        // Save to preferences and database
         scope.launch {
             try {
                 val currentTotal = readerPreferences.totalReadingTimeMillis().get()
@@ -122,6 +131,29 @@ class ReaderStatisticsViewModel(
                 
                 val currentChapters = readerPreferences.chaptersCompleted().get()
                 readerPreferences.chaptersCompleted().set(currentChapters + 1)
+                
+                // Track reading time in statistics database (convert to minutes)
+                val readingMinutes = readingTime / 60000
+                if (readingMinutes > 0) {
+                    trackReadingProgressUseCase.trackReadingTime(readingTime)
+                }
+                
+                // Update reading streak
+                trackReadingProgressUseCase.updateReadingStreak(closeTime)
+                
+                // Track chapter completion if user read at least 80% of the chapter
+                if (currentProgress >= 0.8f && wordsRead > 0) {
+                    trackReadingProgressUseCase.onChapterProgressUpdate(currentProgress, wordsRead)
+                    Log.debug("Chapter progress tracked: ${(currentProgress * 100).toInt()}%, $wordsRead words")
+                    
+                    // Track book completion if this is the last chapter and user read 80%+
+                    val bookId = currentBookId
+                    if (isLastChapter && bookId != null && !completedBooks.contains(bookId)) {
+                        trackReadingProgressUseCase.trackBookCompletion()
+                        completedBooks.add(bookId)
+                        Log.debug("Book completion tracked for bookId: $bookId")
+                    }
+                }
             } catch (e: Exception) {
                 Log.error("Failed to save reading stats", e)
             }

@@ -23,12 +23,38 @@ import co.touchlab.kermit.Severity
 object Log {
 
     private const val DEFAULT_TAG = "IReader"
+    
+    /**
+     * Minimum severity level for logging.
+     * Set to Severity.Warn to suppress Info and Debug logs in production.
+     */
+    var minSeverity: Severity = Severity.Warn
+    
+    /**
+     * Enable verbose logging (Debug and Info levels).
+     * Call this during development or when debugging is needed.
+     */
+    fun enableVerboseLogging() {
+        minSeverity = Severity.Verbose
+        Logger.setMinSeverity(Severity.Verbose)
+    }
+    
+    /**
+     * Enable production logging (only Warn and Error levels).
+     * Call this for release builds to reduce log noise.
+     */
+    fun enableProductionLogging() {
+        minSeverity = Severity.Warn
+        Logger.setMinSeverity(Severity.Warn)
+    }
 
     /**
      * Logs a lazy message at verbose level.
      */
     fun verbose(message: () -> String) {
-        Logger.v(DEFAULT_TAG) { message() }
+        if (minSeverity.ordinal <= Severity.Verbose.ordinal) {
+            Logger.v(DEFAULT_TAG) { message() }
+        }
     }
 
     /**
@@ -49,42 +75,54 @@ object Log {
      * Logs a lazy message at debug level.
      */
     fun debug(message: () -> String) {
-        Logger.d(DEFAULT_TAG) { message() }
+        if (minSeverity.ordinal <= Severity.Debug.ordinal) {
+            Logger.d(DEFAULT_TAG) { message() }
+        }
     }
 
     /**
      * Logs a formatted message at debug level.
      */
     fun debug(message: String, vararg arguments: Any?) {
-        Logger.d(DEFAULT_TAG) { message.formatMessage(*arguments) }
+        if (minSeverity.ordinal <= Severity.Debug.ordinal) {
+            Logger.d(DEFAULT_TAG) { message.formatMessage(*arguments) }
+        }
     }
 
     /**
      * Logs an exception at debug level.
      */
     fun debug(exception: Throwable, message: String? = null, vararg arguments: Any?) {
-        Logger.d(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+        if (minSeverity.ordinal <= Severity.Debug.ordinal) {
+            Logger.d(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+        }
     }
 
     /**
      * Logs a lazy message at info level.
      */
     fun info(message: () -> String) {
-        Logger.i(DEFAULT_TAG) { message() }
+        if (minSeverity.ordinal <= Severity.Info.ordinal) {
+            Logger.i(DEFAULT_TAG) { message() }
+        }
     }
 
     /**
      * Logs a formatted message at info level.
      */
     fun info(message: String, vararg arguments: Any?) {
-        Logger.i(DEFAULT_TAG) { message.formatMessage(*arguments) }
+        if (minSeverity.ordinal <= Severity.Info.ordinal) {
+            Logger.i(DEFAULT_TAG) { message.formatMessage(*arguments) }
+        }
     }
 
     /**
      * Logs an exception at info level.
      */
     fun info(exception: Throwable, message: String? = null, vararg arguments: Any?) {
-        Logger.i(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+        if (minSeverity.ordinal <= Severity.Info.ordinal) {
+            Logger.i(DEFAULT_TAG, exception) { message?.formatMessage(*arguments) ?: exception.message ?: "" }
+        }
     }
 
     /**

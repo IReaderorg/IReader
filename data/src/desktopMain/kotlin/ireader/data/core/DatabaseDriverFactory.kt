@@ -14,7 +14,6 @@ actual class DatabaseDriverFactory {
             AppDir.mkdirs()
         }
         val dbFile = File(dbDir, "/ireader.db")
-        print(dbFile.absolutePath)
         if (!dbDir.exists()) {
             dbDir.mkdirs()
         }
@@ -29,9 +28,7 @@ actual class DatabaseDriverFactory {
         // Use SQLDelight's schema creation - it handles everything correctly
         try {
             Database.Schema.create(driver)
-            println("Database schema created successfully")
-        } catch (e: Exception) {
-            println("Error creating database schema (may already exist): ${e.message}")
+        } catch (_: Exception) {
             // This is fine - the database may already exist
         }
         

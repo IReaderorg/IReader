@@ -2136,4 +2136,21 @@
     <string name="no_settings_found">No settings found</string>
     <string name="try_different_search">Try a different search term</string>
     <string name="clear_search">Clear search</string>
+    
+    <!-- First Launch Dialog -->
+    <string name="welcome_to_ireader">Welcome to IReader!</string>
+    <string name="first_launch_intro">Let\'s set up a few things to get you started. You can always change these settings later.</string>
+    <string name="cloud_features">Cloud Features</string>
+    <string name="cloud_features_description">IReader can connect to cloud services for enhanced features. You can disable this if you prefer a fully offline experience.</string>
+    <string name="enable_cloud_features">Enable Cloud Features</string>
+    <string name="enable_cloud_features_subtitle">Sync, reviews, badges, and leaderboard</string>
+    <string name="reading_progress_sync">Reading Progress Sync</string>
+    <string name="reading_progress_sync_desc">Sync your reading progress across devices</string>
+    <string name="community_reviews_desc">Read and write reviews for books and chapters</string>
+    <string name="leaderboard_desc">Compete with other readers on the leaderboard</string>
+    <string name="badges_achievements">Badges &amp; Achievements</string>
+    <string name="badges_achievements_desc">Earn and display badges on your profile</string>
+    <string name="offline_mode">Offline Mode</string>
+    <string name="offline_mode_description">The app will work completely offline. No data will be sent to cloud servers. Community features will be hidden.</string>
+    <string name="first_launch_privacy_note">You can change this setting anytime in Settings → Advanced. Your reading data stays on your device unless you enable cloud features.</string>
 </resources>

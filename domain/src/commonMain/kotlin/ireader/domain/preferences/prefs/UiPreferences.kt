@@ -411,4 +411,17 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun maxPerformanceMode(): Preference<Boolean> {
         return preferenceStore.getBoolean("max_performance_mode", false)
     }
+    
+    // ============================================================================
+    // First Launch Settings
+    // ============================================================================
+    
+    /**
+     * Whether the user has seen and completed the first launch dialog.
+     * This dialog shows important setup options like Supabase/cloud features toggle.
+     * Default: false (show dialog on first launch)
+     */
+    fun hasCompletedFirstLaunch(): Preference<Boolean> {
+        return preferenceStore.getBoolean("has_completed_first_launch", false)
+    }
 }

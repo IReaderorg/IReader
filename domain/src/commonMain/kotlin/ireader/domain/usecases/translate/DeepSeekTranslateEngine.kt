@@ -110,7 +110,6 @@ class DeepSeekTranslateEngine(
         }
         
         val apiKey = readerPreferences.deepSeekApiKey().get()
-        println("DeepSeek: API key length: ${apiKey.length}, blank: ${apiKey.isBlank()}")
         
         if (apiKey.isBlank()) {
             onError(UiText.DynamicString("DeepSeek API key is not set. Please configure it in Settings > Translation."))
@@ -140,7 +139,6 @@ class DeepSeekTranslateEngine(
                     val splitResults = splitResponse(translationResult, chunk.size)
                     allResults.addAll(splitResults)
                 } catch (e: Exception) {
-                    println("DeepSeek API error for chunk $chunkIndex: ${e.message}")
                     // Rethrow to handle at outer level
                     throw e
                 }
@@ -158,10 +156,6 @@ class DeepSeekTranslateEngine(
             
         } catch (e: Exception) {
             onProgress(0)
-            println("DeepSeek translation error: ${e.message}")
-            e.printStackTrace()
-            
-            // Always show the actual error message for debugging
             val errorMessage = UiText.DynamicString("DeepSeek Error: ${e.message ?: "Unknown error"}")
             onError(errorMessage)
         }
@@ -171,7 +165,6 @@ class DeepSeekTranslateEngine(
      * Call DeepSeek API with retry logic
      */
     private suspend fun callDeepSeekApi(apiKey: String, prompt: String): String {
-        println("DeepSeek: Calling API with key starting with: ${apiKey.take(10)}...")
         
         val response = client.default.post("https://api.deepseek.com/v1/chat/completions") {
             headers {
@@ -195,8 +188,6 @@ class DeepSeekTranslateEngine(
             }
         }
         
-        println("DeepSeek: Response status: ${response.status.value}")
-        
         // Check the response status code
         when (response.status.value) {
             401 -> throw Exception("401 Unauthorized - Invalid API key")
@@ -211,12 +202,10 @@ class DeepSeekTranslateEngine(
         }
         
         val result = response.body<DeepSeekResponse>()
-        println("DeepSeek: Response id: ${result.id}, choices count: ${result.choices?.size ?: 0}")
         
         if (result.choices != null && result.choices.isNotEmpty()) {
             val messageContent = result.choices[0].message?.content
             if (!messageContent.isNullOrEmpty()) {
-                println("DeepSeek: Got translation with ${messageContent.length} chars")
                 return messageContent.trim()
             }
         }

@@ -30,9 +30,8 @@ actual class JSPluginUpdateScheduler(
                             updateNotifier.showUpdateNotification(updates)
                         }
                     }
-                } catch (e: Exception) {
-                    // Log error but don't crash the scheduler
-                    println("Error checking for plugin updates: ${e.message}")
+                } catch (_: Exception) {
+                    // Silently ignore update check errors
                 }
             },
             intervalHours.toLong(),

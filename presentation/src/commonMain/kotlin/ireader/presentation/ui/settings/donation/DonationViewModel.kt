@@ -79,14 +79,7 @@ class DonationViewModel(
                 paymentUri = paymentUri
             )
             
-            // Handle result
-            if (success) {
-                // Wallet opened successfully
-                println("✅ Wallet opened: ${walletApp.displayName}")
-            } else {
-                // Failed to open wallet
-                println("❌ Failed to open wallet: ${walletApp.displayName}")
-            }
+            // Handle result - no logging needed
         }
     }
     

@@ -15,8 +15,8 @@ actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
             if (desktop.isSupported(java.awt.Desktop.Action.BROWSE)) {
                 desktop.browse(java.net.URI(urlString))
             }
-        } catch (e: Exception) {
-            println("Failed to open URL in browser: ${e.message}")
+        } catch (_: Exception) {
+            // Silently ignore browser open errors
         }
     }
 }

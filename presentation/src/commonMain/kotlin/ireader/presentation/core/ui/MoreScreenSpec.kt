@@ -86,25 +86,6 @@ object MoreScreenSpec {
                 onAllReviews = {
                     navController.navigate(NavigationRoutes.allReviews)
                 },
-                // Sub-settings screen navigation
-                onAppearanceSettings = {
-                    navController.navigate(NavigationRoutes.appearance)
-                },
-                onReaderSettings = {
-                    navController.navigate(NavigationRoutes.readerSettings)
-                },
-                onGeneralSettings = {
-                    navController.navigate(NavigationRoutes.generalSettings)
-                },
-                onSecuritySettings = {
-                    navController.navigate(NavigationRoutes.securitySettings)
-                },
-                onAdvancedSettings = {
-                    navController.navigate(NavigationRoutes.advanceSettings)
-                },
-                onTranslationSettings = {
-                    navController.navigate(NavigationRoutes.translationSettings)
-                },
             )
         }
     }

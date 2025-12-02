@@ -34,12 +34,9 @@ class AutoSyncService(
                     if (isConnected && !wasConnected) {
                         // Network is connected, process sync queue
                         try {
-                            val syncedCount = remoteRepository.processSyncQueue()
-                            if (syncedCount > 0) {
-                                println("Auto-sync: Successfully synced $syncedCount items")
-                            }
-                        } catch (e: Exception) {
-                            println("Auto-sync failed: ${e.message}")
+                            remoteRepository.processSyncQueue()
+                        } catch (_: Exception) {
+                            // Silently ignore sync errors
                         }
                     }
                     wasConnected = isConnected

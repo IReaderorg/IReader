@@ -40,26 +40,16 @@ class BrowseSettingsViewModel(
                     val allLanguages = buildSet {
                         // Get languages from installed sources
                         pinned.forEach { catalog ->
-                            catalog.source?.lang?.let { 
-                                add(it)
-                                println("BrowseSettings: Added installed language: $it from ${catalog.name}")
-                            }
+                            catalog.source?.lang?.let { add(it) }
                         }
                         unpinned.forEach { catalog ->
-                            catalog.source?.lang?.let { 
-                                add(it)
-                                println("BrowseSettings: Added installed language: $it from ${catalog.name}")
-                            }
+                            catalog.source?.lang?.let { add(it) }
                         }
                         // Get languages from remote sources
                         remote.forEach { catalog ->
                             add(catalog.lang)
-                            println("BrowseSettings: Added remote language: ${catalog.lang} from ${catalog.name}")
                         }
                     }.sorted()
-                    
-                    println("BrowseSettings: Total available languages: ${allLanguages.size} - $allLanguages")
-                    println("BrowseSettings: Selected languages: ${state.selectedLanguages.size} - ${state.selectedLanguages}")
                     
                     state = state.copy(availableLanguages = allLanguages)
                 }

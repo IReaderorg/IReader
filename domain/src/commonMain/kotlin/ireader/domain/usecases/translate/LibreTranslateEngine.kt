@@ -105,7 +105,6 @@ class LibreTranslateEngine(
     ) {
         // Validate inputs
         if (texts.isNullOrEmpty()) {
-            println("LibreTranslate error: No text to translate")
             onError(UiText.MStringResource(Res.string.no_text_to_translate))
             return
         }
@@ -148,8 +147,6 @@ class LibreTranslateEngine(
             if (currentBatch.isNotEmpty()) {
                 batches.add(currentBatch.toList())
             }
-            
-            println("LibreTranslate: Created ${batches.size} batches from ${texts.size} texts")
             
             // Process each batch
             batches.forEachIndexed { batchIndex, batch ->

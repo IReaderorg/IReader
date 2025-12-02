@@ -35,19 +35,16 @@ class ScheduleAutomaticBackupImpl() : ScheduleAutomaticBackup {
                 delay(intervalMillis)
                 try {
                     performBackup()
-                } catch (e: Exception) {
-                    println("Desktop automatic backup failed: ${e.message}")
+                } catch (_: Exception) {
+                    // Silently ignore backup errors
                 }
             }
         }
-        
-        println("Desktop automatic backup scheduled: $frequency (every ${intervalMillis}ms)")
     }
     
     override fun cancel() {
         scheduledJob?.cancel()
         scheduledJob = null
-        println("Desktop automatic backup cancelled")
     }
     
     override fun isScheduled(): Boolean {
@@ -57,7 +54,6 @@ class ScheduleAutomaticBackupImpl() : ScheduleAutomaticBackup {
     private suspend fun performBackup() {
         // This would be called by the scheduled job
         // The actual backup logic should be injected via dependency injection
-        println("Performing scheduled desktop backup at ${System.currentTimeMillis()}")
         // Note: In a full implementation, this would call CreateBackup use case
     }
 }

@@ -123,8 +123,6 @@ class FreeAITranslateEngine(
                         return@forEachIndexed
                     }
                     
-                    println("FreeAI: Translating from $srcLang to $tgtLang")
-                    
                     // Use Hugging Face Inference API (free tier)
                     val response = client.default.post(modelUrl) {
                         contentType(ContentType.Application.Json)
@@ -142,8 +140,7 @@ class FreeAITranslateEngine(
                         try {
                             val result = response.body<TranslationResponse>()
                             result.translationText ?: result.generatedText
-                        } catch (e2: Exception) {
-                            println("Failed to parse response: ${e2.message}")
+                        } catch (_: Exception) {
                             null
                         }
                     }
@@ -155,9 +152,7 @@ class FreeAITranslateEngine(
                         results.add(text)
                     }
                     
-                } catch (e: Exception) {
-                    println("FreeAI translation error for text at index $index: ${e.message}")
-                    e.printStackTrace()
+                } catch (_: Exception) {
                     // Add original text as fallback
                     results.add(text)
                 }
@@ -170,8 +165,6 @@ class FreeAITranslateEngine(
                 onSuccess(results)
             }
         } catch (e: Exception) {
-            println("FreeAI general error: ${e.message}")
-            e.printStackTrace()
             
             val errorMessage = when {
                 e.message?.contains("failed to connect") == true || 

@@ -37,13 +37,8 @@ internal object FileChooser {
         fileExtensions: String = ""
     ): String? {
         return kotlin.runCatching { chooseFileNative(type, initialDirectory, fileExtensions) }
-            .onFailure { nativeException ->
-                println("A call to chooseDirectoryNative failed: ${nativeException.message}")
-
+            .onFailure {
                 return kotlin.runCatching { chooseFileSwing(type, initialDirectory, fileExtensions) }
-                    .onFailure { swingException ->
-                        println("A call to chooseDirectorySwing failed ${swingException.message}")
-                    }
                     .getOrNull()
             }
             .getOrNull()

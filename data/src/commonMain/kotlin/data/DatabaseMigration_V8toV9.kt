@@ -9,8 +9,6 @@ import app.cash.sqldelight.db.SqlDriver
  */
 fun migrateV8toV9(driver: SqlDriver) {
     try {
-        println("Starting migration from version 8 to 9...")
-        
         // Check if sync_queue table exists
         var syncQueueExists = false
         var hasCorrectSchema = false
@@ -45,17 +43,14 @@ fun migrateV8toV9(driver: SqlDriver) {
                     },
                     parameters = 0
                 )
-            } catch (e: Exception) {
-                println("Error checking sync_queue schema: ${e.message}")
+            } catch (_: Exception) {
+                // Silently ignore schema check errors
             }
             
             if (!hasCorrectSchema) {
-                println("sync_queue table has incorrect schema, recreating...")
                 // Drop the old sync_queue table
                 driver.execute(null, "DROP TABLE IF EXISTS sync_queue;", 0)
-                println("Dropped old sync_queue table")
             } else {
-                println("sync_queue table already has correct schema")
                 return
             }
         }
@@ -72,18 +67,12 @@ fun migrateV8toV9(driver: SqlDriver) {
         """.trimIndent()
         
         driver.execute(null, createSyncQueueSql, 0)
-        println("Created sync_queue table with correct schema")
         
         // Create indexes for better performance
         driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_timestamp ON sync_queue(timestamp ASC);", 0)
         driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_sync_queue_book_id ON sync_queue(book_id);", 0)
-        println("Created indexes for sync_queue table")
         
-        println("Successfully migrated to version 9")
-        
-    } catch (e: Exception) {
-        println("Error migrating to version 9: ${e.message}")
-        e.printStackTrace()
+    } catch (_: Exception) {
         // Don't throw - allow the app to continue even if migration fails
     }
 }
