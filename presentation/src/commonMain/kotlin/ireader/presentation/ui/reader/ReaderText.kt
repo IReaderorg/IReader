@@ -394,9 +394,18 @@ private fun OptimizedPagedReaderText(
             // Structure: header (index 0) + content items (indices 1..N) + void (index N+1)
             val voidIndex = contentSize + 1
             
-            // Wait for LazyColumn to be populated, then scroll
-            repeat(20) { attempt ->
-                kotlinx.coroutines.delay(50)
+            // Quick check - try to scroll immediately if items are ready
+            val immediateTotal = lazyListState.layoutInfo.totalItemsCount
+            if (immediateTotal > voidIndex) {
+                lazyListState.scrollToItem(voidIndex)
+                lastScrolledChapterId = chapterId
+                vm.scrollToEndOnChapterChange = false
+                return@LaunchedEffect
+            }
+            
+            // Wait briefly for LazyColumn to be populated, then scroll
+            repeat(10) {
+                kotlinx.coroutines.delay(16) // ~1 frame
                 val totalItems = lazyListState.layoutInfo.totalItemsCount
                 if (totalItems > voidIndex) {
                     lazyListState.scrollToItem(voidIndex)
