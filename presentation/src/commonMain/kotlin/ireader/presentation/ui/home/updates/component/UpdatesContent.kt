@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.UpdatesWithRelations
@@ -27,6 +29,12 @@ fun UpdatesContent(
         onClickCover: (UpdatesWithRelations) -> Unit,
         onClickDownload: (UpdatesWithRelations) -> Unit,
 ) {
+    // Collect state reactively - this is the key fix!
+    val screenState by state.state.collectAsState()
+    val updates = screenState.updates
+    val selection = screenState.selectedChapterIds
+    val updateHistory = screenState.updateHistory
+    
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -36,43 +44,43 @@ fun UpdatesContent(
             )
         ) {
             // New Updates Section
-            if (state.updates.isNotEmpty()) {
+            if (updates.isNotEmpty()) {
                 item {
                     TextSection(text = localizeHelper.localize(Res.string.new_updates))
                 }
             }
             
-            state.updates.forEach { (date, updates) ->
+            updates.forEach { (date, updatesList) ->
                 item {
                     TextSection(
                         text = date.date.asRelativeTimeString()
                     )
                 }
                 items(
-                    count = updates.size,
+                    count = updatesList.size,
                 ) { index ->
                     UpdatesItem(
-                        book = updates[index],
-                        isSelected = updates[index].chapterId in state.selection,
+                        book = updatesList[index],
+                        isSelected = updatesList[index].chapterId in selection,
                         onClickItem = onClickItem,
                         onLongClickItem = onLongClickItem,
                         onClickCover = onClickCover,
                         onClickDownload = onClickDownload,
-                        isDownloadable = !updates[index].downloaded
+                        isDownloadable = !updatesList[index].downloaded
                     )
                 }
             }
             
             // Update History Section
-            if (state.updateHistory.isNotEmpty()) {
+            if (updateHistory.isNotEmpty()) {
                 item {
                     TextSection(text = localizeHelper.localize(Res.string.update_history))
                 }
                 items(
-                    count = state.updateHistory.size
+                    count = updateHistory.size
                 ) { index ->
                     UpdateHistoryItem(
-                        history = state.updateHistory[index]
+                        history = updateHistory[index]
                     )
                 }
             }

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.BookItem
@@ -26,13 +28,20 @@ internal fun LibraryContent(
         getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
         onResumeReading: () -> Unit,
 ) {
-    if (vm.categories.isEmpty()) return
+    // Collect state reactively - this is the key fix!
+    val state by vm.state.collectAsState()
+    val categories = state.categories
+    val selectedCategoryIndex = state.selectedCategoryIndex
+    val selectedBooks = state.selectedBookIds
+    val layout = state.layout
+    
+    if (categories.isEmpty()) return
     val horizontalPager =
         rememberPagerState(
-            initialPage = vm.selectedCategoryIndex,
+            initialPage = selectedCategoryIndex,
             initialPageOffsetFraction = 0f
         ) {
-            vm.categories.size
+            categories.size
         }
     LaunchedEffect(horizontalPager) {
         snapshotFlow { horizontalPager.currentPage }.collect {
@@ -45,24 +54,24 @@ internal fun LibraryContent(
     ) {
         ScrollableTabs(
             modifier = Modifier.fillMaxWidth(),
-            libraryTabs = vm.categories
+            libraryTabs = categories
                 .map { it.visibleName.plus(if (vm.showCountInCategory.value) " (${it.bookCount})" else "") },
             pagerState = horizontalPager,
-            visible = vm.showCategoryTabs.value && vm.categories.isNotEmpty()
+            visible = vm.showCategoryTabs.value && categories.isNotEmpty()
         )
         LibraryPager(
             pagerState = horizontalPager,
             onClick = onBook,
             onLongClick = onLongBook,
             goToLatestChapter = goToLatestChapter,
-            categories = vm.categories,
-            pageCount = vm.categories.size,
-            layout = vm.layout,
+            categories = categories,
+            pageCount = categories.size,
+            layout = layout,
             onPageChange = { page ->
                 vm.getLibraryForCategoryIndex(categoryIndex = page)
             },
-            selection = vm.selectedBooks,
-            currentPage = vm.selectedCategoryIndex,
+            selection = selectedBooks.toList(),
+            currentPage = selectedCategoryIndex,
             showUnreadBadge = vm.unreadBadge.value,
             showReadBadge = vm.readBadge.value,
             showGoToLastChapterBadge = vm.goToLastChapterBadge.value,

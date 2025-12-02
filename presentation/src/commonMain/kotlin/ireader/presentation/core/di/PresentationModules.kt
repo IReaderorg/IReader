@@ -6,16 +6,13 @@ import ireader.presentation.core.theme.AppThemeViewModel
 import ireader.presentation.di.screenModelModule
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
-import ireader.presentation.ui.home.history.viewmodel.HistoryStateImpl
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
-import ireader.presentation.ui.home.library.viewmodel.LibraryStateImpl
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import ireader.presentation.ui.home.sources.browse.BrowseSettingsViewModel
 import ireader.presentation.ui.home.sources.extension.CatalogsStateImpl
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchStateImpl
 import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearchViewModel
-import ireader.presentation.ui.home.updates.viewmodel.UpdateStateImpl
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenPreferencesStateImpl
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenStateImpl
@@ -53,11 +50,8 @@ import org.koin.dsl.module
 val PresentationModules = module {
 
 
-    // Changed state objects from single to factory - each screen should have its own state
-    factory<HistoryStateImpl> { HistoryStateImpl() }
-    factory<LibraryStateImpl> { LibraryStateImpl() }
+    // State objects removed - ViewModels now use Mihon-style MutableStateFlow internally
     factory<CatalogsStateImpl> { CatalogsStateImpl() }
-    factory<UpdateStateImpl> { UpdateStateImpl() }
     factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
 
@@ -84,8 +78,37 @@ val PresentationModules = module {
         )
     }
     // Changed from single to factory - these ViewModels are heavy and should be created on-demand
-    factory  { HistoryViewModel(get(), get(), get(),get(),) }
-    factory  { LibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    // Updated to Mihon-style StateFlow pattern (no separate state impl needed)
+    factory  { HistoryViewModel(get(), get(), get()) }
+    factory  { 
+        LibraryViewModel(
+            localGetBookUseCases = get(),
+            insertUseCases = get(),
+            deleteUseCase = get(),
+            localGetChapterUseCase = get(),
+            libraryScreenPrefUseCases = get(),
+            serviceUseCases = get(),
+            getLibraryCategory = get(),
+            libraryPreferences = get(),
+            markBookAsReadOrNotUseCase = get(),
+            getCategory = get(),
+            downloadUnreadChaptersUseCase = get(),
+            archiveBookUseCase = get(),
+            getLastReadNovelUseCase = get(),
+            syncUseCases = getOrNull(),
+            importEpub = get(),
+            downloadService = get(),
+            bookUseCases = get(),
+            chapterUseCases = get(),
+            categoryUseCases = get(),
+            downloadUseCases = get(),
+            historyUseCases = get(),
+            clipboardService = get(),
+            shareService = get(),
+            fileSystemService = get(),
+            localizeHelper = get()
+        )
+    }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
     factory<GlobalSearchViewModel> { GlobalSearchViewModel(get(), get(), get(), get(), get(), get()) }
     
@@ -97,7 +120,8 @@ val PresentationModules = module {
 
 
     // Changed from single to factory - created on-demand when user navigates to updates
-    factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    // Updated to Mihon-style StateFlow pattern (no separate state impl needed)
+    factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }
     // Changed from single to factory - settings screen is not always needed

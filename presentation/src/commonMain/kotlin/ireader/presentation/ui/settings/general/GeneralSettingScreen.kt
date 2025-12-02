@@ -69,6 +69,36 @@ fun GeneralSettingScreen(
     val manageNotificationComponent = mangeNotificationRow()
     val items = remember {
         listOf<Components>(
+                // Language Section - Moved to top for better visibility
+                Components.Header(
+                        text = localizeHelper.localize(Res.string.language_translation),
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.Language
+                ),
+                Components.Dynamic {
+                    ChoicePreference(
+                            preference = vm.language,
+                            choices = vm.getLanguageChoices(),
+                            title = localizeHelper.localize(
+                                    Res.string.languages
+                            ),
+                            onValue = { value: String ->
+                                vm.language.value = value
+                                vm.localeHelper.updateLocal()
+                            }
+                    )
+                },
+                Components.Dynamic {
+                    NavigationPreferenceCustom(
+                        title = localizeHelper.localize(Res.string.translation_settings),
+                        subtitle = localizeHelper.localize(Res.string.api_settings),
+                        icon = { Icon(Icons.Filled.Translate, contentDescription = null) },
+                        onClick = onTranslationSettingsClick
+                    )
+                },
+                
+                Components.Space,
+                
                 // App Updates & Display Section
                 Components.Header(
                         text = localizeHelper.localize(Res.string.app_updates_display),
@@ -291,35 +321,6 @@ fun GeneralSettingScreen(
                 ),
                 manageNotificationComponent,
                 
-                Components.Space,
-                
-                // Language & Translation Section
-                Components.Header(
-                        text = localizeHelper.localize(Res.string.language_translation),
-                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-                        icon = Icons.Filled.Language
-                ),
-                Components.Dynamic {
-                    NavigationPreferenceCustom(
-                        title = localizeHelper.localize(Res.string.translation_settings),
-                        subtitle = localizeHelper.localize(Res.string.api_settings),
-                        icon = { Icon(Icons.Filled.Translate, contentDescription = null) },
-                        onClick = onTranslationSettingsClick
-                    )
-                },
-                Components.Dynamic {
-                    ChoicePreference(
-                            preference = vm.language,
-                            choices = vm.getLanguageChoices(),
-                            title = localizeHelper.localize(
-                                    Res.string.languages
-                            ),
-                            onValue = { value: String ->
-                                vm.language.value = value
-                                vm.localeHelper.updateLocal()
-                            }
-                    )
-                }
         )
     }
 
@@ -502,10 +503,39 @@ class GeneralSettingScreenViewModel(
     // Leaderboard preferences
     val leaderboardRealtimeEnabled = uiPreferences.leaderboardRealtimeEnabled().asStateIn(scope)
 
+    /**
+     * Returns language choices filtered to only include languages that have
+     * available translations in the app. This ensures users only see languages
+     * they can actually use.
+     */
     @Composable
     fun getLanguageChoices(): Map<String, String> {
-        val lanuages = localeHelper.languages.mapNotNull { SubtitleHelper.fromTwoLettersToLanguage(it)?.let { lang -> it to lang } }
-        return lanuages.toMap()
+        // Available locales in the app (from i18n/src/commonMain/composeResources/values-*)
+        val availableLocales = setOf(
+            "en",      // English (default)
+            "ar",      // Arabic
+            "fa",      // Persian/Farsi
+            "fr",      // French
+            "ko",      // Korean
+            "ru",      // Russian
+            "tr",      // Turkish
+            "zh",      // Chinese (Simplified)
+        )
+        
+        // Filter languages to only include those with available translations
+        val languages = localeHelper.languages
+            .filter { locale -> 
+                // Handle locale codes like "zh-CN" -> "zh"
+                val baseLocale = locale.substringBefore("-").substringBefore("_").lowercase()
+                availableLocales.contains(baseLocale)
+            }
+            .mapNotNull { locale ->
+                SubtitleHelper.fromTwoLettersToLanguage(locale)?.let { langName -> 
+                    locale to langName 
+                }
+            }
+        
+        return languages.toMap()
     }
     
     /**

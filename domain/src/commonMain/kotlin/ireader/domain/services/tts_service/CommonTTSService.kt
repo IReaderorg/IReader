@@ -128,6 +128,7 @@ interface TTSServiceState {
     val currentChapter: StateFlow<Chapter?>
     val currentParagraph: StateFlow<Int>
     val previousParagraph: StateFlow<Int>  // For UI highlighting
+    val paragraphSpeakingStartTime: StateFlow<Long>  // Timestamp when TTS actually starts speaking current paragraph
     val totalParagraphs: StateFlow<Int>
     val currentContent: StateFlow<List<String>>
     val speechSpeed: StateFlow<Float>

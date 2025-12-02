@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +42,9 @@ fun BookImage(
     performanceConfig: PerformanceConfig = LocalPerformanceConfig.current,
     badge: @Composable BoxScope.() -> Unit,
 ) {
+    // Cache the BookCover to prevent recreation on every recomposition
+    val bookCover = remember(book.id, book.cover) { BookCover.from(book) }
+    
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -62,31 +66,21 @@ fun BookImage(
                     )
                 ),
         ) {
-            // During fast scrolling, show a placeholder instead of loading images
-            if (!isScrollingFast) {
-                IBookImageComposable(
-                    modifier = Modifier
-                        .aspectRatio(ratio)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
-                        .align(Alignment.Center),
-                    image = BookCover.from(book),
-                    headers = header,
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    crossfadeDurationMs = performanceConfig.crossfadeDurationMs
-                )
-            } else {
-                // Simple placeholder during fast scroll
-                Box(
-                    modifier = Modifier
-                        .aspectRatio(ratio)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(4.dp))
-                        .align(Alignment.Center)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                )
-            }
+            // Always render the image composable to maintain proper caching and state
+            // The image loader handles caching internally, so images won't disappear on scroll
+            IBookImageComposable(
+                modifier = Modifier
+                    .aspectRatio(ratio)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(4.dp))
+                    .align(Alignment.Center),
+                image = bookCover,
+                headers = header,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                alignment = Alignment.Center,
+                // Use faster crossfade during fast scrolling for better performance
+                crossfadeDurationMs = if (isScrollingFast) 0 else performanceConfig.crossfadeDurationMs
+            )
             if (!onlyCover) {
                 Box(
                     Modifier

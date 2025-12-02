@@ -416,6 +416,18 @@ class TranslationEnginesManager(
     }
     
     /**
+     * Refresh available translation engines
+     * This reloads the list of available engines including plugins
+     */
+    suspend fun refreshEngines() {
+        // Clear the translation cache when refreshing engines
+        clearCache()
+        
+        // Refresh plugin manager to discover new plugins
+        pluginManager?.refreshPlugins()
+    }
+    
+    /**
      * Translate with context-aware settings for AI-powered engines
      */
     suspend fun translateWithContext(

@@ -199,7 +199,7 @@ data class BookDetailScreenSpec constructor(
         )
         
         // Sheet state
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         
         // Debounced scroll position saving
         LaunchedEffect(scrollState) {
@@ -310,7 +310,7 @@ data class BookDetailScreenSpec constructor(
                                 source = state.source,
                                 onCommand = {
                                     chapterMode.value = false
-                                    scope.launch { sheetState.show() }
+                                    scope.launch { sheetState.partialExpand() }
                                 },
                                 hasSelection = vm.hasSelection,
                                 selectionSize = vm.selection.size,
@@ -450,7 +450,7 @@ data class BookDetailScreenSpec constructor(
                             },
                             onSortClick = {
                                 chapterMode.value = true
-                                scope.launch { sheetState.show() }
+                                scope.launch { sheetState.partialExpand() }
                             },
                             chapters = chaptersState,
                             scrollState = scrollState,

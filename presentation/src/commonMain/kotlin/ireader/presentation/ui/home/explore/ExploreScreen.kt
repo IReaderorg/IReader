@@ -37,10 +37,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Stable key generator for explore book items
+ * Stable key generator for explore book items.
+ * Uses the column (index) to preserve API order while ensuring stability.
+ * The column is set when converting books to BookItems and represents the original order.
  */
 @Stable
-private fun stableExploreBookKey(book: BookItem): Any = "${book.id}_${book.column}"
+private fun stableExploreBookKey(book: BookItem): Any = book.column
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,12 +86,10 @@ fun ExploreScreen(
     val stableOnBook = remember(onBook) { onBook }
     val stableOnLongClick = remember(onLongClick) { onLongClick }
     
-    // Memoize books with stable keys - derived from state
-    val booksWithKeys by remember(state.books) {
-        derivedStateOf {
-            state.books.mapIndexed { index, book ->
-                book.toBookItem().copy(column = index.toLong())
-            }
+    // Memoize books with stable keys - only recompute when books list changes
+    val booksWithKeys = remember(state.books) {
+        state.books.mapIndexed { index, book ->
+            book.toBookItem().copy(column = index.toLong())
         }
     }
     

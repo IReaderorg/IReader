@@ -132,6 +132,12 @@ class TTSStateImpl() : AndroidTTSState {
     // Gradio TTS flag (for online TTS engines)
     var useGradioTTS by mutableStateOf(false)
     
+    // Timestamp when TTS actually starts speaking current paragraph (for highlighter sync)
+    private val _paragraphSpeakingStartTime = kotlinx.coroutines.flow.MutableStateFlow(0L)
+    val paragraphSpeakingStartTime: kotlinx.coroutines.flow.StateFlow<Long> = _paragraphSpeakingStartTime
+    
+    fun setParagraphSpeakingStartTime(value: Long) { _paragraphSpeakingStartTime.value = value }
+    
     // Alias for speechSpeed (for compatibility)
     val speechRate: kotlinx.coroutines.flow.StateFlow<Float> get() = _speechSpeed
     

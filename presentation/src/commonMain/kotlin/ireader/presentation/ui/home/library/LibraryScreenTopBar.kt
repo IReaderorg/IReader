@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,7 +52,7 @@ import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.ui.DEFAULT_ELEVATION
-import ireader.presentation.ui.home.library.viewmodel.LibraryState
+import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -61,7 +62,7 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun LibraryScreenTopBar(
-    state: LibraryState,
+    state: LibraryViewModel,
     onSearch: (() -> Unit)? = null,
     refreshUpdate: () -> Unit,
     onClickSelectAll: () -> Unit,
@@ -78,8 +79,13 @@ fun LibraryScreenTopBar(
     onSyncRemote: () -> Unit = {},
     onSearchLibrary: () -> Unit = {}
 ) {
+    // Collect state reactively
+    val screenState by state.state.collectAsState()
+    val selectionMode = screenState.selectionMode
+    val selectedBooksSize = screenState.selectedBookIds.size
+    
     AnimatedContent(
-        targetState = state.selectionMode,
+        targetState = selectionMode,
         transitionSpec = {
             slideInHorizontally(
                 initialOffsetX = { if (targetState) it else -it },
@@ -90,10 +96,10 @@ fun LibraryScreenTopBar(
                 animationSpec = tween(300)
             ) + fadeOut(animationSpec = tween(150))
         }
-    ) { selectionMode ->
-        if (selectionMode) {
+    ) { inSelectionMode ->
+        if (inSelectionMode) {
             EditModeTopAppBar(
-                selectionSize = state.selectedBooks.size,
+                selectionSize = selectedBooksSize,
                 onClickCancelSelection = onClearSelection,
                 onClickSelectAll = onClickSelectAll,
                 onClickInvertSelection = onClickInvertSelection,
@@ -128,7 +134,7 @@ fun LibraryScreenTopBar(
 )
 @Composable
 private fun RegularTopBar(
-    vm: LibraryState,
+    vm: LibraryViewModel,
     onSearch: () -> Unit,
     refreshUpdate: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -142,6 +148,11 @@ private fun RegularTopBar(
     onSyncRemote: () -> Unit = {},
     onSearchLibrary: () -> Unit = {}
 ) {
+    // Collect state reactively
+    val screenState by vm.state.collectAsState()
+    val inSearchMode = screenState.inSearchMode
+    val searchQuery = screenState.searchQuery
+    
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -151,13 +162,13 @@ private fun RegularTopBar(
     Toolbar(
         title = {
             AnimatedContent(
-                targetState = vm.inSearchMode,
+                targetState = inSearchMode,
                 transitionSpec = {
                     fadeIn(animationSpec = tween(300)) togetherWith 
                     fadeOut(animationSpec = tween(300))
                 }
-            ) { inSearchMode ->
-                if (!inSearchMode) {
+            ) { isSearchMode ->
+                if (!isSearchMode) {
                     BigSizeTextComposable(
                         text = localize(Res.string.library),
                         style = MaterialTheme.typography.headlineSmall.copy(
@@ -166,15 +177,13 @@ private fun RegularTopBar(
                     )
                 } else {
                     AppTextField(
-                        query = vm.searchQuery ?: "",
+                        query = searchQuery ?: "",
                         onValueChange = { query ->
-                            vm.searchQuery = query
+                            vm.searchInLibrary(query)
                             onSearch()
                         },
                         onConfirm = {
-                            onSearch()
-                            vm.inSearchMode = false
-                            vm.searchQuery = null
+                            // Just hide keyboard, keep search active with results
                             keyboardController?.hide()
                             focusManager.clearFocus()
                         },
@@ -184,14 +193,12 @@ private fun RegularTopBar(
             }
         },
         actions = {
-            if (vm.inSearchMode) {
+            if (inSearchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
                     contentDescription = localize(Res.string.close),
                     onClick = {
-                        vm.inSearchMode = false
-                        vm.searchQuery = null
-                        onSearch()
+                        vm.clearSearch()
                     },
                 )
             } else {
@@ -216,7 +223,7 @@ private fun RegularTopBar(
                     icon = Icons.Outlined.Search,
                     contentDescription = localize(Res.string.search),
                     onClick = {
-                        vm.inSearchMode = true
+                        vm.setSearchMode(true)
                     }
                 )
                 
@@ -299,10 +306,9 @@ private fun RegularTopBar(
             }
         },
         navigationIcon = {
-            if (vm.inSearchMode) {
+            if (inSearchMode) {
                 TopAppBarBackButton {
-                    vm.inSearchMode = false
-                    vm.searchQuery = null
+                    vm.clearSearch()
                 }
             } else null
         },

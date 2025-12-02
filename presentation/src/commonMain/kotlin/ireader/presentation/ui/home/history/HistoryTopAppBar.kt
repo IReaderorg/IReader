@@ -3,11 +3,12 @@ package ireader.presentation.ui.home.history
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -19,28 +20,31 @@ import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
-import ireader.presentation.ui.home.history.viewmodel.HistoryState
+import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryTopAppBar(
-        modifier: Modifier = Modifier,
-        vm: HistoryState,
-        onDeleteAll: () -> Unit,
-        scrollBehavior: TopAppBarScrollBehavior? = null
+    modifier: Modifier = Modifier,
+    vm: HistoryViewModel,
+    onDeleteAll: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
+    // Collect state reactively
+    val state by vm.state.collectAsState()
+    val searchMode = state.isSearchMode
+    val searchQuery = state.searchQuery
+    
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     Toolbar(
         title = {
-            if (!vm.searchMode) {
+            if (!searchMode) {
                 BigSizeTextComposable(text = localize(Res.string.history_screen_label))
             } else {
                 AppTextField(
-                    query = vm.searchQuery,
-                    onValueChange = {
-                        vm.searchQuery = it
-                    },
+                    query = searchQuery,
+                    onValueChange = { vm.onSearchQueryChange(it) },
                     onConfirm = {
                         keyboardController?.hide()
                         focusManager.clearFocus()
@@ -49,13 +53,12 @@ fun HistoryTopAppBar(
             }
         },
         actions = {
-            if (vm.searchMode) {
+            if (searchMode) {
                 AppIconButton(
                     imageVector = Icons.Default.Close,
                     contentDescription = localize(Res.string.close),
                     onClick = {
-                        vm.searchMode = false
-                        vm.searchQuery = ""
+                        vm.toggleSearchMode()
                         keyboardController?.hide()
                     },
                 )
@@ -63,27 +66,16 @@ fun HistoryTopAppBar(
             AppIconButton(
                 imageVector = Icons.Default.Search,
                 contentDescription = localize(Res.string.search),
-                onClick = {
-                    vm.searchMode = true
-                },
+                onClick = { vm.toggleSearchMode() },
             )
-            // Delete this action bar
-//            AppIconButton(
-//                imageVector = Icons.Default.Delete,
-//                contentDescription = localize(Res.string.delete_all_histories),
-//                onClick = {
-//                    onDeleteAll()
-//                },
-//            )
         },
         navigationIcon = {
-            if (vm.searchMode) {
+            if (searchMode) {
                 AppIconButton(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = localize(Res.string.toggle_search_mode_off),
                     onClick = {
-                        vm.searchMode = false
-                        vm.searchQuery = ""
+                        vm.toggleSearchMode()
                         keyboardController?.hide()
                     }
                 )
@@ -91,6 +83,5 @@ fun HistoryTopAppBar(
         },
         scrollBehavior = scrollBehavior,
         modifier = modifier
-
     )
 }

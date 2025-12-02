@@ -35,29 +35,48 @@ data class PerformanceConfig(
     val maxConcurrentImageLoads: Int = 4,
     val enableComplexAnimations: Boolean = true,
     val enableBlurEffects: Boolean = true,
-    val enableShadows: Boolean = true
+    val enableShadows: Boolean = true,
+    // Image loading optimizations
+    val maxImageSize: Int = 1024, // Max dimension in pixels
+    val thumbnailSize: Int = 256, // Size for list thumbnails
+    val enableImageCrossfade: Boolean = true,
+    val useRgb565: Boolean = false, // Use RGB_565 for non-transparent images (saves 50% memory)
+    val enableImagePlaceholder: Boolean = true,
+    val deferImageLoadingOnScroll: Boolean = false // Defer loading during fast scroll
 ) {
     companion object {
         val Default = PerformanceConfig()
         
         val LowEnd = PerformanceConfig(
-            animationDurationMs = 150,
-            crossfadeDurationMs = 100,
-            prefetchDistance = 2,
+            animationDurationMs = 100,
+            crossfadeDurationMs = 0, // Disable crossfade for instant display
+            prefetchDistance = 1,
             maxConcurrentImageLoads = 2,
             enableComplexAnimations = false,
             enableBlurEffects = false,
-            enableShadows = false
+            enableShadows = false,
+            maxImageSize = 384, // Smaller images for low-end
+            thumbnailSize = 128,
+            enableImageCrossfade = false,
+            useRgb565 = true,
+            enableImagePlaceholder = false, // Simple color placeholder
+            deferImageLoadingOnScroll = true
         )
         
         val Medium = PerformanceConfig(
             animationDurationMs = 200,
-            crossfadeDurationMs = 150,
-            prefetchDistance = 3,
+            crossfadeDurationMs = 100,
+            prefetchDistance = 2,
             maxConcurrentImageLoads = 3,
             enableComplexAnimations = true,
             enableBlurEffects = false,
-            enableShadows = true
+            enableShadows = true,
+            maxImageSize = 512,
+            thumbnailSize = 192,
+            enableImageCrossfade = true,
+            useRgb565 = false,
+            enableImagePlaceholder = true,
+            deferImageLoadingOnScroll = false
         )
     }
 }

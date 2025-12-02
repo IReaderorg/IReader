@@ -23,21 +23,22 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 
 @Composable
 fun EditCategoriesDialog(
-        vm: LibraryViewModel,
-        modifier: Modifier = Modifier,
-        onConfirm: () -> Unit,
-        dismissDialog: () -> Unit,
-        onAddToInsertQueue: (Category) -> Unit,
-        onRemoteInInsertQueue: (Category) -> Unit,
-        onRemoteInDeleteQueue: (Category) -> Unit,
-        onAddDeleteQueue: (Category) -> Unit,
-        categories: List<CategoryWithCount>
+    vm: LibraryViewModel,
+    modifier: Modifier = Modifier,
+    showDialog: Boolean = false,
+    onConfirm: () -> Unit,
+    dismissDialog: () -> Unit,
+    onAddToInsertQueue: (Category) -> Unit,
+    onRemoteInInsertQueue: (Category) -> Unit,
+    onRemoteInDeleteQueue: (Category) -> Unit,
+    onAddDeleteQueue: (Category) -> Unit,
+    categories: List<CategoryWithCount>
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    if (vm.showDialog) {
+    if (showDialog) {
         IAlertDialog(
             modifier = modifier.heightIn(max = 350.dp, min = 200.dp),
-            onDismissRequest = { vm.showDialog = false },
+            onDismissRequest = dismissDialog,
             title = { Text(localizeHelper.localize(Res.string.edit_category)) },
             text = {
                 LazyColumn {

@@ -551,6 +551,7 @@
     <string name="api_response_error">Api Response was not successful</string>
     <string name="deepseek_payment_required">DeepSeek payment required or API quota exceeded</string>
     <string name="translations">translation</string>
+    <string name="translation_engines_refreshed">Translation engines refreshed</string>
     <string name="ollama_server_url_not_set">OOllama server url not set</string>
     <string name="literary">Literary</string>
     <string name="technical">Technical</string>

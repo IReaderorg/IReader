@@ -1,5 +1,6 @@
 package ireader.presentation.ui.home.history.viewmodel
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,149 +12,140 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.reusable_composable.WarningAlertData
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-
+/**
+ * ViewModel for the History screen following Mihon's StateScreenModel pattern.
+ */
+@Stable
 class HistoryViewModel(
-    private val state: HistoryStateImpl,
     val historyUseCase: HistoryUseCase,
     val uiPreferences: UiPreferences,
-    // NEW: Clean architecture use cases (for future enhancements)
     private val historyUseCases: ireader.domain.usecases.history.HistoryUseCases,
-) : BaseViewModel(), HistoryState by state {
+) : BaseViewModel() {
+
+    // Mihon-style immutable state
+    private val _state = MutableStateFlow(HistoryScreenState())
+    val state: StateFlow<HistoryScreenState> = _state.asStateFlow()
+    
+    // Convenience accessors for backward compatibility
+    val isLoading get() = _state.value.isLoading
+    val isEmpty get() = _state.value.isEmpty
+    val histories get() = _state.value.histories
+    val searchMode get() = _state.value.isSearchMode
+    val searchQuery get() = _state.value.searchQuery
+    val groupByNovel get() = _state.value.groupByNovel
+    val dateFilter get() = _state.value.dateFilter
+    
+    // Refresh trigger for UI updates (kept for backward compatibility)
+    var refreshTrigger: Int = 0
+        private set
 
     val relative by uiPreferences.relativeTime().asState()
     val relativeFormat by uiPreferences.relativeTime().asState()
     var warningAlert by mutableStateOf(WarningAlertData())
 
-    // Track all history items to support filtering
+    // All histories for filtering
     private var allHistories: Map<Long, List<HistoryWithRelations>> = emptyMap()
     
     init {
-        // Load groupByNovel preference
+        // Load preferences
         scope.launch {
-            groupByNovel = uiPreferences.groupHistoryByNovel().get()
+            val groupByNovel = uiPreferences.groupHistoryByNovel().get()
+            _state.update { it.copy(groupByNovel = groupByNovel) }
         }
         
-        // When ViewModel is created or re-initialized, refresh the data
+        // Subscribe to history data
         scope.launch {
-            historyUseCase.findHistoriesByFlowLongType().collect {
-                allHistories = it
+            _state.update { it.copy(isLoading = true) }
+            historyUseCase.findHistoriesByFlowLongType().collect { histories ->
+                allHistories = histories
                 applySearchFilter()
-                // Force refresh to ensure UI updates
-                refreshTrigger++
             }
         }
     }
-    /**
-     * Update search query and filter results
-     */
+    
     fun onSearchQueryChange(query: String) {
-        searchQuery = query
-        // Apply filter immediately
-        this@HistoryViewModel.applySearchFilter()
-        // Force refresh to update UI
-        refreshTrigger++
+        _state.update { it.copy(searchQuery = query) }
+        applySearchFilter()
     }
 
-
-    /**
-     * Force a refresh of the history display
-     */
-    fun forceRefresh() {
-        refreshTrigger++
-    }
-    /**
-     * Toggle search mode visibility
-     */
     fun toggleSearchMode() {
-        searchMode = !searchMode
-        if (!searchMode) {
-            // Reset search when exiting search mode
-            searchQuery = ""
+        val newMode = !_state.value.isSearchMode
+        _state.update { it.copy(isSearchMode = newMode) }
+        
+        if (!newMode) {
+            _state.update { it.copy(searchQuery = "") }
             applySearchFilter()
         }
-        // Force refresh to update UI
-        refreshTrigger++
     }
     
-    /**
-     * Toggle group by novel mode
-     */
     fun toggleGroupByNovel() {
-        groupByNovel = !groupByNovel
-        scope.launch {
-            uiPreferences.groupHistoryByNovel().set(groupByNovel)
-        }
-        refreshTrigger++
+        val newValue = !_state.value.groupByNovel
+        _state.update { it.copy(groupByNovel = newValue) }
+        scope.launch { uiPreferences.groupHistoryByNovel().set(newValue) }
     }
     
-    /**
-     * Set date filter
-     */
     fun setDateFilterHistory(filter: DateFilter?) {
-        dateFilter = filter
-        refreshTrigger++
+        _state.update { it.copy(dateFilter = filter) }
     }
-    /**
-     * Apply current search filter to history items
-     */
+    
     fun applySearchFilter() {
-        if (searchQuery.isBlank()) {
-            // No filter, show all items
-            histories = allHistories
+        val query = _state.value.searchQuery
+        val filtered = if (query.isBlank()) {
+            allHistories
         } else {
-            // Filter by title containing search query (case insensitive)
-            val filteredItems = allHistories.mapValues { (_, historyList) ->
+            allHistories.mapValues { (_, historyList) ->
                 historyList.filter {
-                    it.title.contains(searchQuery, ignoreCase = true) ||
-                            (it.chapterName?.contains(searchQuery, ignoreCase = true) ?: false)
+                    it.title.contains(query, ignoreCase = true) ||
+                    (it.chapterName?.contains(query, ignoreCase = true) ?: false)
                 }
             }.filterValues { it.isNotEmpty() }
-
-            histories = filteredItems
+        }
+        
+        _state.update { current ->
+            current.copy(
+                histories = filtered.mapValues { (_, list) -> list.toImmutableList() }.toImmutableMap(),
+                isLoading = false
+            )
         }
     }
 
-    /**
-     * Delete a specific history item with confirmation
-     */
     fun deleteHistory(history: HistoryWithRelations, localizeHelper: LocalizeHelper) {
-        // Create the alert dialog with proper callbacks
+        _state.update { it.copy(dialog = HistoryDialog.DeleteHistory(history)) }
+        
         val newAlert = WarningAlertData()
         newAlert.enable = true
         newAlert.title.value = localizeHelper.localize(Res.string.remove)
         newAlert.text.value = localizeHelper.localize(Res.string.dialog_remove_chapter_history_description)
         newAlert.onDismiss.value = {
-            // Just dismiss the alert without deleting when cancel is pressed
             warningAlert.enable = false
-            // Trigger UI refresh to reset the swipe state
-            refreshTrigger++
+            _state.update { it.copy(dialog = null) }
         }
         newAlert.onConfirm.value = {
-            // Capture the chapterId before any state changes
             val chapterIdToDelete = history.chapterId
-            // Proceed with deletion in a coroutine BEFORE closing the alert
-            // This ensures the deletion starts before any UI changes
             scope.launch {
                 try {
                     historyUseCase.deleteHistory(chapterIdToDelete)
                 } finally {
-                    // Close the alert and trigger UI refresh after deletion
                     warningAlert.enable = false
-                    refreshTrigger++
+                    _state.update { it.copy(dialog = null) }
                 }
             }
         }
         warningAlert = newAlert
     }
 
-
-    /**
-     * Delete all history entries with a confirmation dialog
-     */
     fun deleteAllHistories(localizeHelper: LocalizeHelper) {
-        // Create the alert dialog with proper callbacks
+        _state.update { it.copy(dialog = HistoryDialog.DeleteAllHistory) }
+        
         val warningMessage = localizeHelper.localize(Res.string.dialog_remove_chapter_books_description) + 
             " " + localizeHelper.localize(Res.string.action_cannot_be_undone)
         
@@ -162,36 +154,34 @@ class HistoryViewModel(
         newAlert.title.value = localizeHelper.localize(Res.string.delete_all_histories)
         newAlert.text.value = warningMessage
         newAlert.onDismiss.value = {
-            // Just dismiss the alert without deleting when cancel is pressed
             warningAlert.enable = false
-            // Trigger UI refresh to ensure UI consistency
-            refreshTrigger++
+            _state.update { it.copy(dialog = null) }
         }
         newAlert.onConfirm.value = {
-            // Proceed with deletion in a coroutine BEFORE closing the alert
             scope.launch {
                 try {
                     historyUseCase.deleteAllHistories()
                 } finally {
-                    // Close the alert and trigger UI refresh after deletion
                     warningAlert.enable = false
-                    refreshTrigger++
+                    _state.update { it.copy(dialog = null) }
                 }
             }
         }
         warningAlert = newAlert
     }
-
-
-
-
-
-
-
-
-}
-
-sealed class HistoryUiModel {
-    data class Header(val date: String) : HistoryUiModel()
-    data class Item(val item: HistoryWithRelations) : HistoryUiModel()
+    
+    fun saveScrollPosition(index: Int, offset: Int) {
+        _state.update { it.copy(savedScrollIndex = index, savedScrollOffset = offset) }
+    }
+    
+    fun forceRefresh() {
+        scope.launch {
+            _state.update { it.copy(isRefreshing = true) }
+            historyUseCase.findHistoriesByFlowLongType().collect { histories ->
+                allHistories = histories
+                applySearchFilter()
+                _state.update { it.copy(isRefreshing = false) }
+            }
+        }
+    }
 }

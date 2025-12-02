@@ -11,9 +11,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FolderOpen
@@ -21,13 +27,20 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import ireader.core.source.HttpSource
 import ireader.core.source.LocalSource
@@ -39,7 +52,6 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.*
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
-import ireader.presentation.ui.component.reusable_composable.AppTextField
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.component.text_related.RadioButton
@@ -60,7 +72,9 @@ fun BrowseTopAppBar(
         onLayoutTypeSelect: (DisplayMode) -> Unit,
         currentLayout: DisplayMode,
         scrollBehavior: TopAppBarScrollBehavior?,
-        onOpenLocalFolder: (() -> Unit)? = null
+        onOpenLocalFolder: (() -> Unit)? = null,
+        searchQuery: String = state.searchQuery ?: "",
+        isSearchMode: Boolean = state.isSearchModeEnable
 ) {
     var topMenu by remember {
         mutableStateOf(false)
@@ -73,7 +87,7 @@ fun BrowseTopAppBar(
             scrollBehavior = scrollBehavior,
             title = {
                 AnimatedVisibility(
-                    visible = !state.isSearchModeEnable,
+                    visible = !isSearchMode,
                     enter = fadeIn() + scaleIn(
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -86,7 +100,7 @@ fun BrowseTopAppBar(
                 }
                 
                 AnimatedVisibility(
-                    visible = state.isSearchModeEnable,
+                    visible = isSearchMode,
                     enter = fadeIn() + scaleIn(
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -95,23 +109,12 @@ fun BrowseTopAppBar(
                     ),
                     exit = fadeOut() + scaleOut()
                 ) {
-                    Surface(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .padding(vertical = 4.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        AppTextField(
-                            query = state.searchQuery ?: "",
-                            onValueChange = {
-                                onValueChange(it)
-                            },
-                            onConfirm = {
-                                onSearch()
-                            },
-                        )
-                    }
+                    ModernSearchField(
+                        query = searchQuery,
+                        onValueChange = onValueChange,
+                        onSearch = onSearch,
+                        placeholder = localize(Res.string.search_hint)
+                    )
                 }
             },
             actions = {
@@ -121,7 +124,7 @@ fun BrowseTopAppBar(
                 ) {
                     // Search/Close button with animation
                     AnimatedVisibility(
-                        visible = state.isSearchModeEnable,
+                        visible = isSearchMode,
                         enter = fadeIn() + scaleIn(
                             animationSpec = spring(
                                 dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -147,7 +150,7 @@ fun BrowseTopAppBar(
                     }
                     
                     AnimatedVisibility(
-                        visible = !state.isSearchModeEnable && source?.getFilters()
+                        visible = !isSearchMode && source?.getFilters()
                             ?.find { it is Filter.Title } != null,
                         enter = fadeIn() + scaleIn(
                             animationSpec = spring(
@@ -280,4 +283,93 @@ fun BrowseTopAppBar(
                 }
             },
     )
+}
+
+/**
+ * Modern search field with Material 3 styling
+ */
+@Composable
+private fun ModernSearchField(
+    query: String,
+    onValueChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier
+) {
+    val focusRequester = remember { FocusRequester() }
+    
+    // Auto-focus when the search field appears
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+    
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (query.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                }
+                
+                BasicTextField(
+                    value = query,
+                    onValueChange = onValueChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(
+                        onSearch = { onSearch() }
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                )
+            }
+            
+            // Clear button
+            if (query.isNotEmpty()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
+                    onClick = { onValueChange("") },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = localize(Res.string.clear),
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
 }

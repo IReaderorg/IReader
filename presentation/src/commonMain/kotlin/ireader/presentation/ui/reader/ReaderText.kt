@@ -472,17 +472,20 @@ private fun OptimizedPagedReaderText(
                     }
                 }
                 
-                // Void space at end of chapter with comments (only shown after scrolling to end)
-                item(key = "${vm.stateChapter?.id ?: 0}-chapter-void") {
-                    ChapterVoidSpace(
-                        chapter = vm.stateChapter ?: return@item,
-                        isLast = !hasNextChapter,
-                        textColor = vm.textColor.value.toComposeColor(),
-                        backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                        onShowComments = { vm.stateChapter?.let { onShowComments(it) } },
-                        onNextChapter = onNext,
-                        isLoading = vm.isLoading
-                    )
+                // Void space at end of chapter with comments (only shown when content exists)
+                // Users must read the chapter before seeing the "chapter complete" section
+                if (content.isNotEmpty()) {
+                    item(key = "${vm.stateChapter?.id ?: 0}-chapter-void") {
+                        ChapterVoidSpace(
+                            chapter = vm.stateChapter ?: return@item,
+                            isLast = !hasNextChapter,
+                            textColor = vm.textColor.value.toComposeColor(),
+                            backgroundColor = vm.backgroundColor.value.toComposeColor(),
+                            onShowComments = { vm.stateChapter?.let { onShowComments(it) } },
+                            onNextChapter = onNext,
+                            isLoading = vm.isLoading
+                        )
+                    }
                 }
             }
         }
@@ -1085,17 +1088,20 @@ private fun ContinuesReaderPage(
                     }
                 }
                 
-                // Void space at end of chapter
-                item(key = "void-${chapter.id}") {
-                    ChapterVoidSpace(
-                        chapter = chapter,
-                        isLast = isLastChapter && !hasNextChapter,
-                        textColor = vm.textColor.value.toComposeColor(),
-                        backgroundColor = vm.backgroundColor.value.toComposeColor(),
-                        onShowComments = { onShowComments(chapter) },
-                        onNextChapter = onNext,
-                        isLoading = vm.isLoading
-                    )
+                // Void space at end of chapter (only shown when content exists)
+                // Users must read the chapter before seeing the "chapter complete" section
+                if (content.isNotEmpty()) {
+                    item(key = "void-${chapter.id}") {
+                        ChapterVoidSpace(
+                            chapter = chapter,
+                            isLast = isLastChapter && !hasNextChapter,
+                            textColor = vm.textColor.value.toComposeColor(),
+                            backgroundColor = vm.backgroundColor.value.toComposeColor(),
+                            onShowComments = { onShowComments(chapter) },
+                            onNextChapter = onNext,
+                            isLoading = vm.isLoading
+                        )
+                    }
                 }
             }
         }

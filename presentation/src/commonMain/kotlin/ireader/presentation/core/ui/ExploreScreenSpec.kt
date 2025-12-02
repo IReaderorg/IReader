@@ -1,13 +1,9 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
-import ireader.presentation.core.NavigationRoutes
-
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,8 +17,11 @@ import ireader.domain.models.entities.toBookItem
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.query_must_not_be_empty
+import ireader.i18n.resources.source_not_available
 import ireader.presentation.core.IModalSheets
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.imageloader.convertToOkHttpRequest
@@ -64,7 +63,7 @@ data class ExploreScreenSpec(
         val scope = rememberCoroutineScope()
         
         val headers = remember { mutableStateOf<Headers?>(null) }
-        val sheetState = rememberModalBottomSheetState()
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         val snackBarHostState = SnackBarListener(vm)
         
         IModalSheets(
@@ -106,6 +105,8 @@ data class ExploreScreenSpec(
                         scrollBehavior = scrollBehavior,
                         state = vm,
                         source = source,
+                        searchQuery = state.searchQuery ?: "",
+                        isSearchMode = state.isSearchModeEnabled,
                         onValueChange = { vm.searchQuery = it },
                         onSearch = {
                             val searchQuery = state.searchQuery
@@ -196,7 +197,7 @@ data class ExploreScreenSpec(
                         onPopBackStack = { navController.popBackStack() },
                         snackBarHostState = snackBarHostState,
                         showmodalSheet = {
-                            scope.launchIO { sheetState.show() }
+                            scope.launchIO { sheetState.partialExpand() }
                         },
                         headers = { url ->
                             if (headers.value == null) {

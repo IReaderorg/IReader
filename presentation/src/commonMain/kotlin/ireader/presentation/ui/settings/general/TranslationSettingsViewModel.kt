@@ -288,4 +288,16 @@ class TranslationSettingsViewModel(
     fun resetModelRefreshMessage() {
         modelRefreshMessage = null
     }
+    
+    /**
+     * Refresh available translation engines
+     * This reloads the list of available engines including plugins
+     */
+    fun refreshEngines() {
+        scope.launch {
+            // Trigger a refresh of the translation engines manager
+            // This will reload built-in engines and discover any new plugins
+            translationEnginesManager.refreshEngines()
+        }
+    }
 } 

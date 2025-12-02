@@ -76,6 +76,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -162,7 +163,14 @@ fun HistoryScreen(
     onBookCover: (HistoryWithRelations) -> Unit,
     onLongClickDelete: (HistoryWithRelations) -> Unit,
 ) {
-    val items = vm.histories
+    // Collect state reactively - this is the key fix!
+    val state by vm.state.collectAsState()
+    val items = state.histories
+    val searchQuery = state.searchQuery
+    val searchMode = state.isSearchMode
+    val groupByNovel = state.groupByNovel
+    val dateFilter = state.dateFilter
+    
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val searchFocusRequester = remember { FocusRequester() }
@@ -180,10 +188,10 @@ fun HistoryScreen(
     }
     
     // Derive screen state for efficient rendering
-    val screenState by remember(items, vm.searchQuery) {
+    val screenState by remember(items, searchQuery) {
         derivedStateOf {
             when {
-                items.values.flatten().isEmpty() && vm.searchQuery.isNotEmpty() -> HistoryScreenState.NoSearchResults
+                items.values.flatten().isEmpty() && searchQuery.isNotEmpty() -> HistoryScreenState.NoSearchResults
                 items.values.isEmpty() -> HistoryScreenState.Empty
                 else -> HistoryScreenState.Content
             }
@@ -191,25 +199,22 @@ fun HistoryScreen(
     }
     
     // Observe when back in history
-    LaunchedEffect(vm.searchQuery) {
+    LaunchedEffect(searchQuery) {
         vm.applySearchFilter()
     }
-    
-    // Observe refreshTrigger for UI updates
-    val refreshTrigger = vm.refreshTrigger
     
     Scaffold(
         topBar = {
             HistoryTopAppBar(
-                searchMode = vm.searchMode,
-                searchQuery = vm.searchQuery,
+                searchMode = searchMode,
+                searchQuery = searchQuery,
                 onSearchModeChange = { vm.toggleSearchMode() },
                 onSearchQueryChange = { vm.onSearchQueryChange(it) },
                 focusRequester = searchFocusRequester,
                 onClearClick = { vm.onSearchQueryChange("") },
-                groupByNovel = vm.groupByNovel,
+                groupByNovel = groupByNovel,
                 onToggleGroupByNovel = { vm.toggleGroupByNovel() },
-                dateFilter = vm.dateFilter,
+                dateFilter = dateFilter,
                 onDateFilterChange = { vm.setDateFilterHistory(it) },
                 onClearAll = { vm.deleteAllHistories(localizeHelper) },
                 hasHistory = items.values.isNotEmpty()
@@ -238,7 +243,7 @@ fun HistoryScreen(
         ) {
             when (screenState) {
                 HistoryScreenState.NoSearchResults -> EmptyScreen(
-                    text = localize(Res.string.no_matches_found_in_search) + " \"${vm.searchQuery}\"",
+                    text = localize(Res.string.no_matches_found_in_search) + " \"${searchQuery}\"",
                     modifier = Modifier.fillMaxSize(),
                     icon = Icons.Outlined.Search
                 )
@@ -255,7 +260,9 @@ fun HistoryScreen(
                     onClickPlay = clickHandlers.onClickPlay,
                     onBookCover = clickHandlers.onBookCover,
                     onLongClickDelete = { history -> vm.deleteHistory(history, localizeHelper) },
-                    vm = vm
+                    vm = vm,
+                    dateFilter = dateFilter,
+                    searchQuery = searchQuery
                 )
             }
         }
@@ -267,8 +274,8 @@ fun HistoryScreen(
     }
     
     // Focus the search field when search mode is activated
-    LaunchedEffect(vm.searchMode) {
-        if (vm.searchMode) {
+    LaunchedEffect(searchMode) {
+        if (searchMode) {
             delay(100) // Short delay to ensure the TextField is in the hierarchy
             searchFocusRequester.requestFocus()
         }
@@ -481,7 +488,9 @@ fun HistoryContent(
     onClickPlay: (HistoryWithRelations) -> Unit,
     onBookCover: (HistoryWithRelations) -> Unit,
     onLongClickDelete: (HistoryWithRelations) -> Unit,
-    vm: HistoryViewModel
+    vm: HistoryViewModel,
+    dateFilter: DateFilter? = null,
+    searchQuery: String = ""
 ) {
     // Memoize time boundaries to avoid recalculation
     val timeBoundaries = remember {
@@ -507,10 +516,10 @@ fun HistoryContent(
     val (today, yesterday, lastWeek) = timeBoundaries
     
     // Use derivedStateOf for grouped items to minimize recompositions
-    val groupedItems by remember(items, vm.dateFilter, today, yesterday, lastWeek) {
+    val groupedItems by remember(items, dateFilter, today, yesterday, lastWeek) {
         derivedStateOf {
             val allItems = items.values.flatten()
-            val filteredItems = when (vm.dateFilter) {
+            val filteredItems = when (dateFilter) {
                 DateFilter.TODAY -> allItems.filter { it.readAt >= today }
                 DateFilter.YESTERDAY -> allItems.filter { it.readAt >= yesterday && it.readAt < today }
                 DateFilter.PAST_7_DAYS -> allItems.filter { it.readAt >= lastWeek }
@@ -572,7 +581,8 @@ fun HistoryContent(
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete,
                         onHistoryDelete = onClickDelete,
-                        vm = vm
+                        vm = vm,
+                        searchQuery = searchQuery
                     )
                 }
             }
@@ -597,7 +607,8 @@ fun HistoryContent(
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete,
                         onHistoryDelete = onClickDelete,
-                        vm = vm
+                        vm = vm,
+                        searchQuery = searchQuery
                     )
                 }
             }
@@ -622,7 +633,8 @@ fun HistoryContent(
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete,
                         onHistoryDelete = onClickDelete,
-                        vm = vm
+                        vm = vm,
+                        searchQuery = searchQuery
                     )
                 }
             }
@@ -647,7 +659,8 @@ fun HistoryContent(
                         onBookCover = onBookCover,
                         onLongClickDelete = onLongClickDelete,
                         onHistoryDelete = onClickDelete,
-                        vm = vm
+                        vm = vm,
+                        searchQuery = searchQuery
                     )
                 }
             }
@@ -697,7 +710,8 @@ fun HistoryItem(
     onBookCover: (HistoryWithRelations) -> Unit,
     onLongClickDelete: (HistoryWithRelations) -> Unit,
     onHistoryDelete: (HistoryWithRelations) -> Unit,
-    vm: HistoryViewModel
+    vm: HistoryViewModel,
+    searchQuery: String = ""
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
@@ -840,7 +854,7 @@ fun HistoryItem(
                     ) {
                         HighlightedText(
                             text = history.title,
-                            searchQuery = vm.searchQuery,
+                            searchQuery = searchQuery,
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -848,7 +862,7 @@ fun HistoryItem(
                         
                         HighlightedText(
                             text = history.chapterName ?: "",
-                            searchQuery = vm.searchQuery,
+                            searchQuery = searchQuery,
                             style = MaterialTheme.typography.bodyMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,

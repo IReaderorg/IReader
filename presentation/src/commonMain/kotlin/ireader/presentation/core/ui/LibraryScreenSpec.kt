@@ -11,6 +11,8 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -35,6 +37,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Library screen specification - provides tab metadata and content
+ * Updated to use Mihon-style StateFlow pattern
  */
 object LibraryScreenSpec {
     
@@ -51,10 +54,13 @@ object LibraryScreenSpec {
     @Composable
     fun TabContent() {
         val vm: LibraryViewModel = getIViewModel(key = "library")
-        LaunchedEffect(key1 = vm.selectionMode) {
-            MainStarterScreen.showBottomNav(!vm.selectionMode)
+        val state by vm.state.collectAsState()
+        
+        LaunchedEffect(state.selectionMode) {
+            MainStarterScreen.showBottomNav(!state.selectionMode)
         }
-        val sheetState = rememberModalBottomSheetState()
+        
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scope = rememberCoroutineScope()
 
@@ -62,7 +68,7 @@ object LibraryScreenSpec {
         LaunchedEffect(Unit) {
             MainStarterScreen.libraryFilterSheetFlow().collectLatest { show ->
                 if (show) {
-                    sheetState.show()
+                    sheetState.partialExpand()
                 }
             }
         }
@@ -75,25 +81,17 @@ object LibraryScreenSpec {
                 val pagerState = rememberPagerState(
                     initialPage = 0,
                     initialPageOffsetFraction = 0f
-                ) {
-                    3
-                }
+                ) { 3 }
                 BottomTabComposable(
                     modifier = it,
                     pagerState = pagerState,
                     filters = vm.filters.value,
-                    toggleFilter = {
-                        vm.toggleFilter(it.type)
-                    },
-                    onSortSelected = {
-                        vm.toggleSort(it.type)
-                    },
-                    sortType = vm.sortType,
-                    isSortDesc = vm.desc,
-                    onLayoutSelected = { layout ->
-                        vm.onLayoutTypeChange(layout)
-                    },
-                    layoutType = vm.layout,
+                    toggleFilter = { filter -> vm.toggleFilter(filter.type) },
+                    onSortSelected = { sort -> vm.toggleSort(sort.type) },
+                    sortType = state.sort,
+                    isSortDesc = !state.sort.isAscending,
+                    onLayoutSelected = { layout -> vm.onLayoutTypeChange(layout) },
+                    layoutType = state.layout,
                     vm = vm,
                     scaffoldPadding = PaddingValues(0.dp)
                 )
@@ -103,58 +101,29 @@ object LibraryScreenSpec {
                 topBar = { scrollBehavior ->
                     LibraryScreenTopBar(
                         state = vm,
-                        refreshUpdate = {
-                            vm.refreshUpdate()
-                        },
-                        onClearSelection = {
-                            vm.unselectAll()
-                        },
-                        onClickInvertSelection = {
-                            vm.flipAllInCurrentCategory()
-                        },
-                        onClickSelectAll = {
-                            vm.selectAllInCurrentCategory()
-                        },
+                        refreshUpdate = { vm.refreshUpdate() },
+                        onClearSelection = { vm.unselectAll() },
+                        onClickInvertSelection = { vm.flipAllInCurrentCategory() },
+                        onClickSelectAll = { vm.selectAllInCurrentCategory() },
                         scrollBehavior = scrollBehavior,
-                        hideModalSheet = {
-                            scope.launch {
-                                sheetState.hide()
-                            }
-                        },
-                        showModalSheet = {
-                            scope.launch {
-                                sheetState.show()
-                            }
-                        },
+                        hideModalSheet = { scope.launch { sheetState.hide() } },
+                        showModalSheet = { scope.launch { sheetState.partialExpand() } },
                         isModalVisible = sheetState.isVisible,
-                        onUpdateLibrary = {
-                            vm.updateLibrary()
-                        },
-                        onUpdateCategory = {
-                            vm.showUpdateCategoryDialog()
-                        },
-                        onImportEpub = {
-                            vm.showImportEpubDialog = true
-                        },
+                        onUpdateLibrary = { vm.updateLibrary() },
+                        onUpdateCategory = { vm.showUpdateCategoryDialog() },
+                        onImportEpub = { vm.setShowImportEpubDialog(true) },
                         onOpenRandom = {
                             vm.openRandomEntry()?.let { bookId ->
-                                navController.navigateTo(
-                                    BookDetailScreenSpec(bookId = bookId)
-                                )
+                                navController.navigateTo(BookDetailScreenSpec(bookId = bookId))
                             }
                         },
-                        onSyncRemote = {
-                            vm.syncWithRemote()
-                        },
-                        onSearchLibrary = {
-                            // Search is handled by the search mode in the toolbar
-                        }
+                        onSyncRemote = { vm.syncWithRemote() },
+                        onSearchLibrary = { }
                     )
                 }
             ) { scaffoldPadding ->
-
                 PullToRefreshBox(
-                    isRefreshing = vm.isBookRefreshing,
+                    isRefreshing = state.isRefreshing,
                     onRefresh = { vm.refreshUpdate() },
                     state = pullToRefreshState
                 ) {
@@ -163,25 +132,16 @@ object LibraryScreenSpec {
                         vm = vm,
                         goToReader = { book ->
                             navController.navigateTo(
-                                ReaderScreenSpec(
-                                    bookId = book.id,
-                                    chapterId = LAST_CHAPTER
-                                )
+                                ReaderScreenSpec(bookId = book.id, chapterId = LAST_CHAPTER)
                             )
                         },
                         goToDetail = { book ->
-                            navController.navigateTo(
-                                BookDetailScreenSpec(
-                                    bookId = book.id
-                                )
-                            )
+                            navController.navigateTo(BookDetailScreenSpec(bookId = book.id))
                         },
                         scaffoldPadding = scaffoldPadding,
                         sheetState = sheetState,
                         requestHideNavigator = {
-                            scope.launch {
-                                MainStarterScreen.showBottomNav(!vm.selectionMode)
-                            }
+                            scope.launch { MainStarterScreen.showBottomNav(!state.selectionMode) }
                         }
                     )
                 }
@@ -190,9 +150,9 @@ object LibraryScreenSpec {
         
         // EPUB Import Dialog
         OnShowImportEpub(
-            show = vm.showImportEpubDialog,
+            show = state.showImportEpubDialog,
             onFileSelected = { uris ->
-                vm.showImportEpubDialog = false
+                vm.setShowImportEpubDialog(false)
                 if (uris.isNotEmpty()) {
                     vm.importEpubFiles(uris.map { it.toString() })
                 }

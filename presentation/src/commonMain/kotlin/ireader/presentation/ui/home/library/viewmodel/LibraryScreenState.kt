@@ -1,23 +1,24 @@
 package ireader.presentation.ui.home.library.viewmodel
 
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import ireader.domain.models.DisplayMode
+import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.CategoryWithCount
-import ireader.domain.models.entities.History
-import ireader.domain.models.entities.LibraryBook
 import ireader.domain.models.entities.Chapter
+import ireader.domain.models.entities.LibraryBook
+import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
 import ireader.i18n.UiText
-import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 
 /**
  * State for undo operations
  */
+@Immutable
 data class UndoState(
     val previousChapterStates: Map<Long, List<Chapter>>,
     val operationType: UndoOperationType,
@@ -29,52 +30,21 @@ enum class UndoOperationType {
     MARK_AS_UNREAD
 }
 
-
-interface LibraryState {
-    var isLoading: Boolean
-    var books: List<LibraryBook>
-    val isEmpty: Boolean
-    var searchedBook: List<LibraryBook>
-    var error: UiText
-    var inSearchMode: Boolean
-    var searchQuery: String?
-    var sortType: LibrarySort
-    var desc: Boolean
-
-    // var filters: SnapshotStateList<FilterType>
-    var currentScrollState: Int
-    var selectedCategoryIndex: Int
-    var histories: List<History>
-    var selectedBooks: SnapshotStateList<Long>
-    val selectionMode: Boolean
-    val inititialized: Boolean
-    val categories: List<CategoryWithCount>
-    val selectedCategory: CategoryWithCount?
-    var batchOperationInProgress: Boolean
-    var batchOperationMessage: String?
-    var lastUndoState: UndoState?
-
-    var isUpdatingLibrary: Boolean
-    var showUpdateCategoryDialog: Boolean
-    var importProgress: ImportProgress?
-
-    // EPUB import/export state
-    var epubImportState: EpubImportState
-    var epubExportState: EpubExportState
+/**
+ * Dialog types for the library screen
+ */
+sealed interface LibraryDialog {
+    data object Filter : LibraryDialog
+    data object EditCategories : LibraryDialog
+    data object UpdateCategory : LibraryDialog
+    data object ImportEpub : LibraryDialog
+    data class BatchOperation(val operation: ireader.presentation.ui.home.library.components.BatchOperation) : LibraryDialog
 }
 
 /**
- * Progress state for EPUB import
+ * EPUB import progress state
  */
-data class ImportProgress(
-    val current: Int,
-    val total: Int,
-    val currentFileName: String
-)
-
-/**
- * Detailed EPUB import state
- */
+@Immutable
 data class EpubImportState(
     val showPreview: Boolean = false,
     val showProgress: Boolean = false,
@@ -88,6 +58,7 @@ data class EpubImportState(
 /**
  * EPUB export state
  */
+@Immutable
 data class EpubExportState(
     val showProgress: Boolean = false,
     val showCompletion: Boolean = false,
@@ -96,50 +67,78 @@ data class EpubExportState(
 )
 
 /**
- * Sync status for remote sync
+ * Immutable state for the Library screen following Mihon's StateScreenModel pattern.
  */
-sealed class SyncStatus {
-    object Idle : SyncStatus()
-    object Syncing : SyncStatus()
-    data class Success(val message: String) : SyncStatus()
-    data class Error(val message: String) : SyncStatus()
-}
-
-open class LibraryStateImpl : LibraryState {
-    override var isLoading by mutableStateOf<Boolean>(false)
-    override var books by mutableStateOf<List<LibraryBook>>(emptyList())
-    override val isEmpty: Boolean by derivedStateOf { books.isEmpty() }
-    override var searchedBook by mutableStateOf<List<LibraryBook>>(emptyList())
-    override var error by mutableStateOf<UiText>(UiText.MStringResource(Res.string.no_error))
-    override var inSearchMode by mutableStateOf<Boolean>(false)
-    override var searchQuery by mutableStateOf<String?>(null)
-    override var sortType by mutableStateOf<LibrarySort>(
-        LibrarySort(
-            LibrarySort.Type.LastRead,
-            true
-        )
-    )
-    override var desc by mutableStateOf<Boolean>(false)
-    override var inititialized by mutableStateOf<Boolean>(false)
-
-    // override var filters: SnapshotStateList<FilterType> = mutableStateListOf()
-    override var currentScrollState by mutableStateOf<Int>(0)
-    override var selectedCategoryIndex by mutableStateOf<Int>(0)
-    override val selectedCategory by derivedStateOf { categories.getOrNull(selectedCategoryIndex) }
-    override var histories by mutableStateOf<List<History>>(emptyList())
-    override var selectedBooks: SnapshotStateList<Long> = mutableStateListOf()
-    override val selectionMode: Boolean by derivedStateOf { selectedBooks.isNotEmpty() }
-    override var categories: List<CategoryWithCount> by mutableStateOf(emptyList())
-    override var batchOperationInProgress by mutableStateOf<Boolean>(false)
-    override var batchOperationMessage by mutableStateOf<String?>(null)
-    override var lastUndoState by mutableStateOf<UndoState?>(null)
-
-    // New properties for toolbar actions
-    override var isUpdatingLibrary by mutableStateOf<Boolean>(false)
-    override var showUpdateCategoryDialog by mutableStateOf<Boolean>(false)
-    override var importProgress by mutableStateOf<ImportProgress?>(null)
-
+@Immutable
+data class LibraryScreenState(
+    // Loading states
+    val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val isUpdatingLibrary: Boolean = false,
+    
+    // Data
+    val books: ImmutableList<LibraryBook> = persistentListOf(),
+    val categories: ImmutableList<CategoryWithCount> = persistentListOf(),
+    val selectedCategoryIndex: Int = 0,
+    
+    // UI state
+    val layout: DisplayMode = DisplayMode.CompactGrid,
+    val searchQuery: String? = null,
+    val inSearchMode: Boolean = false,
+    val selectedBookIds: ImmutableSet<Long> = persistentSetOf(),
+    
+    // Filters & Sort
+    val filters: ImmutableList<LibraryFilter> = persistentListOf(),
+    val sort: LibrarySort = LibrarySort(LibrarySort.Type.LastRead, true),
+    val activeFilters: ImmutableSet<LibraryFilter.Type> = persistentSetOf(),
+    
+    // Error
+    val error: UiText? = null,
+    
+    // Scroll position
+    val savedScrollIndex: Int = 0,
+    val savedScrollOffset: Int = 0,
+    
+    // Dialog state
+    val dialog: LibraryDialog? = null,
+    val showUpdateCategoryDialog: Boolean = false,
+    val showImportEpubDialog: Boolean = false,
+    
+    // Batch operation state
+    val batchOperationInProgress: Boolean = false,
+    val batchOperationMessage: String? = null,
+    val lastUndoState: UndoState? = null,
+    
     // EPUB import/export state
-    override var epubImportState by mutableStateOf(EpubImportState())
-    override var epubExportState by mutableStateOf(EpubExportState())
+    val epubImportState: EpubImportState = EpubImportState(),
+    val epubExportState: EpubExportState = EpubExportState(),
+    
+    // Resume reading
+    val lastReadInfo: ireader.domain.models.entities.LastReadInfo? = null,
+    val isResumeCardVisible: Boolean = true,
+    
+    // Sync
+    val isSyncAvailable: Boolean = false,
+    
+    // Column settings
+    val columnsInPortrait: Int = 2,
+    val columnsInLandscape: Int = 3
+) {
+    @Stable
+    val selectionMode: Boolean get() = selectedBookIds.isNotEmpty()
+    
+    @Stable
+    val selectedCount: Int get() = selectedBookIds.size
+    
+    @Stable
+    val isEmpty: Boolean get() = books.isEmpty() && !isLoading
+    
+    @Stable
+    val selectedCategory: CategoryWithCount? get() = categories.getOrNull(selectedCategoryIndex)
+    
+    @Stable
+    val isInitialLoading: Boolean get() = isLoading && books.isEmpty()
+    
+    @Stable
+    val hasContent: Boolean get() = books.isNotEmpty()
 }

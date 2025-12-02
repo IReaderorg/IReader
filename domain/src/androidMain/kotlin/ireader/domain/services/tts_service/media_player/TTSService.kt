@@ -420,7 +420,13 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 override fun onStart(utteranceId: String) {
                     state.setLoading(false) // Clear loading state when TTS starts
                     state.setPlaying(true)
-                    state.setUtteranceId(utteranceId)
+                    // BRILLIANT SYNC: Embed actual speaking start timestamp in utteranceId
+                    // Format: "originalUtteranceId_actualStartTimestamp"
+                    // The UI extracts this timestamp for precise highlighter sync
+                    val actualStartTime = System.currentTimeMillis()
+                    val syncedUtteranceId = "${utteranceId}_$actualStartTime"
+                    state.setUtteranceId(syncedUtteranceId)
+                    state.setParagraphSpeakingStartTime(actualStartTime)
                     setPlaybackState(PlaybackStateCompat.STATE_PLAYING)
                     scope.launch { updateNotification() }
                 }

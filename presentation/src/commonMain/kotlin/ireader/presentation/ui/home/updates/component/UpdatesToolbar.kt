@@ -14,6 +14,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,13 +27,13 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.component.reusable_composable.AppIcon
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
-import ireader.presentation.ui.home.updates.viewmodel.UpdateState
+import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpdatesToolbar(
-        state: UpdateState,
+        state: UpdatesViewModel,
         onClickCancelSelection: () -> Unit,
         onClickSelectAll: () -> Unit,
         onClickFlipSelection: () -> Unit,
@@ -44,11 +45,17 @@ fun UpdatesToolbar(
         onCategorySelected: (Long?) -> Unit = {},
         scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
+    // Collect state reactively
+    val screenState by state.state.collectAsState()
+    val hasSelection = screenState.hasSelection
+    val selectionSize = screenState.selectedChapterIds.size
+    val selectedCategoryId = screenState.selectedCategoryId
+    
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
-            state.hasSelection -> {
+            hasSelection -> {
                 UpdatesSelectionToolbar(
-                    selectionSize = state.selection.size,
+                    selectionSize = selectionSize,
                     onClickCancelSelection = onClickCancelSelection,
                     onClickSelectAll = onClickSelectAll,
                     onClickInvertSelection = onClickFlipSelection,
@@ -62,7 +69,7 @@ fun UpdatesToolbar(
                     onClickDelete = onClickDelete,
                     onClickUpdateAll = onClickUpdateAll,
                     categories = categories,
-                    selectedCategoryId = state.selectedCategoryId,
+                    selectedCategoryId = selectedCategoryId,
                     onCategorySelected = onCategorySelected,
                     scrollBehavior = scrollBehavior
                 )

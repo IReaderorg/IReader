@@ -12,12 +12,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,9 +29,17 @@ import ireader.presentation.ui.home.library.components.EditCategoriesDialog
 import ireader.presentation.ui.home.library.components.LibraryFilterBottomSheet
 import ireader.presentation.ui.home.library.ui.LibraryContent
 import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
+import ireader.presentation.ui.home.library.viewmodel.LibraryScreenState
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+
+/**
+ * Screen state enum for efficient rendering
+ */
+private enum class ScreenState {
+    Loading, Empty, Content
+}
 
 @ExperimentalAnimationApi
 @Composable
@@ -55,6 +60,7 @@ fun LibraryScreen(
     requestHideBottomNav: (Boolean) -> Unit,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
     onPagerPageChange: (page: Int) -> Unit,
+    showCategoryDialog: Boolean = false,
     editCategoryOnConfirm: () -> Unit,
     editCategoryDismissDialog: () -> Unit,
     editCategoryOnAddToInsertQueue: (Category) -> Unit,
@@ -65,37 +71,27 @@ fun LibraryScreen(
     onShowFilterSheet: () -> Unit = {},
     onHideFilterSheet: () -> Unit = {},
 ) {
-    // Pre-compute modifiers to avoid recreation on each recomposition
+    // Collect state from ViewModel
+    val state by vm.state.collectAsState()
+    
+    // Pre-compute modifiers
     val fillMaxSizeModifier = remember { Modifier.fillMaxSize() }
     val selectionBarModifier = remember {
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
     }
     
-    // Memoize callbacks to prevent unnecessary recompositions
-    val stableGoToLatestChapter = remember(goToLatestChapter) { goToLatestChapter }
-    val stableOnBook = remember(onBook) { onBook }
-    val stableOnLongBook = remember(onLongBook) { onLongBook }
-    
-    // Derive loading/empty state to minimize recompositions
-    val screenState by remember {
-        derivedStateOf {
-            when {
-                vm.isLoading -> LibraryScreenState.Loading
-                vm.isEmpty && vm.filters.value.isEmpty() -> LibraryScreenState.Empty
-                else -> LibraryScreenState.Content
-            }
-        }
+    // Derive screen state
+    val screenState = when {
+        state.isLoading -> ScreenState.Loading
+        state.isEmpty && state.filters.isEmpty() -> ScreenState.Empty
+        else -> ScreenState.Content
     }
     
-    // Derive resume card visibility
-    val showResumeCard by remember {
-        derivedStateOf { vm.isResumeCardVisible && !vm.selectionMode }
-    }
+    // Show resume card when not in selection mode
+    val showResumeCard = state.isResumeCardVisible && !state.selectionMode
     
-    LaunchedEffect(vm.selectionMode) {
-        requestHideBottomNav(vm.selectionMode)
+    LaunchedEffect(state.selectionMode) {
+        requestHideBottomNav(state.selectionMode)
     }
     
     // Refresh last read info when screen becomes visible
@@ -108,26 +104,25 @@ fun LibraryScreen(
         tonalElevation = 1.dp
     ) {
         Box(
-            modifier = Modifier
-                .padding(scaffoldPadding)
-                .fillMaxSize(),
+            modifier = Modifier.padding(scaffoldPadding).fillMaxSize(),
         ) {
             Column(modifier = fillMaxSizeModifier) {
                 LibraryContent(
                     vm = vm,
-                    onBook = stableOnBook,
-                    onLongBook = stableOnLongBook,
-                    goToLatestChapter = stableGoToLatestChapter,
+                    onBook = onBook,
+                    onLongBook = onLongBook,
+                    goToLatestChapter = goToLatestChapter,
                     onPageChanged = onPagerPageChange,
                     getColumnsForOrientation = getColumnsForOrientation,
                     onResumeReading = {}
                 )
             }
             
-            // Spotify-style Resume Reading Bar at the bottom - memoized click handler
-            val resumeClickHandler: () -> Unit = remember(vm.lastReadInfo, stableGoToLatestChapter) {
-                {
-                    vm.lastReadInfo?.let { info ->
+            // Resume Reading Card
+            ireader.presentation.ui.home.library.components.ResumeReadingCard(
+                lastRead = state.lastReadInfo,
+                onResume = {
+                    state.lastReadInfo?.let { info ->
                         val bookItem = BookItem(
                             id = info.novelId,
                             sourceId = 0,
@@ -135,15 +130,9 @@ fun LibraryScreen(
                             cover = info.coverUrl,
                             customCover = info.coverUrl
                         )
-                        stableGoToLatestChapter(bookItem)
+                        goToLatestChapter(bookItem)
                     }
-                    Unit
-                }
-            }
-            
-            ireader.presentation.ui.home.library.components.ResumeReadingCard(
-                lastRead = vm.lastReadInfo,
-                onResume = resumeClickHandler,
+                },
                 onDismiss = { vm.dismissResumeCard() },
                 isVisible = showResumeCard,
                 modifier = Modifier.align(Alignment.BottomCenter)
@@ -151,44 +140,40 @@ fun LibraryScreen(
             
             EditCategoriesDialog(
                 vm = vm,
+                showDialog = showCategoryDialog,
                 onConfirm = editCategoryOnConfirm,
                 dismissDialog = editCategoryDismissDialog,
                 onAddDeleteQueue = editCategoryOnAddDeleteQueue,
                 onRemoteInInsertQueue = editCategoryOnRemoteInInsertQueue,
                 onAddToInsertQueue = editCategoryOnAddToInsertQueue,
                 onRemoteInDeleteQueue = editCategoryOnRemoteInDeleteQueue,
-                categories = vm.categories.filter { !it.category.isSystemCategory }
+                categories = state.categories.filter { !it.category.isSystemCategory }
             )
             
             // Update Category Dialog
-            if (vm.showUpdateCategoryDialog) {
+            if (state.showUpdateCategoryDialog) {
                 ireader.presentation.ui.home.library.components.UpdateCategoryDialog(
-                    categories = vm.categories.map { it.category }.filter { !it.isSystemCategory },
-                    onCategorySelected = { category ->
-                        vm.updateCategory(category.id)
-                    },
-                    onDismiss = {
-                        vm.hideUpdateCategoryDialog()
-                    }
+                    categories = state.categories.map { it.category }.filter { !it.isSystemCategory },
+                    onCategorySelected = { category -> vm.updateCategory(category.id) },
+                    onDismiss = { vm.hideUpdateCategoryDialog() }
                 )
             }
             
-            // Use derived state for efficient state-based rendering
+            // Screen state rendering
             Crossfade(
                 targetState = screenState,
                 animationSpec = tween(durationMillis = 300)
-            ) { state ->
-                when (state) {
-                    LibraryScreenState.Loading -> LoadingScreen()
-                    LibraryScreenState.Empty -> EmptyScreen(
-                        text = localize(Res.string.empty_library)
-                    )
-                    LibraryScreenState.Content -> { /* Content is rendered above */ }
+            ) { currentState ->
+                when (currentState) {
+                    ScreenState.Loading -> LoadingScreen()
+                    ScreenState.Empty -> EmptyScreen(text = localize(Res.string.empty_library))
+                    ScreenState.Content -> { /* Content rendered above */ }
                 }
             }
 
+            // Selection bar
             AnimatedVisibility(
-                visible = vm.selectionMode,
+                visible = state.selectionMode,
                 enter = fadeIn(animationSpec = tween(200)) + slideInVertically(
                     initialOffsetY = { it },
                     animationSpec = tween(300)
@@ -215,45 +200,21 @@ fun LibraryScreen(
         // Filter Bottom Sheet
         if (showFilterSheet) {
             LibraryFilterBottomSheet(
-                filters = vm.filters.value,
-                sorting = vm.sorting.value,
-                columnCount = vm.columnInPortrait.value,
-                displayMode = vm.layout,
+                filters = state.filters,
+                sorting = state.sort,
+                columnCount = state.columnsInPortrait,
+                displayMode = state.layout,
                 showResumeReadingCard = vm.showResumeReadingCard.value,
                 showArchivedBooks = vm.showArchivedBooks.value,
-                onFilterToggle = { type ->
-                    vm.toggleFilterImmediate(type)
-                },
-                onSortChange = { type ->
-                    vm.toggleSort(type)
-                },
-                onSortDirectionToggle = {
-                    vm.toggleSortDirection()
-                },
-                onColumnCountChange = { count ->
-                    vm.updateColumnCount(count)
-                },
-                onDisplayModeChange = { mode ->
-                    vm.onLayoutTypeChange(mode)
-                },
-                onResumeReadingCardToggle = { enabled ->
-                    vm.toggleResumeReadingCard(enabled)
-                },
-                onArchivedBooksToggle = { enabled ->
-                    vm.toggleShowArchivedBooks(enabled)
-                },
+                onFilterToggle = { type -> vm.toggleFilterImmediate(type) },
+                onSortChange = { type -> vm.toggleSort(type) },
+                onSortDirectionToggle = { vm.toggleSortDirection() },
+                onColumnCountChange = { count -> vm.updateColumnCount(count) },
+                onDisplayModeChange = { mode -> vm.onLayoutTypeChange(mode) },
+                onResumeReadingCardToggle = { enabled -> vm.toggleResumeReadingCard(enabled) },
+                onArchivedBooksToggle = { enabled -> vm.toggleShowArchivedBooks(enabled) },
                 onDismiss = onHideFilterSheet
             )
         }
     }
-}
-
-/**
- * Enum representing the different states of the library screen
- * Used with derivedStateOf for efficient recomposition
- */
-private enum class LibraryScreenState {
-    Loading,
-    Empty,
-    Content
 }

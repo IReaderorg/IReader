@@ -136,10 +136,48 @@ class LibraryViewModel(
 
 ## Screen Usage
 
+### CRITICAL: Always Use collectAsState()
+
+The most common mistake when migrating to StateFlow is forgetting to collect the state reactively.
+
+**WRONG - Using convenience accessors (snapshot values):**
+```kotlin
+@Composable
+fun HistoryScreen(vm: HistoryViewModel) {
+    // ❌ WRONG: These are snapshot values that don't trigger recomposition!
+    val items = vm.histories  // Returns _state.value.histories - a snapshot
+    val searchQuery = vm.searchQuery  // Returns _state.value.searchQuery - a snapshot
+    
+    // This will NOT update when state changes!
+    LazyColumn {
+        items(items) { ... }
+    }
+}
+```
+
+**CORRECT - Using collectAsState():**
+```kotlin
+@Composable
+fun HistoryScreen(vm: HistoryViewModel) {
+    // ✅ CORRECT: Collect state reactively
+    val state by vm.state.collectAsState()
+    val items = state.histories
+    val searchQuery = state.searchQuery
+    
+    // This WILL update when state changes!
+    LazyColumn {
+        items(items) { ... }
+    }
+}
+```
+
+### Full Example
+
 ```kotlin
 @Composable
 fun LibraryScreen(viewModel: LibraryViewModel) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    // Always collect state at the top of the composable
+    val state by viewModel.state.collectAsState()
     
     when (val s = state) {
         is LibraryViewModel.State.Loading -> {

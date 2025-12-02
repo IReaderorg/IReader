@@ -5,7 +5,13 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.domain.models.entities.UpdatesWithRelations
 
-class BookCover(
+/**
+ * Data class representing book cover information for image loading.
+ * Using data class ensures proper equality comparison, which is critical for
+ * Compose's image caching - without it, different instances with the same values
+ * would be treated as different keys, causing unnecessary image reloads.
+ */
+data class BookCover(
     val bookId: Long,
     val sourceId: Long,
     val cover: String?,

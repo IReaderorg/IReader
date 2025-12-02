@@ -5,6 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -35,28 +37,30 @@ object UpdateScreenSpec {
     fun TabContent() {
         val vm: UpdatesViewModel = getIViewModel()
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        
+        // Collect state reactively - this is the key fix!
+        val state by vm.state.collectAsState()
+        val updates = state.updates
+        val selection = state.selectedChapterIds
+        val hasSelection = state.hasSelection
+        val categories = state.categories
 
         IScaffold(
             topBar = { scrollBehavior ->
                 UpdatesToolbar(
                     state = vm,
                     onClickCancelSelection = {
-                        vm.selection.clear()
+                        vm.clearSelection()
                     },
                     onClickSelectAll = {
-                        val ids: List<Long> =
-                            (vm.selection + vm.updates.values.flatMap { list -> list.map { it.chapterId } }).distinct()
-                        vm.selection.clear()
-                        vm.selection.addAll(ids)
+                        vm.selectAll()
                     },
                     onClickFlipSelection = {
-                        val ids: List<Long> =
-                            (
-                                vm.updates.flatMap { update -> update.value.map { it.chapterId } }
-                                    .filterNot { it in vm.selection }
-                            ).distinct()
-                        vm.selection.clear()
-                        vm.selection.addAll(ids)
+                        // Flip selection - select unselected, deselect selected
+                        val allIds = updates.values.flatMap { list -> list.map { it.chapterId } }
+                        val currentSelection = selection
+                        vm.clearSelection()
+                        allIds.filterNot { it in currentSelection }.forEach { vm.toggleSelection(it) }
                     },
                     onClickRefresh = {
                         vm.refreshUpdate()
@@ -64,25 +68,20 @@ object UpdateScreenSpec {
                     onClickDelete = {
                         vm.scope.launch {
                             vm.updateUseCases.deleteAllUpdates()
-                            vm.updates = emptyMap()
                         }
                     },
-                    onClickUpdateAll = if (vm.updates.isNotEmpty()) {
+                    onClickUpdateAll = if (updates.isNotEmpty()) {
                         {
-                            val allIds = vm.updates.values.flatMap { list -> list.map { it.chapterId } }
-                            vm.selection.clear()
-                            vm.selection.addAll(allIds)
+                            vm.selectAll()
                             vm.downloadChapters()
-                            vm.selection.clear()
                         }
                     } else null,
-                    onClickUpdateSelected = if (vm.hasSelection) {
+                    onClickUpdateSelected = if (hasSelection) {
                         {
                             vm.downloadChapters()
-                            vm.selection.clear()
                         }
                     } else null,
-                    categories = vm.categories,
+                    categories = categories,
                     onCategorySelected = { categoryId ->
                         vm.selectCategory(categoryId)
                     },
@@ -94,7 +93,7 @@ object UpdateScreenSpec {
                 modifier = Modifier.padding(scaffoldPadding),
                 state = vm,
                 onUpdate = { update ->
-                    if (vm.hasSelection) {
+                    if (hasSelection) {
                         vm.addUpdate(update)
                     } else {
                         navController.navigateTo(
@@ -118,23 +117,21 @@ object UpdateScreenSpec {
                 onDownloadUpdate = {
                     vm.addUpdate(it)
                     vm.downloadChapters()
-                    vm.selection.clear()
                 },
                 onBottomBarDownload = {
                     vm.downloadChapters()
-                    vm.selection.clear()
                 },
                 onBottomBarMarkAsRead = {
                     vm.updateChapters {
                         this.copy(read = !this.read)
                     }
-                    vm.selection.clear()
+                    vm.clearSelection()
                 },
                 onBottomBookMark = {
                     vm.updateChapters {
                         this.copy(bookmark = !this.bookmark)
                     }
-                    vm.selection.clear()
+                    vm.clearSelection()
                 },
                 onRefresh = {
                     vm.refreshUpdate()

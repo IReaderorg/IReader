@@ -65,6 +65,9 @@ abstract class BaseTTSService(
     // TTS engine ready state
     private val _isTTSReady = MutableStateFlow(false)
     
+    // Timestamp when TTS actually starts speaking current paragraph (for highlighter sync)
+    private val _paragraphSpeakingStartTime = MutableStateFlow(0L)
+    
     // TTS Engine
     protected var ttsEngine: TTSEngine? = null
     protected var ttsNotification: TTSNotification? = null
@@ -85,6 +88,7 @@ abstract class BaseTTSService(
         override val currentChapter = _currentChapter.asStateFlow()
         override val currentParagraph = _currentParagraph.asStateFlow()
         override val previousParagraph = _previousParagraph.asStateFlow()
+        override val paragraphSpeakingStartTime = _paragraphSpeakingStartTime.asStateFlow()
         override val totalParagraphs = _totalParagraphs.asStateFlow()
         override val currentContent = _currentContent.asStateFlow()
         override val speechSpeed = _speechSpeed.asStateFlow()
@@ -455,6 +459,9 @@ abstract class BaseTTSService(
         ttsEngine?.setCallback(object : TTSEngineCallback {
             override fun onStart(utteranceId: String) {
                 scope.launch {
+                    // Update the speaking start time when TTS actually starts speaking
+                    // This is critical for highlighter synchronization
+                    _paragraphSpeakingStartTime.value = System.currentTimeMillis()
                     updateNotification()
                 }
             }

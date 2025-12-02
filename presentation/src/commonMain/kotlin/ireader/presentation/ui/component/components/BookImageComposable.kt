@@ -32,13 +32,17 @@ fun IBookImageComposable(
         crossfadeDurationMs: Int = 200
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    // Use the BookCover directly as the model for better caching
+    // Coil will use the cover URL and lastModified for cache keys
     IImageLoader(
             modifier = modifier,
             contentScale = contentScale,
-            model =  image.cover?.toUri(), // coil3 only supports Uri data type right now
+            model = image, // Pass BookCover directly for better cache key management
             contentDescription = localizeHelper.localize(Res.string.an_image),
             alignment = alignment,
             crossfadeDurationMs = crossfadeDurationMs,
+            enableMemoryCache = true,
+            enableDiskCache = true,
     )
 }
 enum class BookImageCover(val ratio: Float) {

@@ -462,7 +462,10 @@ fun TTSContentDisplay(
     
     // Time-based sentence index
     var currentSentenceIndex by remember { mutableStateOf(0) }
-    var highlightStartTime by remember { mutableStateOf(0L) }
+    
+    // Use paragraphStartTime from state for synchronization with TTS service
+    // This ensures the highlighter stays in sync with actual TTS playback
+    val paragraphStartTime = state.paragraphStartTime
     
     // Store refs for coroutine - only update when highlighting is enabled
     val isPlayingRef = rememberUpdatedState(state.isPlaying && highlightEnabled)
@@ -470,35 +473,45 @@ fun TTSContentDisplay(
     val totalWordsRef = rememberUpdatedState(totalWords)
     val calibratedWPMRef = rememberUpdatedState(state.calibratedWPM)
     val speechSpeedRef = rememberUpdatedState(state.speechSpeed)
+    val paragraphStartTimeRef = rememberUpdatedState(paragraphStartTime)
     
-    // Reset when paragraph changes - only if highlighting enabled
-    LaunchedEffect(state.currentReadingParagraph, highlightEnabled) {
+    // ULTIMATE BRILLIANT FIX: Use paragraphStartTime as a CHANGE SIGNAL
+    // When it changes, we know TTS has started speaking - capture local time at that moment
+    var localStartTime by remember { mutableStateOf(0L) }
+    var lastSignal by remember { mutableStateOf(0L) }
+    
+    // This is the KEY: Reset local timer when paragraphStartTime changes (TTS.onStart fired)
+    // paragraphStartTime is updated in TTSService.onStart() - the exact moment TTS begins speaking
+    LaunchedEffect(paragraphStartTime) {
+        if (paragraphStartTime > 0 && paragraphStartTime != lastSignal) {
+            currentSentenceIndex = 0
+            localStartTime = System.currentTimeMillis()  // Capture LOCAL time NOW
+            lastSignal = paragraphStartTime
+        }
+    }
+    
+    // Also reset when paragraph changes (for manual navigation)
+    LaunchedEffect(state.currentReadingParagraph) {
         if (highlightEnabled) {
             currentSentenceIndex = 0
-            highlightStartTime = System.currentTimeMillis()
+            // Only reset local time if we're playing (TTS will send signal via paragraphStartTime)
+            // If not playing, we don't need timing
         }
     }
     
-    // Reset start time when playback starts - only if highlighting enabled
-    LaunchedEffect(state.isPlaying, highlightEnabled) {
-        if (state.isPlaying && highlightEnabled) {
-            highlightStartTime = System.currentTimeMillis()
-        }
-    }
-    
-    // Main highlighting loop - only runs when highlighting is enabled
+    // Main highlighting loop
     LaunchedEffect(highlightEnabled) {
         if (!highlightEnabled) return@LaunchedEffect
         
         while (true) {
-            if (isPlayingRef.value) {
+            if (isPlayingRef.value && localStartTime > 0) {
                 val sentences = sentencesRef.value
                 if (sentences.isNotEmpty()) {
                     val words = totalWordsRef.value
                     val wpm = ((calibratedWPMRef.value ?: 170f) * speechSpeedRef.value).coerceAtLeast(50f)
                     val durationMs = ((words.toFloat() / wpm) * 60000).toLong().coerceIn(2000, 120000)
                     
-                    val elapsed = System.currentTimeMillis() - highlightStartTime
+                    val elapsed = System.currentTimeMillis() - localStartTime
                     val progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 0.99f)
                     val newIndex = (progress * sentences.size).toInt().coerceIn(0, sentences.lastIndex)
                     
@@ -507,7 +520,7 @@ fun TTSContentDisplay(
                     }
                 }
             }
-            delay(150) // Slightly longer delay for better battery life
+            delay(100)
         }
     }
     

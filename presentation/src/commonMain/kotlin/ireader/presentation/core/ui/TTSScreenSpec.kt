@@ -151,6 +151,11 @@ class TTSScreenSpec(
         val speechSpeed by ttsService.state.speechSpeed.collectAsState()
         val autoNextChapter by ttsService.state.autoNextChapter.collectAsState()
         
+        // Collect paragraph speaking start time from service for highlighter sync
+        // This is updated when TTS actually starts speaking (in TTSService.onStart callback)
+        // Used as a SIGNAL to reset the sentence highlighter timer in CommonTTSScreen
+        val paragraphSpeakingStartTime by ttsService.state.paragraphSpeakingStartTime.collectAsState()
+        
         // Memoize colors to prevent unnecessary recompositions
         val backgroundColor by remember(useCustomColors, customBackgroundColor) {
             derivedStateOf { if (useCustomColors) customBackgroundColor else Color.Unspecified }
@@ -255,33 +260,28 @@ class TTSScreenSpec(
             }
         }
         
-        // Track paragraph start time for sentence-level highlighting
-        var paragraphStartTime by remember { mutableStateOf(System.currentTimeMillis()) }
-        
         // TTS Speed Calibration - measure actual TTS speed from first paragraph
         var calibratedWPM by remember { mutableStateOf<Float?>(null) }
         var isCalibrated by remember { mutableStateOf(false) }
         var firstParagraphStartTime by remember { mutableStateOf(0L) }
         var firstParagraphWordCount by remember { mutableStateOf(0) }
         
-        // Track when first paragraph starts
-        LaunchedEffect(content, isPlaying) {
-            if (content.isNotEmpty() && isPlaying && !isCalibrated && currentParagraph == 0) {
+        // Track when first paragraph starts for calibration
+        LaunchedEffect(paragraphSpeakingStartTime, isPlaying) {
+            if (content.isNotEmpty() && isPlaying && !isCalibrated && currentParagraph == 0 && paragraphSpeakingStartTime > 0) {
                 if (firstParagraphStartTime == 0L) {
-                    firstParagraphStartTime = System.currentTimeMillis()
+                    firstParagraphStartTime = paragraphSpeakingStartTime
                     firstParagraphWordCount = SentenceHighlighter.countTotalWords(content[0])
                 }
             }
         }
         
-        // Update paragraph start time and handle calibration when paragraph changes
-        LaunchedEffect(currentParagraph) {
-            val now = System.currentTimeMillis()
-            
+        // Handle calibration when paragraph changes
+        LaunchedEffect(currentParagraph, paragraphSpeakingStartTime) {
             // Calibrate when first paragraph completes (paragraph changes from 0 to 1+)
             if (currentParagraph >= 1 && !isCalibrated && firstParagraphWordCount > 0 && firstParagraphStartTime > 0) {
-                // Calculate how long the first paragraph took
-                val firstParagraphDuration = now - firstParagraphStartTime
+                // Calculate how long the first paragraph took using the actual speaking start time
+                val firstParagraphDuration = paragraphSpeakingStartTime - firstParagraphStartTime
                 // Only calibrate if we have reasonable data (at least 500ms)
                 if (firstParagraphDuration > 500) {
                     calibratedWPM = SentenceHighlighter.calculateCalibratedWPM(
@@ -291,16 +291,6 @@ class TTSScreenSpec(
                     )
                     isCalibrated = true
                 }
-            }
-            
-            // Update paragraph start time for the new paragraph
-            paragraphStartTime = now
-        }
-        
-        // Also update start time when playback starts (in case it was paused)
-        LaunchedEffect(isPlaying) {
-            if (isPlaying) {
-                paragraphStartTime = System.currentTimeMillis()
             }
         }
         
@@ -334,7 +324,7 @@ class TTSScreenSpec(
             currentParagraph, previousParagraph, isPlaying, isLoading, isTTSReady, content,
             translatedContent, showTranslation, bilingualMode, chapterName, bookTitle,
             speechSpeed, autoNextChapter, fullScreenMode, cachedParagraphs, loadingParagraphs,
-            sleepTimeRemaining, sleepModeEnabledState, paragraphStartTime, sentenceHighlightEnabled,
+            sleepTimeRemaining, sleepModeEnabledState, paragraphSpeakingStartTime, sentenceHighlightEnabled,
             calibratedWPM, isCalibrated
         ) {
             derivedStateOf {
@@ -359,7 +349,7 @@ class TTSScreenSpec(
                     hasDownloadFeature = false,
                     currentEngine = currentEngineName,
                     availableEngines = availableEngines,
-                    paragraphStartTime = paragraphStartTime,
+                    paragraphStartTime = paragraphSpeakingStartTime,
                     sentenceHighlightEnabled = sentenceHighlightEnabled,
                     calibratedWPM = calibratedWPM,
                     isCalibrated = isCalibrated,

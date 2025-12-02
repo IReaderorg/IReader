@@ -200,6 +200,10 @@ class AndroidTTSStateAdapter(
     override val currentParagraph: StateFlow<Int> = sharedState.currentReadingParagraph
     override val previousParagraph: StateFlow<Int> = sharedState.previousReadingParagraph
     
+    // Extract timestamp from utteranceId (format: "paragraphIndex_timestamp")
+    private val _paragraphSpeakingStartTime = MutableStateFlow(0L)
+    override val paragraphSpeakingStartTime: StateFlow<Long> = _paragraphSpeakingStartTime.asStateFlow()
+    
     private val _totalParagraphs = MutableStateFlow(0)
     override val totalParagraphs: StateFlow<Int> = _totalParagraphs.asStateFlow()
     
@@ -237,6 +241,21 @@ class AndroidTTSStateAdapter(
                 val nonNullContent = content ?: emptyList()
                 _currentContent.value = nonNullContent
                 _totalParagraphs.value = nonNullContent.size
+            }
+        }
+        
+        // Extract timestamp from utteranceId (format: "paragraphIndex_actualStartTimestamp")
+        // BRILLIANT SYNC: The timestamp is embedded in utteranceId by TTSService.onStart()
+        // This gives us the EXACT moment TTS actually started speaking, not when speak() was called
+        scope.launch {
+            sharedState.utteranceId.collect { utteranceId ->
+                if (utteranceId.contains("_")) {
+                    // Get the last part which is the actual start timestamp
+                    val parts = utteranceId.split("_")
+                    parts.lastOrNull()?.toLongOrNull()?.let { timestamp ->
+                        _paragraphSpeakingStartTime.value = timestamp
+                    }
+                }
             }
         }
         

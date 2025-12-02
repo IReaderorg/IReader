@@ -30,6 +30,8 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -42,7 +44,6 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.updates.component.UpdatesContent
-import ireader.presentation.ui.home.updates.viewmodel.UpdateState
 import ireader.presentation.ui.home.updates.viewmodel.UpdatesViewModel
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
@@ -60,14 +61,24 @@ fun UpdateScreen(
         onBottomBookMark: () -> Unit,
         onRefresh: () -> Unit,
 ) {
+    // Collect state reactively - this is the key fix!
+    val screenState by state.state.collectAsState()
+    val isLoading = screenState.isLoading
+    val isEmpty = screenState.isEmpty
+    val hasSelection = screenState.hasSelection
+    val isRefreshing = screenState.isRefreshing
+    val updateProgress = screenState.updateProgress
+    val updates = screenState.updates
+    val selection = screenState.selectedChapterIds
+    
     Box(
         modifier = modifier.fillMaxSize()
 
     ) {
-        Crossfade(targetState = Pair(state.isLoading, state.isEmpty)) { (isLoading, isEmpty) ->
+        Crossfade(targetState = Pair(isLoading, isEmpty)) { (loading, empty) ->
             when {
-                isLoading -> LoadingScreen()
-                isEmpty -> UpdatesEmptyState()
+                loading -> LoadingScreen()
+                empty -> UpdatesEmptyState()
                 else -> UpdatesContent(
                     state = state,
                     onClickItem = onUpdate,
@@ -77,7 +88,7 @@ fun UpdateScreen(
                 )
             }
             when {
-                state.hasSelection -> {
+                hasSelection -> {
                     UpdateEditBar(
                         state,
                         onBottomBarDownload,
@@ -89,15 +100,15 @@ fun UpdateScreen(
         }
         
         // Progress indicator when refreshing
-        if (state.isRefreshing || state.updateProgress != null) {
+        if (isRefreshing || updateProgress != null) {
             UpdateProgressIndicator(
-                progress = state.updateProgress,
+                progress = updateProgress,
                 modifier = Modifier.align(Alignment.Center)
             )
         }
         
         // FAB for refresh action
-        if (state.isEmpty && !state.isLoading && !state.isRefreshing) {
+        if (isEmpty && !isLoading && !isRefreshing) {
             ExtendedFloatingActionButton(
                 onClick = onRefresh,
                 modifier = Modifier
@@ -214,11 +225,16 @@ private fun UpdateProgressIndicator(
 
 @Composable
 private fun BoxScope.UpdateEditBar(
-        state: UpdateState,
+        state: UpdatesViewModel,
         onBottomBarDownload: () -> Unit,
         onBottomBarMarkAsRead: () -> Unit,
         onBottomBookMark: () -> Unit,
 ) {
+    // Collect state reactively
+    val screenState by state.state.collectAsState()
+    val selection = screenState.selectedChapterIds
+    val updates = screenState.updates
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -239,8 +255,8 @@ private fun BoxScope.UpdateEditBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (state.selection.any { selectionId ->
-                selectionId in state.updates.values.flatten().filter { !it.downloaded }
+            if (selection.any { selectionId ->
+                selectionId in updates.values.flatten().filter { !it.downloaded }
                     .map { it.chapterId }
             }
             ) {
