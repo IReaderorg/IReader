@@ -189,8 +189,8 @@ kotlin {
                 implementation("io.github.givimad:piper-jni:1.2.0-a0f09cd")
                 
                 // GraalVM JavaScript for JavaScript engine
-                implementation("org.graalvm.polyglot:polyglot:23.1.0")
-                implementation("org.graalvm.polyglot:js:23.1.0")
+                implementation("org.graalvm.polyglot:polyglot:25.0.1")
+                implementation("org.graalvm.polyglot:js:25.0.1")
             }
         }
     }
