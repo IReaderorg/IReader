@@ -2,7 +2,7 @@ package ireader.data.remote
 
 import ireader.domain.models.remote.ReadingProgress
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ class DebouncedProgressSync(
     private val delayMs: Long = 2000
 ) {
     private var syncJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(ioDispatcher)
     
     /**
      * Schedules a sync operation with debouncing

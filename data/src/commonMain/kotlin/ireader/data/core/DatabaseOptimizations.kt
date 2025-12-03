@@ -1,10 +1,10 @@
-﻿package ireader.data.core
+package ireader.data.core
 
 import app.cash.sqldelight.Query
 import ir.kazemcodes.infinityreader.Database
 import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +30,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
 class DatabaseOptimizations(
     private val handler: DatabaseHandler
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private val queryCache = QueryCache()
     private val performanceStats = PerformanceStats()
     
@@ -298,7 +298,7 @@ class DatabaseOptimizations(
      * Preload critical data into cache for faster initial access.
      * Call this during app startup via DatabasePreloader.
      */
-    suspend fun preloadCriticalData() = withContext(Dispatchers.IO) {
+    suspend fun preloadCriticalData() = withContext(ioDispatcher) {
         Log.info("Starting critical data preload...", TAG)
         val startTime = currentTimeToLong()
         
@@ -316,7 +316,7 @@ class DatabaseOptimizations(
      * Call when user opens a book detail screen.
      * Note: Actual preloading is done via DatabasePreloader.
      */
-    suspend fun preloadBookData(bookId: Long) = withContext(Dispatchers.IO) {
+    suspend fun preloadBookData(bookId: Long) = withContext(ioDispatcher) {
         Log.debug("Book data preload requested for book $bookId", TAG)
         // Preloading is handled by DatabasePreloader which has access to mappers
     }

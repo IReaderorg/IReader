@@ -5,7 +5,7 @@ import ireader.domain.models.backup.BackupInfo
 import ireader.domain.services.backup.GoogleDriveBackupService
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.utils.extensions.formatForFilename
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.json.Json
@@ -13,6 +13,7 @@ import okio.Buffer
 import okio.GzipSink
 import okio.GzipSource
 import okio.buffer
+import okio.use
 import kotlin.time.ExperimentalTime
 
 /**
@@ -38,7 +39,7 @@ class GoogleDriveBackupServiceImpl(
         ignoreUnknownKeys = true
     }
     
-    override suspend fun authenticate(): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun authenticate(): Result<String> = withContext(ioDispatcher) {
         return@withContext try {
             // Use the injected authenticator to perform platform-specific OAuth2 flow
             val result = authenticator.authenticate()
@@ -60,7 +61,7 @@ class GoogleDriveBackupServiceImpl(
         }
     }
     
-    override suspend fun disconnect(): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun disconnect(): Result<Unit> = withContext(ioDispatcher) {
         return@withContext try {
             // Revoke tokens and clean up
             authenticator.disconnect()
@@ -77,7 +78,7 @@ class GoogleDriveBackupServiceImpl(
         return authenticator.isAuthenticated()
     }
     
-    override suspend fun createBackup(data: BackupData): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun createBackup(data: BackupData): Result<String> = withContext(ioDispatcher) {
         return@withContext try {
             if (!isAuthenticated()) {
                 return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
@@ -90,7 +91,7 @@ class GoogleDriveBackupServiceImpl(
             val jsonString = json.encodeToString(data)
             
             // Compress with GZIP using existing method
-            val compressedData = compressData(jsonString.toByteArray())
+            val compressedData = compressData(jsonString.encodeToByteArray())
             
             // Generate filename with timestamp
             val timestamp = currentTimeToLong().formatForFilename()
@@ -113,7 +114,7 @@ class GoogleDriveBackupServiceImpl(
         }
     }
     
-    override suspend fun listBackups(): Result<List<BackupInfo>> = withContext(Dispatchers.IO) {
+    override suspend fun listBackups(): Result<List<BackupInfo>> = withContext(ioDispatcher) {
         return@withContext try {
             if (!isAuthenticated()) {
                 return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
@@ -162,7 +163,7 @@ class GoogleDriveBackupServiceImpl(
         }
     }
     
-    override suspend fun downloadBackup(backupId: String): Result<BackupData> = withContext(Dispatchers.IO) {
+    override suspend fun downloadBackup(backupId: String): Result<BackupData> = withContext(ioDispatcher) {
         return@withContext try {
             if (!isAuthenticated()) {
                 return@withContext Result.failure(Exception("Not authenticated with Google Drive"))
@@ -186,7 +187,7 @@ class GoogleDriveBackupServiceImpl(
             val decompressedData = decompressData(compressedData)
             
             // Deserialize JSON to BackupData using existing json instance
-            val jsonString = String(decompressedData, Charsets.UTF_8)
+            val jsonString = decompressedData.decodeToString()
             val backupData = json.decodeFromString<BackupData>(jsonString)
             
             Result.success(backupData)
@@ -195,7 +196,7 @@ class GoogleDriveBackupServiceImpl(
         }
     }
     
-    override suspend fun deleteBackup(backupId: String): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun deleteBackup(backupId: String): Result<Unit> = withContext(ioDispatcher) {
         return@withContext try {
             if (!isAuthenticated()) {
                 return@withContext Result.failure(Exception("Not authenticated with Google Drive"))

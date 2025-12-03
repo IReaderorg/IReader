@@ -14,8 +14,6 @@ import ireader.domain.models.characterart.CharacterArt
 import ireader.domain.models.characterart.CharacterArtSort
 import ireader.domain.models.characterart.SubmitCharacterArtRequest
 import kotlinx.serialization.json.Json
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.ExperimentalTime
 
@@ -250,23 +248,22 @@ class CloudflareR2DataSource(
         return hmacSha256(kService, "aws4_request")
     }
     
+    /**
+     * HMAC-SHA256 using Okio (KMP compatible)
+     */
     private fun hmacSha256(key: ByteArray, data: String): ByteArray {
-        val mac = Mac.getInstance("HmacSHA256")
-        mac.init(SecretKeySpec(key, "HmacSHA256"))
-        return mac.doFinal(data.encodeToByteArray())
+        val dataBytes = okio.ByteString.of(*data.encodeToByteArray())
+        return okio.ByteString.of(*key).hmacSha256(dataBytes).toByteArray()
     }
     
     @OptIn(ExperimentalEncodingApi::class)
     private fun hmacSha256Hex(key: ByteArray, data: String): String {
-        return hmacSha256(key, data).toHexString()
+        val dataBytes = okio.ByteString.of(*data.encodeToByteArray())
+        return okio.ByteString.of(*key).hmacSha256(dataBytes).hex()
     }
     
     private fun sha256Hex(data: ByteArray): String {
         return okio.ByteString.of(*data).sha256().hex()
-    }
-    
-    private fun ByteArray.toHexString(): String {
-        return joinToString("") { "%02x".format(it) }
     }
     
     private fun getContentType(fileName: String): String {
@@ -296,21 +293,22 @@ data class R2Config(
 ) {
     companion object {
         /**
-         * Create config from environment variables or properties
+         * Create config from provided values
+         * Environment variable access should be done at the platform level
          */
-        fun fromEnvironment(): R2Config? {
-            val accountId = System.getenv("R2_ACCOUNT_ID") ?: return null
-            val accessKeyId = System.getenv("R2_ACCESS_KEY_ID") ?: return null
-            val secretAccessKey = System.getenv("R2_SECRET_ACCESS_KEY") ?: return null
-            val bucketName = System.getenv("R2_BUCKET_NAME") ?: "ireader-character-art"
-            val publicUrl = System.getenv("R2_PUBLIC_URL") ?: "https://pub-$accountId.r2.dev"
-            
+        fun create(
+            accountId: String,
+            accessKeyId: String,
+            secretAccessKey: String,
+            bucketName: String = "ireader-character-art",
+            publicUrl: String? = null
+        ): R2Config {
             return R2Config(
                 accountId = accountId,
                 accessKeyId = accessKeyId,
                 secretAccessKey = secretAccessKey,
                 bucketName = bucketName,
-                publicUrl = publicUrl
+                publicUrl = publicUrl ?: "https://pub-$accountId.r2.dev"
             )
         }
     }

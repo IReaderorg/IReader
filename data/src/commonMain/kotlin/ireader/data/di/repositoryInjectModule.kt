@@ -1,5 +1,6 @@
 package ireader.data.di
 
+import ireader.data.util.AppDataDirectory
 import ireader.data.book.BookRepositoryImpl
 import ireader.data.core.DatabaseOptimizations
 import ireader.data.catalog.CatalogRemoteRepositoryImpl
@@ -174,8 +175,7 @@ val repositoryInjectModule = module {
     }
     // Voice Storage for TTS voice models
     single<ireader.domain.storage.VoiceStorage> {
-        val appDataDir = "${System.getProperty("user.home")}/.ireader".toPath()
-        ireader.data.storage.VoiceStorageImpl(appDataDir)
+        ireader.data.storage.VoiceStorageImpl(AppDataDirectory.getPath())
     }
     
     // Leaderboard repository
@@ -276,27 +276,12 @@ val repositoryInjectModule = module {
                     getCurrentUserId = { getCurrentUserUseCase().getOrNull()?.id }
                 )
                 
-                // Create image storage (R2 if configured, otherwise local)
-                val imageStorage: ireader.data.characterart.ImageStorageProvider = try {
-                    val r2Config = ireader.data.characterart.R2Config.fromEnvironment()
-                    if (r2Config != null) {
-                        ireader.data.characterart.CloudflareR2ImageStorage(
-                            ireader.data.characterart.CloudflareR2DataSource(
-                                httpClient = get(),
-                                config = r2Config
-                            )
-                        )
-                    } else {
-                        // Fallback to local storage
-                        ireader.data.characterart.LocalImageStorage(
-                            basePath = "${System.getProperty("user.home")}/.ireader/character-art"
-                        )
-                    }
-                } catch (e: Exception) {
+                // Create image storage - use local storage by default
+                // R2 configuration should be done via platform-specific setup
+                val imageStorage: ireader.data.characterart.ImageStorageProvider = 
                     ireader.data.characterart.LocalImageStorage(
-                        basePath = "${System.getProperty("user.home")}/.ireader/character-art"
+                        basePath = "${AppDataDirectory.getPathString()}/character-art"
                     )
-                }
                 
                 // Create the combined data source
                 val dataSource = ireader.data.characterart.CharacterArtDataSource(

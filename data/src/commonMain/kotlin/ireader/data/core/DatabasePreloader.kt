@@ -1,8 +1,8 @@
-﻿package ireader.data.core
+package ireader.data.core
 
 import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -21,7 +21,7 @@ class DatabasePreloader(
     private val dbOptimizations: DatabaseOptimizations,
     private val handler: DatabaseHandler
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     
     companion object {
         private const val TAG = "DatabasePreloader"
@@ -43,7 +43,7 @@ class DatabasePreloader(
      * Preload critical data and wait for completion.
      * Use this when you need to ensure data is loaded before proceeding.
      */
-    suspend fun preloadCriticalData() = withContext(Dispatchers.IO) {
+    suspend fun preloadCriticalData() = withContext(ioDispatcher) {
         Log.info("Starting critical data preload...", TAG)
         val startTime = currentTimeToLong()
         
@@ -80,7 +80,7 @@ class DatabasePreloader(
      * Preload data for the reader.
      * Call this when user is about to start reading.
      */
-    suspend fun preloadReaderData(bookId: Long, chapterId: Long) = withContext(Dispatchers.IO) {
+    suspend fun preloadReaderData(bookId: Long, chapterId: Long) = withContext(ioDispatcher) {
         try {
             // Preload current chapter and adjacent chapters
             val chapters = handler.awaitList {

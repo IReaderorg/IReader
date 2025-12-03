@@ -1,11 +1,11 @@
-﻿package ireader.data.font
+package ireader.data.font
 
 import data.CustomFonts
 import ireader.core.db.Transactions
 import ireader.domain.data.repository.FontRepository
 import ireader.domain.models.common.Uri
 import ireader.domain.models.fonts.CustomFont
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path.Companion.toPath
@@ -36,7 +36,7 @@ class FontRepositoryImpl(
     private val fontsDirectory: String = "fonts" // Will be platform-specific
 
     override suspend fun importFont(filePath: String, fontName: String): Result<CustomFont> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 // Handle system fonts (empty filePath) - just insert into database
                 if (filePath.isEmpty()) {
@@ -135,7 +135,7 @@ class FontRepositoryImpl(
     }
 
     override suspend fun deleteFont(fontId: String): Result<Unit> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 // Get font to delete file
                 val font = getFontById(fontId)
@@ -173,7 +173,7 @@ class FontRepositoryImpl(
     }
     
     override suspend fun importFontFromUri(uri: Uri, fontName: String): Result<CustomFont> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 // Determine file extension from URI or default to ttf
                 val uriString = uri.toString()

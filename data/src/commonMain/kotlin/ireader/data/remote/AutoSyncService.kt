@@ -1,7 +1,7 @@
 package ireader.data.remote
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -17,7 +17,7 @@ class AutoSyncService(
     private val remoteRepository: SupabaseRemoteRepository
 ) {
     private var monitoringJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(ioDispatcher)
     
     /**
      * Starts monitoring network connectivity and auto-syncing

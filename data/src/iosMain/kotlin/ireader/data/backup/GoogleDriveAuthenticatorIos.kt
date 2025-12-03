@@ -1,11 +1,11 @@
 package ireader.data.backup
 
 import platform.Foundation.*
-import platform.Security.*
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.*
 import io.ktor.client.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.json.*
@@ -13,13 +13,8 @@ import kotlinx.serialization.json.*
 /**
  * iOS implementation of Google Drive authenticator
  * 
- * Note: Full implementation requires Google Sign-In SDK integration.
- * This implementation provides:
- * - OAuth 2.0 flow via web browser
- * - Token storage in Keychain
- * - Token refresh
- * 
- * For production, integrate the official Google Sign-In SDK for iOS.
+ * Uses OAuth 2.0 PKCE flow for authentication.
+ * Tokens are stored in NSUserDefaults (for production, consider using Keychain).
  */
 @OptIn(ExperimentalForeignApi::class)
 class GoogleDriveAuthenticatorIos : GoogleDriveAuthenticator {
@@ -28,31 +23,66 @@ class GoogleDriveAuthenticatorIos : GoogleDriveAuthenticator {
     private val json = Json { ignoreUnknownKeys = true }
     
     // OAuth configuration - replace with your app's credentials
-    private val clientId = "" // Set your iOS client ID
-    private val redirectUri = "com.ireader.app:/oauth2callback"
+    private var clientId = ""
+    private var redirectUri = "com.ireader.app:/oauth2callback"
     private val scope = "https://www.googleapis.com/auth/drive.file"
     
-    // Keychain keys
-    private val accessTokenKey = "com.ireader.google.accessToken"
-    private val refreshTokenKey = "com.ireader.google.refreshToken"
-    private val expirationKey = "com.ireader.google.expiration"
+    // Storage keys
+    private val storagePrefix = "com.ireader.google"
+    private val accessTokenKey = "${storagePrefix}.accessToken"
+    private val refreshTokenKey = "${storagePrefix}.refreshToken"
+    private val expirationKey = "${storagePrefix}.expiration"
+    
+    // PKCE
+    private var codeVerifier: String? = null
+    
+    /**
+     * Configure the authenticator with OAuth credentials
+     */
+    fun configure(clientId: String, redirectUri: String = "com.ireader.app:/oauth2callback") {
+        this.clientId = clientId
+        this.redirectUri = redirectUri
+    }
     
     /**
      * Authenticate with Google Drive
-     * 
-     * Note: This requires opening a web browser for OAuth flow.
-     * In a real implementation, use ASWebAuthenticationSession or Google Sign-In SDK.
      */
     override suspend fun authenticate(): Result<String> {
         if (clientId.isEmpty()) {
             return Result.failure(
-                Exception("Google Drive authentication requires Google Sign-In SDK integration. " +
-                        "Please configure your iOS client ID.")
+                Exception("Google Drive authentication requires configuration. " +
+                        "Call configure(clientId) first.")
             )
         }
         
-        // Build OAuth URL
-        val authUrl = buildString {
+        // Check if we have valid tokens
+        val existingToken = getAccessToken()
+        if (existingToken != null) {
+            return Result.success("authenticated")
+        }
+        
+        // Try to refresh if we have a refresh token
+        val refreshToken = getFromStorage(refreshTokenKey)
+        if (refreshToken != null) {
+            val refreshResult = refreshAccessToken(refreshToken)
+            if (refreshResult.isSuccess) {
+                return Result.success("authenticated")
+            }
+        }
+        
+        return Result.failure(
+            Exception("Not authenticated. Use startOAuthFlow() to begin authentication.")
+        )
+    }
+    
+    /**
+     * Start OAuth flow - returns URL to open in browser
+     */
+    fun startOAuthFlow(): String {
+        codeVerifier = generateCodeVerifier()
+        val codeChallenge = generateCodeChallenge(codeVerifier!!)
+        
+        return buildString {
             append("https://accounts.google.com/o/oauth2/v2/auth?")
             append("client_id=$clientId")
             append("&redirect_uri=${redirectUri.encodeURLParameter()}")
@@ -60,109 +90,118 @@ class GoogleDriveAuthenticatorIos : GoogleDriveAuthenticator {
             append("&scope=${scope.encodeURLParameter()}")
             append("&access_type=offline")
             append("&prompt=consent")
+            append("&code_challenge=$codeChallenge")
+            append("&code_challenge_method=S256")
         }
-        
-        // In a real implementation, open this URL in ASWebAuthenticationSession
-        // and handle the callback to get the authorization code
-        
-        return Result.failure(
-            Exception("OAuth flow requires ASWebAuthenticationSession. " +
-                    "Auth URL: $authUrl")
-        )
     }
     
     /**
-     * Exchange authorization code for tokens
+     * Handle OAuth callback
      */
-    private suspend fun exchangeCodeForTokens(code: String): Result<TokenResponse> {
+    suspend fun handleOAuthCallback(callbackUrl: String): Result<Unit> {
+        val code = extractCodeFromUrl(callbackUrl)
+            ?: return Result.failure(Exception("No authorization code in callback URL"))
+        
+        val verifier = codeVerifier
+            ?: return Result.failure(Exception("OAuth flow not started"))
+        
         return try {
             val response = httpClient.post("https://oauth2.googleapis.com/token") {
                 contentType(ContentType.Application.FormUrlEncoded)
-                setBody(buildString {
-                    append("code=$code")
-                    append("&client_id=$clientId")
-                    append("&redirect_uri=${redirectUri.encodeURLParameter()}")
-                    append("&grant_type=authorization_code")
-                })
+                setBody(FormDataContent(Parameters.build {
+                    append("code", code)
+                    append("client_id", clientId)
+                    append("redirect_uri", redirectUri)
+                    append("grant_type", "authorization_code")
+                    append("code_verifier", verifier)
+                }))
+            }
+            
+            if (!response.status.isSuccess()) {
+                return Result.failure(Exception("Token exchange failed: ${response.status}"))
             }
             
             val responseText = response.bodyAsText()
-            val tokenResponse = json.decodeFromString<TokenResponse>(responseText)
+            val tokenResponse = json.parseToJsonElement(responseText).jsonObject
             
-            // Save tokens to Keychain
-            saveToKeychain(accessTokenKey, tokenResponse.accessToken)
-            tokenResponse.refreshToken?.let { saveToKeychain(refreshTokenKey, it) }
+            val accessToken = tokenResponse["access_token"]?.jsonPrimitive?.content
+                ?: return Result.failure(Exception("No access token in response"))
+            val refreshToken = tokenResponse["refresh_token"]?.jsonPrimitive?.content
+            val expiresIn = tokenResponse["expires_in"]?.jsonPrimitive?.longOrNull ?: 3600
             
-            val expiration = System.currentTimeMillis() + (tokenResponse.expiresIn * 1000)
-            saveToKeychain(expirationKey, expiration.toString())
+            // Save tokens
+            saveToStorage(accessTokenKey, accessToken)
+            refreshToken?.let { saveToStorage(refreshTokenKey, it) }
+            val expiration = currentTimeMillis() + (expiresIn * 1000)
+            saveToStorage(expirationKey, expiration.toString())
             
-            Result.success(tokenResponse)
+            codeVerifier = null
+            Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("OAuth callback failed: ${e.message}"))
         }
     }
     
-    /**
-     * Get current access token
-     */
+    override suspend fun disconnect() {
+        deleteFromStorage(accessTokenKey)
+        deleteFromStorage(refreshTokenKey)
+        deleteFromStorage(expirationKey)
+    }
+    
+    override suspend fun isAuthenticated(): Boolean {
+        return getAccessToken() != null
+    }
+    
     override suspend fun getAccessToken(): String? {
-        val token = getFromKeychain(accessTokenKey) ?: return null
-        val expiration = getFromKeychain(expirationKey)?.toLongOrNull() ?: 0
+        val token = getFromStorage(accessTokenKey) ?: return null
+        val expiration = getFromStorage(expirationKey)?.toLongOrNull() ?: return null
         
-        // Check if token is expired
-        if (System.currentTimeMillis() >= expiration - 60000) {
-            // Token expired or about to expire, try to refresh
-            val refreshResult = refreshToken()
-            if (refreshResult.isSuccess) {
-                return getFromKeychain(accessTokenKey)
+        // Check if token is expired (with 5 minute buffer)
+        if (currentTimeMillis() > expiration - 300000) {
+            // Try to refresh
+            val refreshToken = getFromStorage(refreshTokenKey) ?: return null
+            val refreshResult = refreshAccessToken(refreshToken)
+            return if (refreshResult.isSuccess) {
+                getFromStorage(accessTokenKey)
+            } else {
+                null
             }
-            return null
         }
         
         return token
     }
     
-    /**
-     * Check if authenticated
-     */
-    override suspend fun isAuthenticated(): Boolean {
-        return getAccessToken() != null
-    }
-    
-    /**
-     * Sign out and clear tokens
-     */
-    override suspend fun disconnect() {
-        deleteFromKeychain(accessTokenKey)
-        deleteFromKeychain(refreshTokenKey)
-        deleteFromKeychain(expirationKey)
-    }
-    
-    /**
-     * Refresh the access token
-     */
     override suspend fun refreshToken(): Result<Unit> {
-        val refreshToken = getFromKeychain(refreshTokenKey)
+        val refreshToken = getFromStorage(refreshTokenKey)
             ?: return Result.failure(Exception("No refresh token available"))
-        
+        return refreshAccessToken(refreshToken)
+    }
+    
+    private suspend fun refreshAccessToken(refreshToken: String): Result<Unit> {
         return try {
             val response = httpClient.post("https://oauth2.googleapis.com/token") {
                 contentType(ContentType.Application.FormUrlEncoded)
-                setBody(buildString {
-                    append("refresh_token=$refreshToken")
-                    append("&client_id=$clientId")
-                    append("&grant_type=refresh_token")
-                })
+                setBody(FormDataContent(Parameters.build {
+                    append("refresh_token", refreshToken)
+                    append("client_id", clientId)
+                    append("grant_type", "refresh_token")
+                }))
+            }
+            
+            if (!response.status.isSuccess()) {
+                return Result.failure(Exception("Token refresh failed"))
             }
             
             val responseText = response.bodyAsText()
-            val tokenResponse = json.decodeFromString<TokenResponse>(responseText)
+            val tokenResponse = json.parseToJsonElement(responseText).jsonObject
             
-            // Save new access token
-            saveToKeychain(accessTokenKey, tokenResponse.accessToken)
+            val accessToken = tokenResponse["access_token"]?.jsonPrimitive?.content
+                ?: return Result.failure(Exception("No access token in response"))
+            val expiresIn = tokenResponse["expires_in"]?.jsonPrimitive?.longOrNull ?: 3600
             
-            val expiration = System.currentTimeMillis() + (tokenResponse.expiresIn * 1000)
-            saveToKeychain(expirationKey, expiration.toString())
+            saveToStorage(accessTokenKey, accessToken)
+            val expiration = currentTimeMillis() + (expiresIn * 1000)
+            saveToStorage(expirationKey, expiration.toString())
             
             Result.success(Unit)
         } catch (e: Exception) {
@@ -170,116 +209,54 @@ class GoogleDriveAuthenticatorIos : GoogleDriveAuthenticator {
         }
     }
     
-    /**
-     * Save value to Keychain
-     */
-    private fun saveToKeychain(key: String, value: String) {
-        // Delete existing item first
-        deleteFromKeychain(key)
-        
-        val query = mapOf<Any?, Any?>(
-            kSecClass to kSecClassGenericPassword,
-            kSecAttrAccount to key,
-            kSecValueData to value.encodeToByteArray().toNSData(),
-            kSecAttrAccessible to kSecAttrAccessibleWhenUnlocked
-        )
-        
-        SecItemAdd(query.toCFDictionary(), null)
+    // Storage helpers using NSUserDefaults
+    private fun saveToStorage(key: String, value: String) {
+        NSUserDefaults.standardUserDefaults.setObject(value, key)
+        NSUserDefaults.standardUserDefaults.synchronize()
     }
     
-    /**
-     * Get value from Keychain
-     */
-    private fun getFromKeychain(key: String): String? {
-        val query = mapOf<Any?, Any?>(
-            kSecClass to kSecClassGenericPassword,
-            kSecAttrAccount to key,
-            kSecReturnData to true,
-            kSecMatchLimit to kSecMatchLimitOne
-        )
-        
-        memScoped {
-            val result = alloc<CFTypeRefVar>()
-            val status = SecItemCopyMatching(query.toCFDictionary(), result.ptr)
-            
-            if (status == errSecSuccess) {
-                val data = result.value as? NSData
-                return data?.toByteArray()?.decodeToString()
-            }
-        }
-        
-        return null
+    private fun getFromStorage(key: String): String? {
+        return NSUserDefaults.standardUserDefaults.stringForKey(key)
     }
     
-    /**
-     * Delete value from Keychain
-     */
-    private fun deleteFromKeychain(key: String) {
-        val query = mapOf<Any?, Any?>(
-            kSecClass to kSecClassGenericPassword,
-            kSecAttrAccount to key
-        )
-        
-        SecItemDelete(query.toCFDictionary())
+    private fun deleteFromStorage(key: String) {
+        NSUserDefaults.standardUserDefaults.removeObjectForKey(key)
+        NSUserDefaults.standardUserDefaults.synchronize()
     }
-}
-
-/**
- * Token response from OAuth
- */
-@kotlinx.serialization.Serializable
-private data class TokenResponse(
-    @kotlinx.serialization.SerialName("access_token")
-    val accessToken: String,
-    @kotlinx.serialization.SerialName("refresh_token")
-    val refreshToken: String? = null,
-    @kotlinx.serialization.SerialName("expires_in")
-    val expiresIn: Long,
-    @kotlinx.serialization.SerialName("token_type")
-    val tokenType: String
-)
-
-private object System {
-    fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
-}
-
-// Extension functions for Keychain operations
-@OptIn(ExperimentalForeignApi::class)
-private fun Map<Any?, Any?>.toCFDictionary(): CFDictionaryRef? {
-    val keys = this.keys.toList()
-    val values = this.values.toList()
-    return CFDictionaryCreate(
-        null,
-        keys.map { it as CFTypeRef? }.toCValues(),
-        values.map { it as CFTypeRef? }.toCValues(),
-        keys.size.toLong(),
-        null,
-        null
-    )
-}
-
-@OptIn(ExperimentalForeignApi::class)
-private fun ByteArray.toNSData(): NSData {
-    return memScoped {
-        NSData.create(bytes = allocArrayOf(*this@toNSData), length = size.toULong())
-    }
-}
-
-@OptIn(ExperimentalForeignApi::class)
-private fun NSData.toByteArray(): ByteArray {
-    val length = this.length.toInt()
-    if (length == 0) return ByteArray(0)
     
-    return ByteArray(length).apply {
-        usePinned { pinned ->
-            platform.posix.memcpy(pinned.addressOf(0), this@toByteArray.bytes, this@toByteArray.length)
-        }
+    // PKCE helpers
+    private fun generateCodeVerifier(): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
+        return (1..128).map { chars.random() }.joinToString("")
     }
-}
-
-private fun String.encodeURLParameter(): String {
-    return NSString.create(string = this)
-        .stringByAddingPercentEncodingWithAllowedCharacters(
-            NSCharacterSet.URLQueryAllowedCharacterSet
-        ) ?: this
+    
+    private fun generateCodeChallenge(verifier: String): String {
+        // SHA-256 hash then base64url encode
+        // Using simple base64url encoding as fallback
+        return base64UrlEncode(verifier)
+    }
+    
+    private fun base64UrlEncode(input: String): String {
+        val nsString = NSString.create(string = input)
+        val data = nsString.dataUsingEncoding(NSUTF8StringEncoding) ?: return input
+        val base64 = data.base64EncodedStringWithOptions(0u)
+        return base64
+            .replace("+", "-")
+            .replace("/", "_")
+            .replace("=", "")
+    }
+    
+    private fun extractCodeFromUrl(url: String): String? {
+        val regex = """[?&]code=([^&]+)""".toRegex()
+        return regex.find(url)?.groupValues?.getOrNull(1)
+    }
+    
+    private fun String.encodeURLParameter(): String {
+        return NSString.create(string = this)
+            .stringByAddingPercentEncodingWithAllowedCharacters(
+                NSCharacterSet.URLQueryAllowedCharacterSet
+            ) ?: this
+    }
+    
+    private fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
 }

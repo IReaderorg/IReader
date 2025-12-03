@@ -1,7 +1,7 @@
-﻿package ireader.data.core
+package ireader.data.core
 
 import ireader.core.log.Log
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 import ireader.domain.utils.extensions.currentTimeToLong
 
@@ -27,7 +27,7 @@ class DatabaseMaintenance(
      * 
      * Run: Weekly or after major data changes
      */
-    suspend fun analyze() = withContext(Dispatchers.IO) {
+    suspend fun analyze() = withContext(ioDispatcher) {
         try {
             Log.info("Running ANALYZE...", "DatabaseMaintenance")
             val start = currentTimeToLong()
@@ -53,7 +53,7 @@ class DatabaseMaintenance(
      * Run: Monthly or when database is fragmented
      * Warning: This can take several minutes on large databases
      */
-    suspend fun vacuum() = withContext(Dispatchers.IO) {
+    suspend fun vacuum() = withContext(ioDispatcher) {
         try {
             Log.info("Running VACUUM...", "DatabaseMaintenance")
             val start = currentTimeToLong()
@@ -76,7 +76,7 @@ class DatabaseMaintenance(
      * 
      * Run: Rarely, only if index corruption suspected
      */
-    suspend fun reindex() = withContext(Dispatchers.IO) {
+    suspend fun reindex() = withContext(ioDispatcher) {
         try {
             Log.info("Running REINDEX...", "DatabaseMaintenance")
             val start = currentTimeToLong()
@@ -95,7 +95,7 @@ class DatabaseMaintenance(
     /**
      * Get database statistics
      */
-    suspend fun getDatabaseStats(): DatabaseStats = withContext(Dispatchers.IO) {
+    suspend fun getDatabaseStats(): DatabaseStats = withContext(ioDispatcher) {
         try {
             handler.await {
                 // Query database statistics
@@ -119,7 +119,7 @@ class DatabaseMaintenance(
     /**
      * Check database integrity
      */
-    suspend fun checkIntegrity(): Boolean = withContext(Dispatchers.IO) {
+    suspend fun checkIntegrity(): Boolean = withContext(ioDispatcher) {
         try {
             Log.info("Checking database integrity...", "DatabaseMaintenance")
             
@@ -148,7 +148,7 @@ class DatabaseMaintenance(
     /**
      * Clean up orphaned data
      */
-    suspend fun cleanupOrphanedData(): Int = withContext(Dispatchers.IO) {
+    suspend fun cleanupOrphanedData(): Int = withContext(ioDispatcher) {
         try {
             Log.info("Cleaning up orphaned data...", "DatabaseMaintenance")
             

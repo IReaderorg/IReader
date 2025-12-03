@@ -8,7 +8,7 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.services.epub.EpubExportOptions
 import ireader.domain.services.epub.EpubExportService
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -34,7 +34,7 @@ class EpubExportServiceImpl(
         chapters: List<Chapter>,
         options: EpubExportOptions,
         onProgress: (Float, String) -> Unit
-    ): Result<Uri> = withContext(Dispatchers.IO) {
+    ): Result<Uri> = withContext(ioDispatcher) {
         try {
             onProgress(0.1f, "Preparing export...")
             

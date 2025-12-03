@@ -214,7 +214,8 @@ class LibraryBackupRepositoryImpl(
     
     override suspend fun deleteBackup(backupId: String): Boolean {
         return try {
-            backupHistory.removeIf { it.id == backupId }
+            val toRemove = backupHistory.filter { it.id == backupId }
+            backupHistory.removeAll(toRemove)
             true
         } catch (e: Exception) {
             false

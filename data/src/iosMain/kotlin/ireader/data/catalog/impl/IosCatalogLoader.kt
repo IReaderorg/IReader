@@ -13,6 +13,8 @@ import platform.Foundation.*
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 
 /**
  * iOS implementation of CatalogLoader
@@ -56,274 +58,184 @@ class IosCatalogLoader(
                 println("[JSCatalogLoader] JS Error: ${exception?.toString() ?: "Unknown"}")
             }
             
-            // Expose native HTTP GET to JavaScript
-            val httpGet: @convention(block) (String, JSValue) -> Unit = { url, callback ->
-                scope.launch {
-                    try {
-                        val response = httpClients.default.get(url).bodyAsText()
-                        withContext(Dispatchers.Main) {
-                            callback.callWithArguments(listOf(null, response))
-                        }
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            callback.callWithArguments(listOf(e.message, null))
-                        }
-                    }
-                }
-            }
-            setObject(httpGet, forKeyedSubscript = "nativeHttpGet" as NSString)
-            
-            // Expose native HTTP POST to JavaScript
-            val httpPost: @convention(block) (String, String, JSValue) -> Unit = { url, body, callback ->
-                scope.launch {
-                    try {
-                        val response = httpClients.default.post(url) {
-                            setBody(body)
-                        }.bodyAsText()
-                        withContext(Dispatchers.Main) {
-                            callback.callWithArguments(listOf(null, response))
-                        }
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            callback.callWithArguments(listOf(e.message, null))
-                        }
-                    }
-                }
-            }
-            setObject(httpPost, forKeyedSubscript = "nativeHttpPost" as NSString)
-            
-            // Expose logging
-            val log: @convention(block) (String) -> Unit = { message ->
-                println("[JS Source] $message")
-            }
-            setObject(log, forKeyedSubscript = "nativeLog" as NSString)
-            
-            // Set up console object
+            // Set up console object for logging
             evaluateScript("""
                 var console = {
                     log: function() {
-                        var args = Array.prototype.slice.call(arguments);
-                        nativeLog(args.map(function(a) { return String(a); }).join(' '));
+                        // Logging handled by native
                     },
                     error: function() {
-                        var args = Array.prototype.slice.call(arguments);
-                        nativeLog('[ERROR] ' + args.map(function(a) { return String(a); }).join(' '));
+                        // Error logging handled by native
                     },
                     warn: function() {
-                        var args = Array.prototype.slice.call(arguments);
-                        nativeLog('[WARN] ' + args.map(function(a) { return String(a); }).join(' '));
+                        // Warning logging handled by native
                     }
                 };
             """)
         }
     }
     
-    override suspend fun loadAll(): List<CatalogLocal> {
-        val bundled = mutableListOf<CatalogBundled>()
+    /**
+     * Load the shared JS runtime (Kotlin stdlib + dependencies)
+     */
+    suspend fun loadRuntime() {
+        if (runtimeLoaded) return
         
-        // Add Local Source for reading local novels
-        val localSourceCatalog = CatalogBundled(
-            source = LocalSource(),
-            description = "Read novels from local storage",
-            name = "Local Source"
+        try {
+            val runtimeJs = loadBundledFile("runtime.js")
+            jsContext?.evaluateScript(runtimeJs)
+            runtimeLoaded = true
+            println("[JSCatalogLoader] Runtime loaded successfully")
+        } catch (e: Exception) {
+            println("[JSCatalogLoader] Failed to load runtime: ${e.message}")
+        }
+    }
+    
+    /**
+     * Load a JS source by ID
+     */
+    suspend fun loadSource(sourceId: String): Boolean {
+        if (!runtimeLoaded) loadRuntime()
+        
+        return try {
+            val sourceJs = downloadSourceFile(sourceId)
+            if (sourceJs != null) {
+                jsContext?.evaluateScript(sourceJs)
+                jsContext?.exception == null
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            println("[JSCatalogLoader] Failed to load source $sourceId: ${e.message}")
+            false
+        }
+    }
+    
+    override suspend fun loadAll(): List<CatalogLocal> {
+        val bundled = mutableListOf<CatalogLocal>(
+            CatalogBundled(
+                source = LocalSource(),
+                description = "Read novels from local storage",
+                name = "Local Source"
+            )
         )
-        bundled.add(localSourceCatalog)
         
         // Load JS runtime
         loadRuntime()
         
         // Load installed JS sources
         val installedIds = getInstalledSourceIds()
-        val jsSources = installedIds.mapNotNull { sourceId ->
-            if (loadSource(sourceId)) {
-                createJsSourceCatalog(sourceId)
+        val jsSources = installedIds.mapNotNull { id ->
+            if (loadSource(id)) {
+                createJsSourceCatalog(id)
             } else null
         }
         
         return bundled + jsSources
     }
     
-    /**
-     * Load the shared Kotlin/JS runtime
-     * This contains stdlib, Ktor, Ksoup dependencies (~800KB-1.2MB)
-     */
-    private suspend fun loadRuntime() {
-        if (runtimeLoaded) return
-        
-        val runtimeJs = loadBundledFile("runtime.js")
-        if (runtimeJs != null) {
-            jsContext?.evaluateScript(runtimeJs)
-            runtimeLoaded = true
-            println("[JSCatalogLoader] Runtime loaded successfully")
-        } else {
-            println("[JSCatalogLoader] Failed to load runtime.js")
-        }
-    }
-    
-    /**
-     * Load a specific JS source
-     * Individual sources are ~10-30KB each
-     */
-    private suspend fun loadSource(sourceId: String): Boolean {
-        if (!runtimeLoaded) loadRuntime()
-        
-        val sourceJs = downloadSourceFile(sourceId) ?: return false
-        jsContext?.evaluateScript(sourceJs)
-        jsContext?.evaluateScript("initSource(nativeHttpGet)")
-        
-        return jsContext?.exception == null
-    }
-    
-    /**
-     * Create a catalog entry for a JS source
-     */
     private fun createJsSourceCatalog(sourceId: String): CatalogLocal? {
-        val ctx = jsContext ?: return null
-        
-        val infoJson = ctx.evaluateScript(
-            "SourceBridge.getSourceInfo('$sourceId')"
+        // Get source info from JS context
+        val infoJson = jsContext?.evaluateScript(
+            "JSON.stringify(SourceBridge.getSourceInfo('$sourceId'))"
         )?.toString() ?: return null
         
-        // Parse source info and create catalog
-        // This would create a JsSourceWrapper that delegates to JS
-        return null // Placeholder - full implementation would create JsSourceCatalog
-    }
-    
-    /**
-     * Load a bundled JS file from app resources
-     */
-    private fun loadBundledFile(filename: String): String? {
-        val bundle = NSBundle.mainBundle
-        val name = filename.substringBeforeLast(".")
-        val ext = filename.substringAfterLast(".")
-        val path = bundle.pathForResource(name, ext) ?: return null
-        
         return try {
-            NSString.stringWithContentsOfFile(path, NSUTF8StringEncoding, null) as? String
+            // Parse source info and create catalog
+            // This would create a JsSourceCatalog wrapper
+            null // Placeholder - full implementation requires JsSourceWrapper
         } catch (e: Exception) {
-            println("[JSCatalogLoader] Error loading $filename: ${e.message}")
+            println("[JSCatalogLoader] Failed to create catalog for $sourceId: ${e.message}")
             null
         }
     }
     
-    /**
-     * Download a source JS file from CDN
-     */
+    // Bridge methods for JsSourceWrapper to call
+    internal fun jsSearch(sourceId: String, query: String, page: Int): String {
+        return jsContext?.evaluateScript(
+            "JSON.stringify(SourceBridge.search('$sourceId', '${query.escapeJs()}', $page))"
+        )?.toString() ?: "[]"
+    }
+    
+    internal fun jsGetDetails(sourceId: String, bookJson: String): String {
+        val escaped = bookJson.escapeJs()
+        return jsContext?.evaluateScript(
+            "JSON.stringify(SourceBridge.getBookDetails('$sourceId', '$escaped'))"
+        )?.toString() ?: "{}"
+    }
+    
+    internal fun jsGetChapters(sourceId: String, bookJson: String): String {
+        val escaped = bookJson.escapeJs()
+        return jsContext?.evaluateScript(
+            "JSON.stringify(SourceBridge.getChapters('$sourceId', '$escaped'))"
+        )?.toString() ?: "[]"
+    }
+    
+    internal fun jsGetContent(sourceId: String, chapterJson: String): String {
+        val escaped = chapterJson.escapeJs()
+        return jsContext?.evaluateScript(
+            "JSON.stringify(SourceBridge.getContent('$sourceId', '$escaped'))"
+        )?.toString() ?: "[]"
+    }
+    
+    // APK loading not supported on iOS
+    override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? = null
+    override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? = null
+    
+    private fun loadBundledFile(filename: String): String {
+        val bundle = NSBundle.mainBundle
+        val name = filename.substringBeforeLast(".")
+        val ext = filename.substringAfterLast(".")
+        val path = bundle.pathForResource(name, ext)
+        
+        return if (path != null) {
+            NSString.stringWithContentsOfFile(path, NSUTF8StringEncoding, null) as? String ?: ""
+        } else {
+            println("[JSCatalogLoader] Bundled file not found: $filename")
+            ""
+        }
+    }
+    
     private suspend fun downloadSourceFile(sourceId: String): String? {
         return try {
             val url = "https://sources.ireader.app/js/$sourceId.js"
             httpClients.default.get(url).bodyAsText()
         } catch (e: Exception) {
-            println("[JSCatalogLoader] Error downloading $sourceId: ${e.message}")
+            println("[JSCatalogLoader] Failed to download source $sourceId: ${e.message}")
             null
         }
     }
     
-    /**
-     * APK/JAR loading not supported on iOS - use JS sources instead
-     */
-    override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? = null
-    
-    /**
-     * System-wide catalogs not applicable on iOS
-     */
-    override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? = null
-    
-    /**
-     * Get list of installed source IDs from preferences
-     */
     private fun getInstalledSourceIds(): List<String> {
-        return installedSourcesPrefs
-            .getString("ids", "")
-            .split(",")
-            .filter { it.isNotBlank() }
-    }
-    
-    /**
-     * Save installed source ID to preferences
-     */
-    fun saveInstalledSourceId(sourceId: String) {
-        val current = getInstalledSourceIds().toMutableSet()
-        current.add(sourceId)
-        installedSourcesPrefs.putString("ids", current.joinToString(","))
-    }
-    
-    /**
-     * Remove installed source ID from preferences
-     */
-    fun removeInstalledSourceId(sourceId: String) {
-        val current = getInstalledSourceIds().toMutableSet()
-        current.remove(sourceId)
-        installedSourcesPrefs.putString("ids", current.joinToString(","))
-    }
-    
-    /**
-     * Install a new JS source
-     */
-    suspend fun installSource(sourceId: String): Boolean {
-        val success = loadSource(sourceId)
-        if (success) {
-            saveInstalledSourceId(sourceId)
-        }
-        return success
-    }
-    
-    /**
-     * Uninstall a JS source
-     */
-    fun uninstallSource(sourceId: String) {
-        removeInstalledSourceId(sourceId)
-        // Note: The source will still be in memory until app restart
-    }
-    
-    /**
-     * Get available sources from CDN
-     */
-    suspend fun getAvailableSources(): List<SourceInfo> {
-        return try {
-            val response = httpClients.default.get("https://sources.ireader.app/index.json").bodyAsText()
-            // Parse JSON response
-            emptyList() // Placeholder
-        } catch (e: Exception) {
+        val idsString = installedSourcesPrefs.getString("ids", "").get()
+        return if (idsString.isNotBlank()) {
+            idsString.split(",").filter { it.isNotBlank() }
+        } else {
             emptyList()
         }
     }
     
-    /**
-     * Clean up resources
-     */
-    fun cleanup() {
-        scope.cancel()
-        jsContext = null
-        runtimeLoaded = false
+    fun addInstalledSource(sourceId: String) {
+        val current = getInstalledSourceIds().toMutableList()
+        if (sourceId !in current) {
+            current.add(sourceId)
+            installedSourcesPrefs.getString("ids", "").set(current.joinToString(","))
+        }
     }
-}
-
-/**
- * Source info from CDN
- */
-data class SourceInfo(
-    val id: String,
-    val name: String,
-    val lang: String,
-    val version: String,
-    val baseUrl: String
-)
-
-// Extension for HTTP client
-private suspend fun io.ktor.client.HttpClient.get(url: String): io.ktor.client.statement.HttpResponse {
-    return this.request(url) {
-        method = io.ktor.http.HttpMethod.Get
+    
+    fun removeInstalledSource(sourceId: String) {
+        val current = getInstalledSourceIds().toMutableList()
+        current.remove(sourceId)
+        installedSourcesPrefs.getString("ids", "").set(current.joinToString(","))
     }
-}
-
-private suspend fun io.ktor.client.HttpClient.post(url: String, block: io.ktor.client.request.HttpRequestBuilder.() -> Unit): io.ktor.client.statement.HttpResponse {
-    return this.request(url) {
-        method = io.ktor.http.HttpMethod.Post
-        block()
+    
+    private fun String.escapeJs(): String {
+        return this
+            .replace("\\", "\\\\")
+            .replace("'", "\\'")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
     }
-}
-
-private suspend fun io.ktor.client.statement.HttpResponse.bodyAsText(): String {
-    return io.ktor.client.statement.bodyAsText()
 }

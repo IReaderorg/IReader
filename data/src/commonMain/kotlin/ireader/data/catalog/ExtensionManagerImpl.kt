@@ -8,6 +8,11 @@ import kotlinx.coroutines.flow.flow
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
+ * Exception thrown when extension security check fails
+ */
+class ExtensionSecurityException(message: String) : Exception(message)
+
+/**
  * Comprehensive extension manager implementation
  */
 class ExtensionManagerImpl(
@@ -45,7 +50,7 @@ class ExtensionManagerImpl(
             // Verify security before installation
             val security = extensionSecurityManager.scanExtension(catalog)
             if (security.trustLevel == ExtensionTrustLevel.BLOCKED) {
-                return Result.failure(SecurityException("Extension is blocked"))
+                return Result.failure(ExtensionSecurityException("Extension is blocked"))
             }
             
             // Install using specified method
@@ -114,7 +119,7 @@ class ExtensionManagerImpl(
             // Verify security before update
             val security = extensionSecurityManager.scanExtension(catalog)
             if (security.trustLevel == ExtensionTrustLevel.BLOCKED) {
-                return Result.failure(SecurityException("Extension is blocked"))
+                return Result.failure(ExtensionSecurityException("Extension is blocked"))
             }
             
             updateCatalog.await(catalog).collect { step ->

@@ -3,7 +3,7 @@ package ireader.data.migration
 import ireader.core.log.Log
 import ireader.data.core.DatabaseHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.launch
 
 /**
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
  */
 class RepositoryMigrationScript(
     private val handler: DatabaseHandler,
-    private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val scope: CoroutineScope = CoroutineScope(ioDispatcher)
 ) {
 
     /**

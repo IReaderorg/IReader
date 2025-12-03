@@ -2,7 +2,7 @@ package ireader.data.storage
 
 import ireader.core.log.Log
 import ireader.domain.storage.VoiceStorage
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.IOException
@@ -29,7 +29,7 @@ class VoiceStorageImpl(
     }
     
     override suspend fun saveVoiceModel(voiceId: String, data: ByteArray): Result<Unit> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 val voiceFile = voicesDir / "$voiceId.voice"
                 fileSystem.sink(voiceFile).buffer().use { sink ->
@@ -45,7 +45,7 @@ class VoiceStorageImpl(
     }
     
     override suspend fun loadVoiceModel(voiceId: String): Result<ByteArray> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 val voiceFile = voicesDir / "$voiceId.voice"
                 if (!fileSystem.exists(voiceFile)) {
@@ -66,7 +66,7 @@ class VoiceStorageImpl(
     }
     
     override suspend fun deleteVoiceModel(voiceId: String): Result<Unit> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 val voiceFile = voicesDir / "$voiceId.voice"
                 if (fileSystem.exists(voiceFile)) {
@@ -82,7 +82,7 @@ class VoiceStorageImpl(
     }
     
     override suspend fun getInstalledVoices(): List<String> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 if (!fileSystem.exists(voicesDir)) return@withContext emptyList()
                 fileSystem.list(voicesDir)
@@ -96,14 +96,14 @@ class VoiceStorageImpl(
     }
     
     override suspend fun getVoiceModelPath(voiceId: String): String? {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             val voiceFile = voicesDir / "$voiceId.voice"
             if (fileSystem.exists(voiceFile)) voiceFile.toString() else null
         }
     }
     
     override suspend fun getVoiceModelSize(voiceId: String): Long {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             val voiceFile = voicesDir / "$voiceId.voice"
             if (fileSystem.exists(voiceFile)) {
                 fileSystem.metadata(voiceFile).size ?: 0L

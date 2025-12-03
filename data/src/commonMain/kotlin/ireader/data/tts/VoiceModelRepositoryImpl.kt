@@ -7,7 +7,7 @@ import ireader.domain.services.tts_service.VoiceDownloader
 import ireader.domain.services.tts_service.VoiceStorage
 import okio.FileSystem
 import okio.Path
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 
 /**
@@ -51,7 +51,7 @@ class VoiceModelRepositoryImpl(
         return voiceStorage.deleteVoice(voiceId)
     }
     
-    override suspend fun getInstalledVoices(): Result<List<VoiceModel>> = withContext(Dispatchers.IO) {
+    override suspend fun getInstalledVoices(): Result<List<VoiceModel>> = withContext(ioDispatcher) {
         try {
             val installedIds = voiceStorage.getDownloadedVoiceIds()
             val installedVoices = installedIds.mapNotNull { id ->
@@ -63,7 +63,7 @@ class VoiceModelRepositoryImpl(
         }
     }
     
-    override suspend fun verifyVoiceIntegrity(voiceId: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun verifyVoiceIntegrity(voiceId: String): Boolean = withContext(ioDispatcher) {
         try {
             val voice = VoiceCatalog.getVoiceById(voiceId) ?: return@withContext false
             

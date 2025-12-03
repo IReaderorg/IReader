@@ -4,6 +4,9 @@ import platform.UIKit.*
 import platform.Foundation.*
 import platform.CoreGraphics.*
 import kotlinx.cinterop.*
+import kotlinx.cinterop.refTo
+import kotlinx.cinterop.usePinned
+import kotlinx.cinterop.addressOf
 
 /**
  * iOS implementation of ImageCompressor
@@ -141,42 +144,42 @@ actual class ImageCompressor {
     /**
      * Get image format from bytes
      */
-    fun getImageFormat(imageBytes: ByteArray): ImageFormat {
-        if (imageBytes.size < 4) return ImageFormat.UNKNOWN
+    fun getImageFormat(imageBytes: ByteArray): IosImageFormat {
+        if (imageBytes.size < 4) return IosImageFormat.UNKNOWN
         
         return when {
             // JPEG: FF D8 FF
             imageBytes[0] == 0xFF.toByte() && 
             imageBytes[1] == 0xD8.toByte() && 
-            imageBytes[2] == 0xFF.toByte() -> ImageFormat.JPEG
+            imageBytes[2] == 0xFF.toByte() -> IosImageFormat.JPEG
             
             // PNG: 89 50 4E 47
             imageBytes[0] == 0x89.toByte() && 
             imageBytes[1] == 0x50.toByte() && 
             imageBytes[2] == 0x4E.toByte() && 
-            imageBytes[3] == 0x47.toByte() -> ImageFormat.PNG
+            imageBytes[3] == 0x47.toByte() -> IosImageFormat.PNG
             
             // GIF: 47 49 46 38
             imageBytes[0] == 0x47.toByte() && 
             imageBytes[1] == 0x49.toByte() && 
             imageBytes[2] == 0x46.toByte() && 
-            imageBytes[3] == 0x38.toByte() -> ImageFormat.GIF
+            imageBytes[3] == 0x38.toByte() -> IosImageFormat.GIF
             
             // WebP: 52 49 46 46 ... 57 45 42 50
             imageBytes[0] == 0x52.toByte() && 
             imageBytes[1] == 0x49.toByte() && 
             imageBytes[2] == 0x46.toByte() && 
-            imageBytes[3] == 0x46.toByte() -> ImageFormat.WEBP
+            imageBytes[3] == 0x46.toByte() -> IosImageFormat.WEBP
             
-            else -> ImageFormat.UNKNOWN
+            else -> IosImageFormat.UNKNOWN
         }
     }
 }
 
 /**
- * Image format enum
+ * iOS-specific image format enum with additional formats
  */
-enum class ImageFormat {
+enum class IosImageFormat {
     JPEG,
     PNG,
     GIF,
@@ -190,11 +193,8 @@ enum class ImageFormat {
 @OptIn(ExperimentalForeignApi::class)
 private fun ByteArray.toNSData(): NSData? {
     if (isEmpty()) return null
-    return memScoped {
-        NSData.create(
-            bytes = allocArrayOf(*this@toNSData),
-            length = size.toULong()
-        )
+    return this.usePinned { pinned ->
+        NSData.create(bytes = pinned.addressOf(0), length = size.toULong())
     }
 }
 
@@ -206,8 +206,8 @@ private fun NSData.toByteArray(): ByteArray {
     val length = this.length.toInt()
     if (length == 0) return ByteArray(0)
     
-    return ByteArray(length).apply {
-        usePinned { pinned ->
+    return ByteArray(length).also { bytes ->
+        bytes.usePinned { pinned ->
             platform.posix.memcpy(pinned.addressOf(0), this@toByteArray.bytes, this@toByteArray.length)
         }
     }

@@ -78,7 +78,7 @@ class NotificationRepositoryImpl : NotificationRepository {
             // Add user info
             val userInfo = mutableMapOf<Any?, Any?>()
             userInfo["notificationId"] = notification.id
-            notification.data?.forEach { (key, value) ->
+            notification.extras.forEach { (key, value) ->
                 userInfo[key] = value
             }
             setUserInfo(userInfo)
