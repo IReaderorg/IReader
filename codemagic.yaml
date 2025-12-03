@@ -59,13 +59,17 @@ workflows:
           cd iosApp
           pod install --repo-update || echo "No Pods to install"
       
-      # Build Kotlin framework for iOS
+      # Build Kotlin framework for iOS Simulator
       - name: Build Kotlin Framework
         script: |
-          ./gradlew :ios-build-check:embedAndSignAppleFrameworkForXcode \
-            -PXCODE_CONFIGURATION=Release \
-            -PSDK_NAME=iphonesimulator \
-            --no-daemon
+          # Build the iOS framework directly (not via Xcode task)
+          ./gradlew :ios-build-check:linkReleaseFrameworkIosSimulatorArm64 --no-daemon
+          
+          # Copy framework to expected location for Xcode
+          FRAMEWORK_PATH="ios-build-check/build/bin/iosSimulatorArm64/releaseFramework"
+          DEST_PATH="ios-build-check/build/xcode-frameworks/Release/iphonesimulator"
+          mkdir -p "$DEST_PATH"
+          cp -R "$FRAMEWORK_PATH"/* "$DEST_PATH/" || echo "Framework copy skipped"
       
       # Build iOS app (simulator)
       - name: Build iOS App (Simulator)
@@ -75,10 +79,10 @@ workflows:
             -scheme iosApp \
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
-            -allowProvisioningUpdates \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../ios-build-check/build/bin/iosSimulatorArm64/releaseFramework"
       
       # Run iOS tests (if available)
       - name: Run iOS Tests
@@ -105,24 +109,23 @@ workflows:
           failure: true
 
   # ============================================
-  # iOS Release Build (with signing)
+  # AltStore / Sideloading Build (Unsigned IPA)
   # ============================================
-  ios-release:
-    name: iOS Release Build
+  # This creates an unsigned IPA that can be installed via:
+  # - AltStore (recommended)
+  # - Sideloadly
+  # - 3uTools
+  # - Other sideloading tools
+  ios-sideload:
+    name: iOS Sideload Build (AltStore)
     max_build_duration: 120
     instance_type: mac_mini_m1
     
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.infinity.iosApp
+      # No signing needed - AltStore will sign with user's Apple ID
       vars:
-        XCODE_WORKSPACE: "iosApp/iosApp.xcodeproj"
         XCODE_SCHEME: "iosApp"
         BUNDLE_ID: "com.infinity.iosApp"
-        # Add your Supabase secrets in Codemagic UI
-        # SUPABASE_URL: Encrypted(...)
-        # SUPABASE_KEY: Encrypted(...)
       xcode: latest
       java: 17
       cocoapods: default
@@ -130,17 +133,22 @@ workflows:
     triggering:
       events:
         - tag
+        - push
       tag_patterns:
         - pattern: 'v*'
           include: true
-        - pattern: 'ios-*'
+        - pattern: 'sideload-*'
+          include: true
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+        - pattern: 'release/*'
           include: true
     
     scripts:
       - name: Set up local.properties
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          # Use environment variables for secrets (set in Codemagic UI)
           echo "supabase.auth.url=${SUPABASE_URL:-https://placeholder.supabase.co}" >> local.properties
           echo "supabase.auth.key=${SUPABASE_KEY:-placeholder-key}" >> local.properties
           echo "supabase.reading.url=${SUPABASE_URL:-https://placeholder.supabase.co}" >> local.properties
@@ -163,41 +171,62 @@ workflows:
       
       - name: Build Kotlin Framework
         script: |
-          ./gradlew :ios-build-check:embedAndSignAppleFrameworkForXcode \
-            -PXCODE_CONFIGURATION=Release \
-            -PSDK_NAME=iphoneos \
-            --no-daemon
+          # Build the iOS framework for real devices (arm64)
+          ./gradlew :ios-build-check:linkReleaseFrameworkIosArm64 --no-daemon
+          
+          # Copy framework to expected location
+          FRAMEWORK_PATH="ios-build-check/build/bin/iosArm64/releaseFramework"
+          DEST_PATH="ios-build-check/build/xcode-frameworks/Release/iphoneos"
+          mkdir -p "$DEST_PATH"
+          cp -R "$FRAMEWORK_PATH"/* "$DEST_PATH/" || echo "Framework copy skipped"
       
-      - name: Build iOS App (Release)
+      - name: Build Unsigned App
         script: |
-          xcodebuild archive \
+          # Build for real device without signing
+          xcodebuild build \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -configuration Release \
-            -archivePath build/iosApp.xcarchive \
             -destination 'generic/platform=iOS' \
-            -allowProvisioningUpdates
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../ios-build-check/build/bin/iosArm64/releaseFramework"
       
-      - name: Export IPA
+      - name: Create Unsigned IPA
         script: |
-          xcodebuild -exportArchive \
-            -archivePath build/iosApp.xcarchive \
-            -exportPath build/ipa \
-            -exportOptionsPlist iosApp/ExportOptions.plist \
-            -allowProvisioningUpdates
+          # Find the .app bundle
+          APP_PATH=$(find build/DerivedData -name "*.app" -type d | head -1)
+          echo "Found app at: $APP_PATH"
+          
+          # Create Payload directory structure
+          mkdir -p build/Payload
+          cp -r "$APP_PATH" build/Payload/
+          
+          # Create the IPA (it's just a zip file)
+          cd build
+          zip -r Infinity-unsigned.ipa Payload
+          
+          # Also create with version in filename
+          VERSION=$(date +%Y%m%d-%H%M%S)
+          cp Infinity-unsigned.ipa "Infinity-${VERSION}-sideload.ipa"
+          
+          echo "✅ Created unsigned IPA for sideloading!"
+          ls -la *.ipa
     
     artifacts:
-      - build/ipa/*.ipa
-      - build/iosApp.xcarchive
+      - build/*.ipa
+      - build/Payload/**/*.app
     
-    # Uncomment and configure when you have App Store Connect API key
-    # publishing:
-    #   app_store_connect:
-    #     # First add integration in Codemagic UI: Settings -> Integrations -> App Store Connect
-    #     api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-    #     key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-    #     issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-    #     submit_to_testflight: true
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true
 
   # ============================================
   # Kotlin Multiplatform Tests (No Mac needed)
