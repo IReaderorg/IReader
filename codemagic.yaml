@@ -8,9 +8,7 @@ workflows:
     instance_type: mac_mini_m1
     
     environment:
-      ios_signing:
-        distribution_type: development
-        bundle_identifier: com.infinity.iosApp
+      # No ios_signing needed for simulator builds!
       vars:
         XCODE_WORKSPACE: "iosApp/iosApp.xcodeproj"
         XCODE_SCHEME: "iosApp"
