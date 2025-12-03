@@ -13,7 +13,7 @@ workflows:
         XCODE_WORKSPACE: "iosApp/iosApp.xcodeproj"
         XCODE_SCHEME: "iosApp"
         BUNDLE_ID: "com.infinity.iosApp"
-      xcode: 15.2
+      xcode: latest
       java: 17
       cocoapods: default
     
@@ -123,7 +123,7 @@ workflows:
         # Add your Supabase secrets in Codemagic UI
         # SUPABASE_URL: Encrypted(...)
         # SUPABASE_KEY: Encrypted(...)
-      xcode: 15.2
+      xcode: latest
       java: 17
       cocoapods: default
     
