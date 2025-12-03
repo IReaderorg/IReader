@@ -1,6 +1,6 @@
 import UIKit
 import SwiftUI
-import iosBuildCheck
+import presentation
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -11,19 +11,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         // Initialize Koin for dependency injection
-        // Note: When presentation framework is linked, uncomment:
-        // IosKoinInitKt.initKoin(additionalModules: [])
+        IosKoinInitKt.initKoin(additionalModules: [])
         
         window = UIWindow(frame: UIScreen.main.bounds)
         
-        // Use SwiftUI ContentView for now
-        // When Compose UI is ready, switch to:
-        // let composeVC = IosMainViewControllerKt.MainViewController()
-        // window?.rootViewController = composeVC
-        
-        let contentView = ContentView()
-        window?.rootViewController = UIHostingController(rootView: contentView)
+        // Use Compose Multiplatform UI
+        let composeVC = IosMainViewControllerKt.MainViewController()
+        window?.rootViewController = composeVC
         window?.makeKeyAndVisible()
+        
         return true
     }
 

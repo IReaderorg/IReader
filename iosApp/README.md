@@ -12,20 +12,25 @@ This is the iOS application for IReader, built with Kotlin Multiplatform and Com
 
 ### From Xcode
 
-1. Open `iosApp.xcodeproj` in Xcode
-2. Select your target device/simulator
-3. Build and run (⌘R)
+1. Build the Kotlin framework first:
+   ```bash
+   cd ..
+   ./gradlew :presentation:linkDebugFrameworkIosSimulatorArm64
+   # Or for device:
+   ./gradlew :presentation:linkDebugFrameworkIosArm64
+   ```
 
-The Xcode project includes a build phase that automatically compiles the Kotlin framework.
+2. Open `iosApp.xcodeproj` in Xcode
+3. Select your target device/simulator
+4. Build and run (⌘R)
 
 ### From Command Line
 
 ```bash
-# Build the presentation framework first
-cd ..
+# Build the presentation framework
 ./gradlew :presentation:linkDebugFrameworkIosSimulatorArm64
 
-# Then open Xcode
+# Open Xcode
 open iosApp/iosApp.xcodeproj
 ```
 
@@ -37,8 +42,8 @@ iosApp/
 ├── iosApp/
 │   ├── AppDelegate.swift # App entry point with Koin initialization
 │   ├── SceneDelegate.swift
-│   ├── ContentView.swift # Main SwiftUI view (fallback UI)
-│   ├── ComposeViewController.swift # Bridge to Compose UI
+│   ├── ContentView.swift # SwiftUI wrapper for Compose UI
+│   ├── ComposeViewController.swift # UIKit bridge to Compose UI
 │   ├── Info.plist        # App configuration
 │   └── Assets.xcassets/  # App icons and colors
 ├── Podfile               # CocoaPods config (optional)
@@ -47,24 +52,24 @@ iosApp/
 
 ## Architecture
 
-The iOS app uses a hybrid approach:
-- **SwiftUI** for native iOS UI components and navigation
-- **Compose Multiplatform** for shared UI from the presentation module
-- **Koin** for dependency injection (initialized in AppDelegate)
+The iOS app uses Compose Multiplatform for the entire UI:
+
+1. **AppDelegate** initializes Koin and sets up the root view controller
+2. **IosKoinInit.kt** configures all dependency injection modules
+3. **IosMainViewController.kt** creates the Compose UI entry point
+4. **CommonNavHost** provides shared navigation across all platforms
 
 ## Kotlin Framework Integration
 
-The app can import multiple Kotlin frameworks:
-
 ```swift
-import iosBuildCheck    // Build verification module
-import presentation     // Main presentation layer (when linked)
+import presentation
 
-// Initialize Koin
+// Initialize Koin (call once at app startup)
 IosKoinInitKt.initKoin(additionalModules: [])
 
 // Get Compose UI ViewController
 let composeVC = IosMainViewControllerKt.MainViewController()
+window?.rootViewController = composeVC
 ```
 
 ## Features
@@ -83,3 +88,19 @@ The app requests the following permissions:
 - Photo Library (for character art)
 - Camera (optional, for capturing images)
 - Files (for backup/restore and EPUB import)
+
+## Troubleshooting
+
+### Framework not found
+Make sure to build the Kotlin framework before opening Xcode:
+```bash
+./gradlew :presentation:linkDebugFrameworkIosSimulatorArm64
+```
+
+### Koin not initialized
+Ensure `IosKoinInitKt.initKoin()` is called in AppDelegate before any Compose UI is created.
+
+### Compose UI not showing
+Check that the presentation framework is properly linked in Xcode:
+1. Go to Build Phases
+2. Verify "Embed Frameworks" includes the presentation framework

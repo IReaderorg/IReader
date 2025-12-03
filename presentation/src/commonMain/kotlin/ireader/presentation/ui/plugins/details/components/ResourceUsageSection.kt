@@ -155,7 +155,7 @@ private fun getProgressColor(percentage: Float): androidx.compose.ui.graphics.Co
  * Extension function to format doubles
  */
 private fun Double.format(decimals: Int): String {
-    return ireader.presentation.ui.core.utils.formatDecimal(this, decimals)
+    return ireader.presentation.ui.core.utils.toDecimalString(this, decimals)
 }
 
 /**

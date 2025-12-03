@@ -58,7 +58,7 @@ fun ReviewsSectionHeader(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = ireader.presentation.ui.core.utils.formatDecimal(averageRating.toDouble(), 1),
+                            text = ireader.presentation.ui.core.utils.toDecimalString(averageRating.toDouble(), 1),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )

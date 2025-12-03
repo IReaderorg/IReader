@@ -1,5 +1,6 @@
 import UIKit
 import SwiftUI
+import presentation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -12,8 +13,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(windowScene: windowScene)
-        let contentView = ContentView()
-        window?.rootViewController = UIHostingController(rootView: contentView)
+        
+        // Use Compose Multiplatform UI
+        let composeVC = IosMainViewControllerKt.MainViewController()
+        window?.rootViewController = composeVC
         window?.makeKeyAndVisible()
     }
 

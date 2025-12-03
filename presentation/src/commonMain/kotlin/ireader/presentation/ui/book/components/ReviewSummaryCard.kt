@@ -87,7 +87,7 @@ fun ReviewSummaryCard(
                         )
                         Column {
                             Text(
-                                text = ireader.presentation.ui.core.utils.formatDecimal(averageRating.toDouble(), 1),
+                                text = ireader.presentation.ui.core.utils.toDecimalString(averageRating.toDouble(), 1),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface,

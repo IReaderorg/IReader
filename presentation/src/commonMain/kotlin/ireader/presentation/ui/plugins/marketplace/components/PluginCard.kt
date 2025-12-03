@@ -103,7 +103,7 @@ fun PluginCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = ireader.presentation.ui.core.utils.formatDecimal(rating.toDouble(), 1),
+                            text = ireader.presentation.ui.core.utils.toDecimalString(rating.toDouble(), 1),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium
                         )
@@ -196,8 +196,8 @@ private fun PriceBadge(
  */
 private fun formatDownloadCount(count: Int): String {
     return when {
-        count >= 1_000_000 -> "${ireader.presentation.ui.core.utils.formatDecimal(count / 1_000_000.0, 1)}M"
-        count >= 1_000 -> "${ireader.presentation.ui.core.utils.formatDecimal(count / 1_000.0, 1)}K"
+        count >= 1_000_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000_000.0, 1)}M"
+        count >= 1_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000.0, 1)}K"
         else -> count.toString()
     }
 }
@@ -213,5 +213,5 @@ private fun formatPrice(price: Double, currency: String): String {
         "JPY" -> "¥"
         else -> currency
     }
-    return "$symbol${ireader.presentation.ui.core.utils.formatDecimal(price, 2)}"
+    return "$symbol${ireader.presentation.ui.core.utils.toDecimalString(price, 2)}"
 }

@@ -1,16 +1,25 @@
 package ireader.presentation
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ComposeUIViewController
+import androidx.navigation.compose.rememberNavController
+import ireader.i18n.LocalizeHelper
+import ireader.presentation.core.CommonNavHost
+import ireader.presentation.core.ProvideNavigator
+import ireader.presentation.core.theme.AppTheme
+import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import org.koin.compose.KoinContext
+import org.koin.compose.koinInject
 import platform.UIKit.UIViewController
-import ireader.presentation.core.theme.IReaderTheme
 
 /**
  * Creates the main UIViewController for the iOS app that hosts Compose UI.
@@ -22,23 +31,32 @@ fun MainViewController(): UIViewController = ComposeUIViewController {
 
 /**
  * The main composable entry point for the iOS app.
- * This wraps the shared presentation layer.
+ * This wraps the shared presentation layer with full navigation.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IReaderApp() {
-    IReaderTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+    KoinContext {
+        val scope = rememberCoroutineScope()
+        val localizeHelper: LocalizeHelper = koinInject()
+        
+        CompositionLocalProvider(
+            LocalLocalizeHelper provides localizeHelper
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "IReader iOS",
-                    style = MaterialTheme.typography.headlineMedium
-                )
+            AppTheme(scope) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    val navController = rememberNavController()
+                    
+                    ProvideNavigator(navController) {
+                        IScaffold {
+                            CommonNavHost(navController)
+                        }
+                    }
+                }
             }
         }
     }

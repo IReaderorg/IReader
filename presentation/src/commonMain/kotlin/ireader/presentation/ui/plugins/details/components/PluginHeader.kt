@@ -87,7 +87,7 @@ fun PluginHeader(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = ireader.presentation.ui.core.utils.formatDecimal((plugin.rating ?: 0f).toDouble(), 1),
+                        text = ireader.presentation.ui.core.utils.toDecimalString((plugin.rating ?: 0f).toDouble(), 1),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -120,8 +120,8 @@ fun PluginHeader(
  */
 private fun formatDownloadCount(count: Int): String {
     return when {
-        count >= 1_000_000 -> "${ireader.presentation.ui.core.utils.formatDecimal(count / 1_000_000.0, 1)}M"
-        count >= 1_000 -> "${ireader.presentation.ui.core.utils.formatDecimal(count / 1_000.0, 1)}K"
+        count >= 1_000_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000_000.0, 1)}M"
+        count >= 1_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000.0, 1)}K"
         else -> count.toString()
     }
 }

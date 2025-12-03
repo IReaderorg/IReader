@@ -417,7 +417,7 @@ private fun ConfigurationSlider(
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = ireader.presentation.ui.core.utils.formatDecimal(value.toDouble(), 2),
+                text = ireader.presentation.ui.core.utils.toDecimalString(value.toDouble(), 2),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )

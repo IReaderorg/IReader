@@ -696,8 +696,8 @@ private fun RarityIcon(rarity: String) {
 
 private fun formatDonationAmount(amount: Double): String {
     return when {
-        amount >= 1000 -> "$${ireader.presentation.ui.core.utils.formatDecimal(amount / 1000, 1)}K"
+        amount >= 1000 -> "$${ireader.presentation.ui.core.utils.toDecimalString(amount / 1000, 1)}K"
         amount >= 100 -> "$${amount.toInt()}"
-        else -> "$${ireader.presentation.ui.core.utils.formatDecimal(amount, 2)}"
+        else -> "$${ireader.presentation.ui.core.utils.toDecimalString(amount, 2)}"
     }
 }

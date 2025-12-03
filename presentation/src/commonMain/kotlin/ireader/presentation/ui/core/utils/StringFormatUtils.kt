@@ -33,16 +33,18 @@ fun Double.formatDecimal(decimals: Int): String {
 fun Float.formatDecimal(decimals: Int): String = this.toDouble().formatDecimal(decimals)
 
 /**
- * Top-level function to format a Double with specified decimal places.
- * Example: formatDecimal(3.14159, 2) -> "3.14"
+ * Top-level function to format a number with specified decimal places.
+ * Use this when you can't use extension function syntax.
+ * Example: toDecimalString(3.14159, 2) -> "3.14"
  */
-fun formatDecimal(value: Double, decimals: Int): String = value.formatDecimal(decimals)
+fun toDecimalString(value: Double, decimals: Int): String = value.formatDecimal(decimals)
 
 /**
- * Top-level function to format a Float with specified decimal places.
- * Example: formatDecimal(3.14159f, 2) -> "3.14"
+ * Top-level function to format a number with specified decimal places.
+ * Use this when you can't use extension function syntax.
+ * Example: toDecimalString(3.14159f, 2) -> "3.14"
  */
-fun formatDecimal(value: Float, decimals: Int): String = value.toDouble().formatDecimal(decimals)
+fun toDecimalString(value: Float, decimals: Int): String = value.toDouble().formatDecimal(decimals)
 
 /**
  * Format rating with review count.

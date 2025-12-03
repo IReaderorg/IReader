@@ -54,7 +54,7 @@ fun PurchaseDialog(
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "${monetization.currency} ${ireader.presentation.ui.core.utils.formatDecimal(monetization.price, 2)}",
+                        text = "${monetization.currency} ${ireader.presentation.ui.core.utils.toDecimalString(monetization.price, 2)}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

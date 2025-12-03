@@ -631,7 +631,7 @@ private fun FeaturedBadgeCard(
                             )
                             Spacer(modifier = Modifier.width(if (isCompact) 4.dp else 8.dp))
                             Text(
-                                text = "${ireader.presentation.ui.core.utils.formatDecimal(price, 2)} USD",
+                                text = "${ireader.presentation.ui.core.utils.toDecimalString(price, 2)} USD",
                                 style = if (isCompact) MaterialTheme.typography.labelLarge else MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = gradientColors.first()
@@ -811,7 +811,7 @@ private fun ModernBadgeCard(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = ireader.presentation.ui.core.utils.formatDecimal(price, 2),
+                                text = ireader.presentation.ui.core.utils.toDecimalString(price, 2),
                                 style = if (isLargeScreen) 
                                     MaterialTheme.typography.titleSmall 
                                 else 
@@ -1104,7 +1104,7 @@ private fun ModernPurchaseDialog(
                                     color = Color.White
                                 ) {
                                     Text(
-                                        text = "${ireader.presentation.ui.core.utils.formatDecimal(price, 2)} USD",
+                                        text = "${ireader.presentation.ui.core.utils.toDecimalString(price, 2)} USD",
                                         modifier = Modifier.padding(
                                             horizontal = if (isCompactDialog) 16.dp else 24.dp,
                                             vertical = if (isCompactDialog) 8.dp else 12.dp

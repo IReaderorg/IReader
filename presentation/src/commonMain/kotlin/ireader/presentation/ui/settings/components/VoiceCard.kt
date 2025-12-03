@@ -207,7 +207,7 @@ fun formatFileSize(bytes: Long): String {
         bytes < 1024 -> "$bytes B"
         bytes < 1024 * 1024 -> "${bytes / 1024} KB"
         bytes < 1024 * 1024 * 1024 -> "${bytes / (1024 * 1024)} MB"
-        else -> "${ireader.presentation.ui.core.utils.formatDecimal(bytes / (1024.0 * 1024.0 * 1024.0), 1)} GB"
+        else -> "${ireader.presentation.ui.core.utils.toDecimalString(bytes / (1024.0 * 1024.0 * 1024.0), 1)} GB"
     }
 }
 
