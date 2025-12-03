@@ -15,6 +15,7 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.theme.ExtraColors
 import ireader.domain.models.theme.Theme
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.utils.removeIf
 import ireader.presentation.ui.core.theme.AppTypography
 import ireader.presentation.ui.core.theme.asState
 import ireader.presentation.ui.core.theme.getAppUiFontFamily

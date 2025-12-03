@@ -140,10 +140,10 @@ object LanguageHelper {
     private fun getFlagFromIsoShort(flagAscii: String?): String? {
         if (flagAscii.isNullOrBlank() || flagAscii.length < 2) return null
         return try {
-            val firstChar: Int = Character.codePointAt(flagAscii, 0) + offset
-            val secondChar: Int = Character.codePointAt(flagAscii, 1) + offset
+            val firstChar: Int = flagAscii[0].code + offset
+            val secondChar: Int = flagAscii[1].code + offset
 
-            (String(Character.toChars(firstChar)) + String(Character.toChars(secondChar)))
+            (firstChar.toChar().toString() + secondChar.toChar().toString())
         } catch (e: Exception) {
             Log.error(e)
             null

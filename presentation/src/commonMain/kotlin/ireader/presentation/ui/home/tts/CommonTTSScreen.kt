@@ -1268,7 +1268,7 @@ private fun DesktopTTSControls(
     
     // Memoize speed text to avoid String.format on every recomposition
     val speedText = remember(state.speechSpeed) {
-        String.format("%.1fx", state.speechSpeed)
+        ireader.presentation.ui.core.utils.formatMultiplier(state.speechSpeed)
     }
     
     Column(
@@ -1428,7 +1428,7 @@ private fun MobileTTSControls(
     
     // Memoize speed text to avoid String.format on every recomposition
     val speedText = remember(state.speechSpeed) {
-        String.format("%.1fx", state.speechSpeed)
+        ireader.presentation.ui.core.utils.formatMultiplier(state.speechSpeed)
     }
     
     Row(
@@ -1666,7 +1666,7 @@ fun TTSSettingsPanelCommon(
                 }
                 
                 // Speed Control
-                SettingSectionCommon(title = "Speech Speed: ${String.format("%.1fx", speechSpeed)}") {
+                SettingSectionCommon(title = "Speech Speed: ${ireader.presentation.ui.core.utils.formatMultiplier(speechSpeed)}") {
                     Slider(
                         value = speechSpeed,
                         onValueChange = onSpeedChange,

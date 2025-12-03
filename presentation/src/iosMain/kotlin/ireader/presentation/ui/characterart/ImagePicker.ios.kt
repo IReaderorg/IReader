@@ -1,35 +1,49 @@
 package ireader.presentation.ui.characterart
 
-import androidx.compose.runtime.*
-import platform.UIKit.*
-import platform.Foundation.*
-import platform.darwin.NSObject
-import platform.Photos.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.*
-import kotlin.coroutines.resume
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import platform.Foundation.NSData
+import platform.Foundation.NSDate
+import platform.Foundation.NSURL
+import platform.Foundation.timeIntervalSince1970
+import platform.Photos.PHAuthorizationStatusAuthorized
+import platform.Photos.PHAuthorizationStatusLimited
+import platform.Photos.PHAuthorizationStatusNotDetermined
+import platform.Photos.PHPhotoLibrary
+import platform.UIKit.UIApplication
+import platform.UIKit.UIImage
+import platform.UIKit.UIImageJPEGRepresentation
+import platform.UIKit.UIImagePickerController
+import platform.UIKit.UIImagePickerControllerDelegateProtocol
+import platform.UIKit.UIImagePickerControllerImageURL
+import platform.UIKit.UIImagePickerControllerOriginalImage
+import platform.UIKit.UIImagePickerControllerSourceType
+import platform.UIKit.UINavigationControllerDelegateProtocol
+import platform.UIKit.UIViewController
+import platform.UIKit.UIWindow
+import platform.darwin.NSObject
+import platform.posix.memcpy
 
-/**
- * iOS implementation of ImagePicker
- * 
- * Uses UIImagePickerController for image selection
- */
 @OptIn(ExperimentalForeignApi::class)
 actual class ImagePicker {
     private var selectedPath: String? = null
     private var selectedBytes: ByteArray? = null
     private var pendingCallback: ((ByteArray, String) -> Unit)? = null
     private var pendingErrorCallback: ((String) -> Unit)? = null
+    private var delegate: ImagePickerDelegateImpl? = null
     
-    /**
-     * Pick an image from the photo library
-     */
     actual suspend fun pickImage(
         onImagePicked: (bytes: ByteArray, fileName: String) -> Unit,
         onError: (String) -> Unit
     ) {
         withContext(Dispatchers.Main) {
-            // Check photo library permission
             val status = PHPhotoLibrary.authorizationStatus()
             
             when (status) {
@@ -37,7 +51,6 @@ actual class ImagePicker {
                     showImagePicker(onImagePicked, onError)
                 }
                 PHAuthorizationStatusNotDetermined -> {
-                    // Request permission
                     PHPhotoLibrary.requestAuthorization { newStatus ->
                         if (newStatus == PHAuthorizationStatusAuthorized || 
                             newStatus == PHAuthorizationStatusLimited) {
@@ -56,9 +69,6 @@ actual class ImagePicker {
         }
     }
     
-    /**
-     * Show the image picker UI
-     */
     private fun showImagePicker(
         onImagePicked: (ByteArray, String) -> Unit,
         onError: (String) -> Unit
@@ -72,36 +82,30 @@ actual class ImagePicker {
             return
         }
         
-        // Check if image picker is available
-        if (!UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceTypePhotoLibrary)) {
+        if (!UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypePhotoLibrary)) {
             onError("Photo library not available")
             return
         }
         
-        val picker = UIImagePickerController().apply {
-            sourceType = UIImagePickerControllerSourceTypePhotoLibrary
-            allowsEditing = false
-            
-            // Set delegate
-            delegate = ImagePickerDelegate(
-                onImageSelected = { image, url ->
-                    handleImageSelected(image, url)
-                },
-                onCancelled = {
-                    pendingErrorCallback?.invoke("Image selection cancelled")
-                    clearCallbacks()
-                }
-            )
-        }
+        val picker = UIImagePickerController()
+        picker.sourceType = UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypePhotoLibrary
+        picker.allowsEditing = false
+        
+        delegate = ImagePickerDelegateImpl(
+            onImageSelected = { image, url ->
+                handleImageSelected(image, url)
+            },
+            onCancelled = {
+                pendingErrorCallback?.invoke("Image selection cancelled")
+                clearCallbacks()
+            }
+        )
+        picker.delegate = delegate
         
         rootViewController.presentViewController(picker, animated = true, completion = null)
     }
     
-    /**
-     * Handle selected image
-     */
     private fun handleImageSelected(image: UIImage, url: NSURL?) {
-        // Convert UIImage to bytes
         val imageData = UIImageJPEGRepresentation(image, 0.9)
         
         if (imageData == null) {
@@ -111,7 +115,7 @@ actual class ImagePicker {
         }
         
         val bytes = imageData.toByteArray()
-        val fileName = url?.lastPathComponent ?: "image_${System.currentTimeMillis()}.jpg"
+        val fileName = url?.lastPathComponent ?: "image_${currentTimeMillis()}.jpg"
         
         selectedPath = url?.path
         selectedBytes = bytes
@@ -125,36 +129,26 @@ actual class ImagePicker {
         pendingErrorCallback = null
     }
     
-    /**
-     * Get the root view controller
-     */
     private fun getRootViewController(): UIViewController? {
         val keyWindow = UIApplication.sharedApplication.keyWindow
-            ?: UIApplication.sharedApplication.windows.firstOrNull { 
-                (it as? UIWindow)?.isKeyWindow == true 
+            ?: UIApplication.sharedApplication.windows.firstOrNull { window ->
+                (window as? UIWindow)?.isKeyWindow() == true
             } as? UIWindow
         
         var rootVC = keyWindow?.rootViewController
-        
         while (rootVC?.presentedViewController != null) {
             rootVC = rootVC.presentedViewController
         }
-        
         return rootVC
     }
     
-    actual fun getSelectedImagePath(): String? {
-        return selectedPath
-    }
+    actual fun getSelectedImagePath(): String? = selectedPath
     
     actual fun clearSelection() {
         selectedPath = null
         selectedBytes = null
     }
     
-    /**
-     * Pick image from camera
-     */
     suspend fun pickFromCamera(
         onImagePicked: (ByteArray, String) -> Unit,
         onError: (String) -> Unit
@@ -166,7 +160,7 @@ actual class ImagePicker {
                 return@withContext
             }
             
-            if (!UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceTypeCamera)) {
+            if (!UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera)) {
                 onError("Camera not available")
                 return@withContext
             }
@@ -174,31 +168,28 @@ actual class ImagePicker {
             pendingCallback = onImagePicked
             pendingErrorCallback = onError
             
-            val picker = UIImagePickerController().apply {
-                sourceType = UIImagePickerControllerSourceTypeCamera
-                allowsEditing = false
-                
-                delegate = ImagePickerDelegate(
-                    onImageSelected = { image, url ->
-                        handleImageSelected(image, url)
-                    },
-                    onCancelled = {
-                        pendingErrorCallback?.invoke("Camera cancelled")
-                        clearCallbacks()
-                    }
-                )
-            }
+            val picker = UIImagePickerController()
+            picker.sourceType = UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera
+            picker.allowsEditing = false
+            
+            delegate = ImagePickerDelegateImpl(
+                onImageSelected = { image, url ->
+                    handleImageSelected(image, url)
+                },
+                onCancelled = {
+                    pendingErrorCallback?.invoke("Camera cancelled")
+                    clearCallbacks()
+                }
+            )
+            picker.delegate = delegate
             
             rootViewController.presentViewController(picker, animated = true, completion = null)
         }
     }
 }
 
-/**
- * UIImagePickerController delegate
- */
 @OptIn(ExperimentalForeignApi::class)
-private class ImagePickerDelegate(
+private class ImagePickerDelegateImpl(
     private val onImageSelected: (UIImage, NSURL?) -> Unit,
     private val onCancelled: () -> Unit
 ) : NSObject(), UIImagePickerControllerDelegateProtocol, UINavigationControllerDelegateProtocol {
@@ -209,7 +200,6 @@ private class ImagePickerDelegate(
     ) {
         picker.dismissViewControllerAnimated(true, completion = null)
         
-        // Get the selected image
         val image = didFinishPickingMediaWithInfo[UIImagePickerControllerOriginalImage] as? UIImage
         val url = didFinishPickingMediaWithInfo[UIImagePickerControllerImageURL] as? NSURL
         
@@ -231,50 +221,16 @@ actual fun rememberImagePicker(): ImagePicker {
     return remember { ImagePicker() }
 }
 
-/**
- * Composable that provides image picking functionality for iOS
- */
-@Composable
-fun ImagePickerHost(
-    onImagePicked: (ByteArray, String) -> Unit,
-    onError: (String) -> Unit,
-    content: @Composable (launchPicker: () -> Unit, selectedPath: String?) -> Unit
-) {
-    val picker = remember { ImagePicker() }
-    var selectedPath by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-    
-    content(
-        launchPicker = {
-            scope.launch {
-                picker.pickImage(
-                    onImagePicked = { bytes, fileName ->
-                        selectedPath = picker.getSelectedImagePath()
-                        onImagePicked(bytes, fileName)
-                    },
-                    onError = onError
-                )
-            }
-        },
-        selectedPath = selectedPath
-    )
-}
-
-/**
- * Extension to convert NSData to ByteArray
- */
 @OptIn(ExperimentalForeignApi::class)
 private fun NSData.toByteArray(): ByteArray {
     val length = this.length.toInt()
     if (length == 0) return ByteArray(0)
     
-    return ByteArray(length).apply {
-        usePinned { pinned ->
-            platform.posix.memcpy(pinned.addressOf(0), this@toByteArray.bytes, this@toByteArray.length)
-        }
+    val bytes = ByteArray(length)
+    bytes.usePinned { pinned ->
+        memcpy(pinned.addressOf(0), this.bytes, this.length)
     }
+    return bytes
 }
 
-private object System {
-    fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
-}
+private fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()

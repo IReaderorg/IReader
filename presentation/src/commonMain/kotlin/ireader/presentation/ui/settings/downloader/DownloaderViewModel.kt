@@ -1,24 +1,24 @@
 package ireader.presentation.ui.settings.downloader
 
 import ireader.domain.models.entities.SavedDownload
-import ireader.domain.models.entities.SavedDownloadWithInfo
 import ireader.domain.services.common.DownloadService
-import ireader.domain.services.common.NotificationService
 import ireader.domain.services.common.NotificationPriority
+import ireader.domain.services.common.NotificationService
 import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.common.ServiceState
 import ireader.domain.usecases.download.DownloadUseCases
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.i18n.LocalizeHelper
-import kotlinx.coroutines.Dispatchers
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.download_failed_title
+import ireader.i18n.resources.downloads_stopped
+import ireader.i18n.resources.retry_failed
+import ireader.i18n.resources.retrying_download
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
 
 
 /**
@@ -146,12 +146,12 @@ class DownloaderViewModel(
     }
 
     fun deleteAllDownloads() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             downloadUseCases.deleteAllSavedDownload()
         }
     }
     fun deleteSelectedDownloads(list: List<SavedDownload>) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             downloadUseCases.deleteSavedDownloads(list.map { it.toDownload() })
         }
     }
@@ -163,7 +163,7 @@ class DownloaderViewModel(
      * to be connected when such a library is added.
      */
     fun reorderDownloads(fromIndex: Int, toIndex: Int) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             if (fromIndex == toIndex) return@launch
             
             val newList = downloads.toMutableList()

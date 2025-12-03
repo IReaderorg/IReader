@@ -35,6 +35,17 @@ kotlin {
             }
         }
     }
+    
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "presentation"
+            isStatic = true
+        }
+    }
 
     sourceSets {
          commonMain {
@@ -51,16 +62,12 @@ kotlin {
                 api(compose.animation)
                 api(compose.animationGraphics)
                 api(compose.materialIconsExtended)
-                api(compose.preview)
                 api(compose.ui)
                 api(compose.components.resources)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 api(compose.material3)
-                // Removed duplicate compose.materialIconsExtended
-
 
                 implementation(libs.navigation.compose)
-                // Voyager tab navigator removed - using pure Compose Navigation
                 api(libs.koin.core)
                 api(libs.koin.compose)
                 
@@ -72,16 +79,12 @@ kotlin {
                 api(libs.coil.network.ktor)
 
                 implementation(libs.zxing.core)
-
-
             }
         }
         
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
-                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.uiTest)
             }
         }
         androidMain {
@@ -96,8 +99,6 @@ kotlin {
 
                 api(composeLib.material3.windowsizeclass)
 
-
-
                 api(composeLib.compose.ui.util)
                 api(composeLib.compose.constraintlayout)
                 api(accompanist.permissions)
@@ -107,9 +108,11 @@ kotlin {
                 api(androidx.media)
                 api(androidx.emoji)
                 api(androidx.work.runtime)
-
-
-
+                
+                // Preview only available on Android/Desktop
+                api(compose.preview)
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                implementation(compose.uiTest)
             }
         }
         val desktopMain by getting {
@@ -117,6 +120,8 @@ kotlin {
             dependencies {
                 api(compose.desktop.currentOs)
                 api(libs.kotlinx.coroutines.swing)
+                // Preview only available on Android/Desktop
+                api(compose.preview)
 
                 val lwjglVersion = "3.3.1"
                 listOf("lwjgl", "lwjgl-nfd").forEach { lwjglDep ->
@@ -129,6 +134,19 @@ kotlin {
                         runtimeOnly("org.lwjgl:${lwjglDep}:${lwjglVersion}:${native}")
                     }
                 }
+            }
+        }
+        
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                // iOS-specific dependencies if needed
             }
         }
     }

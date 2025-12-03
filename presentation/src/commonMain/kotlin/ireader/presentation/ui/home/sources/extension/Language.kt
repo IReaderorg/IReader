@@ -105,9 +105,18 @@ data class Language(val code: String) {
 }
 
 fun String.Companion.fromCodePoints(vararg codePoints: Int): String {
-    var buffer = charArrayOf()
+    val builder = StringBuilder()
     for (codePoint in codePoints) {
-        buffer += Character.toChars(codePoint)
+        // For BMP characters (most common), just convert directly
+        if (codePoint in 0..0xFFFF) {
+            builder.append(codePoint.toChar())
+        } else {
+            // For supplementary characters, create surrogate pair
+            val highSurrogate = ((codePoint - 0x10000) shr 10) + 0xD800
+            val lowSurrogate = ((codePoint - 0x10000) and 0x3FF) + 0xDC00
+            builder.append(highSurrogate.toChar())
+            builder.append(lowSurrogate.toChar())
+        }
     }
-    return String(buffer)
+    return builder.toString()
 }

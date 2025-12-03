@@ -167,5 +167,5 @@ fun formatDuration(duration: Duration): String {
     val totalSeconds = duration.inWholeSeconds
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
-    return String.format("%02d:%02d", minutes, seconds)
+    return "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
 }

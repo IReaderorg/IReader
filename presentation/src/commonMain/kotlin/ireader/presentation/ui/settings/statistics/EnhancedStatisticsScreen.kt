@@ -18,6 +18,7 @@ import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.formatPercentage
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 
@@ -513,7 +514,7 @@ class EnhancedStatisticsScreen : KoinComponent {
                         .height(8.dp)
                 )
                 Text(
-                    text = "${String.format("%.1f", completionRate)}%",
+                    text = formatPercentage(completionRate.toDouble()),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )

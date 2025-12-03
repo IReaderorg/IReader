@@ -142,12 +142,6 @@ class CloudBackupScreenSpec {
      * Get platform-specific download directory
      */
     private fun getDownloadDirectory(): String {
-        return try {
-            // Try to get user home directory
-            val userHome = System.getProperty("user.home") ?: "."
-            "$userHome/Downloads/IReader"
-        } catch (e: Exception) {
-            "./downloads"
-        }
+        return "./downloads"
     }
 }

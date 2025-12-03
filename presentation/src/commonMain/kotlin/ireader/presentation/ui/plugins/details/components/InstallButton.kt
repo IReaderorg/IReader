@@ -91,7 +91,7 @@ private fun NotInstalledButton(
                     onClick = onPurchase,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Buy for ${monetization.currency} ${String.format("%.2f", monetization.price)}")
+                    Text("Buy for ${monetization.currency} ${ireader.presentation.ui.core.utils.formatDecimal(monetization.price, 2)}")
                 }
             }
         }

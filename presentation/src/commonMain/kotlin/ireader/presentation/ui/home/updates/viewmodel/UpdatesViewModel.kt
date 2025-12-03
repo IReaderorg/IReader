@@ -6,12 +6,12 @@ import ireader.domain.models.entities.UpdatesWithRelations
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.services.ServiceUseCases
 import ireader.domain.usecases.updates.UpdateUseCases
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toImmutableSet
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -112,7 +112,7 @@ class UpdatesViewModel(
             .filter { it.chapterId in selectedIds }
             .map { it.chapterId }
             
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             val chapters = chapterIds.mapNotNull {
                 getChapterUseCase.findChapterById(it)
             }.map(onChapter)

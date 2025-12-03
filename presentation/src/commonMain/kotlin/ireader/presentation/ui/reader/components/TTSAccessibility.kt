@@ -82,7 +82,7 @@ fun TTSWaveformVisualizer(
             while (true) {
                 kotlinx.coroutines.delay(16) // ~60 FPS
                 phase += 0.1f
-                if (phase > 2 * Math.PI) {
+                if (phase > 2 * kotlin.math.PI) {
                     phase = 0f
                 }
             }

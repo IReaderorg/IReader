@@ -436,6 +436,6 @@ private fun formatFileSize(bytes: Long): String {
     return when {
         bytes < 1024 -> "$bytes B"
         bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-        else -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
+        else -> "${ireader.presentation.ui.core.utils.formatDecimal(bytes / (1024.0 * 1024.0), 1)} MB"
     }
 }

@@ -30,6 +30,9 @@ class LibraryCovers(
     }
 }
 
-fun Path.setLastModified(epoch: Long) {
-    toFile().setLastModified(epoch)
-}
+/**
+ * Sets the last modified time of a file.
+ * Note: This is a no-op on non-JVM platforms as okio doesn't support this directly.
+ * The actual implementation should be provided per-platform if needed.
+ */
+expect fun Path.setLastModified(epoch: Long)

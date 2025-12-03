@@ -16,6 +16,7 @@ import ireader.domain.usecases.local.book_usecases.FindDuplicateBook
 import ireader.domain.usecases.preferences.reader_preferences.BrowseScreenPrefUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.exceptionHandler
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
@@ -221,7 +222,7 @@ class ExploreViewModel(
         listing: Listing?,
         filters: List<Filter<*>>?,
         page: Int
-    ): Result<MangasPageInfo> = withContext(Dispatchers.IO) {
+    ): Result<MangasPageInfo> = withContext(ioDispatcher) {
         try {
             var result = MangasPageInfo(emptyList(), false)
             

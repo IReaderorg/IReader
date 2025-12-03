@@ -33,6 +33,7 @@ import ireader.presentation.ui.component.RatingStars
 import ireader.presentation.ui.component.ReviewCard
 import ireader.presentation.ui.component.WriteReviewDialog
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.formatRatingShort
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 
@@ -87,7 +88,7 @@ fun ChapterReviewSection(
                     RatingStars(rating = averageRating.toInt(), size = 16.dp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = String.format("%.1f (%d)", averageRating, reviews.size),
+                        text = formatRatingShort(averageRating, reviews.size),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

@@ -47,6 +47,8 @@ import ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase
 import ireader.domain.usecases.translate.TranslateParagraphUseCase
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
+import ireader.domain.utils.extensions.ioDispatcher
+import ireader.domain.utils.removeIf
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
@@ -55,7 +57,6 @@ import ireader.i18n.resources.something_wrong_with_book
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toDomainColor
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -721,7 +722,7 @@ class ReaderScreenViewModel(
     // ==================== Chapter Health ====================
 
     private fun checkChapterHealth(chapter: Chapter) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 val isBroken = chapterHealthChecker.isChapterBroken(chapter.content)
                 val breakReason = if (isBroken) {
@@ -742,7 +743,7 @@ class ReaderScreenViewModel(
     }
 
     fun repairChapter() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             val currentState = _state.value
             if (currentState !is ReaderState.Success) return@launch
 
@@ -816,7 +817,7 @@ class ReaderScreenViewModel(
     // ==================== Bookmark ====================
 
     fun bookmarkChapter() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             val currentState = _state.value
             if (currentState !is ReaderState.Success) return@launch
 
@@ -875,7 +876,7 @@ class ReaderScreenViewModel(
     // ==================== Glossary ====================
 
     private fun loadGlossary(bookId: Long) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 getGlossaryByBookIdUseCase.subscribe(bookId).collect { entries: List<ireader.domain.models.entities.Glossary> ->
                     // Glossary loaded - can be used for translation

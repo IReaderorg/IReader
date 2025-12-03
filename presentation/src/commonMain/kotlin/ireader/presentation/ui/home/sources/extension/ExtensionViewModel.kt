@@ -26,6 +26,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.ioDispatcher
+import kotlinx.coroutines.IO
 
 /**
  * ViewModel for the Extension screen using sealed state pattern.
@@ -297,7 +299,9 @@ class ExtensionViewModel(
      * Install or update a catalog
      */
     fun installCatalog(catalog: Catalog) {
-        installerJobs.putIfAbsent(catalog.sourceId, Job())
+        if (!installerJobs.containsKey(catalog.sourceId)) {
+            installerJobs[catalog.sourceId] = Job()
+        }
         installerJobs[catalog.sourceId] = scope.launch {
             val isUpdate = catalog is CatalogInstalled
             val (pkgName, flow) = if (isUpdate) {
@@ -371,7 +375,7 @@ class ExtensionViewModel(
      * Refresh catalogs from remote
      */
     fun refreshCatalogs() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             updateState { it.copy(isRefreshing = true) }
             
             syncRemoteCatalogs.await(true, onError = { error ->
@@ -393,7 +397,7 @@ class ExtensionViewModel(
      * Refresh catalogs without showing loading indicator
      */
     private fun refreshCatalogsQuietly() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 catalogStore.reloadCatalogs()
             } catch (e: Exception) {
@@ -408,7 +412,7 @@ class ExtensionViewModel(
      * Check health status of a specific source
      */
     fun checkSourceHealth(sourceId: Long) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 val health = sourceHealthChecker.checkStatus(sourceId)
                 updateState { state ->
@@ -462,7 +466,7 @@ class ExtensionViewModel(
      * Login to a source
      */
     fun loginToSource(sourceId: Long, username: String, password: String) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 sourceCredentialsRepository.storeCredentials(sourceId, username, password)
                 checkSourceHealth(sourceId)
@@ -484,7 +488,7 @@ class ExtensionViewModel(
      * Logout from a source
      */
     fun logoutFromSource(sourceId: Long) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 sourceCredentialsRepository.removeCredentials(sourceId)
                 checkSourceHealth(sourceId)
@@ -595,7 +599,7 @@ class ExtensionViewModel(
     // ==================== Enhanced Extension Management ====================
     
     fun getExtensionSecurity(catalog: Catalog) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 extensionSecurityManager?.scanExtension(catalog)
                 showSnackBar(UiText.DynamicString("Security scan complete"))
@@ -614,7 +618,7 @@ class ExtensionViewModel(
     }
     
     fun setExtensionTrustLevel(extensionId: Long, trustLevel: ExtensionTrustLevel) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 extensionSecurityManager?.setTrustLevel(extensionId, trustLevel)
                 showSnackBar(UiText.DynamicString("Trust level updated"))
@@ -625,7 +629,7 @@ class ExtensionViewModel(
     }
     
     fun batchUpdateExtensions() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 val currentState = _state.value
                 val installed = (currentState.pinnedCatalogs + currentState.unpinnedCatalogs)
@@ -641,7 +645,7 @@ class ExtensionViewModel(
     }
     
     fun checkForExtensionUpdates() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 val updates = extensionManager?.checkForUpdates()
                 if (updates != null && updates.isNotEmpty()) {
@@ -656,7 +660,7 @@ class ExtensionViewModel(
     }
     
     fun trackExtensionUsage(extensionId: Long) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 extensionManager?.trackExtensionUsage(extensionId)
             } catch (e: Exception) {
@@ -666,7 +670,7 @@ class ExtensionViewModel(
     }
     
     fun reportExtensionError(extensionId: Long, error: Throwable) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 extensionManager?.reportExtensionError(extensionId, error)
             } catch (e: Exception) {

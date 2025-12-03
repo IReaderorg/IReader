@@ -27,6 +27,8 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
         google()
+        // JetBrains Compose repository for Compose Multiplatform
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/")
         maven("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
         maven("https://oss.sonatype.org/service/local/staging/deploy/maven2")

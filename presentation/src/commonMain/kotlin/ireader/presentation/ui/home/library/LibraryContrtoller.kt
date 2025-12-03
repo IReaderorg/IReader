@@ -15,8 +15,9 @@ import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBookCategory
+import ireader.domain.utils.extensions.ioDispatcher
+import ireader.domain.utils.removeIf
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
@@ -43,7 +44,7 @@ fun LibraryController(
     LibraryScreen(
         modifier = modifier,
         onMarkAsRead = {
-            vm.scope.launch(Dispatchers.IO) {
+            vm.scope.launch(ioDispatcher) {
                 vm.markAsReadWithUndo()
             }
         },
@@ -51,17 +52,17 @@ fun LibraryController(
             vm.downloadChapters()
         },
         onDownloadUnread = {
-            vm.scope.launch(Dispatchers.IO) {
+            vm.scope.launch(ioDispatcher) {
                 vm.downloadUnreadChapters()
             }
         },
         onMarkAsNotRead = {
-            vm.scope.launch(Dispatchers.IO) {
+            vm.scope.launch(ioDispatcher) {
                 vm.markAsUnreadWithUndo()
             }
         },
         onDelete = {
-            vm.scope.launch(Dispatchers.IO) {
+            vm.scope.launch(ioDispatcher) {
                 kotlin.runCatching {
                     vm.deleteUseCase.unFavoriteBook(state.selectedBookIds.toList())
                 }
@@ -107,7 +108,7 @@ fun LibraryController(
             addQueues.addAll(category.toBookCategory(state.selectedBookIds.toList()))
         },
         editCategoryOnConfirm = {
-            vm.scope.launch(Dispatchers.IO) {
+            vm.scope.launch(ioDispatcher) {
                 vm.getCategory.insertBookCategory(addQueues)
                 vm.getCategory.deleteBookCategory(deleteQueues)
                 deleteQueues.clear()

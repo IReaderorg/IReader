@@ -1,30 +1,95 @@
 package ireader.presentation.ui.settings.advance
 
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Construction
+import androidx.compose.material.icons.filled.DataObject
+import androidx.compose.material.icons.filled.FolderDelete
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import ireader.core.log.Log
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.cache_cleared
+import ireader.i18n.resources.cache_management
+import ireader.i18n.resources.cancel
+import ireader.i18n.resources.chapters_was_cleared
+import ireader.i18n.resources.clear_all_cache
+import ireader.i18n.resources.clear_all_cached_data_to_free_up_storage_space
+import ireader.i18n.resources.clear_all_chapters
+import ireader.i18n.resources.clear_all_cover_cache
+import ireader.i18n.resources.clear_all_database
+import ireader.i18n.resources.clear_cached_book_cover_images_to_free_up_storage
+import ireader.i18n.resources.clear_not_in_library_books
+import ireader.i18n.resources.confirm
+import ireader.i18n.resources.cover_cache_cleared
+import ireader.i18n.resources.danger_zone
+import ireader.i18n.resources.database_deleted
+import ireader.i18n.resources.database_maintenance
+import ireader.i18n.resources.database_was_cleared
+import ireader.i18n.resources.delete_all_database
+import ireader.i18n.resources.epub
+import ireader.i18n.resources.fix_book_category_assignments
+import ireader.i18n.resources.fix_database_structure_and_integrity_issues
+import ireader.i18n.resources.import_epub
+import ireader.i18n.resources.import_epub_files_into_your_library
+import ireader.i18n.resources.permanently_delete_entire_database
+import ireader.i18n.resources.reader_settings_reset
+import ireader.i18n.resources.remove_all_books_and_chapters
+import ireader.i18n.resources.remove_all_custom_themes
+import ireader.i18n.resources.remove_all_downloaded_chapters
+import ireader.i18n.resources.remove_books_not_in_library
+import ireader.i18n.resources.repair_categories
+import ireader.i18n.resources.repair_database
+import ireader.i18n.resources.reset_categories
+import ireader.i18n.resources.reset_reader_screen_settings
+import ireader.i18n.resources.reset_themes
+import ireader.i18n.resources.restore_default_categories
+import ireader.i18n.resources.restore_default_reader_settings
+import ireader.i18n.resources.success
+import ireader.i18n.resources.text_does_not_match
+import ireader.i18n.resources.these_actions_are_destructive_and
+import ireader.i18n.resources.type_1
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import kotlinx.serialization.ExperimentalSerializationApi
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
@@ -60,7 +125,7 @@ fun AdvanceSettings(
     
     // Load cache sizes asynchronously
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             cacheSize = vm.cacheManager.getCacheSize()
             coverCacheSize = vm.getCoverCacheSize()
         }

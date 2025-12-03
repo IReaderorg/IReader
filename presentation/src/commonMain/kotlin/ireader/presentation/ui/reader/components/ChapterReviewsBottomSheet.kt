@@ -16,6 +16,7 @@ import ireader.domain.models.remote.UserBadge
 import ireader.presentation.ui.component.RatingStars
 import ireader.presentation.ui.component.ReviewCard
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.formatRatingWithReviews
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 
@@ -67,7 +68,7 @@ fun ChapterReviewsBottomSheet(
                     ) {
                         RatingStars(rating = averageRating.toInt(), size = 18.dp)
                         Text(
-                            text = String.format("%.1f (%d reviews)", averageRating, reviews.size),
+                            text = formatRatingWithReviews(averageRating, reviews.size),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

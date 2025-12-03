@@ -1,0 +1,21 @@
+platform :ios, '15.0'
+
+target 'iosApp' do
+  use_frameworks!
+  
+  # Kotlin Multiplatform shared framework
+  # The framework is built by Gradle and linked via Xcode build phase
+  # No additional pods needed for basic KMP integration
+  
+  # Optional: Add any iOS-specific dependencies here
+  # pod 'Alamofire', '~> 5.6'
+  # pod 'SDWebImage', '~> 5.0'
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+    end
+  end
+end

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import ireader.domain.models.donation.FundingGoal
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.formatDecimal
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 
@@ -173,7 +174,7 @@ private fun FundingGoalCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${goal.currency} ${String.format("%.2f", goal.currentAmount)} / ${String.format("%.2f", goal.targetAmount)}",
+                    text = "${goal.currency} ${goal.currentAmount.formatDecimal(2)} / ${goal.targetAmount.formatDecimal(2)}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = if (goal.isReached) {
@@ -363,7 +364,7 @@ private fun FundingGoalDetailDialog(
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         Text(
-                            text = "${goal.currency} ${String.format("%.2f", goal.currentAmount)} of ${String.format("%.2f", goal.targetAmount)}",
+                            text = "${goal.currency} ${goal.currentAmount.formatDecimal(2)} of ${goal.targetAmount.formatDecimal(2)}",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )

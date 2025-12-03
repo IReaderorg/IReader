@@ -48,6 +48,7 @@ import ireader.presentation.ui.component.getDisplayName
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.core.utils.formatRatingWithReviews
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 
@@ -160,7 +161,7 @@ fun ChapterReviewsFullSheet(
                     ) {
                         RatingStars(rating = averageRating.toInt(), size = 18.dp)
                         Text(
-                            text = String.format("%.1f (%d reviews)", averageRating, reviews.size),
+                            text = formatRatingWithReviews(averageRating, reviews.size),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -107,7 +107,7 @@ fun GradioTTSSection(
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = "Global Speed: ${String.format("%.1f", globalSpeed)}x",
+                        text = "Global Speed: ${ireader.presentation.ui.core.utils.formatMultiplier(globalSpeed)}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )

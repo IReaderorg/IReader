@@ -11,6 +11,7 @@ import ireader.core.source.CatalogSource
 import ireader.core.source.Source
 import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
+import ireader.core.util.IO
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.domain.models.entities.Book
@@ -37,6 +38,8 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.source.CheckSourceAvailabilityUseCase
 import ireader.domain.usecases.source.MigrateToSourceUseCase
 import ireader.domain.usecases.sync.SyncUseCases
+import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.extensions.withIOContext
 import ireader.domain.utils.extensions.withUIContext
 import ireader.i18n.UiText
@@ -64,7 +67,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * BookDetailViewModel using sealed state pattern (Mihon architecture).
@@ -227,7 +229,7 @@ class BookDetailViewModel(
                     // Trigger remote fetch if book needs updating or has no chapters
                     val needsRemoteFetch = (book.lastUpdate < 1L || chapters.isEmpty()) && catalogSource?.source != null
                     if (needsRemoteFetch) {
-                        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                        scope.launch(ioDispatcher) {
                             if (book.lastUpdate < 1L) {
                                 getRemoteBookDetailSilent(book, catalogSource)
                             }
@@ -236,7 +238,7 @@ class BookDetailViewModel(
                     }
                     
                     // Check source availability in background
-                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    scope.launch(ioDispatcher) {
                         checkSourceAvailability(bookId)
                     }
                     return@launch

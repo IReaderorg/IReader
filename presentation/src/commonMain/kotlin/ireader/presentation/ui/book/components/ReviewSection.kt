@@ -62,7 +62,7 @@ fun ReviewSection(
                         RatingStars(rating = averageRating.toInt())
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = String.format("%.1f (%d reviews)", averageRating, reviews.size),
+                            text = ireader.presentation.ui.core.utils.formatRatingWithReviews(averageRating, reviews.size),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }

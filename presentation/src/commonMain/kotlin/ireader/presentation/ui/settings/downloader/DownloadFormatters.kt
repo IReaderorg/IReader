@@ -1,13 +1,15 @@
 package ireader.presentation.ui.settings.downloader
 
+import ireader.presentation.ui.core.utils.formatDecimal
+
 /**
  * Format download speed in bytes per second to human-readable format
  */
 fun formatSpeed(bytesPerSecond: Float): String {
     return when {
         bytesPerSecond < 1024 -> "${bytesPerSecond.toInt()} B/s"
-        bytesPerSecond < 1024 * 1024 -> String.format("%.1f KB/s", bytesPerSecond / 1024)
-        else -> String.format("%.2f MB/s", bytesPerSecond / (1024 * 1024))
+        bytesPerSecond < 1024 * 1024 -> "${(bytesPerSecond / 1024).formatDecimal(1)} KB/s"
+        else -> "${(bytesPerSecond / (1024 * 1024)).formatDecimal(2)} MB/s"
     }
 }
 
@@ -34,8 +36,8 @@ fun formatDuration(milliseconds: Long): String {
 fun formatBytes(bytes: Long): String {
     return when {
         bytes < 1024 -> "$bytes B"
-        bytes < 1024 * 1024 -> String.format("%.1f KB", bytes / 1024.0)
-        bytes < 1024 * 1024 * 1024 -> String.format("%.2f MB", bytes / (1024.0 * 1024.0))
-        else -> String.format("%.2f GB", bytes / (1024.0 * 1024.0 * 1024.0))
+        bytes < 1024 * 1024 -> "${(bytes / 1024.0).formatDecimal(1)} KB"
+        bytes < 1024 * 1024 * 1024 -> "${(bytes / (1024.0 * 1024.0)).formatDecimal(2)} MB"
+        else -> "${(bytes / (1024.0 * 1024.0 * 1024.0)).formatDecimal(2)} GB"
     }
 }

@@ -1,11 +1,14 @@
 package ireader.presentation.ui.core.theme
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.Painter
 import ireader.core.io.FileSystem
 import ireader.core.io.VirtualFile
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 
 /**
@@ -28,7 +31,7 @@ class ThemeAssetLoader(
                 return Result.success(it)
             }
             
-            val image = withContext(Dispatchers.IO) {
+            val image = withContext(ioDispatcher) {
                 when {
                     path.startsWith("http://") || path.startsWith("https://") -> {
                         loadImageFromUrl(path)
