@@ -3,7 +3,7 @@
 import ireader.data.core.DatabaseHandler
 import ireader.domain.plugins.TrialInfo
 import ireader.domain.plugins.TrialRepository
-import java.util.UUID
+import ireader.core.util.randomUUID
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
@@ -22,7 +22,7 @@ class TrialRepositoryImpl(
         
         handler.await {
             pluginTrialQueries.insert(
-                id = UUID.randomUUID().toString(),
+                id = randomUUID(),
                 plugin_id = pluginId,
                 user_id = userId,
                 start_date = startDate,

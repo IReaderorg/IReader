@@ -3,14 +3,13 @@
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
-import java.util.concurrent.ConcurrentHashMap
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Thread-safe in-memory cookie jar with automatic cleanup to prevent unbounded growth.
  * 
  * Features:
- * - Thread-safe using ConcurrentHashMap
+ * - Thread-safe using synchronized map
  * - Automatic removal of expired cookies on each request
  * - Maximum cookie limit to prevent memory issues
  * - Stale cookie cleanup for session cookies without explicit expiration
@@ -18,9 +17,9 @@ import ireader.domain.utils.extensions.currentTimeToLong
  */
 class MemoryCookieJar : CookieJar {
     
-    // Using ConcurrentHashMap for thread-safe operations
+    // Using synchronized map for thread-safe operations
     // Key is the cookie identifier (name+domain+path), value is the wrapped cookie
-    private val cache = ConcurrentHashMap<String, WrappedCookie>()
+    private val cache = mutableMapOf<String, WrappedCookie>()
     
     companion object {
         /**

@@ -43,6 +43,15 @@ enum class ImageSourceMode {
 }
 
 /**
+ * Default Gemini models for image generation
+ */
+private val defaultModels = listOf(
+    GeminiModelInfo("imagen-3.0-generate-002", "Imagen 3", "High quality image generation"),
+    GeminiModelInfo("imagen-3.0-fast-generate-001", "Imagen 3 Fast", "Faster generation, slightly lower quality"),
+    GeminiModelInfo("gemini-2.0-flash-exp", "Gemini 2.0 Flash", "Experimental multimodal generation")
+)
+
+/**
  * Screen for uploading new character art with Gemini AI generation support
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,6 +75,13 @@ fun UploadCharacterArtScreen(
     isGenerating: Boolean,
     uploadProgress: Float,
     generationError: String?,
+    // Model selection parameters
+    availableModels: List<GeminiModelInfo> = defaultModels,
+    selectedModel: GeminiModelInfo? = defaultModels.firstOrNull(),
+    isLoadingModels: Boolean = false,
+    onModelSelect: (GeminiModelInfo) -> Unit = {},
+    onFetchModels: (String) -> Unit = {},
+    onApiKeyChanged: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues()
 ) {
@@ -99,6 +115,11 @@ fun UploadCharacterArtScreen(
             onDismiss = { showApiKeyDialog = false },
             onSave = { key ->
                 geminiApiKey = key
+                onApiKeyChanged(key)
+                // Fetch models when API key is set
+                if (key.isNotBlank()) {
+                    onFetchModels(key)
+                }
                 showApiKeyDialog = false
             }
         )
@@ -146,12 +167,17 @@ fun UploadCharacterArtScreen(
                             characterName = characterName,
                             bookTitle = bookTitle,
                             selectedStyle = selectedStyle,
+                            selectedModel = selectedModel,
+                            availableModels = availableModels,
+                            isLoadingModels = isLoadingModels,
                             generatedPreview = generatedImagePreview,
                             isGenerating = isGenerating,
                             error = generationError,
                             onApiKeyClick = { showApiKeyDialog = true },
                             onPromptChange = { generationPrompt = it },
                             onStyleChange = { selectedStyle = it },
+                            onModelSelect = onModelSelect,
+                            onFetchModels = { onFetchModels(geminiApiKey) },
                             onGenerate = {
                                 if (geminiApiKey.isNotBlank() && generationPrompt.isNotBlank()) {
                                     onGenerateImage(
@@ -161,8 +187,8 @@ fun UploadCharacterArtScreen(
                                         bookTitle,
                                         selectedStyle
                                     )
-                                    // Auto-fill AI model
-                                    aiModel = "Gemini Imagen 3"
+                                    // Auto-fill AI model with selected model name
+                                    aiModel = selectedModel?.displayName ?: "Gemini Imagen 3"
                                     prompt = generationPrompt
                                 }
                             },
@@ -659,6 +685,15 @@ private fun ToggleOption(
 }
 
 /**
+ * Simple model info for UI display
+ */
+data class GeminiModelInfo(
+    val id: String,
+    val displayName: String,
+    val description: String = ""
+)
+
+/**
  * Gemini AI image generation section
  */
 @Composable
@@ -668,17 +703,23 @@ private fun GeminiGeneratorSection(
     characterName: String,
     bookTitle: String,
     selectedStyle: String,
+    selectedModel: GeminiModelInfo?,
+    availableModels: List<GeminiModelInfo>,
+    isLoadingModels: Boolean,
     generatedPreview: ByteArray?,
     isGenerating: Boolean,
     error: String?,
     onApiKeyClick: () -> Unit,
     onPromptChange: (String) -> Unit,
     onStyleChange: (String) -> Unit,
+    onModelSelect: (GeminiModelInfo) -> Unit,
+    onFetchModels: () -> Unit,
     onGenerate: () -> Unit,
     isWideScreen: Boolean
 ) {
-    val height = if (isWideScreen) 350.dp else 280.dp
+    val height = if (isWideScreen) 400.dp else 320.dp
     val hasApiKey = apiKey.isNotBlank()
+    var showModelDropdown by remember { mutableStateOf(false) }
     
     Card(
         modifier = Modifier
@@ -737,6 +778,104 @@ private fun GeminiGeneratorSection(
                         Text(
                             text = if (hasApiKey) "API Key Set" else "Add Key",
                             style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+            
+            // Model selector
+            Text(
+                text = "AI Model",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            Box {
+                OutlinedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    onClick = { 
+                        if (hasApiKey) {
+                            showModelDropdown = true
+                            if (availableModels.isEmpty() || availableModels == defaultModels) {
+                                onFetchModels()
+                            }
+                        } else {
+                            onApiKeyClick()
+                        }
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = selectedModel?.displayName ?: "Select Model",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            if (selectedModel?.description?.isNotBlank() == true) {
+                                Text(
+                                    text = selectedModel.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                        if (isLoadingModels) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Select model"
+                            )
+                        }
+                    }
+                }
+                
+                DropdownMenu(
+                    expanded = showModelDropdown,
+                    onDismissRequest = { showModelDropdown = false }
+                ) {
+                    availableModels.forEach { model ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(
+                                        text = model.displayName,
+                                        fontWeight = if (model.id == selectedModel?.id) 
+                                            FontWeight.Bold else FontWeight.Normal
+                                    )
+                                    if (model.description.isNotBlank()) {
+                                        Text(
+                                            text = model.description,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 2
+                                        )
+                                    }
+                                }
+                            },
+                            onClick = {
+                                onModelSelect(model)
+                                showModelDropdown = false
+                            },
+                            leadingIcon = {
+                                if (model.id == selectedModel?.id) {
+                                    Icon(
+                                        Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
                         )
                     }
                 }
@@ -1042,6 +1181,12 @@ fun UploadCharacterArtScreen(
         isGenerating = false,
         uploadProgress = uploadProgress,
         generationError = null,
+        availableModels = defaultModels,
+        selectedModel = defaultModels.firstOrNull(),
+        isLoadingModels = false,
+        onModelSelect = {},
+        onFetchModels = {},
+        onApiKeyChanged = {},
         modifier = modifier,
         paddingValues = paddingValues
     )

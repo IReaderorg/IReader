@@ -16,8 +16,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
-import java.util.concurrent.ConcurrentLinkedQueue
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
@@ -395,7 +396,8 @@ class JSPluginLoader(
             file.nameWithoutExtension in priorityPluginIds
         }
         
-        val allCatalogs = ConcurrentLinkedQueue<JSPluginCatalog>()
+        val allCatalogs = mutableListOf<JSPluginCatalog>()
+        val catalogsMutex = Mutex()
         val semaphore = Semaphore(maxConcurrency)
         
         // Load priority plugins first (sequentially for immediate availability)
@@ -424,7 +426,9 @@ class JSPluginLoader(
                         try {
                             val catalog = loadPlugin(file)
                             if (catalog != null) {
-                                allCatalogs.add(catalog)
+                                catalogsMutex.withLock {
+                                    allCatalogs.add(catalog)
+                                }
                                 onPluginLoaded(catalog)
                             }
                         } catch (e: Exception) {

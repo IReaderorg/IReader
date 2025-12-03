@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.data.characterart.GeminiImageGenerator
+import ireader.data.characterart.ImageModel
 
 /**
  * State for Character Art Gallery screen
@@ -32,7 +34,15 @@ data class CharacterArtScreenState(
     val successMessage: String? = null,
     val isAdmin: Boolean = false,
     val hasMorePages: Boolean = true,
-    val currentPage: Int = 0
+    val currentPage: Int = 0,
+    // Gemini AI generation state
+    val availableModels: List<ImageModel> = GeminiImageGenerator.DEFAULT_IMAGE_MODELS,
+    val selectedModel: ImageModel? = null,
+    val isLoadingModels: Boolean = false,
+    val isGenerating: Boolean = false,
+    val generatedImageBytes: ByteArray? = null,
+    val generationError: String? = null,
+    val geminiApiKey: String = ""
 )
 
 /**
@@ -41,7 +51,8 @@ data class CharacterArtScreenState(
 @Stable
 class CharacterArtViewModel(
     private val repository: CharacterArtRepository,
-    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
+    private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?,
+    private val geminiImageGenerator: GeminiImageGenerator? = null
 ) : BaseViewModel() {
     
     private val _state = MutableStateFlow(CharacterArtScreenState())
@@ -318,5 +329,127 @@ class CharacterArtViewModel(
         if (_state.value.isAdmin) {
             loadPendingArt()
         }
+    }
+    
+    // ==================== Gemini AI Generation ====================
+    
+    /**
+     * Set the Gemini API key and fetch available models
+     */
+    fun setGeminiApiKey(apiKey: String) {
+        _state.update { it.copy(geminiApiKey = apiKey) }
+        if (apiKey.isNotBlank()) {
+            fetchAvailableModels(apiKey)
+        }
+    }
+    
+    /**
+     * Fetch available image generation models from Gemini API
+     */
+    fun fetchAvailableModels(apiKey: String) {
+        val generator = geminiImageGenerator ?: return
+        
+        scope.launch {
+            _state.update { it.copy(isLoadingModels = true) }
+            
+            generator.fetchAvailableModels(apiKey)
+                .onSuccess { models ->
+                    _state.update { state ->
+                        state.copy(
+                            availableModels = models,
+                            selectedModel = models.firstOrNull() ?: state.selectedModel,
+                            isLoadingModels = false
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update { 
+                        it.copy(
+                            isLoadingModels = false,
+                            generationError = "Failed to fetch models: ${error.message}"
+                        )
+                    }
+                }
+        }
+    }
+    
+    /**
+     * Select a model for image generation
+     */
+    fun selectModel(model: ImageModel) {
+        _state.update { it.copy(selectedModel = model) }
+    }
+    
+    /**
+     * Generate an image using Gemini AI
+     */
+    fun generateImage(
+        prompt: String,
+        characterName: String,
+        bookTitle: String,
+        style: String
+    ) {
+        val generator = geminiImageGenerator ?: run {
+            _state.update { it.copy(generationError = "Image generator not available") }
+            return
+        }
+        
+        val apiKey = _state.value.geminiApiKey
+        if (apiKey.isBlank()) {
+            _state.update { it.copy(generationError = "Please set your Gemini API key first") }
+            return
+        }
+        
+        val selectedModel = _state.value.selectedModel
+        
+        scope.launch {
+            _state.update { 
+                it.copy(
+                    isGenerating = true, 
+                    generationError = null,
+                    generatedImageBytes = null
+                ) 
+            }
+            
+            // Use appropriate generation method based on selected model
+            val result = if (selectedModel?.id?.contains("gemini-2") == true) {
+                generator.generateWithGemini2Flash(apiKey, prompt, characterName, bookTitle)
+            } else {
+                generator.generateImage(apiKey, prompt, characterName, bookTitle, style)
+            }
+            
+            result
+                .onSuccess { generatedImage ->
+                    _state.update { 
+                        it.copy(
+                            isGenerating = false,
+                            generatedImageBytes = generatedImage.bytes,
+                            successMessage = "Image generated successfully! 🎨"
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update { 
+                        it.copy(
+                            isGenerating = false,
+                            generationError = error.message ?: "Image generation failed"
+                        )
+                    }
+                }
+        }
+    }
+    
+    /**
+     * Clear generated image
+     */
+    fun clearGeneratedImage() {
+        _state.update { it.copy(generatedImageBytes = null, generationError = null) }
+    }
+    
+    /**
+     * Clear generation error
+     */
+    fun clearGenerationError() {
+        _state.update { it.copy(generationError = null) }
     }
 }

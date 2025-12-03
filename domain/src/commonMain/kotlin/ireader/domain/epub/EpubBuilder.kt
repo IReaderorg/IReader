@@ -1,4 +1,4 @@
-package ireader.domain.epub
+﻿package ireader.domain.epub
 
 import ireader.core.log.Log
 import ireader.core.source.model.Text
@@ -20,7 +20,7 @@ import kotlin.time.Clock
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.util.UUID
+import ireader.core.util.randomUUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -90,7 +90,7 @@ class EpubBuilder(
     
     private fun createTempDirectory(customPath: String? = null): File {
         val basePath = customPath ?: System.getProperty("java.io.tmpdir")
-        val tempDir = File(basePath, "epub_${UUID.randomUUID()}")
+        val tempDir = File(basePath, "epub_${randomUUID()}")
         if (!tempDir.mkdirs() && !tempDir.exists()) {
             throw Exception("Failed to create temp directory: ${tempDir.absolutePath}")
         }
@@ -124,7 +124,7 @@ class EpubBuilder(
         return EpubMetadata(
             title = book.title,
             author = book.author.ifEmpty { "Unknown" },
-            identifier = "urn:uuid:${UUID.randomUUID()}",
+            identifier = "urn:uuid:${randomUUID()}",
             date = currentDate,
             description = book.description.takeIf { it.isNotBlank() }
         )

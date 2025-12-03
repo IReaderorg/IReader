@@ -1,4 +1,4 @@
-package ireader.presentation.ui.reader.viewmodel
+﻿package ireader.presentation.ui.reader.viewmodel
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.getValue
@@ -65,7 +65,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * ViewModel for the Reader screen using sealed state pattern.
@@ -194,7 +193,7 @@ class ReaderScreenViewModel(
     private var getChapterJob: Job? = null
     private var preloadJob: Job? = null
     private var chapterNavigationJob: Job? = null
-    private val preloadedChapters = ConcurrentHashMap<Long, Chapter>()
+    private val preloadedChapters = mutableMapOf<Long, Chapter>()
 
     // ==================== Initialization ====================
 

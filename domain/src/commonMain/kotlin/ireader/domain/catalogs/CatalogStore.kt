@@ -26,7 +26,10 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
+import ireader.core.util.SynchronizedMap
+import ireader.core.util.SynchronizedSet
+import ireader.core.util.synchronizedMapOf
+import ireader.core.util.synchronizedSetOf
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
@@ -60,15 +63,15 @@ class CatalogStore(
 
     private val scope = createICoroutineScope()
     
-    // Thread-safe tracking sets using ConcurrentHashMap.newKeySet()
-    private val stubSourceIds: MutableSet<Long> = ConcurrentHashMap.newKeySet()
-    private val loadingSourceIds: MutableSet<Long> = ConcurrentHashMap.newKeySet()
+    // Thread-safe tracking sets using KMP SynchronizedSet
+    private val stubSourceIds: MutableSet<Long> = synchronizedSetOf()
+    private val loadingSourceIds: MutableSet<Long> = synchronizedSetOf()
     
     // Efficient lookup map for catalogs by source ID
-    private val catalogsBySourceMap: ConcurrentHashMap<Long, CatalogLocal> = ConcurrentHashMap()
+    private val catalogsBySourceMap: SynchronizedMap<Long, CatalogLocal> = synchronizedMapOf()
     
     // Efficient lookup map for catalogs by package name
-    private val catalogsByPkgName: ConcurrentHashMap<String, CatalogLocal> = ConcurrentHashMap()
+    private val catalogsByPkgName: SynchronizedMap<String, CatalogLocal> = synchronizedMapOf()
     
     // Semaphore to limit concurrent plugin loading
     private val loadingSemaphore = Semaphore(MAX_CONCURRENT_LOADS)
@@ -100,8 +103,8 @@ class CatalogStore(
     private var remoteCatalogs = emptyList<CatalogRemote>()
     
     // Lazy-initialized remote catalog lookup map
-    private val remoteCatalogsByPkgName: MutableMap<String, CatalogRemote> by lazy {
-        ConcurrentHashMap()
+    private val remoteCatalogsByPkgName: SynchronizedMap<String, CatalogRemote> by lazy {
+        synchronizedMapOf()
     }
 
     // Deprecated: Use catalogsBySourceMap instead

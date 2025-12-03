@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.characterart.CharacterArtViewModel
+import ireader.presentation.ui.characterart.GeminiModelInfo
 import ireader.presentation.ui.characterart.UploadCharacterArtScreen
 import ireader.presentation.ui.characterart.rememberImagePicker
 import kotlinx.coroutines.launch
@@ -25,11 +26,29 @@ class CharacterArtUploadScreenSpec {
         
         var selectedImageBytes by remember { mutableStateOf<ByteArray?>(null) }
         var selectedImagePath by remember { mutableStateOf<String?>(null) }
-        var generatedImageBytes by remember { mutableStateOf<ByteArray?>(null) }
-        var generationError by remember { mutableStateOf<String?>(null) }
-        var isGenerating by remember { mutableStateOf(false) }
         
         val imagePicker = rememberImagePicker()
+        
+        // Convert ImageModel to GeminiModelInfo for UI
+        val availableModels = remember(state.availableModels) {
+            state.availableModels.map { model ->
+                GeminiModelInfo(
+                    id = model.id,
+                    displayName = model.displayName,
+                    description = model.description
+                )
+            }
+        }
+        
+        val selectedModel = remember(state.selectedModel) {
+            state.selectedModel?.let { model ->
+                GeminiModelInfo(
+                    id = model.id,
+                    displayName = model.displayName,
+                    description = model.description
+                )
+            }
+        }
         
         UploadCharacterArtScreen(
             onBack = {
@@ -49,19 +68,10 @@ class CharacterArtUploadScreenSpec {
                 }
             },
             onGenerateImage = { apiKey, prompt, characterName, bookTitle, style ->
-                // TODO: Implement Gemini generation
-                isGenerating = true
-                generationError = null
-                scope.launch {
-                    // Call GeminiImageGenerator here
-                    // For now, just simulate
-                    kotlinx.coroutines.delay(2000)
-                    isGenerating = false
-                    generationError = "Gemini integration coming soon"
-                }
+                vm.generateImage(prompt, characterName, bookTitle, style)
             },
             onSubmit = { characterName, bookTitle, bookAuthor, description, aiModel, prompt, tags ->
-                val imageBytes = generatedImageBytes ?: selectedImageBytes
+                val imageBytes = state.generatedImageBytes ?: selectedImageBytes
                 if (imageBytes != null) {
                     vm.submitArt(
                         request = ireader.domain.models.characterart.SubmitCharacterArtRequest(
@@ -79,11 +89,26 @@ class CharacterArtUploadScreenSpec {
                 }
             },
             selectedImagePath = selectedImagePath,
-            generatedImagePreview = generatedImageBytes,
+            generatedImagePreview = state.generatedImageBytes,
             isUploading = state.isUploading,
-            isGenerating = isGenerating,
+            isGenerating = state.isGenerating,
             uploadProgress = state.uploadProgress,
-            generationError = generationError,
+            generationError = state.generationError,
+            availableModels = availableModels,
+            selectedModel = selectedModel,
+            isLoadingModels = state.isLoadingModels,
+            onModelSelect = { modelInfo ->
+                // Find the matching ImageModel and select it
+                state.availableModels.find { it.id == modelInfo.id }?.let { model ->
+                    vm.selectModel(model)
+                }
+            },
+            onFetchModels = { apiKey ->
+                vm.fetchAvailableModels(apiKey)
+            },
+            onApiKeyChanged = { apiKey ->
+                vm.setGeminiApiKey(apiKey)
+            },
             paddingValues = PaddingValues(0.dp)
         )
     }

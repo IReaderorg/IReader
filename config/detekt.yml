@@ -354,7 +354,49 @@ style:
     values: ['TODO:', 'FIXME:', 'STOPSHIP:']
     allowedPatterns: ''
   ForbiddenImport:
-    active: false
+    active: true
+    imports:
+      # JVM-only date/time APIs - use kotlinx-datetime instead
+      - value: 'java.util.Date'
+        reason: 'Use kotlinx-datetime APIs instead. See domain/utils/extensions/DateExt.kt'
+      - value: 'java.util.Calendar'
+        reason: 'Use kotlinx-datetime APIs instead. See domain/utils/extensions/DateExt.kt'
+      - value: 'java.text.SimpleDateFormat'
+        reason: 'Use kotlinx-datetime formatting functions instead. See domain/utils/extensions/DateExt.kt'
+      - value: 'java.text.DateFormat'
+        reason: 'Use kotlinx-datetime formatting functions instead. See domain/utils/extensions/DateExt.kt'
+      - value: 'java.time.*'
+        reason: 'Use kotlinx-datetime APIs instead for KMP compatibility'
+      # JVM-only I/O - use okio or ktor instead
+      - value: 'java.io.File'
+        reason: 'Use okio Path/FileSystem for KMP compatibility'
+      - value: 'java.io.InputStream'
+        reason: 'Use okio Source for KMP compatibility'
+      - value: 'java.io.OutputStream'
+        reason: 'Use okio Sink for KMP compatibility'
+      - value: 'java.io.Reader'
+        reason: 'Use okio BufferedSource for KMP compatibility'
+      - value: 'java.io.Writer'
+        reason: 'Use okio BufferedSink for KMP compatibility'
+      # JVM-only concurrency - use kotlinx.coroutines instead
+      - value: 'java.util.concurrent.*'
+        reason: 'Use kotlinx.coroutines for KMP compatibility'
+      - value: 'java.lang.Thread'
+        reason: 'Use kotlinx.coroutines for KMP compatibility'
+      # JVM-only collections that have KMP alternatives
+      - value: 'java.util.HashMap'
+        reason: 'Use kotlin.collections.HashMap or mutableMapOf()'
+      - value: 'java.util.ArrayList'
+        reason: 'Use kotlin.collections.ArrayList or mutableListOf()'
+      - value: 'java.util.HashSet'
+        reason: 'Use kotlin.collections.HashSet or mutableSetOf()'
+    # Only apply to commonMain source sets
+    excludes:
+      - '**/androidMain/**'
+      - '**/desktopMain/**'
+      - '**/jvmMain/**'
+      - '**/iosMain/**'
+      - '**/jsMain/**'
   ForbiddenMethodCall:
     active: false
   ForbiddenPublicDataClass:

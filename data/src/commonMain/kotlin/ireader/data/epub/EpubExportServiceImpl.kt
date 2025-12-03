@@ -1,4 +1,4 @@
-package ireader.data.epub
+﻿package ireader.data.epub
 
 import ireader.core.log.Log
 import ireader.domain.data.repository.ChapterRepository
@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.UUID
+import ireader.core.util.randomUUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -198,7 +198,7 @@ class EpubExportServiceImpl(
      * Generate OEBPS/content.opf (metadata and manifest)
      */
     private fun generateContentOpf(book: Book, chapters: List<Chapter>, options: EpubExportOptions): String {
-        val uuid = UUID.randomUUID().toString()
+        val uuid = randomUUID()
         val chapterManifest = chapters.indices.joinToString("\n") { index ->
             """        <item id="chapter${index + 1}" href="chapter${index + 1}.xhtml" media-type="application/xhtml+xml"/>"""
         }
@@ -253,7 +253,7 @@ class EpubExportServiceImpl(
             <?xml version="1.0" encoding="UTF-8"?>
             <ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
                 <head>
-                    <meta name="dtb:uid" content="urn:uuid:${UUID.randomUUID()}"/>
+                    <meta name="dtb:uid" content="urn:uuid:${randomUUID()}"/>
                     <meta name="dtb:depth" content="1"/>
                     <meta name="dtb:totalPageCount" content="0"/>
                     <meta name="dtb:maxPageNumber" content="0"/>

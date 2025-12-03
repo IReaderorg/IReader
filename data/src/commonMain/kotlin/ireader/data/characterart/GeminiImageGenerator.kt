@@ -27,6 +27,71 @@ class GeminiImageGenerator(
     companion object {
         private const val GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models"
         private const val IMAGE_MODEL = "imagen-3.0-generate-002"
+        
+        // Default available image generation models
+        val DEFAULT_IMAGE_MODELS = listOf(
+            ImageModel("imagen-3.0-generate-002", "Imagen 3", "High quality image generation"),
+            ImageModel("imagen-3.0-fast-generate-001", "Imagen 3 Fast", "Faster generation, slightly lower quality"),
+            ImageModel("gemini-2.0-flash-exp", "Gemini 2.0 Flash", "Experimental multimodal generation")
+        )
+    }
+    
+    /**
+     * Fetch available image generation models from Gemini API
+     * 
+     * @param apiKey User's Gemini API key
+     * @return List of available models that support image generation
+     */
+    suspend fun fetchAvailableModels(apiKey: String): Result<List<ImageModel>> {
+        return try {
+            val response = httpClient.get(GEMINI_API_URL) {
+                parameter("key", apiKey)
+            }
+            
+            if (response.status.isSuccess()) {
+                val responseBody = response.bodyAsText()
+                val modelsResponse = json.decodeFromString<ModelsListResponse>(responseBody)
+                
+                // Filter models that support image generation
+                val imageModels = modelsResponse.models
+                    .filter { model ->
+                        // Check if model supports image generation
+                        model.supportedGenerationMethods.any { method ->
+                            method.contains("generate", ignoreCase = true) ||
+                            method.contains("predict", ignoreCase = true)
+                        } && (
+                            model.name.contains("imagen", ignoreCase = true) ||
+                            model.name.contains("gemini-2", ignoreCase = true)
+                        )
+                    }
+                    .map { model ->
+                        ImageModel(
+                            id = model.name.removePrefix("models/"),
+                            displayName = model.displayName,
+                            description = model.description
+                        )
+                    }
+                
+                if (imageModels.isEmpty()) {
+                    // Return default models if none found
+                    Result.success(DEFAULT_IMAGE_MODELS)
+                } else {
+                    Result.success(imageModels)
+                }
+            } else {
+                val errorBody = response.bodyAsText()
+                val errorMessage = try {
+                    val error = json.decodeFromString<GeminiErrorResponse>(errorBody)
+                    error.error.message
+                } catch (e: Exception) {
+                    "Failed to fetch models: ${response.status}"
+                }
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            // Return default models on error
+            Result.success(DEFAULT_IMAGE_MODELS)
+        }
     }
     
     /**
@@ -276,4 +341,30 @@ data class Gemini2Response(
 @Serializable
 data class Gemini2Candidate(
     val content: Gemini2Content? = null
+)
+
+// Models list response DTOs
+
+@Serializable
+data class ModelsListResponse(
+    val models: List<GeminiModelInfo> = emptyList()
+)
+
+@Serializable
+data class GeminiModelInfo(
+    val name: String,
+    val displayName: String = "",
+    val description: String = "",
+    val supportedGenerationMethods: List<String> = emptyList(),
+    val inputTokenLimit: Int = 0,
+    val outputTokenLimit: Int = 0
+)
+
+/**
+ * Simplified image model info for UI
+ */
+data class ImageModel(
+    val id: String,
+    val displayName: String,
+    val description: String = ""
 )

@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import java.util.UUID
+import ireader.core.util.randomUUID
 import ireader.domain.utils.extensions.currentTimeToLong
 
 val customFontMapper: (
@@ -82,7 +82,7 @@ class FontRepositoryImpl(
                 }
                 
                 // Generate unique ID and destination path
-                val fontId = UUID.randomUUID().toString()
+                val fontId = randomUUID()
                 val fileName = "${fontId}.${extension}"
                 val destPath = fontsDir.resolve(fileName)
                 
@@ -190,7 +190,7 @@ class FontRepositoryImpl(
                 }
                 
                 // Generate unique ID and destination path
-                val fontId = UUID.randomUUID().toString()
+                val fontId = randomUUID()
                 val fileName = "${fontId}.${extension}"
                 val destPath = fontsDir.resolve(fileName)
                 

@@ -4,14 +4,12 @@ import ireader.core.prefs.PreferenceStore
 import okhttp3.Cookie
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import java.net.URI
-import java.util.concurrent.ConcurrentHashMap
 import ireader.core.util.currentTimeMillis
 
 
 class PersistentCookieStore(private val preferenceStore: PreferenceStore) {
 
-    private val cookieMap = ConcurrentHashMap<String, List<Cookie>>()
+    private val cookieMap = mutableMapOf<String, List<Cookie>>()
 
     val keyPref = preferenceStore.getString("cookie_manager_keys")
     val keys = mutableListOf<String>()
@@ -43,7 +41,7 @@ class PersistentCookieStore(private val preferenceStore: PreferenceStore) {
 
     @Synchronized
     fun addAll(url: HttpUrl, cookies: List<Cookie>) {
-        val key = url.toUri().host
+        val key = url.host
 
         // Append or replace the cookies for this domain.
         val cookiesForDomain = cookieMap[key].orEmpty().toMutableList()
@@ -73,17 +71,15 @@ class PersistentCookieStore(private val preferenceStore: PreferenceStore) {
         cookieMap.clear()
     }
 
-    fun remove(uri: URI) {
-        preferenceStore.getStringSet(uri.host).delete()
-        cookieMap.remove(uri.host)
+    fun remove(host: String) {
+        preferenceStore.getStringSet(host).delete()
+        cookieMap.remove(host)
     }
 
-    fun get(url: HttpUrl) = get(url.toUri().host)
+    fun get(url: HttpUrl): List<Cookie> = getByHost(url.host)
 
-    fun get(uri: URI) = get(uri.host)
-
-    private fun get(url: String): List<Cookie> {
-        return cookieMap[url].orEmpty().filter { !it.hasExpired() }
+    fun getByHost(host: String): List<Cookie> {
+        return cookieMap[host].orEmpty().filter { !it.hasExpired() }
     }
 
     private fun Cookie.hasExpired() = currentTimeMillis() >= expiresAt

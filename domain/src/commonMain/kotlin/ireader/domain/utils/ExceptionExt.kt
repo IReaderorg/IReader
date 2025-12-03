@@ -11,52 +11,50 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import kotlinx.coroutines.CancellationException
-import java.io.IOException
-import java.net.SocketTimeoutException
-import java.util.concurrent.TimeoutException
+
 fun exceptionHandler(e: Throwable): UiText? {
     // Silently ignore cancellation exceptions - these are expected during navigation
-    if (e is CancellationException || e is java.util.concurrent.CancellationException) {
+    if (e is CancellationException) {
+        return null
+    }
+    
+    // Check exception class name for JVM-specific exceptions (KMP compatible)
+    val exceptionName = e::class.simpleName ?: ""
+    if (exceptionName.contains("CancellationException")) {
         return null
     }
     
     Log.error(e, "exceptionHandler catch an exception")
 
-    return when (e) {
-        is IOException -> {
+    return when {
+        // Network errors - check by class name for KMP compatibility
+        exceptionName == "IOException" || exceptionName.contains("IOException") -> {
             UiText.MStringResource(Res.string.noInternetError)
         }
-        is SocketTimeoutException -> {
+        exceptionName == "SocketTimeoutException" -> {
             UiText.MStringResource(Res.string.noInternetError)
         }
-        is java.util.concurrent.CancellationException -> {
-            null
-        }
-        is CancellationException -> {
-            null
-        }
-        is org.jsoup.select.Selector.SelectorParseException -> {
-            UiText.MStringResource(Res.string.cant_get_content)
-        }
-        is NoSuchMethodError -> {
-            UiText.MStringResource(Res.string.library_is_out_of_date)
-        }
-        is TimeoutException -> {
+        exceptionName == "TimeoutException" || exceptionName.contains("Timeout") -> {
             UiText.MStringResource(Res.string.time_out_exception)
         }
-        is java.lang.ClassCastException -> {
+        exceptionName == "SelectorParseException" -> {
+            UiText.MStringResource(Res.string.cant_get_content)
+        }
+        e is NoSuchMethodError -> {
+            UiText.MStringResource(Res.string.library_is_out_of_date)
+        }
+        exceptionName == "ClassCastException" -> {
             null
         }
-        is CatalogNotFoundException -> {
+        e is CatalogNotFoundException -> {
             UiText.MStringResource(Res.string.catalog_not_found_error)
         }
-        is EmptyQuery -> UiText.MStringResource(Res.string.query_must_not_be_empty)
-        is LocalSourceException -> null
-        is OutOfDateWebView -> UiText.MStringResource(Res.string.query_must_not_be_empty)
-        is NeedWebView -> UiText.MStringResource(Res.string.information_webview_required)
-        is CloudflareBypassFailed -> UiText.MStringResource(Res.string.information_cloudflare_bypass_failure)
-
-        is SourceNotFoundException -> UiText.MStringResource(Res.string.the_source_is_not_found)
+        e is EmptyQuery -> UiText.MStringResource(Res.string.query_must_not_be_empty)
+        e is LocalSourceException -> null
+        e is OutOfDateWebView -> UiText.MStringResource(Res.string.query_must_not_be_empty)
+        e is NeedWebView -> UiText.MStringResource(Res.string.information_webview_required)
+        e is CloudflareBypassFailed -> UiText.MStringResource(Res.string.information_cloudflare_bypass_failure)
+        e is SourceNotFoundException -> UiText.MStringResource(Res.string.the_source_is_not_found)
         else -> {
             UiText.ExceptionString(e)
         }

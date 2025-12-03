@@ -4,6 +4,8 @@ import ireader.domain.services.tts_service.GradioTTSManager
 import ireader.presentation.ui.settings.statistics.StatsScreenModel
 import ireader.presentation.ui.reader.viewmodel.*
 import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
+import ireader.presentation.ui.characterart.CharacterArtViewModel
+import ireader.data.characterart.GeminiImageGenerator
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -154,4 +156,26 @@ val screenModelModule = module {
     
     // Note: ReaderScreenViewModel is NOT registered in Koin to avoid circular dependencies
     // It should be created manually where needed with all its dependencies
+    
+    // ==================== Character Art Gallery ====================
+    
+    // GeminiImageGenerator - singleton for image generation
+    single {
+        GeminiImageGenerator(
+            httpClient = get()
+            // Uses default Json { ignoreUnknownKeys = true }
+        )
+    }
+    
+    // Character Art ViewModel
+    factory {
+        CharacterArtViewModel(
+            repository = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            },
+            geminiImageGenerator = get()
+        )
+    }
 }

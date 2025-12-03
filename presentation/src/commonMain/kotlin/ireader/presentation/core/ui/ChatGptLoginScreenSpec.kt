@@ -1,11 +1,11 @@
-package ireader.presentation.core.ui
+﻿package ireader.presentation.core.ui
 
 import ireader.presentation.core.LocalNavigator
 
 import androidx.compose.runtime.Composable
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import org.koin.compose.koinInject
-import java.util.UUID
+import ireader.core.util.randomUUID
 
 /**
  * Screen for logging into ChatGPT and handling translation
