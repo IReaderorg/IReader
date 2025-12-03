@@ -23,8 +23,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.bean.ApkMeta
-import org.jsoup.Jsoup
-import org.jsoup.parser.Parser
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.parser.Parser
 import okio.Path.Companion.toPath
 import java.io.File
 import java.net.URLClassLoader
@@ -191,7 +191,7 @@ class DesktopCatalogLoader(
             return null
         }
 
-        val appInfo = Jsoup.parse(apkFile.manifestXml, Parser.xmlParser()).select("application").select("meta-data")
+        val appInfo = Ksoup.parse(apkFile.manifestXml, Parser.xmlParser()).select("application").select("meta-data")
 
         val meta = appInfo.map {
             val element = it.select("meta-data")

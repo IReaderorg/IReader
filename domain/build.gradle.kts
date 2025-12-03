@@ -163,8 +163,10 @@ kotlin {
                 implementation(composeLib.compose.googlFonts)
                 implementation(androidx.media)
 
-                // ML Kit excluded for F-Droid builds - provided by app module for standard/dev flavors only
-                compileOnly(libs.googleTranslator)
+                // ML Kit - provided at runtime by app module for standard/dev flavors only
+                // Using implementation instead of compileOnly to avoid Kotlin/Native warnings
+                // The actual ML Kit dependency is only included in non-F-Droid builds via app module
+                implementation(libs.googleTranslator)
 
                 // REMOVED: gson - not used, using kotlinx.serialization
                 // implementation(libs.gson)

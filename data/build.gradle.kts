@@ -55,7 +55,7 @@ kotlin {
                 implementation(compose.components.resources)
 
                 api(libs.koin.core)
-                api(libs.jsoup)
+                api(libs.ksoup)
                 api(kotlinx.datetime)
                 // Common Ktor dependencies (platform-agnostic)
                 api(libs.ktor.core)

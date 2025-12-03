@@ -55,6 +55,7 @@ The iOS migration is nearly complete with most core components fully implemented
 | StartTTSServicesUseCase | ✅ Complete | AVSpeechSynthesizer service |
 | OpenLocalFolder | ✅ Complete | Documents directory + Files app integration |
 | LNReaderBackupParser | ✅ Complete | ZIP parsing for LNReader backups |
+| ScheduleAutomaticBackupImpl | ✅ Complete | BGTaskScheduler for automatic backups |
 
 ### presentation Module (iosMain)
 
@@ -88,6 +89,20 @@ The iOS migration is nearly complete with most core components fully implemented
 | ExtensionWatcherService | ⚠️ Stub | File watching not critical for iOS |
 | PlatformConfig | ⚠️ Stub | Needs Info.plist reading |
 | VirtualZipFile | ⚠️ Stub | ZIP operations - uses workarounds |
+
+## Recently Added
+
+| Component | Status | Description |
+|-----------|--------|-------------|
+| ScheduleAutomaticBackupImpl | ✅ Complete | BGTaskScheduler for automatic backups |
+
+## Known Issues
+
+See [iOS-Implementation-Issues.md](./iOS-Implementation-Issues.md) for detailed documentation of:
+- Critical issues requiring fixes
+- Medium priority improvements
+- Intentional stubs and their rationale
+- Testing recommendations
 
 ## Build Commands
 
@@ -180,10 +195,16 @@ For full iOS functionality, add these to Info.plist:
 <!-- Background Tasks -->
 <key>BGTaskSchedulerPermittedIdentifiers</key>
 <array>
+    <!-- Automatic Backup -->
+    <string>com.ireader.backup.automatic</string>
+    <string>com.ireader.backup.refresh</string>
+    <!-- Download Service -->
     <string>com.ireader.download.processing</string>
     <string>com.ireader.download.refresh</string>
+    <!-- Library Update -->
     <string>com.ireader.library.update</string>
     <string>com.ireader.library.refresh</string>
+    <!-- Plugin Updates -->
     <string>com.ireader.plugin.update</string>
 </array>
 
@@ -226,6 +247,9 @@ For full iOS functionality, add these to Info.plist:
 Register background tasks in `didFinishLaunchingWithOptions`:
 
 ```swift
+// Register automatic backup tasks
+registerAutomaticBackupTasks(backupScheduler)
+
 // Register download background tasks
 registerDownloadBackgroundTasks(downloadService)
 

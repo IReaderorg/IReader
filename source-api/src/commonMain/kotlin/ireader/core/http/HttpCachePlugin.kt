@@ -1,16 +1,20 @@
 ﻿package ireader.core.http
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.plugins.api.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.util.*
-import io.ktor.util.date.*
-import io.ktor.utils.io.*
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.call.HttpClientCall
+import io.ktor.client.plugins.api.Send
+import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.HttpResponseData
+import io.ktor.client.statement.readRawBytes
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpProtocolVersion
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.util.date.GMTDate
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.InternalAPI
 import ireader.core.util.currentTimeMillis
-import io.ktor.http.Headers as KtorHeaders
 
 /**
  * Configuration for HTTP cache plugin
@@ -88,7 +92,7 @@ val HttpCachePlugin = createClientPlugin("HttpCachePlugin", ::HttpCacheConfig) {
         // Cache response if status code is cacheable
         if (call.response.status in pluginConfig.cacheableStatusCodes) {
             try {
-                val responseBody = call.response.readBytes()
+                val responseBody = call.response.readRawBytes()
                 // Use custom cache duration if specified
                 val cacheDuration = cacheControl?.cacheDurationMs ?: pluginConfig.cacheDurationMs
                 val entry = CacheEntry(

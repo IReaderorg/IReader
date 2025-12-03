@@ -72,8 +72,8 @@ kotlin {
                 api(libs.ktor.contentNegotiation)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 // Ksoup - KMP-compatible HTML parser (replaces Jsoup for iOS)
-                api("com.fleeksoft.ksoup:ksoup:0.2.2")
-                api("com.fleeksoft.ksoup:ksoup-network:0.2.2")
+                api(libs.ksoup)
+                api(libs.ksoup.network)
                 // Kermit logging - exposed as API for consumers
                 api(libs.kermit)
             }
@@ -87,13 +87,12 @@ kotlin {
                 
                 implementation(androidx.core)
 //                implementation(libs.quickjs.android)
-                compileOnly(libs.jsoup)
             }
         }
         
         val androidUnitTest by getting {
             dependencies {
-                implementation("io.mockk:mockk:1.13.8")
+                implementation(libs.mockk.v1138)
             }
         }
         
@@ -105,13 +104,12 @@ kotlin {
                 implementation(libs.ktor.contentNegotiation.gson)
                 
 //                implementation(libs.quickjs.jvm)
-                compileOnly(libs.jsoup)
             }
         }
         
         val desktopTest by getting {
             dependencies {
-                implementation("io.mockk:mockk:1.13.8")
+                implementation(libs.mock)
             }
         }
         
@@ -125,7 +123,7 @@ kotlin {
             iosSimulatorArm64Main.dependsOn(this)
             dependencies {
                 api(libs.ktor.core)
-                implementation("io.ktor:ktor-client-darwin:3.3.2")
+                implementation(libs.ktor.client.darwin.v333)
             }
         }
         
@@ -142,9 +140,9 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+                implementation(libs.coroutines.test)
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
-                implementation("io.ktor:ktor-client-mock:3.3.2")
+                implementation(libs.ktor.client.mock.v333)
             }
         }
     }

@@ -342,7 +342,7 @@ dependencies {
     implementation(kotlinx.coroutines.android)
     // REMOVED: Duplicate firebase.analytic declarations (already included above)
 
-    implementation(libs.jsoup)
+    implementation(libs.ksoup)
     testImplementation(libs.ktor.core.cio)
 
     implementation(libs.koin.androidCompose)

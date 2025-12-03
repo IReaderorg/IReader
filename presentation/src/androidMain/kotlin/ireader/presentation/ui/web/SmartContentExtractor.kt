@@ -3,10 +3,10 @@ package ireader.presentation.ui.web
 import android.webkit.WebView
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.nodes.TextNode
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.TextNode
 
 /**
  * Smart content extractor that analyzes HTML to find chapter content
@@ -38,7 +38,7 @@ class SmartContentExtractor {
      * Extract chapter content from HTML using multiple strategies
      */
     fun extractContent(html: String): ExtractionResult {
-        val doc = Jsoup.parse(html)
+        val doc = Ksoup.parse(html)
         
         // Try strategies in order of reliability
         tryCommonSelectors(doc)?.let { return it }
@@ -230,7 +230,7 @@ class SmartContentExtractor {
      * Get all possible content candidates for manual selection
      */
     fun findCandidates(html: String): List<ContentCandidate> {
-        val doc = Jsoup.parse(html)
+        val doc = Ksoup.parse(html)
         val candidates = mutableListOf<ContentCandidate>()
         
         doc.select("div, article, section, main").forEach { element ->

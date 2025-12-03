@@ -30,18 +30,18 @@ android {
 kotlin {
     androidTarget {
         publishLibraryVariants("release")
-        compilations {
-            all {
-                compilerOptions.configure {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
                     jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.androidJvmTarget.toString()))
                 }
             }
         }
     }
     jvm("desktop") {
-        compilations {
-            all {
-                compilerOptions.configure {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
                     jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(ProjectConfig.desktopJvmTarget.toString()))
                 }
             }
@@ -77,7 +77,6 @@ kotlin {
                 api(libs.ktor.contentNegotiation.kotlinx)
                 api(libs.okio)
                 api(libs.navigation.compose)
-                compileOnly(libs.jsoup)
                 api(libs.koin.core)
                 api(libs.androidx.datastore.core)
                 api(libs.androidx.datastore.preferences.core)
@@ -107,7 +106,6 @@ kotlin {
                 implementation(androidx.dataStore)
 //                implementation(libs.quickjs.android)
                 api(libs.ktor.okhttp)
-                compileOnly(libs.jsoup)
             }
         }
         
@@ -125,7 +123,6 @@ kotlin {
                 
 //                implementation(libs.quickjs.jvm)
                 api(libs.ktor.okhttp)
-                compileOnly(libs.jsoup)
             }
         }
         

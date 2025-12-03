@@ -15,6 +15,23 @@ import okio.SYSTEM
 
 /**
  * iOS implementation of EpubCreator
+ * 
+ * Creates EPUB files from books using the EpubBuilder.
+ * 
+ * ## Usage
+ * ```kotlin
+ * val creator = EpubCreator()
+ * creator.setDependencies(httpClient, chapterRepository)
+ * creator(book, uri) { event -> println(event) }
+ * ```
+ * 
+ * ## Dependencies
+ * - HttpClient: For downloading cover images
+ * - ChapterRepository: For fetching chapter content
+ * 
+ * ## Note
+ * Uses `findChaptersByBookIdWithContent()` to get chapters WITH their text content.
+ * This is required for EPUB export but can be memory-intensive for large books.
  */
 actual class EpubCreator {
     
@@ -22,6 +39,12 @@ actual class EpubCreator {
     private var httpClient: HttpClient? = null
     private var chapterRepository: ChapterRepository? = null
     
+    /**
+     * Set required dependencies for EPUB creation
+     * 
+     * @param httpClient HTTP client for downloading cover images
+     * @param chapterRepository Repository for fetching chapter content
+     */
     fun setDependencies(httpClient: HttpClient, chapterRepository: ChapterRepository) {
         this.httpClient = httpClient
         this.chapterRepository = chapterRepository
@@ -30,20 +53,23 @@ actual class EpubCreator {
     actual suspend operator fun invoke(book: Book, uri: Uri, currentEvent: (String) -> Unit) {
         val client = httpClient
         if (client == null) {
-            currentEvent("Error: HttpClient not initialized")
+            currentEvent("Error: HttpClient not initialized. Call setDependencies() first.")
             return
         }
         
         val chapRepo = chapterRepository
         if (chapRepo == null) {
-            currentEvent("Error: ChapterRepository not initialized")
+            currentEvent("Error: ChapterRepository not initialized. Call setDependencies() first.")
             return
         }
         
         try {
-            currentEvent("Loading chapters...")
+            currentEvent("Loading chapters with content...")
+            
+            // Use findChaptersByBookIdWithContent to get chapters WITH their text content
+            // This is essential for EPUB export - findChaptersByBookId only returns metadata
             val chapters = withContext(Dispatchers.Default) {
-                chapRepo.findChaptersByBookId(book.id)
+                chapRepo.findChaptersByBookIdWithContent(book.id)
             }
             
             if (chapters.isEmpty()) {
@@ -51,7 +77,15 @@ actual class EpubCreator {
                 return
             }
             
-            currentEvent("Found ${chapters.size} chapters")
+            // Filter out chapters without content using Chapter.isEmpty() method
+            // Chapter.content is List<Page>, and isEmpty() checks if content.joinToString().isBlank()
+            val chaptersWithContent = chapters.filter { !it.isEmpty() }
+            if (chaptersWithContent.isEmpty()) {
+                currentEvent("Error: No chapters with content found. Download chapters first.")
+                return
+            }
+            
+            currentEvent("Found ${chaptersWithContent.size} chapters with content (${chapters.size} total)")
 
             val options = ExportOptions(
                 includeCover = true,
@@ -69,7 +103,7 @@ actual class EpubCreator {
             currentEvent("Building EPUB file...")
             val result = epubBuilder.createEpub(
                 book = book,
-                chapters = chapters,
+                chapters = chaptersWithContent,
                 options = options,
                 outputUri = outputPath
             )
@@ -109,5 +143,3 @@ actual class EpubCreator {
         return name.replace(Regex("[\\\\/:*?\"<>|]"), "_").replace(Regex("\\s+"), "_").take(100)
     }
 }
-
-private suspend fun ChapterRepository.findChaptersByBookId(bookId: Long): List<Chapter> = emptyList()
