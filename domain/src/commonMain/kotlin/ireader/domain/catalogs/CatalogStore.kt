@@ -31,6 +31,7 @@ import ireader.core.util.SynchronizedSet
 import ireader.core.util.synchronizedMapOf
 import ireader.core.util.synchronizedSetOf
 import ireader.domain.utils.extensions.currentTimeToLong
+import kotlinx.coroutines.FlowPreview
 
 /**
  * Optimized CatalogStore with improved performance for catalog and JS plugin loading.
@@ -43,6 +44,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
  * 5. Debounced flow emissions to prevent UI thrashing
  * 6. Priority-based loading for frequently used plugins
  */
+@OptIn(FlowPreview::class)
 class CatalogStore(
     private val loader: CatalogLoader,
     catalogPreferences: CatalogPreferences,

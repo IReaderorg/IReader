@@ -7,7 +7,12 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.data.repository.LibraryRepository
 import ireader.domain.models.common.Uri
-import ireader.domain.usecases.backup.backup.*
+import ireader.domain.usecases.backup.backup.Backup
+import ireader.domain.usecases.backup.backup.BookProto
+import ireader.domain.usecases.backup.backup.CategoryProto
+import ireader.domain.usecases.backup.backup.ChapterProto
+import ireader.domain.usecases.backup.backup.HistoryProto
+import ireader.domain.usecases.backup.backup.TrackProto
 import ireader.domain.usecases.file.FileSaver
 import ireader.domain.utils.fastMap
 import ireader.i18n.UiText
@@ -58,6 +63,7 @@ class CreateBackup  internal constructor(
         return kotlinx.serialization.protobuf.ProtoBuf.encodeToByteArray(backup)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private suspend fun dumpLibrary(
         currentEvent: (String) -> Unit
     ): List<BookProto> {

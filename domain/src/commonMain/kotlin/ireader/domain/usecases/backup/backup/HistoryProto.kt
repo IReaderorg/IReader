@@ -1,9 +1,9 @@
-
-
+@file:OptIn(ExperimentalSerializationApi::class)
 
 package ireader.domain.usecases.backup.backup
 
 import ireader.domain.models.entities.History
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 

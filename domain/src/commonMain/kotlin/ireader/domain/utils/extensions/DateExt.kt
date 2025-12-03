@@ -1,7 +1,6 @@
 package ireader.domain.utils.extensions
 
 import kotlinx.datetime.*
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
@@ -93,8 +92,8 @@ fun convertLongToTime(time: Long): String {
         .toLocalDateTime(TimeZone.currentSystemDefault())
     
     val year = dateTime.year
-    val month = dateTime.monthNumber.toString().padStart(2, '0')
-    val day = dateTime.dayOfMonth.toString().padStart(2, '0')
+    val month = dateTime.month.number.toString().padStart(2, '0')
+    val day = dateTime.day.toString().padStart(2, '0')
     val hour = dateTime.hour.toString().padStart(2, '0')
     val minute = dateTime.minute.toString().padStart(2, '0')
     
@@ -105,8 +104,8 @@ fun convertLongToTime(time: Long): String {
  * Format LocalDateTime to ISO date string (yyyy-MM-dd).
  */
 fun LocalDateTime.toIsoDateString(): String {
-    val month = monthNumber.toString().padStart(2, '0')
-    val day = dayOfMonth.toString().padStart(2, '0')
+    val month = month.number.toString().padStart(2, '0')
+    val day = day.toString().padStart(2, '0')
     return "$year-$month-$day"
 }
 
@@ -114,8 +113,8 @@ fun LocalDateTime.toIsoDateString(): String {
  * Format LocalDateTime to ISO date-time string.
  */
 fun LocalDateTime.toIsoDateTimeString(): String {
-    val month = monthNumber.toString().padStart(2, '0')
-    val day = dayOfMonth.toString().padStart(2, '0')
+    val month = month.number.toString().padStart(2, '0')
+    val day = day.toString().padStart(2, '0')
     val h = hour.toString().padStart(2, '0')
     val m = minute.toString().padStart(2, '0')
     val s = second.toString().padStart(2, '0')
@@ -159,8 +158,8 @@ fun Long.isWithinDays(days: Int): Boolean {
 fun Long.formatDateTime(): String {
     val dt = this.toLocalDate()
     val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-    val month = monthNames[dt.monthNumber - 1]
-    val day = dt.dayOfMonth.toString().padStart(2, '0')
+    val month = monthNames[dt.month.number - 1]
+    val day = dt.day.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     return "$month $day, ${dt.year} $hour:$minute"
@@ -173,8 +172,8 @@ fun Long.formatDateTime(): String {
 fun Long.formatDate(): String {
     val dt = this.toLocalDate()
     val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-    val month = monthNames[dt.monthNumber - 1]
-    return "$month ${dt.dayOfMonth}, ${dt.year}"
+    val month = monthNames[dt.month.number - 1]
+    return "$month ${dt.day}, ${dt.year}"
 }
 
 /**
@@ -195,8 +194,8 @@ fun Long.formatTime12Hour(): String {
  */
 fun Long.formatForFilename(): String {
     val dt = this.toLocalDate()
-    val month = dt.monthNumber.toString().padStart(2, '0')
-    val day = dt.dayOfMonth.toString().padStart(2, '0')
+    val month = dt.month.number.toString().padStart(2, '0')
+    val day = dt.day.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     val second = dt.second.toString().padStart(2, '0')
@@ -209,8 +208,8 @@ fun Long.formatForFilename(): String {
  */
 fun Long.formatIsoDate(): String {
     val dt = this.toLocalDate()
-    val month = dt.monthNumber.toString().padStart(2, '0')
-    val day = dt.dayOfMonth.toString().padStart(2, '0')
+    val month = dt.month.number.toString().padStart(2, '0')
+    val day = dt.day.toString().padStart(2, '0')
     return "${dt.year}-$month-$day"
 }
 
@@ -220,8 +219,8 @@ fun Long.formatIsoDate(): String {
  */
 fun Long.formatIsoDateTime(): String {
     val dt = this.toLocalDate()
-    val month = dt.monthNumber.toString().padStart(2, '0')
-    val day = dt.dayOfMonth.toString().padStart(2, '0')
+    val month = dt.month.number.toString().padStart(2, '0')
+    val day = dt.day.toString().padStart(2, '0')
     val hour = dt.hour.toString().padStart(2, '0')
     val minute = dt.minute.toString().padStart(2, '0')
     val second = dt.second.toString().padStart(2, '0')

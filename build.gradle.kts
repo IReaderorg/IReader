@@ -54,6 +54,15 @@ subprojects {
         }
     }
     
+    // Configure Kotlin/Native compilation (iOS targets)
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.addAll(
+                "-Xexpect-actual-classes"
+            )
+        }
+    }
+    
     // Optimize Kotlin compilation tasks
     tasks.withType<KotlinCompilationTask<*>>().configureEach {
         compilerOptions {

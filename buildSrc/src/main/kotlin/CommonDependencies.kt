@@ -34,6 +34,6 @@ object CommonDependencies {
      */
     val utilities = listOf(
         "libs.okio",
-        "libs.jsoup"
+        "libs.ksoup"
     )
 }

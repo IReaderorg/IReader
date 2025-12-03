@@ -1,7 +1,10 @@
 package ireader.domain.usecases.backup
 
 import ireader.core.db.Transactions
-import ireader.domain.data.repository.*
+import ireader.domain.data.repository.BookCategoryRepository
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.CategoryRepository
+import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.common.Uri
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookCategory
@@ -86,6 +89,7 @@ class RestoreBackup internal constructor(
 
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private suspend fun restoreManga(manga: BookProto): Long {
         val dbManga = try {
             bookRepository.find(manga.key, manga.sourceId)
@@ -134,6 +138,7 @@ class RestoreBackup internal constructor(
         return dbManga.id
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private suspend fun restoreChapters(manga: BookProto) {
         if (manga.chapters.isEmpty()) return
 
@@ -327,6 +332,7 @@ class RestoreBackup internal constructor(
      * Restore backup from byte array
      * This is a convenience method for restoring from in-memory data
      */
+    @OptIn(ExperimentalSerializationApi::class)
     suspend fun restoreFromBytes(bytes: ByteArray): Result {
         return try {
             val backup = loadDump(bytes)

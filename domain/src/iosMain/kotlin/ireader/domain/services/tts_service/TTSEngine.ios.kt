@@ -1,16 +1,19 @@
 package ireader.domain.services.tts_service
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCSignatureOverride
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
-import platform.Foundation.NSData
-import platform.Foundation.create
+import kotlinx.coroutines.*
+import platform.AVFAudio.*
+import platform.Foundation.*
+import platform.darwin.NSObject
 import platform.posix.memcpy
 
 /**
  * iOS implementation of TTS Engine Factory
  * 
- * TODO: Full implementation using AVSpeechSynthesizer
+ * Uses AVSpeechSynthesizer for native text-to-speech on iOS
  */
 actual object TTSEngineFactory {
     actual fun createNativeEngine(): TTSEngine {
@@ -18,12 +21,12 @@ actual object TTSEngineFactory {
     }
     
     actual fun createGradioEngine(config: GradioTTSConfig): TTSEngine? {
-        // Gradio TTS can work on iOS via HTTP
-        return null // TODO: Implement
+        // Gradio TTS can work on iOS via HTTP - return GradioTTSEngine if needed
+        return null
     }
     
     actual fun getAvailableEngines(): List<String> {
-        return listOf("iOS Native TTS")
+        return listOf("iOS Native TTS (AVSpeechSynthesizer)")
     }
 }
 
@@ -52,37 +55,76 @@ actual fun base64DecodeToBytes(base64: String): ByteArray {
 }
 
 /**
- * iOS TTS Engine implementation stub
+ * iOS TTS Engine implementation using AVSpeechSynthesizer
  */
+@OptIn(ExperimentalForeignApi::class)
 private class IosTTSEngine : TTSEngine {
     private var callback: TTSEngineCallback? = null
     private var speed = 1.0f
     private var pitch = 1.0f
+    private var volume = 1.0f
+    private var voiceIdentifier: String? = null
+    
+    private val synthesizer = AVSpeechSynthesizer()
+    private var delegate: SpeechDelegate? = null
+    private var currentUtteranceId: String? = null
+    
+    init {
+        delegate = SpeechDelegate(
+            onStart = { utteranceId ->
+                callback?.onStart(utteranceId)
+            },
+            onDone = { utteranceId ->
+                callback?.onDone(utteranceId)
+            },
+            onError = { utteranceId, error ->
+                callback?.onError(utteranceId, error)
+            }
+        )
+        synthesizer.delegate = delegate
+    }
     
     override suspend fun speak(text: String, utteranceId: String) {
-        callback?.onStart(utteranceId)
-        // TODO: Implement using AVSpeechSynthesizer
-        callback?.onDone(utteranceId)
+        currentUtteranceId = utteranceId
+        delegate?.currentUtteranceId = utteranceId
+        
+        val utterance = AVSpeechUtterance.speechUtteranceWithString(text).apply {
+            rate = (speed * AVSpeechUtteranceDefaultSpeechRate).coerceIn(
+                AVSpeechUtteranceMinimumSpeechRate.toFloat(),
+                AVSpeechUtteranceMaximumSpeechRate.toFloat()
+            )
+            
+            pitchMultiplier = pitch.coerceIn(0.5f, 2.0f)
+            this.volume = this@IosTTSEngine.volume.coerceIn(0.0f, 1.0f)
+            
+            voiceIdentifier?.let { identifier ->
+                AVSpeechSynthesisVoice.voiceWithIdentifier(identifier)?.let { voice ->
+                    this.voice = voice
+                }
+            }
+        }
+        
+        synthesizer.speakUtterance(utterance)
     }
     
     override fun stop() {
-        // TODO: Implement
+        synthesizer.stopSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
     }
     
     override fun pause() {
-        // TODO: Implement
+        synthesizer.pauseSpeakingAtBoundary(AVSpeechBoundary.AVSpeechBoundaryImmediate)
     }
     
     override fun resume() {
-        // TODO: Implement
+        synthesizer.continueSpeaking()
     }
     
     override fun setSpeed(speed: Float) {
-        this.speed = speed
+        this.speed = speed.coerceIn(0.1f, 4.0f)
     }
     
     override fun setPitch(pitch: Float) {
-        this.pitch = pitch
+        this.pitch = pitch.coerceIn(0.5f, 2.0f)
     }
     
     override fun setCallback(callback: TTSEngineCallback) {
@@ -92,8 +134,39 @@ private class IosTTSEngine : TTSEngine {
     override fun isReady(): Boolean = true
     
     override fun cleanup() {
+        stop()
         callback = null
+        delegate = null
     }
     
     override fun getEngineName(): String = "iOS Native TTS"
+}
+
+/**
+ * AVSpeechSynthesizerDelegate implementation
+ */
+@OptIn(ExperimentalForeignApi::class)
+private class SpeechDelegate(
+    private val onStart: (String) -> Unit,
+    private val onDone: (String) -> Unit,
+    private val onError: (String, String) -> Unit
+) : NSObject(), AVSpeechSynthesizerDelegateProtocol {
+    
+    var currentUtteranceId: String = ""
+    
+    @ObjCSignatureOverride
+    override fun speechSynthesizer(
+        synthesizer: AVSpeechSynthesizer,
+        didStartSpeechUtterance: AVSpeechUtterance
+    ) {
+        onStart(currentUtteranceId)
+    }
+    
+    @ObjCSignatureOverride
+    override fun speechSynthesizer(
+        synthesizer: AVSpeechSynthesizer,
+        didFinishSpeechUtterance: AVSpeechUtterance
+    ) {
+        onDone(currentUtteranceId)
+    }
 }
