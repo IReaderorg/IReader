@@ -74,12 +74,20 @@ workflows:
       # Build iOS app (simulator)
       - name: Build iOS App (Simulator)
         script: |
-          # Use any available iOS simulator
+          # Find first available iPhone simulator
+          SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
+          echo "Using simulator: $SIMULATOR_ID"
+          
+          # If no iPhone found, use any simulator
+          if [ -z "$SIMULATOR_ID" ]; then
+            SIMULATOR_ID=$(xcrun simctl list devices available | grep -oE '[A-F0-9-]{36}' | head -1)
+          fi
+          
           xcodebuild build \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' \
+            -destination "id=$SIMULATOR_ID" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -88,10 +96,15 @@ workflows:
       # Run iOS tests (if available)
       - name: Run iOS Tests
         script: |
+          SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -oE '[A-F0-9-]{36}')
+          if [ -z "$SIMULATOR_ID" ]; then
+            SIMULATOR_ID=$(xcrun simctl list devices available | grep -oE '[A-F0-9-]{36}' | head -1)
+          fi
+          
           xcodebuild test \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
-            -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' \
+            -destination "id=$SIMULATOR_ID" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO || echo "No tests configured"
         ignore_failure: true
