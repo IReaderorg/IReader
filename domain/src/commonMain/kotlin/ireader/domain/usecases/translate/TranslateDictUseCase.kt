@@ -7,8 +7,8 @@ import ireader.domain.data.engines.TranslateEngine
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import io.ktor.http.encodeURLParameter
 import kotlinx.coroutines.delay
-import java.net.URLEncoder
 
 class TranslateDictUseCase(
     private val client: HttpClients
@@ -146,7 +146,7 @@ class TranslateDictUseCase(
                 val progress = 10 + (index * 80 / texts.size.coerceAtLeast(1))
                 onProgress(progress)
                 
-                val url = "https://t2.translatedict.com/1.php?p1=$source&p2=$target&p3=${URLEncoder.encode(text,"utf-8")}"
+                val url = "https://t2.translatedict.com/1.php?p1=$source&p2=$target&p3=${text.encodeURLParameter()}"
                 delay(1000)
                 client.default.get(urlString = url) {}.bodyAsText()
             }.joinToString().split("\n")

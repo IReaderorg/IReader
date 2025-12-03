@@ -11,7 +11,7 @@ import ireader.domain.storage.AndroidCacheManager
 import ireader.domain.storage.AndroidStorageManager
 import ireader.domain.storage.CacheManager
 import ireader.domain.storage.StorageManager
-import java.io.File
+import okio.Path
 
 
 class AndroidGetSimpleStorage(
@@ -29,26 +29,26 @@ class AndroidGetSimpleStorage(
         simpleStorageHelper = SimpleStorageHelper(activity, savedState)
     }
 
-    override val mainIReaderDir: File
+    override val mainIReaderDir: Path
         get() = storageManager.appDirectory
 
-    override fun ireaderDirectory(dirName: String): File =
+    override fun ireaderDirectory(dirName: String): Path =
         storageManager.getSubDirectory(dirName)
 
-    override fun extensionDirectory(): File =
+    override fun extensionDirectory(): Path =
         storageManager.extensionsDirectory
 
-    override fun cacheExtensionDir() = cacheManager.extensionCacheDirectory
+    override fun cacheExtensionDir(): Path = cacheManager.extensionCacheDirectory
     
-    override fun ireaderCacheDir() = cacheManager.cacheDirectory
+    override fun ireaderCacheDir(): Path = cacheManager.cacheDirectory
 
-    override val backupDirectory: File
+    override val backupDirectory: Path
         get() = storageManager.backupDirectory
         
-    override val booksDirectory: File
+    override val booksDirectory: Path
         get() = storageManager.booksDirectory
         
-    override val automaticBackupDirectory: File
+    override val automaticBackupDirectory: Path
         get() = storageManager.automaticBackupDirectory
 
     override fun checkPermission(): Boolean {
@@ -81,7 +81,7 @@ class AndroidGetSimpleStorage(
     }
 
     fun get(dirName: String): DocumentFile {
-        val dir = ireaderDirectory(dirName)
+        val dir = ireaderDirectory(dirName).toFile()
         if (!dir.exists()) {
             dir.mkdirs()
         }

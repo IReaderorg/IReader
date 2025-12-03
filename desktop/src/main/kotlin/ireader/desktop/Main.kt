@@ -312,10 +312,12 @@ object CoilDiskCache {
     @Synchronized
     fun get(context: GetSimpleStorage): DiskCache {
         return instance ?: run {
-            val safeCacheDir = context.ireaderCacheDir().apply { mkdirs() }
+            val safeCacheDir = context.ireaderCacheDir()
+            // Ensure directory exists
+            FileSystem.SYSTEM.createDirectories(safeCacheDir)
             // Create the singleton disk cache instance.
             DiskCache.Builder().fileSystem(FileSystem.SYSTEM)
-                .directory(safeCacheDir.resolve(FOLDER_NAME).toOkioPath())
+                .directory(safeCacheDir / FOLDER_NAME)
                 .build().also { instance = it }
 
         }

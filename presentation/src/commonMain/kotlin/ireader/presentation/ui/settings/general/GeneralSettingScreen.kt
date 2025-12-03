@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DisplaySettings
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.History
@@ -22,14 +24,11 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Update
-import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material.icons.filled.Autorenew
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -50,14 +49,65 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.add_novels_to_library_only
+import ireader.i18n.resources.allow_loading_lnreader_compatible_javascript
+import ireader.i18n.resources.api_settings
+import ireader.i18n.resources.app_updates_display
+import ireader.i18n.resources.auto_download
+import ireader.i18n.resources.auto_installer
+import ireader.i18n.resources.auto_installer_subtitle
+import ireader.i18n.resources.automatically_download_newly_detected_chapters
+import ireader.i18n.resources.automatically_refresh_leaderboard_when_other
+import ireader.i18n.resources.catalog_settings
+import ireader.i18n.resources.community_leaderboard
+import ireader.i18n.resources.configure_js_plugins_and_enable
+import ireader.i18n.resources.confirm_exit
+import ireader.i18n.resources.default_chapter_sort
+import ireader.i18n.resources.default_sorting_method_for_chapter_lists
+import ireader.i18n.resources.delay_between_chapter_downloads_to
+import ireader.i18n.resources.disable_haptic_feedback
+import ireader.i18n.resources.disable_loading_animations
+import ireader.i18n.resources.display_auto_populated_categories_like
+import ireader.i18n.resources.display_when_each_novel_was
+import ireader.i18n.resources.download_delay
+import ireader.i18n.resources.download_new_chapters
+import ireader.i18n.resources.download_settings
+import ireader.i18n.resources.enable_javascript_plugins
+import ireader.i18n.resources.global_search
+import ireader.i18n.resources.installer_mode
+import ireader.i18n.resources.javascript_plugin_settings
+import ireader.i18n.resources.language_translation
+import ireader.i18n.resources.languages
+import ireader.i18n.resources.leaderboard_realtime_updates
+import ireader.i18n.resources.library_settings
+import ireader.i18n.resources.local_installer
+import ireader.i18n.resources.max_performance_mode
+import ireader.i18n.resources.max_performance_mode_subtitle
+import ireader.i18n.resources.notifications
+import ireader.i18n.resources.only_update_on_finding_novel
+import ireader.i18n.resources.package_manager
+import ireader.i18n.resources.replace_toolbar_buttons_with_floating
+import ireader.i18n.resources.saved_local_source_location
+import ireader.i18n.resources.show_history
+import ireader.i18n.resources.show_last_update_time
+import ireader.i18n.resources.show_local_catalogs
+import ireader.i18n.resources.show_local_catalogs_subtitle
+import ireader.i18n.resources.show_smart_categories
+import ireader.i18n.resources.show_system_catalogs
+import ireader.i18n.resources.show_system_catalogs_subtitle
+import ireader.i18n.resources.show_update
+import ireader.i18n.resources.translation_settings
+import ireader.i18n.resources.turn_off_vibration_feedback_for_interactions
+import ireader.i18n.resources.updater_is_enable
+import ireader.i18n.resources.use_fab_in_library
+import ireader.i18n.resources.use_static_indicators_instead_of_animated_ones
+import ireader.i18n.resources.user_interface
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.component.components.ChoicePreference
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.component.components.SetupSettingComponents
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.asStateIn
-import ireader.presentation.ui.video.component.cores.player.SubtitleHelper
 
 @Composable
 fun GeneralSettingScreen(
@@ -539,7 +589,7 @@ class GeneralSettingScreenViewModel(
                 availableLocales.contains(baseLocale)
             }
             .mapNotNull { locale ->
-                SubtitleHelper.fromTwoLettersToLanguage(locale)?.let { langName -> 
+                LanguageHelper.fromTwoLettersToLanguage(locale)?.let { langName ->
                     locale to langName 
                 }
             }

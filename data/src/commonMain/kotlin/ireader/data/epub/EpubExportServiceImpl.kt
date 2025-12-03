@@ -1,20 +1,18 @@
 ﻿package ireader.data.epub
 
 import ireader.core.log.Log
+import ireader.core.util.randomUUID
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.common.Uri
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.services.epub.EpubExportOptions
 import ireader.domain.services.epub.EpubExportService
-import ireader.domain.usecases.epub.HtmlContentCleaner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
-import java.io.File
-import ireader.core.util.randomUUID
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 /**
  * Implementation of EpubExportService that generates EPUB files with beautified formatting.
@@ -109,7 +107,8 @@ class EpubExportServiceImpl(
     }
     
     /**
-     * Generate complete EPUB content as byte array
+     * Generate complete EPUB content as byte array.
+     * Uses platform-specific ZIP writer for KMP compatibility.
      */
     private suspend fun generateEpubContent(
         book: Book,
@@ -117,70 +116,58 @@ class EpubExportServiceImpl(
         options: EpubExportOptions,
         onProgress: (Float, String) -> Unit
     ): ByteArray {
-        val outputStream = ByteArrayOutputStream()
-        val zipOutputStream = ZipOutputStream(outputStream)
+        val entries = mutableListOf<EpubZipEntry>()
         
-        try {
-            // 1. Write mimetype (must be first, uncompressed)
-            zipOutputStream.setLevel(0)
-            zipOutputStream.putNextEntry(ZipEntry("mimetype"))
-            zipOutputStream.write("application/epub+zip".toByteArray())
-            zipOutputStream.closeEntry()
+        // 1. Mimetype (must be first, uncompressed)
+        entries.add(EpubZipEntry("mimetype", "application/epub+zip".encodeToByteArray(), compressed = false))
+        
+        // 2. META-INF/container.xml
+        entries.add(EpubZipEntry("META-INF/container.xml", generateContainerXml().encodeToByteArray()))
+        
+        // 3. OEBPS/content.opf (metadata and manifest)
+        entries.add(EpubZipEntry("OEBPS/content.opf", generateContentOpf(book, chapters, options).encodeToByteArray()))
+        
+        // 4. OEBPS/toc.ncx (table of contents)
+        entries.add(EpubZipEntry("OEBPS/toc.ncx", generateTocNcx(book, chapters).encodeToByteArray()))
+        
+        // 5. OEBPS/stylesheet.css
+        entries.add(EpubZipEntry("OEBPS/stylesheet.css", generateStylesheet(options).encodeToByteArray()))
+        
+        // 6. Chapter XHTML files
+        chapters.forEachIndexed { index, chapter ->
+            val progress = 0.4f + (0.4f * (index.toFloat() / chapters.size))
+            onProgress(progress, "Writing chapter ${index + 1}/${chapters.size}...")
             
-            // Reset compression for other files
-            zipOutputStream.setLevel(9)
-            
-            // 2. Write META-INF/container.xml
-            zipOutputStream.putNextEntry(ZipEntry("META-INF/container.xml"))
-            zipOutputStream.write(generateContainerXml().toByteArray())
-            zipOutputStream.closeEntry()
-            
-            // 3. Write OEBPS/content.opf (metadata and manifest)
-            zipOutputStream.putNextEntry(ZipEntry("OEBPS/content.opf"))
-            zipOutputStream.write(generateContentOpf(book, chapters, options).toByteArray())
-            zipOutputStream.closeEntry()
-            
-            // 4. Write OEBPS/toc.ncx (table of contents)
-            zipOutputStream.putNextEntry(ZipEntry("OEBPS/toc.ncx"))
-            zipOutputStream.write(generateTocNcx(book, chapters).toByteArray())
-            zipOutputStream.closeEntry()
-            
-            // 5. Write OEBPS/stylesheet.css
-            zipOutputStream.putNextEntry(ZipEntry("OEBPS/stylesheet.css"))
-            zipOutputStream.write(generateStylesheet(options).toByteArray())
-            zipOutputStream.closeEntry()
-            
-            // 6. Write chapter XHTML files
-            chapters.forEachIndexed { index, chapter ->
-                val progress = 0.4f + (0.4f * (index.toFloat() / chapters.size))
-                onProgress(progress, "Writing chapter ${index + 1}/${chapters.size}...")
-                
-                zipOutputStream.putNextEntry(ZipEntry("OEBPS/chapter${index + 1}.xhtml"))
-                zipOutputStream.write(generateChapterXhtml(chapter, index + 1, options).toByteArray())
-                zipOutputStream.closeEntry()
-            }
-            
-            // 7. Write cover image if available and requested
-            if (options.includeCover && book.cover.isNotBlank()) {
-                try {
-                    val coverData = fileProvider.downloadCoverImage(book.cover)
-                    if (coverData != null) {
-                        zipOutputStream.putNextEntry(ZipEntry("OEBPS/images/cover.jpg"))
-                        zipOutputStream.write(coverData)
-                        zipOutputStream.closeEntry()
-                    }
-                } catch (e: Exception) {
-                    Log.warn { "Failed to include cover image: ${e.message}" }
-                }
-            }
-            
-            zipOutputStream.close()
-            return outputStream.toByteArray()
-        } finally {
-            zipOutputStream.close()
-            outputStream.close()
+            entries.add(EpubZipEntry(
+                "OEBPS/chapter${index + 1}.xhtml",
+                generateChapterXhtml(chapter, index + 1, options).encodeToByteArray()
+            ))
         }
+        
+        // 7. Cover image if available and requested
+        if (options.includeCover && book.cover.isNotBlank()) {
+            try {
+                val coverData = fileProvider.downloadCoverImage(book.cover)
+                if (coverData != null) {
+                    entries.add(EpubZipEntry("OEBPS/images/cover.jpg", coverData))
+                }
+            } catch (e: Exception) {
+                Log.warn { "Failed to include cover image: ${e.message}" }
+            }
+        }
+        
+        // Use platform-specific ZIP creation
+        return createEpubZip(entries)
     }
+    
+    /**
+     * Data class for ZIP entries
+     */
+    data class EpubZipEntry(
+        val path: String,
+        val content: ByteArray,
+        val compressed: Boolean = true
+    )
     
     /**
      * Generate META-INF/container.xml
@@ -197,6 +184,7 @@ class EpubExportServiceImpl(
     /**
      * Generate OEBPS/content.opf (metadata and manifest)
      */
+    @OptIn(ExperimentalTime::class)
     private fun generateContentOpf(book: Book, chapters: List<Chapter>, options: EpubExportOptions): String {
         val uuid = randomUUID()
         val chapterManifest = chapters.indices.joinToString("\n") { index ->
@@ -218,7 +206,7 @@ class EpubExportServiceImpl(
                     <dc:language>en</dc:language>
                     <dc:identifier id="BookId">urn:uuid:$uuid</dc:identifier>
                     <dc:description>${escapeXml(book.description)}</dc:description>
-                    <dc:date>${java.time.LocalDate.now()}</dc:date>
+                    <dc:date>${kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.UTC).date}</dc:date>
                     <meta name="generator" content="iReader"/>
                 </metadata>
                 <manifest>
@@ -410,3 +398,10 @@ interface EpubFileProvider {
      */
     suspend fun downloadCoverImage(url: String): ByteArray?
 }
+
+
+/**
+ * Platform-specific ZIP creation for EPUB files.
+ * Implementations should handle proper ZIP format with mimetype uncompressed first.
+ */
+expect fun createEpubZip(entries: List<EpubExportServiceImpl.EpubZipEntry>): ByteArray

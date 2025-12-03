@@ -25,6 +25,7 @@ import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.bean.ApkMeta
 import org.jsoup.Jsoup
 import org.jsoup.parser.Parser
+import okio.Path.Companion.toPath
 import java.io.File
 import java.net.URLClassLoader
 
@@ -38,7 +39,7 @@ class DesktopCatalogLoader(
     // JavaScript plugin loader
     private val jsPluginLoader: JSPluginLoader by lazy {
         val jsPluginsDir = File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }
-        JSPluginLoader(jsPluginsDir, httpClients.default, preferences)
+        JSPluginLoader(jsPluginsDir.absolutePath.toPath(), httpClients.default, preferences)
     }
     
     /**
@@ -164,7 +165,7 @@ class DesktopCatalogLoader(
             versionName = data.versionName,
             versionCode = data.versionCode,
             nsfw = data.nsfw,
-            installDir = file.parentFile!!,
+            installDir = file.parentFile!!.absolutePath.toPath(),
             iconUrl = data.icon
         )
 

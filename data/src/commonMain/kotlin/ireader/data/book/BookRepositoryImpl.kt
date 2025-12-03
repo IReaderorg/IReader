@@ -15,7 +15,6 @@ import ireader.domain.models.library.LibrarySort
 import ireader.core.log.IReaderLog
 import ireader.core.performance.PerformanceMonitor
 import kotlinx.coroutines.flow.Flow
-import java.util.Locale
 
 class BookRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -116,7 +115,7 @@ class BookRepositoryImpl(
     override suspend fun findDuplicateBook(title: String, sourceId: Long): Book? {
         return handler.awaitOneOrNull() {
             bookQueries.getDuplicateLibraryManga(
-                title.lowercase(Locale.getDefault()),
+                title.lowercase(),
                 sourceId,
                 booksMapper
             )

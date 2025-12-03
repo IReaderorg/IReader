@@ -1,4 +1,4 @@
-package ireader.core.util
+package ireader.core.time
 
 import kotlin.time.ExperimentalTime
 

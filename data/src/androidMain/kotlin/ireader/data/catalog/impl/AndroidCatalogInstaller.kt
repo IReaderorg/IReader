@@ -18,6 +18,7 @@ import ireader.i18n.UiText
 import ireader.i18n.asString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okio.Path.Companion.toPath
 import java.io.File
 
 /**
@@ -82,10 +83,10 @@ class AndroidCatalogInstaller(
                     val iconResponse: ByteReadChannel = client.get(catalog.iconUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
-                    apkResponse.saveTo(tmpApkFile)
+                    apkResponse.saveTo(tmpApkFile.absolutePath.toPath(), okio.FileSystem.SYSTEM)
                     
                     // Save the icon to storage
-                    iconResponse.saveTo(tmpIconFile)
+                    iconResponse.saveTo(tmpIconFile.absolutePath.toPath(), okio.FileSystem.SYSTEM)
                     val extDir = File(context.cacheDir, catalog.pkgName).apply { mkdirs() }
                     val iconFile = File(extDir, tmpIconFile.name)
                     tmpIconFile.copyRecursively(iconFile, true)

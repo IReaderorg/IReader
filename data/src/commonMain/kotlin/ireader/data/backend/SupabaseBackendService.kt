@@ -9,7 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import ireader.core.log.Log
 import kotlinx.serialization.json.*
-import java.net.URLEncoder
+import io.ktor.http.encodeURLParameter
 
 /**
  * Supabase implementation of BackendService.
@@ -45,7 +45,7 @@ class SupabaseBackendService(
             
             // Add filters
             filters.forEach { (key, value) ->
-                val encodedValue = URLEncoder.encode(value.toString(), "UTF-8")
+                val encodedValue = value.toString().encodeURLParameter()
                 queryParams.add("$key=eq.$encodedValue")
             }
             
@@ -191,7 +191,7 @@ class SupabaseBackendService(
         return try {
             // Build filter query string with URL encoding
             val filterQuery = filters.entries.joinToString("&") { (key, value) ->
-                val encodedValue = URLEncoder.encode(value.toString(), "UTF-8")
+                val encodedValue = value.toString().encodeURLParameter()
                 "$key=eq.$encodedValue"
             }
             

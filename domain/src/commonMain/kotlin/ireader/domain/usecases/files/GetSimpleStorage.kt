@@ -1,21 +1,24 @@
 package ireader.domain.usecases.files
 
-import java.io.File
+import okio.Path
 
-
+/**
+ * Platform-agnostic storage interface.
+ * Uses Okio Path for KMP compatibility instead of java.io.File.
+ */
 interface GetSimpleStorage {
-    val mainIReaderDir: File
-    fun ireaderDirectory(dirName: String): File
-    fun extensionDirectory(): File
-    fun cacheExtensionDir()  : File
-    fun ireaderCacheDir(): File
-    val backupDirectory: File
-    val booksDirectory: File
-    val automaticBackupDirectory: File
+    val mainIReaderDir: Path
+    fun ireaderDirectory(dirName: String): Path
+    fun extensionDirectory(): Path
+    fun cacheExtensionDir(): Path
+    fun ireaderCacheDir(): Path
+    val backupDirectory: Path
+    val booksDirectory: Path
+    val automaticBackupDirectory: Path
     fun checkPermission(): Boolean
     fun createIReaderDir()
     fun createNoMediaFile()
     fun clearImageCache()
     fun clearCache()
-    fun getCacheSize() : String
+    fun getCacheSize(): String
 }

@@ -17,6 +17,8 @@ import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import kotlinx.coroutines.flow.channelFlow
+import okio.FileSystem
+import okio.Path.Companion.toPath
 import java.io.File
 
 
@@ -38,8 +40,8 @@ class AndroidLocalInstaller(
 
     private fun savedCatalogLocation(catalog: CatalogRemote): File {
         val savedFromCache= uiPreferences.savedLocalCatalogLocation().get()
-        val cacheLocation = File(getSimpleStorage.cacheExtensionDir(), catalog.pkgName).apply { mkdirs() }
-        val primaryLocation = File(getSimpleStorage.extensionDirectory(), catalog.pkgName).apply { mkdirs() }
+        val cacheLocation = File(getSimpleStorage.cacheExtensionDir().toFile(), catalog.pkgName).apply { mkdirs() }
+        val primaryLocation = File(getSimpleStorage.extensionDirectory().toFile(), catalog.pkgName).apply { mkdirs() }
 
         return if (savedFromCache) cacheLocation else primaryLocation
     }
@@ -72,7 +74,7 @@ class AndroidLocalInstaller(
             val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
-            apkResponse.saveTo(tmpApkFile)
+            apkResponse.saveTo(tmpApkFile.absolutePath.toPath(), FileSystem.SYSTEM)
 
             send(InstallStep.Downloading)
             val extDir = savedCatalogLocation(catalog)
@@ -122,7 +124,7 @@ class AndroidLocalInstaller(
             val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
-            jsResponse.saveTo(jsFile)
+            jsResponse.saveTo(jsFile.absolutePath.toPath(), FileSystem.SYSTEM)
             
             // Save metadata from remote catalog (including language)
             // This ensures the language from the remote API is preserved
@@ -161,8 +163,8 @@ class AndroidLocalInstaller(
     override suspend fun uninstall(pkgName: String): InstallStep {
         return try {
             // Try to uninstall as traditional APK extension
-            val file = File(getSimpleStorage.extensionDirectory(), pkgName)
-            val cacheFile = File(getSimpleStorage.cacheExtensionDir(), pkgName)
+            val file = File(getSimpleStorage.extensionDirectory().toFile(), pkgName)
+            val cacheFile = File(getSimpleStorage.cacheExtensionDir().toFile(), pkgName)
             file.deleteRecursively()
             cacheFile.deleteRecursively()
             

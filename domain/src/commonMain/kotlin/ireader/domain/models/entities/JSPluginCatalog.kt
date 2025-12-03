@@ -3,16 +3,17 @@ package ireader.domain.models.entities
 import ireader.core.source.HttpSource
 import ireader.domain.js.bridge.JSPluginSource
 import ireader.domain.js.models.PluginMetadata
-import java.io.File
+import okio.Path
 
 /**
  * Catalog implementation for JavaScript plugins.
  * Wraps a JSPluginSource or converted native HttpSource as a CatalogInstalled for integration with IReader's catalog system.
+ * Uses Okio Path for KMP compatibility.
  */
 data class JSPluginCatalog(
     override val source: HttpSource,
     val metadata: PluginMetadata,
-    val pluginFile: File,
+    val pluginFile: Path,
     override val name: String = metadata.name,
     override val description: String = metadata.site,
     override val pkgName: String = metadata.id,
@@ -30,7 +31,7 @@ data class JSPluginCatalog(
         }
         else -> "https://via.placeholder.com/300x300?text=${metadata.id}"
     },
-    override val installDir: File = pluginFile.parentFile,
+    override val installDir: Path? = pluginFile.parent,
     override val nsfw: Boolean = false,
     override val isPinned: Boolean = false,
     override val hasUpdate: Boolean = false

@@ -28,7 +28,6 @@ import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
 import ireader.presentation.imageloader.IImageLoader
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import java.util.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 data class SourceDetailScreen(
@@ -130,7 +129,7 @@ private fun SourceDetailContent(
         DetailItem(
             label = localize(Res.string.language),
             value = when (catalog) {
-                is CatalogInstalled -> catalog.source?.lang?.uppercase(Locale.getDefault()) ?: localize(Res.string.unknown)
+                is CatalogInstalled -> catalog.source?.lang?.uppercase() ?: localize(Res.string.unknown)
                 else -> localize(Res.string.unknown)
             }
         )

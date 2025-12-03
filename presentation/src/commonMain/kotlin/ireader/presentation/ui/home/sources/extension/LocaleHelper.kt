@@ -3,10 +3,10 @@ package ireader.presentation.ui.home.sources.extension
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import java.util.*
 
 /**
  * Utility class to change the application's language in runtime.
+ * Uses KMP-compatible locale handling.
  */
 object LocaleHelper {
 
@@ -132,27 +132,8 @@ object LocaleHelper {
         val normalizedLang = lang.replace("-r", "-")
         languageDisplayNames[normalizedLang]?.let { return it }
         
-        // Fall back to Locale for any unmapped languages
-        val locale = getLocale(lang)
-        val displayName = locale.getDisplayName(locale)
-        
-        // If Locale returns the code itself or empty, return the code in uppercase
-        return if (displayName.isBlank() || displayName == lang) {
-            lang.uppercase()
-        } else {
-            displayName.replaceFirstChar { it.uppercase(locale) }
-        }
-    }
-
-    /**
-     * Return Locale from string language code
-     */
-    private fun getLocale(lang: String): Locale {
-        val sp = lang.split("_", "-")
-        return when (sp.size) {
-            2 -> Locale(sp[0], sp[1])
-            3 -> Locale(sp[0], sp[1], sp[2])
-            else -> Locale(lang)
-        }
+        // Fall back to uppercase code for any unmapped languages
+        // This is KMP-compatible without java.util.Locale
+        return lang.uppercase()
     }
 }

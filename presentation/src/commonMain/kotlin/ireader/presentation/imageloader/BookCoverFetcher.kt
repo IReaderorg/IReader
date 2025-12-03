@@ -30,7 +30,6 @@ import okio.Source
 import okio.buffer
 import okio.sink
 import okio.source
-import java.net.HttpURLConnection
 
 /**
  * A [Fetcher] that fetches cover image for [Manga] object.
@@ -170,7 +169,7 @@ class BookCoverFetcher(
     private suspend fun executeNetworkRequest(): Response {
         val client = sourceLazy.value?.client?.okhttp ?: callFactoryLazy.value
         val response = client.newCall(newRequest()).await()
-        if (!response.isSuccessful && response.code != HttpURLConnection.HTTP_NOT_MODIFIED) {
+        if (!response.isSuccessful && response.code != 304) { // 304 = HTTP_NOT_MODIFIED
             response.body?.closeQuietly()
             throw HttpException(response)
         }

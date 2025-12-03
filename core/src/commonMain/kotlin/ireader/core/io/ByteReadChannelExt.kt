@@ -16,41 +16,28 @@ import okio.FileSystem
 import okio.Path
 import okio.buffer
 import okio.use
-import java.io.File
 
 private const val BUFFER_SIZE = 8096
 
-
+/**
+ * Saves ByteReadChannel content to a file using Okio FileSystem.
+ * This is the KMP-compatible way to write channel data to disk.
+ */
 suspend fun ByteReadChannel.saveTo(path: Path, fileSystem: FileSystem) {
   withContext(Dispatchers.IO) {
+    // Ensure parent directories exist
+    path.parent?.let { parent ->
+      if (!fileSystem.exists(parent)) {
+        fileSystem.createDirectories(parent)
+      }
+    }
+    
     val buffer = ByteArray(BUFFER_SIZE)
     fileSystem.sink(path).buffer().use { sink ->
       do {
         val read = readAvailable(buffer, 0, BUFFER_SIZE)
         if (read > 0) {
           sink.write(buffer, 0, read)
-        }
-      } while (read >= 0)
-    }
-  }
-}
-
-@Suppress("BlockingMethodInNonBlockingContext")
-suspend fun ByteReadChannel.saveTo(file: File) {
-  withContext(Dispatchers.IO) {
-    // Improved: Ensure parent directories exist before writing
-    file.parentFile?.let { parent ->
-      if (!parent.exists()) {
-        parent.mkdirs()
-      }
-    }
-    
-    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-    file.outputStream().use { output ->
-      do {
-        val read = readAvailable(buffer, 0, DEFAULT_BUFFER_SIZE)
-        if (read > 0) {
-          output.write(buffer, 0, read)
         }
       } while (read >= 0)
     }

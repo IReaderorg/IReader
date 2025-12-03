@@ -26,7 +26,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.io.File
+import okio.FileSystem
+import okio.Path
 import ireader.i18n.resources.Res
 import ireader.domain.utils.extensions.currentTimeToLong
 
@@ -533,22 +534,24 @@ class PluginDetailsViewModel(
     }
     
     /**
-     * Download plugin from repository URL
+     * Download plugin from repository URL.
+     * Uses Okio Path for KMP compatibility.
      */
-    private suspend fun downloadPlugin(plugin: PluginInfo): Result<File> = runCatching {
+    private suspend fun downloadPlugin(plugin: PluginInfo): Result<Path> = runCatching {
         // TODO: Implement actual HTTP download with progress tracking
         // For now, simulate download
         delay(1000)
         
         // In production, this would download from a plugin repository URL
         // and save to a temporary file
-        File.createTempFile("plugin_${plugin.id}", ".zip")
+        val tempPath = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "plugin_${plugin.id}.zip"
+        tempPath
     }
     
     /**
      * Verify plugin signature/checksum
      */
-    private suspend fun verifyPlugin(pluginFile: File): Result<Unit> = runCatching {
+    private suspend fun verifyPlugin(pluginFile: Path): Result<Unit> = runCatching {
         // TODO: Implement actual signature/checksum verification
         // For now, simulate verification
         delay(200)
@@ -557,7 +560,7 @@ class PluginDetailsViewModel(
         // 1. Calculate file checksum (SHA-256)
         // 2. Verify against expected checksum from manifest
         // 3. Verify digital signature if present
-        if (!pluginFile.exists()) {
+        if (!FileSystem.SYSTEM.exists(pluginFile)) {
             throw Exception("Plugin file not found")
         }
     }
@@ -565,7 +568,7 @@ class PluginDetailsViewModel(
     /**
      * Install plugin file to plugins directory
      */
-    private suspend fun installPluginFile(pluginFile: File): Result<Unit> = runCatching {
+    private suspend fun installPluginFile(pluginFile: Path): Result<Unit> = runCatching {
         // TODO: Implement actual plugin installation
         // For now, simulate installation
         delay(300)

@@ -3,8 +3,7 @@ package ireader.domain.usecases.local.book_usecases
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.takeIf
 import ireader.domain.utils.extensions.currentTimeToLong
-import java.net.URI
-import java.net.URISyntaxException
+import io.ktor.http.Url
 
 fun updateBook(newBook: Book, oldBook: Book): Book {
     val newKey = if (newBook.key.isNotBlank() && newBook.key != getBaseUrl(newBook.key)) {
@@ -40,28 +39,36 @@ fun updateBook(newBook: Book, oldBook: Book): Book {
     )
 }
 
+/**
+ * Extract base URL using Ktor's Url class for KMP compatibility.
+ */
 fun getBaseUrl(url: String): String {
     return try {
-        URI.create(url).toURL().let { key ->
-            key.protocol + "://" + key.authority
-        }
+        val parsed = Url(url)
+        "${parsed.protocol.name}://${parsed.host}${if (parsed.port != parsed.protocol.defaultPort) ":${parsed.port}" else ""}"
     } catch (e: Throwable) {
         ""
     }
 }
 
+/**
+ * Extract path and query from URL using Ktor's Url class for KMP compatibility.
+ */
 fun getUrlWithoutDomain(orig: String): String {
     return try {
-        val uri = URI(orig.replace(" ", "%20"))
-        var out = uri.path
-        if (uri.query != null) {
-            out += "?" + uri.query
+        val url = Url(orig.replace(" ", "%20"))
+        buildString {
+            append(url.encodedPath)
+            if (url.encodedQuery.isNotEmpty()) {
+                append("?")
+                append(url.encodedQuery)
+            }
+            if (url.fragment.isNotEmpty()) {
+                append("#")
+                append(url.fragment)
+            }
         }
-        if (uri.fragment != null) {
-            out += "#" + uri.fragment
-        }
-        out
-    } catch (e: URISyntaxException) {
+    } catch (e: Throwable) {
         orig
     }
 }

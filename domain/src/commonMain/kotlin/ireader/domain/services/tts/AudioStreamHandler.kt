@@ -3,10 +3,11 @@ package ireader.domain.services.tts
 import ireader.domain.plugins.AudioStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
+import okio.Buffer
 
 /**
- * Handler for processing audio streams from TTS plugins
+ * Handler for processing audio streams from TTS plugins.
+ * Uses Okio Buffer for KMP-compatible byte array operations.
  * Requirements: 5.3, 5.5
  */
 class AudioStreamHandler {
@@ -19,16 +20,16 @@ class AudioStreamHandler {
     suspend fun readFullStream(audioStream: AudioStream): Result<ByteArray> {
         return withContext(Dispatchers.IO) {
             try {
-                val outputStream = ByteArrayOutputStream()
-                val buffer = ByteArray(8192) // 8KB buffer
+                val buffer = Buffer()
+                val readBuffer = ByteArray(8192) // 8KB buffer
                 
                 var bytesRead: Int
-                while (audioStream.read(buffer).also { bytesRead = it } != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
+                while (audioStream.read(readBuffer).also { bytesRead = it } != -1) {
+                    buffer.write(readBuffer, 0, bytesRead)
                 }
                 
                 audioStream.close()
-                Result.success(outputStream.toByteArray())
+                Result.success(buffer.readByteArray())
             } catch (e: Exception) {
                 audioStream.close()
                 Result.failure(e)

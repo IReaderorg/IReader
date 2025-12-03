@@ -10,18 +10,17 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.storage.CacheManager
 import ireader.domain.storage.StorageManager
 import ireader.domain.usecases.files.GetSimpleStorage
+import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.FileSystem
+import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.zip.ZipFile
 
 /**
@@ -48,7 +47,7 @@ actual class ImportEpub(
         
         if (errors.isNotEmpty()) {
             val errorMessage = errors.joinToString("\n") { (path, error) ->
-                "${File(path).name}: $error"
+                "${path.toPath().name}: $error"
             }
             throw Exception("Failed to import ${errors.size} file(s):\n$errorMessage")
         }
@@ -87,7 +86,7 @@ actual class ImportEpub(
                 author = author,
                 status = MangaInfo.PUBLISHING_FINISHED,
                 description = description,
-                lastUpdate = System.currentTimeMillis()
+                lastUpdate = currentTimeToLong()
             ).let { bookRepository.upsert(it) }
             
             // Extract chapters
@@ -131,7 +130,7 @@ actual class ImportEpub(
     
     private fun extractCover(zip: ZipFile, opfDoc: Document, key: String): String {
         val cacheDir = cacheManager.getCacheSubDirectory("library_covers")
-        val coverFile = File(cacheDir, "$key.jpg")
+        val coverFile = cacheDir / "$key.jpg"
         
         try {
             // Try to find cover image reference
@@ -145,7 +144,9 @@ actual class ImportEpub(
                 
                 zip.getEntry(fullPath)?.let { entry ->
                     zip.getInputStream(entry).use { input ->
-                        coverFile.writeBytes(input.readBytes())
+                        FileSystem.SYSTEM.sink(coverFile).buffer().use { sink ->
+                            sink.write(input.readBytes())
+                        }
                     }
                 }
             }
@@ -153,7 +154,7 @@ actual class ImportEpub(
             // Silently ignore cover extraction errors
         }
         
-        return coverFile.absolutePath
+        return coverFile.toString()
     }
     
     private fun extractChapters(zip: ZipFile, opfDoc: Document, bookId: Long, key: String): List<Chapter> {
@@ -192,7 +193,7 @@ actual class ImportEpub(
                             bookId = bookId,
                             content = content,
                             number = index.toFloat(),
-                            dateUpload = System.currentTimeMillis()
+                            dateUpload = currentTimeToLong()
                         )
                     )
                 }
@@ -221,7 +222,7 @@ actual class ImportEpub(
     
     private fun generateBookKey(title: String, author: String): String {
         val sanitized = "${title}_${author}".replace(Regex("[^a-zA-Z0-9]"), "_")
-        val timestamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(Date())
+        val timestamp = currentTimeToLong()
         return "${sanitized}_$timestamp"
     }
 

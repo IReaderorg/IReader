@@ -1,27 +1,34 @@
 package ireader.domain.image.cache
 
+import okio.FileSystem
+import okio.Path
 
-import java.io.File
-
+/**
+ * Disk utilities using Okio for KMP compatibility.
+ */
 object DiskUtil {
 
     fun hashKeyForDisk(key: String): String {
         return Hash.md5(key)
     }
 
-    fun getDirectorySize(f: File): Long {
+    /**
+     * Calculate directory size recursively using Okio FileSystem.
+     */
+    fun getDirectorySize(path: Path, fileSystem: FileSystem = FileSystem.SYSTEM): Long {
         var size: Long = 0
-        if (f.isDirectory) {
-            for (file in f.listFiles().orEmpty()) {
-                size += getDirectorySize(file)
+        if (fileSystem.exists(path)) {
+            val metadata = fileSystem.metadata(path)
+            if (metadata.isDirectory) {
+                fileSystem.list(path).forEach { child ->
+                    size += getDirectorySize(child, fileSystem)
+                }
+            } else {
+                size = metadata.size ?: 0L
             }
-        } else {
-            size = f.length()
         }
         return size
     }
-
-
 
     /**
      * Mutate the given filename to make it valid for a FAT filesystem,

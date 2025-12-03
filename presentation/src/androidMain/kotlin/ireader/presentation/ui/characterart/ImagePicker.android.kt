@@ -150,7 +150,7 @@ fun ImagePickerHost(
     }
     
     content(
-        launchPicker = { launcher.launch("image/*") },
-        selectedPath = selectedPath
+        { launcher.launch("image/*") },
+        selectedPath
     )
 }

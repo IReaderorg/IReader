@@ -4,7 +4,7 @@ import ireader.domain.storage.CacheManager
 import ireader.domain.storage.DesktopCacheManager
 import ireader.domain.storage.DesktopStorageManager
 import ireader.domain.storage.StorageManager
-import java.io.File
+import okio.Path
 
 
 class DesktopGetSimpleStorage : GetSimpleStorage {
@@ -12,28 +12,28 @@ class DesktopGetSimpleStorage : GetSimpleStorage {
     private val storageManager: StorageManager = DesktopStorageManager()
     private val cacheManager: CacheManager = DesktopCacheManager()
     
-    override val mainIReaderDir: File
+    override val mainIReaderDir: Path
         get() = storageManager.appDirectory
 
-    override fun ireaderDirectory(dirName: String): File =
+    override fun ireaderDirectory(dirName: String): Path =
         storageManager.getSubDirectory(dirName)
 
-    override fun extensionDirectory(): File =
+    override fun extensionDirectory(): Path =
         storageManager.extensionsDirectory
 
-    override fun cacheExtensionDir() =
+    override fun cacheExtensionDir(): Path =
         cacheManager.extensionCacheDirectory
 
-    override fun ireaderCacheDir() =
+    override fun ireaderCacheDir(): Path =
         cacheManager.cacheDirectory
 
-    override val backupDirectory: File
+    override val backupDirectory: Path
         get() = storageManager.backupDirectory
         
-    override val booksDirectory: File
+    override val booksDirectory: Path
         get() = storageManager.booksDirectory
         
-    override val automaticBackupDirectory: File
+    override val automaticBackupDirectory: Path
         get() = storageManager.automaticBackupDirectory
 
     override fun checkPermission(): Boolean {

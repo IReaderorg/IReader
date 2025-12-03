@@ -9,10 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.toInstant
 import kotlinx.serialization.json.Json
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
+import okio.Buffer
+import okio.GzipSink
+import okio.GzipSource
+import okio.buffer
 import kotlin.time.ExperimentalTime
 
 /**
@@ -219,26 +219,22 @@ class GoogleDriveBackupServiceImpl(
     }
     
     /**
-     * Compress data using GZIP
+     * Compress data using GZIP with Okio
      */
     private fun compressData(data: ByteArray): ByteArray {
-        val outputStream = ByteArrayOutputStream()
-        GZIPOutputStream(outputStream).use { gzip ->
-            gzip.write(data)
+        val buffer = Buffer()
+        GzipSink(buffer).buffer().use { sink ->
+            sink.write(data)
         }
-        return outputStream.toByteArray()
+        return buffer.readByteArray()
     }
     
     /**
-     * Decompress GZIP data
+     * Decompress GZIP data with Okio
      */
     private fun decompressData(compressedData: ByteArray): ByteArray {
-        val inputStream = ByteArrayInputStream(compressedData)
-        val outputStream = ByteArrayOutputStream()
-        GZIPInputStream(inputStream).use { gzip ->
-            gzip.copyTo(outputStream)
-        }
-        return outputStream.toByteArray()
+        val source = Buffer().write(compressedData)
+        return GzipSource(source).buffer().readByteArray()
     }
     
     /**

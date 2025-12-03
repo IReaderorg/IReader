@@ -4,13 +4,14 @@ import coil3.PlatformContext
 import ireader.core.io.VirtualFile
 import ireader.core.io.VirtualInputStream
 import ireader.domain.models.BookCover
-import java.io.IOException
+import okio.IOException
 
 /**
  * Class used to create cover cache.
  * It is used to store the covers of the library.
  * Makes use of Coil (which can avoid repeating requests) to download covers.
  * Names of files are created with the md5 of the thumbnail URL.
+ * Uses Okio IOException for KMP compatibility.
  *
  * @param context the application context.
  * @constructor creates an instance of the cover cache.

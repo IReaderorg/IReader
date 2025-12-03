@@ -1,44 +1,47 @@
 ﻿package ireader.domain.services.tts_service
 
 import ireader.domain.models.tts.VoiceModel
-import java.io.File
+import okio.FileSystem
+import okio.Path
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
- * Service for managing local storage of voice models
+ * Service for managing local storage of voice models.
+ * Uses Okio for KMP compatibility.
  * Requirements: 4.5, 5.5
  */
 class VoiceStorage(
-    private val storageDirectory: File
+    private val storageDirectory: Path,
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
     
     init {
-        if (!storageDirectory.exists()) {
-            storageDirectory.mkdirs()
+        if (!fileSystem.exists(storageDirectory)) {
+            fileSystem.createDirectories(storageDirectory)
         }
     }
     
     /**
      * Get the directory for a specific voice
      */
-    fun getVoiceDirectory(voiceId: String): File {
-        return File(storageDirectory, voiceId)
+    fun getVoiceDirectory(voiceId: String): Path {
+        return storageDirectory / voiceId
     }
     
     /**
      * Get the model file for a voice
      */
-    fun getModelFile(voiceId: String): File {
-        return File(getVoiceDirectory(voiceId), "$voiceId.onnx")
+    fun getModelFile(voiceId: String): Path {
+        return getVoiceDirectory(voiceId) / "$voiceId.onnx"
     }
     
     /**
      * Get the config file for a voice
      */
-    fun getConfigFile(voiceId: String): File {
-        return File(getVoiceDirectory(voiceId), "$voiceId.onnx.json")
+    fun getConfigFile(voiceId: String): Path {
+        return getVoiceDirectory(voiceId) / "$voiceId.onnx.json"
     }
     
     /**
@@ -47,18 +50,19 @@ class VoiceStorage(
     fun isVoiceDownloaded(voiceId: String): Boolean {
         val modelFile = getModelFile(voiceId)
         val configFile = getConfigFile(voiceId)
-        return modelFile.exists() && configFile.exists()
+        return fileSystem.exists(modelFile) && fileSystem.exists(configFile)
     }
     
     /**
      * Get list of all downloaded voice IDs
      */
     suspend fun getDownloadedVoiceIds(): List<String> = withContext(Dispatchers.IO) {
-        storageDirectory.listFiles()
-            ?.filter { it.isDirectory }
-            ?.map { it.name }
-            ?.filter { isVoiceDownloaded(it) }
-            ?: emptyList()
+        if (!fileSystem.exists(storageDirectory)) return@withContext emptyList()
+        
+        fileSystem.list(storageDirectory)
+            .filter { fileSystem.metadata(it).isDirectory }
+            .map { it.name }
+            .filter { isVoiceDownloaded(it) }
     }
     
     /**
@@ -67,8 +71,8 @@ class VoiceStorage(
     suspend fun deleteVoice(voiceId: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val voiceDir = getVoiceDirectory(voiceId)
-            if (voiceDir.exists()) {
-                voiceDir.deleteRecursively()
+            if (fileSystem.exists(voiceDir)) {
+                fileSystem.deleteRecursively(voiceDir)
             }
             Result.success(Unit)
         } catch (e: Exception) {
@@ -88,7 +92,7 @@ class VoiceStorage(
      */
     suspend fun getVoiceStorageUsage(voiceId: String): Long = withContext(Dispatchers.IO) {
         val voiceDir = getVoiceDirectory(voiceId)
-        if (voiceDir.exists()) {
+        if (fileSystem.exists(voiceDir)) {
             calculateDirectorySize(voiceDir)
         } else {
             0L
@@ -98,14 +102,17 @@ class VoiceStorage(
     /**
      * Calculate the size of a directory recursively
      */
-    private fun calculateDirectorySize(directory: File): Long {
+    private fun calculateDirectorySize(directory: Path): Long {
+        if (!fileSystem.exists(directory)) return 0L
+        
         var size = 0L
-        directory.listFiles()?.forEach { file ->
-            size += if (file.isDirectory) {
-                calculateDirectorySize(file)
-            } else {
-                file.length()
+        val metadata = fileSystem.metadata(directory)
+        if (metadata.isDirectory) {
+            fileSystem.list(directory).forEach { child ->
+                size += calculateDirectorySize(child)
             }
+        } else {
+            size = metadata.size ?: 0L
         }
         return size
     }
@@ -114,14 +121,16 @@ class VoiceStorage(
      * Clean up orphaned files (directories without both model and config)
      */
     suspend fun cleanupOrphanedFiles(): Int = withContext(Dispatchers.IO) {
+        if (!fileSystem.exists(storageDirectory)) return@withContext 0
+        
         var cleaned = 0
-        storageDirectory.listFiles()?.forEach { dir ->
-            if (dir.isDirectory) {
-                val modelFile = File(dir, "${dir.name}.onnx")
-                val configFile = File(dir, "${dir.name}.onnx.json")
+        fileSystem.list(storageDirectory).forEach { dir ->
+            if (fileSystem.metadata(dir).isDirectory) {
+                val modelFile = dir / "${dir.name}.onnx"
+                val configFile = dir / "${dir.name}.onnx.json"
                 
-                if (!modelFile.exists() || !configFile.exists()) {
-                    dir.deleteRecursively()
+                if (!fileSystem.exists(modelFile) || !fileSystem.exists(configFile)) {
+                    fileSystem.deleteRecursively(dir)
                     cleaned++
                 }
             }

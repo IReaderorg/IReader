@@ -7,12 +7,13 @@ import io.ktor.http.*
 import io.ktor.utils.io.core.*
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStore
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.util.zip.GZIPInputStream
+import okio.Buffer
+import okio.GzipSource
+import okio.buffer
 
 /**
  * Implementation of JSBridgeService that provides HTTP and preference access to plugins.
+ * Uses Okio for KMP-compatible gzip decompression.
  */
 class JSBridgeServiceImpl(
     private val httpClient: HttpClient,
@@ -55,14 +56,13 @@ class JSBridgeServiceImpl(
             val bodyBytes = response.readBytes()
             val contentEncoding = response.headers[HttpHeaders.ContentEncoding]
             
-            // Decompress if gzipped
+            // Decompress if gzipped using Okio
             val text = if (contentEncoding?.contains("gzip", ignoreCase = true) == true) {
                 try {
                     Log.debug("JSBridge: Decompressing gzip response")
-                    val inputStream = GZIPInputStream(ByteArrayInputStream(bodyBytes))
-                    val outputStream = ByteArrayOutputStream()
-                    inputStream.copyTo(outputStream)
-                    outputStream.toString("UTF-8")
+                    val buffer = Buffer().write(bodyBytes)
+                    val gzipSource = GzipSource(buffer)
+                    gzipSource.buffer().readUtf8()
                 } catch (e: Exception) {
                     Log.warn("JSBridge: Failed to decompress gzip, using raw bytes: ${e.message}")
                     bodyBytes.decodeToString()

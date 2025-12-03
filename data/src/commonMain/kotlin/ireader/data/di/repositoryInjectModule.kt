@@ -57,7 +57,7 @@ import ireader.domain.plugins.PluginDatabase
 import ireader.domain.services.SourceHealthChecker
 import ireader.domain.usecases.database.RepairDatabaseUseCase
 import org.koin.dsl.module
-import java.io.File
+import okio.Path.Companion.toPath
 
 
 val repositoryInjectModule = module {
@@ -174,7 +174,7 @@ val repositoryInjectModule = module {
     }
     // Voice Storage for TTS voice models
     single<ireader.domain.storage.VoiceStorage> {
-        val appDataDir = File(System.getProperty("user.home"), ".ireader")
+        val appDataDir = "${System.getProperty("user.home")}/.ireader".toPath()
         ireader.data.storage.VoiceStorageImpl(appDataDir)
     }
     

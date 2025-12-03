@@ -26,7 +26,7 @@ fun ReviewCard(
 ) {
     val formattedDate = remember(createdAt) {
         try {
-            val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(createdAt)
+            val instant =kotlin.time.Instant.fromEpochMilliseconds(createdAt)
             val localDateTime = instant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
             "${localDateTime.date} ${localDateTime.hour}:${localDateTime.minute.toString().padStart(2, '0')}"
         } catch (e: Exception) {

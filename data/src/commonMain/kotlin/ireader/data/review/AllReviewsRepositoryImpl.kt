@@ -79,7 +79,7 @@ class AllReviewsRepositoryImpl(
     private fun parseTimestamp(timestamp: String?): Long {
         if (timestamp == null) return currentTimeToLong()
         return try {
-            kotlinx.datetime.Instant.parse(timestamp).toEpochMilliseconds()
+           kotlin.time.Instant.parse(timestamp).toEpochMilliseconds()
         } catch (e: Exception) {
             timestamp.toLongOrNull() ?: currentTimeToLong()
         }

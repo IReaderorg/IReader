@@ -2,7 +2,7 @@
 package ireader.domain.models.entities
 
 import ireader.core.source.Source
-import java.io.File
+import okio.Path
 
 
 data class CatalogRemote(
@@ -61,7 +61,7 @@ sealed class CatalogInstalled : CatalogLocal() {
     abstract val versionName: String
     abstract val iconUrl: String
     abstract val versionCode: Int
-    abstract val installDir: File?
+    abstract val installDir: Path?
 
     data class SystemWide(
         override val name: String,
@@ -74,7 +74,7 @@ sealed class CatalogInstalled : CatalogLocal() {
         override val isPinned: Boolean = false,
         override val hasUpdate: Boolean = false,
         override val iconUrl: String,
-        override val installDir: File?
+        override val installDir: Path?
     ) : CatalogInstalled()
 
     data class Locally(
@@ -85,7 +85,7 @@ sealed class CatalogInstalled : CatalogLocal() {
         override val versionName: String,
         override val versionCode: Int,
         override val nsfw: Boolean,
-        override val installDir: File,
+        override val installDir: Path,
         override val isPinned: Boolean = false,
         override val hasUpdate: Boolean = false,
         override val iconUrl: String

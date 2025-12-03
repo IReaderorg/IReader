@@ -27,7 +27,6 @@ import ireader.i18n.resources.*
 import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.components.SourceStatusIndicator
 import ireader.presentation.ui.home.sources.extension.Language
-import java.util.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**

@@ -1,10 +1,11 @@
 package ireader.domain.data.repository
 
 import ireader.domain.models.tts.VoiceModel
-import java.io.File
+import okio.Path
 
 /**
- * Repository interface for managing voice models
+ * Repository interface for managing voice models.
+ * Uses Okio Path for KMP compatibility instead of java.io.File.
  * Requirements: 4.1, 4.2, 4.3, 4.4
  */
 interface VoiceModelRepository {
@@ -26,12 +27,12 @@ interface VoiceModelRepository {
      * Download a voice model
      * @param voiceId Unique identifier of the voice to download
      * @param onProgress Callback for download progress (0.0 to 1.0)
-     * @return Result containing the downloaded model file
+     * @return Result containing the downloaded model path
      */
     suspend fun downloadVoice(
         voiceId: String, 
         onProgress: (Float) -> Unit
-    ): Result<File>
+    ): Result<Path>
     
     /**
      * Delete a downloaded voice model

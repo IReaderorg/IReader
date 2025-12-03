@@ -18,6 +18,8 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import okio.FileSystem
+import okio.Path.Companion.toPath
 import java.io.File
 
 class DesktopCatalogInstaller(
@@ -45,7 +47,7 @@ class DesktopCatalogInstaller(
                     val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
-                    jsResponse.saveTo(jsFile)
+                    jsResponse.saveTo(jsFile.absolutePath.toPath(), FileSystem.SYSTEM)
                     
                     // Save metadata from remote catalog (including language)
                     // This ensures the language from the remote API is preserved
@@ -92,13 +94,13 @@ class DesktopCatalogInstaller(
                     val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
-                    apkResponse.saveTo(apkFile)
+                    apkResponse.saveTo(apkFile.absolutePath.toPath(), FileSystem.SYSTEM)
                     
                     // Download JAR
                     val jarResponse: ByteReadChannel = client.get(catalog.jarUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
                     }.body()
-                    jarResponse.saveTo(jarFile)
+                    jarResponse.saveTo(jarFile.absolutePath.toPath(), FileSystem.SYSTEM)
                     
                     // No need to download icon - Coil will handle it via iconUrl with caching
                     

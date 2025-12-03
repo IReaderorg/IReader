@@ -7,7 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import ireader.core.util.currentTimeMillis
+import ireader.core.time.currentTimeMillis
 
 /**
  * Manages lazy initialization of non-critical components.

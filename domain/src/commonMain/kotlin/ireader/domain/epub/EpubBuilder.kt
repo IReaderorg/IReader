@@ -16,20 +16,21 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.readBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.time.Clock
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toPath
+import okio.buffer
+import okio.use
 import ireader.core.util.randomUUID
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 
 /**
  * EPUB 3.0 Builder that creates valid EPUB files with proper structure,
  * metadata, and formatting options.
+ * Uses Okio for KMP-compatible file operations.
  */
 class EpubBuilder(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
     
     /**
@@ -88,35 +89,35 @@ class EpubBuilder(
         }
     }
     
-    private fun createTempDirectory(customPath: String? = null): File {
-        val basePath = customPath ?: System.getProperty("java.io.tmpdir")
-        val tempDir = File(basePath, "epub_${randomUUID()}")
-        if (!tempDir.mkdirs() && !tempDir.exists()) {
-            throw Exception("Failed to create temp directory: ${tempDir.absolutePath}")
+    private fun createTempDirectory(customPath: String? = null): Path {
+        val basePath = customPath ?: FileSystem.SYSTEM_TEMPORARY_DIRECTORY.toString()
+        val tempDir = "$basePath/epub_${randomUUID()}".toPath()
+        if (!fileSystem.exists(tempDir)) {
+            fileSystem.createDirectories(tempDir)
         }
         return tempDir
     }
     
-    private fun createEpubStructure(baseDir: File) {
-        File(baseDir, "META-INF").mkdirs()
-        File(baseDir, "OEBPS").mkdirs()
-        File(baseDir, "OEBPS/Text").mkdirs()
-        File(baseDir, "OEBPS/Styles").mkdirs()
-        File(baseDir, "OEBPS/Images").mkdirs()
+    private fun createEpubStructure(baseDir: Path) {
+        fileSystem.createDirectories(baseDir / "META-INF")
+        fileSystem.createDirectories(baseDir / "OEBPS")
+        fileSystem.createDirectories(baseDir / "OEBPS" / "Text")
+        fileSystem.createDirectories(baseDir / "OEBPS" / "Styles")
+        fileSystem.createDirectories(baseDir / "OEBPS" / "Images")
     }
     
-    private fun createMimetypeFile(baseDir: File) {
-        File(baseDir, "mimetype").writeText("application/epub+zip")
+    private fun createMimetypeFile(baseDir: Path) {
+        fileSystem.sink(baseDir / "mimetype").buffer().use { it.writeUtf8("application/epub+zip") }
     }
     
-    private fun createContainerXml(baseDir: File) {
+    private fun createContainerXml(baseDir: Path) {
         val containerXml = """<?xml version="1.0" encoding="UTF-8"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
     <rootfiles>
         <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
     </rootfiles>
 </container>"""
-        File(baseDir, "META-INF/container.xml").writeText(containerXml)
+        fileSystem.sink(baseDir / "META-INF" / "container.xml").buffer().use { it.writeUtf8(containerXml) }
     }
     
     private fun createMetadata(book: Book): EpubMetadata {
@@ -156,7 +157,7 @@ class EpubBuilder(
     }
     
     private fun createContentOpf(
-        baseDir: File,
+        baseDir: Path,
         book: Book,
         metadata: EpubMetadata,
         chapters: List<EpubChapter>,
@@ -215,10 +216,10 @@ class EpubBuilder(
             appendLine("</package>")
         }
         
-        File(baseDir, "OEBPS/content.opf").writeText(contentOpf)
+        fileSystem.sink(baseDir / "OEBPS" / "content.opf").buffer().use { it.writeUtf8(contentOpf) }
     }
     
-    private fun createTocNcx(baseDir: File, metadata: EpubMetadata, chapters: List<EpubChapter>) {
+    private fun createTocNcx(baseDir: Path, metadata: EpubMetadata, chapters: List<EpubChapter>) {
         val tocNcx = buildString {
             appendLine("""<?xml version="1.0" encoding="UTF-8"?>""")
             appendLine("""<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">""")
@@ -247,10 +248,10 @@ class EpubBuilder(
             appendLine("</ncx>")
         }
         
-        File(baseDir, "OEBPS/toc.ncx").writeText(tocNcx)
+        fileSystem.sink(baseDir / "OEBPS" / "toc.ncx").buffer().use { it.writeUtf8(tocNcx) }
     }
     
-    private fun createNavDocument(baseDir: File, chapters: List<EpubChapter>) {
+    private fun createNavDocument(baseDir: Path, chapters: List<EpubChapter>) {
         val navXhtml = buildString {
             appendLine("""<?xml version="1.0" encoding="UTF-8"?>""")
             appendLine("""<!DOCTYPE html>""")
@@ -275,11 +276,11 @@ class EpubBuilder(
             appendLine("</html>")
         }
         
-        File(baseDir, "OEBPS/nav.xhtml").writeText(navXhtml)
+        fileSystem.sink(baseDir / "OEBPS" / "nav.xhtml").buffer().use { it.writeUtf8(navXhtml) }
     }
     
     private fun createChapterFiles(
-        baseDir: File,
+        baseDir: Path,
         chapters: List<EpubChapter>,
         options: ExportOptions
     ) {
@@ -309,11 +310,11 @@ class EpubBuilder(
                 appendLine("</html>")
             }
             
-            File(baseDir, "OEBPS/${chapter.fileName}").writeText(xhtml)
+            fileSystem.sink(baseDir / "OEBPS" / chapter.fileName).buffer().use { it.writeUtf8(xhtml) }
         }
     }
     
-    private fun createStylesheet(baseDir: File, options: ExportOptions) {
+    private fun createStylesheet(baseDir: Path, options: ExportOptions) {
         val css = """
 body {
     font-family: ${options.fontFamily};
@@ -350,7 +351,7 @@ img {
 }
 """.trimIndent()
         
-        File(baseDir, "OEBPS/Styles/style.css").writeText(css)
+        fileSystem.sink(baseDir / "OEBPS" / "Styles" / "style.css").buffer().use { it.writeUtf8(css) }
     }
     
     private fun processChapterContent(content: String, options: ExportOptions): String {
@@ -375,7 +376,7 @@ img {
             }
     }
     
-    private fun packageAsEpub(sourceDir: File, outputUri: String): String {
+    private fun packageAsEpub(sourceDir: Path, outputUri: String): String {
         Log.info { "packageAsEpub called with outputUri: $outputUri" }
         
         // Handle both file:// URIs and absolute paths
@@ -390,47 +391,64 @@ img {
         }
         
         Log.info { "Resolved output path: $outputPath" }
-        val outputFile = File(outputPath)
+        val outputFile = outputPath.toPath()
         
         // Ensure parent directory exists
-        outputFile.parentFile?.mkdirs() ?: throw IllegalStateException("Cannot create parent directory for: ${outputFile.absolutePath}")
-        
-        ZipOutputStream(FileOutputStream(outputFile)).use { zipOut ->
-            // Add mimetype first (uncompressed)
-            val mimetypeFile = File(sourceDir, "mimetype")
-            zipOut.setLevel(ZipOutputStream.STORED)
-            addFileToZip(zipOut, mimetypeFile, "mimetype")
-            
-            // Add other files (compressed)
-            zipOut.setLevel(ZipOutputStream.DEFLATED)
-            addDirectoryToZip(zipOut, File(sourceDir, "META-INF"), "META-INF")
-            addDirectoryToZip(zipOut, File(sourceDir, "OEBPS"), "OEBPS")
+        outputFile.parent?.let { parent ->
+            if (!fileSystem.exists(parent)) {
+                fileSystem.createDirectories(parent)
+            }
         }
         
-        return outputFile.absolutePath
+        // Use platform-specific ZIP creation
+        val entries = collectZipEntries(sourceDir)
+        val zipBytes = createEpubZipPlatform(entries)
+        fileSystem.sink(outputFile).buffer().use { it.write(zipBytes) }
+        
+        return outputPath
     }
     
-    private fun addFileToZip(zipOut: ZipOutputStream, file: File, entryName: String) {
-        FileInputStream(file).use { fis ->
-            val zipEntry = ZipEntry(entryName)
-            zipOut.putNextEntry(zipEntry)
-            fis.copyTo(zipOut)
-            zipOut.closeEntry()
-        }
+    private fun collectZipEntries(sourceDir: Path): List<EpubZipEntry> {
+        val entries = mutableListOf<EpubZipEntry>()
+        
+        // Add mimetype first (uncompressed)
+        val mimetypeContent = fileSystem.source(sourceDir / "mimetype").buffer().use { it.readByteArray() }
+        entries.add(EpubZipEntry("mimetype", mimetypeContent, compressed = false))
+        
+        // Add META-INF directory
+        collectDirectoryEntries(sourceDir / "META-INF", "META-INF", entries)
+        
+        // Add OEBPS directory
+        collectDirectoryEntries(sourceDir / "OEBPS", "OEBPS", entries)
+        
+        return entries
     }
     
-    private fun addDirectoryToZip(zipOut: ZipOutputStream, dir: File, basePath: String) {
-        dir.listFiles()?.forEach { file ->
+    private fun collectDirectoryEntries(dir: Path, basePath: String, entries: MutableList<EpubZipEntry>) {
+        if (!fileSystem.exists(dir)) return
+        
+        fileSystem.list(dir).forEach { file ->
             val entryName = "$basePath/${file.name}"
-            if (file.isDirectory) {
-                addDirectoryToZip(zipOut, file, entryName)
+            val metadata = fileSystem.metadata(file)
+            if (metadata.isDirectory) {
+                collectDirectoryEntries(file, entryName, entries)
             } else {
-                addFileToZip(zipOut, file, entryName)
+                val content = fileSystem.source(file).buffer().use { it.readByteArray() }
+                entries.add(EpubZipEntry(entryName, content))
             }
         }
     }
     
-    private suspend fun downloadAndEmbedCover(baseDir: File, coverUrl: String) {
+    /**
+     * Data class for ZIP entries
+     */
+    data class EpubZipEntry(
+        val path: String,
+        val content: ByteArray,
+        val compressed: Boolean = true
+    )
+    
+    private suspend fun downloadAndEmbedCover(baseDir: Path, coverUrl: String) {
         try {
             Log.info { "Downloading cover image from: $coverUrl" }
             
@@ -449,8 +467,8 @@ img {
             }
             
             // Save the cover image
-            val coverFile = File(baseDir, "OEBPS/Images/cover.$extension")
-            coverFile.writeBytes(imageBytes)
+            val coverFile = baseDir / "OEBPS" / "Images" / "cover.$extension"
+            fileSystem.sink(coverFile).buffer().use { it.write(imageBytes) }
             
             Log.info { "Cover image downloaded successfully: ${imageBytes.size} bytes" }
         } catch (e: Exception) {
@@ -459,8 +477,8 @@ img {
         }
     }
     
-    private fun cleanupTempDirectory(tempDir: File) {
-        tempDir.deleteRecursively()
+    private fun cleanupTempDirectory(tempDir: Path) {
+        fileSystem.deleteRecursively(tempDir)
     }
     
     private fun String.escapeXml(): String {
@@ -472,3 +490,10 @@ img {
             .replace("'", "&apos;")
     }
 }
+
+
+/**
+ * Platform-specific ZIP creation for EPUB files.
+ * Implementations should handle proper ZIP format with mimetype uncompressed first.
+ */
+expect fun createEpubZipPlatform(entries: List<EpubBuilder.EpubZipEntry>): ByteArray

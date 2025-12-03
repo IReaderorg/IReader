@@ -7,7 +7,7 @@ import ireader.core.http.DEFAULT_USER_AGENT
 import ireader.core.source.model.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import java.security.MessageDigest
+import okio.ByteString.Companion.encodeUtf8
 import ireader.core.source.ParsingUtils.extractCleanText
 import ireader.core.source.ParsingUtils.extractTextWithParagraphs
 import ireader.core.source.ParsingUtils.cleanContent
@@ -18,7 +18,7 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
 
     override val id: Long by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"
-        val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
+        val bytes = key.encodeUtf8().md5().toByteArray()
         (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
             .reduce(Long::or) and Long.MAX_VALUE
     }

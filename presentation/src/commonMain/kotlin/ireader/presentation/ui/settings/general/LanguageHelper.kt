@@ -1,14 +1,11 @@
-package ireader.presentation.ui.video.component.cores.player
+package ireader.presentation.ui.settings.general
 
 
 import ireader.core.log.Log
-import java.util.*
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.i18n.resources.*
-import ireader.i18n.resources.Res
+import java.util.Locale
 
 
-object SubtitleHelper {
+object LanguageHelper {
     data class Language639(
         val languageName: String,
         val nativeName: String,

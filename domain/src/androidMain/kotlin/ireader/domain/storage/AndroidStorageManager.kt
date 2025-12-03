@@ -3,36 +3,45 @@ package ireader.domain.storage
 import android.content.Context
 import android.os.Environment
 import androidx.documentfile.provider.DocumentFile
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toOkioPath
 import java.io.File
 
 class AndroidStorageManager(
     private val context: Context
 ) : StorageManager {
     
-    override val appDirectory: File
-        get() = File(Environment.getExternalStorageDirectory(), "IReader/")
+    private val fileSystem = FileSystem.SYSTEM
+    private val appDirFile = File(Environment.getExternalStorageDirectory(), "IReader/")
     
-    override val booksDirectory: File
-        get() = File(appDirectory, "Books/")
+    override val appDirectory: Path
+        get() = appDirFile.toOkioPath()
     
-    override val backupDirectory: File
-        get() = File(appDirectory, "Backups/")
+    override val booksDirectory: Path
+        get() = appDirectory / "Books"
     
-    override val automaticBackupDirectory: File
-        get() = File(backupDirectory, "Automatic/")
+    override val backupDirectory: Path
+        get() = appDirectory / "Backups"
     
-    override val extensionsDirectory: File
-        get() = File(appDirectory, "Extensions/")
+    override val automaticBackupDirectory: Path
+        get() = backupDirectory / "Automatic"
     
-    override fun getSubDirectory(name: String): File {
-        return File(appDirectory, name).also { it.mkdirs() }
+    override val extensionsDirectory: Path
+        get() = appDirectory / "Extensions"
+    
+    override fun getSubDirectory(name: String): Path {
+        val subDir = appDirectory / name
+        fileSystem.createDirectories(subDir)
+        return subDir
     }
     
     override fun hasStoragePermission(): Boolean {
         // Clean up invalid directories
         listOf(appDirectory, backupDirectory, automaticBackupDirectory, booksDirectory).forEach { dir ->
-            if (dir.exists() && !dir.isDirectory) {
-                dir.deleteRecursively()
+            val file = dir.toFile()
+            if (file.exists() && !file.isDirectory) {
+                file.deleteRecursively()
             }
         }
         return true
@@ -40,7 +49,7 @@ class AndroidStorageManager(
     
     override fun initializeDirectories() {
         kotlin.runCatching {
-            if (!appDirectory.exists()) {
+            if (!appDirFile.exists()) {
                 DocumentFile.fromFile(Environment.getExternalStorageDirectory())
                     ?.createDirectory("IReader")
             }
@@ -48,15 +57,15 @@ class AndroidStorageManager(
         
         // Ensure subdirectories exist
         listOf(booksDirectory, backupDirectory, automaticBackupDirectory, extensionsDirectory).forEach {
-            it.mkdirs()
+            fileSystem.createDirectories(it)
         }
     }
     
     override fun preventMediaIndexing() {
         kotlin.runCatching {
-            val noMediaFile = File(appDirectory, ".nomedia")
+            val noMediaFile = File(appDirFile, ".nomedia")
             if (!noMediaFile.exists()) {
-                DocumentFile.fromFile(appDirectory)?.createFile("", ".nomedia")
+                DocumentFile.fromFile(appDirFile)?.createFile("", ".nomedia")
             }
         }
     }

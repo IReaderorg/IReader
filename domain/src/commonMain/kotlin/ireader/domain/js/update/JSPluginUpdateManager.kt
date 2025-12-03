@@ -97,7 +97,7 @@ class JSPluginUpdateManager(
         val success = updateChecker.installUpdate(update, file)
         
         // Clean up temp file
-        file.delete()
+        okio.FileSystem.SYSTEM.delete(file)
         
         if (success) {
             // Remove from available updates

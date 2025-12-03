@@ -11,7 +11,7 @@ import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.closeQuietly
-import java.io.IOException
+import okio.IOException
 import kotlin.coroutines.resumeWithException
 
 /**

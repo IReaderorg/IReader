@@ -32,7 +32,6 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.ContentAlpha
 import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
-import java.util.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @Composable
@@ -126,7 +125,7 @@ fun CatalogItem(
             }
 
             Text(
-                text = lang?.code?.uppercase(Locale.getDefault()) ?: "",
+                text = lang?.code?.uppercase() ?: "",
                 style = MaterialTheme.typography.labelMedium,
                 color = LocalContentColor.current.copy(alpha = ContentAlpha.medium()),
                 maxLines = 2,

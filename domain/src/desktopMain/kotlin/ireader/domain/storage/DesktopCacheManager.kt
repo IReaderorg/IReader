@@ -1,27 +1,37 @@
 package ireader.domain.storage
 
 import ireader.core.storage.AppDir
-import java.io.File
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toPath
 import java.text.DecimalFormat
+import kotlin.math.log10
+import kotlin.math.pow
 
 class DesktopCacheManager : CacheManager {
     
-    override val cacheDirectory: File
-        get() = File(AppDir, "cache/")
+    private val fileSystem = FileSystem.SYSTEM
+    private val appDirPath = AppDir.absolutePath.toPath()
     
-    override val extensionCacheDirectory: File
-        get() = File(AppDir, "cache/extensions/")
+    override val cacheDirectory: Path
+        get() = appDirPath / "cache"
     
-    override fun getCacheSubDirectory(name: String): File {
-        return File(cacheDirectory, name).also { it.mkdirs() }
+    override val extensionCacheDirectory: Path
+        get() = cacheDirectory / "extensions"
+    
+    override fun getCacheSubDirectory(name: String): Path {
+        val subDir = cacheDirectory / name
+        fileSystem.createDirectories(subDir)
+        return subDir
     }
     
     override fun clearImageCache() {
-        getCacheSubDirectory("covers").deleteRecursively()
+        val coversDir = getCacheSubDirectory("covers")
+        deleteRecursively(coversDir)
     }
     
     override fun clearAllCache() {
-        cacheDirectory.deleteRecursively()
+        deleteRecursively(cacheDirectory)
     }
     
     override fun getCacheSize(): String {
@@ -29,25 +39,41 @@ class DesktopCacheManager : CacheManager {
         if (bytes <= 0) return "0 B"
         
         val units = arrayOf("B", "KB", "MB", "GB", "TB")
-        val digitGroups = (Math.log10(bytes.toDouble()) / Math.log10(1024.0)).toInt()
+        val digitGroups = (log10(bytes.toDouble()) / log10(1024.0)).toInt()
         
-        return DecimalFormat("#,##0.#").format(bytes / Math.pow(1024.0, digitGroups.toDouble())) + " " + units[digitGroups]
+        return DecimalFormat("#,##0.#").format(bytes / 1024.0.pow(digitGroups.toDouble())) + " " + units[digitGroups]
     }
     
     override fun getCacheSizeBytes(): Long {
-        return if (cacheDirectory.exists()) {
-            cacheDirectory.walkTopDown()
-                .filter { it.isFile }
-                .map { it.length() }
-                .sum()
+        return if (fileSystem.exists(cacheDirectory)) {
+            calculateDirectorySize(cacheDirectory)
         } else {
             0L
         }
     }
     
-    override fun clearCacheDirectory(directory: File) {
-        if (directory.exists() && directory.startsWith(cacheDirectory)) {
-            directory.deleteRecursively()
+    override fun clearCacheDirectory(directory: Path) {
+        if (fileSystem.exists(directory) && directory.toString().startsWith(cacheDirectory.toString())) {
+            deleteRecursively(directory)
         }
+    }
+    
+    private fun calculateDirectorySize(path: Path): Long {
+        if (!fileSystem.exists(path)) return 0L
+        val metadata = fileSystem.metadata(path)
+        return if (metadata.isDirectory) {
+            fileSystem.list(path).sumOf { calculateDirectorySize(it) }
+        } else {
+            metadata.size ?: 0L
+        }
+    }
+    
+    private fun deleteRecursively(path: Path) {
+        if (!fileSystem.exists(path)) return
+        val metadata = fileSystem.metadata(path)
+        if (metadata.isDirectory) {
+            fileSystem.list(path).forEach { deleteRecursively(it) }
+        }
+        fileSystem.delete(path)
     }
 }

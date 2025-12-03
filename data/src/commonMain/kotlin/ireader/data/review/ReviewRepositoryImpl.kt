@@ -73,7 +73,7 @@ class ReviewRepositoryImpl(
         return try {
             // Try to parse ISO 8601 timestamp to milliseconds
             // Format: 2024-01-15T10:30:00Z or 2024-01-15T10:30:00.123Z
-            kotlinx.datetime.Instant.parse(timestamp).toEpochMilliseconds()
+           kotlin.time.Instant.parse(timestamp).toEpochMilliseconds()
         } catch (e: Exception) {
             // Fallback: try to parse as long
             timestamp.toLongOrNull() ?: currentTimeToLong()

@@ -1,26 +1,27 @@
 package ireader.domain.storage
 
-import java.io.File
+import okio.Path
 
 /**
  * Platform-agnostic cache manager interface.
  * Abstracts cache operations and directory management.
+ * Uses Okio Path for KMP compatibility.
  */
 interface CacheManager {
     /**
      * Main cache directory
      */
-    val cacheDirectory: File
+    val cacheDirectory: Path
     
     /**
      * Cache directory for extensions
      */
-    val extensionCacheDirectory: File
+    val extensionCacheDirectory: Path
     
     /**
      * Get a cache subdirectory
      */
-    fun getCacheSubDirectory(name: String): File
+    fun getCacheSubDirectory(name: String): Path
     
     /**
      * Clear all image caches (memory and disk)
@@ -45,5 +46,5 @@ interface CacheManager {
     /**
      * Clear specific cache directory
      */
-    fun clearCacheDirectory(directory: File)
+    fun clearCacheDirectory(directory: Path)
 }

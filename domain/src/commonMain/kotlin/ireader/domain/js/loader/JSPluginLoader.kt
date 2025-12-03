@@ -18,7 +18,10 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
+import okio.FileSystem
+import okio.Path
+import okio.buffer
+import okio.use
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
@@ -48,11 +51,13 @@ private data class LoadedPlugin(
 /**
  * Loader for JavaScript plugins using Zipline.
  * Executes JavaScript plugins in a type-safe manner.
+ * Uses Okio for KMP-compatible file operations.
  */
 class JSPluginLoader(
-    private val pluginsDirectory: File,
+    private val pluginsDirectory: Path,
     private val httpClient: HttpClient,
-    private val preferenceStoreFactory: PreferenceStoreFactory
+    private val preferenceStoreFactory: PreferenceStoreFactory,
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
     
     private val pluginCache = mutableMapOf<String, LoadedPlugin>()
@@ -66,14 +71,14 @@ class JSPluginLoader(
         val startTime = currentTimeToLong()
         
         // Ensure plugins directory exists
-        if (!pluginsDirectory.exists()) {
-            pluginsDirectory.mkdirs()
+        if (!fileSystem.exists(pluginsDirectory)) {
+            fileSystem.createDirectories(pluginsDirectory)
         }
         
         // Scan for plugin files
-        val pluginFiles = pluginsDirectory.listFiles { file ->
-            file.extension == "js" && file.canRead()
-        } ?: emptyArray()
+        val pluginFiles = fileSystem.list(pluginsDirectory).filter { path ->
+            path.name.endsWith(".js")
+        }
         
         // Load each plugin
         val catalogs = pluginFiles.mapNotNull { file ->
@@ -93,15 +98,17 @@ class JSPluginLoader(
      * The metadata will be extracted from the plugin code and language will be converted.
      */
     suspend fun createMissingMetadataFiles() {
-        val pluginFiles = pluginsDirectory.listFiles { file ->
-            file.extension == "js" && file.canRead()
-        } ?: return
+        if (!fileSystem.exists(pluginsDirectory)) return
+        
+        val pluginFiles = fileSystem.list(pluginsDirectory).filter { path ->
+            path.name.endsWith(".js")
+        }
         
         pluginFiles.forEach { file ->
-            val pluginId = file.nameWithoutExtension
-            val metadataFile = File(file.parentFile, "${pluginId}.meta.json")
+            val pluginId = file.name.substringBeforeLast(".")
+            val metadataFile = file.parent!! / "${pluginId}.meta.json"
             
-            if (!metadataFile.exists()) {
+            if (!fileSystem.exists(metadataFile)) {
                 try {
                     // Load the plugin to extract metadata
                     val catalog = loadPlugin(file)
@@ -124,9 +131,13 @@ class JSPluginLoader(
         val stubs = stubManager.getPluginStubs()
         
         // Scan for actual plugin files to verify they still exist
-        val pluginFiles = pluginsDirectory.listFiles { file ->
-            file.extension == "js" && file.canRead()
-        }?.associateBy { it.nameWithoutExtension } ?: emptyMap()
+        val pluginFiles = if (fileSystem.exists(pluginsDirectory)) {
+            fileSystem.list(pluginsDirectory)
+                .filter { it.name.endsWith(".js") }
+                .associateBy { it.name.substringBeforeLast(".") }
+        } else {
+            emptyMap()
+        }
         
         // Create stub catalogs for plugins that still exist
         val stubCatalogs = stubs.mapNotNull { (pluginId, stubData) ->
@@ -146,7 +157,7 @@ class JSPluginLoader(
     /**
      * Creates a stub catalog from metadata.
      */
-    private fun createStubCatalog(metadata: PluginMetadata, file: File): JSPluginCatalog {
+    private fun createStubCatalog(metadata: PluginMetadata, file: Path): JSPluginCatalog {
         val pluginPreferenceStore = preferenceStoreFactory.create("js_plugin_${metadata.id}")
         
         val httpClientsInterface = object : ireader.core.http.HttpClientsInterface {
@@ -176,24 +187,25 @@ class JSPluginLoader(
      * @param file The plugin file
      * @return Loaded catalog or null if loading failed
      */
-    suspend fun loadPlugin(file: File): JSPluginCatalog? {
-        val pluginId = file.nameWithoutExtension
+    suspend fun loadPlugin(file: Path): JSPluginCatalog? {
+        val pluginId = file.name.substringBeforeLast(".")
         val startTime = currentTimeToLong()
         
         try {
             // Check cache
-            val lastModified = file.lastModified()
+            val lastModified = fileSystem.metadata(file).lastModifiedAtMillis ?: 0L
             val cached = pluginCache[pluginId]
             if (cached != null && cached.lastModified == lastModified) {
                 return cached.catalog
             }
             
             // Try to load saved metadata first (contains language from remote catalog)
-            val metadataFile = File(file.parentFile, "${pluginId}.meta.json")
-            val savedMetadata = if (metadataFile.exists()) {
+            val metadataFile = file.parent!! / "${pluginId}.meta.json"
+            val savedMetadata = if (fileSystem.exists(metadataFile)) {
                 try {
                     val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
-                    json.decodeFromString<PluginMetadata>(metadataFile.readText())
+                    val content = fileSystem.source(metadataFile).buffer().use { it.readUtf8() }
+                    json.decodeFromString<PluginMetadata>(content)
                 } catch (e: Exception) {
                     null
                 }
@@ -202,7 +214,7 @@ class JSPluginLoader(
             }
             
             // Read plugin code
-            val jsCode = file.readText()
+            val jsCode = fileSystem.source(file).buffer().use { it.readUtf8() }
             
             // Validate that the file contains JavaScript, not an error page
             if (jsCode.contains("404") && jsCode.contains("Not Found") && jsCode.length < 1000) {
@@ -274,18 +286,18 @@ class JSPluginLoader(
             pluginCache[pluginId] = LoadedPlugin(catalog, plugin, engine, lastModified)
             
             // Save stub for future fast loading
-            stubManager.savePluginStub(metadata, file.nameWithoutExtension)
+            stubManager.savePluginStub(metadata, file.name.substringBeforeLast("."))
             
             // Save metadata file if it doesn't exist (for plugins without saved metadata)
             if (savedMetadata == null) {
                 try {
-                    val metadataFile = File(file.parentFile, "${pluginId}.meta.json")
+                    val metadataFilePath = file.parent!! / "${pluginId}.meta.json"
                     val json = kotlinx.serialization.json.Json { 
                         prettyPrint = true
                         ignoreUnknownKeys = true 
                     }
                     val metadataJson = json.encodeToString(PluginMetadata.serializer(), metadata)
-                    metadataFile.writeText(metadataJson)
+                    fileSystem.sink(metadataFilePath).buffer().use { it.writeUtf8(metadataJson) }
                 } catch (e: Exception) {
                     // Ignore errors
                 }
@@ -340,7 +352,7 @@ class JSPluginLoader(
      * @param pluginId The plugin identifier
      * @return The plugin file or null if not found
      */
-    fun getPluginFile(pluginId: String): File? {
+    fun getPluginFile(pluginId: String): Path? {
         return pluginCache[pluginId]?.catalog?.pluginFile
     }
     
@@ -374,14 +386,14 @@ class JSPluginLoader(
         val startTime = currentTimeToLong()
         
         // Ensure plugins directory exists
-        if (!pluginsDirectory.exists()) {
-            pluginsDirectory.mkdirs()
+        if (!fileSystem.exists(pluginsDirectory)) {
+            fileSystem.createDirectories(pluginsDirectory)
         }
         
         // Scan for plugin files
-        val pluginFiles = pluginsDirectory.listFiles { file ->
-            file.extension == "js" && file.canRead()
-        } ?: emptyArray()
+        val pluginFiles = fileSystem.list(pluginsDirectory).filter { path ->
+            path.name.endsWith(".js")
+        }
         
         if (pluginFiles.isEmpty()) {
             Log.debug { "JSPluginLoader: No plugin files found" }
@@ -393,7 +405,7 @@ class JSPluginLoader(
         
         // Separate priority and normal plugins
         val (priorityFiles, normalFiles) = pluginFiles.partition { file ->
-            file.nameWithoutExtension in priorityPluginIds
+            file.name.substringBeforeLast(".") in priorityPluginIds
         }
         
         val allCatalogs = mutableListOf<JSPluginCatalog>()
@@ -458,20 +470,20 @@ class JSPluginLoader(
     ) {
         val startTime = currentTimeToLong()
         
-        if (!pluginsDirectory.exists()) {
-            pluginsDirectory.mkdirs()
+        if (!fileSystem.exists(pluginsDirectory)) {
+            fileSystem.createDirectories(pluginsDirectory)
             return
         }
         
-        val pluginFiles = pluginsDirectory.listFiles { file ->
-            file.extension == "js" && file.canRead()
-        } ?: return
+        val pluginFiles = fileSystem.list(pluginsDirectory).filter { path ->
+            path.name.endsWith(".js")
+        }
         
         if (pluginFiles.isEmpty()) return
         
         val priorityPluginIds = stubManager.getPriorityPlugins()
         val (priorityFiles, normalFiles) = pluginFiles.partition { file ->
-            file.nameWithoutExtension in priorityPluginIds
+            file.name.substringBeforeLast(".") in priorityPluginIds
         }
         
         val semaphore = Semaphore(maxConcurrency)

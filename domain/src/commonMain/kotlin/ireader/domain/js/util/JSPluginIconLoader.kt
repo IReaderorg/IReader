@@ -7,15 +7,20 @@ import ireader.domain.js.models.JSPluginError
 import ireader.domain.storage.CacheManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
+import okio.FileSystem
+import okio.Path
+import okio.buffer
+import okio.use
 
 /**
  * Loader for JavaScript plugin icons.
  * Handles downloading, caching, and validation of plugin icons.
+ * Uses Okio for KMP-compatible file operations.
  */
 class JSPluginIconLoader(
     private val httpClient: HttpClient,
-    private val cacheManager: CacheManager
+    private val cacheManager: CacheManager,
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
     
     companion object {
@@ -32,7 +37,7 @@ class JSPluginIconLoader(
         private const val EXPECTED_ICON_SIZE = 96
     }
     
-    private val iconCacheDir: File
+    private val iconCacheDir: Path
         get() = cacheManager.getCacheSubDirectory("js-plugin-icons")
     
     /**
@@ -79,7 +84,13 @@ class JSPluginIconLoader(
     fun cacheIcon(pluginId: String, bitmap: ByteArray) {
         try {
             val iconFile = getIconCacheFile(pluginId)
-            iconFile.writeBytes(bitmap)
+            // Ensure parent directory exists
+            iconFile.parent?.let { parent ->
+                if (!fileSystem.exists(parent)) {
+                    fileSystem.createDirectories(parent)
+                }
+            }
+            fileSystem.sink(iconFile).buffer().use { it.write(bitmap) }
         } catch (e: Exception) {
             JSPluginLogger.logError(
                 pluginId,
@@ -96,8 +107,8 @@ class JSPluginIconLoader(
     private fun loadFromCache(pluginId: String): ByteArray? {
         return try {
             val iconFile = getIconCacheFile(pluginId)
-            if (iconFile.exists()) {
-                iconFile.readBytes()
+            if (fileSystem.exists(iconFile)) {
+                fileSystem.source(iconFile).buffer().use { it.readByteArray() }
             } else {
                 null
             }
@@ -156,10 +167,10 @@ class JSPluginIconLoader(
     /**
      * Gets the cache file for a plugin icon.
      * @param pluginId The plugin ID
-     * @return File object for the cached icon
+     * @return Path for the cached icon
      */
-    private fun getIconCacheFile(pluginId: String): File {
-        return File(iconCacheDir, "$pluginId.png")
+    private fun getIconCacheFile(pluginId: String): Path {
+        return iconCacheDir / "$pluginId.png"
     }
     
     /**
@@ -169,8 +180,8 @@ class JSPluginIconLoader(
     fun clearCache(pluginId: String) {
         try {
             val iconFile = getIconCacheFile(pluginId)
-            if (iconFile.exists()) {
-                iconFile.delete()
+            if (fileSystem.exists(iconFile)) {
+                fileSystem.delete(iconFile)
             }
         } catch (e: Exception) {
             JSPluginLogger.logError(

@@ -5,17 +5,20 @@ import ireader.domain.data.repository.VoiceModelRepository
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.services.tts_service.VoiceDownloader
 import ireader.domain.services.tts_service.VoiceStorage
-import java.io.File
+import okio.FileSystem
+import okio.Path
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Implementation of VoiceModelRepository
+ * Implementation of VoiceModelRepository.
+ * Uses Okio for KMP-compatible file operations.
  * Requirements: 4.1, 4.2, 4.3, 4.4
  */
 class VoiceModelRepositoryImpl(
     private val voiceStorage: VoiceStorage,
-    private val voiceDownloader: VoiceDownloader
+    private val voiceDownloader: VoiceDownloader,
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) : VoiceModelRepository {
     
     override suspend fun getAvailableVoices(): Result<List<VoiceModel>> {
@@ -37,7 +40,7 @@ class VoiceModelRepositoryImpl(
     override suspend fun downloadVoice(
         voiceId: String,
         onProgress: (Float) -> Unit
-    ): Result<File> {
+    ): Result<Path> {
         val voice = VoiceCatalog.getVoiceById(voiceId)
             ?: return Result.failure(IllegalArgumentException("Voice not found: $voiceId"))
         
@@ -72,12 +75,20 @@ class VoiceModelRepositoryImpl(
             val modelFile = voiceStorage.getModelFile(voiceId)
             val configFile = voiceStorage.getConfigFile(voiceId)
             
-            // Verify files are readable and not empty
-            if (!modelFile.canRead() || modelFile.length() == 0L) {
+            // Verify files exist and are not empty using Okio
+            if (!fileSystem.exists(modelFile)) {
+                return@withContext false
+            }
+            val modelSize = fileSystem.metadata(modelFile).size ?: 0L
+            if (modelSize == 0L) {
                 return@withContext false
             }
             
-            if (!configFile.canRead() || configFile.length() == 0L) {
+            if (!fileSystem.exists(configFile)) {
+                return@withContext false
+            }
+            val configSize = fileSystem.metadata(configFile).size ?: 0L
+            if (configSize == 0L) {
                 return@withContext false
             }
             

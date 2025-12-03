@@ -2,7 +2,7 @@
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import ireader.core.util.currentTimeMillis
+import ireader.core.time.currentTimeMillis
 
 /**
  * In-memory fake implementation of FileSystem for testing.

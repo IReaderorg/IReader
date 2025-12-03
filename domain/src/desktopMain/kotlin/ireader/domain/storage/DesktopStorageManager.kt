@@ -2,25 +2,31 @@ package ireader.domain.storage
 
 import ireader.core.storage.AppDir
 import ireader.core.storage.ExtensionDir
-import java.io.File
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toPath
 
 class DesktopStorageManager : StorageManager {
     
-    override val appDirectory: File = AppDir
+    private val fileSystem = FileSystem.SYSTEM
     
-    override val booksDirectory: File
-        get() = File(appDirectory, "books/")
+    override val appDirectory: Path = AppDir.absolutePath.toPath()
     
-    override val backupDirectory: File
-        get() = File(appDirectory, "backup/")
+    override val booksDirectory: Path
+        get() = appDirectory / "books"
     
-    override val automaticBackupDirectory: File
-        get() = File(backupDirectory, "automatic/")
+    override val backupDirectory: Path
+        get() = appDirectory / "backup"
     
-    override val extensionsDirectory: File = ExtensionDir
+    override val automaticBackupDirectory: Path
+        get() = backupDirectory / "automatic"
     
-    override fun getSubDirectory(name: String): File {
-        return File(appDirectory, name).also { it.mkdirs() }
+    override val extensionsDirectory: Path = ExtensionDir.absolutePath.toPath()
+    
+    override fun getSubDirectory(name: String): Path {
+        val subDir = appDirectory / name
+        fileSystem.createDirectories(subDir)
+        return subDir
     }
     
     override fun hasStoragePermission(): Boolean {
@@ -29,7 +35,7 @@ class DesktopStorageManager : StorageManager {
     
     override fun initializeDirectories() {
         listOf(appDirectory, booksDirectory, backupDirectory, automaticBackupDirectory, extensionsDirectory).forEach {
-            it.mkdirs()
+            fileSystem.createDirectories(it)
         }
     }
     

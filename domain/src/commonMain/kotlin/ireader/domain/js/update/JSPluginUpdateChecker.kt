@@ -13,10 +13,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.io.File
+import okio.FileSystem
+import okio.Path
+import okio.buffer
+import okio.use
 
 /**
  * Checks for updates to JavaScript plugins from configured repositories.
+ * Uses Okio for KMP-compatible file operations.
  * 
  * @property httpClient HTTP client for downloading plugin lists and updates
  * @property pluginLoader Plugin loader to access currently installed plugins
@@ -25,7 +29,8 @@ import java.io.File
 class JSPluginUpdateChecker(
     private val httpClient: HttpClient,
     private val pluginLoader: JSPluginLoader,
-    private val repositories: List<JSPluginRepository>
+    private val repositories: List<JSPluginRepository>,
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
     
     private val json = Json { 
@@ -98,9 +103,9 @@ class JSPluginUpdateChecker(
      * Downloads a plugin update to a temporary location.
      * 
      * @param update The plugin update to download
-     * @return The temporary file containing the downloaded plugin, or null if download failed
+     * @return The temporary path containing the downloaded plugin, or null if download failed
      */
-    suspend fun downloadUpdate(update: PluginUpdate): File? = withContext(Dispatchers.IO) {
+    suspend fun downloadUpdate(update: PluginUpdate): Path? = withContext(Dispatchers.IO) {
         try {
             JSPluginLogger.logDebug(update.pluginId, "Downloading update from ${update.downloadUrl}")
             
@@ -117,12 +122,12 @@ class JSPluginUpdateChecker(
                 return@withContext null
             }
             
-            // Save to temporary file
-            val tempFile = File.createTempFile("plugin_${update.pluginId}_", ".js")
-            tempFile.writeText(code)
+            // Save to temporary file using Okio
+            val tempPath = createTempPluginPath(update.pluginId)
+            fileSystem.sink(tempPath).buffer().use { it.writeUtf8(code) }
             
             JSPluginLogger.logDebug(update.pluginId, "Update downloaded successfully")
-            return@withContext tempFile
+            return@withContext tempPath
         } catch (e: Exception) {
             JSPluginLogger.logError(
                 update.pluginId,
@@ -132,14 +137,19 @@ class JSPluginUpdateChecker(
         }
     }
     
+    private fun createTempPluginPath(pluginId: String): Path {
+        // Create temp path in system temp directory
+        return FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "plugin_${pluginId}_${ireader.domain.utils.extensions.currentTimeToLong()}.js"
+    }
+    
     /**
      * Installs a plugin update.
      * 
      * @param update The plugin update information
-     * @param file The file containing the new plugin code
+     * @param file The path containing the new plugin code
      * @return True if installation succeeded, false otherwise
      */
-    suspend fun installUpdate(update: PluginUpdate, file: File): Boolean = withContext(Dispatchers.IO) {
+    suspend fun installUpdate(update: PluginUpdate, file: Path): Boolean = withContext(Dispatchers.IO) {
         try {
             JSPluginLogger.logDebug(update.pluginId, "Installing update ${update.newVersion}")
             
@@ -153,25 +163,25 @@ class JSPluginUpdateChecker(
             }
             
             // Backup current plugin
-            val backupFile = File(pluginFile.parentFile, "${pluginFile.name}.backup")
-            pluginFile.copyTo(backupFile, overwrite = true)
+            val backupFile = pluginFile.parent!! / "${pluginFile.name}.backup"
+            fileSystem.copy(pluginFile, backupFile)
             
             try {
                 // Copy new file to plugins directory
-                file.copyTo(pluginFile, overwrite = true)
+                fileSystem.copy(file, pluginFile)
                 
                 // Reload the plugin
                 pluginLoader.reloadPlugin(update.pluginId)
                 
                 // Delete backup on success
-                backupFile.delete()
+                fileSystem.delete(backupFile)
                 
                 JSPluginLogger.logDebug(update.pluginId, "Update installed successfully")
                 return@withContext true
             } catch (e: Exception) {
                 // Restore backup on failure
-                backupFile.copyTo(pluginFile, overwrite = true)
-                backupFile.delete()
+                fileSystem.copy(backupFile, pluginFile)
+                fileSystem.delete(backupFile)
                 
                 JSPluginLogger.logError(
                     update.pluginId,
@@ -207,8 +217,8 @@ class JSPluginUpdateChecker(
                 return@withContext false
             }
             
-            val backupFile = File(pluginFile.parentFile, "${pluginFile.name}.backup")
-            if (!backupFile.exists()) {
+            val backupFile = pluginFile.parent!! / "${pluginFile.name}.backup"
+            if (!fileSystem.exists(backupFile)) {
                 JSPluginLogger.logError(
                     pluginId,
                     JSPluginError.LoadError(pluginId, Exception("Backup file not found"))
@@ -217,8 +227,8 @@ class JSPluginUpdateChecker(
             }
             
             // Restore from backup
-            backupFile.copyTo(pluginFile, overwrite = true)
-            backupFile.delete()
+            fileSystem.copy(backupFile, pluginFile)
+            fileSystem.delete(backupFile)
             
             // Reload the plugin
             pluginLoader.reloadPlugin(pluginId)

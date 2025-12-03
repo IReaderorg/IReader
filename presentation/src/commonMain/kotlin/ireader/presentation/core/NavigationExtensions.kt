@@ -2,7 +2,7 @@ package ireader.presentation.core
 
 import androidx.navigation.NavHostController
 import ireader.presentation.core.ui.*
-import java.net.URLEncoder
+import io.ktor.http.encodeURLParameter
 
 /**
  * Extension functions to convert ScreenSpec objects to string-based routes
@@ -20,12 +20,12 @@ fun NavHostController.navigate(spec: ReaderScreenSpec) {
 }
 
 fun NavHostController.navigate(spec: ExploreScreenSpec) {
-    val query = spec.query?.let { "&query=${URLEncoder.encode(it, "UTF-8")}" } ?: ""
+    val query = spec.query?.let { "&query=${it.encodeURLParameter()}" } ?: ""
     navigate("explore/${spec.sourceId}$query")
 }
 
 fun NavHostController.navigate(spec: GlobalSearchScreenSpec) {
-    val query = spec.query?.let { "?query=${URLEncoder.encode(it, "UTF-8")}" } ?: ""
+    val query = spec.query?.let { "?query=${it.encodeURLParameter()}" } ?: ""
     navigate("globalSearch$query")
 }
 
@@ -41,7 +41,7 @@ fun NavHostController.navigateToWebView(
     enableChapterFetch: Boolean = false,
     enableChaptersFetch: Boolean = false
 ) {
-    val encodedUrl = url?.let { URLEncoder.encode(it, "UTF-8") } ?: ""
+    val encodedUrl = url?.encodeURLParameter() ?: ""
     navigate("webView/$sourceId/$bookId/$chapterId?url=$encodedUrl&enableBookFetch=$enableBookFetch&enableChapterFetch=$enableChapterFetch&enableChaptersFetch=$enableChaptersFetch")
 }
 

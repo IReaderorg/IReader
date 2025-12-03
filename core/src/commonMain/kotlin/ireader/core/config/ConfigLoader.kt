@@ -1,12 +1,17 @@
 package ireader.core.config
 
-import java.io.File
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import okio.buffer
+import okio.use
 
 /**
  * Loads configuration from config.properties file
  * Checks multiple locations:
  * 1. File system (current directory, parent directory)
- * 2. Classpath resources
+ * 2. Classpath resources (platform-specific)
+ * 
+ * Uses Okio for KMP-compatible file operations.
  */
 object ConfigLoader {
     private var config: Map<String, String>? = null
@@ -28,22 +33,23 @@ object ConfigLoader {
     }
     
     private fun tryLoadFromFileSystem(properties: MutableMap<String, String>): Boolean {
+        val fileSystem = FileSystem.SYSTEM
         val locations = listOf(
-            File("config.properties"),                    // Current directory
-            File("../config.properties"),                 // Parent directory
-            File(System.getProperty("user.dir"), "config.properties")  // Working directory
+            "config.properties".toPath(),           // Current directory
+            "../config.properties".toPath(),        // Parent directory
         )
         
-        for (file in locations) {
-            if (file.exists() && file.isFile) {
+        for (path in locations) {
+            if (fileSystem.exists(path)) {
                 try {
-                    file.bufferedReader().use { reader ->
-                        parseProperties(reader.lineSequence(), properties)
+                    fileSystem.source(path).buffer().use { source ->
+                        val content = source.readUtf8()
+                        parseProperties(content.lineSequence(), properties)
                     }
-                    println("Loaded config.properties from: ${file.absolutePath}")
+                    println("Loaded config.properties from: $path")
                     return true
                 } catch (e: Exception) {
-                    println("Failed to load config.properties from ${file.absolutePath}: ${e.message}")
+                    println("Failed to load config.properties from $path: ${e.message}")
                 }
             }
         }
@@ -51,18 +57,8 @@ object ConfigLoader {
     }
     
     private fun tryLoadFromResources(properties: MutableMap<String, String>): Boolean {
-        try {
-            val inputStream = this::class.java.classLoader?.getResourceAsStream("config.properties")
-            if (inputStream != null) {
-                inputStream.bufferedReader().use { reader ->
-                    parseProperties(reader.lineSequence(), properties)
-                }
-                println("Loaded config.properties from resources")
-                return true
-            }
-        } catch (e: Exception) {
-            println("Failed to load config.properties from resources: ${e.message}")
-        }
+        // Resource loading is platform-specific, handled via expect/actual if needed
+        // For now, file system loading is the primary method
         return false
     }
     

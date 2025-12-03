@@ -4,24 +4,37 @@ import ireader.core.log.Log
 import ireader.domain.storage.VoiceStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileNotFoundException
+import okio.FileSystem
+import okio.IOException
+import okio.Path
+import okio.buffer
+import okio.use
 
 /**
- * Implementation of VoiceStorage for managing voice model files
+ * Implementation of VoiceStorage for managing voice model files.
+ * Uses Okio for KMP-compatible file operations.
  * Requirements: 3.1, 3.2
  */
 class VoiceStorageImpl(
-    private val baseDirectory: File
+    private val baseDirectory: Path,
+    private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) : VoiceStorage {
     
-    private val voicesDir = File(baseDirectory, "tts_voices").apply { mkdirs() }
+    private val voicesDir = baseDirectory / "tts_voices"
+    
+    init {
+        if (!fileSystem.exists(voicesDir)) {
+            fileSystem.createDirectories(voicesDir)
+        }
+    }
     
     override suspend fun saveVoiceModel(voiceId: String, data: ByteArray): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                val voiceFile = File(voicesDir, "$voiceId.voice")
-                voiceFile.writeBytes(data)
+                val voiceFile = voicesDir / "$voiceId.voice"
+                fileSystem.sink(voiceFile).buffer().use { sink ->
+                    sink.write(data)
+                }
                 Log.info { "Voice model saved: $voiceId (${data.size} bytes)" }
                 Result.success(Unit)
             } catch (e: Exception) {
@@ -34,13 +47,15 @@ class VoiceStorageImpl(
     override suspend fun loadVoiceModel(voiceId: String): Result<ByteArray> {
         return withContext(Dispatchers.IO) {
             try {
-                val voiceFile = File(voicesDir, "$voiceId.voice")
-                if (!voiceFile.exists()) {
+                val voiceFile = voicesDir / "$voiceId.voice"
+                if (!fileSystem.exists(voiceFile)) {
                     return@withContext Result.failure(
-                        FileNotFoundException("Voice model not found: $voiceId")
+                        IOException("Voice model not found: $voiceId")
                     )
                 }
-                val data = voiceFile.readBytes()
+                val data = fileSystem.source(voiceFile).buffer().use { source ->
+                    source.readByteArray()
+                }
                 Log.info { "Voice model loaded: $voiceId (${data.size} bytes)" }
                 Result.success(data)
             } catch (e: Exception) {
@@ -53,14 +68,10 @@ class VoiceStorageImpl(
     override suspend fun deleteVoiceModel(voiceId: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                val voiceFile = File(voicesDir, "$voiceId.voice")
-                if (voiceFile.exists()) {
-                    val deleted = voiceFile.delete()
-                    if (deleted) {
-                        Log.info { "Voice model deleted: $voiceId" }
-                    } else {
-                        Log.warn { "Failed to delete voice model file: $voiceId" }
-                    }
+                val voiceFile = voicesDir / "$voiceId.voice"
+                if (fileSystem.exists(voiceFile)) {
+                    fileSystem.delete(voiceFile)
+                    Log.info { "Voice model deleted: $voiceId" }
                 }
                 Result.success(Unit)
             } catch (e: Exception) {
@@ -73,10 +84,10 @@ class VoiceStorageImpl(
     override suspend fun getInstalledVoices(): List<String> {
         return withContext(Dispatchers.IO) {
             try {
-                voicesDir.listFiles()
-                    ?.filter { it.extension == "voice" }
-                    ?.map { it.nameWithoutExtension }
-                    ?: emptyList()
+                if (!fileSystem.exists(voicesDir)) return@withContext emptyList()
+                fileSystem.list(voicesDir)
+                    .filter { it.name.endsWith(".voice") }
+                    .map { it.name.removeSuffix(".voice") }
             } catch (e: Exception) {
                 Log.error("Failed to list installed voices", e)
                 emptyList()
@@ -86,15 +97,19 @@ class VoiceStorageImpl(
     
     override suspend fun getVoiceModelPath(voiceId: String): String? {
         return withContext(Dispatchers.IO) {
-            val voiceFile = File(voicesDir, "$voiceId.voice")
-            if (voiceFile.exists()) voiceFile.absolutePath else null
+            val voiceFile = voicesDir / "$voiceId.voice"
+            if (fileSystem.exists(voiceFile)) voiceFile.toString() else null
         }
     }
     
     override suspend fun getVoiceModelSize(voiceId: String): Long {
         return withContext(Dispatchers.IO) {
-            val voiceFile = File(voicesDir, "$voiceId.voice")
-            if (voiceFile.exists()) voiceFile.length() else 0L
+            val voiceFile = voicesDir / "$voiceId.voice"
+            if (fileSystem.exists(voiceFile)) {
+                fileSystem.metadata(voiceFile).size ?: 0L
+            } else {
+                0L
+            }
         }
     }
 }

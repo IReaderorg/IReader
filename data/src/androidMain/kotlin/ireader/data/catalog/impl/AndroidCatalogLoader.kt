@@ -33,7 +33,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import okio.Path.Companion.toPath
 import java.io.File
+
+// Extension to explicitly convert String to okio.Path
+private fun String.toOkioPath(): okio.Path = this.toPath()
+
 /**
  * Class that handles the loading of the catalogs installed in the system and the app.
  */
@@ -57,7 +62,7 @@ class AndroidCatalogLoader(
     private val jsPluginLoader: JSPluginLoader by lazy {
         // Use the appropriate directory based on user preference
         val jsPluginsDir = getJSPluginsDirectory()
-        JSPluginLoader(jsPluginsDir, httpClients.default, preferenceStore)
+        JSPluginLoader(jsPluginsDir.absolutePath.toPath(), httpClients.default, preferenceStore)
     }
     
     /**
@@ -137,13 +142,13 @@ class AndroidCatalogLoader(
         val systemPkgs =
             pkgManager.getInstalledPackages(PACKAGE_FLAGS).filter(::isPackageAnExtension)
 
-        val localPkgs= simpleStorage.extensionDirectory().listFiles()
+        val localPkgs= simpleStorage.extensionDirectory().toFile().listFiles()
             .orEmpty()
             .filter { it.isDirectory }
             .map { File(it, it.name + ".apk") }
             .filter { it.exists() }
 
-        val cachePkgs = simpleStorage.cacheExtensionDir().listFiles()
+        val cachePkgs = simpleStorage.cacheExtensionDir().toFile().listFiles()
             .orEmpty()
             .filter { it.isDirectory }
             .map { File(it, it.name + ".apk") }
@@ -221,8 +226,8 @@ class AndroidCatalogLoader(
         }
         
         // Try to load as traditional APK extension
-        val file = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.apk")
-        val cacheFile = File(simpleStorage.cacheExtensionDir(), "${pkgName}/${pkgName}.apk")
+        val file = File(simpleStorage.extensionDirectory().toFile(), "${pkgName}/${pkgName}.apk")
+        val cacheFile = File(simpleStorage.cacheExtensionDir().toFile(), "${pkgName}/${pkgName}.apk")
         val finalFile = if (file.canRead() && file.canRead()) {
             file
         } else {
@@ -250,7 +255,7 @@ class AndroidCatalogLoader(
      * contains the required feature flag before trying to load it.
      */
     override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? {
-        val iconFile = File(simpleStorage.extensionDirectory(), "${pkgName}/${pkgName}.png")
+        val iconFile = File(simpleStorage.extensionDirectory().toFile(), "${pkgName}/${pkgName}.png")
         val cacheFile = File(context.cacheDir, "${pkgName}/${pkgName}.apk")
         val icon = if (iconFile.exists() && iconFile.canRead()) {
             iconFile
@@ -291,7 +296,7 @@ class AndroidCatalogLoader(
                 versionName = data.versionName,
                 versionCode = data.versionCode,
                 nsfw = data.nsfw,
-                installDir = file.parentFile!!,
+                installDir = file.parentFile!!.absolutePath.toOkioPath(),
                 iconUrl = data.icon
             )
         } catch (e: Exception) {
@@ -384,7 +389,7 @@ class AndroidCatalogLoader(
             versionCode = data.versionCode,
             nsfw = data.nsfw,
             iconUrl = data.icon,
-            installDir = iconFile?.parentFile,
+            installDir = iconFile?.parentFile?.absolutePath?.toOkioPath(),
         )
     }
 

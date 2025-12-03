@@ -1,6 +1,6 @@
 ﻿package ireader.core.startup
 
-import ireader.core.util.currentTimeMillis
+import ireader.core.time.currentTimeMillis
 
 /**
  * Startup profiler to measure and identify slow initialization phases.

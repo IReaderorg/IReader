@@ -2,12 +2,14 @@ package ireader.domain.usecases.backup.lnreader
 
 import ireader.domain.models.lnreader.*
 import kotlinx.serialization.json.Json
-import java.io.ByteArrayInputStream
-import java.io.InputStream
-import java.util.zip.ZipInputStream
+import okio.Buffer
+import okio.BufferedSource
+import okio.Source
+import okio.buffer
 
 /**
- * Parser for LNReader backup ZIP files
+ * Parser for LNReader backup ZIP files.
+ * Uses Okio for KMP-compatible stream operations.
  * 
  * LNReader backup structure:
  * - Version.json - Backup version info
@@ -25,61 +27,33 @@ class LNReaderBackupParser {
     }
     
     /**
-     * Parse a complete LNReader backup from input stream
+     * Parse a complete LNReader backup from Okio Source
      */
-    suspend fun parseBackup(inputStream: InputStream): LNReaderBackup {
+    suspend fun parseBackup(source: Source): LNReaderBackup {
         var version = LNReaderVersion("unknown")
         val novels = mutableListOf<LNReaderNovel>()
         var categories = emptyList<LNReaderCategory>()
         var settings = emptyMap<String, String>()
         
-        ZipInputStream(inputStream).use { zipStream ->
-            var entry = zipStream.nextEntry
-            while (entry != null) {
-                val entryName = entry.name
-                
-                when {
-                    entryName == "Version.json" || entryName.endsWith("/Version.json") -> {
-                        val content = zipStream.readBytes().decodeToString()
-                        version = parseVersion(content)
-                    }
-                    entryName == "Category.json" || entryName.endsWith("/Category.json") -> {
-                        val content = zipStream.readBytes().decodeToString()
-                        categories = parseCategories(content)
-                    }
-                    entryName == "Setting.json" || entryName.endsWith("/Setting.json") -> {
-                        val content = zipStream.readBytes().decodeToString()
-                        settings = parseSettings(content)
-                    }
-                    entryName.contains("NovelAndChapters/") && entryName.endsWith(".json") -> {
-                        val content = zipStream.readBytes().decodeToString()
-                        try {
-                            val novel = parseNovel(content)
-                            novels.add(novel)
-                        } catch (e: Exception) {
-                            ireader.core.log.Log.warn(e, "Failed to parse novel: $entryName")
-                        }
-                    }
-                }
-                
-                zipStream.closeEntry()
-                entry = zipStream.nextEntry
-            }
-        }
-        
-        return LNReaderBackup(
-            version = version,
-            novels = novels,
-            categories = categories,
-            settings = settings
-        )
+        // Read all bytes first, then parse as ZIP
+        val bytes = source.buffer().readByteArray()
+        return parseBackup(bytes)
     }
     
     /**
-     * Parse backup from byte array
+     * Parse backup from byte array using platform-specific ZIP handling
      */
     suspend fun parseBackup(bytes: ByteArray): LNReaderBackup {
-        return parseBackup(ByteArrayInputStream(bytes))
+        return parseBackupFromZipBytes(bytes)
+    }
+    
+    /**
+     * Platform-specific ZIP parsing - implemented via expect/actual
+     */
+    private suspend fun parseBackupFromZipBytes(bytes: ByteArray): LNReaderBackup {
+        // For now, use a simple approach that works cross-platform
+        // This would need platform-specific ZIP implementations for full KMP support
+        return parseBackupPlatform(bytes)
     }
     
     /**
@@ -127,32 +101,20 @@ class LNReaderBackupParser {
     companion object {
         /**
          * Check if the given bytes represent an LNReader backup
+         * Uses platform-specific ZIP detection
          */
         fun isLNReaderBackup(bytes: ByteArray): Boolean {
-            return try {
-                ZipInputStream(ByteArrayInputStream(bytes)).use { zipStream ->
-                    var entry = zipStream.nextEntry
-                    var hasVersion = false
-                    var hasNovelDir = false
-                    
-                    while (entry != null) {
-                        val name = entry.name
-                        if (name == "Version.json" || name.endsWith("/Version.json")) {
-                            hasVersion = true
-                        }
-                        if (name.contains("NovelAndChapters/")) {
-                            hasNovelDir = true
-                        }
-                        if (hasVersion && hasNovelDir) return@use true
-                        
-                        zipStream.closeEntry()
-                        entry = zipStream.nextEntry
-                    }
-                    hasVersion || hasNovelDir
-                }
-            } catch (e: Exception) {
-                false
-            }
+            return isLNReaderBackupPlatform(bytes)
         }
     }
 }
+
+/**
+ * Platform-specific backup parsing - needs expect/actual implementation
+ */
+expect suspend fun parseBackupPlatform(bytes: ByteArray): LNReaderBackup
+
+/**
+ * Platform-specific LNReader backup detection
+ */
+expect fun isLNReaderBackupPlatform(bytes: ByteArray): Boolean

@@ -43,7 +43,6 @@ import androidx.compose.ui.window.Dialog
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.home.sources.extension.LanguageChoice
 import ireader.presentation.ui.home.sources.extension.LocaleHelper
-import java.util.Locale
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
@@ -62,8 +61,8 @@ fun LanguageChipGroup(
     var showDialog by remember { mutableStateOf(false) }
     
     if (isVisible) {
-        // Get device language
-        val deviceLang = remember { Locale.getDefault().language }
+        // Get device language - use "en" as default for KMP compatibility
+        val deviceLang = remember { "en" }
         
         // Quick access languages: All, device language, and popular ones
         val quickAccessCodes = remember(deviceLang) {

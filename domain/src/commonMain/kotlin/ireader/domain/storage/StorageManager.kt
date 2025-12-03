@@ -1,41 +1,42 @@
 package ireader.domain.storage
 
-import java.io.File
+import okio.Path
 
 /**
  * Platform-agnostic storage manager interface.
  * Abstracts file system operations and directory management.
+ * Uses Okio Path for KMP compatibility.
  */
 interface StorageManager {
     /**
      * Main application directory
      */
-    val appDirectory: File
+    val appDirectory: Path
     
     /**
      * Directory for storing books
      */
-    val booksDirectory: File
+    val booksDirectory: Path
     
     /**
      * Directory for backups
      */
-    val backupDirectory: File
+    val backupDirectory: Path
     
     /**
      * Directory for automatic backups
      */
-    val automaticBackupDirectory: File
+    val automaticBackupDirectory: Path
     
     /**
      * Directory for extensions
      */
-    val extensionsDirectory: File
+    val extensionsDirectory: Path
     
     /**
      * Get a subdirectory within the app directory
      */
-    fun getSubDirectory(name: String): File
+    fun getSubDirectory(name: String): Path
     
     /**
      * Check if storage permissions are granted
