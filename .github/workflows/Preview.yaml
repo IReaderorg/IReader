@@ -117,6 +117,12 @@ jobs:
           SUPABASE_BADGES_KEY: ${{ secrets.SUPABASE_BADGES_KEY }}
           SUPABASE_ANALYTICS_URL: ${{ secrets.SUPABASE_ANALYTICS_URL }}
           SUPABASE_ANALYTICS_KEY: ${{ secrets.SUPABASE_ANALYTICS_KEY }}
+          # Cloudflare R2 Storage
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
         with:
           arguments: >
             ${{ matrix.build }}
