@@ -90,11 +90,20 @@ The iOS migration is nearly complete with most core components fully implemented
 | PlatformConfig | ⚠️ Stub | Needs Info.plist reading |
 | VirtualZipFile | ⚠️ Stub | ZIP operations - uses workarounds |
 
-## Recently Added
+## Recently Fixed (2025-12-03)
 
 | Component | Status | Description |
 |-----------|--------|-------------|
 | ScheduleAutomaticBackupImpl | ✅ Complete | BGTaskScheduler for automatic backups |
+| EpubCreator | ✅ Fixed | Proper content type handling for List<Page> |
+| ImportEpub | ✅ Fixed | Pure Kotlin DEFLATE decompression |
+| PluginLoader | ✅ Fixed | Pure Kotlin DEFLATE decompression |
+| LNReaderBackupParser | ✅ Fixed | Pure Kotlin DEFLATE decompression |
+| GoogleTranslateML | ✅ Fixed | Rate limiting with exponential backoff |
+| OpenLocalFolder | ✅ Fixed | iOS version checking and fallbacks |
+| DomainModulePlatform | ✅ Updated | Full DI registration for iOS components |
+| DropboxProvider | ✅ Improved | OAuth 2.0 PKCE flow support |
+| GoogleDriveProvider | ✅ Improved | OAuth 2.0 PKCE flow with token refresh |
 
 ## Known Issues
 

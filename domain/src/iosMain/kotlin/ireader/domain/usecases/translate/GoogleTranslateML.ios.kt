@@ -18,10 +18,15 @@ import kotlinx.serialization.json.*
  * 1. Google Cloud Translation API (if API key is provided)
  * 2. Free Google Translate web API as fallback
  * 
- * Note: For production use, consider using:
- * - Apple's Translation framework (iOS 17.4+)
- * - DeepL API
- * - LibreTranslate (self-hosted)
+ * ## Rate Limiting
+ * - Implements exponential backoff for rate limit errors (HTTP 429)
+ * - Adds delays between batches to avoid triggering rate limits
+ * - Retries failed requests up to 3 times
+ * 
+ * ## Recommendations for Production
+ * - Use Google Cloud Translation API with an API key for reliability
+ * - Consider Apple's Translation framework (iOS 17.4+)
+ * - Consider LibreTranslate (self-hosted) for privacy
  */
 @OptIn(ExperimentalForeignApi::class)
 actual class GoogleTranslateML actual constructor() : TranslateEngine() {
@@ -34,6 +39,12 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
     
     // Optional: Set your Google Cloud Translation API key
     private var apiKey: String? = null
+    
+    // Rate limiting configuration
+    private var lastRequestTime: Long = 0
+    private val minRequestInterval: Long = 100 // Minimum ms between requests
+    private val maxRetries = 3
+    private val baseRetryDelay: Long = 1000 // Base delay for exponential backoff
     
     /**
      * Set Google Cloud Translation API key for better reliability
@@ -60,14 +71,22 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
             val total = texts.size
             
             // Translate texts in batches to avoid rate limiting
-            val batchSize = 10
+            val batchSize = if (apiKey != null) 50 else 5 // Smaller batches for free API
             val batches = texts.chunked(batchSize)
             
             batches.forEachIndexed { batchIndex, batch ->
-                val batchResults = if (apiKey != null) {
-                    translateWithCloudApi(batch, source, target)
-                } else {
-                    translateWithFreeApi(batch, source, target)
+                // Ensure minimum interval between requests
+                enforceRateLimit()
+                
+                val batchResults = try {
+                    if (apiKey != null) {
+                        translateWithCloudApiRetry(batch, source, target)
+                    } else {
+                        translateWithFreeApiRetry(batch, source, target)
+                    }
+                } catch (e: RateLimitException) {
+                    println("[GoogleTranslateML] Rate limit exceeded, returning original text")
+                    batch // Return original texts on rate limit
                 }
                 
                 results.addAll(batchResults)
@@ -76,9 +95,10 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
                 val progress = ((batchIndex + 1) * batchSize).coerceAtMost(total)
                 onProgress((progress * 100) / total)
                 
-                // Small delay between batches to avoid rate limiting
+                // Delay between batches (longer for free API)
                 if (batchIndex < batches.size - 1) {
-                    delay(100)
+                    val delayMs = if (apiKey != null) 50L else 500L
+                    delay(delayMs)
                 }
             }
             
@@ -87,6 +107,80 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
         } catch (e: Exception) {
             println("[GoogleTranslateML] Translation error: ${e.message}")
             onError(UiText.DynamicString("Translation failed: ${e.message}"))
+        }
+    }
+    
+    /**
+     * Enforce rate limiting by waiting if necessary
+     */
+    private suspend fun enforceRateLimit() {
+        val now = currentTimeMillis()
+        val elapsed = now - lastRequestTime
+        if (elapsed < minRequestInterval) {
+            delay(minRequestInterval - elapsed)
+        }
+        lastRequestTime = currentTimeMillis()
+    }
+    
+    /**
+     * Translate with Cloud API with retry logic
+     */
+    private suspend fun translateWithCloudApiRetry(
+        texts: List<String>,
+        source: String,
+        target: String
+    ): List<String> {
+        var lastException: Exception? = null
+        
+        repeat(maxRetries) { attempt ->
+            try {
+                return translateWithCloudApi(texts, source, target)
+            } catch (e: RateLimitException) {
+                lastException = e
+                val delayMs = baseRetryDelay * (1 shl attempt) // Exponential backoff
+                println("[GoogleTranslateML] Rate limited, retrying in ${delayMs}ms (attempt ${attempt + 1}/$maxRetries)")
+                delay(delayMs)
+            } catch (e: Exception) {
+                lastException = e
+                if (attempt < maxRetries - 1) {
+                    delay(baseRetryDelay)
+                }
+            }
+        }
+        
+        throw lastException ?: Exception("Translation failed after $maxRetries attempts")
+    }
+    
+    /**
+     * Translate with free API with retry logic
+     */
+    private suspend fun translateWithFreeApiRetry(
+        texts: List<String>,
+        source: String,
+        target: String
+    ): List<String> {
+        return texts.map { text ->
+            var lastException: Exception? = null
+            
+            repeat(maxRetries) { attempt ->
+                try {
+                    return@map translateSingleTextWithRateLimit(text, source, target)
+                } catch (e: RateLimitException) {
+                    lastException = e
+                    val delayMs = baseRetryDelay * (1 shl attempt)
+                    println("[GoogleTranslateML] Rate limited, retrying in ${delayMs}ms")
+                    delay(delayMs)
+                } catch (e: Exception) {
+                    lastException = e
+                    if (attempt < maxRetries - 1) {
+                        delay(baseRetryDelay / 2)
+                    }
+                }
+            }
+            
+            // Return original text if all retries failed
+            println("[GoogleTranslateML] Failed to translate after $maxRetries attempts: ${lastException?.message}")
+            text
         }
     }
     
@@ -114,8 +208,27 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
             }.toString())
         }
         
+        // Check for rate limiting
+        if (response.status.value == 429) {
+            throw RateLimitException("Rate limit exceeded")
+        }
+        
+        if (!response.status.isSuccess()) {
+            throw Exception("API error: ${response.status}")
+        }
+        
         val responseText = response.bodyAsText()
         val jsonResponse = json.parseToJsonElement(responseText).jsonObject
+        
+        // Check for error in response
+        jsonResponse["error"]?.let { error ->
+            val errorMessage = error.jsonObject["message"]?.jsonPrimitive?.content ?: "Unknown error"
+            val errorCode = error.jsonObject["code"]?.jsonPrimitive?.intOrNull ?: 0
+            if (errorCode == 429) {
+                throw RateLimitException(errorMessage)
+            }
+            throw Exception(errorMessage)
+        }
         
         val translations = jsonResponse["data"]
             ?.jsonObject?.get("translations")
@@ -127,31 +240,18 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
     }
     
     /**
-     * Translate using free Google Translate web API
-     * Less reliable but doesn't require API key
+     * Translate a single text with rate limit handling
      */
-    private suspend fun translateWithFreeApi(
-        texts: List<String>,
-        source: String,
-        target: String
-    ): List<String> {
-        return texts.map { text ->
-            translateSingleText(text, source, target)
-        }
-    }
-    
-    /**
-     * Translate a single text using the free API
-     */
-    private suspend fun translateSingleText(
+    private suspend fun translateSingleTextWithRateLimit(
         text: String,
         source: String,
         target: String
     ): String {
         if (text.isBlank()) return text
         
+        enforceRateLimit()
+        
         try {
-            // Use the unofficial Google Translate API
             val encodedText = text.encodeURLParameter()
             val url = "https://translate.googleapis.com/translate_a/single" +
                     "?client=gtx" +
@@ -161,7 +261,34 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
                     "&q=$encodedText"
             
             val response = httpClient.get(url)
+            
+            // Check for rate limiting
+            if (response.status.value == 429) {
+                throw RateLimitException("Rate limit exceeded")
+            }
+            
+            if (!response.status.isSuccess()) {
+                throw Exception("HTTP error: ${response.status}")
+            }
+            
             val responseText = response.bodyAsText()
+            
+            // Check for error responses
+            if (responseText.contains("\"error\"") || responseText.startsWith("{")) {
+                try {
+                    val errorJson = json.parseToJsonElement(responseText).jsonObject
+                    errorJson["error"]?.let { error ->
+                        val code = error.jsonObject["code"]?.jsonPrimitive?.intOrNull
+                        if (code == 429) {
+                            throw RateLimitException("Rate limit exceeded")
+                        }
+                    }
+                } catch (e: RateLimitException) {
+                    throw e
+                } catch (e: Exception) {
+                    // Not a JSON error, continue parsing
+                }
+            }
             
             // Parse the response (it's a nested JSON array)
             val jsonArray = json.parseToJsonElement(responseText).jsonArray
@@ -176,6 +303,8 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
             
             return translations.toString().ifEmpty { text }
             
+        } catch (e: RateLimitException) {
+            throw e
         } catch (e: Exception) {
             println("[GoogleTranslateML] Single text translation error: ${e.message}")
             return text // Return original text on error
@@ -191,6 +320,8 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
                 NSCharacterSet.URLQueryAllowedCharacterSet
             ) ?: this
     }
+    
+    private fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
     
     /**
      * Get supported languages
@@ -245,6 +376,8 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
         if (text.isBlank()) return null
         
         try {
+            enforceRateLimit()
+            
             val encodedText = text.take(100).encodeURLParameter()
             val url = "https://translate.googleapis.com/translate_a/single" +
                     "?client=gtx" +
@@ -254,6 +387,12 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
                     "&q=$encodedText"
             
             val response = httpClient.get(url)
+            
+            if (response.status.value == 429) {
+                println("[GoogleTranslateML] Rate limited during language detection")
+                return null
+            }
+            
             val responseText = response.bodyAsText()
             val jsonArray = json.parseToJsonElement(responseText).jsonArray
             
@@ -266,6 +405,11 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
         }
     }
 }
+
+/**
+ * Exception for rate limit errors
+ */
+private class RateLimitException(message: String) : Exception(message)
 
 /**
  * Data class for language information

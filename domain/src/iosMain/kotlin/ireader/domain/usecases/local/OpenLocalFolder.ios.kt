@@ -12,7 +12,20 @@ import kotlinx.cinterop.ExperimentalForeignApi
  * Instead, this implementation:
  * 1. Returns the app's Documents directory path
  * 2. Provides a method to open the Files app (if possible)
- * 3. Can be extended to use UIDocumentPickerViewController for file selection
+ * 3. Handles different iOS versions appropriately
+ * 
+ * ## iOS Version Support
+ * - iOS 11+: Uses shareddocuments:// URL scheme to open Files app
+ * - iOS 10 and below: Returns false (Files app not available)
+ * 
+ * ## Info.plist Requirements
+ * For file sharing to work, add these to Info.plist:
+ * ```xml
+ * <key>UIFileSharingEnabled</key>
+ * <true/>
+ * <key>LSSupportsOpeningDocumentsInPlace</key>
+ * <true/>
+ * ```
  */
 @OptIn(ExperimentalForeignApi::class)
 actual class OpenLocalFolder actual constructor(private val localSource: LocalCatalogSource) {
@@ -24,37 +37,99 @@ actual class OpenLocalFolder actual constructor(private val localSource: LocalCa
      * 
      * On iOS, this attempts to open the Files app to the app's documents folder.
      * Returns true if the operation was initiated, false otherwise.
+     * 
+     * @return true if Files app was opened or operation initiated, false if not supported
      */
     actual fun open(): Boolean {
+        // Check iOS version - Files app requires iOS 11+
+        val systemVersion = UIDevice.currentDevice.systemVersion
+        val majorVersion = systemVersion.substringBefore(".").toIntOrNull() ?: 0
+        
+        if (majorVersion < 11) {
+            println("[OpenLocalFolder] Files app not available on iOS $systemVersion (requires iOS 11+)")
+            return false
+        }
+        
         // Get the documents directory URL
+        val documentsUrl = getDocumentsDirectoryUrl()
+        if (documentsUrl == null) {
+            println("[OpenLocalFolder] Could not get documents directory URL")
+            return false
+        }
+        
+        // Try multiple approaches to open Files app
+        return tryOpenFilesAppWithPath(documentsUrl) 
+            || tryOpenFilesAppDirect()
+            || tryOpenDocumentsDirectory()
+    }
+    
+    /**
+     * Try to open Files app with specific path
+     */
+    private fun tryOpenFilesAppWithPath(documentsUrl: NSURL): Boolean {
+        // Use shareddocuments:// URL scheme with path
+        val path = documentsUrl.path ?: return false
+        val filesAppUrl = NSURL.URLWithString("shareddocuments://$path")
+        
+        if (filesAppUrl != null && canOpenURL(filesAppUrl)) {
+            openURL(filesAppUrl)
+            println("[OpenLocalFolder] Opened Files app with path: $path")
+            return true
+        }
+        return false
+    }
+    
+    /**
+     * Try to open Files app directly (without specific path)
+     */
+    private fun tryOpenFilesAppDirect(): Boolean {
+        val filesUrl = NSURL.URLWithString("shareddocuments://")
+        
+        if (filesUrl != null && canOpenURL(filesUrl)) {
+            openURL(filesUrl)
+            println("[OpenLocalFolder] Opened Files app directly")
+            return true
+        }
+        return false
+    }
+    
+    /**
+     * Try to open using file:// URL (may show in-app document browser)
+     */
+    private fun tryOpenDocumentsDirectory(): Boolean {
         val documentsUrl = getDocumentsDirectoryUrl() ?: return false
         
-        // Try to open in Files app using shareddocuments:// URL scheme
-        // Note: This requires the app to have UIFileSharingEnabled in Info.plist
-        val filesAppUrl = NSURL.URLWithString("shareddocuments://${documentsUrl.path}")
-        
-        return if (filesAppUrl != null && UIApplication.sharedApplication.canOpenURL(filesAppUrl)) {
-            UIApplication.sharedApplication.openURL(
-                filesAppUrl,
-                options = emptyMap<Any?, Any>(),
-                completionHandler = null
-            )
-            true
-        } else {
-            // Fallback: Try to open the Files app directly
-            val filesUrl = NSURL.URLWithString("shareddocuments://")
-            if (filesUrl != null && UIApplication.sharedApplication.canOpenURL(filesUrl)) {
-                UIApplication.sharedApplication.openURL(
-                    filesUrl,
-                    options = emptyMap<Any?, Any>(),
-                    completionHandler = null
-                )
-                true
-            } else {
-                println("[OpenLocalFolder] Cannot open Files app")
-                false
-            }
+        // This may not open Files app but could trigger document browser
+        if (canOpenURL(documentsUrl)) {
+            openURL(documentsUrl)
+            println("[OpenLocalFolder] Opened documents directory URL")
+            return true
         }
+        
+        println("[OpenLocalFolder] Could not open any Files app URL")
+        return false
+    }
+    
+    /**
+     * Check if URL can be opened
+     */
+    private fun canOpenURL(url: NSURL): Boolean {
+        return UIApplication.sharedApplication.canOpenURL(url)
+    }
+    
+    /**
+     * Open URL with completion handler
+     */
+    private fun openURL(url: NSURL) {
+        UIApplication.sharedApplication.openURL(
+            url,
+            options = emptyMap<Any?, Any>(),
+            completionHandler = { success ->
+                if (!success) {
+                    println("[OpenLocalFolder] Failed to open URL: ${url.absoluteString}")
+                }
+            }
+        )
     }
     
     /**
@@ -98,12 +173,17 @@ actual class OpenLocalFolder actual constructor(private val localSource: LocalCa
         
         // Create directory if it doesn't exist
         if (!fileManager.fileExistsAtPath(novelsDir)) {
-            fileManager.createDirectoryAtPath(
-                novelsDir,
-                withIntermediateDirectories = true,
-                attributes = null,
-                error = null
-            )
+            try {
+                fileManager.createDirectoryAtPath(
+                    novelsDir,
+                    withIntermediateDirectories = true,
+                    attributes = null,
+                    error = null
+                )
+                println("[OpenLocalFolder] Created LocalNovels directory: $novelsDir")
+            } catch (e: Exception) {
+                println("[OpenLocalFolder] Failed to create directory: ${e.message}")
+            }
         }
         
         return novelsDir
@@ -121,14 +201,14 @@ actual class OpenLocalFolder actual constructor(private val localSource: LocalCa
             val fileName = item as? String ?: return@mapNotNull null
             val filePath = "$novelsDir/$fileName"
             
-            var isDirectory: Boolean = false
-            val exists = fileManager.fileExistsAtPath(filePath, isDirectory = null)
-            
+            val exists = fileManager.fileExistsAtPath(filePath)
             if (!exists) return@mapNotNull null
             
             val attributes = fileManager.attributesOfItemAtPath(filePath, error = null)
             val fileSize = (attributes?.get(NSFileSize) as? NSNumber)?.longValue ?: 0L
             val modDate = attributes?.get(NSFileModificationDate) as? NSDate
+            val fileType = attributes?.get(NSFileType) as? String
+            val isDirectory = fileType == NSFileTypeDirectory
             
             LocalFileInfo(
                 name = fileName,
@@ -153,7 +233,12 @@ actual class OpenLocalFolder actual constructor(private val localSource: LocalCa
      */
     fun deleteFile(fileName: String): Boolean {
         val filePath = "${getLocalNovelsDirectory()}/$fileName"
-        return fileManager.removeItemAtPath(filePath, error = null)
+        return try {
+            fileManager.removeItemAtPath(filePath, error = null)
+        } catch (e: Exception) {
+            println("[OpenLocalFolder] Failed to delete file: ${e.message}")
+            false
+        }
     }
     
     /**
@@ -174,14 +259,13 @@ actual class OpenLocalFolder actual constructor(private val localSource: LocalCa
             val fileName = item as? String ?: return@forEach
             val filePath = "$path/$fileName"
             
-            var isDirectory: Boolean = false
-            if (fileManager.fileExistsAtPath(filePath, isDirectory = null)) {
-                if (isDirectory) {
-                    totalSize += calculateDirectorySize(filePath)
-                } else {
-                    val attributes = fileManager.attributesOfItemAtPath(filePath, error = null)
-                    totalSize += (attributes?.get(NSFileSize) as? NSNumber)?.longValue ?: 0L
-                }
+            val attributes = fileManager.attributesOfItemAtPath(filePath, error = null)
+            val fileType = attributes?.get(NSFileType) as? String
+            
+            if (fileType == NSFileTypeDirectory) {
+                totalSize += calculateDirectorySize(filePath)
+            } else {
+                totalSize += (attributes?.get(NSFileSize) as? NSNumber)?.longValue ?: 0L
             }
         }
         
@@ -195,9 +279,32 @@ actual class OpenLocalFolder actual constructor(private val localSource: LocalCa
         return when {
             bytes < 1024 -> "$bytes B"
             bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-            bytes < 1024 * 1024 * 1024 -> "${bytes / (1024 * 1024)} MB"
-            else -> "${bytes / (1024 * 1024 * 1024)} GB"
+            bytes < 1024 * 1024 * 1024 -> {
+                val mb = bytes / (1024.0 * 1024.0)
+                "${(mb * 10).toLong() / 10.0} MB"
+            }
+            else -> {
+                val gb = bytes / (1024.0 * 1024.0 * 1024.0)
+                "${(gb * 100).toLong() / 100.0} GB"
+            }
         }
+    }
+    
+    /**
+     * Get iOS version info
+     */
+    fun getIOSVersion(): String {
+        return UIDevice.currentDevice.systemVersion
+    }
+    
+    /**
+     * Check if Files app integration is supported
+     */
+    fun isFilesAppSupported(): Boolean {
+        val majorVersion = UIDevice.currentDevice.systemVersion
+            .substringBefore(".")
+            .toIntOrNull() ?: 0
+        return majorVersion >= 11
     }
 }
 
