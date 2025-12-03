@@ -192,11 +192,14 @@ workflows:
       - build/ipa/*.ipa
       - build/iosApp.xcarchive
     
-    publishing:
-      app_store_connect:
-        # Configure in Codemagic UI with your App Store Connect API key
-        auth: integration
-        submit_to_testflight: true
+    # Uncomment and configure when you have App Store Connect API key
+    # publishing:
+    #   app_store_connect:
+    #     # First add integration in Codemagic UI: Settings -> Integrations -> App Store Connect
+    #     api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+    #     key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+    #     issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+    #     submit_to_testflight: true
 
   # ============================================
   # Kotlin Multiplatform Tests (No Mac needed)
