@@ -1,9 +1,10 @@
 ﻿package ireader.data.characterart
 
-import io.ktor.client.*
 import ireader.data.repository.CharacterArtRemoteDataSource
-import ireader.domain.models.characterart.*
-import kotlinx.serialization.json.Json
+import ireader.domain.models.characterart.ArtStyleFilter
+import ireader.domain.models.characterart.CharacterArt
+import ireader.domain.models.characterart.CharacterArtSort
+import ireader.domain.models.characterart.SubmitCharacterArtRequest
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
@@ -225,15 +226,20 @@ class CloudflareR2ImageStorage(
  * Local file storage implementation (for offline/testing)
  */
 class LocalImageStorage(
-    private val basePath: String
+    private val basePath: String,
+    private val fileSystem: okio.FileSystem = okio.FileSystem.SYSTEM
 ) : ImageStorageProvider {
     
     override suspend fun uploadImage(imageBytes: ByteArray, fileName: String): Result<String> {
         return try {
-            val file = java.io.File(basePath, "pending/$fileName")
-            file.parentFile?.mkdirs()
-            file.writeBytes(imageBytes)
-            Result.success("file://${file.absolutePath}")
+            val filePath = "$basePath/pending/$fileName".toOkioPath()
+            filePath.parent?.let { parent ->
+                fileSystem.createDirectories(parent)
+            }
+            fileSystem.write(filePath) {
+                write(imageBytes)
+            }
+            Result.success("file://$filePath")
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -241,8 +247,8 @@ class LocalImageStorage(
     
     override suspend fun deleteImage(imageUrl: String): Result<Unit> {
         return try {
-            val path = imageUrl.removePrefix("file://")
-            java.io.File(path).delete()
+            val path = imageUrl.removePrefix("file://").toOkioPath()
+            fileSystem.delete(path)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -254,11 +260,13 @@ class LocalImageStorage(
         val approvedPath = pendingPath.replace("/pending/", "/approved/")
         
         try {
-            val source = java.io.File(pendingPath)
-            val dest = java.io.File(approvedPath)
-            dest.parentFile?.mkdirs()
-            source.copyTo(dest, overwrite = true)
-            source.delete()
+            val sourcePath = pendingPath.toOkioPath()
+            val destPath = approvedPath.toOkioPath()
+            destPath.parent?.let { parent ->
+                fileSystem.createDirectories(parent)
+            }
+            fileSystem.copy(sourcePath, destPath)
+            fileSystem.delete(sourcePath)
             return "file://$approvedPath"
         } catch (e: Exception) {
             return pendingUrl
@@ -267,5 +275,9 @@ class LocalImageStorage(
     
     override suspend fun generateThumbnail(imageBytes: ByteArray, width: Int, height: Int): ByteArray {
         return imageBytes // Simplified - actual implementation would resize
+    }
+    
+    private fun String.toOkioPath(): okio.Path {
+        return with(okio.Path.Companion) { this@toOkioPath.toPath() }
     }
 }

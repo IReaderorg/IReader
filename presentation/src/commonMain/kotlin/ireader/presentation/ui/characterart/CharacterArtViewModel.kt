@@ -3,6 +3,7 @@
 import androidx.compose.runtime.Stable
 import ireader.domain.data.repository.CharacterArtRepository
 import ireader.domain.models.characterart.*
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,7 +53,8 @@ data class CharacterArtScreenState(
 class CharacterArtViewModel(
     private val repository: CharacterArtRepository,
     private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?,
-    private val geminiImageGenerator: GeminiImageGenerator? = null
+    private val geminiImageGenerator: GeminiImageGenerator? = null,
+    private val readerPreferences: ReaderPreferences? = null
 ) : BaseViewModel() {
     
     private val _state = MutableStateFlow(CharacterArtScreenState())
@@ -62,6 +64,19 @@ class CharacterArtViewModel(
     
     init {
         loadInitialData()
+        loadSavedApiKey()
+    }
+    
+    /**
+     * Load saved Gemini API key from preferences
+     */
+    private fun loadSavedApiKey() {
+        val savedKey = readerPreferences?.geminiApiKey()?.get() ?: ""
+        if (savedKey.isNotBlank()) {
+            _state.update { it.copy(geminiApiKey = savedKey) }
+            // Fetch models with saved key
+            fetchAvailableModels(savedKey)
+        }
     }
     
     private fun loadInitialData() {
@@ -334,10 +349,12 @@ class CharacterArtViewModel(
     // ==================== Gemini AI Generation ====================
     
     /**
-     * Set the Gemini API key and fetch available models
+     * Set the Gemini API key, save to preferences, and fetch available models
      */
     fun setGeminiApiKey(apiKey: String) {
         _state.update { it.copy(geminiApiKey = apiKey) }
+        // Save to preferences for persistence
+        readerPreferences?.geminiApiKey()?.set(apiKey)
         if (apiKey.isNotBlank()) {
             fetchAvailableModels(apiKey)
         }
@@ -401,6 +418,7 @@ class CharacterArtViewModel(
         }
         
         val selectedModel = _state.value.selectedModel
+        val modelId = selectedModel?.id ?: "imagen-4.0-generate-001"
         
         scope.launch {
             _state.update { 
@@ -412,10 +430,11 @@ class CharacterArtViewModel(
             }
             
             // Use appropriate generation method based on selected model
-            val result = if (selectedModel?.id?.contains("gemini-2") == true) {
-                generator.generateWithGemini2Flash(apiKey, prompt, characterName, bookTitle)
+            // Gemini models use generateContent endpoint, Imagen models use predict endpoint
+            val result = if (modelId.startsWith("gemini-")) {
+                generator.generateWithGemini2Flash(apiKey, prompt, characterName, bookTitle, modelId)
             } else {
-                generator.generateImage(apiKey, prompt, characterName, bookTitle, style)
+                generator.generateImage(apiKey, prompt, characterName, bookTitle, style, modelId)
             }
             
             result

@@ -26,13 +26,21 @@ class GeminiImageGenerator(
     
     companion object {
         private const val GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models"
-        private const val IMAGE_MODEL = "imagen-3.0-generate-002"
+        private const val IMAGE_MODEL = "imagen-4.0-generate-001"
         
-        // Default available image generation models
+        // Default available image generation models (only image generation capable)
         val DEFAULT_IMAGE_MODELS = listOf(
+            ImageModel("imagen-4.0-generate-001", "Imagen 4", "Latest high quality image generation"),
             ImageModel("imagen-3.0-generate-002", "Imagen 3", "High quality image generation"),
             ImageModel("imagen-3.0-fast-generate-001", "Imagen 3 Fast", "Faster generation, slightly lower quality"),
-            ImageModel("gemini-2.0-flash-exp", "Gemini 2.0 Flash", "Experimental multimodal generation")
+            ImageModel("gemini-2.0-flash-preview-image-generation", "Gemini 2.0 Flash", "Multimodal image generation")
+        )
+        
+        // Known image generation model prefixes for filtering
+        private val IMAGE_MODEL_PREFIXES = listOf(
+            "imagen-",
+            "gemini-2.0-flash-preview-image",
+            "gemini-2.5-flash-preview-image"
         )
     }
     
@@ -40,7 +48,7 @@ class GeminiImageGenerator(
      * Fetch available image generation models from Gemini API
      * 
      * @param apiKey User's Gemini API key
-     * @return List of available models that support image generation
+     * @return List of available models that support image generation (only image models, not text models)
      */
     suspend fun fetchAvailableModels(apiKey: String): Result<List<ImageModel>> {
         return try {
@@ -52,24 +60,34 @@ class GeminiImageGenerator(
                 val responseBody = response.bodyAsText()
                 val modelsResponse = json.decodeFromString<ModelsListResponse>(responseBody)
                 
-                // Filter models that support image generation
+                // Filter to ONLY image generation models (not text/chat models)
                 val imageModels = modelsResponse.models
                     .filter { model ->
-                        // Check if model supports image generation
-                        model.supportedGenerationMethods.any { method ->
-                            method.contains("generate", ignoreCase = true) ||
-                            method.contains("predict", ignoreCase = true)
-                        } && (
-                            model.name.contains("imagen", ignoreCase = true) ||
-                            model.name.contains("gemini-2", ignoreCase = true)
-                        )
+                        val modelId = model.name.removePrefix("models/")
+                        // Only include models that are specifically for image generation
+                        IMAGE_MODEL_PREFIXES.any { prefix -> 
+                            modelId.startsWith(prefix, ignoreCase = true) 
+                        }
                     }
                     .map { model ->
                         ImageModel(
                             id = model.name.removePrefix("models/"),
-                            displayName = model.displayName,
-                            description = model.description
+                            displayName = model.displayName.ifBlank { 
+                                formatModelName(model.name.removePrefix("models/"))
+                            },
+                            description = model.description.ifBlank {
+                                getDefaultDescription(model.name.removePrefix("models/"))
+                            }
                         )
+                    }
+                    .sortedBy { model ->
+                        // Sort: Imagen 4 first, then Imagen 3, then Gemini
+                        when {
+                            model.id.contains("imagen-4") -> 0
+                            model.id.contains("imagen-3") && !model.id.contains("fast") -> 1
+                            model.id.contains("imagen-3") && model.id.contains("fast") -> 2
+                            else -> 3
+                        }
                     }
                 
                 if (imageModels.isEmpty()) {
@@ -94,14 +112,36 @@ class GeminiImageGenerator(
         }
     }
     
+    private fun formatModelName(modelId: String): String {
+        return when {
+            modelId.contains("imagen-4") -> "Imagen 4"
+            modelId.contains("imagen-3") && modelId.contains("fast") -> "Imagen 3 Fast"
+            modelId.contains("imagen-3") -> "Imagen 3"
+            modelId.contains("gemini-2.0-flash") -> "Gemini 2.0 Flash"
+            modelId.contains("gemini-2.5-flash") -> "Gemini 2.5 Flash"
+            else -> modelId
+        }
+    }
+    
+    private fun getDefaultDescription(modelId: String): String {
+        return when {
+            modelId.contains("imagen-4") -> "Latest high quality image generation"
+            modelId.contains("imagen-3") && modelId.contains("fast") -> "Faster generation, slightly lower quality"
+            modelId.contains("imagen-3") -> "High quality image generation"
+            modelId.contains("gemini") -> "Multimodal image generation"
+            else -> "Image generation model"
+        }
+    }
+    
     /**
-     * Generate an image using Gemini's Imagen 3 model
+     * Generate an image using Gemini's Imagen model
      * 
      * @param apiKey User's Gemini API key
      * @param prompt Description of the image to generate
      * @param characterName Name of the character (added to prompt)
      * @param bookTitle Book the character is from (added to prompt)
      * @param style Art style preference
+     * @param modelId Optional model ID to use (defaults to IMAGE_MODEL)
      * @return Result containing image bytes or error
      */
     suspend fun generateImage(
@@ -109,7 +149,8 @@ class GeminiImageGenerator(
         prompt: String,
         characterName: String,
         bookTitle: String,
-        style: String = "digital art"
+        style: String = "digital art",
+        modelId: String = IMAGE_MODEL
     ): Result<GeneratedImage> {
         return try {
             // Build enhanced prompt
@@ -127,8 +168,8 @@ class GeminiImageGenerator(
                 )
             )
             
-            val response = httpClient.post("$GEMINI_API_URL/$IMAGE_MODEL:predict") {
-                parameter("key", apiKey)
+            val response = httpClient.post("$GEMINI_API_URL/$modelId:predict") {
+                header("x-goog-api-key", apiKey)
                 contentType(ContentType.Application.Json)
                 setBody(json.encodeToString(ImageGenerationRequest.serializer(), requestBody))
             }
@@ -152,12 +193,7 @@ class GeminiImageGenerator(
                 )
             } else {
                 val errorBody = response.bodyAsText()
-                val errorMessage = try {
-                    val error = json.decodeFromString<GeminiErrorResponse>(errorBody)
-                    error.error.message
-                } catch (e: Exception) {
-                    "Image generation failed: ${response.status}"
-                }
+                val errorMessage = parseErrorMessage(response.status.value, errorBody)
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
@@ -166,13 +202,35 @@ class GeminiImageGenerator(
     }
     
     /**
-     * Alternative: Use Gemini 2.0 Flash for image generation (experimental)
+     * Parse error message from API response with user-friendly messages
+     */
+    private fun parseErrorMessage(statusCode: Int, errorBody: String): String {
+        return when (statusCode) {
+            429 -> "Rate limit exceeded. Please wait a moment and try again. Free tier has limited requests per minute."
+            402 -> "Quota exceeded. Please check your Gemini API billing or wait for quota reset."
+            403 -> "Access forbidden. Please check your API key permissions."
+            404 -> "Model not found. The selected model may not be available in your region."
+            else -> {
+                try {
+                    val error = json.decodeFromString<GeminiErrorResponse>(errorBody)
+                    error.error.message
+                } catch (e: Exception) {
+                    "Image generation failed (HTTP $statusCode)"
+                }
+            }
+        }
+    }
+    
+    /**
+     * Generate image using Gemini Flash model (2.0 or 2.5)
+     * Uses the generateContent endpoint with image response modality
      */
     suspend fun generateWithGemini2Flash(
         apiKey: String,
         prompt: String,
         characterName: String,
-        bookTitle: String
+        bookTitle: String,
+        modelId: String = "gemini-2.0-flash-preview-image-generation"
     ): Result<GeneratedImage> {
         return try {
             val enhancedPrompt = buildPrompt(prompt, characterName, bookTitle, "detailed illustration")
@@ -181,7 +239,7 @@ class GeminiImageGenerator(
                 contents = listOf(
                     Gemini2Content(
                         parts = listOf(
-                            Gemini2Part(text = "Generate an image: $enhancedPrompt")
+                            Gemini2Part(text = enhancedPrompt)
                         )
                     )
                 ),
@@ -190,8 +248,8 @@ class GeminiImageGenerator(
                 )
             )
             
-            val response = httpClient.post("$GEMINI_API_URL/gemini-2.0-flash-exp:generateContent") {
-                parameter("key", apiKey)
+            val response = httpClient.post("$GEMINI_API_URL/$modelId:generateContent") {
+                header("x-goog-api-key", apiKey)
                 contentType(ContentType.Application.Json)
                 setBody(json.encodeToString(Gemini2Request.serializer(), requestBody))
             }
@@ -203,7 +261,7 @@ class GeminiImageGenerator(
                 // Find image part in response
                 val imagePart = result.candidates.firstOrNull()?.content?.parts
                     ?.find { it.inlineData != null }?.inlineData
-                    ?: return Result.failure(Exception("No image in response"))
+                    ?: return Result.failure(Exception("No image in response. The model may not support image generation."))
                 
                 @OptIn(ExperimentalEncodingApi::class)
                 val imageBytes = Base64.decode(imagePart.data)
@@ -216,7 +274,9 @@ class GeminiImageGenerator(
                     )
                 )
             } else {
-                Result.failure(Exception("Generation failed: ${response.status}"))
+                val errorBody = response.bodyAsText()
+                val errorMessage = parseErrorMessage(response.status.value, errorBody)
+                Result.failure(Exception(errorMessage))
             }
         } catch (e: Exception) {
             Result.failure(e)

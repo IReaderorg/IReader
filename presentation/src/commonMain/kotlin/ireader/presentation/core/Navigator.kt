@@ -8,6 +8,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
+import io.ktor.http.encodeURLPathPart
 import ireader.presentation.core.NavigationRoutes.repositoryAdd
 import ireader.presentation.core.ui.BookDetailScreenSpec
 import ireader.presentation.core.ui.ChatGptLoginScreenSpec
@@ -161,7 +162,7 @@ fun NavHostController.navigateTo(spec: RepositoryAddScreenSpec) {
 }
 
 fun NavHostController.navigateTo(spec: GlobalSearchScreenSpec) {
-    val query = spec.query?.let { "?query=${java.net.URLEncoder.encode(it, "UTF-8")}" } ?: ""
+    val query = spec.query?.let { "?query=${it.encodeURLPathPart()}" } ?: ""
     val route = "${NavigationRoutes.GLOBAL_SEARCH}$query"
     navigate(route) {
         launchSingleTop = true

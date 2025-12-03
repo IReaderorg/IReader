@@ -83,9 +83,7 @@ class VoiceDownloader(
      */
     private fun calculateChecksum(data: ByteArray): String {
         return try {
-            val digest = java.security.MessageDigest.getInstance("SHA-256")
-            val hash = digest.digest(data)
-            hash.joinToString("") { "%02x".format(it) }
+            okio.ByteString.of(*data).sha256().hex()
         } catch (e: Exception) {
             Log.warn { "Failed to calculate checksum: ${e.message}" }
             ""

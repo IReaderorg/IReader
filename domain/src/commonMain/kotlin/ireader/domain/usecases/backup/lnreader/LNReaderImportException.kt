@@ -130,12 +130,21 @@ sealed class LNReaderImportException(
         fun fromException(e: Throwable): LNReaderImportException {
             return when (e) {
                 is LNReaderImportException -> e
-                is java.io.FileNotFoundException -> FileNotFoundException(cause = e)
-                is java.util.zip.ZipException -> CorruptedBackupException(cause = e)
+                is okio.FileNotFoundException -> FileNotFoundException(cause = e)
                 is OutOfMemoryError -> OutOfMemoryException(cause = e)
                 is SecurityException -> PermissionDeniedException(cause = e)
                 is kotlinx.serialization.SerializationException -> ParseFailedException(e.message ?: "JSON parsing error", e)
-                else -> UnknownException(e.message ?: "Unknown error", e)
+                else -> {
+                    // Check exception message for zip-related errors
+                    val message = e.message?.lowercase() ?: ""
+                    if (message.contains("zip") || message.contains("corrupt")) {
+                        CorruptedBackupException(cause = e)
+                    } else if (message.contains("not found") || message.contains("no such file")) {
+                        FileNotFoundException(cause = e)
+                    } else {
+                        UnknownException(e.message ?: "Unknown error", e)
+                    }
+                }
             }
         }
     }

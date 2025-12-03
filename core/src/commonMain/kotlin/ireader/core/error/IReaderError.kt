@@ -75,20 +75,24 @@ sealed class IReaderError : Exception() {
  * Extension function to convert generic exceptions to IReaderError
  */
 fun Throwable.toIReaderError(): IReaderError {
-    return when (this) {
-        is IReaderError -> this
-        is java.net.UnknownHostException -> IReaderError.NetworkError(
-            message = "No internet connection",
-            cause = this
-        )
-        is java.net.SocketTimeoutException -> IReaderError.NetworkError(
-            message = "Connection timeout",
-            cause = this
-        )
-        is java.io.IOException -> IReaderError.StorageError(
-            message = "File operation failed: ${this.message}",
-            cause = this
-        )
+    val errorMessage = this.message?.lowercase() ?: ""
+    return when {
+        this is IReaderError -> this
+        errorMessage.contains("unknown host") || errorMessage.contains("unable to resolve") -> 
+            IReaderError.NetworkError(
+                message = "No internet connection",
+                cause = this
+            )
+        errorMessage.contains("timeout") || errorMessage.contains("timed out") -> 
+            IReaderError.NetworkError(
+                message = "Connection timeout",
+                cause = this
+            )
+        this is okio.IOException || errorMessage.contains("io") || errorMessage.contains("file") -> 
+            IReaderError.StorageError(
+                message = "File operation failed: ${this.message}",
+                cause = this
+            )
         else -> IReaderError.UnknownError(
             message = this.message ?: "An unknown error occurred",
             cause = this

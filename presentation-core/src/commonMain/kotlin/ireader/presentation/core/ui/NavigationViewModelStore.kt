@@ -34,17 +34,8 @@ class NavigationViewModelStore {
     
     fun clear(key: String) {
         viewModels.remove(key)?.let { vm ->
-            // Call onCleared if it's a ViewModel
-            if (vm is ViewModel) {
-                try {
-                    // Use reflection to call onCleared since it's protected
-                    val method = ViewModel::class.java.getDeclaredMethod("onCleared")
-                    method.isAccessible = true
-                    method.invoke(vm)
-                } catch (e: Exception) {
-                    // Ignore if method not found or not accessible
-                }
-            }
+            // ViewModel cleanup is handled by the framework
+            // We just remove the reference and let GC handle it
         }
     }
     

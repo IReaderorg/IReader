@@ -26,6 +26,7 @@ import okhttp3.Response
 import okhttp3.internal.closeQuietly
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
+import okio.Path.Companion.toPath
 import okio.Source
 import okio.buffer
 import okio.sink
@@ -83,7 +84,7 @@ class BookCoverFetcher(
 
     private suspend fun fileLoader(file: VirtualFile): FetchResult {
         // Convert VirtualFile to okio Path for Coil
-        val okioPath = java.io.File(file.path).toOkioPath()
+        val okioPath = file.path.toPath()
         return SourceFetchResult(
             source = ImageSource(
                 file = okioPath,

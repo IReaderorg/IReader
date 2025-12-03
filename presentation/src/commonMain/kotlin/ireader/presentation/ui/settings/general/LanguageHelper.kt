@@ -2,7 +2,6 @@ package ireader.presentation.ui.settings.general
 
 
 import ireader.core.log.Log
-import java.util.Locale
 
 
 object LanguageHelper {
@@ -77,7 +76,7 @@ object LanguageHelper {
         if (ISO_639_1Map.isEmpty()) {
             initISO6391Map()
         }
-        val comparison = input.lowercase(Locale.ROOT)
+        val comparison = input.lowercase()
 
         return ISO_639_1Map[comparison]
     }
@@ -85,7 +84,7 @@ object LanguageHelper {
     /**ISO_639_2_B or ISO_639_2_T or ISO_639_3-> lang*/
     fun fromThreeLettersToLanguage(input: String): String? {
         if (input.length != 3) return null
-        val comparison = input.lowercase(Locale.ROOT)
+        val comparison = input.lowercase()
         for (lang in languages) {
             if (lang.ISO_639_2_B == comparison) {
                 return lang.languageName

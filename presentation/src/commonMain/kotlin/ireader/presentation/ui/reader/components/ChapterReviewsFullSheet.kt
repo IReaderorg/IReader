@@ -246,7 +246,10 @@ fun ChapterReviewsFullSheet(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(reviews) { review ->
+                items(
+                    items = reviews,
+                    key = { review -> review.id ?: "${review.userId}_${review.createdAt}" }
+                ) { review ->
                     val userBadges = userBadgesMap[review.userId] ?: emptyList()
                     val primaryBadge = userBadges.find { it.isPrimary }?.let { userBadge ->
                         ireader.domain.models.remote.Badge(

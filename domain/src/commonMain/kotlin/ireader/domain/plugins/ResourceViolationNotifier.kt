@@ -1,5 +1,6 @@
 package ireader.domain.plugins
 
+import ireader.domain.utils.extensions.formatDateTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.launchIn
@@ -51,8 +52,7 @@ class ResourceViolationNotifier(
      * Log a resource violation
      */
     private fun logViolation(violation: ResourceViolation) {
-        val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            .format(java.util.Date(violation.timestamp))
+        val timestamp = violation.timestamp.formatDateTime()
         
         println("[$timestamp] Plugin Resource Violation:")
         println("  Plugin ID: ${violation.pluginId}")

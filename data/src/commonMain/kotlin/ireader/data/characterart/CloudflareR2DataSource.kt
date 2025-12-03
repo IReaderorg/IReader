@@ -262,8 +262,7 @@ class CloudflareR2DataSource(
     }
     
     private fun sha256Hex(data: ByteArray): String {
-        val digest = java.security.MessageDigest.getInstance("SHA-256")
-        return digest.digest(data).toHexString()
+        return okio.ByteString.of(*data).sha256().hex()
     }
     
     private fun ByteArray.toHexString(): String {

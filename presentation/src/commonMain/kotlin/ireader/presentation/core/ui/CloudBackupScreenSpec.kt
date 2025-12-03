@@ -134,12 +134,8 @@ class CloudBackupScreenSpec {
      * Get platform-specific temporary directory for backup files
      */
     private fun getTempBackupDirectory(): String {
-        return try {
-            // Try to get system temp directory
-            System.getProperty("java.io.tmpdir") ?: "/tmp"
-        } catch (e: Exception) {
-            "/tmp"
-        }
+        // Use okio's FileSystem to get a platform-appropriate temp directory
+        return okio.FileSystem.SYSTEM_TEMPORARY_DIRECTORY.toString()
     }
     
     /**

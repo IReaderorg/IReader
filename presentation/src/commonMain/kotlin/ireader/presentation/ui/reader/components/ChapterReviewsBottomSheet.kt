@@ -105,7 +105,10 @@ fun ChapterReviewsBottomSheet(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(reviews) { review ->
+                items(
+                    items = reviews,
+                    key = { review -> review.id ?: "${review.userId}_${review.createdAt}" }
+                ) { review ->
                     ReviewCard(
                         userName = "User ${review.userId.take(8)}",
                         rating = review.rating,

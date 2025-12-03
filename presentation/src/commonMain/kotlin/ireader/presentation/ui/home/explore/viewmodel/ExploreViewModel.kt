@@ -282,8 +282,7 @@ class ExploreViewModel(
      */
     private fun processErrorResult(error: Throwable) {
         // Silently ignore cancellation exceptions - these are expected during navigation
-        if (error is kotlinx.coroutines.CancellationException || 
-            error is java.util.concurrent.CancellationException) {
+        if (error is kotlinx.coroutines.CancellationException) {
             return
         }
         

@@ -5,13 +5,15 @@ import ireader.domain.data.repository.SourceCredentialsRepository
 import ireader.domain.usecases.backup.CloudBackupFile
 import ireader.domain.usecases.backup.CloudBackupManager
 import ireader.domain.usecases.backup.CloudProvider
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ireader.domain.utils.extensions.currentTimeToLong
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 /**
  * ViewModel for managing cloud backup state and operations
@@ -209,6 +211,7 @@ class CloudBackupViewModel(
     /**
      * Upload a backup to cloud storage
      */
+    @OptIn(ExperimentalTime::class)
     fun uploadBackup(localFilePath: String, fileName: String) {
         val provider = _selectedProvider.value ?: return
         
@@ -221,8 +224,12 @@ class CloudBackupViewModel(
                 
                 when (result) {
                     is ireader.domain.models.BackupResult.Success -> {
-                        val timestamp = java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault())
-                            .format(java.util.Date(result.timestamp))
+                        val timestamp = result.timestamp.let { ts ->
+                            val dt = kotlinx.datetime.Instant.fromEpochMilliseconds(ts)
+                                .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                            val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+                            "${monthNames[dt.monthNumber - 1]} ${dt.dayOfMonth.toString().padStart(2, '0')}, ${dt.year} ${dt.hour.toString().padStart(2, '0')}:${dt.minute.toString().padStart(2, '0')}"
+                        }
                         _successMessage.value = "Backup uploaded successfully at $timestamp"
                         // Reload backups to show the new one
                         loadCloudBackups()

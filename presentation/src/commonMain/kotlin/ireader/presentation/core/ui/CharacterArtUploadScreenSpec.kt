@@ -109,6 +109,7 @@ class CharacterArtUploadScreenSpec {
             onApiKeyChanged = { apiKey ->
                 vm.setGeminiApiKey(apiKey)
             },
+            initialApiKey = state.geminiApiKey,
             paddingValues = PaddingValues(0.dp)
         )
     }

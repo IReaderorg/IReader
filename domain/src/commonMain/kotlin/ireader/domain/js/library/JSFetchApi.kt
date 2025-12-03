@@ -9,6 +9,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLPathPart
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -71,7 +72,7 @@ class JSFetchApi(
                             (data as? Map<*, *>)?.entries?.joinToString("&") { (key, values) ->
                                 val valueList = values as? List<*> ?: listOf(values)
                                 valueList.joinToString("&") { value ->
-                                    "$key=${java.net.URLEncoder.encode(value.toString(), "UTF-8")}"
+                                    "$key=${value.toString().encodeURLPathPart()}"
                                 }
                             }
                         } ?: ""

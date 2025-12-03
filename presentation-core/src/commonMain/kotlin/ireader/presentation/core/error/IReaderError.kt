@@ -74,24 +74,25 @@ sealed class IReaderError : Exception() {
          * Creates appropriate error type from generic exception
          */
         fun fromException(exception: Throwable, context: String? = null): IReaderError {
-            return when (exception) {
-                is IReaderError -> exception
-                is java.net.UnknownHostException, 
-                is java.net.SocketTimeoutException,
-                is java.net.ConnectException -> NetworkError(
+            val errorMessage = exception.message?.lowercase() ?: ""
+            return when {
+                exception is IReaderError -> exception
+                errorMessage.contains("unknown host") || 
+                errorMessage.contains("timeout") || 
+                errorMessage.contains("connect") -> NetworkError(
                     message = context?.let { "$it: ${exception.message}" } ?: exception.message ?: "Network error",
                     cause = exception
                 )
-                is java.sql.SQLException -> DatabaseError(
+                errorMessage.contains("sql") || errorMessage.contains("database") -> DatabaseError(
                     message = context?.let { "$it: ${exception.message}" } ?: exception.message ?: "Database error",
                     cause = exception,
                     operation = context
                 )
-                is java.io.IOException -> FileSystemError(
+                exception is okio.IOException || errorMessage.contains("io") || errorMessage.contains("file") -> FileSystemError(
                     message = context?.let { "$it: ${exception.message}" } ?: exception.message ?: "File system error",
                     cause = exception
                 )
-                is kotlinx.serialization.SerializationException -> ParseError(
+                exception is kotlinx.serialization.SerializationException -> ParseError(
                     message = context?.let { "$it: ${exception.message}" } ?: exception.message ?: "Parsing error",
                     cause = exception,
                     contentType = "JSON"

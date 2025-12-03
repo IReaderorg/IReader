@@ -1,5 +1,7 @@
 package ireader.domain.plugins
 
+import ireader.domain.utils.extensions.formatDateTime
+
 /**
  * Utility for formatting plugin changelogs
  * Requirements: 12.3
@@ -40,9 +42,7 @@ object PluginChangelogFormatter {
      * Format a date timestamp
      */
     private fun formatDate(timestamp: Long): String {
-        // Simple date formatting - in production, use proper date formatter
-        val date = java.util.Date(timestamp)
-        return date.toString()
+        return timestamp.formatDateTime()
     }
     
     /**

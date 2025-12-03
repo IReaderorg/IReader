@@ -16,12 +16,13 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class BadgeRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -450,6 +451,7 @@ class BadgeRepositoryImpl(
         }
     }
     
+    @OptIn(ExperimentalTime::class)
     override suspend fun updatePaymentProofStatus(
         proofId: String,
         status: ireader.domain.models.remote.PaymentProofStatus,
@@ -463,7 +465,7 @@ class BadgeRepositoryImpl(
         val updateData = buildJsonObject {
             put("status", status.name)
             put("reviewed_by", adminUserId)
-            put("reviewed_at", java.time.Instant.now().toString())
+            put("reviewed_at", Clock.System.now().toString())
         }
         backendService.update(
             table = "payment_proofs",

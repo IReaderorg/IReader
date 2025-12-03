@@ -249,31 +249,36 @@ object ErrorHandler {
     fun fromException(e: Throwable, context: String = ""): FetchError {
         // Improved: Build context suffix once
         val contextSuffix = if (context.isNotEmpty()) ": $context" else ""
+        val errorMessage = e.message?.lowercase() ?: ""
         
         return when {
-            e is java.net.SocketTimeoutException || e is java.util.concurrent.TimeoutException -> {
+            // Check for timeout-related errors by message
+            errorMessage.contains("timeout") || errorMessage.contains("timed out") -> {
                 FetchError.TimeoutError(
                     message = "Request timed out$contextSuffix",
                     timeoutMs = 30000L
                 )
             }
-            e is java.net.UnknownHostException -> {
+            // Check for host resolution errors
+            errorMessage.contains("unknown host") || errorMessage.contains("unable to resolve") -> {
                 FetchError.NetworkError(
                     message = "Cannot resolve host$contextSuffix",
                     cause = e
                 )
             }
-            e is java.net.ConnectException -> {
+            // Check for connection errors
+            errorMessage.contains("connect") && (errorMessage.contains("refused") || errorMessage.contains("failed")) -> {
                 FetchError.NetworkError(
                     message = "Cannot connect to server$contextSuffix",
                     cause = e
                 )
             }
-            e is java.io.IOException -> {
+            // Check for IO errors
+            e is okio.IOException || errorMessage.contains("io") || errorMessage.contains("stream") -> {
                 // Improved: More specific IO error messages
                 val ioMessage = when {
-                    e.message?.contains("closed", ignoreCase = true) == true -> "Connection closed"
-                    e.message?.contains("reset", ignoreCase = true) == true -> "Connection reset"
+                    errorMessage.contains("closed") -> "Connection closed"
+                    errorMessage.contains("reset") -> "Connection reset"
                     else -> "Network error"
                 }
                 FetchError.NetworkError(
@@ -281,7 +286,7 @@ object ErrorHandler {
                     cause = e
                 )
             }
-            e.message?.contains("parse", ignoreCase = true) == true -> {
+            errorMessage.contains("parse") -> {
                 FetchError.ParsingError(
                     message = e.message ?: "Parsing failed",
                     url = context,

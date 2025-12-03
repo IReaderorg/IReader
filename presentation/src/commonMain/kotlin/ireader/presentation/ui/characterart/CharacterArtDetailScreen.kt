@@ -25,12 +25,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.characterart.CharacterArt
-import ireader.presentation.ui.component.isTableUi
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.presentation.ui.component.isTableUi
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 /**
  * Detail screen for viewing character art
@@ -664,6 +665,7 @@ private fun ReportDialog(
     )
 }
 
+@OptIn(ExperimentalTime::class)
 private fun formatDate(timestamp: Long): String {
     val now = currentTimeToLong()
     val diff = now - timestamp
@@ -674,8 +676,12 @@ private fun formatDate(timestamp: Long): String {
         diff < 86400_000 -> "${diff / 3600_000}h ago"
         diff < 604800_000 -> "${diff / 86400_000}d ago"
         else -> {
-            val date = java.text.SimpleDateFormat("MMM d, yyyy", java.util.Locale.getDefault())
-            date.format(java.util.Date(timestamp))
+            timestamp.let { 
+                val dt = kotlinx.datetime.Instant.fromEpochMilliseconds(it)
+                    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+                "${monthNames[dt.monthNumber - 1]} ${dt.dayOfMonth}, ${dt.year}"
+            }
         }
     }
 }

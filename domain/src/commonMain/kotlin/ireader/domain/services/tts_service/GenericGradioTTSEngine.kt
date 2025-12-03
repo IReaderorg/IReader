@@ -56,12 +56,12 @@ class GenericGradioTTSEngine(
     @Volatile
     private var isGeneratingSpeech = false
     
-    // Audio cache for pre-fetching (thread-safe with ConcurrentHashMap)
-    private val audioCache = java.util.concurrent.ConcurrentHashMap<String, ByteArray>()
-    private val loadingParagraphs = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+    // Audio cache for pre-fetching (thread-safe with synchronized map)
+    private val audioCache = ireader.core.util.synchronizedMapOf<String, ByteArray>()
+    private val loadingParagraphs = ireader.core.util.synchronizedSetOf<String>()
     
-    // Pre-fetch job management (thread-safe with ConcurrentHashMap)
-    private val prefetchJobs = java.util.concurrent.ConcurrentHashMap<String, Job>()
+    // Pre-fetch job management (thread-safe with synchronized map)
+    private val prefetchJobs = ireader.core.util.synchronizedMapOf<String, Job>()
     
     private val _cachedParagraphs = MutableStateFlow<Set<Int>>(emptySet())
     val cachedParagraphs: StateFlow<Set<Int>> = _cachedParagraphs.asStateFlow()

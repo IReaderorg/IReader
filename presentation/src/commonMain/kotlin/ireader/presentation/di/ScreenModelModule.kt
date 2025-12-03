@@ -175,7 +175,8 @@ val screenModelModule = module {
                 val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
                 getCurrentUserUseCase().getOrNull()
             },
-            geminiImageGenerator = get()
+            geminiImageGenerator = get(),
+            readerPreferences = get()
         )
     }
 }

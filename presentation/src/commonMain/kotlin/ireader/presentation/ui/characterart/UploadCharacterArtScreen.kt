@@ -43,12 +43,13 @@ enum class ImageSourceMode {
 }
 
 /**
- * Default Gemini models for image generation
+ * Default Gemini models for image generation (only image generation models)
  */
 private val defaultModels = listOf(
+    GeminiModelInfo("imagen-4.0-generate-001", "Imagen 4", "Latest high quality image generation"),
     GeminiModelInfo("imagen-3.0-generate-002", "Imagen 3", "High quality image generation"),
     GeminiModelInfo("imagen-3.0-fast-generate-001", "Imagen 3 Fast", "Faster generation, slightly lower quality"),
-    GeminiModelInfo("gemini-2.0-flash-exp", "Gemini 2.0 Flash", "Experimental multimodal generation")
+    GeminiModelInfo("gemini-2.0-flash-preview-image-generation", "Gemini 2.0 Flash", "Multimodal image generation")
 )
 
 /**
@@ -82,6 +83,8 @@ fun UploadCharacterArtScreen(
     onModelSelect: (GeminiModelInfo) -> Unit = {},
     onFetchModels: (String) -> Unit = {},
     onApiKeyChanged: (String) -> Unit = {},
+    // Initial API key from preferences
+    initialApiKey: String = "",
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues()
 ) {
@@ -98,7 +101,7 @@ fun UploadCharacterArtScreen(
     
     // Gemini AI generation state
     var imageSourceMode by remember { mutableStateOf(ImageSourceMode.PICK_FILE) }
-    var geminiApiKey by remember { mutableStateOf("") }
+    var geminiApiKey by remember(initialApiKey) { mutableStateOf(initialApiKey) }
     var generationPrompt by remember { mutableStateOf("") }
     var selectedStyle by remember { mutableStateOf("digital art") }
     var showApiKeyDialog by remember { mutableStateOf(false) }
@@ -1187,6 +1190,7 @@ fun UploadCharacterArtScreen(
         onModelSelect = {},
         onFetchModels = {},
         onApiKeyChanged = {},
+        initialApiKey = "",
         modifier = modifier,
         paddingValues = paddingValues
     )
