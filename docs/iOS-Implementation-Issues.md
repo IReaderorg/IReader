@@ -33,44 +33,42 @@ This document tracks known issues, limitations, and incomplete functionality in 
 
 ---
 
-### 3. Services Missing Actual Implementation Logic ⚠️ ARCHITECTURAL LIMITATION
+### 3. Services Full Implementation ✅ FIXED
 
 **Files:**
 - `StartDownloadServicesUseCase.ios.kt`
 - `StartLibraryUpdateServicesUseCase.ios.kt`
 - `StartTTSServicesUseCase.ios.kt`
 
-**Issue:** These services have the background task scheduling infrastructure but lack the actual business logic implementation.
+**Issue:** These services had the background task scheduling infrastructure but lacked the actual business logic implementation.
 
-**Root Cause:** The `expect class` declarations in commonMain don't have constructor parameters, so actual implementations can't inject dependencies through constructors.
+**Root Cause:** The `expect class` declarations in commonMain don't have constructor parameters, so actual implementations couldn't inject dependencies through constructors.
 
-**Current State:**
-- ✅ Background task scheduling works (BGTaskScheduler)
-- ✅ Task registration helpers provided
-- ⚠️ Actual download/update logic is placeholder (logging only)
+**Fix Applied:**
+- Implemented **Service Locator Pattern** using Koin's `KoinComponent` interface
+- All services now extend `KoinComponent` and use `by inject()` for dependencies
+- Full business logic implemented using shared common module functions
 
-**Workaround Options:**
-1. **Service Locator Pattern:** Use Koin's `get()` inside the service to retrieve dependencies
-2. **Setter Injection:** Add `setDependencies()` method similar to EpubCreator
-3. **Common Module Change:** Modify expect declarations to include constructor parameters
+**StartDownloadServicesUseCase:**
+- Uses `runDownloadService()` from commonMain
+- Injects: BookRepository, ChapterRepository, RemoteUseCases, LocalizeHelper, CatalogStore, LocalInsertUseCases, DownloadUseCases, DownloadStateHolder, PlatformNotificationManager
+- Full pause/resume support via DownloadStateHolder
+- BGTaskScheduler for background downloads
 
-**Example Workaround (Service Locator):**
-```kotlin
-actual class StartDownloadServicesUseCase {
-    private val downloadUseCases: DownloadUseCases by lazy {
-        // Get from Koin
-        org.koin.core.context.GlobalContext.get().get()
-    }
-    
-    private fun startImmediateDownload(...) {
-        downloadJob = scope.launch {
-            downloadUseCases.downloadChapters(chapterIds)
-        }
-    }
-}
-```
+**StartLibraryUpdateServicesUseCase:**
+- Uses `runLibraryUpdateService()` from commonMain
+- Injects: LocalGetBookUseCases, LocalGetChapterUseCase, RemoteUseCases, GetLocalCatalog, LocalInsertUseCases, PlatformNotificationManager
+- Automatic rescheduling for periodic updates (6 hours)
+- BGTaskScheduler for background library updates
 
-**Note:** Full implementation requires either common module changes or service locator pattern adoption.
+**StartTTSServicesUseCase:**
+- Full AVSpeechSynthesizer implementation
+- Injects: BookRepository, ChapterRepository
+- Chapter reading with paragraph navigation
+- MPRemoteCommandCenter for lock screen/Control Center controls
+- MPNowPlayingInfoCenter for Now Playing info
+- Auto-advance to next chapter
+- Configurable speech rate, pitch, and volume
 
 ---
 
@@ -281,7 +279,69 @@ provider.uploadBackup(localPath, fileName)
 
 ---
 
-### 17. GoogleDriveProvider OAuth Support ✅ IMPROVED
+### 17. StartDownloadServicesUseCase Full Implementation ✅ FIXED
+
+**File:** `domain/src/iosMain/kotlin/ireader/domain/usecases/services/StartDownloadServicesUseCase.ios.kt`
+
+**Status:** Full implementation using KoinComponent Service Locator pattern.
+
+**Changes:**
+- Extends `KoinComponent` for dependency injection
+- Uses `runDownloadService()` from commonMain for actual download logic
+- Injects all required dependencies: BookRepository, ChapterRepository, RemoteUseCases, LocalizeHelper, CatalogStore, LocalInsertUseCases, DownloadUseCases, DownloadStateHolder, PlatformNotificationManager
+- Full pause/resume support via DownloadStateHolder
+- BGTaskScheduler for background downloads with fallback to BGAppRefreshTask
+
+---
+
+### 18. StartLibraryUpdateServicesUseCase Full Implementation ✅ FIXED
+
+**File:** `domain/src/iosMain/kotlin/ireader/domain/usecases/services/StartLibraryUpdateServicesUseCase.ios.kt`
+
+**Status:** Full implementation using KoinComponent Service Locator pattern.
+
+**Changes:**
+- Extends `KoinComponent` for dependency injection
+- Uses `runLibraryUpdateService()` from commonMain for actual update logic
+- Injects all required dependencies: LocalGetBookUseCases, LocalGetChapterUseCase, RemoteUseCases, GetLocalCatalog, LocalInsertUseCases, PlatformNotificationManager
+- Automatic rescheduling for periodic updates (6 hours)
+- BGTaskScheduler for background library updates
+
+---
+
+### 19. StartTTSServicesUseCase Full Implementation ✅ FIXED
+
+**File:** `domain/src/iosMain/kotlin/ireader/domain/usecases/services/StartTTSServicesUseCase.ios.kt`
+
+**Status:** Full AVSpeechSynthesizer implementation with chapter reading.
+
+**Changes:**
+- Extends `KoinComponent` for dependency injection
+- Injects BookRepository and ChapterRepository for loading book/chapter data
+- Full chapter reading with paragraph-by-paragraph navigation
+- MPRemoteCommandCenter for lock screen/Control Center controls
+- MPNowPlayingInfoCenter for Now Playing info display
+- Auto-advance to next chapter when current chapter finishes
+- Configurable speech rate, pitch, and volume
+- Commands: PLAY, PAUSE, STOP, NEXT, PREVIOUS, TOGGLE, NEXT_PAR, PREV_PAR
+
+---
+
+### 20. EpubCreator KoinComponent Migration ✅ IMPROVED
+
+**File:** `domain/src/iosMain/kotlin/ireader/domain/usecases/epub/EpubCreator.ios.kt`
+
+**Status:** Migrated to KoinComponent Service Locator pattern.
+
+**Changes:**
+- Extends `KoinComponent` for dependency injection
+- Injects HttpClient and ChapterRepository automatically via `by inject()`
+- Removed `setDependencies()` method - no longer needed
+- Simplified usage: just create instance and call `invoke()`
+
+---
+
+### 21. GoogleDriveProvider OAuth Support ✅ IMPROVED
 
 **File:** `domain/src/iosMain/kotlin/ireader/domain/usecases/backup/GoogleDriveProvider.ios.kt`
 
@@ -360,17 +420,17 @@ single<ScheduleAutomaticBackup> { ScheduleAutomaticBackupImpl() }
 single { DropboxProvider() }
 single { GoogleDriveProvider() }
 
-// Background services (infrastructure ready, need use case injection for full functionality)
-single { StartDownloadServicesUseCase() }
-single { StartLibraryUpdateServicesUseCase() }
-single { StartTTSServicesUseCase() }
+// Background services (fully implemented using KoinComponent Service Locator pattern)
+single { StartDownloadServicesUseCase() }  // Uses runDownloadService with all dependencies
+single { StartLibraryUpdateServicesUseCase() }  // Uses runLibraryUpdateService with all dependencies
+single { StartTTSServicesUseCase() }  // Full AVSpeechSynthesizer with chapter reading
 single { StartExtensionManagerService() }
 
 // Translation with rate limiting
 single { GoogleTranslateML() }
 
-// EPUB (EpubCreator needs setDependencies() call)
-single { EpubCreator() }
+// EPUB (both use KoinComponent for dependency injection)
+single { EpubCreator() }  // Uses HttpClient and ChapterRepository via KoinComponent
 single { ImportEpub() }
 
 // JavaScript engine
@@ -388,9 +448,10 @@ single { PluginClassLoader() }
 
 Some components need additional setup after injection:
 
-1. **EpubCreator**: Call `setDependencies(httpClient, chapterRepository)` before use
-2. **DropboxProvider/GoogleDriveProvider**: Call `setAccessToken(token)` after OAuth flow
-3. **GoogleTranslateML**: Optionally call `setApiKey(key)` for Cloud API
+1. **DropboxProvider/GoogleDriveProvider**: Call `setAccessToken(token)` after OAuth flow, or use OAuth methods
+2. **GoogleTranslateML**: Optionally call `setApiKey(key)` for Cloud API
+
+Note: EpubCreator now uses KoinComponent and no longer requires `setDependencies()` call.
 
 ---
 
@@ -416,3 +477,7 @@ Some components need additional setup after injection:
 | 2025-12-03 | Added iOS version checking and fallbacks to OpenLocalFolder |
 | 2025-12-03 | Added OAuth 2.0 PKCE flow to DropboxProvider and GoogleDriveProvider |
 | 2025-12-03 | Updated DomainModulePlatform.ios.kt with full DI registration |
+| 2025-12-03 | Implemented full StartDownloadServicesUseCase using KoinComponent and runDownloadService |
+| 2025-12-03 | Implemented full StartLibraryUpdateServicesUseCase using KoinComponent and runLibraryUpdateService |
+| 2025-12-03 | Implemented full StartTTSServicesUseCase with AVSpeechSynthesizer, chapter reading, and remote controls |
+| 2025-12-03 | Migrated EpubCreator to KoinComponent, removed setDependencies() requirement |

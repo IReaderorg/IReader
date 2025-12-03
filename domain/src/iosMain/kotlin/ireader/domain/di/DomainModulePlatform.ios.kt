@@ -66,9 +66,12 @@ actual val DomainModule: Module = module {
     single { GoogleDriveProvider() }
     
     // Background services
-    // Note: These have infrastructure but need actual use case injection for full functionality
-    // The services will log operations but won't perform actual downloads/updates
-    // Full implementation requires injecting DownloadUseCases, LibraryUpdateUseCase, etc.
+    // These services use KoinComponent to inject dependencies via Service Locator pattern
+    // since expect/actual classes don't support constructor parameters in commonMain.
+    // Full functionality is now available including:
+    // - StartDownloadServicesUseCase: Uses runDownloadService with all required dependencies
+    // - StartLibraryUpdateServicesUseCase: Uses runLibraryUpdateService with all required dependencies
+    // - StartTTSServicesUseCase: Full TTS with chapter reading, paragraph navigation, and remote controls
     single { StartDownloadServicesUseCase() }
     single { StartLibraryUpdateServicesUseCase() }
     single { StartTTSServicesUseCase() }
@@ -78,7 +81,7 @@ actual val DomainModule: Module = module {
     single { GoogleTranslateML() }
     
     // EPUB
-    // Note: EpubCreator requires setDependencies() to be called with HttpClient and ChapterRepository
+    // EpubCreator uses KoinComponent to inject HttpClient and ChapterRepository automatically
     single { EpubCreator() }
     single { ImportEpub() }
     

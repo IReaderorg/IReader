@@ -4,12 +4,34 @@ import platform.BackgroundTasks.*
 import platform.Foundation.*
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.*
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.services.library_update_service.runLibraryUpdateService
+import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.notification.PlatformNotificationManager
 
 /**
  * iOS implementation of StartLibraryUpdateServicesUseCase
+ * 
+ * Uses Koin Service Locator pattern to inject dependencies since expect/actual
+ * classes don't support constructor parameters in commonMain.
+ * 
+ * Features:
+ * - BGTaskScheduler for background library updates
+ * - Full library update implementation using runLibraryUpdateService
+ * - Automatic rescheduling for periodic updates
  */
 @OptIn(ExperimentalForeignApi::class)
-actual class StartLibraryUpdateServicesUseCase {
+actual class StartLibraryUpdateServicesUseCase : KoinComponent {
+    
+    // Dependencies injected via Koin Service Locator
+    private val getBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases by inject()
+    private val getChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase by inject()
+    private val remoteUseCases: RemoteUseCases by inject()
+    private val getLocalCatalog: GetLocalCatalog by inject()
+    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases by inject()
+    private val notificationManager: PlatformNotificationManager by inject()
     
     private var updateJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -17,13 +39,13 @@ actual class StartLibraryUpdateServicesUseCase {
     companion object {
         const val LIBRARY_UPDATE_TASK_ID = "com.ireader.library.update"
         const val LIBRARY_REFRESH_TASK_ID = "com.ireader.library.refresh"
-        const val UPDATE_INTERVAL_SECONDS: Double = 6.0 * 60.0 * 60.0
+        const val UPDATE_INTERVAL_SECONDS: Double = 6.0 * 60.0 * 60.0 // 6 hours
         private var forceUpdatePending = false
     }
     
     actual fun start(forceUpdate: Boolean) {
         forceUpdatePending = forceUpdate
-        if (forceUpdate) startImmediateUpdate()
+        startImmediateUpdate(forceUpdate)
         scheduleBackgroundRefresh()
     }
     
@@ -42,7 +64,7 @@ actual class StartLibraryUpdateServicesUseCase {
         
         try {
             BGTaskScheduler.sharedScheduler.submitTaskRequest(request, null)
-            println("[LibraryUpdate] Background refresh scheduled")
+            println("[LibraryUpdate] Background refresh scheduled for ${UPDATE_INTERVAL_SECONDS / 3600} hours from now")
         } catch (e: Exception) {
             println("[LibraryUpdate] Failed to schedule refresh task: ${e.message}")
             scheduleBackgroundProcessing()
@@ -64,12 +86,40 @@ actual class StartLibraryUpdateServicesUseCase {
         }
     }
     
-    private fun startImmediateUpdate() {
+    private fun startImmediateUpdate(forceUpdate: Boolean = forceUpdatePending) {
         updateJob?.cancel()
         updateJob = scope.launch {
             try {
-                println("[LibraryUpdate] Starting library update")
-                println("[LibraryUpdate] Library update completed")
+                println("[LibraryUpdate] Starting library update (force=$forceUpdate)")
+                
+                val result = runLibraryUpdateService(
+                    getBookUseCases = getBookUseCases,
+                    getChapterUseCase = getChapterUseCase,
+                    remoteUseCases = remoteUseCases,
+                    getLocalCatalog = getLocalCatalog,
+                    insertUseCases = insertUseCases,
+                    notificationManager = notificationManager,
+                    forceUpdate = forceUpdate,
+                    updateProgress = { max, progress, inProgress ->
+                        println("[LibraryUpdate] Progress: $progress/$max")
+                    },
+                    updateTitle = { title ->
+                        println("[LibraryUpdate] Updating: $title")
+                    },
+                    updateSubtitle = { subtitle ->
+                        println("[LibraryUpdate] $subtitle")
+                    },
+                    updateNotification = { /* iOS handles notifications differently */ },
+                    onSuccess = { bookSize, skippedBooks ->
+                        println("[LibraryUpdate] Completed: $bookSize books updated, $skippedBooks skipped")
+                    },
+                    onCancel = { error ->
+                        println("[LibraryUpdate] Cancelled: ${error.message}")
+                    }
+                )
+                
+                println("[LibraryUpdate] Library update finished with result: $result")
+                
             } catch (e: CancellationException) {
                 println("[LibraryUpdate] Update cancelled")
                 throw e
@@ -84,13 +134,14 @@ actual class StartLibraryUpdateServicesUseCase {
         
         scope.launch {
             try {
-                startImmediateUpdate()
+                startImmediateUpdate(forceUpdatePending)
                 updateJob?.join()
                 task.setTaskCompletedWithSuccess(true)
             } catch (e: Exception) {
                 println("[LibraryUpdate] Background task failed: ${e.message}")
                 task.setTaskCompletedWithSuccess(false)
             }
+            // Always reschedule for periodic updates
             scheduleBackgroundRefresh()
         }
     }
