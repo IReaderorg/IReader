@@ -1,7 +1,13 @@
-﻿package ireader.domain.epub
+package ireader.domain.epub
+import ireader.domain.utils.extensions.ioDispatcher
 
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.readBytes
 import ireader.core.log.Log
 import ireader.core.source.model.Text
+import ireader.core.util.IO
+import ireader.core.util.randomUUID
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.epub.EpubChapter
@@ -11,17 +17,14 @@ import ireader.domain.usecases.epub.HtmlContentCleaner
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.utils.extensions.formatIsoDate
 import ireader.domain.utils.extensions.formatIsoDateTime
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.readBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import okio.SYSTEM
 import okio.buffer
 import okio.use
-import ireader.core.util.randomUUID
 
 /**
  * EPUB 3.0 Builder that creates valid EPUB files with proper structure,
@@ -49,7 +52,7 @@ class EpubBuilder(
         options: ExportOptions,
         outputUri: String,
         tempDirPath: String? = null
-    ): Result<String> = withContext(Dispatchers.IO) {
+    ): Result<String> = withContext(ioDispatcher) {
         try {
             // Create temporary directory for EPUB structure
             val tempDir = createTempDirectory(tempDirPath)

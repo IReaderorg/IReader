@@ -96,12 +96,5 @@ val PluginModule = module {
     // PluginClassLoader, MemoryTracker, and pluginsDir are provided by platform-specific modules
 }
 
-// Helper function to get current platform
-private fun getPlatform(): Platform {
-    return when {
-        System.getProperty("os.name")?.contains("Windows", ignoreCase = true) == true -> Platform.DESKTOP
-        System.getProperty("os.name")?.contains("Mac", ignoreCase = true) == true -> Platform.DESKTOP
-        System.getProperty("os.name")?.contains("Linux", ignoreCase = true) == true -> Platform.DESKTOP
-        else -> Platform.ANDROID // Default to Android
-    }
-}
+// Helper function to get current platform - uses expect/actual pattern
+internal expect fun getPlatform(): Platform

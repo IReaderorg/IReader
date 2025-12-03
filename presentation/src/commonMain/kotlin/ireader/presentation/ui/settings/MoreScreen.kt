@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings
+package ireader.presentation.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.home.history
+package ireader.presentation.ui.home.history
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable

@@ -1,35 +1,29 @@
 package ireader.domain.usecases.translate
 
-import ireader.domain.models.entities.Book
-import ireader.domain.models.entities.Chapter
+import ireader.domain.data.engines.TranslateEngine
+import ireader.i18n.UiText
 
 /**
  * iOS implementation of GoogleTranslateML
  * 
- * TODO: Implement using Apple's Translation framework (iOS 17.4+)
+ * TODO: Full implementation using Apple's Translation framework (iOS 17.4+)
  * or a third-party translation API
  */
-actual class GoogleTranslateML : TranslateEngine {
+actual class GoogleTranslateML actual constructor() : TranslateEngine() {
+    
+    override val id: Long = TranslateEngine.GOOGLE
+    override val engineName: String = "Google ML Kit (iOS)"
+    
     actual override suspend fun translate(
         texts: List<String>,
         source: String,
-        target: String
-    ): List<String> {
-        // TODO: Implement using Apple Translation framework
-        return texts
+        target: String,
+        onProgress: (Int) -> Unit,
+        onSuccess: (List<String>) -> Unit,
+        onError: (UiText) -> Unit
+    ) {
+        // TODO: Implement using Apple Translation framework or Google Cloud Translation API
+        // For now, return original texts
+        onSuccess(texts)
     }
-    
-    override suspend fun translate(
-        book: Book,
-        chapters: List<Chapter>,
-        source: String,
-        target: String
-    ): List<Chapter> {
-        // TODO: Implement
-        return chapters
-    }
-    
-    override fun isAvailable(): Boolean = false
-    
-    override fun supportedLanguages(): List<String> = emptyList()
 }

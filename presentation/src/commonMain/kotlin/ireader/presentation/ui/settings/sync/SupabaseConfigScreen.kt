@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.sync
+package ireader.presentation.ui.settings.sync
 
 import ireader.presentation.core.LocalNavigator
 
@@ -569,7 +569,7 @@ private fun SchemaTable(tableName: String, columns: List<String>) {
             Spacer(modifier = Modifier.height(8.dp))
             columns.forEach { column ->
                 Text(
-                    text = "• $column",
+                    text = "� $column",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(start = 8.dp, top = 2.dp)
                 )
@@ -1034,7 +1034,7 @@ private fun MultiProjectCard(
                 testResult?.let { result ->
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = if (result.contains("✓")) 
+                            containerColor = if (result.contains("?")) 
                                 MaterialTheme.colorScheme.primaryContainer 
                             else 
                                 MaterialTheme.colorScheme.errorContainer

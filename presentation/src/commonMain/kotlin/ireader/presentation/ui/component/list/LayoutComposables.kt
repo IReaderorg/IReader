@@ -35,7 +35,7 @@ fun LayoutComposable(
     showLocalMangaBadge: Boolean = false,
     showLanguageBadge: Boolean = false,
     columns: Int? = null,
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     keys: ((item: BookItem) -> Any) = {
         it.id
     }

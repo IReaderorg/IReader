@@ -261,7 +261,7 @@ class JSPluginSource(
      */
     private fun parseHtmlToPages(html: String): List<Page> {
         return try {
-            val doc = org.jsoup.Jsoup.parse(html)
+            val doc = com.fleeksoft.ksoup.Ksoup.parse(html)
             
             // Remove script and style elements
             doc.select("script, style").remove()

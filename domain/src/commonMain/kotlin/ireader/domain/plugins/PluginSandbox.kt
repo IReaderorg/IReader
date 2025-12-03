@@ -158,7 +158,7 @@ class PluginSandbox(
     suspend fun validateFileOperation(path: String, operation: FileOperation): Result<Unit> {
         if (!restrictFileAccess(path)) {
             return Result.failure(
-                SecurityException("Plugin $pluginId does not have access to path: $path")
+                IllegalStateException("Plugin $pluginId does not have access to path: $path")
             )
         }
         
@@ -171,7 +171,7 @@ class PluginSandbox(
     fun validateNetworkOperation(url: String): Result<Unit> {
         if (!restrictNetworkAccess(url)) {
             return Result.failure(
-                SecurityException("Plugin $pluginId does not have network permission or URL is blocked: $url")
+                IllegalStateException("Plugin $pluginId does not have network permission or URL is blocked: $url")
             )
         }
         

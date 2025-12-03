@@ -14,7 +14,7 @@ actual class PluginClassLoader {
      * Load a plugin class from a package file
      * On Desktop, .iplugin files are JAR files that can be loaded with URLClassLoader
      */
-    actual suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Class<out Plugin> {
+    actual suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Any {
         try {
             // Convert VirtualFile to java.io.File for URLClassLoader
             // This is a temporary bridge until we have a full VirtualFile implementation

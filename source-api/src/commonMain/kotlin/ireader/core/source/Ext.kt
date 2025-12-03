@@ -1,20 +1,20 @@
 package ireader.core.source
 
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.request
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
 
 inline fun <reified T> Iterable<*>.findInstance() = find { it is T } as? T
 
 suspend fun HttpResponse.asJsoup(html: String? = null): Document {
-    return Jsoup.parse(html ?: this.bodyAsText(), request.url.toString())
+    return Ksoup.parse(html ?: this.bodyAsText(), request.url.toString())
 }
 
 fun String.asJsoup(html: String? = null): Document {
-    return Jsoup.parse(html ?: this)
+    return Ksoup.parse(html ?: this)
 }
 
 /**

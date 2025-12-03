@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ireader.core.time.currentTimeMillis
+import ireader.core.util.IO
 
 /**
  * Startup benchmark utility for measuring and tracking app startup performance.

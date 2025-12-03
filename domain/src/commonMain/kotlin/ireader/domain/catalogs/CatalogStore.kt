@@ -113,7 +113,7 @@ class CatalogStore(
     private val pinnedCatalogsPreference = catalogPreferences.pinnedCatalogs()
     
     // Cached pinned catalog IDs to avoid repeated preference reads
-    @Volatile
+    @kotlin.concurrent.Volatile
     private var cachedPinnedIds: Set<String> = emptySet()
 
     private val lock = Mutex()

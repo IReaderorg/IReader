@@ -6,15 +6,19 @@ package ireader.domain.js.update
  * TODO: Implement using BGTaskScheduler
  */
 actual class JSPluginUpdateScheduler {
-    actual fun scheduleUpdateCheck(intervalHours: Int) {
+    private var scheduled = false
+    
+    actual fun schedulePeriodicCheck(intervalHours: Int) {
         // TODO: Schedule using BGTaskScheduler
+        scheduled = true
     }
     
-    actual fun cancelScheduledUpdates() {
+    actual fun cancelPeriodicCheck() {
         // TODO: Cancel scheduled tasks
+        scheduled = false
     }
     
-    actual fun checkForUpdatesNow() {
-        // TODO: Trigger immediate check
+    actual fun isScheduled(): Boolean {
+        return scheduled
     }
 }

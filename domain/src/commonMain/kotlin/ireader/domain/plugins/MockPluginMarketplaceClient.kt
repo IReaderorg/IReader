@@ -20,7 +20,7 @@ class MockPluginMarketplaceClient(
      * Add mock version data for testing
      */
     fun addMockVersion(pluginId: String, versionInfo: PluginVersionInfo) {
-        val versions = mockVersions.getOrDefault(pluginId, emptyList()).toMutableList()
+        val versions = (mockVersions[pluginId] ?: emptyList()).toMutableList()
         versions.add(versionInfo)
         mockVersions[pluginId] = versions.sortedByDescending { it.versionCode }
     }

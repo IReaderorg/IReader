@@ -1,4 +1,5 @@
 package ireader.domain.services.tts_service
+import ireader.domain.utils.extensions.ioDispatcher
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -44,7 +45,7 @@ class VoiceDownloader(
     suspend fun downloadVoice(
         voice: VoiceModel,
         onProgress: (Float) -> Unit
-    ): Result<Path> = withContext(Dispatchers.IO) {
+    ): Result<Path> = withContext(ioDispatcher) {
         try {
             // Create voice directory
             val voiceDir = downloadDirectory / voice.id
@@ -93,7 +94,7 @@ class VoiceDownloader(
         urlString: String,
         destination: Path,
         onProgress: (Float) -> Unit
-    ) = withContext(Dispatchers.IO) {
+    ) = withContext(ioDispatcher) {
         val response = httpClient.get(urlString)
         
         if (!response.status.isSuccess()) {
@@ -148,7 +149,7 @@ class VoiceDownloader(
         voice: VoiceModel,
         partialFile: Path,
         onProgress: (Float) -> Unit
-    ): Result<Path> = withContext(Dispatchers.IO) {
+    ): Result<Path> = withContext(ioDispatcher) {
         try {
             val existingSize = if (fileSystem.exists(partialFile)) {
                 fileSystem.metadata(partialFile).size ?: 0L

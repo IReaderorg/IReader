@@ -272,8 +272,16 @@ enum class ViolationType {
 }
 
 /**
- * Extension function to format doubles
+ * Extension function to format doubles (KMP-compatible)
  */
 private fun Double.format(decimals: Int): String {
-    return "%.${decimals}f".format(this)
+    if (decimals <= 0) {
+        return kotlin.math.round(this).toLong().toString()
+    }
+    var factor = 1.0
+    repeat(decimals) { factor *= 10.0 }
+    val rounded = kotlin.math.round(this * factor) / factor
+    val intPart = rounded.toLong()
+    val fracPart = ((rounded - intPart) * factor).toLong()
+    return "$intPart.${kotlin.math.abs(fracPart).toString().padStart(decimals, '0')}"
 }

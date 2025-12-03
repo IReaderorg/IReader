@@ -91,7 +91,7 @@ class SandboxedPluginContext(
  */
 class RestrictedPluginPreferencesStore : PluginPreferencesStore {
     private fun throwPermissionError(): Nothing {
-        throw SecurityException("Plugin does not have PREFERENCES permission")
+        throw IllegalStateException("Plugin does not have PREFERENCES permission")
     }
     
     override fun getString(key: String, defaultValue: String): String = defaultValue

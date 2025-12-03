@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.core.theme
+package ireader.presentation.ui.core.theme
 
 import androidx.compose.runtime.*
 import ireader.domain.models.theme.Theme

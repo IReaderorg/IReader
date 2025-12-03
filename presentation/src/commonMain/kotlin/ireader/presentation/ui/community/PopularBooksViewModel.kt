@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.community
+package ireader.presentation.ui.community
 
 import androidx.compose.runtime.Stable
 import ireader.domain.data.repository.BookRepository

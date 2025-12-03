@@ -7,17 +7,16 @@ package ireader.core.http
  */
 actual class SSLConfiguration {
     
-    actual fun applyToClient(builder: Any) {
-        // iOS handles SSL through ATS - no manual configuration needed
+    actual fun enableCertificatePinning(pins: Map<String, List<String>>) {
+        // iOS handles certificate pinning through ATS or URLSession delegate
+        // TODO: Implement if needed
     }
     
-    actual fun trustAllCertificates(): SSLConfiguration {
-        // Not recommended for production
-        return this
+    actual fun allowSelfSignedCertificates() {
+        // Not recommended for production - requires ATS exception in Info.plist
     }
     
-    actual fun pinCertificates(pins: List<String>): SSLConfiguration {
-        // TODO: Implement certificate pinning if needed
-        return this
+    actual fun setMinimumTlsVersion(version: TlsVersion) {
+        // iOS handles TLS version through ATS configuration
     }
 }

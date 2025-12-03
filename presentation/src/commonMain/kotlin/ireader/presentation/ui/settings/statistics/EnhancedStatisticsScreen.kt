@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.statistics
+package ireader.presentation.ui.settings.statistics
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -567,7 +567,7 @@ class EnhancedStatisticsScreen : KoinComponent {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${authorCount.bookCount} books � ${authorCount.chaptersRead} chapters read",
+                    text = "${authorCount.bookCount} books ? ${authorCount.chaptersRead} chapters read",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -593,7 +593,7 @@ class EnhancedStatisticsScreen : KoinComponent {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${session.durationMinutes} min � ${session.chaptersRead} chapters",
+                    text = "${session.durationMinutes} min ? ${session.chaptersRead} chapters",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

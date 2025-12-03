@@ -29,7 +29,7 @@ class PluginLoader(
      * Scans for .iplugin files and loads each valid plugin
      */
     suspend fun loadAll(): List<Plugin> {
-        return withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.Default) {
             val pluginsDir = fileSystem.getDataDirectory().resolve("plugins")
             
             if (!pluginsDir.exists()) {
@@ -60,7 +60,7 @@ class PluginLoader(
      * 4. Instantiate plugin
      */
     suspend fun loadPlugin(file: VirtualFile): Plugin? {
-        return withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.Default) {
             try {
                 // Step 1: Extract manifest
                 val manifest = extractManifest(file)
@@ -74,7 +74,7 @@ class PluginLoader(
                 val pluginClass = classLoader.loadPluginClass(file, manifest)
                 
                 // Step 4: Instantiate plugin
-                val plugin = pluginClass.getDeclaredConstructor().newInstance()
+                val plugin = instantiatePlugin(pluginClass)
                 
                 plugin
             } catch (e: Exception) {
@@ -116,3 +116,8 @@ class PluginLoader(
  * Platform-specific ZIP extraction
  */
 expect suspend fun extractZipEntry(file: VirtualFile, entryName: String): String?
+
+/**
+ * Platform-specific plugin instantiation
+ */
+expect fun instantiatePlugin(pluginClass: Any): Plugin

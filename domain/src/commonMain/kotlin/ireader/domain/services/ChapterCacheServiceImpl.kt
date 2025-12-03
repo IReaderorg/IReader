@@ -20,7 +20,7 @@ class ChapterCacheServiceImpl(
     private val maxMemoryMB: Int = 50
 ) : ChapterCacheService {
     
-    private val cache = LinkedHashMap<Long, CacheEntry>(maxCapacity, 0.75f, true)
+    private val cache = linkedMapOf<Long, CacheEntry>()
     private val mutex = Mutex()
     
     // Statistics

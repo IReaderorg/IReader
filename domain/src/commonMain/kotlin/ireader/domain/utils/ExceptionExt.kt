@@ -40,7 +40,7 @@ fun exceptionHandler(e: Throwable): UiText? {
         exceptionName == "SelectorParseException" -> {
             UiText.MStringResource(Res.string.cant_get_content)
         }
-        e is NoSuchMethodError -> {
+        exceptionName == "NoSuchMethodError" -> {
             UiText.MStringResource(Res.string.library_is_out_of_date)
         }
         exceptionName == "ClassCastException" -> {

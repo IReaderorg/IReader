@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.characterart
+package ireader.presentation.ui.characterart
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -402,7 +402,7 @@ private fun ArtInfoContent(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("⭐", fontSize = 16.sp)
+                Text("?", fontSize = 16.sp)
                 Spacer(Modifier.width(6.dp))
                 Text(
                     "Featured Art",
@@ -446,7 +446,7 @@ private fun ArtInfoContent(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("🤖", fontSize = 18.sp)
+                    Text("??", fontSize = 18.sp)
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "AI Generation Info",

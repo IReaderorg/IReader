@@ -1,10 +1,14 @@
 package ireader.core.util
 
+import kotlinx.coroutines.CompletionHandler
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -21,11 +25,20 @@ actual class ActorScope<E>(actual val channel: Channel<E>)
 actual fun <E> CoroutineScope.actor(
     context: CoroutineContext,
     capacity: Int,
+    start: CoroutineStart,
+    onCompletion: CompletionHandler?,
     block: suspend ActorScope<E>.() -> Unit
-): Channel<E> {
+): SendChannel<E> {
     val channel = Channel<E>(capacity)
-    kotlinx.coroutines.launch(context) {
-        ActorScope(channel).block()
+    val job = launch(context, start) {
+        try {
+            ActorScope(channel).block()
+        } finally {
+            channel.close()
+        }
+    }
+    onCompletion?.let { handler ->
+        job.invokeOnCompletion(handler)
     }
     return channel
 }

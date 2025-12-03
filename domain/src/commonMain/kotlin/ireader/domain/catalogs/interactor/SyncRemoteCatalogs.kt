@@ -1,12 +1,13 @@
 package ireader.domain.catalogs.interactor
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.core.log.Log
+import ireader.core.util.IO
 import ireader.domain.catalogs.CatalogPreferences
 import ireader.domain.catalogs.service.CatalogRemoteApi
 import ireader.domain.catalogs.service.CatalogRemoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.time.Instant
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 
@@ -24,7 +25,7 @@ class SyncRemoteCatalogs(
 
         if (forceRefresh || now - lastCheck > minTimeApiCheck) {
             try {
-                withContext(Dispatchers.IO) {
+                withContext(ioDispatcher) {
                     val newCatalogs = catalogRemoteApi.fetchCatalogs()
                     catalogRemoteRepository.deleteAllRemoteCatalogs()
                     catalogRemoteRepository.insertRemoteCatalogs(newCatalogs)

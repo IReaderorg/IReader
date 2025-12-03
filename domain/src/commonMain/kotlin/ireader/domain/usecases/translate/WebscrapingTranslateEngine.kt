@@ -1,4 +1,5 @@
 package ireader.domain.usecases.translate
+import ireader.domain.utils.extensions.ioDispatcher
 
 import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
@@ -327,7 +328,7 @@ open class WebscrapingTranslateEngine(
             val batchSize = 5 // Process 5 paragraphs at a time
             val batches = texts.chunked(batchSize)
             
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 for ((batchIndex, batch) in batches.withIndex()) {
                     val combinedText = batch.joinToString("\n---PARAGRAPH_BREAK---\n")
                     

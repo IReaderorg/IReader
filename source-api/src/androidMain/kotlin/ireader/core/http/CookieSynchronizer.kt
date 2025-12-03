@@ -2,7 +2,7 @@ package ireader.core.http
 
 import android.webkit.CookieManager
 import okhttp3.Cookie
-import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 /**
  * Android implementation of cookie synchronization between WebView and OkHttp
@@ -12,19 +12,21 @@ actual class CookieSynchronizer(
 ) {
     private val cookieManager = CookieManager.getInstance()
     
-    actual fun syncFromWebView(url: HttpUrl) {
-        val webViewCookies = cookieManager.getCookie(url.toString())
+    actual fun syncFromWebView(url: String) {
+        val httpUrl = url.toHttpUrlOrNull() ?: return
+        val webViewCookies = cookieManager.getCookie(url)
         if (!webViewCookies.isNullOrEmpty()) {
             val cookies = webViewCookies.split(";")
-                .mapNotNull { Cookie.parse(url, it.trim()) }
-            webViewCookieJar.saveFromResponse(url, cookies)
+                .mapNotNull { Cookie.parse(httpUrl, it.trim()) }
+            webViewCookieJar.saveFromResponse(httpUrl, cookies)
         }
     }
     
-    actual fun syncToWebView(url: HttpUrl) {
-        val cookies = webViewCookieJar.loadForRequest(url)
+    actual fun syncToWebView(url: String) {
+        val httpUrl = url.toHttpUrlOrNull() ?: return
+        val cookies = webViewCookieJar.loadForRequest(httpUrl)
         cookies.forEach { cookie ->
-            cookieManager.setCookie(url.toString(), cookie.toString())
+            cookieManager.setCookie(url, cookie.toString())
         }
         cookieManager.flush()
     }

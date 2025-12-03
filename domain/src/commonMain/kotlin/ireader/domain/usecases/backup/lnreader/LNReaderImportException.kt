@@ -132,9 +132,16 @@ sealed class LNReaderImportException(
                 is LNReaderImportException -> e
                 is okio.FileNotFoundException -> FileNotFoundException(cause = e)
                 is OutOfMemoryError -> OutOfMemoryException(cause = e)
-                is SecurityException -> PermissionDeniedException(cause = e)
-                is kotlinx.serialization.SerializationException -> ParseFailedException(e.message ?: "JSON parsing error", e)
                 else -> {
+                    // Check exception class name for platform-specific exceptions
+                    val exceptionName = e::class.simpleName ?: ""
+                    if (exceptionName == "SecurityException") {
+                        return PermissionDeniedException(cause = e)
+                    }
+                    if (e is kotlinx.serialization.SerializationException) {
+                        return ParseFailedException(e.message ?: "JSON parsing error", e)
+                    }
+                    
                     // Check exception message for zip-related errors
                     val message = e.message?.lowercase() ?: ""
                     if (message.contains("zip") || message.contains("corrupt")) {

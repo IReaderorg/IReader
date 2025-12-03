@@ -1,4 +1,5 @@
 package ireader.domain.usecases.remote
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
@@ -22,7 +23,7 @@ class GetRemoteBooksUseCase() {
     ) {
         val source = catalog?.source ?: throw SourceNotFoundException()
         if (source !is ireader.core.source.CatalogSource) throw SourceNotFoundException()
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             try {
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)
                 if (query != null) {

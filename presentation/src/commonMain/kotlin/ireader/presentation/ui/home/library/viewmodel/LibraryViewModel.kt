@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.home.library.viewmodel
+package ireader.presentation.ui.home.library.viewmodel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State

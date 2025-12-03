@@ -11,26 +11,46 @@ import okio.buffer
 
 actual suspend fun FileSystem.withAsyncSink(path: Path, block: (BufferedSink) -> Unit) {
     withContext(Dispatchers.IO) {
-        sink(path).buffer().use { block(it) }
+        val sink = sink(path).buffer()
+        try {
+            block(sink)
+        } finally {
+            sink.close()
+        }
     }
 }
 
 actual suspend fun FileSystem.withAsyncGzipSink(path: Path, block: (BufferedSink) -> Unit) {
     withContext(Dispatchers.IO) {
-        // TODO: Implement gzip compression
-        sink(path).buffer().use { block(it) }
+        // TODO: Implement gzip compression using okio.GzipSink when available
+        val sink = sink(path).buffer()
+        try {
+            block(sink)
+        } finally {
+            sink.close()
+        }
     }
 }
 
 actual suspend fun <T> FileSystem.withAsyncSource(path: Path, block: (BufferedSource) -> T): T {
     return withContext(Dispatchers.IO) {
-        source(path).buffer().use { block(it) }
+        val source = source(path).buffer()
+        try {
+            block(source)
+        } finally {
+            source.close()
+        }
     }
 }
 
 actual suspend fun <T> FileSystem.withAsyncGzipSource(path: Path, block: (BufferedSource) -> T): T {
     return withContext(Dispatchers.IO) {
-        // TODO: Implement gzip decompression
-        source(path).buffer().use { block(it) }
+        // TODO: Implement gzip decompression using okio.GzipSource when available
+        val source = source(path).buffer()
+        try {
+            block(source)
+        } finally {
+            source.close()
+        }
     }
 }

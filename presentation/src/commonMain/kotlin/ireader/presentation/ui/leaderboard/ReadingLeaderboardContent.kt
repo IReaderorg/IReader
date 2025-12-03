@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.leaderboard
+package ireader.presentation.ui.leaderboard
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -357,11 +357,11 @@ private fun ReadingTopThreePodium(entries: List<LeaderboardEntry>) {
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 20.dp)) {
-                Text("✨", style = MaterialTheme.typography.headlineMedium)
+                Text("?", style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Top Readers", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("✨", style = MaterialTheme.typography.headlineMedium)
+                Text("?", style = MaterialTheme.typography.headlineMedium)
             }
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.Bottom) {
@@ -377,7 +377,7 @@ private fun ReadingTopThreePodium(entries: List<LeaderboardEntry>) {
 @Composable
 private fun ReadingPodiumPlace(entry: LeaderboardEntry, place: Int, height: Dp) {
     val color = when (place) { 1 -> Color(0xFFFFD700); 2 -> Color(0xFFC0C0C0); 3 -> Color(0xFFCD7F32); else -> MaterialTheme.colorScheme.surfaceVariant }
-    val medal = when (place) { 1 -> "🥇"; 2 -> "🥈"; 3 -> "🥉"; else -> "" }
+    val medal = when (place) { 1 -> "??"; 2 -> "??"; 3 -> "??"; else -> "" }
     val scale by animateFloatAsState(targetValue = if (place == 1) 1.05f else 1f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
     
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(100.dp).scale(scale)) {
@@ -389,7 +389,7 @@ private fun ReadingPodiumPlace(entry: LeaderboardEntry, place: Int, height: Dp) 
             Text(entry.username, style = MaterialTheme.typography.bodyMedium, fontWeight = if (place == 1) FontWeight.Bold else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 70.dp))
             if (entry.hasBadge) {
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(when (entry.badgeType) { "supporter" -> "💎"; "nft" -> "🎨"; "premium" -> "⭐"; else -> "🏅" }, style = MaterialTheme.typography.bodySmall)
+                Text(when (entry.badgeType) { "supporter" -> "??"; "nft" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.bodySmall)
             }
         }
         Text(formatReadingTime(entry.totalReadingTimeMinutes), style = MaterialTheme.typography.labelLarge, color = color, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
@@ -400,7 +400,7 @@ private fun ReadingPodiumPlace(entry: LeaderboardEntry, place: Int, height: Dp) 
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("#$place", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Color.White)
-                if (place == 1) Text("👑", style = MaterialTheme.typography.titleLarge)
+                if (place == 1) Text("??", style = MaterialTheme.typography.titleLarge)
             }
         }
     }
@@ -427,7 +427,7 @@ private fun ReadingLeaderboardEntryCard(entry: LeaderboardEntry, isCurrentUser: 
                 Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(entry.username, style = MaterialTheme.typography.titleMedium, fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        if (entry.hasBadge) { Spacer(modifier = Modifier.width(6.dp)); Text(when (entry.badgeType) { "supporter" -> "💎"; "nft" -> "🎨"; "premium" -> "⭐"; else -> "🏅" }, style = MaterialTheme.typography.bodyMedium) }
+                        if (entry.hasBadge) { Spacer(modifier = Modifier.width(6.dp)); Text(when (entry.badgeType) { "supporter" -> "??"; "nft" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.bodyMedium) }
                         if (isCurrentUser) { Spacer(modifier = Modifier.width(8.dp)); Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.secondary) { Text("YOU", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondary, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } }
                     }
                     Spacer(modifier = Modifier.height(6.dp))
@@ -475,7 +475,7 @@ private fun ReadingStatItem(icon: androidx.compose.ui.graphics.vector.ImageVecto
 private fun ReadingBadgeIndicator(badgeType: String?) {
     Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.tertiaryContainer, modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-            Text(when (badgeType) { "supporter" -> "💎"; "nft" -> "🎨"; "premium" -> "⭐"; else -> "🏅" }, style = MaterialTheme.typography.titleMedium)
+            Text(when (badgeType) { "supporter" -> "??"; "nft" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.width(8.dp))
             Text("${badgeType?.replaceFirstChar { it.uppercase() } ?: "Badge"} Member", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onTertiaryContainer)
         }

@@ -10,7 +10,7 @@ import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.getOrDefault
 import coil3.request.Options
-import ireader.core.http.okhttp
+import io.ktor.client.engine.okhttp.OkHttpEngine
 import ireader.core.io.VirtualFile
 import ireader.core.log.Log
 import ireader.core.source.HttpSource
@@ -21,16 +21,13 @@ import ireader.domain.models.entities.Book
 import ireader.presentation.imageloader.coil.imageloader.BookCoverKeyer
 import okhttp3.CacheControl
 import okhttp3.Call
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.closeQuietly
 import okio.FileSystem
-import okio.Path.Companion.toOkioPath
 import okio.Path.Companion.toPath
 import okio.Source
-import okio.buffer
-import okio.sink
-import okio.source
 
 /**
  * A [Fetcher] that fetches cover image for [Manga] object.
@@ -72,8 +69,6 @@ class BookCoverFetcher(
         return when (getResourceType(url)) {
             Type.File -> {
                 val path = url.substringAfter("file://")
-                // Platform-specific file loading would be needed here
-                // For now, use the URL-based approach
                 httpLoader()
             }
             Type.URI -> fileUriLoader(url)
@@ -83,7 +78,6 @@ class BookCoverFetcher(
     }
 
     private suspend fun fileLoader(file: VirtualFile): FetchResult {
-        // Convert VirtualFile to okio Path for Coil
         val okioPath = file.path.toPath()
         return SourceFetchResult(
             source = ImageSource(
@@ -97,13 +91,10 @@ class BookCoverFetcher(
     }
 
     private suspend fun fileUriLoader(uri: String): FetchResult {
-        // Platform-specific URI loading
-        // This would need to be implemented per-platform
         throw NotImplementedError("URI loading must be implemented platform-specifically")
     }
 
     private suspend fun httpLoader(): FetchResult {
-        // Only cache separately if it's a library item
         val libraryCoverCacheFile = if (isLibraryManga) {
             coverCache.getCoverFile(bookCover)
         } else {
@@ -115,15 +106,12 @@ class BookCoverFetcher(
 
         var snapshot = readFromDiskCache()
         try {
-            // Fetch from disk cache
             if (snapshot != null) {
                 val snapshotCoverCache = moveSnapshotToCoverCache(snapshot, libraryCoverCacheFile)
                 if (snapshotCoverCache != null) {
-                    // Read from cover cache after added to library
                     return fileLoader(snapshotCoverCache)
                 }
 
-                // Read from snapshot
                 return SourceFetchResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
@@ -131,17 +119,14 @@ class BookCoverFetcher(
                 )
             }
 
-            // Fetch from network
             val response = executeNetworkRequest()
             val responseBody = checkNotNull(response.body) { "Null response source" }
             try {
-                // Read from cover cache after library manga cover updated
                 val responseCoverCache = writeResponseToCoverCache(response, libraryCoverCacheFile)
                 if (responseCoverCache != null) {
                     return fileLoader(responseCoverCache)
                 }
 
-                // Read from disk cache
                 snapshot = writeToDiskCache(response)
                 if (snapshot != null) {
                     return SourceFetchResult(
@@ -151,7 +136,6 @@ class BookCoverFetcher(
                     )
                 }
 
-                // Read from response if cache is unused or unusable
                 return SourceFetchResult(
                     source = ImageSource(source = responseBody.source(), fileSystem = FileSystem.SYSTEM),
                     mimeType = "image/*",
@@ -167,37 +151,43 @@ class BookCoverFetcher(
         }
     }
 
+    private fun getOkHttpClient(): Call.Factory {
+        val source = sourceLazy.value
+        if (source != null) {
+            val engine = source.client.engine
+            if (engine is OkHttpEngine) {
+                return engine.config.preconfigured ?: OkHttpClient()
+            }
+        }
+        return callFactoryLazy.value
+    }
+
     private suspend fun executeNetworkRequest(): Response {
-        val client = sourceLazy.value?.client?.okhttp ?: callFactoryLazy.value
+        val client = getOkHttpClient()
         val response = client.newCall(newRequest()).await()
-        if (!response.isSuccessful && response.code != 304) { // 304 = HTTP_NOT_MODIFIED
+        if (!response.isSuccessful && response.code != 304) {
             response.body?.closeQuietly()
             throw HttpException(response)
         }
         return response
     }
-    fun DefaultHeader() : okhttp3.Headers {
-        return okhttp3.Headers.Builder().apply {
 
-        }.build()
+    private fun DefaultHeader(): okhttp3.Headers {
+        return okhttp3.Headers.Builder().build()
     }
+
     private fun newRequest(): Request {
         val request = Request.Builder().apply {
             url(url!!)
-
             val sourceHeaders = sourceLazy.value?.getCoverRequest(url)?.second?.build()?.convertToOkHttpRequest()?.headers ?: DefaultHeader()
-            if (sourceHeaders != null) {
-                headers(sourceHeaders)
-            }
+            headers(sourceHeaders)
         }
 
         when {
             options.networkCachePolicy.readEnabled -> {
-                // don't take up okhttp cache
                 request.cacheControl(CACHE_CONTROL_NO_STORE)
             }
             else -> {
-                // This causes the request to fail with a 504 Unsatisfiable Request.
                 request.cacheControl(CACHE_CONTROL_NO_NETWORK_NO_CACHE)
             }
         }
@@ -238,18 +228,12 @@ class BookCoverFetcher(
         cacheFile.parent?.mkdirs()
         cacheFile.delete()
         try {
-            // Use okio's efficient copy instead of manual buffering
             val outputStream = cacheFile.outputStream(append = false)
             val buffer = okio.Buffer()
             
-            // Read all from input source into buffer
-            var totalBytes = 0L
             while (true) {
                 val bytesRead = input.read(buffer, 8192L)
                 if (bytesRead == -1L) break
-                totalBytes += bytesRead
-                
-                // Write buffer to VirtualOutputStream
                 val bytes = buffer.readByteArray()
                 outputStream.write(bytes)
             }
@@ -270,9 +254,7 @@ class BookCoverFetcher(
         }
     }
 
-    private fun writeToDiskCache(
-        response: Response,
-    ): DiskCache.Snapshot? {
+    private fun writeToDiskCache(response: Response): DiskCache.Snapshot? {
         val editor = diskCacheLazy.value.openEditor(diskCacheKey) ?: return null
         try {
             diskCacheLazy.value.fileSystem.write(editor.data) {
@@ -319,7 +301,6 @@ class BookCoverFetcher(
         private val catalogStore: CatalogStore,
         private val coverCache: CoverCache,
     ) : Fetcher.Factory<BookCover> {
-
 
         override fun create(data: BookCover, options: Options, imageLoader: ImageLoader): Fetcher {
             return BookCoverFetcher(

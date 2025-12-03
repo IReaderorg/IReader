@@ -6,14 +6,9 @@ package ireader.core.util
  */
 actual object PlatformFilePicker {
     actual suspend fun pickFiles(
-        allowMultiple: Boolean,
-        mimeTypes: List<String>
-    ): List<String> {
-        // TODO: Implement using UIDocumentPickerViewController
-        return emptyList()
-    }
-    
-    actual suspend fun pickDirectory(): String? {
+        fileTypes: List<String>,
+        multiSelect: Boolean
+    ): List<String>? {
         // TODO: Implement using UIDocumentPickerViewController
         return null
     }

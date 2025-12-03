@@ -17,8 +17,7 @@ actual class SSLConfiguration {
     private var allowSelfSigned: Boolean = false
     private var minTlsVersion: TlsVersion = TlsVersion.TLS_1_2
     
-    actual fun applyTo(builder: OkHttpClient.Builder) {
-        // Apply certificate pinning if configured
+    fun applyTo(builder: OkHttpClient.Builder) {
         if (certificatePins.isNotEmpty()) {
             val pinner = CertificatePinner.Builder().apply {
                 certificatePins.forEach { (domain, pins) ->
@@ -30,7 +29,6 @@ actual class SSLConfiguration {
             builder.certificatePinner(pinner)
         }
         
-        // Apply self-signed certificate trust if enabled (development only)
         if (allowSelfSigned) {
             val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
                 override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
@@ -45,10 +43,11 @@ actual class SSLConfiguration {
             builder.hostnameVerifier { _, _ -> true }
         }
         
-        // Apply TLS version configuration
         val connectionSpec = ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
             .tlsVersions(
                 when (minTlsVersion) {
+                    TlsVersion.TLS_1_0 -> OkHttpTlsVersion.TLS_1_0
+                    TlsVersion.TLS_1_1 -> OkHttpTlsVersion.TLS_1_1
                     TlsVersion.TLS_1_2 -> OkHttpTlsVersion.TLS_1_2
                     TlsVersion.TLS_1_3 -> OkHttpTlsVersion.TLS_1_3
                 }

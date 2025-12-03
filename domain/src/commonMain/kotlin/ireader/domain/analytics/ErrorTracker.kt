@@ -38,7 +38,7 @@ class ErrorTracker(
             )
             
             errors.add(errorEvent)
-            errorCounts[errorType] = errorCounts.getOrDefault(errorType, 0) + 1
+            errorCounts[errorType] = (errorCounts[errorType] ?: 0) + 1
             
             // Trim old errors if exceeding limit
             if (errors.size > maxErrors) {
@@ -130,7 +130,7 @@ class ErrorTracker(
             
             errors.filter { it.timestamp >= startTime }.forEach { error ->
                 val hour = error.timestamp / (60 * 60 * 1000)
-                hourlyErrors[hour] = hourlyErrors.getOrDefault(hour, 0) + 1
+                hourlyErrors[hour] = (hourlyErrors[hour] ?: 0) + 1
             }
             
             hourlyErrors

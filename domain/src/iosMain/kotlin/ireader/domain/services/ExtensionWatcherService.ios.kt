@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.emptyFlow
  * On iOS, extensions are JS plugins that don't need file system watching
  */
 actual class ExtensionWatcherService {
-    actual val extensionChanges: Flow<ExtensionChangeEvent>
+    actual val events: Flow<ExtensionChangeEvent>
         get() = emptyFlow()
     
     actual fun start() {
@@ -19,10 +19,6 @@ actual class ExtensionWatcherService {
     actual fun stop() {
         // No-op
     }
-}
-
-sealed class ExtensionChangeEvent {
-    data class Added(val path: String) : ExtensionChangeEvent()
-    data class Removed(val path: String) : ExtensionChangeEvent()
-    data class Modified(val path: String) : ExtensionChangeEvent()
+    
+    actual fun isRunning(): Boolean = false
 }

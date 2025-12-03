@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.backups
+package ireader.presentation.ui.settings.backups
 
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.models.backup.BackupData

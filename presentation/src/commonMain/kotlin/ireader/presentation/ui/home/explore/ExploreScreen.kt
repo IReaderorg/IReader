@@ -60,7 +60,7 @@ fun ExploreScreen(
     snackBarHostState: SnackbarHostState,
     showmodalSheet: () -> Unit,
     onLongClick: (Book) -> Unit = {},
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
     prevPaddingValues: PaddingValues
 ) {

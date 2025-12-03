@@ -1,6 +1,5 @@
 package ireader.core.source
 
-import com.google.errorprone.annotations.Keep
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.url
@@ -12,13 +11,11 @@ import ireader.core.source.model.Listing
 import ireader.core.source.model.PageComplete
 import ireader.core.source.model.PageUrl
 import kotlinx.coroutines.flow.MutableSharedFlow
-import okio.ByteString.Companion.encodeUtf8
 
 /**
  * A simple implementation for sources from a website.
  */
 @Suppress("unused", "unused_parameter")
-@Keep
 abstract class HttpSource(private val dependencies: ireader.core.source.Dependencies) :
     ireader.core.source.CatalogSource {
 
@@ -39,12 +36,10 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
      * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
      * of the MD5 of the string: sourcename/language/versionId
      * Note the generated id sets the sign bit to 0.
-     * Uses Okio for KMP-compatible MD5 hashing.
      */
-    override val id : Long by lazy {
+    override val id: Long by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"
-        val bytes = key.encodeUtf8().md5().toByteArray()
-        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
+        generateSourceId(key)
     }
 
     /**
@@ -80,18 +75,10 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
         return emptyList()
     }
 
-    /**
-     * the commands that are used
-     * to decrease the request to servers
-     * @return [CommandList] check out [Command]
-     */
     override fun getCommands(): CommandList {
         return emptyList()
     }
     
-    /**
-     * Helper to build absolute URLs from relative paths
-     */
     protected fun getAbsoluteUrl(path: String): String {
         return when {
             path.startsWith("http://") || path.startsWith("https://") -> path
@@ -101,29 +88,31 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
         }
     }
     
-    /**
-     * Helper to emit events for debugging/logging
-     */
     protected suspend fun emitEvent(event: String) {
         eventFlow.emit(event)
     }
     
-    /**
-     * Check if source is available (can be overridden for maintenance checks)
-     */
     open suspend fun isAvailable(): Boolean = true
     
-    /**
-     * Get source capabilities (can be overridden to declare features)
-     */
     open fun getCapabilities(): SourceCapabilities {
         return SourceCapabilities()
     }
+    
+    companion object {
+        /**
+         * Generate a source ID from a key string using a simple hash
+         */
+        fun generateSourceId(key: String): Long {
+            // Simple hash implementation for KMP compatibility
+            var hash = 0L
+            for (char in key) {
+                hash = 31 * hash + char.code
+            }
+            return hash and Long.MAX_VALUE
+        }
+    }
 }
 
-/**
- * Declares what features a source supports
- */
 data class SourceCapabilities(
     val supportsLatest: Boolean = true,
     val supportsSearch: Boolean = true,

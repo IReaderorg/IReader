@@ -33,7 +33,7 @@ fun LinearBookItem(
     title: String,
     selected: Boolean = false,
     book: BookItem,
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     isScrollingFast: Boolean = false,
     performanceConfig: PerformanceConfig = LocalPerformanceConfig.current,
 ) {
@@ -145,7 +145,7 @@ fun LinearListDisplay(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     keys: ((item: BookItem) -> Any)
 ) {
     // Performance optimization: track fast scrolling to defer expensive operations

@@ -8,13 +8,11 @@
 
 package ireader.core.http
 
-import okio.Closeable
-
 /**
  * A wrapper to allow executing JavaScript code without knowing the implementation details.
  */
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-expect class JS : Closeable {
+expect class JS {
 
   /**
    * Evaluates the given JavaScript [script] and returns its result as [String] or throws an
@@ -42,6 +40,5 @@ expect class JS : Closeable {
   /**
    * Closes this instance. No evaluations can be made on this instance after calling this method.
    */
-  override fun close()
-
+  fun close()
 }

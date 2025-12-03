@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.sync
+package ireader.presentation.ui.settings.sync
 
 
 import ireader.domain.data.repository.RemoteRepository
@@ -149,7 +149,7 @@ class SupabaseConfigViewModel(
                 supabasePreferences.supabaseAnalyticsKey().set(currentState.analyticsApiKey)
                 
                 updateState { it.copy(
-                    testResult = "✓ Configuration saved successfully! Total storage: 3.5GB",
+                    testResult = "? Configuration saved successfully! Total storage: 3.5GB",
                     error = null
                 )}
             } catch (e: Exception) {
@@ -171,18 +171,18 @@ class SupabaseConfigViewModel(
                 if (result.isSuccess) {
                     updateState { it.copy(
                         isTesting = false,
-                        testResult = "✓ Connection successful! Supabase is configured correctly."
+                        testResult = "? Connection successful! Supabase is configured correctly."
                     )}
                 } else {
                     updateState { it.copy(
                         isTesting = false,
-                        testResult = "✗ Connection failed: ${result.exceptionOrNull()?.message}"
+                        testResult = "? Connection failed: ${result.exceptionOrNull()?.message}"
                     )}
                 }
             } catch (e: Exception) {
                 updateState { it.copy(
                     isTesting = false,
-                    testResult = "✗ Connection failed: ${e.message}"
+                    testResult = "? Connection failed: ${e.message}"
                 )}
             }
         }
@@ -237,7 +237,7 @@ class SupabaseConfigViewModel(
                     updateState { it.copy(
                         isSyncing = false,
                         lastSyncTime = currentTime,
-                        testResult = "✓ Synced $favoriteCount favorite books successfully!",
+                        testResult = "? Synced $favoriteCount favorite books successfully!",
                         error = null
                     )}
                 } else {

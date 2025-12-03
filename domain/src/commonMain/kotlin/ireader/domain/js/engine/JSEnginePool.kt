@@ -233,13 +233,14 @@ class JSEnginePool(
     
     /**
      * Updates memory usage for a plugin.
+     * Note: Memory tracking is platform-specific and may not be accurate on all platforms.
      */
     suspend fun updateMemoryUsage(pluginId: String) = metricsMutex.withLock {
-        val runtime = Runtime.getRuntime()
-        val usedMemory = runtime.totalMemory() - runtime.freeMemory()
+        // Use a simple estimation based on cache size since Runtime is JVM-only
+        val estimatedMemory = codeCache.values.sumOf { it.sizeBytes }
         
         val current = metricsMap[pluginId] ?: PluginPerformanceMetrics(pluginId)
-        metricsMap[pluginId] = current.updateMemoryUsage(usedMemory)
+        metricsMap[pluginId] = current.updateMemoryUsage(estimatedMemory)
     }
     
     /**

@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.statistics
+package ireader.presentation.ui.settings.statistics
 
 import ireader.presentation.core.viewmodel.IReaderStateScreenModel
 // screenModelScope is provided by IReaderStateScreenModel

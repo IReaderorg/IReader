@@ -9,4 +9,8 @@ actual class StartExtensionManagerService {
     actual fun start() {
         // No-op on iOS - extensions are JS plugins loaded via JavaScriptCore
     }
+    
+    actual fun stop() {
+        // No-op on iOS
+    }
 }

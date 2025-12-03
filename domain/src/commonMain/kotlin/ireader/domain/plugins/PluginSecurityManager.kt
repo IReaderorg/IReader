@@ -121,7 +121,7 @@ class PluginSecurityManager(
      */
     suspend fun validateFileAccess(pluginId: String, path: String): Result<Unit> {
         val sandbox = sandboxes[pluginId]
-            ?: return Result.failure(SecurityException("Plugin sandbox not found"))
+            ?: return Result.failure(IllegalStateException("Plugin sandbox not found"))
         
         return sandbox.validateFileOperation(path, FileOperation.READ)
     }
@@ -132,7 +132,7 @@ class PluginSecurityManager(
      */
     fun validateNetworkAccess(pluginId: String, url: String): Result<Unit> {
         val sandbox = sandboxes[pluginId]
-            ?: return Result.failure(SecurityException("Plugin sandbox not found"))
+            ?: return Result.failure(IllegalStateException("Plugin sandbox not found"))
         
         return sandbox.validateNetworkOperation(url)
     }

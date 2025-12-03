@@ -1,4 +1,5 @@
 package ireader.domain.services.downloaderService
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.BookRepository
@@ -46,7 +47,7 @@ suspend fun runDownloadService(
 ): Boolean {
     try {
         // Get chapters to download
-        val chapters: List<Chapter> = withContext(Dispatchers.IO) {
+        val chapters: List<Chapter> = withContext(ioDispatcher) {
             when {
                 inputtedBooksIds != null -> {
                     inputtedBooksIds.toList().flatMap { bookId ->
@@ -81,7 +82,7 @@ suspend fun runDownloadService(
 
         // Get books and sources
         val distinctBookIds = chapters.map { it.bookId }.distinct()
-        val books = withContext(Dispatchers.IO) {
+        val books = withContext(ioDispatcher) {
             distinctBookIds.mapNotNull { bookId -> bookRepo.findBookById(bookId) }
         }
         val distinctSources = books.mapNotNull { it.sourceId }.distinct()
@@ -130,7 +131,7 @@ suspend fun runDownloadService(
 
         // Insert downloads into database so they appear in the download screen
         // This is safe to call even if already inserted (will update or ignore)
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             downloadUseCases.insertDownloads(downloads.map { it.toDownload() })
         }
         updateProgress(downloads.size, 0, true)
@@ -164,7 +165,7 @@ suspend fun runDownloadService(
             val source = sources.find { it.sourceId == book.sourceId } ?: continue
 
             // Double-check if chapter is already downloaded (may have been downloaded by another process)
-            val freshChapter = withContext(Dispatchers.IO) {
+            val freshChapter = withContext(ioDispatcher) {
                 chapterRepo.findChapterById(download.chapterId)
             }
             if (freshChapter != null) {
@@ -179,7 +180,7 @@ suspend fun runDownloadService(
                                 progress = 1f
                             )))
                     }
-                    withContext(Dispatchers.IO) {
+                    withContext(ioDispatcher) {
                         downloadUseCases.deleteSavedDownload(download.toDownload())
                     }
                     completedCount++
@@ -266,12 +267,12 @@ suspend fun runDownloadService(
                     )
 
                     // Save chapter with preserved ID
-                    withContext(Dispatchers.IO) {
+                    withContext(ioDispatcher) {
                         insertUseCases.insertChapter(chapter = finalChapter)
                     }
 
                     // Mark as completed - remove from download queue
-                    withContext(Dispatchers.IO) {
+                    withContext(ioDispatcher) {
                         downloadUseCases.deleteSavedDownload(download.toDownload())
                     }
 
@@ -330,7 +331,7 @@ suspend fun runDownloadService(
                 }
 
                 // Mark as failed in database
-                withContext(Dispatchers.IO) {
+                withContext(ioDispatcher) {
                     downloadUseCases.insertDownload(
                         download.copy(priority = 0).toDownload()
                     )

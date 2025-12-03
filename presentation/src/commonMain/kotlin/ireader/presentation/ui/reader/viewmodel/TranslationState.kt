@@ -34,7 +34,6 @@ class TranslationStateHolder {
      * Sets translatedContent first, then hasTranslation to ensure
      * content is available when hasTranslation becomes true.
      */
-    @Synchronized
     fun setTranslation(content: List<Page>, error: String? = null) {
         translationError = error
         translatedContent = content
@@ -45,7 +44,6 @@ class TranslationStateHolder {
      * Clear translation state atomically.
      * Sets hasTranslation to false first to prevent reading stale content.
      */
-    @Synchronized
     fun clearTranslation(error: String? = null) {
         hasTranslation = false
         translatedContent = emptyList()

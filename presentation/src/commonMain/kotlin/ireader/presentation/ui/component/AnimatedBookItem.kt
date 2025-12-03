@@ -52,7 +52,7 @@ fun AnimatedBookItem(
     onLongClick: (BookItem) -> Unit = {},
     showTitle: Boolean = true,
     elevation: Dp = 4.dp,
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     isSelected: Boolean = false,
     displayMode: DisplayMode = DisplayMode.CompactGrid,
     index: Int = 0
@@ -158,7 +158,7 @@ fun BookCard(
     onLongClick: (BookItem) -> Unit = {},
     elevation: Dp = 4.dp,
     showTitle: Boolean = true,
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     floatOffset: Float = 0f,
     scale: Float = 1f,
     displayMode: DisplayMode = DisplayMode.CompactGrid,
@@ -217,7 +217,7 @@ private fun GridModeBookCard(
     isNew: Boolean,
     containerColor: Color,
     cardShape: RoundedCornerShape,
-    headers: ((url: String) -> okhttp3.Headers?)?,
+    headers: ((url: String) -> Map<String, String>?)?,
     elevation: Dp
 ) {
     Card(
@@ -334,7 +334,7 @@ private fun ListModeBookCard(
     isSelected: Boolean,
     isNew: Boolean,
     containerColor: Color,
-    headers: ((url: String) -> okhttp3.Headers?)?
+    headers: ((url: String) -> Map<String, String>?)?
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
@@ -455,7 +455,7 @@ private fun ListModeBookCard(
 @Composable
 fun BookCoverImage(
     book: BookItem,
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     isSelected: Boolean = false,
     isBlurred: Boolean = false
 ) {

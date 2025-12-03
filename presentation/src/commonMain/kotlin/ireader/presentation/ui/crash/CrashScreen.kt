@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.crash
+package ireader.presentation.ui.crash
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState

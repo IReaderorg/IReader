@@ -1,26 +1,33 @@
 package ireader.core.http
 
-import okhttp3.HttpUrl
-
 /**
- * Synchronizes cookies between WebView and HTTP clients
- * This ensures consistent cookie state across different network components
+ * Synchronizes cookies between WebView and HTTP client.
+ * Platform-specific implementations handle the actual synchronization.
  */
 expect class CookieSynchronizer {
     /**
      * Sync cookies from WebView to HTTP client storage
-     * @param url The URL to sync cookies for
+     * @param url The URL string to sync cookies for
      */
-    fun syncFromWebView(url: HttpUrl)
+    fun syncFromWebView(url: String)
     
     /**
-     * Sync cookies from HTTP client storage to WebView
-     * @param url The URL to sync cookies for
+     * Sync cookies from HTTP client to WebView
+     * @param url The URL string to sync cookies for
      */
-    fun syncToWebView(url: HttpUrl)
+    fun syncToWebView(url: String)
     
     /**
-     * Clear all cookies from both WebView and HTTP client
+     * Clear all cookies
      */
+    fun clearAll()
+}
+
+/**
+ * Common cookie synchronizer interface for platform implementations
+ */
+interface CookieSynchronizerInterface {
+    fun syncFromWebView(url: String)
+    fun syncToWebView(url: String)
     fun clearAll()
 }

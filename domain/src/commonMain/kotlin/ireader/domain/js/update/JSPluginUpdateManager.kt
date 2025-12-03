@@ -158,7 +158,7 @@ class JSPluginUpdateManager(
      * Performs a background update check (used by scheduler).
      */
     fun performBackgroundCheck() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.Default) {
             try {
                 checkForUpdates(showNotification = true)
             } catch (e: Exception) {

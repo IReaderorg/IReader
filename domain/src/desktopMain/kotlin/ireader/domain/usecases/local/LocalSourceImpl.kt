@@ -1,12 +1,13 @@
 package ireader.domain.usecases.local
 
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.parser.Parser
 import ireader.core.source.LocalSource
 import ireader.core.source.LocalCatalogSource
 import ireader.core.source.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import org.jsoup.Jsoup
 import java.io.File
 import java.util.zip.ZipFile
 
@@ -145,7 +146,7 @@ class LocalSourceImpl(
             ZipFile(file).use { zip ->
                 val opfEntry = findOpfFile(zip) ?: return emptyList()
                 val opfContent = zip.getInputStream(opfEntry).bufferedReader().readText()
-                val opfDoc = Jsoup.parse(opfContent, "", org.jsoup.parser.Parser.xmlParser())
+                val opfDoc = Ksoup.parse(opfContent, Parser.xmlParser())
                 
                 val opfPath = opfEntry.name
                 val basePath = if (opfPath.contains("/")) opfPath.substringBeforeLast("/") + "/" else ""
@@ -163,7 +164,7 @@ class LocalSourceImpl(
                     
                     try {
                         val html = zip.getInputStream(entry).bufferedReader().readText()
-                        val doc = Jsoup.parse(html)
+                        val doc = Ksoup.parse(html)
                         
                         doc.select("h1, h2, h3, h4, h5, h6, p, blockquote, pre, li").forEach { element ->
                             val text = element.text().trim()
@@ -199,7 +200,7 @@ class LocalSourceImpl(
         val containerEntry = zip.getEntry("META-INF/container.xml")
         if (containerEntry != null) {
             val containerXml = zip.getInputStream(containerEntry).bufferedReader().readText()
-            val doc = Jsoup.parse(containerXml, "", org.jsoup.parser.Parser.xmlParser())
+            val doc = Ksoup.parse(containerXml, Parser.xmlParser())
             val rootfile = doc.selectFirst("rootfile[full-path]")
             val opfPath = rootfile?.attr("full-path")
             if (opfPath != null) {

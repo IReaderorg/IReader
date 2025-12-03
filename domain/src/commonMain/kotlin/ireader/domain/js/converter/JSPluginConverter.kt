@@ -6,9 +6,10 @@ import ireader.core.source.model.*
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.select.Elements
 
 /**
  * Converts analyzed JS plugins into native Kotlin HttpSource implementations
@@ -110,11 +111,11 @@ class JSPluginConverter {
                 println("JSPluginConverter: Query: '$query', Page: $page")
                 
                 val html = client.get(url).bodyAsText()
-                val doc = Jsoup.parse(html, baseUrl)
+                val doc = Ksoup.parse(html, baseUrl)
                 
                 // Try multiple selectors if the main one fails
                 val selectors = pattern.selector.split(",").map { it.trim() }
-                var elements = org.jsoup.select.Elements()
+                var elements = Elements()
                 
                 for (selector in selectors) {
                     elements = doc.select(selector)
@@ -231,7 +232,7 @@ class JSPluginConverter {
                 println("JSPluginConverter: Fetching details from: ${manga.key}")
                 
                 val html = client.get(manga.key).bodyAsText()
-                val doc = Jsoup.parse(html, baseUrl)
+                val doc = Ksoup.parse(html, baseUrl)
                 
                 // Extract author with fallback selectors
                 val author = pattern.authorSelector?.let { selectors ->
@@ -296,11 +297,11 @@ class JSPluginConverter {
                 println("JSPluginConverter: Fetching chapters from: ${manga.key}")
                 
                 val html = client.get(manga.key).bodyAsText()
-                val doc = Jsoup.parse(html, baseUrl)
+                val doc = Ksoup.parse(html, baseUrl)
                 
                 // Try multiple selectors
                 val selectors = chaptersSelector.split(",").map { it.trim() }
-                var elements = org.jsoup.select.Elements()
+                var elements = Elements()
                 
                 for (selector in selectors) {
                     elements = doc.select(selector)
@@ -355,11 +356,11 @@ class JSPluginConverter {
                 println("JSPluginConverter: Fetching content from: ${chapter.key}")
                 
                 val html = client.get(chapter.key).bodyAsText()
-                val doc = Jsoup.parse(html, baseUrl)
+                val doc = Ksoup.parse(html, baseUrl)
                 
                 // Try multiple selectors
                 val selectors = pattern.selector.split(",").map { it.trim() }
-                var elements = org.jsoup.select.Elements()
+                var elements = Elements()
                 
                 for (selector in selectors) {
                     elements = doc.select(selector)

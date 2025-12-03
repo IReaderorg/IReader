@@ -9,6 +9,33 @@ This module helps developers on Windows/Linux verify that:
 - Dependencies resolve properly for iOS platforms
 - Common code compiles without errors
 
+## Current Status: source-api Requires Refactoring
+
+The `source-api` module currently uses JVM-only dependencies in `commonMain`:
+- **Jsoup** - HTML parsing (JVM-only)
+- **OkHttp types** - `Headers`, `Cookie`, `HttpUrl` (JVM-only)
+- **Android annotations** - `@Keep` (Android-only)
+
+### Required Migration (per iOS-Source-Architecture.md)
+
+**Phase 1: Migrate from Jsoup to Ksoup**
+```kotlin
+// Before (Jsoup - JVM only)
+import org.jsoup.nodes.Document
+import org.jsoup.Jsoup
+
+// After (Ksoup - KMP)
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.Ksoup
+```
+
+**Phase 2: Replace OkHttp types with Ktor/common types**
+- Replace `okhttp3.Headers` with `Map<String, String>` or Ktor headers
+- Replace `okhttp3.Cookie` with a common `Cookie` data class
+- Replace `okhttp3.HttpUrl` with `String` URLs
+
+Until this refactoring is complete, iOS compilation of `source-api` will fail.
+
 ## Usage
 
 ### Quick Check (Works on Windows/Linux)
@@ -97,4 +124,43 @@ kotlin.mpp.applyDefaultHierarchyTemplate=false
 
 # Suppress compileOnly warning for jsoup (JVM-only, iOS uses Ksoup)
 kotlin.suppressGradlePluginWarnings=IncorrectCompileOnlyDependencyWarning
+```
+
+
+## Module iOS Compilation Status
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| `i18n` | ✅ Ready | No JVM dependencies |
+| `ios-build-check` | ✅ Ready | Test module |
+| `core` | ⚠️ Partial | Some expect/actual may need fixes |
+| `data` | ⚠️ Partial | Depends on source-api |
+| `domain` | ⚠️ Partial | Depends on source-api |
+| `source-api` | ❌ Blocked | Requires Jsoup→Ksoup migration |
+
+## Next Steps for Full iOS Support
+
+1. **Migrate source-api to Ksoup** (biggest task)
+   - Add Ksoup dependency: `com.fleeksoft.ksoup:ksoup:0.1.2`
+   - Update all Jsoup imports to Ksoup
+   - Replace OkHttp types with common types
+
+2. **Fix remaining expect/actual mismatches**
+   - Run `./gradlew :module:compileKotlinIosArm64` on macOS
+   - Fix signature mismatches in iOS implementations
+
+3. **Add iOS-specific implementations**
+   - JavaScriptCore for JS plugin execution
+   - WKWebView for browser engine
+   - NSHTTPCookieStorage for cookies
+
+## Testing Commands
+
+```bash
+# Test what works now (Windows/Linux)
+./gradlew :i18n:compileCommonMainKotlinMetadata
+./gradlew :ios-build-check:compileCommonMainKotlinMetadata
+
+# Full iOS compilation (macOS only)
+./gradlew :source-api:compileKotlinIosArm64  # Will fail until Ksoup migration
 ```

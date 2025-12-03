@@ -5,6 +5,7 @@ import io.ktor.http.*
 import io.ktor.util.date.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import io.ktor.http.Headers as KtorHeaders
 
 /**
  * Cache entry for HTTP responses
@@ -12,7 +13,7 @@ import kotlinx.coroutines.sync.withLock
 data class CacheEntry(
     val response: ByteArray,
     val contentType: ContentType?,
-    val headers: Headers,
+    val headers: KtorHeaders,
     val statusCode: HttpStatusCode,
     val expiresAt: Long
 ) {

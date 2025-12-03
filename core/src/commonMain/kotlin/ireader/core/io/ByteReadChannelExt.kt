@@ -10,6 +10,7 @@ package ireader.core.io
 
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readAvailable
+import ireader.core.util.IO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.FileSystem

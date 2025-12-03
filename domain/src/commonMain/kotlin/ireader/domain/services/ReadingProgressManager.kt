@@ -12,7 +12,7 @@ import kotlin.time.ExperimentalTime
  */
 class ReadingProgressManager(
     private val historyRepository: HistoryRepository,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 ) {
     /**
      * Updates reading progress for a chapter

@@ -1,6 +1,8 @@
 package ireader.domain.analytics
 
 import ireader.core.log.Log
+import ireader.domain.utils.extensions.currentTimeToLong
+import kotlinx.datetime.Clock
 
 /**
  * UI performance tracker for monitoring frame rendering times
@@ -19,7 +21,7 @@ class UIPerformanceTracker(
      */
     fun onFrameStart() {
         try {
-            frameStartTime = System.nanoTime()
+            frameStartTime = currentTimeToLong()
         } catch (e: Exception) {
             Log.error { "Failed to mark frame start: ${e.message}" }
         }
@@ -32,7 +34,7 @@ class UIPerformanceTracker(
         try {
             if (frameStartTime == 0L) return
             
-            val frameTime = (System.nanoTime() - frameStartTime) / 1_000_000.0 // Convert to ms
+            val frameTime = (currentTimeToLong() - frameStartTime).toDouble() // Already in ms
             frameCount++
             
             val context = buildMap {
@@ -100,12 +102,12 @@ class UIPerformanceTracker(
         composableName: String,
         block: () -> T
     ): T {
-        val startTime = System.nanoTime()
+        val startTime = currentTimeToLong()
         return try {
             block()
         } finally {
             try {
-                val duration = (System.nanoTime() - startTime) / 1_000_000.0 // Convert to ms
+                val duration = (currentTimeToLong() - startTime).toDouble() // Already in ms
                 
                 val context = mapOf(
                     "composable" to composableName,

@@ -12,6 +12,8 @@ import ireader.domain.js.models.JSNovelItem
 import ireader.domain.js.models.JSPluginError
 import ireader.domain.js.models.JSSourceNovel
 import ireader.domain.js.models.PluginMetadata
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import ireader.domain.utils.extensions.currentTimeToLong
@@ -48,9 +50,10 @@ class JSPluginBridge(
     // Cache for plugin metadata
     private var cachedMetadata: PluginMetadata? = null
 
-    // Dedicated single-threaded dispatcher for this JS engine
-    // GraalVM requires all operations on a context to happen on the same thread
-    private val jsDispatcher = kotlinx.coroutines.newSingleThreadContext("JSEngine-$pluginId")
+    // Dispatcher for JS engine operations
+    // On JVM (Desktop), this should be a single-threaded context for GraalVM
+    // On other platforms, use Default dispatcher
+    private val jsDispatcher: CoroutineDispatcher = Dispatchers.Default
 
     /**
      * Extracts plugin metadata from the plugin instance.
@@ -344,7 +347,7 @@ class JSPluginBridge(
         var waitTime = 10L
 
         while (attempts < maxAttempts) {
-            Thread.sleep(waitTime)
+            kotlinx.coroutines.delay(waitTime)
 
             // Check result periodically to reduce engine calls
             if (attempts % 5 == 0 || attempts < 10) {
@@ -461,7 +464,7 @@ class JSPluginBridge(
                     var waitTime = 10L // Start with 10ms
 
                     while (attempts < maxAttempts) {
-                        Thread.sleep(waitTime)
+                        kotlinx.coroutines.delay(waitTime)
 
                         // Only check every few attempts to reduce statement count
                         if (attempts % 5 == 0 || attempts < 10) {
@@ -593,7 +596,7 @@ class JSPluginBridge(
                     var waitTime = 10L
 
                     while (attempts < maxAttempts) {
-                        Thread.sleep(waitTime)
+                        kotlinx.coroutines.delay(waitTime)
 
                         if (attempts % 5 == 0 || attempts < 10) {
                             val checkScript = "globalThis.__searchResult_${sanitizedId}"
@@ -698,7 +701,7 @@ class JSPluginBridge(
                     var waitTime = 10L
 
                     while (attempts < maxAttempts) {
-                        Thread.sleep(waitTime)
+                        kotlinx.coroutines.delay(waitTime)
 
                         if (attempts % 5 == 0 || attempts < 10) {
                             val checkScript = "globalThis.__parseNovelResult_${sanitizedId}"
@@ -802,7 +805,7 @@ class JSPluginBridge(
                 var waitTime = 10L
 
                 while (attempts < maxAttempts) {
-                    Thread.sleep(waitTime)
+                    kotlinx.coroutines.delay(waitTime)
 
                     if (attempts % 5 == 0 || attempts < 10) {
                         val checkScript =
@@ -899,7 +902,7 @@ class JSPluginBridge(
                     is Map<*, *> -> filterObj as Map<String, Any?>
                     is JSValue -> filterObj.asMap()
                     else -> {
-                        Log.warn { "[JSPlugin] Filter '$key' is not a map: ${filterObj.javaClass.simpleName}" }
+                        Log.warn { "[JSPlugin] Filter '$key' is not a map: ${filterObj::class.simpleName}" }
                         continue
                     }
                 }
@@ -1125,7 +1128,7 @@ class JSPluginBridge(
                 is Map<*, *> -> value as Map<String, Any?>
                 is JSValue -> value.asMap()
                 else -> {
-                    Log.warn { "[JSPlugin] Filter value is not a map: ${value.javaClass.simpleName}" }
+                    Log.warn { "[JSPlugin] Filter value is not a map: ${value::class.simpleName}" }
                     return null
                 }
             }

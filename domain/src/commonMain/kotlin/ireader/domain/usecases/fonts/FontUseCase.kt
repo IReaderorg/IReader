@@ -6,7 +6,7 @@ import ireader.core.http.HttpClients
 import ireader.core.prefs.PreferenceStore
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.jsoup.Jsoup
+import com.fleeksoft.ksoup.Ksoup
 import ireader.domain.utils.extensions.currentTimeToLong
 
 
@@ -52,7 +52,7 @@ class FontUseCase(
         // Fetch from API
         return try {
             val response: String = clients.default.get("https://fonts.gstatic.com/s/a/directory.xml", block = {}).body()
-            val fonts = Jsoup.parse(response).select("family").eachAttr("name")
+            val fonts = Ksoup.parse(response).select("family").map { it.attr("name") }
             
             // Update in-memory cache
             cachedFonts = fonts

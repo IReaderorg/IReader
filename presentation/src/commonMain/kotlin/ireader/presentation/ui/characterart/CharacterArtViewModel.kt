@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.characterart
+package ireader.presentation.ui.characterart
 
 import androidx.compose.runtime.Stable
 import ireader.domain.data.repository.CharacterArtRepository
@@ -237,7 +237,7 @@ class CharacterArtViewModel(
                         state.copy(
                             isUploading = false,
                             uploadProgress = 1f,
-                            successMessage = "Art submitted for review! 🎨",
+                            successMessage = "Art submitted for review! ??",
                             userSubmissions = state.userSubmissions + art
                         )
                     }
@@ -260,7 +260,7 @@ class CharacterArtViewModel(
                     _state.update { state ->
                         state.copy(
                             pendingArt = state.pendingArt.filter { it.id != artId },
-                            successMessage = "Art approved! ✅"
+                            successMessage = "Art approved! ?"
                         )
                     }
                     loadArt(refresh = true)
@@ -431,7 +431,7 @@ class CharacterArtViewModel(
                         it.copy(
                             isGenerating = false,
                             generatedImageBytes = generatedImage.bytes,
-                            successMessage = "Image generated successfully! 🎨"
+                            successMessage = "Image generated successfully! ??"
                         )
                     }
                 }

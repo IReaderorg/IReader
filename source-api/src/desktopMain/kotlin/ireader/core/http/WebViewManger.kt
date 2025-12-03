@@ -1,28 +1,18 @@
 package ireader.core.http
 
-import org.jsoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Document
 
 /**
  * Desktop implementation of WebViewManager
  * Currently a stub - could be enhanced with JavaFX WebView or JCEF
  */
 actual class WebViewManger {
-    actual var isInit: Boolean
-        get() = false
-        set(value) {}
+    actual var isInit: Boolean = false
     actual var userAgent: String = DEFAULT_USER_AGENT
-    actual var selector: String?
-        get() = null
-        set(value) {}
-    actual var html: Document
-        get() = Document("")
-        set(value) {}
-    actual var webUrl: String?
-        get() = null
-        set(value) {}
-    actual var inProgress: Boolean
-        get() = false
-        set(value) {}
+    actual var selector: String? = null
+    actual var html: Document? = null
+    actual var webUrl: String? = null
+    actual var inProgress: Boolean = false
 
     actual fun init(): Any {
         return 0

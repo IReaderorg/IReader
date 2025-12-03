@@ -1,43 +1,38 @@
 package ireader.domain.usecases.backup
 
-import ireader.domain.models.common.Uri
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import ireader.domain.models.BackupResult
 
 /**
  * iOS implementation of DropboxProvider
  * 
- * TODO: Implement using Dropbox SDK for iOS
+ * TODO: Full implementation using Dropbox SDK for iOS
  */
-actual class DropboxProvider : CloudStorageProvider {
-    override val name: String = "Dropbox"
-    override val isAvailable: Boolean = false
+actual class DropboxProvider actual constructor() : CloudStorageProvider {
+    override val providerName: String = "Dropbox"
+    
+    override suspend fun isAuthenticated(): Boolean = false
     
     override suspend fun authenticate(): Result<Unit> {
         return Result.failure(Exception("Dropbox not implemented on iOS"))
     }
     
-    override suspend fun isAuthenticated(): Boolean = false
-    
-    override suspend fun disconnect(): Result<Unit> {
+    override suspend fun signOut(): Result<Unit> {
         return Result.success(Unit)
     }
     
-    override suspend fun upload(data: ByteArray, fileName: String): Result<String> {
-        return Result.failure(Exception("Not implemented"))
+    override suspend fun uploadBackup(localFilePath: String, fileName: String): BackupResult {
+        return BackupResult.Error("Dropbox not implemented on iOS")
     }
     
-    override suspend fun download(fileId: String): Result<ByteArray> {
-        return Result.failure(Exception("Not implemented"))
+    override suspend fun downloadBackup(cloudFileName: String, localFilePath: String): BackupResult {
+        return BackupResult.Error("Dropbox not implemented on iOS")
     }
     
-    override suspend fun listBackups(): Result<List<CloudBackupInfo>> {
+    override suspend fun listBackups(): Result<List<CloudBackupFile>> {
         return Result.success(emptyList())
     }
     
-    override suspend fun delete(fileId: String): Result<Unit> {
-        return Result.failure(Exception("Not implemented"))
+    override suspend fun deleteBackup(fileName: String): Result<Unit> {
+        return Result.failure(Exception("Dropbox not implemented on iOS"))
     }
-    
-    override fun observeAuthState(): Flow<Boolean> = flowOf(false)
 }

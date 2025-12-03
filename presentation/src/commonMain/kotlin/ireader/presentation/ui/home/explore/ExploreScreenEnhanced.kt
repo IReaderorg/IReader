@@ -63,7 +63,7 @@ fun ExploreScreenEnhanced(
     snackBarHostState: SnackbarHostState,
     showmodalSheet: () -> Unit,
     onLongClick: (Book) -> Unit = {},
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
     prevPaddingValues: PaddingValues
 ) {
@@ -217,7 +217,7 @@ private fun ExploreMainContent(
     snackBarHostState: SnackbarHostState,
     showmodalSheet: () -> Unit,
     onLongClick: (Book) -> Unit,
-    headers: ((url: String) -> okhttp3.Headers?)?,
+    headers: ((url: String) -> Map<String, String>?)?,
     scrollState: androidx.compose.foundation.lazy.LazyListState,
     gridState: androidx.compose.foundation.lazy.grid.LazyGridState,
     columns: Int,
@@ -359,7 +359,7 @@ private fun ExploreBooksList(
     onClick: (BookItem) -> Unit,
     isLoading: Boolean,
     onLongClick: (BookItem) -> Unit,
-    headers: ((url: String) -> okhttp3.Headers?)?,
+    headers: ((url: String) -> Map<String, String>?)?,
     columns: Int,
 ) {
     ModernLayoutComposable(

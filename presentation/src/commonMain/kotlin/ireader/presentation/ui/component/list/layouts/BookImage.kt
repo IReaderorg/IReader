@@ -35,7 +35,7 @@ fun BookImage(
     book: BaseBook,
     ratio: Float = 0.70f,
     selected: Boolean = false,
-    header: ((url: String) -> okhttp3.Headers?)? = null,
+    header: ((url: String) -> Map<String, String>?)? = null,
     onlyCover: Boolean = false,
     comfortableMode: Boolean = false,
     isScrollingFast: Boolean = false,

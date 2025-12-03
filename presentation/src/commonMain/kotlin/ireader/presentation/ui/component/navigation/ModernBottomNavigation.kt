@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.component.navigation
+package ireader.presentation.ui.component.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*

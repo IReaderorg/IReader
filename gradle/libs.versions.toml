@@ -38,6 +38,7 @@ buildkonfig = "0.17.1"
 okhttp = "5.3.0"
 
 jsoup = "1.21.2"
+ksoup = "0.2.5"
 dex2jar = "2.4.32"
 coil = "3.3.0"
 uiText = "1.9.5"
@@ -111,6 +112,8 @@ firebase-analytic = { module = "com.google.firebase:firebase-analytics" }
 
 okio = "com.squareup.okio:okio:3.16.2"
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+# Ksoup - Kotlin Multiplatform HTML parser (works on iOS, Android, Desktop)
+ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 
 # Immutable Collections - Critical for Compose performance
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxImmutable" }

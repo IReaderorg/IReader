@@ -40,7 +40,7 @@ class JSLibraryProvider(
         if (fetchProcessorRunning) return
         fetchProcessorRunning = true
         
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default).launch {
             while (fetchProcessorRunning) {
                 try {
                     processFetchQueue()
@@ -1016,15 +1016,12 @@ class JSLibraryProvider(
     
     /**
      * Loads a JavaScript library from resources.
+     * Note: Resource loading is not available in commonMain - libraries should be bundled inline.
      */
     private fun loadLibraryFromResources(path: String): String? {
-        return try {
-            // Try to load from resources
-            val resourceStream = javaClass.getResourceAsStream(path)
-            resourceStream?.bufferedReader()?.use { it.readText() }
-        } catch (e: Exception) {
-            null
-        }
+        // Resource loading via javaClass.getResourceAsStream is JVM-only
+        // For cross-platform support, libraries should be bundled inline or loaded via expect/actual
+        return null
     }
     
     /**

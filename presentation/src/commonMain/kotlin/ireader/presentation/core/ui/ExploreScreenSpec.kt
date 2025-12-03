@@ -24,7 +24,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
-import ireader.presentation.imageloader.convertToOkHttpRequest
+import ireader.presentation.imageloader.getHeadersMap
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.EmptyScreenComposable
 import ireader.presentation.ui.component.hideKeyboard
@@ -34,7 +34,7 @@ import ireader.presentation.ui.home.explore.ExploreScreen
 import ireader.presentation.ui.home.explore.FilterBottomSheet
 import ireader.presentation.ui.home.explore.viewmodel.ExploreViewModel
 import kotlinx.coroutines.launch
-import okhttp3.Headers
+
 import org.koin.core.parameter.parametersOf
 
 @OptIn(
@@ -62,7 +62,7 @@ data class ExploreScreenSpec(
         val source = state.source
         val scope = rememberCoroutineScope()
         
-        val headers = remember { mutableStateOf<Headers?>(null) }
+        val headers = remember { mutableStateOf<Map<String, String>?>(null) }
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         val snackBarHostState = SnackBarListener(vm)
         
@@ -202,8 +202,8 @@ data class ExploreScreenSpec(
                         headers = { url ->
                             if (headers.value == null) {
                                 headers.value = (source as? HttpSource)
-                                    ?.getCoverRequest(url)?.second?.build()
-                                    ?.convertToOkHttpRequest()?.headers
+                                    ?.getCoverRequest(url)?.second
+                                    ?.getHeadersMap()
                             }
                             headers.value
                         },

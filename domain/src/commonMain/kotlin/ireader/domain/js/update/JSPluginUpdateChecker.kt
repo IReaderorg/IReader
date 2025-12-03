@@ -57,7 +57,7 @@ class JSPluginUpdateChecker(
      * 
      * @return List of available updates
      */
-    suspend fun checkForUpdates(): List<PluginUpdate> = withContext(Dispatchers.IO) {
+    suspend fun checkForUpdates(): List<PluginUpdate> = withContext(Dispatchers.Default) {
         val updates = mutableListOf<PluginUpdate>()
         val installedPlugins = pluginLoader.getInstalledPlugins()
         
@@ -105,7 +105,7 @@ class JSPluginUpdateChecker(
      * @param update The plugin update to download
      * @return The temporary path containing the downloaded plugin, or null if download failed
      */
-    suspend fun downloadUpdate(update: PluginUpdate): Path? = withContext(Dispatchers.IO) {
+    suspend fun downloadUpdate(update: PluginUpdate): Path? = withContext(Dispatchers.Default) {
         try {
             JSPluginLogger.logDebug(update.pluginId, "Downloading update from ${update.downloadUrl}")
             
@@ -149,7 +149,7 @@ class JSPluginUpdateChecker(
      * @param file The path containing the new plugin code
      * @return True if installation succeeded, false otherwise
      */
-    suspend fun installUpdate(update: PluginUpdate, file: Path): Boolean = withContext(Dispatchers.IO) {
+    suspend fun installUpdate(update: PluginUpdate, file: Path): Boolean = withContext(Dispatchers.Default) {
         try {
             JSPluginLogger.logDebug(update.pluginId, "Installing update ${update.newVersion}")
             
@@ -204,7 +204,7 @@ class JSPluginUpdateChecker(
      * @param pluginId The plugin identifier
      * @return True if rollback succeeded, false otherwise
      */
-    suspend fun rollbackUpdate(pluginId: String): Boolean = withContext(Dispatchers.IO) {
+    suspend fun rollbackUpdate(pluginId: String): Boolean = withContext(Dispatchers.Default) {
         try {
             JSPluginLogger.logDebug(pluginId, "Rolling back update")
             

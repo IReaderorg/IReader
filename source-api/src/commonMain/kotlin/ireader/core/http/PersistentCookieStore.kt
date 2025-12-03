@@ -1,86 +1,82 @@
-﻿package ireader.core.http
+package ireader.core.http
 
-import ireader.core.prefs.PreferenceStore
-import okhttp3.Cookie
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import ireader.core.util.currentTimeMillis
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.time.ExperimentalTime
 
-
-class PersistentCookieStore(private val preferenceStore: PreferenceStore) {
-
-    private val cookieMap = mutableMapOf<String, List<Cookie>>()
-
-    val keyPref = preferenceStore.getString("cookie_manager_keys")
-    val keys = mutableListOf<String>()
-    val cookieSeparator = "#COOKIE_SEPARATOR#"
-    fun decodePrefsCookies() {
-        keys.addAll(keyPref.get().split(cookieSeparator))
-    }
-
-    init {
-        decodePrefsCookies()
-        val cookies = keys.map {
-            it to preferenceStore.getString(it).get()
-        }
-        for ((key, value) in cookies) {
-            @Suppress("UNCHECKED_CAST")
-            val cookies = value as? Set<String>
-            if (cookies != null) {
-                try {
-                    val url = "http://$key".toHttpUrlOrNull() ?: continue
-                    val nonExpiredCookies = cookies.mapNotNull { Cookie.parse(url, it) }
-                        .filter { !it.hasExpired() }
-                    cookieMap.put(key, nonExpiredCookies)
-                } catch (e: Exception) {
-                    // Ignore
+/**
+ * Thread-safe cookie store for persisting cookies across sessions.
+ * KMP-compatible implementation using common Cookie type.
+ */
+class PersistentCookieStore {
+    private val cookies = mutableMapOf<String, MutableMap<String, Cookie>>()
+    private val mutex = Mutex()
+    
+    suspend fun addCookies(url: String, newCookies: List<Cookie>) {
+        val host = extractHost(url)
+        mutex.withLock {
+            val hostCookies = cookies.getOrPut(host) { mutableMapOf() }
+            newCookies.forEach { cookie ->
+                if (cookie.persistent || cookie.expiresAt == 0L) {
+                    hostCookies[cookie.name] = cookie
                 }
             }
         }
     }
-
-    @Synchronized
-    fun addAll(url: HttpUrl, cookies: List<Cookie>) {
-        val key = url.host
-
-        // Append or replace the cookies for this domain.
-        val cookiesForDomain = cookieMap[key].orEmpty().toMutableList()
-        for (cookie in cookies) {
-            // Find a cookie with the same name. Replace it if found, otherwise add a new one.
-            val pos = cookiesForDomain.indexOfFirst { it.name == cookie.name }
-            if (pos == -1) {
-                cookiesForDomain.add(cookie)
-            } else {
-                cookiesForDomain[pos] = cookie
+    
+    @OptIn(ExperimentalTime::class)
+    suspend fun getCookies(url: String): List<Cookie> {
+        val host = extractHost(url)
+        return mutex.withLock {
+            val hostCookies = cookies[host] ?: return@withLock emptyList()
+            val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+            
+            val validCookies = hostCookies.values.filter { cookie ->
+                cookie.expiresAt == 0L || cookie.expiresAt > now
             }
+            
+            hostCookies.entries.removeAll { (_, cookie) ->
+                cookie.expiresAt != 0L && cookie.expiresAt <= now
+            }
+            
+            validCookies
         }
-        cookieMap.put(key, cookiesForDomain)
-
-        // Get cookies to be stored in disk
-        val newValues = cookiesForDomain.asSequence()
-            .filter { it.persistent && !it.hasExpired() }
-            .map(Cookie::toString)
-            .toSet()
-
-        keyPref.set(keys.joinToString(cookieSeparator))
-        preferenceStore.getStringSet(key).set(newValues)
     }
-
-    @Synchronized
-    fun removeAll() {
-        cookieMap.clear()
+    
+    suspend fun removeCookie(url: String, cookieName: String) {
+        val host = extractHost(url)
+        mutex.withLock {
+            cookies[host]?.remove(cookieName)
+        }
     }
-
-    fun remove(host: String) {
-        preferenceStore.getStringSet(host).delete()
-        cookieMap.remove(host)
+    
+    suspend fun clearCookies(url: String) {
+        val host = extractHost(url)
+        mutex.withLock {
+            cookies.remove(host)
+        }
     }
-
-    fun get(url: HttpUrl): List<Cookie> = getByHost(url.host)
-
-    fun getByHost(host: String): List<Cookie> {
-        return cookieMap[host].orEmpty().filter { !it.hasExpired() }
+    
+    suspend fun clearAll() {
+        mutex.withLock {
+            cookies.clear()
+        }
     }
-
-    private fun Cookie.hasExpired() = currentTimeMillis() >= expiresAt
+    
+    suspend fun getAllCookies(): Map<String, List<Cookie>> {
+        return mutex.withLock {
+            cookies.mapValues { it.value.values.toList() }
+        }
+    }
+    
+    private fun extractHost(url: String): String {
+        return try {
+            url.substringAfter("://")
+                .substringBefore("/")
+                .substringBefore(":")
+                .lowercase()
+        } catch (e: Exception) {
+            url
+        }
+    }
 }

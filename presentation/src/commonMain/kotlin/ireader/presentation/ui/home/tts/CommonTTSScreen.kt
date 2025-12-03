@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.home.tts
+package ireader.presentation.ui.home.tts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -181,8 +181,8 @@ object SentenceHighlighter {
     private const val MAX_WORDS_PER_SENTENCE = 50
     
     // Pre-compiled regex patterns for better performance
-    private val SENTENCE_END_PATTERN = Regex("(?<=[.!?。！？;；])")
-    private val COMMA_PATTERN = Regex("(?<=[,，])")
+    private val SENTENCE_END_PATTERN = Regex("(?<=[.!??!?;;])")
+    private val COMMA_PATTERN = Regex("(?<=[,,])")
     private val WHITESPACE_PATTERN = Regex("\\s+")
     
     /**
@@ -320,11 +320,11 @@ object SentenceHighlighter {
         val basePauseMs = when {
             // Sentence-ending punctuation - longer pause
             chunk.endsWith(".") || chunk.endsWith("!") || chunk.endsWith("?") ||
-            chunk.endsWith("。") || chunk.endsWith("！") || chunk.endsWith("？") -> 12
+            chunk.endsWith("?") || chunk.endsWith("!") || chunk.endsWith("?") -> 12
             // Mid-sentence punctuation (comma, semicolon, colon) - shorter pause
-            chunk.contains(",") || chunk.contains("，") || 
-            chunk.contains(";") || chunk.contains("；") ||
-            chunk.contains(":") || chunk.contains("：") -> 5
+            chunk.contains(",") || chunk.contains(",") || 
+            chunk.contains(";") || chunk.contains(";") ||
+            chunk.contains(":") || chunk.contains(":") -> 5
             else -> 2
         }
         val pauseMs = (basePauseMs / speechSpeed).toLong().coerceAtLeast(1)

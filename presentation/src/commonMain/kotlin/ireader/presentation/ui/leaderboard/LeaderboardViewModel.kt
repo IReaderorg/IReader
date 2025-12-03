@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.leaderboard
+package ireader.presentation.ui.leaderboard
 
 import androidx.compose.runtime.Stable
 import ireader.domain.usecases.leaderboard.LeaderboardUseCases
@@ -100,7 +100,7 @@ class LeaderboardViewModel(
                     // Parse error message to provide user-friendly feedback
                     val userFriendlyMessage = when {
                         error.message?.contains("not logged in", ignoreCase = true) == true ->
-                            "Please sign in first (More → Profile & Sync)"
+                            "Please sign in first (More ? Profile & Sync)"
                         
                         error.message?.contains("duplicate key", ignoreCase = true) == true ->
                             "Stats updated successfully!" // This is actually success

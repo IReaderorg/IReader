@@ -38,7 +38,7 @@ open class JSStorage(
         // Validate key for security
         val validationResult = validator.validateFileAccess(key, pluginId)
         if (!validationResult.isValid()) {
-            throw SecurityException("Invalid storage key: ${validationResult.getError()}")
+            throw IllegalStateException("Invalid storage key: ${validationResult.getError()}")
         }
         
         val prefKey = getPrefKey(key)
@@ -67,7 +67,7 @@ open class JSStorage(
         // Validate key for security
         val validationResult = validator.validateFileAccess(key, pluginId)
         if (!validationResult.isValid()) {
-            throw SecurityException("Invalid storage key: ${validationResult.getError()}")
+            throw IllegalStateException("Invalid storage key: ${validationResult.getError()}")
         }
         
         val prefKey = getPrefKey(key)
@@ -103,7 +103,7 @@ open class JSStorage(
         // Validate key for security
         val validationResult = validator.validateFileAccess(key, pluginId)
         if (!validationResult.isValid()) {
-            throw SecurityException("Invalid storage key: ${validationResult.getError()}")
+            throw IllegalStateException("Invalid storage key: ${validationResult.getError()}")
         }
         
         val prefKey = getPrefKey(key)

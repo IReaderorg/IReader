@@ -71,7 +71,9 @@ kotlin {
                 api(libs.ktor.core)
                 api(libs.ktor.contentNegotiation)
                 api(libs.ktor.contentNegotiation.kotlinx)
-                compileOnly(libs.jsoup)
+                // Ksoup - KMP-compatible HTML parser (replaces Jsoup for iOS)
+                api("com.fleeksoft.ksoup:ksoup:0.2.2")
+                api("com.fleeksoft.ksoup:ksoup-network:0.2.2")
                 // Kermit logging - exposed as API for consumers
                 api(libs.kermit)
             }

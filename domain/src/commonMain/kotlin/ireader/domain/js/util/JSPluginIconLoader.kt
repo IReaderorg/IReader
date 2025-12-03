@@ -123,7 +123,7 @@ class JSPluginIconLoader(
      * @return ByteArray of downloaded icon, or null if download fails
      */
     private suspend fun downloadIcon(url: String): ByteArray? {
-        return withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.Default) {
             try {
                 val response = httpClient.get(url)
                 response.readBytes()

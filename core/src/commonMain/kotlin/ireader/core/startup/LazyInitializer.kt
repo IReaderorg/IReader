@@ -1,13 +1,14 @@
 ﻿package ireader.core.startup
 
 import ireader.core.log.Log
+import ireader.core.time.currentTimeMillis
+import ireader.core.util.IO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import ireader.core.time.currentTimeMillis
 
 /**
  * Manages lazy initialization of non-critical components.

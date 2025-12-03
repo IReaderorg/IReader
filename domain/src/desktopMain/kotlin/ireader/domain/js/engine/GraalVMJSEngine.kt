@@ -1,7 +1,12 @@
 package ireader.domain.js.engine
 
 import ireader.core.log.Log
-import ireader.domain.js.bridge.*
+import ireader.domain.js.bridge.FetchOptions
+import ireader.domain.js.bridge.JSBridgeService
+import ireader.domain.js.bridge.LNReaderPlugin
+import ireader.domain.js.bridge.PluginChapter
+import ireader.domain.js.bridge.PluginNovel
+import ireader.domain.js.bridge.PluginNovelDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -9,9 +14,7 @@ import org.graalvm.polyglot.Context
 import org.graalvm.polyglot.Value
 import org.graalvm.polyglot.proxy.ProxyExecutable
 import org.graalvm.polyglot.proxy.ProxyObject
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
+
 
 /**
  * GraalVM-based JavaScript engine for desktop.
@@ -546,7 +549,7 @@ class GraalVMJSEngine(
                 };
             }
             
-            // Cheerio implementation using jsoup
+            // Cheerio implementation using ksoup
             // Note: This is injected as a native object, not JavaScript
             // The actual implementation is in createCheerioProxy()
             

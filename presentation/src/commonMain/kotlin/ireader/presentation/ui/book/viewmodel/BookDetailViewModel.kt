@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.book.viewmodel
+package ireader.presentation.ui.book.viewmodel
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue

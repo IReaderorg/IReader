@@ -1,4 +1,5 @@
-﻿package ireader.domain.usecases.prefetch
+package ireader.domain.usecases.prefetch
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.core.log.Log
 import ireader.domain.models.entities.Book
@@ -33,15 +34,12 @@ class BookPrefetchService(
     private val getChapterUseCase: LocalGetChapterUseCase,
     private val historyUseCase: HistoryUseCase
 ) {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private val mutex = Mutex()
     
     // LRU cache for prefetched book data
-    private val prefetchCache = LinkedHashMap<Long, PrefetchedBookData>(
-        MAX_CACHE_SIZE,
-        0.75f,
-        true // Access order for LRU
-    )
+    private val prefetchCache = mutableMapOf<Long, PrefetchedBookData>()
+    private val cacheAccessOrder = mutableListOf<Long>()
     
     // Track ongoing prefetch jobs to avoid duplicates
     private val ongoingPrefetches = mutableMapOf<Long, Job>()
@@ -156,14 +154,19 @@ class BookPrefetchService(
                 
                 // Store in cache
                 mutex.withLock {
-                    // Enforce cache size limit
+                    // Enforce cache size limit using LRU
                     while (prefetchCache.size >= MAX_CACHE_SIZE) {
-                        val oldestKey = prefetchCache.keys.firstOrNull()
+                        val oldestKey = cacheAccessOrder.firstOrNull()
                         if (oldestKey != null) {
                             prefetchCache.remove(oldestKey)
+                            cacheAccessOrder.removeAt(0)
+                        } else {
+                            break
                         }
                     }
                     prefetchCache[bookId] = data
+                    cacheAccessOrder.remove(bookId)
+                    cacheAccessOrder.add(bookId)
                     ongoingPrefetches.remove(bookId)
                 }
                 

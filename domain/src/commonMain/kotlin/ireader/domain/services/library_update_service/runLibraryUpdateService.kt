@@ -1,4 +1,5 @@
 package ireader.domain.services.library_update_service
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.interactor.GetLocalCatalog
@@ -64,7 +65,7 @@ suspend fun runLibraryUpdateService(
                     if (newChapters.isNotEmpty()) {
                         updatedBookSize += 1
                     }
-                    withContext(Dispatchers.IO) {
+                    withContext(ioDispatcher) {
 
                         insertUseCases.insertChapters(
                             newChapters.map {

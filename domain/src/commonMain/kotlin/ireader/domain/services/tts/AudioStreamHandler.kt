@@ -1,4 +1,5 @@
 package ireader.domain.services.tts
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.domain.plugins.AudioStream
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +19,7 @@ class AudioStreamHandler {
      * Requirements: 5.3
      */
     suspend fun readFullStream(audioStream: AudioStream): Result<ByteArray> {
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             try {
                 val buffer = Buffer()
                 val readBuffer = ByteArray(8192) // 8KB buffer
@@ -47,7 +48,7 @@ class AudioStreamHandler {
         onComplete: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             try {
                 val buffer = ByteArray(4096) // 4KB buffer for streaming
                 

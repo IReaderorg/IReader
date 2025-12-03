@@ -1,24 +1,18 @@
 package ireader.core.source
 
+import com.fleeksoft.ksoup.nodes.Document
 import ireader.core.source.ParsingUtils.extractMainContent
-import org.jsoup.nodes.Document
 
 /**
  * Enhanced error handling for novel fetching and parsing operations
  */
 sealed class FetchError {
-    /**
-     * Network-related errors
-     */
     data class NetworkError(
         val message: String,
         val statusCode: Int? = null,
         val cause: Throwable? = null
     ) : FetchError()
     
-    /**
-     * Parsing-related errors
-     */
     data class ParsingError(
         val message: String,
         val url: String,
@@ -26,49 +20,31 @@ sealed class FetchError {
         val partialContent: String? = null
     ) : FetchError()
     
-    /**
-     * Content validation errors
-     */
     data class ValidationError(
         val message: String,
         val issues: List<String>
     ) : FetchError()
     
-    /**
-     * Timeout errors
-     */
     data class TimeoutError(
         val message: String,
         val timeoutMs: Long
     ) : FetchError()
     
-    /**
-     * Authentication/Authorization errors
-     */
     data class AuthError(
         val message: String,
         val requiresLogin: Boolean = false
     ) : FetchError()
     
-    /**
-     * Rate limiting errors
-     */
     data class RateLimitError(
         val message: String,
         val retryAfterMs: Long? = null
     ) : FetchError()
     
-    /**
-     * Unknown errors
-     */
     data class UnknownError(
         val message: String,
         val cause: Throwable? = null
     ) : FetchError()
     
-    /**
-     * Get user-friendly error message
-     */
     fun getUserMessage(): String {
         return when (this) {
             is NetworkError -> "Network error: $message${statusCode?.let { " (Status: $it)" } ?: ""}"
@@ -81,9 +57,6 @@ sealed class FetchError {
         }
     }
     
-    /**
-     * Check if error is retryable
-     */
     fun isRetryable(): Boolean {
         return when (this) {
             is NetworkError -> statusCode in listOf(408, 429, 500, 502, 503, 504) || statusCode == null
@@ -96,15 +69,12 @@ sealed class FetchError {
         }
     }
     
-    /**
-     * Get suggested retry delay in milliseconds
-     */
     fun getRetryDelayMs(): Long {
         return when (this) {
             is RateLimitError -> retryAfterMs ?: 5000L
             is NetworkError -> when (statusCode) {
-                429 -> 10000L // Rate limit
-                503 -> 5000L // Service unavailable
+                429 -> 10000L
+                503 -> 5000L
                 else -> 2000L
             }
             is TimeoutError -> 3000L
@@ -113,16 +83,10 @@ sealed class FetchError {
     }
 }
 
-/**
- * Result wrapper for fetch operations with error handling
- */
 sealed class FetchResult<out T> {
     data class Success<T>(val data: T) : FetchResult<T>()
     data class Error(val error: FetchError) : FetchResult<Nothing>()
     
-    /**
-     * Map success value
-     */
     fun <R> map(transform: (T) -> R): FetchResult<R> {
         return when (this) {
             is Success -> Success(transform(data))
@@ -130,9 +94,6 @@ sealed class FetchResult<out T> {
         }
     }
     
-    /**
-     * Get value or null
-     */
     fun getOrNull(): T? {
         return when (this) {
             is Success -> data
@@ -140,11 +101,6 @@ sealed class FetchResult<out T> {
         }
     }
     
-
-    
-    /**
-     * Execute block on success
-     */
     inline fun onSuccess(block: (T) -> Unit): FetchResult<T> {
         if (this is Success) {
             block(data)
@@ -152,9 +108,6 @@ sealed class FetchResult<out T> {
         return this
     }
     
-    /**
-     * Execute block on error
-     */
     inline fun onError(block: (FetchError) -> Unit): FetchResult<T> {
         if (this is Error) {
             block(error)
@@ -163,47 +116,31 @@ sealed class FetchResult<out T> {
     }
 }
 
-/**
- * Retry strategy for failed operations
- */
 class RetryStrategy(
     val maxAttempts: Int = 3,
     val initialDelayMs: Long = 1000L,
     val maxDelayMs: Long = 10000L,
     val backoffMultiplier: Double = 2.0
 ) {
-    /**
-     * Calculate delay for retry attempt
-     */
     fun getDelayForAttempt(attempt: Int): Long {
-        val delay = (initialDelayMs * Math.pow(backoffMultiplier, attempt.toDouble())).toLong()
+        var delay = initialDelayMs
+        repeat(attempt) { delay = (delay * backoffMultiplier).toLong() }
         return minOf(delay, maxDelayMs)
     }
     
-    /**
-     * Check if should retry
-     */
     fun shouldRetry(attempt: Int, error: FetchError): Boolean {
         return attempt < maxAttempts && error.isRetryable()
     }
 }
 
-/**
- * Error handler with retry logic
- */
 object ErrorHandler {
     
-    /**
-     * Execute operation with retry logic
-     */
     suspend fun <T> executeWithRetry(
         strategy: RetryStrategy = RetryStrategy(),
         operation: suspend (attempt: Int) -> FetchResult<T>
     ): FetchResult<T> {
-        var attempt = 0
         var lastError: FetchError? = null
         
-        // Improved: Better loop structure with clearer logic
         repeat(strategy.maxAttempts) { currentAttempt ->
             val result = try {
                 operation(currentAttempt)
@@ -221,13 +158,11 @@ object ErrorHandler {
                 is FetchResult.Error -> {
                     lastError = result.error
                     
-                    // Improved: Check if this is the last attempt
                     val isLastAttempt = currentAttempt >= strategy.maxAttempts - 1
                     if (isLastAttempt || !result.error.isRetryable()) {
                         return result
                     }
                     
-                    // Improved: Calculate delay more efficiently
                     val delay = maxOf(
                         strategy.getDelayForAttempt(currentAttempt),
                         result.error.getRetryDelayMs()
@@ -237,45 +172,35 @@ object ErrorHandler {
             }
         }
         
-        // Improved: Better error message with attempt count
         return FetchResult.Error(
             lastError ?: FetchError.UnknownError("Max retry attempts (${strategy.maxAttempts}) reached")
         )
     }
     
-    /**
-     * Convert exception to FetchError
-     */
     fun fromException(e: Throwable, context: String = ""): FetchError {
-        // Improved: Build context suffix once
         val contextSuffix = if (context.isNotEmpty()) ": $context" else ""
         val errorMessage = e.message?.lowercase() ?: ""
         
         return when {
-            // Check for timeout-related errors by message
             errorMessage.contains("timeout") || errorMessage.contains("timed out") -> {
                 FetchError.TimeoutError(
                     message = "Request timed out$contextSuffix",
                     timeoutMs = 30000L
                 )
             }
-            // Check for host resolution errors
             errorMessage.contains("unknown host") || errorMessage.contains("unable to resolve") -> {
                 FetchError.NetworkError(
                     message = "Cannot resolve host$contextSuffix",
                     cause = e
                 )
             }
-            // Check for connection errors
             errorMessage.contains("connect") && (errorMessage.contains("refused") || errorMessage.contains("failed")) -> {
                 FetchError.NetworkError(
                     message = "Cannot connect to server$contextSuffix",
                     cause = e
                 )
             }
-            // Check for IO errors
-            e is okio.IOException || errorMessage.contains("io") || errorMessage.contains("stream") -> {
-                // Improved: More specific IO error messages
+            errorMessage.contains("io") || errorMessage.contains("stream") -> {
                 val ioMessage = when {
                     errorMessage.contains("closed") -> "Connection closed"
                     errorMessage.contains("reset") -> "Connection reset"
@@ -302,9 +227,6 @@ object ErrorHandler {
         }
     }
     
-    /**
-     * Validate parsed content and return error if invalid
-     */
     fun validateParsedContent(content: String, minLength: Int = 50): FetchError? {
         val validation = ParsingErrorRecovery.validateContent(content)
         
@@ -318,9 +240,6 @@ object ErrorHandler {
         }
     }
     
-    /**
-     * Create error from HTTP status code
-     */
     fun fromHttpStatus(statusCode: Int, message: String = ""): FetchError {
         return when (statusCode) {
             in 400..499 -> {
@@ -350,26 +269,18 @@ object ErrorHandler {
     }
 }
 
-/**
- * Fallback parsing strategies for when primary parsing fails
- */
 object FallbackStrategies {
     
-    /**
-     * Strategy 1: Try alternative selectors
-     */
     fun tryAlternativeSelectors(
         document: Document,
         primarySelector: String,
         alternativeSelectors: List<String>
     ): FetchResult<String> {
-        // Try primary selector first
         val primaryElement = document.selectFirst(primarySelector)
         if (primaryElement != null && primaryElement.text().length > 50) {
             return FetchResult.Success(primaryElement.text())
         }
         
-        // Try alternatives
         for (selector in alternativeSelectors) {
             val element = document.selectFirst(selector)
             if (element != null && element.text().length > 50) {
@@ -385,14 +296,11 @@ object FallbackStrategies {
         )
     }
     
-    /**
-     * Strategy 2: Extract largest text block
-     */
     fun extractLargestTextBlock(document: Document): FetchResult<String> {
         val largestBlock = document.body()
-            .select("div, article, section, p")
-            .filter { it.text().length > 100 }
-            .maxByOrNull { it.text().length }
+            ?.select("div, article, section, p")
+            ?.filter { it.text().length > 100 }
+            ?.maxByOrNull { it.text().length }
         
         return if (largestBlock != null) {
             FetchResult.Success(largestBlock.text())
@@ -406,9 +314,6 @@ object FallbackStrategies {
         }
     }
     
-    /**
-     * Strategy 3: Use heuristics to find main content
-     */
     fun useContentHeuristics(document: Document): FetchResult<String> {
         val mainContent = document.extractMainContent()
         
@@ -424,15 +329,11 @@ object FallbackStrategies {
         }
     }
     
-    /**
-     * Apply all fallback strategies in sequence
-     */
     fun applyAllStrategies(
         document: Document,
         primarySelector: String,
         alternativeSelectors: List<String> = emptyList()
     ): FetchResult<String> {
-        // Strategy 1: Alternative selectors
         if (alternativeSelectors.isNotEmpty()) {
             val result = tryAlternativeSelectors(document, primarySelector, alternativeSelectors)
             if (result is FetchResult.Success) {
@@ -440,13 +341,11 @@ object FallbackStrategies {
             }
         }
         
-        // Strategy 2: Content heuristics
         val heuristicsResult = useContentHeuristics(document)
         if (heuristicsResult is FetchResult.Success) {
             return heuristicsResult
         }
         
-        // Strategy 3: Largest text block
         return extractLargestTextBlock(document)
     }
 }

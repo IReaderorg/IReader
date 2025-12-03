@@ -20,7 +20,7 @@ expect fun LocalDate.asRelativeTimeString(
  */
 @OptIn(ExperimentalTime::class)
 fun currentTimeToLong(): Long {
-    return Clock.System.now().toEpochMilliseconds()
+    return kotlin.time.Clock.System.now().toEpochMilliseconds()
 }
 
 /**

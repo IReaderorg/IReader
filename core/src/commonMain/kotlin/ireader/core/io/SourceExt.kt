@@ -8,6 +8,7 @@
 
 package ireader.core.io
 
+import ireader.core.util.IO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.FileSystem

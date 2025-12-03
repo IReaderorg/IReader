@@ -1,4 +1,4 @@
-﻿package ireader.presentation.core.ui
+package ireader.presentation.core.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi

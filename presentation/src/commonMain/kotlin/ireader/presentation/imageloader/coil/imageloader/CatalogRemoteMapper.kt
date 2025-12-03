@@ -11,8 +11,7 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.models.entities.JSPluginCatalog
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
+
 
 class CatalogRemoteMapper : Mapper<Catalog,Uri> {
     override fun map(data: Catalog, options: Options): Uri? {

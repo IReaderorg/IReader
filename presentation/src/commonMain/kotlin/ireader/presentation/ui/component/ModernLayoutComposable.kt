@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.component
+package ireader.presentation.ui.component
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -101,7 +101,7 @@ fun ModernLayoutComposable(
         EmptyContent()
     },
     columns: Int? = null,
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     keys: ((item: BookItem) -> Any) = {
         it.id
     }
@@ -175,7 +175,7 @@ private fun ModernGridLayout(
     isLoading: Boolean,
     showInLibraryBadge: Boolean,
     columns: Int,
-    headers: ((url: String) -> okhttp3.Headers?)?,
+    headers: ((url: String) -> Map<String, String>?)?,
     keys: ((item: BookItem) -> Any),
     showTitle: Boolean = true,
     compactMode: Boolean = false
@@ -245,7 +245,7 @@ private fun ModernListLayout(
     onLongClick: (BookItem) -> Unit,
     scrollState: LazyListState,
     isLoading: Boolean,
-    headers: ((url: String) -> okhttp3.Headers?)?,
+    headers: ((url: String) -> Map<String, String>?)?,
     keys: ((item: BookItem) -> Any)
 ) {
     // Use derivedStateOf for computed values
@@ -290,7 +290,7 @@ fun ModernListItem(
     index: Int,
     onClick: (BookItem) -> Unit,
     onLongClick: (BookItem) -> Unit = {},
-    headers: ((url: String) -> okhttp3.Headers?)? = null
+    headers: ((url: String) -> Map<String, String>?)? = null
 ) {
     // Render directly without animation to prevent scroll issues
     // Animation was causing items to disappear when scrolling fast
@@ -583,7 +583,7 @@ fun AnimatedBookItem(
     index: Int,
     onClick: (BookItem) -> Unit,
     onLongClick: (BookItem) -> Unit = {},
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     showTitle: Boolean = true,
     elevation: Dp = 4.dp
 ) {
@@ -607,7 +607,7 @@ fun EnhancedNovelCard(
     book: BookItem,
     onClick: (BookItem) -> Unit,
     onLongClick: (BookItem) -> Unit = {},
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     showTitle: Boolean = true,
     elevation: Dp = 4.dp
 ) {
@@ -786,7 +786,7 @@ fun StatusBadge(
 @Composable
 fun BookCoverImage(
     book: BookItem,
-    headers: ((url: String) -> okhttp3.Headers?)? = null
+    headers: ((url: String) -> Map<String, String>?)? = null
 ) {
     // Use remember to cache the BookCover object
     val bookCover = remember(book.id, book.cover) {

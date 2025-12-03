@@ -28,3 +28,13 @@ actual suspend fun extractZipEntry(file: VirtualFile, entryName: String): String
         null
     }
 }
+
+/**
+ * Android implementation of plugin instantiation
+ * Uses Java reflection to instantiate the plugin class
+ */
+@Suppress("UNCHECKED_CAST")
+actual fun instantiatePlugin(pluginClass: Any): Plugin {
+    val clazz = pluginClass as Class<out Plugin>
+    return clazz.getDeclaredConstructor().newInstance()
+}

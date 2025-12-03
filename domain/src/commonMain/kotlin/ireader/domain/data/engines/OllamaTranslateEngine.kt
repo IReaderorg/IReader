@@ -1,19 +1,23 @@
 package ireader.domain.data.engines
+import ireader.domain.utils.extensions.ioDispatcher
 
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
+import io.ktor.serialization.kotlinx.json.json
+import ireader.core.util.IO
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.ollama_server_url_not_set
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 
 class OllamaTranslateEngine(
     private val readerPreferences: ReaderPreferences,
@@ -91,7 +95,7 @@ class OllamaTranslateEngine(
                 return
             }
 
-            val results = withContext(Dispatchers.IO) {
+            val results = withContext(ioDispatcher) {
                 val translations = mutableListOf<String>()
                 
                 texts.forEachIndexed { index, text ->

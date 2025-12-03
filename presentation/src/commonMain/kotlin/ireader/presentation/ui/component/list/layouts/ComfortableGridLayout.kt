@@ -44,7 +44,7 @@ fun ComfortableGridLayout(
     showUnreadChaptersBadge: Boolean = false,
     showLocalMangaBadge: Boolean = false,
     showLanguageBadge: Boolean = false,
-    headers: ((url: String) -> okhttp3.Headers?)? = null,
+    headers: ((url: String) -> Map<String, String>?)? = null,
     columns: Int = 3,
     keys: ((item: BookItem) -> Any)
 

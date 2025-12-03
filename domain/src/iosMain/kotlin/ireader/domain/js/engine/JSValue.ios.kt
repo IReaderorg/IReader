@@ -3,25 +3,42 @@ package ireader.domain.js.engine
 /**
  * iOS implementation of JSValue wrapper
  * 
- * TODO: Implement wrapping platform.JavaScriptCore.JSValue
+ * TODO: Full implementation wrapping platform.JavaScriptCore.JSValue
  */
-actual class JSValue {
-    actual fun isNull(): Boolean = true
-    actual fun isUndefined(): Boolean = true
-    actual fun isBoolean(): Boolean = false
-    actual fun isNumber(): Boolean = false
-    actual fun isString(): Boolean = false
-    actual fun isArray(): Boolean = false
-    actual fun isObject(): Boolean = false
+actual class JSValue(private val rawValue: Any? = null) {
     
-    actual fun toBoolean(): Boolean = false
-    actual fun toInt(): Int = 0
-    actual fun toLong(): Long = 0L
-    actual fun toDouble(): Double = 0.0
-    actual fun toStringValue(): String = ""
-    actual fun toList(): List<JSValue> = emptyList()
-    actual fun toMap(): Map<String, JSValue> = emptyMap()
+    actual fun asString(): String = rawValue?.toString() ?: ""
     
-    actual fun getProperty(name: String): JSValue? = null
-    actual fun getIndex(index: Int): JSValue? = null
+    actual fun asInt(): Int = when (rawValue) {
+        is Number -> rawValue.toInt()
+        is String -> rawValue.toIntOrNull() ?: 0
+        else -> 0
+    }
+    
+    actual fun asBoolean(): Boolean = when (rawValue) {
+        is Boolean -> rawValue
+        is Number -> rawValue.toInt() != 0
+        is String -> rawValue.lowercase() == "true"
+        else -> false
+    }
+    
+    actual fun asMap(): Map<String, Any?> {
+        @Suppress("UNCHECKED_CAST")
+        return (rawValue as? Map<String, Any?>) ?: emptyMap()
+    }
+    
+    actual fun asList(): List<Any?> {
+        @Suppress("UNCHECKED_CAST")
+        return (rawValue as? List<Any?>) ?: emptyList()
+    }
+    
+    actual fun isNull(): Boolean = rawValue == null
+    
+    actual fun isUndefined(): Boolean = rawValue == null
+    
+    actual fun getRaw(): Any? = rawValue
+    
+    actual companion object {
+        actual fun from(value: Any?): JSValue = JSValue(value)
+    }
 }

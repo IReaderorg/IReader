@@ -1,4 +1,5 @@
-﻿package ireader.domain.usecases.source
+package ireader.domain.usecases.source
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.domain.data.repository.SourceReportRepository
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ class ReportBrokenSourceUseCase(
      * 
      * @param sourceId The ID of the source
      * @param packageName The package name of the source
+import ireader.domain.utils.extensions.ioDispatcher
      * @param version The version of the source
      * @param reason The reason for reporting
      * @return Result with the report ID or error
@@ -22,7 +24,7 @@ class ReportBrokenSourceUseCase(
         packageName: String,
         version: String,
         reason: String
-    ): Result<Long> = withContext(Dispatchers.IO) {
+    ): Result<Long> = withContext(ioDispatcher) {
         try {
             val reportId = sourceReportRepository.insert(
                 sourceId = sourceId,

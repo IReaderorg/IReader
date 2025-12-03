@@ -12,5 +12,5 @@ val localModule = module {
 
     single<CookiesStorage> { AcceptAllCookiesStorage() }
 
-    factory <CoroutineScope> { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
+    factory<CoroutineScope> { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
 }

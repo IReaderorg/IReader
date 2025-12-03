@@ -28,7 +28,7 @@ fun IBookImageComposable(
         modifier: Modifier = Modifier,
         alignment: Alignment = Alignment.Center,
         contentScale: ContentScale = ContentScale.Crop,
-        headers: ((url: String) -> okhttp3.Headers?)? = null,
+        headers: ((url: String) -> Map<String, String>?)? = null,
         crossfadeDurationMs: Int = 200
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }

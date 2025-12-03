@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.viewmodels
+package ireader.presentation.ui.settings.viewmodels
 
 import ireader.core.log.Log
 import ireader.domain.preferences.prefs.AppPreferences

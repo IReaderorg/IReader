@@ -1,4 +1,5 @@
 package ireader.domain.usecases.remote
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.core.log.Log
 import ireader.core.source.model.CommandList
@@ -25,7 +26,7 @@ class GetRemoteChapters() {
             onRemoteSuccess: suspend (List<Chapter>) -> Unit = {},
             onError: suspend (UiText?) -> Unit,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             kotlin.runCatching {
                 try {
                     val source = catalog?.source ?: throw SourceNotFoundException()

@@ -1,39 +1,30 @@
 package ireader.core.http
 
 /**
- * iOS implementation of BrowserEngine
+ * iOS implementation of BrowserEngine using WKWebView
  * 
- * TODO: Implement using WKWebView for JavaScript execution
+ * TODO: Full implementation using WKWebView for JavaScript execution
  */
 actual class BrowserEngine : BrowserEngineInterface {
     
     actual override suspend fun fetch(
         url: String,
-        headers: Map<String, String>,
-        cookies: Map<String, String>,
+        selector: String?,
+        headers: Headers,
         timeout: Long,
-        userAgent: String?
-    ): BrowserResponse {
+        userAgent: String
+    ): BrowserResult {
         // TODO: Implement using WKWebView
-        return BrowserResponse(
-            url = url,
-            statusCode = 0,
-            body = "",
-            headers = emptyMap(),
-            cookies = emptyMap()
+        return BrowserResult(
+            responseBody = "",
+            cookies = emptyList(),
+            statusCode = 200,
+            error = "WKWebView implementation pending"
         )
     }
     
-    actual override suspend fun evaluateJavaScript(
-        url: String,
-        script: String,
-        timeout: Long
-    ): String {
-        // TODO: Implement using WKWebView
-        return ""
-    }
-    
-    actual override fun close() {
-        // Clean up WKWebView resources
+    actual override fun isAvailable(): Boolean {
+        // WKWebView is available on iOS 8.0+
+        return true
     }
 }

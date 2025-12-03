@@ -6,16 +6,16 @@ package ireader.core.http
  * TODO: Implement using NSHTTPCookieStorage and WKHTTPCookieStore
  */
 actual class CookieSynchronizer {
-    actual fun syncCookies(url: String, cookies: List<String>) {
-        // TODO: Sync cookies to NSHTTPCookieStorage
+    
+    actual fun syncFromWebView(url: String) {
+        // TODO: Sync cookies from WKWebView to HTTP client
     }
     
-    actual fun getCookies(url: String): List<String> {
-        // TODO: Get cookies from NSHTTPCookieStorage
-        return emptyList()
+    actual fun syncToWebView(url: String) {
+        // TODO: Sync cookies from HTTP client to WKWebView
     }
     
-    actual fun clearCookies() {
-        // TODO: Clear all cookies
+    actual fun clearAll() {
+        // TODO: Clear all cookies from both WKWebView and HTTP client
     }
 }

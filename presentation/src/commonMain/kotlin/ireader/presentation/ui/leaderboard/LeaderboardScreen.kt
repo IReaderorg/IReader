@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.leaderboard
+package ireader.presentation.ui.leaderboard
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -555,7 +555,7 @@ private fun EnhancedTopThreePodium(entries: List<LeaderboardEntry>) {
                 modifier = Modifier.padding(bottom = 20.dp)
             ) {
                 Text(
-                    text = "✨",
+                    text = "?",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -566,7 +566,7 @@ private fun EnhancedTopThreePodium(entries: List<LeaderboardEntry>) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "✨",
+                    text = "?",
                     style = MaterialTheme.typography.headlineMedium
                 )
             }
@@ -609,9 +609,9 @@ private fun PodiumPlace(
     }
     
     val medal = when (place) {
-        1 -> "🥇"
-        2 -> "🥈"
-        3 -> "🥉"
+        1 -> "??"
+        2 -> "??"
+        3 -> "??"
         else -> ""
     }
     
@@ -795,10 +795,10 @@ private fun RankBadge(rank: Int, size: Dp) {
 @Composable
 private fun BadgeIcon(badgeType: String?) {
     val icon = when (badgeType) {
-        "supporter" -> "💎"
-        "nft" -> "🎨"
-        "premium" -> "⭐"
-        else -> "🏅"
+        "supporter" -> "??"
+        "nft" -> "??"
+        "premium" -> "?"
+        else -> "??"
     }
     
     Text(
@@ -891,9 +891,9 @@ private fun EnhancedPodiumPlace(
     }
     
     val medal = when (place) {
-        1 -> "🥇"
-        2 -> "🥈"
-        3 -> "🥉"
+        1 -> "??"
+        2 -> "??"
+        3 -> "??"
         else -> ""
     }
     
@@ -948,10 +948,10 @@ private fun EnhancedPodiumPlace(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = when (entry.badgeType) {
-                        "supporter" -> "💎"
-                        "nft" -> "🎨"
-                        "premium" -> "⭐"
-                        else -> "🏅"
+                        "supporter" -> "??"
+                        "nft" -> "??"
+                        "premium" -> "?"
+                        else -> "??"
                     },
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -997,7 +997,7 @@ private fun EnhancedPodiumPlace(
                 )
                 if (place == 1) {
                     Text(
-                        text = "👑",
+                        text = "??",
                         style = MaterialTheme.typography.titleLarge
                     )
                 }
@@ -1292,10 +1292,10 @@ private fun EnhancedBadgeIndicator(badgeType: String?) {
         ) {
             Text(
                 text = when (badgeType) {
-                    "supporter" -> "💎"
-                    "nft" -> "🎨"
-                    "premium" -> "⭐"
-                    else -> "🏅"
+                    "supporter" -> "??"
+                    "nft" -> "??"
+                    "premium" -> "?"
+                    else -> "??"
                 },
                 style = MaterialTheme.typography.titleMedium
             )

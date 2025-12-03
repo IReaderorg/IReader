@@ -1,5 +1,8 @@
 package ireader.domain.usecases.epub
 
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.parser.Parser
 import ireader.core.source.LocalSource
 import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.Text
@@ -17,14 +20,11 @@ import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import okio.buffer
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
 import java.io.File
 import java.util.zip.ZipFile
 
 /**
- * Desktop implementation of EPUB import using pure Kotlin with okio and jsoup
+ * Desktop implementation of EPUB import using pure Kotlin with okio and ksoup
  */
 actual class ImportEpub(
     private val bookRepository: BookRepository,
@@ -61,7 +61,7 @@ actual class ImportEpub(
             // Parse OPF file to get metadata and spine
             val opfEntry = findOpfFile(zip) ?: throw Exception("No OPF file found in EPUB")
             val opfContent = zip.getInputStream(opfEntry).bufferedReader().readText()
-            val opfDoc = Jsoup.parse(opfContent, "", org.jsoup.parser.Parser.xmlParser())
+            val opfDoc = Ksoup.parse(opfContent, Parser.xmlParser())
             
             // Extract metadata
             val metadata = extractMetadata(opfDoc)
@@ -104,7 +104,7 @@ actual class ImportEpub(
         val containerEntry = zip.getEntry("META-INF/container.xml")
         if (containerEntry != null) {
             val containerXml = zip.getInputStream(containerEntry).bufferedReader().readText()
-            val doc = Jsoup.parse(containerXml, "", org.jsoup.parser.Parser.xmlParser())
+            val doc = Ksoup.parse(containerXml, Parser.xmlParser())
             val rootfile = doc.selectFirst("rootfile[full-path]")
             val opfPath = rootfile?.attr("full-path")
             if (opfPath != null) {
@@ -176,7 +176,7 @@ actual class ImportEpub(
             
             try {
                 val html = zip.getInputStream(entry).bufferedReader().readText()
-                val doc = Jsoup.parse(html)
+                val doc = Ksoup.parse(html)
                 
                 // Extract title
                 val title = doc.selectFirst("h1, h2, h3, title")?.text()?.trim()

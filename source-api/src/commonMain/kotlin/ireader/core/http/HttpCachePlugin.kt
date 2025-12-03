@@ -10,6 +10,7 @@ import io.ktor.util.*
 import io.ktor.util.date.*
 import io.ktor.utils.io.*
 import ireader.core.util.currentTimeMillis
+import io.ktor.http.Headers as KtorHeaders
 
 /**
  * Configuration for HTTP cache plugin

@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.plugins.details
+package ireader.presentation.ui.plugins.details
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf

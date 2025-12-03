@@ -1,4 +1,5 @@
-﻿package ireader.domain.usecases.chapter
+package ireader.domain.usecases.chapter
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.ChapterHealthRepository
@@ -32,7 +33,7 @@ class AutoRepairChapterUseCase(
     suspend operator fun invoke(
         chapter: Chapter,
         book: Book
-    ): Result<Chapter> = withContext(Dispatchers.IO) {
+    ): Result<Chapter> = withContext(ioDispatcher) {
         try {
             // Check if repair was recently attempted (within 24 hours)
             val existingHealth = chapterHealthRepository.getChapterHealthById(chapter.id)

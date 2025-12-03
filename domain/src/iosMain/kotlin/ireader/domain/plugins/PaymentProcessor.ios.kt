@@ -1,5 +1,7 @@
 package ireader.domain.plugins
 
+import ireader.domain.data.repository.Purchase
+
 /**
  * iOS implementation of PaymentProcessor
  * 
@@ -7,30 +9,12 @@ package ireader.domain.plugins
  */
 actual interface PaymentProcessor {
     actual suspend fun processPayment(
-        productId: String,
-        amount: Double,
+        itemId: String,
+        price: Double,
         currency: String
-    ): Result<PaymentResult>
+    ): Result<Purchase>
     
-    actual suspend fun verifyPurchase(purchaseToken: String): Result<Boolean>
+    actual suspend fun verifyReceipt(receiptData: String): Result<Boolean>
     
-    actual suspend fun getProducts(): Result<List<Product>>
-    
-    actual suspend fun restorePurchases(): Result<List<String>>
+    actual suspend fun restorePurchases(): Result<List<Purchase>>
 }
-
-data class PaymentResult(
-    val transactionId: String,
-    val status: PaymentStatus
-)
-
-enum class PaymentStatus {
-    SUCCESS, PENDING, FAILED, CANCELLED
-}
-
-data class Product(
-    val id: String,
-    val name: String,
-    val price: Double,
-    val currency: String
-)

@@ -1,4 +1,5 @@
 package ireader.domain.usecases.local.book_usecases
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.models.entities.BookItem
@@ -29,7 +30,7 @@ class SubscribeInLibraryBooks(private val bookRepository: BookRepository) {
 //        ).collect { books ->
 //            val filteredBooks = mutableListOf<BookItem>()
 //
-//            withContext(Dispatchers.IO) {
+//            withContext(ioDispatcher) {
 //                if (filter.contains(FilterType.Unread)) {
 //                    filteredBooks.addAll(localBookRepository.findUnreadBooks())
 //                }

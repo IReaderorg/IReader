@@ -30,7 +30,7 @@ actual class PluginClassLoader(
      * Load a plugin class from a package file
      * On Android, .iplugin files are APK/DEX files that can be loaded with DexClassLoader
      */
-    actual suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Class<out Plugin> {
+    actual suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Any {
         try {
             // Convert VirtualFile to java.io.File for DexClassLoader
             val javaFile = File(file.path)

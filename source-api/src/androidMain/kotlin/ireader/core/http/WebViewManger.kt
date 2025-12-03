@@ -5,12 +5,12 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
 import ireader.core.util.DefaultDispatcher
 import ireader.core.util.createICoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 
 actual class WebViewManger(private val context: Context) {
 
@@ -19,18 +19,18 @@ actual class WebViewManger(private val context: Context) {
 
     actual var userAgent = DEFAULT_USER_AGENT
 
-    actual  var selector: String? = null
-    actual var html: org.jsoup.nodes.Document = org.jsoup.nodes.Document("")
+    actual var selector: String? = null
+    actual var html: Document? = null
     actual var webUrl: String? = null
     actual var inProgress: Boolean = false
     
-    // New properties for improved integration
-    var isBackgroundMode: Boolean = false // When true, WebView works invisibly
-    var onContentReady: ((String) -> Unit)? = null // Callback when content is ready
+    var isBackgroundMode: Boolean = false
+    var onContentReady: ((String) -> Unit)? = null
     var lastError: String? = null
 
     val scope = createICoroutineScope(DefaultDispatcher)
-    actual fun init() : Any {
+    
+    actual fun init(): Any {
         if (webView == null) {
             webView = WebView(context)
             webView?.setDefaultSettings()
@@ -47,21 +47,18 @@ actual class WebViewManger(private val context: Context) {
                                 
                                 if (!isCloudflareChallenge) {
                                     if (!selector.isNullOrBlank()) {
-                                        html = Jsoup.parse(view?.getHtml() ?: "")
-                                        val hasText = html.select(selector.toString()).first() != null
+                                        val htmlContent = view?.getHtml() ?: ""
+                                        html = Ksoup.parse(htmlContent)
+                                        val hasText = html?.selectFirst(selector.toString()) != null
                                         if (hasText && webUrl == url) {
-                                            // Content is ready
-                                            val content = view?.getHtml() ?: ""
-                                            onContentReady?.invoke(content)
-                                            
+                                            onContentReady?.invoke(htmlContent)
                                             webUrl = null
                                             selector = null
-                                            html = Document("")
+                                            html = null
                                             inProgress = false
                                             lastError = null
                                         }
                                     } else {
-                                        // No selector specified, just wait for page load
                                         val content = view?.getHtml() ?: ""
                                         onContentReady?.invoke(content)
                                         inProgress = false
@@ -83,7 +80,6 @@ actual class WebViewManger(private val context: Context) {
                     super.onReceivedError(view, errorCode, description, failingUrl)
                     lastError = description
                     if (errorCode !in listOf(403, 503)) {
-                        // Not a Cloudflare challenge, actual error
                         inProgress = false
                     }
                 }
@@ -102,12 +98,8 @@ actual class WebViewManger(private val context: Context) {
         }
     }
     
-    actual  fun isAvailable(): Boolean = true
+    actual fun isAvailable(): Boolean = true
     
-    /**
-     * Load URL in background mode (invisible to user)
-     * Useful for bypassing Cloudflare without disrupting reading
-     */
     actual fun loadInBackground(url: String, selector: String?, onReady: (String) -> Unit) {
         isBackgroundMode = true
         this.selector = selector
@@ -122,9 +114,6 @@ actual class WebViewManger(private val context: Context) {
         webView?.loadUrl(url)
     }
     
-    /**
-     * Check if WebView is currently processing in background
-     */
     actual fun isProcessingInBackground(): Boolean {
         return isBackgroundMode && inProgress
     }

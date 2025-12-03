@@ -433,7 +433,7 @@ class JSPluginLoader(
         // Load remaining plugins in parallel with controlled concurrency
         coroutineScope {
             normalFiles.map { file ->
-                async(Dispatchers.IO) {
+                async(Dispatchers.Default) {
                     semaphore.withPermit {
                         try {
                             val catalog = loadPlugin(file)
@@ -505,7 +505,7 @@ class JSPluginLoader(
         // Load remaining plugins in parallel
         coroutineScope {
             normalFiles.map { file ->
-                async(Dispatchers.IO) {
+                async(Dispatchers.Default) {
                     semaphore.withPermit {
                         try {
                             val catalog = loadPlugin(file)

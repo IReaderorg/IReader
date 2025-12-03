@@ -1,4 +1,5 @@
 package ireader.domain.usecases.local.book_usecases
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.core.source.model.MangaInfo
 import ireader.domain.data.repository.LibraryRepository
@@ -98,7 +99,7 @@ class GetLibraryCategory  internal constructor(
         val validFilters =
             filters.filter { it.value == LibraryFilter.Value.Included || it.value == LibraryFilter.Value.Excluded }
         if (validFilters.map { it.type }.contains(LibraryFilter.Type.Downloaded)) {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 downloadedBooksId = libraryRepository.findDownloadedBooks().map { it.id }
             }
         }

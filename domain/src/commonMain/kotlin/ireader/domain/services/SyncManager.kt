@@ -27,7 +27,7 @@ class SyncManager(
     private val syncBooksUseCase: SyncBooksUseCase,
     private val getSyncedDataUseCase: GetSyncedDataUseCase
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.Default)
     private var autoSyncJob: Job? = null
     private var debounceSyncJob: Job? = null
     

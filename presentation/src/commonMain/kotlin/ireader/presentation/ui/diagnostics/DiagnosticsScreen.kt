@@ -1,4 +1,4 @@
-ï»¿package ireader.presentation.ui.diagnostics
+package ireader.presentation.ui.diagnostics
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -142,7 +142,7 @@ private fun HealthStatusCard(
                 )
                 healthCheckResult.issues.forEach { issue ->
                     Text(
-                        text = "â€¢ $issue",
+                        text = "• $issue",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -158,7 +158,7 @@ private fun HealthStatusCard(
                 )
                 healthCheckResult.warnings.forEach { warning ->
                     Text(
-                        text = "â€¢ $warning",
+                        text = "• $warning",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )

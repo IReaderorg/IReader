@@ -1,8 +1,5 @@
 package ireader.core.http
 
-import okhttp3.Cookie
-import okhttp3.Headers
-
 /**
  * Browser engine interface for web scraping and dynamic content loading
  * Provides platform-specific implementations for rendering JavaScript and handling Cloudflare
@@ -12,18 +9,18 @@ interface BrowserEngineInterface {
      * Fetch web content with optional JavaScript rendering
      * @param url The URL to fetch
      * @param selector CSS selector to wait for before returning (null = return immediately after page load)
-     * @param headers Custom HTTP headers
+     * @param headers Custom HTTP headers as Map
      * @param timeout Maximum time to wait in milliseconds
      * @param userAgent Custom user agent string
-     * @return Result containing HTML content and cookies
+     * @return BrowserResult containing HTML content and cookies
      */
     suspend fun fetch(
         url: String,
         selector: String? = null,
-        headers: Headers? = null,
+        headers: Headers = emptyMap(),
         timeout: Long = 50000L,
         userAgent: String = DEFAULT_USER_AGENT
-    ): Result
+    ): BrowserResult
     
     /**
      * Check if browser engine is available on this platform
@@ -35,10 +32,10 @@ expect class BrowserEngine() : BrowserEngineInterface {
     override suspend fun fetch(
         url: String,
         selector: String?,
-        headers: Headers?,
+        headers: Headers,
         timeout: Long,
         userAgent: String,
-    ): Result
+    ): BrowserResult
     
     override fun isAvailable(): Boolean
 }
@@ -50,7 +47,7 @@ expect class BrowserEngine() : BrowserEngineInterface {
  * @param statusCode HTTP status code (if available)
  * @param error Error message if fetch failed
  */
-data class Result(
+data class BrowserResult(
     val responseBody: String,
     val cookies: List<Cookie> = emptyList(),
     val statusCode: Int = 200,

@@ -1,30 +1,27 @@
 package ireader.core.source
 
-import com.google.errorprone.annotations.Keep
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
 import io.ktor.client.request.*
 import io.ktor.http.*
 import ireader.core.http.DEFAULT_USER_AGENT
 import ireader.core.source.model.*
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import okio.ByteString.Companion.encodeUtf8
 import ireader.core.source.ParsingUtils.extractCleanText
 import ireader.core.source.ParsingUtils.extractTextWithParagraphs
 import ireader.core.source.ParsingUtils.cleanContent
 
-/** Taken from https://tachiyomi.org/ **/
-@Keep
-abstract class ParsedHttpSource(private val dependencies: ireader.core.source.Dependencies) : HttpSource(dependencies) {
+/**
+ * Parsed HTTP source using Ksoup for HTML parsing
+ */
+abstract class ParsedHttpSource(private val dependencies: Dependencies) : HttpSource(dependencies) {
 
     override val id: Long by lazy {
         val key = "${name.lowercase()}/$lang/$versionId"
-        val bytes = key.encodeUtf8().md5().toByteArray()
-        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
-            .reduce(Long::or) and Long.MAX_VALUE
+        generateSourceId(key)
     }
 
-    open fun getUserAgent() =
-            DEFAULT_USER_AGENT
+    open fun getUserAgent() = DEFAULT_USER_AGENT
+    
     open fun HttpRequestBuilder.headersBuilder(
         block: HeadersBuilder.() -> Unit = {
             append(HttpHeaders.UserAgent, getUserAgent())
@@ -82,7 +79,12 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
 
     abstract fun chapterFromElement(element: Element): ChapterInfo
 
-    fun bookListParse(document: Document, elementSelector: String, nextPageSelector: String?, parser: (element: Element) -> MangaInfo): MangasPageInfo {
+    fun bookListParse(
+        document: Document,
+        elementSelector: String,
+        nextPageSelector: String?,
+        parser: (element: Element) -> MangaInfo
+    ): MangasPageInfo {
         val books = document.select(elementSelector).map { element ->
             parser(element)
         }
@@ -100,27 +102,16 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
         return document.select(chaptersSelector()).map { chapterFromElement(it) }
     }
 
-    abstract fun pageContentParse(
-        document: Document,
-    ): List<String>
+    abstract fun pageContentParse(document: Document): List<String>
 
     abstract fun detailParse(document: Document): MangaInfo
     
-    /**
-     * Enhanced content parsing with error recovery
-     * Override this method to use improved parsing with fallback strategies
-     */
     open fun pageContentParseEnhanced(document: Document): List<String> {
         return try {
-            // Clean the document first
             val cleanedDoc = document.cleanContent()
-            
-            // Try the standard parsing first
             val content = pageContentParse(cleanedDoc)
             
-            // Validate content
             if (content.isEmpty() || content.all { it.trim().isEmpty() }) {
-                // Fallback to error recovery parsing
                 val fallbackContent = ParsingErrorRecovery.extractContentWithFallback(cleanedDoc)
                 if (fallbackContent.isNotEmpty()) {
                     listOf(fallbackContent)
@@ -131,7 +122,6 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
                 content
             }
         } catch (e: Exception) {
-            // Last resort: try error recovery
             try {
                 val fallbackContent = ParsingErrorRecovery.extractContentWithFallback(document)
                 if (fallbackContent.isNotEmpty()) {
@@ -145,9 +135,6 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
         }
     }
     
-    /**
-     * Safe parsing wrapper that catches exceptions
-     */
     protected fun <T> safeParse(block: () -> T, fallback: T): T {
         return try {
             block()
@@ -156,18 +143,9 @@ abstract class ParsedHttpSource(private val dependencies: ireader.core.source.De
         }
     }
     
-    /**
-     * Helper to extract text from element with fallback
-     */
     protected fun Element.textOrEmpty(): String = this.text().trim()
     
-    /**
-     * Helper to extract attribute with fallback
-     */
     protected fun Element.attrOrEmpty(attr: String): String = this.attr(attr).trim()
     
-    /**
-     * Helper to build absolute image URL
-     */
     protected fun getAbsoluteImageUrl(url: String): String = getAbsoluteUrl(url)
 }

@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.reader
+package ireader.presentation.ui.reader
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode

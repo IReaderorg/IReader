@@ -1,23 +1,18 @@
 package ireader.domain.js.update
 
+import ireader.domain.js.models.PluginUpdate
+
 /**
  * iOS implementation of JSPluginUpdateNotifier
  * 
  * TODO: Implement using UserNotifications framework
  */
 actual class JSPluginUpdateNotifier {
-    actual fun notifyUpdatesAvailable(updates: List<PluginUpdate>) {
+    actual fun showUpdateNotification(updates: List<PluginUpdate>) {
         // TODO: Show notification using UNUserNotificationCenter
     }
     
-    actual fun notifyUpdateComplete(pluginName: String, success: Boolean) {
-        // TODO: Show notification
+    actual fun cancelUpdateNotification() {
+        // TODO: Cancel notification
     }
 }
-
-data class PluginUpdate(
-    val pluginId: String,
-    val pluginName: String,
-    val currentVersion: String,
-    val newVersion: String
-)

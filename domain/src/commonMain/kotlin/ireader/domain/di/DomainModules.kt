@@ -1,7 +1,6 @@
 package ireader.domain.di
 
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import ireader.domain.plugins.*
@@ -34,8 +33,9 @@ import org.koin.dsl.module
 val DomainServices = module {
     
     // HTTP Client for general use (image downloads, etc.)
+    // Note: Platform-specific engine is configured via expect/actual or default engine
     single {
-        HttpClient(OkHttp) {
+        HttpClient {
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true

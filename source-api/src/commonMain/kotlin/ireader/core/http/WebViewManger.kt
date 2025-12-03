@@ -1,6 +1,6 @@
 package ireader.core.http
 
-import org.jsoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Document
 
 /**
  * WebView manager for handling web content loading and Cloudflare bypass
@@ -10,7 +10,7 @@ expect class WebViewManger {
     var isInit: Boolean
     var userAgent: String
     var selector: String?
-    var html: Document
+    var html: Document?
     var webUrl: String?
     var inProgress: Boolean
 
@@ -36,7 +36,7 @@ expect class WebViewManger {
      * @param selector CSS selector to wait for
      * @param onReady Callback when content is ready
      */
-    fun loadInBackground(url: String, selector: String? = null, onReady: (String) -> Unit)
+    fun loadInBackground(url: String, selector: String?, onReady: (String) -> Unit)
     
     /**
      * Check if WebView is currently processing in background

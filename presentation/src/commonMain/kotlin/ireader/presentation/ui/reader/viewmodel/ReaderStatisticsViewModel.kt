@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.reader.viewmodel
+package ireader.presentation.ui.reader.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

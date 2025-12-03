@@ -1,5 +1,6 @@
 ﻿package ireader.domain.usecases.backup.lnreader
 
+import com.fleeksoft.io.exception.OutOfMemoryError
 import ireader.core.db.Transactions
 import ireader.domain.data.repository.BookCategoryRepository
 import ireader.domain.data.repository.BookRepository
@@ -103,7 +104,12 @@ class ImportLNReaderBackup(
             // LNReader backups are ZIP files, not GZIP compressed
             emit(ImportProgress.Parsing("Reading backup file..."))
             val bytes = try {
-                fileSaver.readSource(uri).buffer().use { it.readByteArray() }
+                val source = fileSaver.readSource(uri).buffer()
+                try {
+                    source.readByteArray()
+                } finally {
+                    source.close()
+                }
             } catch (e: Exception) {
                 throw LNReaderImportException.ReadFailedException(
                     e.message ?: "Unable to read file", e
@@ -560,14 +566,14 @@ class ImportLNReaderBackup(
         if (dateString.isNullOrBlank()) return 0L
         return try {
             // Try parsing ISO format using kotlinx-datetime
-            kotlin.time.Instant.parse(dateString).toEpochMilliseconds()
+            kotlinx.datetime.Instant.parse(dateString).toEpochMilliseconds()
         } catch (e: Exception) {
             try {
                 // Try common ISO-like formats by normalizing the string
                 val normalized = dateString.trim()
                     .replace(" ", "T")
                     .let { if (!it.endsWith("Z") && !it.contains("+")) "${it}Z" else it }
-                kotlin.time.Instant.parse(normalized).toEpochMilliseconds()
+                kotlinx.datetime.Instant.parse(normalized).toEpochMilliseconds()
             } catch (e: Exception) {
                 // If all parsing fails, return 0
                 0L

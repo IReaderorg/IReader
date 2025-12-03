@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.badges.nft
+package ireader.presentation.ui.settings.badges.nft
 
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource

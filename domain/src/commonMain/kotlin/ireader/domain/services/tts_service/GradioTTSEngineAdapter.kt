@@ -71,7 +71,7 @@ class GradioTTSEngineAdapter(
         return tryAllApis(requestBody)
     }
     
-    @Volatile
+    @kotlin.concurrent.Volatile
     private var currentCompletion: CompletableDeferred<Boolean>? = null
     
     override suspend fun playAndWait(audioData: ByteArray): Boolean {
@@ -104,7 +104,7 @@ class GradioTTSEngineAdapter(
         currentCompletion = null
     }
     
-    @Volatile
+    @kotlin.concurrent.Volatile
     private var isPaused = false
     
     override fun pause() {
@@ -467,7 +467,7 @@ class GradioTTSEngineAdapter(
      */
     private fun isHtmlResponse(data: ByteArray): Boolean {
         if (data.size < 15) return false
-        val header = String(data.take(15).toByteArray())
+        val header = data.take(15).toByteArray().decodeToString()
         return header.contains("<!doctype", ignoreCase = true) || 
                header.contains("<html", ignoreCase = true)
     }

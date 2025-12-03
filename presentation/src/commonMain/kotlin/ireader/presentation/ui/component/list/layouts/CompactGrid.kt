@@ -46,7 +46,7 @@ fun CompactGridLayoutComposable(
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
     columns: Int = 3, // Default 3 columns for better phone display, tablets use adaptive
-    header: ((url: String) -> okhttp3.Headers?)? = null,
+    header: ((url: String) -> Map<String, String>?)? = null,
     keys: ((item: BookItem) -> Any)
 ) {
     // Performance optimization: track fast scrolling to defer expensive operations

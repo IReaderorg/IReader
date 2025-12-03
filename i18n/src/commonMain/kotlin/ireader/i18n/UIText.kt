@@ -59,7 +59,7 @@ fun UiText.asString(localizeHelper: LocalizeHelper): String {
             }
         }
         is UiText.ExceptionString -> {
-            val eString = e.localizedMessage ?: localizeHelper.localize(Res.string.error_unknown)
+            val eString = e.message ?: localizeHelper.localize(Res.string.error_unknown)
             eString.substring(0, eString.length.coerceAtMost(500))
         }
     }

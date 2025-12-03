@@ -36,6 +36,7 @@ fun HttpRequestData.convertToOkHttpRequest(): Request {
 
     return builder.build()
 }
+
 suspend fun Call.await(): Response {
     return suspendCancellableCoroutine { continuation ->
         enqueue(
@@ -69,6 +70,6 @@ suspend fun Call.await(): Response {
     }
 }
 
-fun HttpException(response: Response) :Exception {
+fun HttpException(response: Response): Exception {
     return Exception("HTTP ERROR: $response")
 }

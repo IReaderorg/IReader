@@ -53,7 +53,7 @@ class GenericGradioTTSEngine(
     private var pendingSpeechRequest: SpeechRequest? = null
     
     // Track if we're actively generating speech (making server request)
-    @Volatile
+    @kotlin.concurrent.Volatile
     private var isGeneratingSpeech = false
     
     // Audio cache for pre-fetching (thread-safe with synchronized map)
@@ -302,7 +302,7 @@ class GenericGradioTTSEngine(
     }
     
     // Track current playback completion for pause/stop
-    @Volatile
+    @kotlin.concurrent.Volatile
     private var currentPlaybackCompletion: CompletableDeferred<Boolean>? = null
     
     /**

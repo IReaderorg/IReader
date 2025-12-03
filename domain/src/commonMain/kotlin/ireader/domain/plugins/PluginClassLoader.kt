@@ -12,7 +12,7 @@ expect class PluginClassLoader {
      * Load a plugin class from a package file
      * @param file The .iplugin package file (ZIP format)
      * @param manifest The plugin manifest
-     * @return The loaded plugin class
+     * @return The loaded plugin class (platform-specific type)
      */
-    suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Class<out Plugin>
+    suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Any
 }

@@ -17,7 +17,7 @@ class PurchaseRepositoryImpl : PurchaseRepository {
         return runCatching {
             mutex.withLock {
                 // Remove existing purchase with same ID if exists
-                purchases.removeIf { it.id == purchase.id }
+                purchases.removeAll { it.id == purchase.id }
                 purchases.add(purchase)
             }
         }
@@ -62,7 +62,7 @@ class PurchaseRepositoryImpl : PurchaseRepository {
     override suspend fun deletePurchase(purchaseId: String): Result<Unit> {
         return runCatching {
             mutex.withLock {
-                purchases.removeIf { it.id == purchaseId }
+                purchases.removeAll { it.id == purchaseId }
             }
         }
     }

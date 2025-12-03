@@ -10,29 +10,24 @@ actual fun createPlatformNotificationManager(): PlatformNotificationManager {
 }
 
 private class IosPlatformNotificationManager : PlatformNotificationManager {
-    override fun showNotification(
-        id: Int,
-        title: String,
-        content: String,
-        channelId: String
-    ) {
+    override fun show(notification: NotificationData) {
         // TODO: Implement using UNUserNotificationCenter
     }
     
-    override fun cancelNotification(id: Int) {
+    override fun showPlatformNotification(id: Int, platformNotification: Any) {
+        // TODO: Implement using UNUserNotificationCenter
+    }
+    
+    override fun cancel(id: Int) {
         // TODO: Implement
     }
     
-    override fun cancelAllNotifications() {
+    override fun cancelAll() {
         // TODO: Implement
     }
     
-    override fun createNotificationChannel(
-        id: String,
-        name: String,
-        description: String,
-        importance: Int
-    ) {
-        // No-op on iOS - channels are an Android concept
+    override fun areNotificationsEnabled(): Boolean {
+        // TODO: Check UNUserNotificationCenter authorization status
+        return false
     }
 }

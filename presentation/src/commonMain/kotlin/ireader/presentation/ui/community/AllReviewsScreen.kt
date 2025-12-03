@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.community
+package ireader.presentation.ui.community
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -411,7 +411,7 @@ private fun ReviewsHeader(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "$count reviews • $subtitle",
+                    text = "$count reviews � $subtitle",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )

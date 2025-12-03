@@ -1,4 +1,5 @@
 package ireader.domain.usecases.reader
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.core.source.model.CommandList
 import ireader.domain.models.entities.CatalogLocal
@@ -28,7 +29,7 @@ class PreloadChapterUseCase {
     ): Result<Chapter> {
         val source = catalog?.source ?: return Result.failure(SourceNotFoundException())
         
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             kotlin.runCatching {
                 ireader.core.log.Log.debug("PreloadChapterUseCase: Starting preload for chapter ${chapter.name}")
                 

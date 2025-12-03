@@ -51,9 +51,9 @@ interface CacheService : PlatformService {
     /**
      * Get serializable object from cache
      */
-    suspend fun <T> getObject(
+    suspend fun <T : Any> getObject(
         key: String,
-        type: Class<T>
+        type: kotlin.reflect.KClass<T>
     ): ServiceResult<T?>
     
     /**

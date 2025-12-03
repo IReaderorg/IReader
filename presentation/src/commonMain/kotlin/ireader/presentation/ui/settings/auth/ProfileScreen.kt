@@ -1,4 +1,4 @@
-﻿package ireader.presentation.ui.settings.auth
+package ireader.presentation.ui.settings.auth
 
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
@@ -897,25 +897,25 @@ private fun ReadingStatisticsSection(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatisticItem(
-                        icon = "📖",
+                        icon = "??",
                         label = localizeHelper.localize(Res.string.chapters_read),
                         value = chaptersRead.toString()
                     )
                     
                     StatisticItem(
-                        icon = "📚",
+                        icon = "??",
                         label = localizeHelper.localize(Res.string.books_completed),
                         value = booksCompleted.toString()
                     )
                     
                     StatisticItem(
-                        icon = "✍️",
+                        icon = "??",
                         label = localizeHelper.localize(Res.string.reviews_written),
                         value = reviewsWritten.toString()
                     )
                     
                     StatisticItem(
-                        icon = "🔥",
+                        icon = "??",
                         label = localizeHelper.localize(Res.string.reading_streak),
                         value = "$readingStreak days"
                     )

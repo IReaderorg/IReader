@@ -1,4 +1,5 @@
-﻿package ireader.domain.services.tts_service
+package ireader.domain.services.tts_service
+import ireader.domain.utils.extensions.ioDispatcher
 
 import ireader.domain.models.tts.VoiceModel
 import okio.FileSystem
@@ -56,7 +57,7 @@ class VoiceStorage(
     /**
      * Get list of all downloaded voice IDs
      */
-    suspend fun getDownloadedVoiceIds(): List<String> = withContext(Dispatchers.IO) {
+    suspend fun getDownloadedVoiceIds(): List<String> = withContext(ioDispatcher) {
         if (!fileSystem.exists(storageDirectory)) return@withContext emptyList()
         
         fileSystem.list(storageDirectory)
@@ -68,7 +69,7 @@ class VoiceStorage(
     /**
      * Delete a voice from storage
      */
-    suspend fun deleteVoice(voiceId: String): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun deleteVoice(voiceId: String): Result<Unit> = withContext(ioDispatcher) {
         try {
             val voiceDir = getVoiceDirectory(voiceId)
             if (fileSystem.exists(voiceDir)) {
@@ -83,14 +84,14 @@ class VoiceStorage(
     /**
      * Get total storage used by all voices
      */
-    suspend fun getTotalStorageUsage(): Long = withContext(Dispatchers.IO) {
+    suspend fun getTotalStorageUsage(): Long = withContext(ioDispatcher) {
         calculateDirectorySize(storageDirectory)
     }
     
     /**
      * Get storage used by a specific voice
      */
-    suspend fun getVoiceStorageUsage(voiceId: String): Long = withContext(Dispatchers.IO) {
+    suspend fun getVoiceStorageUsage(voiceId: String): Long = withContext(ioDispatcher) {
         val voiceDir = getVoiceDirectory(voiceId)
         if (fileSystem.exists(voiceDir)) {
             calculateDirectorySize(voiceDir)
@@ -120,7 +121,7 @@ class VoiceStorage(
     /**
      * Clean up orphaned files (directories without both model and config)
      */
-    suspend fun cleanupOrphanedFiles(): Int = withContext(Dispatchers.IO) {
+    suspend fun cleanupOrphanedFiles(): Int = withContext(ioDispatcher) {
         if (!fileSystem.exists(storageDirectory)) return@withContext 0
         
         var cleaned = 0
@@ -146,7 +147,9 @@ class VoiceStorage(
 class VoiceModelCache<T>(
     private val maxCacheSize: Int = 3
 ) {
-    private val cache = LinkedHashMap<String, CacheEntry<T>>(maxCacheSize, 0.75f, true)
+    private val cache = mutableMapOf<String, CacheEntry<T>>()
+    private val accessOrder = mutableListOf<String>()
+    private val lock = kotlinx.coroutines.sync.Mutex()
     
     data class CacheEntry<T>(
         val value: T,
@@ -156,45 +159,53 @@ class VoiceModelCache<T>(
     /**
      * Get a value from the cache
      */
-    @Synchronized
     fun get(key: String): T? {
-        return cache[key]?.value
+        val entry = cache[key]
+        if (entry != null) {
+            // Update access order for LRU
+            accessOrder.remove(key)
+            accessOrder.add(key)
+        }
+        return entry?.value
     }
     
     /**
      * Put a value in the cache
      */
-    @Synchronized
     fun put(key: String, value: T) {
         // Remove oldest entry if cache is full
         if (cache.size >= maxCacheSize && !cache.containsKey(key)) {
-            val oldestKey = cache.keys.first()
-            cache.remove(oldestKey)
+            val oldestKey = accessOrder.firstOrNull()
+            if (oldestKey != null) {
+                cache.remove(oldestKey)
+                accessOrder.removeAt(0)
+            }
         }
         
         cache[key] = CacheEntry(value)
+        accessOrder.remove(key)
+        accessOrder.add(key)
     }
     
     /**
      * Remove a value from the cache
      */
-    @Synchronized
     fun remove(key: String): T? {
+        accessOrder.remove(key)
         return cache.remove(key)?.value
     }
     
     /**
      * Clear the entire cache
      */
-    @Synchronized
     fun clear() {
         cache.clear()
+        accessOrder.clear()
     }
     
     /**
      * Get the current size of the cache
      */
-    @Synchronized
     fun size(): Int {
         return cache.size
     }
@@ -202,7 +213,6 @@ class VoiceModelCache<T>(
     /**
      * Check if a key exists in the cache
      */
-    @Synchronized
     fun contains(key: String): Boolean {
         return cache.containsKey(key)
     }
@@ -210,7 +220,6 @@ class VoiceModelCache<T>(
     /**
      * Get all keys in the cache
      */
-    @Synchronized
     fun keys(): Set<String> {
         return cache.keys.toSet()
     }
@@ -218,10 +227,10 @@ class VoiceModelCache<T>(
     /**
      * Evict least recently used entry
      */
-    @Synchronized
     fun evictLeastUsed(): T? {
         if (cache.isEmpty()) return null
-        val oldestKey = cache.keys.first()
+        val oldestKey = accessOrder.firstOrNull() ?: return null
+        accessOrder.removeAt(0)
         return cache.remove(oldestKey)?.value
     }
 }

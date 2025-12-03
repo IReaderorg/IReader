@@ -128,7 +128,7 @@ class AndroidCacheService(
         return ServiceResult.Success(Unit)
     }
     
-    override suspend fun <T> getObject(key: String, type: Class<T>): ServiceResult<T?> {
+    override suspend fun <T : Any> getObject(key: String, type: kotlin.reflect.KClass<T>): ServiceResult<T?> {
         return ServiceResult.Success(null)
     }
     

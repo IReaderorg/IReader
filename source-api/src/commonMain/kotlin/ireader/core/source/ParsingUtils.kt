@@ -1,10 +1,8 @@
 ﻿package ireader.core.source
 
-import ireader.core.source.ParsingUtils.extractMainContent
-import ireader.core.source.ParsingUtils.extractTextWithParagraphs
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.select.Elements
 import ireader.core.util.currentTimeMillis
 
 /**
@@ -16,10 +14,9 @@ object ParsingUtils {
      * Extract text content with improved handling of whitespace and formatting
      */
     fun Element.extractCleanText(): String {
-        // Improved: Better whitespace normalization
         return this.text()
-            .replace(Regex("\\s+"), " ") // Normalize whitespace
-            .replace(Regex("^\\s+|\\s+$"), "") // Trim
+            .replace(Regex("\\s+"), " ")
+            .replace(Regex("^\\s+|\\s+$"), "")
             .trim()
     }
     
@@ -27,7 +24,6 @@ object ParsingUtils {
      * Extract text content preserving paragraph breaks
      */
     fun Element.extractTextWithParagraphs(): String {
-        // Improved: Better paragraph detection and filtering
         val paragraphs = this.select("p, br, div")
         if (paragraphs.isEmpty()) {
             return extractCleanText()
@@ -39,7 +35,7 @@ object ParsingUtils {
                 if (text.isNotBlank() && text.length > 1) text else null
             }
             .joinToString("\n\n")
-            .replace(Regex("\n{3,}"), "\n\n") // Remove excessive line breaks
+            .replace(Regex("\n{3,}"), "\n\n")
             .trim()
     }
     
@@ -73,7 +69,6 @@ object ParsingUtils {
      * Extract image URL with fallback options
      */
     fun Element.extractImageUrl(baseUrl: String = ""): String? {
-        // Try different image attributes
         val imageUrl = this.attr("abs:src")
             .ifEmpty { this.attr("abs:data-src") }
             .ifEmpty { this.attr("abs:data-lazy-src") }
@@ -85,7 +80,6 @@ object ParsingUtils {
             return null
         }
         
-        // Handle relative URLs
         return if (imageUrl.startsWith("http")) {
             imageUrl
         } else if (baseUrl.isNotEmpty()) {
@@ -102,9 +96,9 @@ object ParsingUtils {
         val patterns = listOf(
             Regex("""(?:chapter|ch\.?|episode|ep\.?)\s*(\d+(?:\.\d+)?)""", RegexOption.IGNORE_CASE),
             Regex("""^(\d+(?:\.\d+)?)(?:\s*[-:.]|\s+)"""),
-            Regex("""第\s*(\d+(?:\.\d+)?)\s*[章话]"""), // Chinese
-            Regex("""(\d+(?:\.\d+)?)\s*화"""), // Korean
-            Regex("""(\d+(?:\.\d+)?)\s*話""") // Japanese
+            Regex("""第\s*(\d+(?:\.\d+)?)\s*[章话]"""),
+            Regex("""(\d+(?:\.\d+)?)\s*화"""),
+            Regex("""(\d+(?:\.\d+)?)\s*話""")
         )
         
         for (pattern in patterns) {
@@ -121,7 +115,6 @@ object ParsingUtils {
      * Clean HTML content by removing unwanted elements
      */
     fun Document.cleanContent(): Document {
-        // Improved: More comprehensive cleaning with better selectors
         val unwantedSelectors = listOf(
             "script", "style", "iframe", "noscript", "svg",
             "nav", "footer", "header", "aside",
@@ -138,7 +131,6 @@ object ParsingUtils {
             }
         }
         
-        // Improved: More efficient comment removal
         try {
             this.select("*").forEach { element ->
                 element.childNodes()
@@ -156,7 +148,6 @@ object ParsingUtils {
      * Extract main content area using heuristics
      */
     fun Document.extractMainContent(): Element? {
-        // Improved: Try common content selectors with better validation
         val contentSelectors = listOf(
             "article",
             "[role='main']",
@@ -177,7 +168,6 @@ object ParsingUtils {
                 val element = this.selectFirst(selector)
                 if (element != null) {
                     val text = element.text()
-                    // Improved: Better validation - check word count too
                     val wordCount = text.split(Regex("\\s+")).size
                     if (text.length > 100 && wordCount > 20) {
                         return element
@@ -188,16 +178,15 @@ object ParsingUtils {
             }
         }
         
-        // Improved: Fallback with better filtering
         return try {
             this.body()
-                .select("div, article, section")
-                .filter { element ->
+                ?.select("div, article, section")
+                ?.filter { element ->
                     val text = element.text()
                     val wordCount = text.split(Regex("\\s+")).size
                     text.length > 100 && wordCount > 20
                 }
-                .maxByOrNull { it.text().length }
+                ?.maxByOrNull { it.text().length }
         } catch (e: Exception) {
             null
         }
@@ -207,17 +196,15 @@ object ParsingUtils {
      * Parse date from various formats
      */
     fun parseDate(dateString: String): Long? {
-        // Common date patterns
         val patterns = listOf(
-            Regex("""(\d{4})-(\d{2})-(\d{2})"""), // YYYY-MM-DD
-            Regex("""(\d{2})/(\d{2})/(\d{4})"""), // MM/DD/YYYY
-            Regex("""(\d{2})\.(\d{2})\.(\d{4})""") // DD.MM.YYYY
+            Regex("""(\d{4})-(\d{2})-(\d{2})"""),
+            Regex("""(\d{2})/(\d{2})/(\d{4})"""),
+            Regex("""(\d{2})\.(\d{2})\.(\d{4})""")
         )
         
         for (pattern in patterns) {
             val match = pattern.find(dateString)
             if (match != null) {
-                // Return timestamp (simplified - would need proper date parsing in production)
                 return currentTimeMillis()
             }
         }
@@ -282,7 +269,7 @@ object ParsingUtils {
  */
 class ParsedContentCache(
     private val maxCacheSize: Int = 100,
-    private val cacheExpiryMs: Long = 10 * 60 * 1000L // 10 minutes
+    private val cacheExpiryMs: Long = 10 * 60 * 1000L
 ) {
     private val cache = mutableMapOf<String, CachedParsedContent>()
     
@@ -292,9 +279,6 @@ class ParsedContentCache(
         val url: String
     )
     
-    /**
-     * Cache parsed content
-     */
     fun <T> cache(url: String, content: T) {
         cleanExpiredCache()
         
@@ -312,9 +296,6 @@ class ParsedContentCache(
         )
     }
     
-    /**
-     * Retrieve cached content
-     */
     @Suppress("UNCHECKED_CAST")
     fun <T> get(url: String): T? {
         val cached = cache[url] ?: return null
@@ -327,36 +308,21 @@ class ParsedContentCache(
         return cached.content as? T
     }
     
-    /**
-     * Check if URL is cached
-     */
     fun contains(url: String): Boolean {
         val cached = cache[url] ?: return false
         return currentTimeMillis() - cached.timestamp <= cacheExpiryMs
     }
     
-    /**
-     * Clear cache
-     */
     fun clear() {
         cache.clear()
     }
     
-    /**
-     * Get cache size
-     */
     fun size(): Int = cache.size
     
-    /**
-     * Remove specific entry
-     */
     fun remove(url: String) {
         cache.remove(url)
     }
     
-    /**
-     * Remove expired entries
-     */
     private fun cleanExpiredCache() {
         val currentTime = currentTimeMillis()
         val expiredKeys = cache.entries
@@ -376,11 +342,10 @@ object ParsingErrorRecovery {
      * Try to extract content with multiple strategies
      */
     fun extractContentWithFallback(document: Document): String {
-        // Improved: Strategy 1 - Try main content extraction with validation
         try {
-            val mainContent = document.extractMainContent()
+            val mainContent = with(ParsingUtils) { document.extractMainContent() }
             if (mainContent != null) {
-                val text = mainContent.extractTextWithParagraphs()
+                val text = with(ParsingUtils) { mainContent.extractTextWithParagraphs() }
                 val wordCount = text.split(Regex("\\s+")).size
                 if (text.length > 100 && wordCount > 20) {
                     return text
@@ -390,7 +355,6 @@ object ParsingErrorRecovery {
             // Continue to next strategy
         }
         
-        // Improved: Strategy 2 - Try common chapter selectors with validation
         val chapterSelectors = listOf(
             ".chapter-content",
             "#chapter-content",
@@ -405,7 +369,7 @@ object ParsingErrorRecovery {
             try {
                 val element = document.selectFirst(selector)
                 if (element != null) {
-                    val text = element.extractTextWithParagraphs()
+                    val text = with(ParsingUtils) { element.extractTextWithParagraphs() }
                     val wordCount = text.split(Regex("\\s+")).size
                     if (text.length > 100 && wordCount > 20) {
                         return text
@@ -416,25 +380,23 @@ object ParsingErrorRecovery {
             }
         }
         
-        // Improved: Strategy 3 - Find largest text block with better filtering
         try {
             val largestBlock = document.body()
-                .select("div, article, section")
-                .filter { element ->
+                ?.select("div, article, section")
+                ?.filter { element ->
                     val text = element.text()
                     val wordCount = text.split(Regex("\\s+")).size
                     text.length > 100 && wordCount > 20
                 }
-                .maxByOrNull { it.text().length }
+                ?.maxByOrNull { it.text().length }
             
             if (largestBlock != null) {
-                return largestBlock.extractTextWithParagraphs()
+                return with(ParsingUtils) { largestBlock.extractTextWithParagraphs() }
             }
         } catch (e: Exception) {
             // Continue to next strategy
         }
         
-        // Improved: Strategy 4 - Return all paragraph text with filtering
         try {
             val paragraphs = document.select("p")
                 .mapNotNull { 
@@ -449,9 +411,8 @@ object ParsingErrorRecovery {
             // Continue to last resort
         }
         
-        // Last resort: return body text
         return try {
-            document.body().text().trim()
+            document.body()?.text()?.trim() ?: ""
         } catch (e: Exception) {
             ""
         }

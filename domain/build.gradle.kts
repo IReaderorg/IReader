@@ -122,17 +122,14 @@ kotlin {
                 implementation(kotlinx.serialization.protobuf)
                 implementation(kotlinx.datetime)
                 implementation(libs.okio)
-                implementation(libs.jsoup)
+                // Ksoup - Kotlin Multiplatform HTML parser (replaces jsoup)
+                implementation(libs.ksoup)
                 api(libs.koin.core)
 
                 api(libs.coil.core)
 
                 // Immutable Collections - Critical for Compose performance (Mihon pattern)
                 api(libs.kotlinx.collections.immutable)
-
-                // Zipline - not used anymore, kept for reference
-                // implementation("app.cash.zipline:zipline:1.24.0")
-                // implementation("app.cash.zipline:zipline-loader:1.24.0")
             }
         }
         commonTest {
