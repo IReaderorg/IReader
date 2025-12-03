@@ -48,6 +48,18 @@ kotlin {
             }
         }
     }
+    
+    // iOS targets
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "sourceApi"
+            isStatic = true
+        }
+    }
 
     sourceSets {
          commonMain {
@@ -56,9 +68,7 @@ kotlin {
                 api(kotlinx.stdlib)
                 api(kotlinx.datetime)
                 api(kotlinx.serialization.json)
-                implementation(libs.ktor.contentNegotiation.gson)
                 api(libs.ktor.core)
-                api(libs.ktor.okhttp)
                 api(libs.ktor.contentNegotiation)
                 api(libs.ktor.contentNegotiation.kotlinx)
                 compileOnly(libs.jsoup)
@@ -68,26 +78,69 @@ kotlin {
         }
          androidMain {
             dependencies {
+                // Platform-specific Ktor engines and JVM-only serialization
+                api(libs.ktor.okhttp)
+                api(libs.ktor.core.android)
+                implementation(libs.ktor.contentNegotiation.gson)
+                
                 implementation(androidx.core)
 //                implementation(libs.quickjs.android)
-                api(libs.ktor.core.android)
                 compileOnly(libs.jsoup)
             }
         }
+        
+        val androidUnitTest by getting {
+            dependencies {
+                implementation("io.mockk:mockk:1.13.8")
+            }
+        }
+        
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
-//                implementation(libs.quickjs.jvm)
+                // Platform-specific Ktor engine and JVM-only serialization
                 api(libs.ktor.okhttp)
+                implementation(libs.ktor.contentNegotiation.gson)
+                
+//                implementation(libs.quickjs.jvm)
                 compileOnly(libs.jsoup)
             }
         }
+        
+        val desktopTest by getting {
+            dependencies {
+                implementation("io.mockk:mockk:1.13.8")
+            }
+        }
+        
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                api(libs.ktor.core)
+                implementation("io.ktor:ktor-client-darwin:3.3.2")
+            }
+        }
+        
+        val iosX64Test by getting
+        val iosArm64Test by getting
+        val iosSimulatorArm64Test by getting
+        val iosTest by creating {
+            dependsOn(commonTest.get())
+            iosX64Test.dependsOn(this)
+            iosArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
+        }
+        
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-                implementation("io.mockk:mockk:1.13.8")
-                // Kermit is already available from commonMain via api()
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
                 implementation("io.ktor:ktor-client-mock:3.3.2")
             }

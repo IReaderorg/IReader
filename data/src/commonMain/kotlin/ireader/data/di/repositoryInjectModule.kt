@@ -260,8 +260,59 @@ val repositoryInjectModule = module {
     
     // Character Art Gallery repository
     single<ireader.domain.data.repository.CharacterArtRepository> {
-        // Use in-memory implementation for now
-        // Can be replaced with Supabase + R2 implementation later
-        ireader.data.repository.CharacterArtRepositoryImpl()
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            // No Supabase configured, use in-memory implementation
+            ireader.data.repository.CharacterArtRepositoryImpl()
+        } else {
+            try {
+                // Get library client from multi-project provider for character art
+                val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).libraryClient
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                
+                // Create Supabase metadata storage
+                val metadataStorage = ireader.data.characterart.SupabaseCharacterArtMetadata(
+                    supabaseClient = supabaseClient,
+                    getCurrentUserId = { getCurrentUserUseCase().getOrNull()?.id }
+                )
+                
+                // Create image storage (R2 if configured, otherwise local)
+                val imageStorage: ireader.data.characterart.ImageStorageProvider = try {
+                    val r2Config = ireader.data.characterart.R2Config.fromEnvironment()
+                    if (r2Config != null) {
+                        ireader.data.characterart.CloudflareR2ImageStorage(
+                            ireader.data.characterart.CloudflareR2DataSource(
+                                httpClient = get(),
+                                config = r2Config
+                            )
+                        )
+                    } else {
+                        // Fallback to local storage
+                        ireader.data.characterart.LocalImageStorage(
+                            basePath = "${System.getProperty("user.home")}/.ireader/character-art"
+                        )
+                    }
+                } catch (e: Exception) {
+                    ireader.data.characterart.LocalImageStorage(
+                        basePath = "${System.getProperty("user.home")}/.ireader/character-art"
+                    )
+                }
+                
+                // Create the combined data source
+                val dataSource = ireader.data.characterart.CharacterArtDataSource(
+                    imageStorage = imageStorage,
+                    metadataStorage = metadataStorage
+                )
+                
+                // Create repository with remote data source
+                ireader.data.repository.CharacterArtRepositoryImpl(
+                    remoteDataSource = dataSource
+                )
+            } catch (e: Exception) {
+                // Fallback to in-memory if something goes wrong
+                println("CharacterArt: Failed to initialize Supabase, using in-memory: ${e.message}")
+                ireader.data.repository.CharacterArtRepositoryImpl()
+            }
+        }
     }
 }

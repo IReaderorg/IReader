@@ -47,6 +47,18 @@ kotlin {
             }
         }
     }
+    
+    // iOS targets
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "core"
+            isStatic = true
+        }
+    }
 
     sourceSets {
          commonMain {
@@ -57,7 +69,6 @@ kotlin {
                 api(kotlinx.stdlib)
                 api(kotlinx.datetime)
                 api(kotlinx.serialization.json)
-                implementation(libs.ktor.contentNegotiation.gson)
                 api(libs.ktor.core)
                 api(libs.ktor.contentNegotiation)
                 // Needed for Compose Resources StringResource type
@@ -82,8 +93,6 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.coroutines.test)
-                implementation(libs.mock)
-                // REMOVED: napier - not used in tests
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
                 implementation(libs.ktor.client.mock)
             }
@@ -91,6 +100,9 @@ kotlin {
          androidMain {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
+                // JVM-only Ktor serialization
+                implementation(libs.ktor.contentNegotiation.gson)
+                
                 implementation(androidx.core)
                 implementation(androidx.dataStore)
 //                implementation(libs.quickjs.android)
@@ -98,13 +110,53 @@ kotlin {
                 compileOnly(libs.jsoup)
             }
         }
+        
+        val androidUnitTest by getting {
+            dependencies {
+                implementation(libs.mock)
+            }
+        }
+        
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
+                // JVM-only Ktor serialization
+                implementation(libs.ktor.contentNegotiation.gson)
+                
 //                implementation(libs.quickjs.jvm)
                 api(libs.ktor.okhttp)
                 compileOnly(libs.jsoup)
             }
+        }
+        
+        val desktopTest by getting {
+            dependencies {
+                implementation(libs.mock)
+            }
+        }
+        
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                implementation(libs.ktor.core)
+                implementation("io.ktor:ktor-client-darwin:3.3.2")
+            }
+        }
+        
+        val iosX64Test by getting
+        val iosArm64Test by getting
+        val iosSimulatorArm64Test by getting
+        val iosTest by creating {
+            dependsOn(commonTest.get())
+            iosX64Test.dependsOn(this)
+            iosArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
         }
     }
 }

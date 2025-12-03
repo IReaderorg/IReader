@@ -24,6 +24,19 @@ kotlin {
             }
         }
     }
+    
+    // iOS targets
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "i18n"
+            isStatic = true
+        }
+    }
+    
     sourceSets {
         commonMain {
             dependencies {
@@ -41,6 +54,16 @@ kotlin {
             dependencies {
                 implementation(compose.components.resources)
             }
+        }
+        
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
         }
     }
 

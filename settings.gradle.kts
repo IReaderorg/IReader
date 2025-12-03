@@ -20,6 +20,7 @@ include(":core")
 include(":i18n")
 include(":desktop")
 include(":source-api")
+include(":ios-build-check")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)

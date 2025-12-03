@@ -226,39 +226,27 @@ class CharacterArtViewModel(
         scope.launch {
             _state.update { it.copy(isUploading = true, uploadProgress = 0f) }
             
-            // Upload image first
-            val fileName = "character_${currentTimeToLong()}.jpg"
-            repository.uploadImage(imageBytes, fileName)
-                .onSuccess { imageUrl ->
-                    _state.update { it.copy(uploadProgress = 0.5f) }
-                    
-                    // Submit art with image URL
-                    val requestWithImage = request.copy(imagePath = imageUrl)
-                    repository.submitArt(requestWithImage)
-                        .onSuccess { art ->
-                            _state.update { state ->
-                                state.copy(
-                                    isUploading = false,
-                                    uploadProgress = 1f,
-                                    successMessage = "Art submitted for review! 🎨",
-                                    userSubmissions = state.userSubmissions + art
-                                )
-                            }
-                        }
-                        .onFailure { error ->
-                            _state.update {
-                                it.copy(
-                                    isUploading = false,
-                                    error = "Failed to submit: ${error.message}"
-                                )
-                            }
-                        }
+            // Include imageBytes in the request for the data source to handle upload
+            val requestWithImage = request.copy(imageBytes = imageBytes)
+            
+            _state.update { it.copy(uploadProgress = 0.3f) }
+            
+            repository.submitArt(requestWithImage)
+                .onSuccess { art ->
+                    _state.update { state ->
+                        state.copy(
+                            isUploading = false,
+                            uploadProgress = 1f,
+                            successMessage = "Art submitted for review! 🎨",
+                            userSubmissions = state.userSubmissions + art
+                        )
+                    }
                 }
                 .onFailure { error ->
                     _state.update {
                         it.copy(
                             isUploading = false,
-                            error = "Failed to upload image: ${error.message}"
+                            error = "Failed to submit: ${error.message}"
                         )
                     }
                 }

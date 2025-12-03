@@ -30,7 +30,7 @@ android {
     compileSdk = ProjectConfig.compileSdk
     defaultConfig {
         minSdk = ProjectConfig.minSdk
-        
+
         // Build config fields with fallback chain: env vars -> local.properties -> gradle.properties
         // 7-Project Supabase Configuration
         buildConfigField("String", "SUPABASE_AUTH_URL", "\"${getConfigProperty("SUPABASE_AUTH_URL", "supabase.auth.url")}\"")
@@ -47,7 +47,7 @@ android {
         buildConfigField("String", "SUPABASE_BADGES_KEY", "\"${getConfigProperty("SUPABASE_BADGES_KEY", "supabase.badges.key")}\"")
         buildConfigField("String", "SUPABASE_ANALYTICS_URL", "\"${getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url")}\"")
         buildConfigField("String", "SUPABASE_ANALYTICS_KEY", "\"${getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key")}\"")
-        
+
         // Use standard flavor by default when consumed by modules with flavors
         missingDimensionStrategy("default", "standard")
     }
@@ -93,9 +93,21 @@ kotlin {
         }
     }
 
+    // iOS targets
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "domain"
+            isStatic = true
+        }
+    }
+
 
     sourceSets {
-         commonMain {
+        commonMain {
             dependencies {
                 implementation(project(Modules.commonResources))
                 implementation(project(Modules.coreApi))
@@ -106,8 +118,7 @@ kotlin {
                 api(kotlinx.coroutines.core)
                 implementation(libs.ktor.core)
                 implementation(libs.ktor.contentNegotiation)
-                implementation(libs.ktor.okhttp)
-                implementation(libs.bundles.ireader)
+                implementation(libs.ktor.contentNegotiation.kotlinx)
                 implementation(kotlinx.serialization.protobuf)
                 implementation(kotlinx.datetime)
                 implementation(libs.okio)
@@ -115,10 +126,10 @@ kotlin {
                 api(libs.koin.core)
 
                 api(libs.coil.core)
-                
+
                 // Immutable Collections - Critical for Compose performance (Mihon pattern)
                 api(libs.kotlinx.collections.immutable)
-                
+
                 // Zipline - not used anymore, kept for reference
                 // implementation("app.cash.zipline:zipline:1.24.0")
                 // implementation("app.cash.zipline:zipline-loader:1.24.0")
@@ -128,14 +139,23 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.coroutines.test)
-                implementation(libs.mock)
-                // REMOVED: napier - not used in tests
                 // Ktor mock engine for HTTP testing (matching project Ktor version 3.3.2)
                 implementation(libs.ktor.client.mock)
             }
         }
-         androidMain {
+
+        val androidUnitTest by getting {
             dependencies {
+                implementation(libs.mock)
+            }
+        }
+
+        androidMain {
+            dependencies {
+                // Platform-specific Ktor engines
+                implementation(libs.ktor.okhttp)
+                implementation(libs.ktor.core.android)
+
                 // REMOVED: slf4j-android - not used
                 // implementation("org.slf4j:slf4j-android:1.7.25")
                 implementation(libs.bundles.simplestorage)
@@ -148,7 +168,7 @@ kotlin {
 
                 // ML Kit excluded for F-Droid builds - provided by app module for standard/dev flavors only
                 compileOnly(libs.googleTranslator)
-                
+
                 // REMOVED: gson - not used, using kotlinx.serialization
                 // implementation(libs.gson)
                 implementation(androidx.work.runtime)
@@ -174,24 +194,57 @@ kotlin {
                 implementation(kotlinx.stdlib)
                 api(libs.koin.android)
                 api(libs.koin.workManager)
-                
+
                 // J2V8 - V8 JavaScript engine for Android (full Promise/async support)
                 // Provides native ES6+, Promises, async/await without polyfills
-                implementation("com.eclipsesource.j2v8:j2v8:6.3.4")
+                implementation(libs.j2v8)
 
             }
         }
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
+                // Platform-specific Ktor engine
+                implementation(libs.ktor.okhttp)
+
                 implementation(compose.desktop.currentOs)
                 // Piper JNI for text-to-speech - Testing version 1.2.0-a0f09cd
                 implementation("io.github.givimad:piper-jni:1.2.0-a0f09cd")
-                
+
                 // GraalVM JavaScript for JavaScript engine
-                implementation("org.graalvm.polyglot:polyglot:25.0.1")
-                implementation("org.graalvm.polyglot:js:25.0.1")
+                implementation(libs.polyglot)
+                implementation(libs.js)
             }
+        }
+
+        val desktopTest by getting {
+            dependencies {
+                implementation(libs.mock)
+            }
+        }
+
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                implementation(libs.ktor.core)
+                implementation(libs.ktor.client.darwin)
+            }
+        }
+
+        val iosX64Test by getting
+        val iosArm64Test by getting
+        val iosSimulatorArm64Test by getting
+        val iosTest by creating {
+            dependsOn(commonTest.get())
+            iosX64Test.dependsOn(this)
+            iosArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
         }
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import ireader.presentation.core.ui.AppTab
 import ireader.presentation.ui.component.ExtensionsShimmerLoading
@@ -369,10 +370,13 @@ private fun PersistentTabContainer(
 /**
  * Individual tab slot - lazy initialization with shimmer loading.
  * Shows shimmer while content is being initialized, then fades to actual content.
- * Hidden tabs use alpha=0 and are disabled for touch to prevent interaction.
+ * Hidden tabs are kept in composition but made invisible and non-interactive.
  * 
  * Key optimization: Content is always composed once initialized (not removed from tree)
  * to preserve scroll positions, loaded images, and other UI state.
+ * 
+ * Uses zIndex to ensure only the visible tab receives touch events, preventing
+ * glitches from hidden tabs intercepting touches.
  */
 @Composable
 private inline fun TabSlot(
@@ -382,31 +386,24 @@ private inline fun TabSlot(
     crossinline shimmerContent: @Composable () -> Unit,
     crossinline content: @Composable () -> Unit
 ) {
-    // Only compose content if initialized - this is the key optimization
+    // Only compose content if initialized or currently visible
     // Once initialized, content stays in composition tree (just hidden)
     if (!isInitialized && !isVisible) {
         // Not initialized and not visible - don't compose anything
         return
     }
     
+    // Use zIndex to layer tabs properly - visible tab on top receives all touches
+    // Hidden tabs are pushed behind with zIndex 0, visible tab gets zIndex 1
+    // This prevents touch event conflicts without using translation hacks
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .zIndex(if (isVisible) 1f else 0f)
             .graphicsLayer {
                 // Use alpha for visibility - keeps content in composition tree
                 alpha = if (isVisible) 1f else 0f
             }
-            // Disable touch when hidden (more reliable than translationX)
-            .then(
-                if (!isVisible) {
-                    Modifier.graphicsLayer { 
-                        // Move slightly off-screen to prevent any touch issues
-                        translationY = -10000f 
-                    }
-                } else {
-                    Modifier
-                }
-            )
     ) {
         when {
             isVisible && !isInitialized -> {

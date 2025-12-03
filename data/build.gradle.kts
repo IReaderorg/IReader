@@ -28,6 +28,18 @@ kotlin {
             }
         }
     }
+    
+    // iOS targets
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "data"
+            isStatic = true
+        }
+    }
 
     sourceSets {
         commonMain {
@@ -45,7 +57,11 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.jsoup)
                 api(kotlinx.datetime)
-                api(libs.bundles.ireader)
+                // Common Ktor dependencies (platform-agnostic)
+                api(libs.ktor.core)
+                api(libs.ktor.core.cio)
+                api(libs.ktor.contentNegotiation)
+                api(libs.ktor.contentNegotiation.kotlinx)
                 
                 // Kotlin Reflection - Required for Supabase inline reified functions
                 implementation(kotlinx.reflect)
@@ -67,6 +83,10 @@ kotlin {
         
         androidMain {
             dependencies {
+                // Platform-specific Ktor engines
+                implementation(libs.ktor.okhttp)
+                implementation(libs.ktor.core.android)
+                
                 implementation(androidx.core)
                 implementation(libs.requerySqlite)
                 implementation(libs.sqldelight.android)
@@ -86,6 +106,9 @@ kotlin {
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
             dependencies {
+                // Platform-specific Ktor engine
+                implementation(libs.ktor.okhttp)
+                
                 implementation(libs.sqldelight.jvm)
                 implementation(libs.apk.parser)
 
@@ -99,6 +122,32 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.sqldelight.jvm)
             }
+        }
+        
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                // Platform-specific Ktor engine
+                implementation("io.ktor:ktor-client-darwin:3.3.2")
+                
+                implementation(libs.sqldelight.native)
+            }
+        }
+        
+        val iosX64Test by getting
+        val iosArm64Test by getting
+        val iosSimulatorArm64Test by getting
+        val iosTest by creating {
+            dependsOn(commonTest.get())
+            iosX64Test.dependsOn(this)
+            iosArm64Test.dependsOn(this)
+            iosSimulatorArm64Test.dependsOn(this)
         }
 
     }
