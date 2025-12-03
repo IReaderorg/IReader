@@ -1,4 +1,6 @@
-package ireader.domain.models.entities
+﻿package ireader.domain.models.entities
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Represents the health check result for a source
@@ -10,6 +12,6 @@ package ireader.domain.models.entities
 data class SourceHealth(
     val sourceId: Long,
     val status: SourceStatus,
-    val lastChecked: Long = System.currentTimeMillis(),
+    val lastChecked: Long = currentTimeToLong(),
     val responseTime: Long? = null
 )

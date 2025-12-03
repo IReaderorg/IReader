@@ -1,4 +1,6 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Notification data for plugin updates
@@ -7,7 +9,7 @@ package ireader.domain.plugins
 data class PluginUpdateNotification(
     val availableUpdatesCount: Int,
     val updates: List<PluginUpdate>,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = currentTimeToLong()
 ) {
     /**
      * Get a summary message for the notification

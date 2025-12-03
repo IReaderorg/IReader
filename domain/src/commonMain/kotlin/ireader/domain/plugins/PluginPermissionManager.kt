@@ -1,10 +1,11 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Manages runtime permissions for plugins
@@ -71,7 +72,7 @@ class PluginPermissionManager(
                 pluginId = pluginId,
                 pluginName = manifest.name,
                 permission = permission,
-                timestamp = System.currentTimeMillis()
+                timestamp = currentTimeToLong()
             )
             
             mutex.withLock {

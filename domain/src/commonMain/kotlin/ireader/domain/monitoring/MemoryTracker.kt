@@ -1,4 +1,6 @@
-package ireader.domain.monitoring
+﻿package ireader.domain.monitoring
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Interface for tracking memory usage of plugins
@@ -51,5 +53,5 @@ interface MemoryTracker {
 data class MemorySnapshot(
     val pluginId: String,
     val usedMemory: Long,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = currentTimeToLong()
 )

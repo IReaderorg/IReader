@@ -1,10 +1,11 @@
-package ireader.domain.models.backup
+﻿package ireader.domain.models.backup
 
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Category
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.Track
 import kotlinx.serialization.Serializable
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Comprehensive library backup data structure
@@ -12,7 +13,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LibraryBackup(
     val version: Int = CURRENT_VERSION,
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = currentTimeToLong(),
     val books: List<BackupBook> = emptyList(),
     val categories: List<BackupCategory> = emptyList(),
     val preferences: BackupPreferences? = null,

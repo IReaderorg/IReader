@@ -1,4 +1,4 @@
-package ireader.presentation.ui.leaderboard
+﻿package ireader.presentation.ui.leaderboard
 
 import androidx.compose.runtime.Stable
 import ireader.domain.usecases.leaderboard.LeaderboardUseCases
@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel for the Reading Leaderboard screen following Mihon's StateScreenModel pattern.
@@ -87,7 +88,7 @@ class LeaderboardViewModel(
                     _state.update { current ->
                         current.copy(
                             isSyncing = false,
-                            lastSyncTime = System.currentTimeMillis(),
+                            lastSyncTime = currentTimeToLong(),
                             syncError = null // Clear any previous errors
                         )
                     }
@@ -121,7 +122,7 @@ class LeaderboardViewModel(
                         _state.update { current ->
                             current.copy(
                                 isSyncing = false,
-                                lastSyncTime = System.currentTimeMillis(),
+                                lastSyncTime = currentTimeToLong(),
                                 syncError = null
                             )
                         }

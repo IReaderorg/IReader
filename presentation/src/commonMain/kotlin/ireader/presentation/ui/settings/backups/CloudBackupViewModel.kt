@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.backups
+﻿package ireader.presentation.ui.settings.backups
 
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.data.repository.SourceCredentialsRepository
@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel for managing cloud backup state and operations
@@ -111,7 +112,7 @@ class CloudBackupViewModel(
                     credentialsRepository.storeCredentials(
                         sourceId = sourceId,
                         username = "authenticated",
-                        password = System.currentTimeMillis().toString()
+                        password = currentTimeToLong().toString()
                     )
                     
                     // Load backups after successful authentication

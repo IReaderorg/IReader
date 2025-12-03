@@ -1,4 +1,4 @@
-package ireader.domain.usecases.migration
+﻿package ireader.domain.usecases.migration
 
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
@@ -12,6 +12,7 @@ import ireader.domain.models.notification.MigrationNotificationInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.delay
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case for performing book migration following Mihon's pattern
@@ -60,7 +61,7 @@ class MigrateBookUseCase(
                     newBookId = migrationResult.newNovelId!!,
                     oldSourceId = request.sourceId,
                     newSourceId = request.targetSourceId,
-                    timestamp = System.currentTimeMillis(),
+                    timestamp = currentTimeToLong(),
                     chaptersTransferred = migrationResult.transferredData?.chaptersTransferred ?: 0,
                     progressPreserved = migrationResult.transferredData?.progressPreserved ?: false,
                     flags = request.flags,
@@ -161,7 +162,7 @@ class MigrateBookUseCase(
     }
     
     private fun generateMigrationId(): String {
-        return "migration_${System.currentTimeMillis()}_${(1000..9999).random()}"
+        return "migration_${currentTimeToLong()}_${(1000..9999).random()}"
     }
 }
 
@@ -178,7 +179,7 @@ class BatchMigrationUseCase(
             // Save initial job
             migrationRepository.saveMigrationJob(job.copy(
                 status = MigrationJobStatus.RUNNING,
-                startTime = System.currentTimeMillis()
+                startTime = currentTimeToLong()
             ))
             
             var completedBooks = 0
@@ -233,7 +234,7 @@ class BatchMigrationUseCase(
                 progress = 1f,
                 completedBooks = completedBooks,
                 failedBooks = failedBooks,
-                endTime = System.currentTimeMillis()
+                endTime = currentTimeToLong()
             )
             
             migrationRepository.updateMigrationJobStatus(job.id, MigrationJobStatus.COMPLETED)

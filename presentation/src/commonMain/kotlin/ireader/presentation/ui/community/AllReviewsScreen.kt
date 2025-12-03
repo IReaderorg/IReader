@@ -1,4 +1,4 @@
-package ireader.presentation.ui.community
+﻿package ireader.presentation.ui.community
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -29,6 +29,7 @@ import kotlin.math.roundToInt
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.domain.utils.extensions.currentTimeToLong
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -866,7 +867,7 @@ private fun EmptyView(message: String) {
 }
 
 private fun formatTimestamp(timestamp: Long): String {
-    val now = System.currentTimeMillis()
+    val now = currentTimeToLong()
     val diff = now - timestamp
     
     return when {

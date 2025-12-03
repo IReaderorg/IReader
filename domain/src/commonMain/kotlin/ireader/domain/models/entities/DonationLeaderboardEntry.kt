@@ -1,6 +1,7 @@
-package ireader.domain.models.entities
+﻿package ireader.domain.models.entities
 
 import kotlinx.serialization.Serializable
+import ireader.domain.utils.extensions.currentTimeToLong
 
 @Serializable
 data class DonationLeaderboardEntry(
@@ -13,7 +14,7 @@ data class DonationLeaderboardEntry(
     val avatarUrl: String? = null,
     val highestBadgeRarity: String? = null,
     val badges: List<DonorBadgeInfo> = emptyList(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = currentTimeToLong()
 )
 
 @Serializable

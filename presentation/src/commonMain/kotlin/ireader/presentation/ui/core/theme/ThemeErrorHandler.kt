@@ -1,4 +1,4 @@
-package ireader.presentation.ui.core.theme
+﻿package ireader.presentation.ui.core.theme
 
 import androidx.compose.runtime.*
 import ireader.domain.models.theme.Theme
@@ -6,6 +6,7 @@ import ireader.domain.plugins.ThemePlugin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Error handler for theme plugin errors with fallback support
@@ -138,7 +139,7 @@ sealed class ThemeError {
         val themeId: String,
         val themeName: String,
         val exception: Throwable,
-        override val timestamp: Long = System.currentTimeMillis()
+        override val timestamp: Long = currentTimeToLong()
     ) : ThemeError() {
         override fun toUserMessage(): String {
             return "Failed to apply theme '$themeName': ${exception.message ?: "Unknown error"}"
@@ -149,7 +150,7 @@ sealed class ThemeError {
         val pluginId: String,
         val pluginName: String,
         val exception: Throwable,
-        override val timestamp: Long = System.currentTimeMillis()
+        override val timestamp: Long = currentTimeToLong()
     ) : ThemeError() {
         override fun toUserMessage(): String {
             return "Failed to load theme plugin '$pluginName': ${exception.message ?: "Unknown error"}"
@@ -160,7 +161,7 @@ sealed class ThemeError {
         val pluginId: String,
         val assetPath: String,
         val exception: Throwable,
-        override val timestamp: Long = System.currentTimeMillis()
+        override val timestamp: Long = currentTimeToLong()
     ) : ThemeError() {
         override fun toUserMessage(): String {
             return "Failed to load theme asset '$assetPath': ${exception.message ?: "Unknown error"}"
@@ -170,7 +171,7 @@ sealed class ThemeError {
     data class InvalidConfiguration(
         val pluginId: String,
         val reason: String,
-        override val timestamp: Long = System.currentTimeMillis()
+        override val timestamp: Long = currentTimeToLong()
     ) : ThemeError() {
         override fun toUserMessage(): String {
             return "Invalid theme configuration: $reason"

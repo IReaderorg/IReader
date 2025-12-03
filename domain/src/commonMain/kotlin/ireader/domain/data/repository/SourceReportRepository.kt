@@ -1,7 +1,8 @@
-package ireader.domain.data.repository
+﻿package ireader.domain.data.repository
 
 import ireader.domain.models.entities.SourceReport
 import kotlinx.coroutines.flow.Flow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 interface SourceReportRepository {
     
@@ -28,7 +29,7 @@ interface SourceReportRepository {
         packageName: String,
         version: String,
         reason: String,
-        timestamp: Long = System.currentTimeMillis(),
+        timestamp: Long = currentTimeToLong(),
         status: String = "pending"
     ): Long
     

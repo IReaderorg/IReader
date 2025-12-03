@@ -1,4 +1,4 @@
-package ireader.data.repository
+﻿package ireader.data.repository
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.*
@@ -9,6 +9,7 @@ import ireader.domain.models.library.ReadingProgress
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of LibraryStatisticsRepository
@@ -294,7 +295,7 @@ class LibraryStatisticsRepositoryImpl(
             readChapters = 0,
             unreadChapters = 0,
             totalReadingTime = getTotalReadingTime(),
-            lastUpdated = System.currentTimeMillis()
+            lastUpdated = currentTimeToLong()
         )
     }
     
@@ -308,7 +309,7 @@ class LibraryStatisticsRepositoryImpl(
             booksCompletedThisYear = 0,
             chaptersReadThisWeek = 0,
             chaptersReadThisMonth = 0,
-            lastReadingSession = System.currentTimeMillis()
+            lastReadingSession = currentTimeToLong()
         )
     }
     

@@ -34,12 +34,15 @@ fun CommunityHubScreen(
     onLeaderboard: () -> Unit,
     onPopularBooks: () -> Unit,
     onAllReviews: () -> Unit,
+    onCharacterArtGallery: () -> Unit,
+    onReadingBuddy: () -> Unit = {},
     onBadgeStore: () -> Unit,
     onNFTBadge: () -> Unit,
     onBadgeManagement: () -> Unit,
     isAdmin: Boolean = false,
     onAdminBadgeVerification: () -> Unit = {},
     onAdminQuoteVerification: () -> Unit = {},
+    onAdminCharacterArtVerification: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -129,6 +132,32 @@ fun CommunityHubScreen(
                 )
             }
             
+            // Creative Section
+            item {
+                SettingsSectionHeader(
+                    title = "Creative",
+                    icon = Icons.Filled.Palette
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "Character Art Gallery",
+                    description = "Browse and share AI-generated character art",
+                    icon = Icons.Filled.Image,
+                    onClick = onCharacterArtGallery
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "Reading Buddy",
+                    description = "Your reading companion with daily quotes",
+                    icon = Icons.Filled.Pets,
+                    onClick = onReadingBuddy
+                )
+            }
+            
             // Badges & Customization Section
             item {
                 SettingsSectionHeader(
@@ -188,6 +217,15 @@ fun CommunityHubScreen(
                         description = "Review and approve community quote submissions",
                         icon = Icons.Outlined.FormatQuote,
                         onClick = onAdminQuoteVerification
+                    )
+                }
+                
+                item {
+                    SettingsItem(
+                        title = "Character Art Verification",
+                        description = "Review and approve character art submissions",
+                        icon = Icons.Outlined.Image,
+                        onClick = onAdminCharacterArtVerification
                     )
                 }
             }

@@ -8,18 +8,18 @@ import ireader.domain.models.epub.EpubChapter
 import ireader.domain.models.epub.EpubMetadata
 import ireader.domain.models.epub.ExportOptions
 import ireader.domain.usecases.epub.HtmlContentCleaner
+import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.formatIsoDate
+import ireader.domain.utils.extensions.formatIsoDateTime
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.readBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import  kotlin.time.Clock
+import kotlin.time.Clock
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -120,7 +120,7 @@ class EpubBuilder(
     }
     
     private fun createMetadata(book: Book): EpubMetadata {
-        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        val currentDate = currentTimeToLong().formatIsoDate()
         return EpubMetadata(
             title = book.title,
             author = book.author.ifEmpty { "Unknown" },
@@ -162,7 +162,7 @@ class EpubBuilder(
         chapters: List<EpubChapter>,
         options: ExportOptions
     ) {
-        val currentDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(Date())
+        val currentDate = currentTimeToLong().formatIsoDateTime()
         
         val contentOpf = buildString {
             appendLine("""<?xml version="1.0" encoding="UTF-8"?>""")

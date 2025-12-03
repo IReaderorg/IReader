@@ -1,8 +1,9 @@
-package ireader.data.core
+﻿package ireader.data.core
 
 import ireader.core.log.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Database maintenance utilities for optimal performance.
@@ -29,7 +30,7 @@ class DatabaseMaintenance(
     suspend fun analyze() = withContext(Dispatchers.IO) {
         try {
             Log.info("Running ANALYZE...", "DatabaseMaintenance")
-            val start = System.currentTimeMillis()
+            val start = currentTimeToLong()
             
             handler.await {
                 // ANALYZE updates statistics for the query optimizer
@@ -38,7 +39,7 @@ class DatabaseMaintenance(
                 // to be implemented in platform-specific code
             }
             
-            val duration = System.currentTimeMillis() - start
+            val duration = currentTimeToLong() - start
             Log.info("ANALYZE completed in ${duration}ms", "DatabaseMaintenance")
         } catch (e: Exception) {
             Log.error("ANALYZE failed", e, "DatabaseMaintenance")
@@ -55,14 +56,14 @@ class DatabaseMaintenance(
     suspend fun vacuum() = withContext(Dispatchers.IO) {
         try {
             Log.info("Running VACUUM...", "DatabaseMaintenance")
-            val start = System.currentTimeMillis()
+            val start = currentTimeToLong()
             
             handler.await {
                 // VACUUM rebuilds the database file, reclaiming unused space
                 // and defragmenting the database
             }
             
-            val duration = System.currentTimeMillis() - start
+            val duration = currentTimeToLong() - start
             Log.info("VACUUM completed in ${duration}ms", "DatabaseMaintenance")
         } catch (e: Exception) {
             Log.error("VACUUM failed", e, "DatabaseMaintenance")
@@ -78,13 +79,13 @@ class DatabaseMaintenance(
     suspend fun reindex() = withContext(Dispatchers.IO) {
         try {
             Log.info("Running REINDEX...", "DatabaseMaintenance")
-            val start = System.currentTimeMillis()
+            val start = currentTimeToLong()
             
             handler.await {
                 // REINDEX rebuilds all indexes
             }
             
-            val duration = System.currentTimeMillis() - start
+            val duration = currentTimeToLong() - start
             Log.info("REINDEX completed in ${duration}ms", "DatabaseMaintenance")
         } catch (e: Exception) {
             Log.error("REINDEX failed", e, "DatabaseMaintenance")
@@ -181,7 +182,7 @@ class DatabaseMaintenance(
      * This is safe to run regularly
      */
     suspend fun runMaintenance(): MaintenanceResult {
-        val start = System.currentTimeMillis()
+        val start = currentTimeToLong()
         
         Log.info("Starting database maintenance...", "DatabaseMaintenance")
         
@@ -193,7 +194,7 @@ class DatabaseMaintenance(
         dbOptimizations?.clearAllCache()
         
         val stats = getDatabaseStats()
-        val duration = System.currentTimeMillis() - start
+        val duration = currentTimeToLong() - start
         
         Log.info("Maintenance completed in ${duration}ms", "DatabaseMaintenance")
         
@@ -213,7 +214,7 @@ class DatabaseMaintenance(
      * This can take several minutes - run monthly or when performance degrades
      */
     suspend fun runDeepMaintenance(): MaintenanceResult {
-        val start = System.currentTimeMillis()
+        val start = currentTimeToLong()
         
         Log.info("Starting DEEP database maintenance...", "DatabaseMaintenance")
         
@@ -224,7 +225,7 @@ class DatabaseMaintenance(
         reindex()
         
         val stats = getDatabaseStats()
-        val duration = System.currentTimeMillis() - start
+        val duration = currentTimeToLong() - start
         
         Log.info("Deep maintenance completed in ${duration}ms", "DatabaseMaintenance")
         

@@ -1,4 +1,4 @@
-package ireader.presentation.core.ui
+﻿package ireader.presentation.core.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -61,6 +61,7 @@ import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import ireader.domain.utils.extensions.currentTimeToLong
 
 
 @OptIn( ExperimentalMaterial3Api::class)
@@ -114,11 +115,11 @@ data class ReaderScreenSpec(
         
         // Track reading time - records time spent in reader screen
         DisposableEffect(key1 = Unit) {
-            val startTime = System.currentTimeMillis()
+            val startTime = currentTimeToLong()
             Log.info { "Reader screen opened - starting time tracking" }
             
             onDispose {
-                val endTime = System.currentTimeMillis()
+                val endTime = currentTimeToLong()
                 val durationMillis = endTime - startTime
                 val durationMinutes = durationMillis / 60000
                 

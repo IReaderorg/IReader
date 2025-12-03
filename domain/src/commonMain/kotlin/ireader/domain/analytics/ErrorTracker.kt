@@ -1,6 +1,7 @@
-package ireader.domain.analytics
+﻿package ireader.domain.analytics
 
 import ireader.core.log.Log
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Error tracker for monitoring application errors
@@ -33,7 +34,7 @@ class ErrorTracker(
                 screen = screen,
                 userAction = userAction,
                 appState = removePII(appState),
-                timestamp = System.currentTimeMillis()
+                timestamp = currentTimeToLong()
             )
             
             errors.add(errorEvent)
@@ -65,7 +66,7 @@ class ErrorTracker(
                     recentErrors = emptyList()
                 )
             } else {
-                val now = System.currentTimeMillis()
+                val now = currentTimeToLong()
                 val oneDayAgo = now - (24 * 60 * 60 * 1000)
                 val recentErrors = errors.filter { it.timestamp >= oneDayAgo }
                 
@@ -123,7 +124,7 @@ class ErrorTracker(
      */
     fun getErrorRateTrend(hours: Int = 24): Map<Long, Int> {
         return try {
-            val now = System.currentTimeMillis()
+            val now = currentTimeToLong()
             val startTime = now - (hours * 60 * 60 * 1000)
             val hourlyErrors = mutableMapOf<Long, Int>()
             

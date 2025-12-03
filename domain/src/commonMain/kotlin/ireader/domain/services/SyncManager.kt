@@ -1,4 +1,4 @@
-package ireader.domain.services
+﻿package ireader.domain.services
 
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.entities.Book
@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Central manager for all sync operations
@@ -100,13 +101,13 @@ class SyncManager(
         }
         
         // Debounce: Skip if last sync was too recent
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         if (currentTime - lastSyncRequestTime < minSyncIntervalMs) {
             // Cancel previous debounce job and schedule new one
             debounceSyncJob?.cancel()
             debounceSyncJob = scope.launch {
                 delay(minSyncIntervalMs)
-                lastSyncRequestTime = System.currentTimeMillis() // Update time for the delayed run
+                lastSyncRequestTime = currentTimeToLong() // Update time for the delayed run
                 performSyncReadingProgress(userId, bookId, sourceId, chapterSlug, scrollPosition)
             }
             return Result.success(Unit)
@@ -131,7 +132,7 @@ class SyncManager(
                 bookId = normalizedBookId,
                 lastChapterSlug = chapterSlug,
                 lastScrollPosition = scrollPosition,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = currentTimeToLong()
             )
             
             remoteRepository.syncReadingProgress(progress)
@@ -209,7 +210,7 @@ class SyncManager(
     }
     
     private fun updateLastSyncTime() {
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         supabasePreferences.lastSyncTime().set(currentTime)
         _lastSyncTime.value = currentTime
     }

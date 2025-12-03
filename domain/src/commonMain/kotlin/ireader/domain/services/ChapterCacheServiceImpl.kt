@@ -1,9 +1,10 @@
-package ireader.domain.services
+﻿package ireader.domain.services
 
 import ireader.core.log.Log
 import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * LRU cache implementation for chapters with memory management
@@ -30,7 +31,7 @@ class ChapterCacheServiceImpl(
     private data class CacheEntry(
         val chapter: Chapter,
         val sizeBytes: Long,
-        val cachedAt: Long = System.currentTimeMillis()
+        val cachedAt: Long = currentTimeToLong()
     )
     
     override suspend fun getChapter(chapterId: Long): Chapter? = mutex.withLock {

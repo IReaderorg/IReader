@@ -1,4 +1,4 @@
-package ireader.domain.services
+﻿package ireader.domain.services
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogStore
@@ -8,6 +8,7 @@ import ireader.domain.models.entities.SourceStatus
 import ireader.domain.models.entities.isUsable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of SourceHealthChecker that monitors source availability and performance
@@ -27,7 +28,7 @@ class SourceHealthCheckerImpl(
      */
     override suspend fun checkStatus(sourceId: Long): SourceHealth {
         return try {
-            val startTime = System.currentTimeMillis()
+            val startTime = currentTimeToLong()
             
             // Get catalog source
             val catalog = catalogStore.get(sourceId)
@@ -43,7 +44,7 @@ class SourceHealthCheckerImpl(
             
             // Check if source is available and usable
             val result = try {
-                val responseTime = System.currentTimeMillis() - startTime
+                val responseTime = currentTimeToLong() - startTime
                 
                 // Check if the catalog has a valid source
                 val source = catalog.source
@@ -57,7 +58,7 @@ class SourceHealthCheckerImpl(
                 }
             } catch (e: Exception) {
                 Log.error { "Source health check failed for source $sourceId" }
-                val responseTime = System.currentTimeMillis() - startTime
+                val responseTime = currentTimeToLong() - startTime
                 
                 // Determine status based on error type
                 val status = when {
@@ -156,7 +157,7 @@ class SourceHealthCheckerImpl(
         return SourceHealth(
             sourceId = sourceId,
             status = status,
-            lastChecked = System.currentTimeMillis(),
+            lastChecked = currentTimeToLong(),
             responseTime = responseTime
         )
     }
@@ -165,7 +166,7 @@ class SourceHealthCheckerImpl(
      * Check if cached result is stale (older than TTL)
      */
     private fun isCacheStale(health: SourceHealth): Boolean {
-        val age = System.currentTimeMillis() - health.lastChecked
+        val age = currentTimeToLong() - health.lastChecked
         return age > CACHE_TTL_MS
     }
 }

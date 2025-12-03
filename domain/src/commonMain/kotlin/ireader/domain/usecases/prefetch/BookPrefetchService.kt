@@ -1,4 +1,4 @@
-package ireader.domain.usecases.prefetch
+﻿package ireader.domain.usecases.prefetch
 
 import ireader.core.log.Log
 import ireader.domain.models.entities.Book
@@ -13,6 +13,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Service for prefetching book data to improve perceived performance.
@@ -57,7 +58,7 @@ class BookPrefetchService(
         val book: Book,
         val chapters: List<Chapter>,
         val lastReadChapterId: Long?,
-        val prefetchedAt: Long = System.currentTimeMillis()
+        val prefetchedAt: Long = currentTimeToLong()
     )
     
     /**
@@ -98,7 +99,7 @@ class BookPrefetchService(
         val data = prefetchCache[bookId]
         
         // Check if data is still fresh (within 5 minutes)
-        if (data != null && System.currentTimeMillis() - data.prefetchedAt < 300_000) {
+        if (data != null && currentTimeToLong() - data.prefetchedAt < 300_000) {
             Log.debug("Prefetch cache HIT for book $bookId", TAG)
             return data
         }
@@ -140,7 +141,7 @@ class BookPrefetchService(
         val job = scope.launch {
             try {
                 Log.debug("Prefetching book $bookId", TAG)
-                val startTime = System.currentTimeMillis()
+                val startTime = currentTimeToLong()
                 
                 // Fetch book data
                 val book = getBookUseCases.findBookById(bookId) ?: return@launch
@@ -166,7 +167,7 @@ class BookPrefetchService(
                     ongoingPrefetches.remove(bookId)
                 }
                 
-                val duration = System.currentTimeMillis() - startTime
+                val duration = currentTimeToLong() - startTime
                 Log.debug("Prefetched book $bookId in ${duration}ms (${chapters.size} chapters)", TAG)
                 
             } catch (e: Exception) {

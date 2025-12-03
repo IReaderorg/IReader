@@ -38,6 +38,12 @@ class CommunityHubScreenSpec {
             onAllReviews = {
                 navController.navigate(NavigationRoutes.allReviews)
             },
+            onCharacterArtGallery = {
+                navController.navigate(NavigationRoutes.characterArtGallery)
+            },
+            onReadingBuddy = {
+                navController.navigate(NavigationRoutes.readingBuddy)
+            },
             onBadgeStore = {
                 navController.navigate(NavigationRoutes.badgeStore)
             },
@@ -53,6 +59,9 @@ class CommunityHubScreenSpec {
             },
             onAdminQuoteVerification = {
                 navController.navigate(NavigationRoutes.adminQuoteVerification)
+            },
+            onAdminCharacterArtVerification = {
+                navController.navigate(NavigationRoutes.adminCharacterArtVerification)
             }
         )
     }

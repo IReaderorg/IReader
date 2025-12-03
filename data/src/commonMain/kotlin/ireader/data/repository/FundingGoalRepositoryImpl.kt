@@ -1,7 +1,8 @@
-package ireader.data.repository
+﻿package ireader.data.repository
 
 import ireader.domain.data.repository.FundingGoalRepository
 import ireader.domain.models.donation.FundingGoal
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Default implementation of FundingGoalRepository
@@ -159,7 +160,7 @@ class FundingGoalRepositoryImpl : FundingGoalRepository {
             }
             
             // Archive old goal (in production, save to history)
-            val archivedGoal = goal.copy(id = "${goal.id}_archived_${System.currentTimeMillis()}")
+            val archivedGoal = goal.copy(id = "${goal.id}_archived_${currentTimeToLong()}")
             
             // Create new goal with reset progress
             val newGoal = goal.copy(currentAmount = 0.0)

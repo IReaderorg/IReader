@@ -1,9 +1,10 @@
-package ireader.domain.services.tts_service
+﻿package ireader.domain.services.tts_service
 
 import ireader.domain.models.tts.VoiceModel
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Service for managing local storage of voice models
@@ -140,7 +141,7 @@ class VoiceModelCache<T>(
     
     data class CacheEntry<T>(
         val value: T,
-        val timestamp: Long = System.currentTimeMillis()
+        val timestamp: Long = currentTimeToLong()
     )
     
     /**

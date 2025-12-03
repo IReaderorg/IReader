@@ -1,10 +1,11 @@
-package ireader.core.source
+﻿package ireader.core.source
 
 import ireader.core.source.ParsingUtils.extractMainContent
 import ireader.core.source.ParsingUtils.extractTextWithParagraphs
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import ireader.core.util.currentTimeMillis
 
 /**
  * Enhanced HTML parsing utilities for better novel content extraction
@@ -217,7 +218,7 @@ object ParsingUtils {
             val match = pattern.find(dateString)
             if (match != null) {
                 // Return timestamp (simplified - would need proper date parsing in production)
-                return System.currentTimeMillis()
+                return currentTimeMillis()
             }
         }
         
@@ -306,7 +307,7 @@ class ParsedContentCache(
         
         cache[url] = CachedParsedContent(
             content = content as Any,
-            timestamp = System.currentTimeMillis(),
+            timestamp = currentTimeMillis(),
             url = url
         )
     }
@@ -318,7 +319,7 @@ class ParsedContentCache(
     fun <T> get(url: String): T? {
         val cached = cache[url] ?: return null
         
-        if (System.currentTimeMillis() - cached.timestamp > cacheExpiryMs) {
+        if (currentTimeMillis() - cached.timestamp > cacheExpiryMs) {
             cache.remove(url)
             return null
         }
@@ -331,7 +332,7 @@ class ParsedContentCache(
      */
     fun contains(url: String): Boolean {
         val cached = cache[url] ?: return false
-        return System.currentTimeMillis() - cached.timestamp <= cacheExpiryMs
+        return currentTimeMillis() - cached.timestamp <= cacheExpiryMs
     }
     
     /**
@@ -357,7 +358,7 @@ class ParsedContentCache(
      * Remove expired entries
      */
     private fun cleanExpiredCache() {
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeMillis()
         val expiredKeys = cache.entries
             .filter { currentTime - it.value.timestamp > cacheExpiryMs }
             .map { it.key }

@@ -1,4 +1,4 @@
-package ireader.data.donationleaderboard
+﻿package ireader.data.donationleaderboard
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.realtime.PostgresAction
@@ -16,6 +16,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class DonationLeaderboardRepositoryImpl(
     private val supabaseClient: SupabaseClient,
@@ -154,7 +155,7 @@ class DonationLeaderboardRepositoryImpl(
             avatarUrl = avatarUrl,
             highestBadgeRarity = highestBadgeRarity,
             badges = badges,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = currentTimeToLong()
         )
     }
     
@@ -170,11 +171,11 @@ class DonationLeaderboardRepositoryImpl(
     }
     
     private fun parseTimestamp(timestamp: String?): Long {
-        if (timestamp == null) return System.currentTimeMillis()
+        if (timestamp == null) return currentTimeToLong()
         return try {
-            System.currentTimeMillis()
+            currentTimeToLong()
         } catch (e: Exception) {
-            System.currentTimeMillis()
+            currentTimeToLong()
         }
     }
 }

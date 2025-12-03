@@ -1,4 +1,4 @@
-package ireader.data.nft
+﻿package ireader.data.nft
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.annotations.SupabaseInternal
@@ -16,6 +16,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class NFTRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -72,7 +73,7 @@ class NFTRepositoryImpl(
             }
             
             // Upsert to Supabase
-            val now = System.currentTimeMillis()
+            val now = currentTimeToLong()
             val cacheExpires = now + (24 * 60 * 60 * 1000) // 24 hours
             
             val data = buildJsonObject {
@@ -209,7 +210,7 @@ class NFTRepositoryImpl(
             
             if (wallet == null) return true
             
-            val now = System.currentTimeMillis()
+            val now = currentTimeToLong()
             wallet.cacheExpiresAt < now
         } catch (e: Exception) {
             // If there's an error, assume expired
@@ -235,10 +236,10 @@ class NFTRepositoryImpl(
                 // If that fails, try parsing as ISO 8601
                 // For simplicity, we'll use a basic parser
                 // In production, consider using kotlinx-datetime
-                System.currentTimeMillis()
+                currentTimeToLong()
             }
         } catch (e: Exception) {
-            System.currentTimeMillis()
+            currentTimeToLong()
         }
     }
 }

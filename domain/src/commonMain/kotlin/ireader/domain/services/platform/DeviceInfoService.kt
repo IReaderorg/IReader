@@ -1,7 +1,8 @@
-package ireader.domain.services.platform
+﻿package ireader.domain.services.platform
 
 import ireader.domain.services.common.PlatformService
 import kotlinx.coroutines.flow.Flow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Platform-agnostic device information service
@@ -113,7 +114,7 @@ data class ScreenSize(
 data class OrientationEvent(
     val isLandscape: Boolean,
     val rotation: Int, // 0, 90, 180, 270
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = currentTimeToLong()
 )
 
 /**

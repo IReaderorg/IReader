@@ -1,4 +1,4 @@
-package ireader.presentation.ui.component.navigation
+﻿package ireader.presentation.ui.component.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Modern redesigned bottom navigation bar with enhanced visual design
@@ -109,7 +110,7 @@ fun RowScope.ModernNavigationItem(
     
     val handleClick: () -> Unit = remember(onClick, onDoubleClick) {
         {
-            val currentTime = System.currentTimeMillis()
+            val currentTime = currentTimeToLong()
             if (onDoubleClick != null && currentTime - lastClickTime < doubleTapTimeout) {
                 // Double tap detected
                 onDoubleClick()
@@ -247,7 +248,7 @@ fun ModernNavigationRailItem(
     
     val handleClick: () -> Unit = remember(onClick, onDoubleClick) {
         {
-            val currentTime = System.currentTimeMillis()
+            val currentTime = currentTimeToLong()
             if (onDoubleClick != null && currentTime - lastClickTime < doubleTapTimeout) {
                 // Double tap detected
                 onDoubleClick()

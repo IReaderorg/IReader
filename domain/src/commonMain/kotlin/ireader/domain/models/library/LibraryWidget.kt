@@ -1,6 +1,7 @@
-package ireader.domain.models.library
+﻿package ireader.domain.models.library
 
 import kotlinx.serialization.Serializable
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Library widget configuration
@@ -38,7 +39,7 @@ enum class WidgetType {
 data class LibraryWidgetData(
     val widgetId: Int,
     val items: List<WidgetItem>,
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = currentTimeToLong()
 )
 
 /**

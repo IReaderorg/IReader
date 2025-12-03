@@ -1,7 +1,8 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Monitors resource usage for a plugin
@@ -17,7 +18,7 @@ class PluginResourceMonitor(
     private val maxHistorySize = 60 // Keep last 60 measurements
     
     // Network usage tracking per minute
-    private var networkUsageStartTime = System.currentTimeMillis()
+    private var networkUsageStartTime = currentTimeToLong()
     private var networkUsageInWindow = 0L
     
     /**
@@ -39,7 +40,7 @@ class PluginResourceMonitor(
             }
             
             // Track network usage in time window
-            val now = System.currentTimeMillis()
+            val now = currentTimeToLong()
             if (now - networkUsageStartTime > 60_000) { // 1 minute
                 networkUsageStartTime = now
                 networkUsageInWindow = networkUsage
@@ -151,7 +152,7 @@ class PluginResourceMonitor(
     fun reset() {
         currentUsage = PluginResourceUsage(0.0, 0, 0)
         usageHistory.clear()
-        networkUsageStartTime = System.currentTimeMillis()
+        networkUsageStartTime = currentTimeToLong()
         networkUsageInWindow = 0L
     }
     

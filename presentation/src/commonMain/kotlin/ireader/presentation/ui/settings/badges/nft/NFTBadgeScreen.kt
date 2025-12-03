@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.badges.nft
+﻿package ireader.presentation.ui.settings.badges.nft
 
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -87,6 +87,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import ireader.domain.utils.extensions.currentTimeToLong
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -468,7 +469,7 @@ fun NFTBadgeOwnershipDisplay(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val currentTime = System.currentTimeMillis()
+    val currentTime = currentTimeToLong()
     val isExpiringSoon = (cacheExpiresAt - currentTime) < (6 * 60 * 60 * 1000L) // Less than 6 hours
     
     Column(

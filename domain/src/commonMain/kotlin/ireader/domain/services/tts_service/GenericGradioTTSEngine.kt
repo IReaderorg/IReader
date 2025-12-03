@@ -1,4 +1,4 @@
-package ireader.domain.services.tts_service
+﻿package ireader.domain.services.tts_service
 
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -11,6 +11,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 
 /**
@@ -487,7 +488,7 @@ class GenericGradioTTSEngine(
      */
     private suspend fun tryQueueApi(requestBody: String): ByteArray? {
         val baseUrl = config.spaceUrl.trimEnd('/')
-        val sessionHash = System.currentTimeMillis().toString()
+        val sessionHash = currentTimeToLong().toString()
         val queueBody = requestBody.dropLast(1) + """, "fn_index": 0, "session_hash": "$sessionHash"}"""
         
         for (queuePrefix in listOf("$baseUrl/queue", "$baseUrl/gradio_api/queue")) {

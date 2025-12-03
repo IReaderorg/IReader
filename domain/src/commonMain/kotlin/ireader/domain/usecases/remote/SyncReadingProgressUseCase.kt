@@ -1,9 +1,10 @@
-package ireader.domain.usecases.remote
+﻿package ireader.domain.usecases.remote
 
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.remote.ReadingProgress
 import ireader.domain.utils.BookIdNormalizer
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case for syncing reading progress to the remote backend
@@ -50,7 +51,7 @@ class SyncReadingProgressUseCase(
                 bookId = normalizedBookId,
                 lastChapterSlug = chapterSlug,
                 lastScrollPosition = scrollPosition,
-                updatedAt = System.currentTimeMillis()
+                updatedAt = currentTimeToLong()
             )
             
             // Sync to remote backend

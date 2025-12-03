@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.sync
+﻿package ireader.presentation.ui.settings.sync
 
 import ireader.presentation.core.LocalNavigator
 
@@ -66,6 +66,7 @@ import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class SupabaseConfigScreen  {
     
@@ -1084,7 +1085,7 @@ private fun MultiProjectCard(
 }
 
 private fun formatTime(timestamp: Long): String {
-    val now = System.currentTimeMillis()
+    val now = currentTimeToLong()
     val diff = now - timestamp
     
     return when {

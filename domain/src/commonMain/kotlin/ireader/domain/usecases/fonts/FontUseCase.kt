@@ -1,4 +1,4 @@
-package ireader.domain.usecases.fonts
+﻿package ireader.domain.usecases.fonts
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -7,6 +7,7 @@ import ireader.core.prefs.PreferenceStore
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jsoup.Jsoup
+import ireader.domain.utils.extensions.currentTimeToLong
 
 
 
@@ -23,7 +24,7 @@ class FontUseCase(
     private val fontListTimePref = preferenceStore.getLong("cached_font_list_time", 0L)
 
     suspend fun getRemoteFonts(): List<String> {
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         
         // Check in-memory cache first
         if (cachedFonts != null && (currentTime - lastFetchTime) < cacheValidityDuration) {

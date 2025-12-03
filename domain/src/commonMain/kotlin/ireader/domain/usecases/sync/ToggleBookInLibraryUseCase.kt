@@ -4,7 +4,7 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.usecases.local.DeleteUseCase
 import ireader.core.log.Log
-import java.util.Calendar
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case for toggling a book in/out of library with automatic sync
@@ -22,7 +22,7 @@ class ToggleBookInLibraryUseCase(
                 // Add to library
                 val newBook = book.copy(
                     favorite = true,
-                    dateAdded = Calendar.getInstance().timeInMillis,
+                    dateAdded = currentTimeToLong(),
                 )
                 bookRepository.updateBook(newBook)
                 

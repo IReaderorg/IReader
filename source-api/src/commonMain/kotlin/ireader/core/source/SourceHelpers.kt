@@ -1,7 +1,8 @@
-package ireader.core.source
+﻿package ireader.core.source
 
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.MangaInfo
+import ireader.core.util.currentTimeMillis
 
 /**
  * Helper utilities for source implementations
@@ -179,7 +180,7 @@ object SourceHelpers {
             if (pattern.containsMatchIn(dateString)) {
                 // Return current time as placeholder
                 // In production, use proper date parsing library
-                return System.currentTimeMillis()
+                return currentTimeMillis()
             }
         }
         
@@ -190,7 +191,7 @@ object SourceHelpers {
      * Format relative time (e.g., "2 hours ago")
      */
     fun formatRelativeTime(timestamp: Long): String {
-        val now = System.currentTimeMillis()
+        val now = currentTimeMillis()
         val diff = now - timestamp
         
         return when {

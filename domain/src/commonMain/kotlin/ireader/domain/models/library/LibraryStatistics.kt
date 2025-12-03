@@ -1,6 +1,7 @@
-package ireader.domain.models.library
+﻿package ireader.domain.models.library
 
 import kotlinx.serialization.Serializable
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Comprehensive library statistics
@@ -24,7 +25,7 @@ data class LibraryStatistics(
     val booksPerSource: Map<Long, Int> = emptyMap(),
     val booksPerStatus: Map<Long, Int> = emptyMap(),
     val monthlyReadingStats: List<MonthlyReadingStats> = emptyList(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = currentTimeToLong()
 ) {
     val completionRate: Float
         get() = if (totalChapters > 0) (readChapters.toFloat() / totalChapters) * 100f else 0f

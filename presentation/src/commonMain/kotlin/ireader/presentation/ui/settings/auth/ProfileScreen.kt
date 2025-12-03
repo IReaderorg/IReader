@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.auth
+﻿package ireader.presentation.ui.settings.auth
 
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
@@ -66,6 +66,7 @@ import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class ProfileScreen  {
     
@@ -959,7 +960,7 @@ private fun StatisticItem(
 }
 
 private fun formatTime(timestamp: Long): String {
-    val now = System.currentTimeMillis()
+    val now = currentTimeToLong()
     val diff = now - timestamp
     
     return when {

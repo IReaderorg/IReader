@@ -1,9 +1,10 @@
-package ireader.domain.usecases.donation
+﻿package ireader.domain.usecases.donation
 
 import ireader.domain.data.repository.ReadingStatisticsRepository
 import ireader.domain.models.donation.DonationTrigger
 import ireader.domain.preferences.prefs.AppPreferences
 import kotlinx.coroutines.flow.first
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Manager for checking donation trigger conditions and determining when to show donation prompts
@@ -106,7 +107,7 @@ class DonationTriggerManager(
      */
     suspend fun shouldShowPrompt(): Boolean {
         val lastPromptTime = appPreferences.lastDonationPromptTime().get()
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         
         if (lastPromptTime == 0L) {
             // Never shown a prompt before
@@ -122,7 +123,7 @@ class DonationTriggerManager(
      * Updates the last prompt time to enforce cooldown
      */
     suspend fun recordPromptShown() {
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         appPreferences.lastDonationPromptTime().set(currentTime)
     }
     
@@ -137,7 +138,7 @@ class DonationTriggerManager(
             return 0
         }
         
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         val daysSinceLastPrompt = (currentTime - lastPromptTime) / MILLIS_PER_DAY
         val daysRemaining = COOLDOWN_DAYS - daysSinceLastPrompt.toInt()
         

@@ -1,4 +1,4 @@
-package ireader.domain.services.tts_service
+﻿package ireader.domain.services.tts_service
 
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -9,6 +9,7 @@ import ireader.core.log.Log
 import ireader.domain.services.tts_service.player.GradioAudioGenerator
 import ireader.domain.services.tts_service.player.GradioAudioPlayback
 import kotlinx.coroutines.*
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Adapter that wraps Gradio TTS API calls and implements GradioAudioGenerator and GradioAudioPlayback
@@ -288,7 +289,7 @@ class GradioTTSEngineAdapter(
     
     private suspend fun tryQueueApi(requestBody: String): ByteArray? {
         val baseUrl = config.spaceUrl.trimEnd('/')
-        val sessionHash = System.currentTimeMillis().toString()
+        val sessionHash = currentTimeToLong().toString()
         val queueBody = requestBody.dropLast(1) + """, "fn_index": 0, "session_hash": "$sessionHash"}"""
         
         for (queuePrefix in listOf("$baseUrl/queue", "$baseUrl/gradio_api/queue")) {

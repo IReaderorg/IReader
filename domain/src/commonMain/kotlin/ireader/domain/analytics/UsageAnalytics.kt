@@ -1,4 +1,4 @@
-package ireader.domain.analytics
+﻿package ireader.domain.analytics
 
 import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Usage analytics for tracking app-wide feature usage
@@ -26,7 +27,7 @@ class UsageAnalytics(
         if (privacyMode == PrivacyMode.STRICT) return
         
         try {
-            currentSessionStart = System.currentTimeMillis()
+            currentSessionStart = currentTimeToLong()
             Log.info { "Analytics: Session started" }
         } catch (e: Exception) {
             Log.error { "Failed to record session start: ${e.message}" }
@@ -41,7 +42,7 @@ class UsageAnalytics(
         
         try {
             val startTime = currentSessionStart ?: return
-            val endTime = System.currentTimeMillis()
+            val endTime = currentTimeToLong()
             val duration = endTime - startTime
             
             sessions.add(
@@ -196,7 +197,7 @@ data class FeatureUsageData(
 ) {
     fun recordUsage(metadata: Map<String, String> = emptyMap()) {
         usageCount++
-        lastUsed = System.currentTimeMillis()
+        lastUsed = currentTimeToLong()
         usageHistory.add(lastUsed)
         
         // Keep only last 1000 usage timestamps to prevent memory issues

@@ -1,4 +1,4 @@
-package ireader.core.http
+﻿package ireader.core.http
 
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -9,6 +9,7 @@ import io.ktor.http.*
 import io.ktor.util.*
 import io.ktor.util.date.*
 import io.ktor.utils.io.*
+import ireader.core.util.currentTimeMillis
 
 /**
  * Configuration for HTTP cache plugin
@@ -94,7 +95,7 @@ val HttpCachePlugin = createClientPlugin("HttpCachePlugin", ::HttpCacheConfig) {
                     contentType = call.response.contentType(),
                     headers = call.response.headers,
                     statusCode = call.response.status,
-                    expiresAt = System.currentTimeMillis() + cacheDuration
+                    expiresAt = currentTimeMillis() + cacheDuration
                 )
                 cache.put(cacheKey, entry)
                 

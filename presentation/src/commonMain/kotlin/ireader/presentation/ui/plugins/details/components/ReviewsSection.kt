@@ -1,4 +1,4 @@
-package ireader.presentation.ui.plugins.details.components
+﻿package ireader.presentation.ui.plugins.details.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,8 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.plugins.details.PluginReview
-import java.text.SimpleDateFormat
-import java.util.*
+import ireader.domain.utils.extensions.formatRelativeTime
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
@@ -215,17 +214,5 @@ fun EmptyReviewsState(modifier: Modifier = Modifier) {
  * Format timestamp to relative time
  */
 private fun formatTimestamp(timestamp: Long): String {
-    val now = System.currentTimeMillis()
-    val diff = now - timestamp
-    
-    return when {
-        diff < 60_000 -> "Just now"
-        diff < 3600_000 -> "${diff / 60_000} minutes ago"
-        diff < 86400_000 -> "${diff / 3600_000} hours ago"
-        diff < 604800_000 -> "${diff / 86400_000} days ago"
-        else -> {
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            dateFormat.format(Date(timestamp))
-        }
-    }
+    return timestamp.formatRelativeTime()
 }

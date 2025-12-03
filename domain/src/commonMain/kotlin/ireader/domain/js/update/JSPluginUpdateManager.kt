@@ -1,10 +1,11 @@
-package ireader.domain.js.update
+﻿package ireader.domain.js.update
 
 import ireader.domain.js.models.PluginUpdate
 import ireader.domain.js.util.JSPluginLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Manages plugin updates including checking, downloading, and installing.
@@ -56,7 +57,7 @@ class JSPluginUpdateManager(
         JSPluginLogger.logInfo("update-manager", "Checking for plugin updates")
         
         val updates = updateChecker.checkForUpdates()
-        lastCheckTime = System.currentTimeMillis()
+        lastCheckTime = currentTimeToLong()
         availableUpdates = updates
         
         if (updates.isNotEmpty()) {

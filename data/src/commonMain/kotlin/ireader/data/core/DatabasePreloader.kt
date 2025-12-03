@@ -1,4 +1,4 @@
-package ireader.data.core
+﻿package ireader.data.core
 
 import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
@@ -8,6 +8,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Preloads critical database data during app startup for faster initial access.
@@ -44,7 +45,7 @@ class DatabasePreloader(
      */
     suspend fun preloadCriticalData() = withContext(Dispatchers.IO) {
         Log.info("Starting critical data preload...", TAG)
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         try {
             // Parallel preload of independent data
@@ -56,7 +57,7 @@ class DatabasePreloader(
             
             jobs.awaitAll()
             
-            val duration = System.currentTimeMillis() - startTime
+            val duration = currentTimeToLong() - startTime
             Log.info("Critical data preload completed in ${duration}ms", TAG)
             
             // Log performance stats

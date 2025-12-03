@@ -1,4 +1,4 @@
-package ireader.presentation.ui.home.library.viewmodel
+﻿package ireader.presentation.ui.home.library.viewmodel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel for the Library screen following Mihon's StateScreenModel pattern.
@@ -504,7 +505,7 @@ class LibraryViewModel(
         val result = markBookAsReadOrNotUseCase.markAsReadWithUndo(selectedIds)
         if (result is MarkResult.Success) {
             _state.update { it.copy(
-                lastUndoState = UndoState(result.previousStates, UndoOperationType.MARK_AS_READ, System.currentTimeMillis())
+                lastUndoState = UndoState(result.previousStates, UndoOperationType.MARK_AS_READ, currentTimeToLong())
             )}
             unselectAll()
         }
@@ -516,7 +517,7 @@ class LibraryViewModel(
         val result = markBookAsReadOrNotUseCase.markAsUnreadWithUndo(selectedIds)
         if (result is MarkResult.Success) {
             _state.update { it.copy(
-                lastUndoState = UndoState(result.previousStates, UndoOperationType.MARK_AS_UNREAD, System.currentTimeMillis())
+                lastUndoState = UndoState(result.previousStates, UndoOperationType.MARK_AS_UNREAD, currentTimeToLong())
             )}
             unselectAll()
         }

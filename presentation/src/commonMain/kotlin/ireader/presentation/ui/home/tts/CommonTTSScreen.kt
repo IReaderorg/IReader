@@ -1,4 +1,4 @@
-package ireader.presentation.ui.home.tts
+﻿package ireader.presentation.ui.home.tts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -129,6 +129,7 @@ import ireader.i18n.resources.voice
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.reader.components.countWords
 import kotlinx.coroutines.delay
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Sentence highlighting data for TTS
@@ -559,7 +560,7 @@ fun TTSContentDisplay(
     LaunchedEffect(paragraphStartTime) {
         if (paragraphStartTime > 0 && paragraphStartTime != lastSignal) {
             currentSentenceIndex = 0
-            localStartTime = System.currentTimeMillis()  // Capture LOCAL time NOW
+            localStartTime = currentTimeToLong()  // Capture LOCAL time NOW
             lastSignal = paragraphStartTime
             dynamicSpeedBoost = 1.0f  // Reset speed boost for new paragraph
         }
@@ -606,7 +607,7 @@ fun TTSContentDisplay(
                     val minDuration = if (words < 10) 400L else 600L
                     val durationMs = ((words.toFloat() / wpm) * 60000).toLong().coerceIn(minDuration, 120000)
                     
-                    val elapsed = System.currentTimeMillis() - localStartTime
+                    val elapsed = currentTimeToLong() - localStartTime
                     var progress = (elapsed.toFloat() / durationMs).coerceIn(0f, 0.999f)
                     
                     // CATCH-UP ACCELERATION: If we're past 70% of estimated time but not past 70% of sentences,

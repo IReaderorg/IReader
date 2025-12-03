@@ -1,4 +1,4 @@
-package ireader.core.http
+﻿package ireader.core.http
 
 import ireader.core.prefs.PreferenceStore
 import okhttp3.Cookie
@@ -6,6 +6,7 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
+import ireader.core.util.currentTimeMillis
 
 
 class PersistentCookieStore(private val preferenceStore: PreferenceStore) {
@@ -85,5 +86,5 @@ class PersistentCookieStore(private val preferenceStore: PreferenceStore) {
         return cookieMap[url].orEmpty().filter { !it.hasExpired() }
     }
 
-    private fun Cookie.hasExpired() = System.currentTimeMillis() >= expiresAt
+    private fun Cookie.hasExpired() = currentTimeMillis() >= expiresAt
 }

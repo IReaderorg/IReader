@@ -1,4 +1,4 @@
-package ireader.domain.usecases.local
+﻿package ireader.domain.usecases.local
 
 import ireader.core.source.LocalSource
 import ireader.core.source.LocalCatalogSource
@@ -6,6 +6,7 @@ import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case to refresh the local library by scanning the local folder
@@ -36,7 +37,7 @@ class RefreshLocalLibrary(
                         description = novelInfo.description,
                         cover = novelInfo.cover,
                         status = novelInfo.status,
-                        lastUpdate = System.currentTimeMillis()
+                        lastUpdate = currentTimeToLong()
                     )
                     bookRepository.upsert(updatedBook)
                     updatedBooks++
@@ -52,7 +53,7 @@ class RefreshLocalLibrary(
                         cover = novelInfo.cover,
                         status = novelInfo.status,
                         favorite = false,
-                        lastUpdate = System.currentTimeMillis()
+                        lastUpdate = currentTimeToLong()
                     )
                     addedBooks++
                     bookRepository.upsert(newBook)

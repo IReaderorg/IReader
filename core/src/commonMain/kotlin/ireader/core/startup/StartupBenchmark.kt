@@ -1,9 +1,10 @@
-package ireader.core.startup
+﻿package ireader.core.startup
 
 import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import ireader.core.util.currentTimeMillis
 
 /**
  * Startup benchmark utility for measuring and tracking app startup performance.
@@ -56,7 +57,7 @@ object StartupBenchmark {
         }
         
         val result = BenchmarkResult(
-            timestamp = System.currentTimeMillis(),
+            timestamp = currentTimeMillis(),
             totalTime = StartupProfiler.getTotalStartupTime(),
             phases = phases,
             type = type
@@ -200,9 +201,9 @@ object StartupBenchmark {
      * Run a quick benchmark of a specific operation.
      */
     fun <T> measure(name: String, block: () -> T): T {
-        val start = System.currentTimeMillis()
+        val start = currentTimeMillis()
         val result = block()
-        val duration = System.currentTimeMillis() - start
+        val duration = currentTimeMillis() - start
         Log.info("[$name] completed in ${duration}ms", TAG)
         return result
     }
@@ -212,9 +213,9 @@ object StartupBenchmark {
      */
     fun measureAsync(name: String, scope: CoroutineScope = CoroutineScope(Dispatchers.IO), block: suspend () -> Unit) {
         scope.launch {
-            val start = System.currentTimeMillis()
+            val start = currentTimeMillis()
             block()
-            val duration = System.currentTimeMillis() - start
+            val duration = currentTimeMillis() - start
             Log.info("[$name] completed in ${duration}ms", TAG)
         }
     }

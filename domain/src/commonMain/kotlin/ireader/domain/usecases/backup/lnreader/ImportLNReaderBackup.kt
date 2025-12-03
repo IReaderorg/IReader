@@ -1,7 +1,10 @@
-package ireader.domain.usecases.backup.lnreader
+﻿package ireader.domain.usecases.backup.lnreader
 
 import ireader.core.db.Transactions
-import ireader.domain.data.repository.*
+import ireader.domain.data.repository.BookCategoryRepository
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.CategoryRepository
+import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.common.Uri
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookCategory
@@ -11,6 +14,7 @@ import ireader.domain.models.lnreader.LNReaderCategory
 import ireader.domain.models.lnreader.LNReaderChapter
 import ireader.domain.models.lnreader.LNReaderNovel
 import ireader.domain.usecases.file.FileSaver
+import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -402,7 +406,7 @@ class ImportLNReaderBackup(
             cover = coverUrl,
             favorite = novel.inLibrary,
             initialized = true,
-            dateAdded = System.currentTimeMillis()
+            dateAdded = currentTimeToLong()
         )
         
         val bookId = bookRepository.upsert(book)
@@ -429,7 +433,7 @@ class ImportLNReaderBackup(
                 read = !chapter.unread && options.importReadProgress,
                 bookmark = chapter.bookmark,
                 dateUpload = parseDate(chapter.releaseTime),
-                dateFetch = System.currentTimeMillis(),
+                dateFetch = currentTimeToLong(),
                 number = chapter.chapterNumber ?: (index + 1).toFloat(),
                 sourceOrder = (chapter.position ?: index).toLong(),
                 lastPageRead = if (options.importReadProgress) {
@@ -488,7 +492,7 @@ class ImportLNReaderBackup(
                     read = !backupChapter.unread && options.importReadProgress,
                     bookmark = backupChapter.bookmark,
                     dateUpload = parseDate(backupChapter.releaseTime),
-                    dateFetch = System.currentTimeMillis(),
+                    dateFetch = currentTimeToLong(),
                     number = backupChapter.chapterNumber ?: (index + 1).toFloat(),
                     sourceOrder = (backupChapter.position ?: index).toLong(),
                     lastPageRead = if (options.importReadProgress) {

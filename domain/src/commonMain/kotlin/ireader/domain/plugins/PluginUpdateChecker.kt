@@ -1,4 +1,4 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
 
 import ireader.core.io.VirtualFile
 import ireader.core.util.createICoroutineScope
@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Service for checking and managing plugin updates
@@ -162,7 +163,7 @@ class PluginUpdateChecker(
                     fromVersionCode = currentPlugin.manifest.versionCode,
                     toVersion = "", // Will be filled after loading new manifest
                     toVersionCode = 0,
-                    updateDate = System.currentTimeMillis(),
+                    updateDate = currentTimeToLong(),
                     success = false // Will be updated after successful install
                 )
             )

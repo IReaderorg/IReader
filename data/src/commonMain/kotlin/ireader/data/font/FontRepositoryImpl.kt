@@ -1,4 +1,4 @@
-package ireader.data.font
+﻿package ireader.data.font
 
 import data.CustomFonts
 import ireader.core.db.Transactions
@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import java.util.UUID
+import ireader.domain.utils.extensions.currentTimeToLong
 
 val customFontMapper: (
     id: String,
@@ -45,7 +46,7 @@ class FontRepositoryImpl(
                         name = fontName,
                         filePath = "",
                         isSystemFont = true,
-                        dateAdded = System.currentTimeMillis()
+                        dateAdded = currentTimeToLong()
                     )
                     
                     // Save to database
@@ -94,7 +95,7 @@ class FontRepositoryImpl(
                     name = fontName,
                     filePath = destPath.toString(),
                     isSystemFont = false,
-                    dateAdded = System.currentTimeMillis()
+                    dateAdded = currentTimeToLong()
                 )
                 
                 // Save to database
@@ -202,7 +203,7 @@ class FontRepositoryImpl(
                     name = fontName,
                     filePath = destPath.toString(),
                     isSystemFont = false,
-                    dateAdded = System.currentTimeMillis()
+                    dateAdded = currentTimeToLong()
                 )
                 
                 // Save to database

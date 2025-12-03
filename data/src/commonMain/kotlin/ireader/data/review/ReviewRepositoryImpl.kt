@@ -1,4 +1,4 @@
-package ireader.data.review
+﻿package ireader.data.review
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -14,6 +14,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import kotlin.time.ExperimentalTime
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class ReviewRepositoryImpl(
     private val handler: DatabaseHandler,
@@ -68,14 +69,14 @@ class ReviewRepositoryImpl(
     
     @OptIn(ExperimentalTime::class)
     private fun parseTimestamp(timestamp: String?): Long {
-        if (timestamp == null) return System.currentTimeMillis()
+        if (timestamp == null) return currentTimeToLong()
         return try {
             // Try to parse ISO 8601 timestamp to milliseconds
             // Format: 2024-01-15T10:30:00Z or 2024-01-15T10:30:00.123Z
             kotlinx.datetime.Instant.parse(timestamp).toEpochMilliseconds()
         } catch (e: Exception) {
             // Fallback: try to parse as long
-            timestamp.toLongOrNull() ?: System.currentTimeMillis()
+            timestamp.toLongOrNull() ?: currentTimeToLong()
         }
     }
     

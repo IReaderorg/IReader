@@ -1,10 +1,11 @@
-package ireader.domain.services
+﻿package ireader.domain.services
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Manages reading time tracking and triggers rest reminders
@@ -29,7 +30,7 @@ class ReadingTimerManager(
             return // Already running
         }
         
-        startTime = System.currentTimeMillis()
+        startTime = currentTimeToLong()
         launchTimerJob()
     }
     
@@ -38,7 +39,7 @@ class ReadingTimerManager(
      */
     fun pauseTimer() {
         if (timerJob?.isActive == true) {
-            val currentTime = System.currentTimeMillis()
+            val currentTime = currentTimeToLong()
             accumulatedTime += (currentTime - startTime)
             timerJob?.cancel()
             timerJob = null
@@ -50,7 +51,7 @@ class ReadingTimerManager(
      */
     fun resumeTimer() {
         if (timerJob?.isActive != true && intervalMinutes > 0) {
-            startTime = System.currentTimeMillis()
+            startTime = currentTimeToLong()
             launchTimerJob()
         }
     }
@@ -69,7 +70,7 @@ class ReadingTimerManager(
      */
     fun resetTimer() {
         accumulatedTime = 0
-        startTime = System.currentTimeMillis()
+        startTime = currentTimeToLong()
     }
     
     /**
@@ -79,7 +80,7 @@ class ReadingTimerManager(
         if (timerJob?.isActive != true) {
             return (accumulatedTime / 60000).toInt()
         }
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         return ((currentTime - startTime + accumulatedTime) / 60000).toInt()
     }
     
@@ -90,7 +91,7 @@ class ReadingTimerManager(
         if (timerJob?.isActive != true) {
             return 0L
         }
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         val elapsedMillis = currentTime - startTime + accumulatedTime
         val targetMillis = intervalMinutes * 60000L
         return (targetMillis - elapsedMillis).coerceAtLeast(0L)
@@ -108,7 +109,7 @@ class ReadingTimerManager(
      */
     fun snoozeTimer(minutes: Int) {
         resetTimer()
-        startTime = System.currentTimeMillis()
+        startTime = currentTimeToLong()
         // Adjust accumulated time to effectively snooze
         accumulatedTime = -(minutes * 60000L)
         // Resume the timer if it was running
@@ -126,14 +127,14 @@ class ReadingTimerManager(
             while (isActive) {
                 delay(1000) // Check every second
                 
-                val currentTime = System.currentTimeMillis()
+                val currentTime = currentTimeToLong()
                 val elapsedMinutes = ((currentTime - startTime + accumulatedTime) / 60000).toInt()
                 
                 if (elapsedMinutes >= intervalMinutes) {
                     onIntervalReached()
                     // Reset timer after reminder
                     resetTimer()
-                    startTime = System.currentTimeMillis()
+                    startTime = currentTimeToLong()
                 }
             }
         }

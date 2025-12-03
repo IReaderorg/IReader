@@ -1,4 +1,4 @@
-package ireader.data.plugin
+﻿package ireader.data.plugin
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.PluginRepository
@@ -7,6 +7,7 @@ import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginManifest
 import ireader.domain.plugins.PluginPermission
 import ireader.domain.plugins.PluginStatus
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of PluginDatabase interface
@@ -29,14 +30,14 @@ class PluginDatabaseImpl(
             existing.copy(
                 manifest = manifest,
                 status = status,
-                lastUpdate = System.currentTimeMillis()
+                lastUpdate = currentTimeToLong()
             )
         } else {
             PluginInfo(
                 id = manifest.id,
                 manifest = manifest,
                 status = status,
-                installDate = System.currentTimeMillis(),
+                installDate = currentTimeToLong(),
                 lastUpdate = null,
                 isPurchased = false,
                 rating = null,
@@ -63,7 +64,7 @@ class PluginDatabaseImpl(
         val plugin = repository.getPlugin(pluginId) ?: return
         val updated = plugin.copy(
             status = status,
-            lastUpdate = System.currentTimeMillis()
+            lastUpdate = currentTimeToLong()
         )
         repository.updatePlugin(updated)
     }

@@ -1,4 +1,4 @@
-package ireader.domain.js.loader
+﻿package ireader.domain.js.loader
 
 import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStore
@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Manages stub/placeholder data for JS plugins to enable fast startup.
@@ -33,7 +34,7 @@ class JSPluginStubManager(
             stubs[metadata.id] = PluginStubData(
                 metadata = metadata,
                 fileName = fileName,
-                lastLoaded = System.currentTimeMillis()
+                lastLoaded = currentTimeToLong()
             )
             
             val serialized = json.encodeToString(stubs)

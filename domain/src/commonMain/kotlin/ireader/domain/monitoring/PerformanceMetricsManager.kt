@@ -1,6 +1,7 @@
-package ireader.domain.monitoring
+﻿package ireader.domain.monitoring
 
 import ireader.domain.plugins.PluginPerformanceInfo
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Manager for tracking and aggregating plugin performance metrics
@@ -92,12 +93,12 @@ private class PluginPerformanceMetrics(
     private var loadTime = 0L
 
     fun startOperation(operation: String) {
-        operationStarts[operation] = System.currentTimeMillis()
+        operationStarts[operation] = currentTimeToLong()
     }
 
     fun endOperation(operation: String, success: Boolean) {
         val startTime = operationStarts.remove(operation) ?: return
-        val duration = System.currentTimeMillis() - startTime
+        val duration = currentTimeToLong() - startTime
 
         operationTimes.add(duration)
         totalOperations++
@@ -140,7 +141,7 @@ private class PluginPerformanceMetrics(
             avgExecutionTime = avgTime,
             maxExecutionTime = maxTime,
             errorRate = errorRate,
-            lastUpdated = System.currentTimeMillis()
+            lastUpdated = currentTimeToLong()
         )
     }
 }

@@ -3,17 +3,17 @@ package ireader.data.backup
 import ireader.domain.models.backup.BackupData
 import ireader.domain.models.backup.BackupInfo
 import ireader.domain.services.backup.GoogleDriveBackupService
+import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.domain.utils.extensions.formatForFilename
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
+import kotlinx.datetime.toInstant
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import kotlin.time.ExperimentalTime
 
 /**
  * Implementation of Google Drive backup service
@@ -93,7 +93,7 @@ class GoogleDriveBackupServiceImpl(
             val compressedData = compressData(jsonString.toByteArray())
             
             // Generate filename with timestamp
-            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val timestamp = currentTimeToLong().formatForFilename()
             val fileName = "ireader_backup_$timestamp.json.gz"
             
             // Upload to Google Drive appDataFolder
@@ -141,8 +141,8 @@ class GoogleDriveBackupServiceImpl(
                         .removePrefix("ireader_backup_")
                         .removeSuffix(".json.gz")
                     
-                    val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-                    val timestamp = dateFormat.parse(timestampStr)?.time ?: 0L
+                    // Parse timestamp from filename format: yyyyMMdd_HHmmss
+                    val timestamp = parseFilenameTimestamp(timestampStr)
                     
                     BackupInfo(
                         id = driveFile.id,
@@ -239,5 +239,28 @@ class GoogleDriveBackupServiceImpl(
             gzip.copyTo(outputStream)
         }
         return outputStream.toByteArray()
+    }
+    
+    /**
+     * Parse timestamp from filename format: yyyyMMdd_HHmmss
+     */
+    @OptIn(ExperimentalTime::class)
+    private fun parseFilenameTimestamp(timestampStr: String): Long {
+        return try {
+            // Format: 20251203_143025
+            if (timestampStr.length != 15 || timestampStr[8] != '_') return 0L
+            
+            val year = timestampStr.substring(0, 4).toIntOrNull() ?: return 0L
+            val month = timestampStr.substring(4, 6).toIntOrNull() ?: return 0L
+            val day = timestampStr.substring(6, 8).toIntOrNull() ?: return 0L
+            val hour = timestampStr.substring(9, 11).toIntOrNull() ?: return 0L
+            val minute = timestampStr.substring(11, 13).toIntOrNull() ?: return 0L
+            val second = timestampStr.substring(13, 15).toIntOrNull() ?: return 0L
+            
+            val dateTime = kotlinx.datetime.LocalDateTime(year, month, day, hour, minute, second)
+            dateTime.toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        } catch (e: Exception) {
+            0L
+        }
     }
 }

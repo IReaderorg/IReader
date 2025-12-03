@@ -1,9 +1,10 @@
-package ireader.domain.utils
+﻿package ireader.domain.utils
 
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
 import java.util.concurrent.ConcurrentHashMap
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Thread-safe in-memory cookie jar with automatic cleanup to prevent unbounded growth.
@@ -40,7 +41,7 @@ class MemoryCookieJar : CookieJar {
     }
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val validCookies = mutableListOf<Cookie>()
         val keysToRemove = mutableListOf<String>()
 
@@ -59,7 +60,7 @@ class MemoryCookieJar : CookieJar {
     }
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         
         cookies.forEach { cookie ->
             val wrapped = WrappedCookie.wrap(cookie, now)
@@ -89,7 +90,7 @@ class MemoryCookieJar : CookieJar {
      * Can be called periodically to clean up memory.
      */
     fun cleanup() {
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val keysToRemove = cache.entries
             .filter { it.value.isExpired(now) || it.value.isStale(now) }
             .map { it.key }
@@ -132,7 +133,7 @@ class MemoryCookieJar : CookieJar {
      * Enforce maximum cookie limit by removing expired, stale, and oldest cookies.
      */
     private fun enforceMaxCookies() {
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         
         // First pass: remove expired and stale cookies
         val keysToRemove = cache.entries
@@ -170,7 +171,7 @@ class WrappedCookie private constructor(
     /**
      * Check if cookie has expired based on its expiresAt value.
      */
-    fun isExpired(now: Long = System.currentTimeMillis()): Boolean {
+    fun isExpired(now: Long = currentTimeToLong()): Boolean {
         return cookie.expiresAt < now
     }
     
@@ -178,7 +179,7 @@ class WrappedCookie private constructor(
      * Check if cookie is stale (session cookie that's been around too long).
      * Session cookies without explicit expiration are considered stale after 24 hours.
      */
-    fun isStale(now: Long = System.currentTimeMillis()): Boolean {
+    fun isStale(now: Long = currentTimeToLong()): Boolean {
         // Cookies with explicit future expiration are not stale
         if (cookie.expiresAt > now + 1000) return false
         
@@ -216,7 +217,7 @@ class WrappedCookie private constructor(
         /**
          * Create a wrapped cookie with the current timestamp.
          */
-        fun wrap(cookie: Cookie, createdAt: Long = System.currentTimeMillis()) = 
+        fun wrap(cookie: Cookie, createdAt: Long = currentTimeToLong()) = 
             WrappedCookie(cookie, createdAt)
     }
 }

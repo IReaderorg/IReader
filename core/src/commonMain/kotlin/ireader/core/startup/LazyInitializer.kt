@@ -1,4 +1,4 @@
-package ireader.core.startup
+﻿package ireader.core.startup
 
 import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
@@ -7,6 +7,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.core.util.currentTimeMillis
 
 /**
  * Manages lazy initialization of non-critical components.
@@ -63,9 +64,9 @@ object LazyInitializer {
             
             sortedTasks.forEach { task ->
                 try {
-                    val start = System.currentTimeMillis()
+                    val start = currentTimeMillis()
                     task.task()
-                    val duration = System.currentTimeMillis() - start
+                    val duration = currentTimeMillis() - start
                     Log.info("Lazy init '${task.name}' completed in ${duration}ms", TAG)
                 } catch (e: Exception) {
                     Log.error("Lazy init '${task.name}' failed: ${e.message}", TAG)

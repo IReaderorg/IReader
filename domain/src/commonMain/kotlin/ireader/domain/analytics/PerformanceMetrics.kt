@@ -1,4 +1,6 @@
-package ireader.domain.analytics
+﻿package ireader.domain.analytics
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Performance metrics data class
@@ -7,7 +9,7 @@ package ireader.domain.analytics
 data class PerformanceMetrics(
     val metricType: MetricType,
     val value: Double,
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = currentTimeToLong(),
     val context: Map<String, String> = emptyMap()
 )
 

@@ -1,4 +1,4 @@
-package ireader.domain.usecases.download
+﻿package ireader.domain.usecases.download
 
 import ireader.domain.data.repository.DownloadRepository
 import ireader.domain.data.repository.NotificationRepository
@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Enhanced download manager following Mihon's DownloadManager pattern
@@ -289,7 +290,7 @@ class DownloadCacheUseCase(
      * Clean up old cache entries
      */
     suspend fun cleanupOldEntries(maxAgeMs: Long = 30L * 24L * 60L * 60L * 1000L) { // 30 days
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         val cacheEntries = downloadRepository.getDownloadCacheEntries()
         
         cacheEntries.forEach { entry ->

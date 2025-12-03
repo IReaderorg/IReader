@@ -1,9 +1,10 @@
-package ireader.domain.analytics
+﻿package ireader.domain.analytics
 
 import ireader.core.log.Log
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Performance reporter for generating reports and insights
@@ -23,7 +24,7 @@ class PerformanceReporter(
      */
     fun generateReport(): PerformanceReport {
         return try {
-            val now = System.currentTimeMillis()
+            val now = currentTimeToLong()
             val oneDayAgo = now - (24 * 60 * 60 * 1000)
             val oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000)
             
@@ -72,7 +73,7 @@ class PerformanceReporter(
         } catch (e: Exception) {
             Log.error { "Failed to generate performance report: ${e.message}" }
             PerformanceReport(
-                generatedAt = System.currentTimeMillis(),
+                generatedAt = currentTimeToLong(),
                 performanceMetrics = PerformanceMetricsReport(),
                 usageMetrics = UsageMetricsReport(
                     sessionStatistics = SessionStatistics(0, 0L, 0L, 0.0),
@@ -125,7 +126,7 @@ class PerformanceReporter(
                 
                 // Check for trend
                 val recentStats = performanceMonitor.getStatistics(MetricType.NETWORK_LATENCY, oneWeekAgo, oneDayAgo)
-                val currentStats = performanceMonitor.getStatistics(MetricType.NETWORK_LATENCY, oneDayAgo, System.currentTimeMillis())
+                val currentStats = performanceMonitor.getStatistics(MetricType.NETWORK_LATENCY, oneDayAgo, currentTimeToLong())
                 
                 if (recentStats != null && currentStats != null) {
                     val change = ((currentStats.average - recentStats.average) / recentStats.average) * 100

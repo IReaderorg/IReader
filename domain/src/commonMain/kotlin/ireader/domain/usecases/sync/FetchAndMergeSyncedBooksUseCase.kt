@@ -1,4 +1,4 @@
-package ireader.domain.usecases.sync
+﻿package ireader.domain.usecases.sync
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogStore
@@ -46,7 +46,7 @@ class FetchAndMergeSyncedBooksUseCase(
                             // Book exists but not in library, add it back
                             bookRepository.updateBook(existingBook.copy(
                                 favorite = true,
-                                dateAdded = System.currentTimeMillis()
+                                dateAdded = currentTimeToLong()
                             ))
                             addedCount++
                             Log.info("Restored book to library: ${existingBook.title}")
@@ -79,7 +79,7 @@ class FetchAndMergeSyncedBooksUseCase(
                                     lastUpdated = currentTimeToLong()
                                 ).copy(
                                     favorite = true,
-                                    dateAdded = System.currentTimeMillis(),
+                                    dateAdded = currentTimeToLong(),
                                     initialized = true
                                 )
                                 

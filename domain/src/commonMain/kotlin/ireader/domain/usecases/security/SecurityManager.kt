@@ -1,9 +1,10 @@
-package ireader.domain.usecases.security
+﻿package ireader.domain.usecases.security
 
 import ireader.domain.preferences.prefs.SecurityPreferences
 import ireader.domain.preferences.prefs.SecureScreenMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Security manager for app lock and secure screen features
@@ -32,7 +33,7 @@ class SecurityManager(
         val lastClosed = securityPreferences.lastAppClosed().get()
         if (lastClosed == 0L) return false
         
-        val elapsedMinutes = (System.currentTimeMillis() - lastClosed) / (1000 * 60)
+        val elapsedMinutes = (currentTimeToLong() - lastClosed) / (1000 * 60)
         return elapsedMinutes >= lockAfter
     }
 
@@ -41,7 +42,7 @@ class SecurityManager(
      */
     suspend fun recordAppClosed() {
         if (isAppLockEnabled()) {
-            securityPreferences.lastAppClosed().set(System.currentTimeMillis())
+            securityPreferences.lastAppClosed().set(currentTimeToLong())
         }
     }
 

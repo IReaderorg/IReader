@@ -1,10 +1,11 @@
-package ireader.data.chapterreport
+﻿package ireader.data.chapterreport
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.ChapterReportRepository
 import ireader.domain.models.entities.ChapterReport
 import ireader.domain.models.entities.IssueCategory
 import kotlinx.coroutines.flow.Flow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class ChapterReportRepositoryImpl(
     private val handler: DatabaseHandler
@@ -46,7 +47,7 @@ class ChapterReportRepositoryImpl(
                 bookId = bookId,
                 issueCategory = issueCategory.name,
                 description = description,
-                timestamp = System.currentTimeMillis(),
+                timestamp = currentTimeToLong(),
                 resolved = false
             )
         }

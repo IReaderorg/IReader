@@ -2,7 +2,7 @@ package ireader.domain.usecases.book
 
 import ireader.core.log.IReaderLog
 import ireader.domain.models.updates.BookUpdate
-import java.util.Calendar
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case for adding books to the library following Mihon's pattern.
@@ -19,7 +19,7 @@ class AddToLibrary(
             val update = BookUpdate(
                 id = bookId,
                 favorite = true,
-                dateAdded = Calendar.getInstance().timeInMillis,
+                dateAdded = currentTimeToLong(),
             )
             
             val result = updateBook.await(update)
@@ -40,7 +40,7 @@ class AddToLibrary(
      */
     suspend fun awaitAll(bookIds: List<Long>): Boolean {
         return try {
-            val currentTime = Calendar.getInstance().timeInMillis
+            val currentTime = currentTimeToLong()
             val updates = bookIds.map { bookId ->
                 BookUpdate(
                     id = bookId,

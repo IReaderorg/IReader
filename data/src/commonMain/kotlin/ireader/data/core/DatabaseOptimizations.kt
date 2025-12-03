@@ -1,4 +1,4 @@
-package ireader.data.core
+﻿package ireader.data.core
 
 import app.cash.sqldelight.Query
 import ir.kazemcodes.infinityreader.Database
@@ -17,6 +17,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Database performance optimizations providing:
@@ -67,11 +68,11 @@ class DatabaseOptimizations(
         
         // Cache miss - execute query
         performanceStats.recordCacheMiss(cacheKey)
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         val result = handler.await(inTransaction, block)
         
-        val duration = System.currentTimeMillis() - startTime
+        val duration = currentTimeToLong() - startTime
         performanceStats.recordQuery(cacheKey, duration)
         
         if (duration > 100) {
@@ -99,11 +100,11 @@ class DatabaseOptimizations(
         }
         
         performanceStats.recordCacheMiss(cacheKey)
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         val result = handler.awaitList(inTransaction, block)
         
-        val duration = System.currentTimeMillis() - startTime
+        val duration = currentTimeToLong() - startTime
         performanceStats.recordQuery(cacheKey, duration)
         
         queryCache.put(cacheKey, result, ttl)
@@ -126,7 +127,7 @@ class DatabaseOptimizations(
             return BatchResult(emptyList(), 0, emptyList())
         }
         
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         val results = mutableListOf<R>()
         val errors = mutableListOf<Pair<Int, Throwable>>()
         var successCount = 0
@@ -143,7 +144,7 @@ class DatabaseOptimizations(
             }
         }
         
-        val duration = System.currentTimeMillis() - startTime
+        val duration = currentTimeToLong() - startTime
         Log.info("Batch '$operationName': $successCount/${items.size} succeeded in ${duration}ms", TAG)
         performanceStats.recordQuery("batch_$operationName", duration)
         
@@ -165,7 +166,7 @@ class DatabaseOptimizations(
             return BatchResult(emptyList(), 0, emptyList())
         }
         
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         val allResults = mutableListOf<R>()
         val allErrors = mutableListOf<Pair<Int, Throwable>>()
         var totalSuccess = 0
@@ -182,7 +183,7 @@ class DatabaseOptimizations(
             onProgress?.invoke(processedCount, items.size)
         }
         
-        val duration = System.currentTimeMillis() - startTime
+        val duration = currentTimeToLong() - startTime
         Log.info("Chunked batch '$operationName': $totalSuccess/${items.size} in ${duration}ms", TAG)
         
         return BatchResult(allResults, totalSuccess, allErrors)
@@ -299,11 +300,11 @@ class DatabaseOptimizations(
      */
     suspend fun preloadCriticalData() = withContext(Dispatchers.IO) {
         Log.info("Starting critical data preload...", TAG)
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         try {
             // Preload is handled by DatabasePreloader which has access to mappers
-            val duration = System.currentTimeMillis() - startTime
+            val duration = currentTimeToLong() - startTime
             Log.info("Critical data preload completed in ${duration}ms", TAG)
         } catch (e: Exception) {
             Log.error("Critical data preload failed: ${e.message}", TAG)
@@ -353,7 +354,7 @@ private class QueryCache {
         @Suppress("UNCHECKED_CAST")
         val entry = cache[key] as? CacheEntry<T> ?: return null
         
-        if (System.currentTimeMillis() > entry.expiresAt) {
+        if (currentTimeToLong() > entry.expiresAt) {
             cache.remove(key)
             return null
         }
@@ -364,7 +365,7 @@ private class QueryCache {
     suspend fun <T> put(key: String, value: T, ttl: Long) = mutex.withLock {
         cache[key] = CacheEntry(
             value = value,
-            expiresAt = System.currentTimeMillis() + ttl
+            expiresAt = currentTimeToLong() + ttl
         )
         
         // Cleanup expired entries periodically (every 100 puts)
@@ -383,7 +384,7 @@ private class QueryCache {
     }
     
     private fun cleanupExpired() {
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val expiredKeys = cache.entries
             .filter { it.value.expiresAt < now }
             .map { it.key }

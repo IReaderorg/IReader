@@ -1,7 +1,8 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Thread-safe registry for managing loaded plugins
@@ -41,7 +42,7 @@ class PluginRegistry(
                     id = plugin.manifest.id,
                     manifest = plugin.manifest,
                     status = PluginStatus.DISABLED,
-                    installDate = System.currentTimeMillis(),
+                    installDate = currentTimeToLong(),
                     lastUpdate = null,
                     isPurchased = false,
                     rating = null,

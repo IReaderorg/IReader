@@ -1,4 +1,4 @@
-package ireader.domain.services.tts_service
+﻿package ireader.domain.services.tts_service
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -20,6 +20,7 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Unified service for managing Piper TTS voices.
@@ -102,7 +103,7 @@ class PiperVoiceService(
         return mutex.withLock {
             try {
                 val count = repository.count()
-                val now = System.currentTimeMillis()
+                val now = currentTimeToLong()
                 
                 // Fetch if empty or cache expired
                 if (count == 0L || (now - lastFetchTime) > CACHE_DURATION_MS) {
@@ -126,7 +127,7 @@ class PiperVoiceService(
             
             try {
                 val count = fetchAndStoreVoices()
-                lastFetchTime = System.currentTimeMillis()
+                lastFetchTime = currentTimeToLong()
                 Result.success(count)
             } catch (e: Exception) {
                 Log.error { "[PiperVoiceService] Refresh failed: ${e.message}" }
@@ -187,7 +188,7 @@ class PiperVoiceService(
      */
     private fun parseVoicesJson(jsonText: String): List<PiperVoice> {
         val voices = mutableListOf<PiperVoice>()
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         
         try {
             val rootObject = json.parseToJsonElement(jsonText).jsonObject

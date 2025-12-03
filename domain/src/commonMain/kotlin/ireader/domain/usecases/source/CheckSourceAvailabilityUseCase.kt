@@ -1,4 +1,4 @@
-package ireader.domain.usecases.source
+﻿package ireader.domain.usecases.source
 
 import ireader.core.log.Log
 import ireader.core.source.Source
@@ -8,6 +8,7 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.data.repository.SourceComparisonRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.SourceComparison
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case to check if better sources are available for a book
@@ -34,7 +35,7 @@ class CheckSourceAvailabilityUseCase(
             val cached = sourceComparisonRepository.getSourceComparisonByBookId(bookId)
             if (cached != null && !isCacheExpired(cached.cachedAt)) {
                 // Check if dismissal period is still active
-                if (cached.dismissedUntil != null && System.currentTimeMillis() < cached.dismissedUntil) {
+                if (cached.dismissedUntil != null && currentTimeToLong() < cached.dismissedUntil) {
                     return Result.success(null) // Don't show banner during dismissal period
                 }
                 return Result.success(cached)
@@ -98,7 +99,7 @@ class CheckSourceAvailabilityUseCase(
                 currentSourceId = book.sourceId,
                 betterSourceId = betterSourceId,
                 chapterDifference = maxChapterDifference,
-                cachedAt = System.currentTimeMillis(),
+                cachedAt = currentTimeToLong(),
                 dismissedUntil = null
             )
             
@@ -112,7 +113,7 @@ class CheckSourceAvailabilityUseCase(
     }
     
     private fun isCacheExpired(cachedAt: Long): Boolean {
-        val hoursSinceCached = (System.currentTimeMillis() - cachedAt) / (1000 * 60 * 60)
+        val hoursSinceCached = (currentTimeToLong() - cachedAt) / (1000 * 60 * 60)
         return hoursSinceCached >= CACHE_TTL_HOURS
     }
 }

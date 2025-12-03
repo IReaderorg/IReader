@@ -1,4 +1,4 @@
-package ireader.presentation.ui.plugins.details
+﻿package ireader.presentation.ui.plugins.details
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.File
 import ireader.i18n.resources.Res
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel for Plugin Details screen
@@ -371,7 +372,7 @@ class PluginDetailsViewModel(
                 val userName = currentUser?.username ?: currentUser?.email ?: "Anonymous User"
                 
                 val reviewId = "${pluginId}_${userId}"
-                val timestamp = System.currentTimeMillis()
+                val timestamp = currentTimeToLong()
                 
                 // Save review to repository
                 val result = pluginRepository.insertReview(

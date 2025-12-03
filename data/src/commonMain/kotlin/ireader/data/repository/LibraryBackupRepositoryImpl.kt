@@ -1,4 +1,4 @@
-package ireader.data.repository
+﻿package ireader.data.repository
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.*
@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of LibraryBackupRepository
@@ -59,8 +60,8 @@ class LibraryBackupRepositoryImpl(
             // Record in history
             backupHistory.add(
                 BackupRecord(
-                    id = "backup_${System.currentTimeMillis()}",
-                    timestamp = System.currentTimeMillis(),
+                    id = "backup_${currentTimeToLong()}",
+                    timestamp = currentTimeToLong(),
                     backupType = backupType,
                     size = 0L, // Calculate actual size
                     location = uri.toString(),
@@ -321,7 +322,7 @@ class LibraryBackupRepositoryImpl(
     private suspend fun createFullBackupData(metadata: BackupMetadata): LibraryBackup {
         return LibraryBackup(
             version = LibraryBackup.CURRENT_VERSION,
-            timestamp = System.currentTimeMillis(),
+            timestamp = currentTimeToLong(),
             books = emptyList(), // Load from database
             categories = emptyList(), // Load from database
             preferences = BackupPreferences(),
@@ -333,7 +334,7 @@ class LibraryBackupRepositoryImpl(
     private suspend fun createLibraryBackupData(metadata: BackupMetadata): LibraryBackup {
         return LibraryBackup(
             version = LibraryBackup.CURRENT_VERSION,
-            timestamp = System.currentTimeMillis(),
+            timestamp = currentTimeToLong(),
             books = emptyList(), // Load from database
             categories = emptyList(), // Load from database
             preferences = null,
@@ -345,7 +346,7 @@ class LibraryBackupRepositoryImpl(
     private suspend fun createSettingsBackupData(metadata: BackupMetadata): LibraryBackup {
         return LibraryBackup(
             version = LibraryBackup.CURRENT_VERSION,
-            timestamp = System.currentTimeMillis(),
+            timestamp = currentTimeToLong(),
             books = emptyList(),
             categories = emptyList(),
             preferences = BackupPreferences(),
@@ -357,7 +358,7 @@ class LibraryBackupRepositoryImpl(
     private suspend fun createIncrementalBackupData(lastBackupTimestamp: Long, metadata: BackupMetadata): LibraryBackup {
         return LibraryBackup(
             version = LibraryBackup.CURRENT_VERSION,
-            timestamp = System.currentTimeMillis(),
+            timestamp = currentTimeToLong(),
             books = emptyList(), // Load only changed books
             categories = emptyList(), // Load only changed categories
             preferences = null,
@@ -376,7 +377,7 @@ class LibraryBackupRepositoryImpl(
         // This would use platform-specific file I/O
         return LibraryBackup(
             version = LibraryBackup.CURRENT_VERSION,
-            timestamp = System.currentTimeMillis(),
+            timestamp = currentTimeToLong(),
             books = emptyList(),
             categories = emptyList(),
             preferences = null,

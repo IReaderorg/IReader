@@ -41,6 +41,10 @@ object NavigationRoutes {
     const val readingBuddy = "readingBuddy"
     const val adminQuoteVerification = "adminQuoteVerification"
     const val communityHub = "communityHub"
+    const val characterArtGallery = "characterArtGallery"
+    const val characterArtUpload = "characterArtUpload"
+    const val characterArtDetail = "characterArtDetail"
+    const val adminCharacterArtVerification = "adminCharacterArtVerification"
     
     // Routes with parameters
     fun bookDetail(bookId: Long) = "bookDetail/$bookId"

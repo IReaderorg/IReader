@@ -1,4 +1,4 @@
-package ireader.data.repository
+﻿package ireader.data.repository
 
 import ireader.core.log.Log
 import ireader.data.core.OptimizedDatabaseHandler
@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Duration.Companion.minutes
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Cached wrapper for BookRepository that provides:
@@ -45,7 +46,7 @@ class CachedBookRepository(
     // Cached methods
     override suspend fun getFavorites(): List<Book> = cacheMutex.withLock {
         val cached = favoritesCache.value
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         
         if (cached != null && (now - cached.timestamp) < cacheTimeout) {
             Log.debug("Cache hit: getFavorites", "CachedBookRepository")
@@ -65,7 +66,7 @@ class CachedBookRepository(
     
     override suspend fun getLibraryBooks(): List<LibraryBook> = cacheMutex.withLock {
         val cached = libraryCache.value
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         
         if (cached != null && (now - cached.timestamp) < cacheTimeout) {
             Log.debug("Cache hit: getLibraryBooks", "CachedBookRepository")

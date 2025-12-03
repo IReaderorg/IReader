@@ -1,4 +1,6 @@
-package ireader.domain.services.tts_service
+﻿package ireader.domain.services.tts_service
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Predefined configurations for popular Gradio TTS spaces.
@@ -175,7 +177,7 @@ object GradioTTSPresets {
      * Create a blank custom config template
      */
     fun createCustomTemplate(
-        id: String = "custom_${System.currentTimeMillis()}",
+        id: String = "custom_${currentTimeToLong()}",
         name: String = "Custom TTS"
     ) = GradioTTSConfig(
         id = id,

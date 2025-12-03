@@ -1,6 +1,7 @@
-package ireader.domain.analytics
+﻿package ireader.domain.analytics
 
 import ireader.core.log.Log
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Database analytics tracker for monitoring query performance
@@ -16,7 +17,7 @@ class DatabaseAnalyticsTracker(
         return DatabaseQueryTracker(
             queryType = queryType,
             tableName = tableName,
-            startTime = System.currentTimeMillis(),
+            startTime = currentTimeToLong(),
             analyticsManager = analyticsManager
         )
     }
@@ -74,7 +75,7 @@ class DatabaseQueryTracker(
      */
     fun complete(success: Boolean = true, rowCount: Int? = null) {
         try {
-            val duration = System.currentTimeMillis() - startTime
+            val duration = currentTimeToLong() - startTime
             
             val context = buildMap {
                 put("query_type", queryType)
@@ -100,7 +101,7 @@ class DatabaseQueryTracker(
      */
     fun fail(error: Throwable) {
         try {
-            val duration = System.currentTimeMillis() - startTime
+            val duration = currentTimeToLong() - startTime
             
             val context = buildMap {
                 put("query_type", queryType)

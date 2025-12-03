@@ -1,4 +1,4 @@
-package ireader.data.services
+﻿package ireader.data.services
 
 import ireader.core.source.HttpSource
 import ireader.core.source.Source
@@ -11,6 +11,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.seconds
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of SourceHealthChecker that performs actual health checks on sources
@@ -70,7 +71,7 @@ class SourceHealthCheckerImpl(
      * Perform the actual health check on a source
      */
     private suspend fun performHealthCheck(sourceId: Long): SourceHealth {
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         return try {
             val catalog = catalogStore.get(sourceId)
@@ -79,7 +80,7 @@ class SourceHealthCheckerImpl(
                 return SourceHealth(
                     sourceId = sourceId,
                     status = SourceStatus.Error("Source not found"),
-                    lastChecked = System.currentTimeMillis(),
+                    lastChecked = currentTimeToLong(),
                     responseTime = null
                 )
             }
@@ -91,21 +92,21 @@ class SourceHealthCheckerImpl(
                 checkSourceHealth(source)
             }
             
-            val responseTime = System.currentTimeMillis() - startTime
+            val responseTime = currentTimeToLong() - startTime
             
             if (result == null) {
                 // Timeout occurred
                 SourceHealth(
                     sourceId = sourceId,
                     status = SourceStatus.Offline,
-                    lastChecked = System.currentTimeMillis(),
+                    lastChecked = currentTimeToLong(),
                     responseTime = null
                 )
             } else {
                 SourceHealth(
                     sourceId = sourceId,
                     status = result,
-                    lastChecked = System.currentTimeMillis(),
+                    lastChecked = currentTimeToLong(),
                     responseTime = responseTime
                 )
             }
@@ -113,7 +114,7 @@ class SourceHealthCheckerImpl(
             SourceHealth(
                 sourceId = sourceId,
                 status = SourceStatus.Error(e.message ?: "Unknown error"),
-                lastChecked = System.currentTimeMillis(),
+                lastChecked = currentTimeToLong(),
                 responseTime = null
             )
         }
@@ -159,7 +160,7 @@ class SourceHealthCheckerImpl(
      * Check if a cached health result has expired
      */
     private fun isCacheExpired(health: SourceHealth): Boolean {
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         return (currentTime - health.lastChecked) > cacheExpirationMs
     }
 }

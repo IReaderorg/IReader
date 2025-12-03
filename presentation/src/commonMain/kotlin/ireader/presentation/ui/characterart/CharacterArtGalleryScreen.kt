@@ -1,0 +1,835 @@
+package ireader.presentation.ui.characterart
+
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import ireader.domain.models.characterart.*
+import ireader.presentation.ui.component.isTableUi
+import kotlinx.coroutines.launch
+
+
+/**
+ * Main Character Art Gallery Screen
+ * Modern UI optimized for both Android and Desktop
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CharacterArtGalleryScreen(
+    vm: CharacterArtViewModel,
+    onBack: () -> Unit,
+    onArtClick: (CharacterArt) -> Unit,
+    onUploadClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues()
+) {
+    val state by vm.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val isWideScreen = isTableUi()
+    
+    LaunchedEffect(state.error) {
+        state.error?.let {
+            snackbarHostState.showSnackbar(it)
+            vm.clearError()
+        }
+    }
+    
+    LaunchedEffect(state.successMessage) {
+        state.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            vm.clearSuccessMessage()
+        }
+    }
+    
+    Scaffold(
+        modifier = modifier.padding(paddingValues),
+        topBar = {
+            GalleryTopBar(
+                searchQuery = state.searchQuery,
+                onSearchChange = { vm.setSearchQuery(it) },
+                onBack = onBack,
+                isWideScreen = isWideScreen
+            )
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = !state.isLoading,
+                enter = scaleIn() + fadeIn(),
+                exit = scaleOut() + fadeOut()
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = onUploadClick,
+                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                    text = { Text("Upload Art") },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            // Filter chips row
+            FilterChipsRow(
+                selectedFilter = state.selectedFilter,
+                onFilterChange = { vm.setFilter(it) },
+                selectedSort = state.selectedSort,
+                onSortChange = { vm.setSort(it) },
+                viewMode = state.viewMode,
+                onViewModeChange = { vm.setViewMode(it) },
+                isWideScreen = isWideScreen
+            )
+            
+            // Main content
+            Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                    state.isLoading -> {
+                        LoadingContent(isWideScreen)
+                    }
+                    state.artList.isEmpty() -> {
+                        EmptyGalleryContent(onUploadClick)
+                    }
+                    else -> {
+                        GalleryContent(
+                            artList = state.artList,
+                            viewMode = state.viewMode,
+                            onArtClick = onArtClick,
+                            onLikeClick = { vm.toggleLike(it) },
+                            isWideScreen = isWideScreen
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GalleryTopBar(
+    searchQuery: String,
+    onSearchChange: (String) -> Unit,
+    onBack: () -> Unit,
+    isWideScreen: Boolean
+) {
+    var isSearchExpanded by remember { mutableStateOf(false) }
+    
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            }
+            
+            AnimatedVisibility(
+                visible = !isSearchExpanded,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "🎨",
+                        fontSize = 28.sp,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    Column {
+                        Text(
+                            text = "Character Gallery",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "AI-generated character art",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            
+            AnimatedVisibility(
+                visible = isSearchExpanded,
+                enter = expandHorizontally() + fadeIn(),
+                exit = shrinkHorizontally() + fadeOut()
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp),
+                    placeholder = { Text("Search characters, books...") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = Color.Transparent,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = null)
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { onSearchChange("") }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Clear")
+                            }
+                        }
+                    }
+                )
+            }
+            
+            IconButton(onClick = { isSearchExpanded = !isSearchExpanded }) {
+                Icon(
+                    if (isSearchExpanded) Icons.Default.Close else Icons.Default.Search,
+                    contentDescription = if (isSearchExpanded) "Close search" else "Search"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterChipsRow(
+    selectedFilter: ArtStyleFilter,
+    onFilterChange: (ArtStyleFilter) -> Unit,
+    selectedSort: CharacterArtSort,
+    onSortChange: (CharacterArtSort) -> Unit,
+    viewMode: GalleryViewMode,
+    onViewModeChange: (GalleryViewMode) -> Unit,
+    isWideScreen: Boolean
+) {
+    var showSortMenu by remember { mutableStateOf(false) }
+    
+    Surface(
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
+    ) {
+        Column {
+            // Style filter chips
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(ArtStyleFilter.entries) { filter ->
+                    FilterChip(
+                        selected = selectedFilter == filter,
+                        onClick = { onFilterChange(filter) },
+                        label = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(filter.icon, fontSize = 14.sp)
+                                Text(filter.displayName)
+                            }
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    )
+                }
+            }
+            
+            // Sort and view mode row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Sort dropdown
+                Box {
+                    TextButton(onClick = { showSortMenu = true }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Sort,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(selectedSort.displayName)
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
+                    
+                    DropdownMenu(
+                        expanded = showSortMenu,
+                        onDismissRequest = { showSortMenu = false }
+                    ) {
+                        CharacterArtSort.entries.forEach { sort ->
+                            DropdownMenuItem(
+                                text = { Text(sort.displayName) },
+                                onClick = {
+                                    onSortChange(sort)
+                                    showSortMenu = false
+                                },
+                                leadingIcon = {
+                                    if (selectedSort == sort) {
+                                        Icon(
+                                            Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                // View mode toggle
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    ViewModeButton(
+                        icon = Icons.Default.GridView,
+                        selected = viewMode == GalleryViewMode.GRID,
+                        onClick = { onViewModeChange(GalleryViewMode.GRID) }
+                    )
+                    ViewModeButton(
+                        icon = Icons.Default.ViewList,
+                        selected = viewMode == GalleryViewMode.LIST,
+                        onClick = { onViewModeChange(GalleryViewMode.LIST) }
+                    )
+                    if (isWideScreen) {
+                        ViewModeButton(
+                            icon = Icons.Default.Dashboard,
+                            selected = viewMode == GalleryViewMode.MASONRY,
+                            onClick = { onViewModeChange(GalleryViewMode.MASONRY) }
+                        )
+                    }
+                }
+            }
+            
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        }
+    }
+}
+
+@Composable
+private fun ViewModeButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (selected) 1.1f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f),
+        label = "scale"
+    )
+    
+    Surface(
+        modifier = Modifier.scale(scale),
+        shape = RoundedCornerShape(8.dp),
+        color = if (selected) 
+            MaterialTheme.colorScheme.primaryContainer 
+        else 
+            Color.Transparent,
+        onClick = onClick
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            modifier = Modifier.padding(8.dp),
+            tint = if (selected)
+                MaterialTheme.colorScheme.onPrimaryContainer
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun GalleryContent(
+    artList: List<CharacterArt>,
+    viewMode: GalleryViewMode,
+    onArtClick: (CharacterArt) -> Unit,
+    onLikeClick: (String) -> Unit,
+    isWideScreen: Boolean
+) {
+    val gridState = rememberLazyGridState()
+    val columns = when {
+        viewMode == GalleryViewMode.LIST -> GridCells.Fixed(1)
+        isWideScreen -> GridCells.Adaptive(minSize = 280.dp)
+        else -> GridCells.Fixed(2)
+    }
+    
+    LazyVerticalGrid(
+        columns = columns,
+        state = gridState,
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(
+            items = artList,
+            key = { it.id }
+        ) { art ->
+            CharacterArtCard(
+                art = art,
+                viewMode = viewMode,
+                onClick = { onArtClick(art) },
+                onLikeClick = { onLikeClick(art.id) },
+                isWideScreen = isWideScreen
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun CharacterArtCard(
+    art: CharacterArt,
+    viewMode: GalleryViewMode,
+    onClick: () -> Unit,
+    onLikeClick: () -> Unit,
+    isWideScreen: Boolean
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    var isPressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f),
+        label = "cardScale"
+    )
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (viewMode == GalleryViewMode.LIST) 
+                    Modifier.height(120.dp) 
+                else 
+                    Modifier.aspectRatio(0.75f)
+            )
+            .scale(scale)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp,
+            pressedElevation = 8.dp
+        )
+    ) {
+        if (viewMode == GalleryViewMode.LIST) {
+            ListViewCard(art, onLikeClick)
+        } else {
+            GridViewCard(art, onLikeClick)
+        }
+    }
+}
+
+@Composable
+private fun GridViewCard(
+    art: CharacterArt,
+    onLikeClick: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Image placeholder with gradient
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                        )
+                    )
+                )
+        ) {
+            // Placeholder icon
+            Icon(
+                Icons.Outlined.Image,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .align(Alignment.Center),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+            
+            // TODO: Replace with actual image loading
+            // AsyncImage(model = art.imageUrl, ...)
+        }
+        
+        // Featured badge
+        if (art.isFeatured) {
+            Surface(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .align(Alignment.TopStart),
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("⭐", fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        "Featured",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+        
+        // Like button
+        LikeButton(
+            isLiked = art.isLikedByUser,
+            likesCount = art.likesCount,
+            onClick = onLikeClick,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+        )
+        
+        // Bottom info overlay
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.7f)
+                        )
+                    )
+                )
+                .padding(12.dp)
+        ) {
+            Column {
+                Text(
+                    text = art.characterName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = art.bookTitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (art.aiModel.isNotBlank()) {
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("🤖", fontSize = 10.sp)
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = art.aiModel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ListViewCard(
+    art: CharacterArt,
+    onLikeClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Thumbnail
+        Box(
+            modifier = Modifier
+                .size(96.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Outlined.Image,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+            
+            if (art.isFeatured) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(4.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.tertiaryContainer
+                ) {
+                    Text(
+                        "⭐",
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(4.dp)
+                    )
+                }
+            }
+        }
+        
+        // Info
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    text = art.characterName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = art.bookTitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (art.aiModel.isNotBlank()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("🤖", fontSize = 12.sp)
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = art.aiModel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                Text(
+                    text = "by ${art.submitterUsername.ifBlank { "Anonymous" }}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        
+        // Like button
+        LikeButton(
+            isLiked = art.isLikedByUser,
+            likesCount = art.likesCount,
+            onClick = onLikeClick,
+            compact = true
+        )
+    }
+}
+
+@Composable
+private fun LikeButton(
+    isLiked: Boolean,
+    likesCount: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    compact: Boolean = false
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (isLiked) 1.2f else 1f,
+        animationSpec = spring(dampingRatio = 0.4f),
+        label = "likeScale"
+    )
+    
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(if (compact) 8.dp else 12.dp),
+        color = if (isLiked)
+            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.9f)
+        else
+            Color.Black.copy(alpha = 0.4f),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                horizontal = if (compact) 8.dp else 10.dp,
+                vertical = if (compact) 6.dp else 8.dp
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = if (isLiked) "Unlike" else "Like",
+                modifier = Modifier
+                    .size(if (compact) 16.dp else 18.dp)
+                    .scale(scale),
+                tint = if (isLiked)
+                    MaterialTheme.colorScheme.error
+                else
+                    Color.White
+            )
+            Text(
+                text = if (likesCount > 0) likesCount.toString() else "",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isLiked)
+                    MaterialTheme.colorScheme.onErrorContainer
+                else
+                    Color.White
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingContent(isWideScreen: Boolean) {
+    val columns = if (isWideScreen) 4 else 2
+    
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(columns),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(8) {
+            ShimmerCard()
+        }
+    }
+}
+
+@Composable
+private fun ShimmerCard() {
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.7f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shimmerAlpha"
+    )
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(0.75f),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = alpha)
+                )
+        )
+    }
+}
+
+@Composable
+private fun EmptyGalleryContent(onUploadClick: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text("🎨", fontSize = 64.sp)
+            
+            Text(
+                text = "No Character Art Yet",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            
+            Text(
+                text = "Be the first to share AI-generated art of your favorite book characters!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            
+            Spacer(Modifier.height(8.dp))
+            
+            Button(
+                onClick = onUploadClick,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Upload First Art")
+            }
+        }
+    }
+}

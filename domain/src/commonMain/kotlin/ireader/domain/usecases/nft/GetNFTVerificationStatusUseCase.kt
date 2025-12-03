@@ -1,7 +1,8 @@
-package ireader.domain.usecases.nft
+﻿package ireader.domain.usecases.nft
 
 import ireader.domain.data.repository.NFTRepository
 import ireader.domain.models.remote.NFTWallet
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class GetNFTVerificationStatusUseCase(
     private val nftRepository: NFTRepository
@@ -30,7 +31,7 @@ class GetNFTVerificationStatusUseCase(
         }
         
         // Cache is expired, check if within 7-day grace period
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         val gracePeriodEnd = cachedWallet.cacheExpiresAt + (7 * 24 * 60 * 60 * 1000L) // 7 days in milliseconds
         
         if (currentTime <= gracePeriodEnd) {

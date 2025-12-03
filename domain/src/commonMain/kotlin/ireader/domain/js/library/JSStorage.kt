@@ -1,4 +1,4 @@
-package ireader.domain.js.library
+﻿package ireader.domain.js.library
 
 import ireader.core.prefs.PreferenceStore
 import kotlinx.coroutines.CoroutineScope
@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * JavaScript Storage API implementation using PreferenceStore.
@@ -48,7 +49,7 @@ open class JSStorage(
         
         val entry = StorageEntry(
             value = valueStr,
-            created = System.currentTimeMillis(),
+            created = currentTimeToLong(),
             expires = expires
         )
         
@@ -81,7 +82,7 @@ open class JSStorage(
             
             // Check expiration
             if (entry.expires != null) {
-                val now = System.currentTimeMillis()
+                val now = currentTimeToLong()
                 if (now > entry.expires) {
                     delete(key)
                     return null

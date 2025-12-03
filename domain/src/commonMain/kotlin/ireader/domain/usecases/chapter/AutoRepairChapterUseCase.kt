@@ -1,4 +1,4 @@
-package ireader.domain.usecases.chapter
+﻿package ireader.domain.usecases.chapter
 
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.data.repository.ChapterHealthRepository
@@ -9,6 +9,7 @@ import ireader.domain.models.entities.ChapterHealth
 import ireader.domain.services.ChapterHealthChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case for automatically repairing broken chapters by searching alternative sources
@@ -36,7 +37,7 @@ class AutoRepairChapterUseCase(
             // Check if repair was recently attempted (within 24 hours)
             val existingHealth = chapterHealthRepository.getChapterHealthById(chapter.id)
             if (existingHealth?.repairAttemptedAt != null) {
-                val hoursSinceAttempt = (System.currentTimeMillis() - existingHealth.repairAttemptedAt) / (1000 * 60 * 60)
+                val hoursSinceAttempt = (currentTimeToLong() - existingHealth.repairAttemptedAt) / (1000 * 60 * 60)
                 if (hoursSinceAttempt < 24) {
                     return@withContext Result.failure(
                         Exception("Repair already attempted within the last 24 hours")
@@ -83,8 +84,8 @@ class AutoRepairChapterUseCase(
                     chapterId = chapter.id,
                     isBroken = true,
                     breakReason = chapterHealthChecker.getBreakReason(chapter.content),
-                    checkedAt = System.currentTimeMillis(),
-                    repairAttemptedAt = System.currentTimeMillis(),
+                    checkedAt = currentTimeToLong(),
+                    repairAttemptedAt = currentTimeToLong(),
                     repairSuccessful = false,
                     replacementSourceId = null
                 )
@@ -139,8 +140,8 @@ class AutoRepairChapterUseCase(
                             chapterId = chapter.id,
                             isBroken = false,
                             breakReason = null,
-                            checkedAt = System.currentTimeMillis(),
-                            repairAttemptedAt = System.currentTimeMillis(),
+                            checkedAt = currentTimeToLong(),
+                            repairAttemptedAt = currentTimeToLong(),
                             repairSuccessful = true,
                             replacementSourceId = catalog.sourceId
                         )
@@ -187,8 +188,8 @@ class AutoRepairChapterUseCase(
                             chapterId = chapter.id,
                             isBroken = false,
                             breakReason = null,
-                            checkedAt = System.currentTimeMillis(),
-                            repairAttemptedAt = System.currentTimeMillis(),
+                            checkedAt = currentTimeToLong(),
+                            repairAttemptedAt = currentTimeToLong(),
                             repairSuccessful = true,
                             replacementSourceId = catalog.sourceId
                         )

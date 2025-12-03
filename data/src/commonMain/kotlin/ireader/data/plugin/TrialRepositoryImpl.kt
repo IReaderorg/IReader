@@ -1,9 +1,10 @@
-package ireader.data.plugin
+﻿package ireader.data.plugin
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.plugins.TrialInfo
 import ireader.domain.plugins.TrialRepository
 import java.util.UUID
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of TrialRepository using SQLDelight
@@ -16,7 +17,7 @@ class TrialRepositoryImpl(
 
     override suspend fun startTrial(pluginId: String, durationDays: Int): Result<TrialInfo> = runCatching {
         val userId = getCurrentUserId()
-        val startDate = System.currentTimeMillis()
+        val startDate = currentTimeToLong()
         val expirationDate = startDate + (durationDays * 24 * 60 * 60 * 1000L)
         
         handler.await {

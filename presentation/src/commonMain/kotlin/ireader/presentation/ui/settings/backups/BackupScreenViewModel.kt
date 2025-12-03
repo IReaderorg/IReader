@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.backups
+﻿package ireader.presentation.ui.settings.backups
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +20,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
-
+import ireader.domain.utils.extensions.currentTimeToLong
 
 
 class BackupScreenViewModel(
@@ -78,7 +78,7 @@ class BackupScreenViewModel(
     }
 //    fun onLocalBackupRequested(onStart: (Intent) -> Unit) {
 //        val mimeTypes = arrayOf("application/gzip")
-//        val fn = "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"
+//        val fn = "IReader_${convertLongToTime(currentTimeToLong())}.gz"
 //        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
 //            .addCategory(Intent.CATEGORY_OPENABLE)
 //            .setType("application/gzip")
@@ -134,7 +134,7 @@ class BackupScreenViewModel(
      */
     fun pickBackupLocation() {
         scope.launch {
-            val timestamp = System.currentTimeMillis()
+            val timestamp = currentTimeToLong()
             val fileName = "IReader_backup_$timestamp"
             
             when (val result = fileSystemService.saveFile(

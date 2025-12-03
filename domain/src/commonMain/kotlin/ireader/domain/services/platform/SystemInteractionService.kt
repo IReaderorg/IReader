@@ -1,8 +1,9 @@
-package ireader.domain.services.platform
+﻿package ireader.domain.services.platform
 
 import ireader.domain.services.common.PlatformService
 import ireader.domain.services.common.ServiceResult
 import kotlinx.coroutines.flow.Flow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Platform-agnostic system interaction service
@@ -106,7 +107,7 @@ interface SystemInteractionService : PlatformService {
  */
 data class VolumeKeyEvent(
     val type: VolumeKeyType,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = currentTimeToLong()
 )
 
 enum class VolumeKeyType {

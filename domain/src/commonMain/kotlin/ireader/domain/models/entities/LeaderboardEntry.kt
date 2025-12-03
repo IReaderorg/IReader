@@ -1,6 +1,7 @@
-package ireader.domain.models.entities
+﻿package ireader.domain.models.entities
 
 import kotlinx.serialization.Serializable
+import ireader.domain.utils.extensions.currentTimeToLong
 
 @Serializable
 data class LeaderboardEntry(
@@ -12,7 +13,7 @@ data class LeaderboardEntry(
     val avatarUrl: String? = null,
     val hasBadge: Boolean = false,
     val badgeType: String? = null,
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = currentTimeToLong()
 )
 
 @Serializable

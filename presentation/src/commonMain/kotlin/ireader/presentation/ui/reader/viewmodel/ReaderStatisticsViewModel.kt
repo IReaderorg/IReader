@@ -1,4 +1,4 @@
-package ireader.presentation.ui.reader.viewmodel
+﻿package ireader.presentation.ui.reader.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +11,7 @@ import ireader.domain.usecases.statistics.TrackReadingProgressUseCase
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel responsible for reading statistics and tracking
@@ -92,7 +93,7 @@ class ReaderStatisticsViewModel(
      * @param isLast Whether this is the last chapter of the book
      */
     fun onChapterOpened(chapter: Chapter, isLast: Boolean = false) {
-        chapterOpenTimestamp = System.currentTimeMillis()
+        chapterOpenTimestamp = currentTimeToLong()
         currentChapterId = chapter.id
         currentBookId = chapter.bookId
         currentProgress = 0f
@@ -100,7 +101,7 @@ class ReaderStatisticsViewModel(
         
         // Start session if not already started
         if (sessionStartTime == null) {
-            sessionStartTime = System.currentTimeMillis()
+            sessionStartTime = currentTimeToLong()
         }
         
         Log.debug("Chapter opened: ${chapter.name}, isLastChapter: $isLast")
@@ -111,7 +112,7 @@ class ReaderStatisticsViewModel(
      */
     fun onChapterClosed() {
         val openTime = chapterOpenTimestamp ?: return
-        val closeTime = System.currentTimeMillis()
+        val closeTime = currentTimeToLong()
         val readingTime = closeTime - openTime
         
         // Track reading time
@@ -190,7 +191,7 @@ class ReaderStatisticsViewModel(
      */
     private fun calculateReadingSpeed() {
         val openTime = chapterOpenTimestamp ?: return
-        val currentTime = System.currentTimeMillis()
+        val currentTime = currentTimeToLong()
         val elapsedMinutes = (currentTime - openTime) / 60000.0
         
         if (elapsedMinutes > 0 && wordsRead > 0) {
@@ -307,7 +308,7 @@ class ReaderStatisticsViewModel(
      */
     fun getSessionStats(): ReadingSessionStats {
         val sessionTime = sessionStartTime?.let {
-            System.currentTimeMillis() - it
+            currentTimeToLong() - it
         } ?: 0
         
         return _sessionStats.copy(
@@ -320,7 +321,7 @@ class ReaderStatisticsViewModel(
      * Reset session statistics
      */
     fun resetSessionStats() {
-        sessionStartTime = System.currentTimeMillis()
+        sessionStartTime = currentTimeToLong()
         totalReadingTimeMs = 0
         _sessionStats = ReadingSessionStats()
         wordsRead = 0
@@ -333,7 +334,7 @@ class ReaderStatisticsViewModel(
      */
     fun getFormattedSessionDuration(): String {
         val sessionTime = sessionStartTime?.let {
-            System.currentTimeMillis() - it
+            currentTimeToLong() - it
         } ?: 0
         
         val hours = sessionTime / 3600000

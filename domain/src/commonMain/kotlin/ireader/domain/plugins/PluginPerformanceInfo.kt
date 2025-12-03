@@ -1,4 +1,6 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Performance metrics for a plugin.
@@ -11,7 +13,7 @@ data class PluginPerformanceInfo(
     val avgExecutionTime: Long = 0L,   // Average method execution time in ms
     val maxExecutionTime: Long = 0L,   // Maximum method execution time in ms
     val errorRate: Float = 0.0f,       // Error rate (0.0 to 1.0)
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = currentTimeToLong()
 ) {
     /**
      * Memory usage as a percentage of the limit

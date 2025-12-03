@@ -1,4 +1,4 @@
-package ireader.data.repository
+﻿package ireader.data.repository
 
 import ireader.core.log.Log
 import ireader.domain.data.repository.BookRepository
@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import  kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of LibraryInsightsRepository
@@ -348,7 +349,7 @@ class LibraryInsightsRepositoryImpl(
             )
 
             EntitiesStatisticsExport(
-                exportDate = System.currentTimeMillis(),
+                exportDate = currentTimeToLong(),
                 libraryInsights = libraryInsights,
                 readingStatisticsType1 = readingStatisticsType1,
                 readingAnalytics = readingAnalytics,
@@ -358,7 +359,7 @@ class LibraryInsightsRepositoryImpl(
         } catch (e: Exception) {
             Log.error { "Failed to export statistics: ${e.message}" }
             EntitiesStatisticsExport(
-                exportDate = System.currentTimeMillis(),
+                exportDate = currentTimeToLong(),
                 libraryInsights = LibraryInsights(),
                 readingStatisticsType1 = ireader.domain.models.entities.ReadingStatisticsType1(),
                 readingAnalytics = ReadingAnalytics(),

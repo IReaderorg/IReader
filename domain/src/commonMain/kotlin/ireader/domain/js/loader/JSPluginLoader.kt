@@ -1,4 +1,4 @@
-package ireader.domain.js.loader
+﻿package ireader.domain.js.loader
 
 import io.ktor.client.HttpClient
 import ireader.core.log.Log
@@ -18,6 +18,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import java.io.File
 import java.util.concurrent.ConcurrentLinkedQueue
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Common interface for JS engines.
@@ -61,7 +62,7 @@ class JSPluginLoader(
      * @return List of loaded catalogs
      */
     suspend fun loadAllPlugins(): List<JSPluginCatalog> {
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         // Ensure plugins directory exists
         if (!pluginsDirectory.exists()) {
@@ -116,7 +117,7 @@ class JSPluginLoader(
      * @return List of stub catalogs
      */
     fun loadStubPlugins(): List<JSPluginCatalog> {
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         // Get saved stubs
         val stubs = stubManager.getPluginStubs()
@@ -176,7 +177,7 @@ class JSPluginLoader(
      */
     suspend fun loadPlugin(file: File): JSPluginCatalog? {
         val pluginId = file.nameWithoutExtension
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         try {
             // Check cache
@@ -369,7 +370,7 @@ class JSPluginLoader(
         onPluginLoaded: (JSPluginCatalog) -> Unit = {},
         maxConcurrency: Int = 4
     ): List<JSPluginCatalog> {
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         // Ensure plugins directory exists
         if (!pluginsDirectory.exists()) {
@@ -410,7 +411,7 @@ class JSPluginLoader(
             }
         }
         
-        val priorityLoadTime = System.currentTimeMillis() - startTime
+        val priorityLoadTime = currentTimeToLong() - startTime
         if (priorityFiles.isNotEmpty()) {
             Log.debug { "JSPluginLoader: Loaded ${priorityFiles.size} priority plugins in ${priorityLoadTime}ms" }
         }
@@ -434,7 +435,7 @@ class JSPluginLoader(
             }.awaitAll()
         }
         
-        val totalLoadTime = System.currentTimeMillis() - startTime
+        val totalLoadTime = currentTimeToLong() - startTime
         Log.info { "JSPluginLoader: Loaded ${allCatalogs.size} plugins in ${totalLoadTime}ms (${priorityFiles.size} priority, ${normalFiles.size} normal)" }
         
         return allCatalogs.toList()
@@ -451,7 +452,7 @@ class JSPluginLoader(
         onPluginLoaded: suspend (JSPluginCatalog) -> Unit,
         maxConcurrency: Int = 4
     ) {
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         
         if (!pluginsDirectory.exists()) {
             pluginsDirectory.mkdirs()
@@ -504,7 +505,7 @@ class JSPluginLoader(
             }.awaitAll()
         }
         
-        val totalTime = System.currentTimeMillis() - startTime
+        val totalTime = currentTimeToLong() - startTime
         Log.debug { "JSPluginLoader: Streaming load completed - $loadedCount plugins in ${totalTime}ms" }
     }
     

@@ -1,4 +1,4 @@
-package ireader.presentation.ui.home.history
+﻿package ireader.presentation.ui.home.history
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -128,12 +128,13 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.history.viewmodel.DateFilter
 import ireader.presentation.ui.home.history.viewmodel.HistoryViewModel
+import ireader.domain.utils.extensions.todayStartMillis
+import ireader.domain.utils.extensions.yesterdayStartMillis
+import ireader.domain.utils.extensions.daysAgoStartMillis
+import ireader.domain.utils.extensions.formatTime12Hour
+import ireader.domain.utils.extensions.formatDate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 /**
  * Stable holder for history item click handlers to prevent recomposition
@@ -506,25 +507,13 @@ fun HistoryContent(
     dateFilter: DateFilter? = null,
     searchQuery: String = ""
 ) {
-    // Memoize time boundaries to avoid recalculation
+    // Memoize time boundaries to avoid recalculation - using KMP datetime
     val timeBoundaries = remember {
-        val calendar = Calendar.getInstance()
-        val today = calendar.apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-        
-        val yesterday = calendar.apply {
-            add(Calendar.DAY_OF_MONTH, -1)
-        }.timeInMillis
-        
-        val lastWeek = calendar.apply {
-            add(Calendar.DAY_OF_MONTH, -6)
-        }.timeInMillis
-        
-        Triple(today, yesterday, lastWeek)
+        Triple(
+            todayStartMillis(),
+            yesterdayStartMillis(),
+            daysAgoStartMillis(7)
+        )
     }
     
     val (today, yesterday, lastWeek) = timeBoundaries
@@ -563,9 +552,9 @@ fun HistoryContent(
         }
     }
     
-    // Memoize date formatters
-    val timeFormat = remember { SimpleDateFormat("h:mm a", Locale.getDefault()) }
-    val dateFormat = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
+    // Use KMP date formatting functions
+    val formatTime: (Long) -> String = remember { { it.formatTime12Hour() } }
+    val formatDateStr: (Long) -> String = remember { { it.formatDate() } }
     
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
@@ -588,7 +577,7 @@ fun HistoryContent(
                 ) { history ->
                     HistoryItem(
                         history = history,
-                        timeString = timeFormat.format(Date(history.readAt)),
+                        timeString = formatTime(history.readAt),
                         onClickItem = onClickItem,
                         onClickDelete = onClickDelete,
                         onClickPlay = onClickPlay,
@@ -614,7 +603,7 @@ fun HistoryContent(
                 ) { history ->
                     HistoryItem(
                         history = history,
-                        timeString = timeFormat.format(Date(history.readAt)),
+                        timeString = formatTime(history.readAt),
                         onClickItem = onClickItem,
                         onClickDelete = onClickDelete,
                         onClickPlay = onClickPlay,
@@ -640,7 +629,7 @@ fun HistoryContent(
                 ) { history ->
                     HistoryItem(
                         history = history,
-                        timeString = dateFormat.format(Date(history.readAt)),
+                        timeString = formatDateStr(history.readAt),
                         onClickItem = onClickItem,
                         onClickDelete = onClickDelete,
                         onClickPlay = onClickPlay,
@@ -666,7 +655,7 @@ fun HistoryContent(
                 ) { history ->
                     HistoryItem(
                         history = history,
-                        timeString = dateFormat.format(Date(history.readAt)),
+                        timeString = formatDateStr(history.readAt),
                         onClickItem = onClickItem,
                         onClickDelete = onClickDelete,
                         onClickPlay = onClickPlay,

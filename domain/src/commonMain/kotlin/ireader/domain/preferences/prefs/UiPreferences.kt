@@ -7,9 +7,7 @@ import ireader.core.prefs.Preference
 import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.getEnum
 import ireader.domain.models.prefs.PreferenceValues
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Locale
+import ireader.domain.utils.extensions.formatDate
 
 
 class UiPreferences(private val preferenceStore: PreferenceStore) {
@@ -110,9 +108,12 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getEnum("relative_time", PreferenceValues.RelativeTime.Day)
     }
 
-    fun getDateFormat(format: String = dateFormat().get()): DateFormat = when (format) {
-        "" -> DateFormat.getDateInstance(DateFormat.SHORT)
-        else -> SimpleDateFormat(format, Locale.getDefault())
+    /**
+     * Returns a function that formats timestamps according to user preferences.
+     * Uses KMP-compatible date formatting.
+     */
+    fun getDateFormatter(format: String = dateFormat().get()): (Long) -> String = { timestamp ->
+        timestamp.formatDate()
     }
 
     fun downloadedOnly(): Preference<Boolean> {

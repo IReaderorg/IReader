@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.viewmodels
+﻿package ireader.presentation.ui.settings.viewmodels
 
 import ireader.core.log.Log
 import ireader.domain.preferences.prefs.AppPreferences
@@ -10,6 +10,7 @@ import ireader.domain.services.tts_service.GradioTTSPresets
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * State for Gradio TTS settings screen
@@ -233,7 +234,7 @@ class GradioTTSSettingsViewModel(
      */
     fun duplicateConfig(config: GradioTTSConfig) {
         val newConfig = config.copy(
-            id = "custom_${System.currentTimeMillis()}",
+            id = "custom_${currentTimeToLong()}",
             name = "${config.name} (Copy)",
             isCustom = true
         )

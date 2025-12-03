@@ -1,4 +1,4 @@
-package ireader.presentation.ui.reader
+﻿package ireader.presentation.ui.reader
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -94,6 +94,7 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.MultiSwipeRefresh
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 @Composable
 fun ReaderText(
@@ -118,7 +119,7 @@ fun ReaderText(
     
     val debouncedToggleReaderMode = remember {
         {
-            val currentTime = System.currentTimeMillis()
+            val currentTime = currentTimeToLong()
             if (currentTime - lastToggleTime > debounceInterval) {
                 lastToggleTime = currentTime
                 toggleReaderMode()

@@ -1,4 +1,6 @@
-package ireader.core.startup
+﻿package ireader.core.startup
+
+import ireader.core.util.currentTimeMillis
 
 /**
  * Startup profiler to measure and identify slow initialization phases.
@@ -34,7 +36,7 @@ object StartupProfiler {
      */
     fun start() {
         if (!isEnabled) return
-        startTime = System.currentTimeMillis()
+        startTime = currentTimeMillis()
         lastMarkTime = startTime
         marks.clear()
         println("$TAG: === Startup Profiling Started ===")
@@ -46,7 +48,7 @@ object StartupProfiler {
     fun mark(name: String) {
         if (!isEnabled || startTime == 0L) return
         
-        val now = System.currentTimeMillis()
+        val now = currentTimeMillis()
         val fromStart = now - startTime
         val fromLast = now - lastMarkTime
         

@@ -1,7 +1,8 @@
-package ireader.domain.models.download
+﻿package ireader.domain.models.download
 
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Download queue item with enhanced metadata
@@ -22,7 +23,7 @@ data class DownloadItem(
     val estimatedTimeRemaining: Long = 0L, // milliseconds
     val errorMessage: String? = null,
     val retryCount: Int = 0,
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = currentTimeToLong(),
     val startedAt: Long? = null,
     val completedAt: Long? = null
 )

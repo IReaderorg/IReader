@@ -1,7 +1,8 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * In-memory implementation of TrialRepository
@@ -25,7 +26,7 @@ class TrialRepositoryImpl(
                     throw IllegalStateException("Trial already exists for this plugin")
                 }
                 
-                val startDate = System.currentTimeMillis()
+                val startDate = currentTimeToLong()
                 val expirationDate = startDate + (durationDays * 24 * 60 * 60 * 1000L)
                 
                 val trialInfo = TrialInfo(

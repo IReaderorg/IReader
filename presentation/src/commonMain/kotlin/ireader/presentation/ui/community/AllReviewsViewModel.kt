@@ -1,4 +1,4 @@
-package ireader.presentation.ui.community
+﻿package ireader.presentation.ui.community
 
 import androidx.compose.runtime.Stable
 import ireader.domain.data.repository.AllReviewsRepository
@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel for the All Reviews screen following Mihon's StateScreenModel pattern.
@@ -57,7 +58,7 @@ class AllReviewsViewModel(
                         bookCurrentPage = 1
                     )
                 }
-                lastLoadTime = System.currentTimeMillis()
+                lastLoadTime = currentTimeToLong()
             }
             .onFailure { error ->
                 _state.update { current ->
@@ -80,7 +81,7 @@ class AllReviewsViewModel(
                         chapterCurrentPage = 1
                     )
                 }
-                lastLoadTime = System.currentTimeMillis()
+                lastLoadTime = currentTimeToLong()
             }
             .onFailure { error ->
                 _state.update { current ->
@@ -110,7 +111,7 @@ class AllReviewsViewModel(
     
     private fun loadMoreBookReviews() {
         // Rate limiting check
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val timeSinceLastLoad = now - lastLoadTime
         
         if (timeSinceLastLoad < minLoadInterval) {
@@ -138,7 +139,7 @@ class AllReviewsViewModel(
                             bookCurrentPage = current.bookCurrentPage + 1
                         )
                     }
-                    lastLoadTime = System.currentTimeMillis()
+                    lastLoadTime = currentTimeToLong()
                 }
                 .onFailure { error ->
                     _state.update { current ->
@@ -153,7 +154,7 @@ class AllReviewsViewModel(
     
     private fun loadMoreChapterReviews() {
         // Rate limiting check
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val timeSinceLastLoad = now - lastLoadTime
         
         if (timeSinceLastLoad < minLoadInterval) {
@@ -181,7 +182,7 @@ class AllReviewsViewModel(
                             chapterCurrentPage = current.chapterCurrentPage + 1
                         )
                     }
-                    lastLoadTime = System.currentTimeMillis()
+                    lastLoadTime = currentTimeToLong()
                 }
                 .onFailure { error ->
                     _state.update { current ->

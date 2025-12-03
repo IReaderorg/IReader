@@ -1,4 +1,4 @@
-package ireader.presentation.ui.component
+﻿package ireader.presentation.ui.component
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -81,6 +81,7 @@ import ireader.i18n.resources.try_another_search
 import ireader.i18n.resources.unread_chapters
 import ireader.presentation.ui.component.components.BookShimmerLoading
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.domain.utils.extensions.currentTimeToLong
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -871,7 +872,7 @@ fun ShimmerLoadingEffect() {
 
 // Simple relative time formatter - you might want to replace this with a more sophisticated implementation
 private fun formatRelativeTime(timestamp: Long): String {
-    val current = System.currentTimeMillis()
+    val current = currentTimeToLong()
     val diff = current - timestamp
 
     return when {

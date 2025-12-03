@@ -44,6 +44,34 @@ supabase.analytics.key=your-anon-key-here
 WALLET_USE_BROWSER=true
 
 # ============================================
+# CLOUDFLARE R2 STORAGE (Character Art)
+# ============================================
+# Free tier: 10GB storage, 10M reads/month, 1M writes/month
+# No egress fees! See docs/CLOUDFLARE_R2_SETUP.md for setup guide
+
+# Your Cloudflare Account ID (from R2 dashboard)
+r2.accountId=your-account-id-here
+
+# API Token credentials (create at R2 > Manage API Tokens)
+r2.accessKeyId=your-access-key-id-here
+r2.secretAccessKey=your-secret-access-key-here
+
+# Bucket name (create in R2 dashboard)
+r2.bucketName=ireader-character-art
+
+# Public URL for serving images (enable public access in bucket settings)
+r2.publicUrl=https://pub-your-bucket-id.r2.dev
+
+# ============================================
+# GEMINI AI (Character Art Generation)
+# ============================================
+# Optional: Users can enter their own API key in the app
+# Get free API key at: https://aistudio.google.com/apikey
+# 
+# Note: API key is entered by users in the app UI, not stored here
+# This section is for documentation only
+
+# ============================================
 # NOTES
 # ============================================
 # 1. Get your Supabase URL and anon key from:

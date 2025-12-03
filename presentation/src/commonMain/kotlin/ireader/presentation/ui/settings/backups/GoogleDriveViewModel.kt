@@ -1,4 +1,4 @@
-package ireader.presentation.ui.settings.backups
+﻿package ireader.presentation.ui.settings.backups
 
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.models.backup.BackupData
@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel for Google Drive backup operations
@@ -216,7 +217,7 @@ class GoogleDriveViewModel(
                             bookId = chapter.bookId,
                             chapterId = chapter.id,
                             lastPageRead = chapter.lastPageRead,
-                            lastReadTime = System.currentTimeMillis()
+                            lastReadTime = currentTimeToLong()
                         )
                     }
                 
@@ -228,7 +229,7 @@ class GoogleDriveViewModel(
                             bookId = chapter.bookId,
                             chapterId = chapter.id,
                             page = chapter.lastPageRead,
-                            timestamp = System.currentTimeMillis()
+                            timestamp = currentTimeToLong()
                         )
                     }
                 

@@ -1,6 +1,7 @@
-package ireader.domain.models.entities
+﻿package ireader.domain.models.entities
 
 import kotlinx.serialization.Serializable
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Represents a user report for a broken or problematic chapter
@@ -12,7 +13,7 @@ data class ChapterReport(
     val bookId: Long,
     val issueCategory: IssueCategory,
     val description: String = "",
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = currentTimeToLong(),
     val resolved: Boolean = false
 )
 

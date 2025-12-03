@@ -1,4 +1,4 @@
-package ireader.data.repository
+﻿package ireader.data.repository
 
 import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.LibraryWidgetRepository
@@ -10,6 +10,7 @@ import ireader.domain.models.library.WidgetType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of LibraryWidgetRepository
@@ -174,7 +175,7 @@ class LibraryWidgetRepositoryImpl(
         return LibraryWidgetData(
             widgetId = widgetId,
             items = items.take(config.maxItems),
-            lastUpdated = System.currentTimeMillis()
+            lastUpdated = currentTimeToLong()
         )
     }
     

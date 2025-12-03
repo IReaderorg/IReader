@@ -1,4 +1,4 @@
-package ireader.presentation.ui.leaderboard
+﻿package ireader.presentation.ui.leaderboard
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -32,6 +32,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlin.math.roundToInt
+import ireader.domain.utils.extensions.currentTimeToLong
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -863,7 +864,7 @@ private fun formatReadingTime(minutes: Long): String {
 }
 
 private fun formatSyncTime(timestamp: Long): String {
-    val now = System.currentTimeMillis()
+    val now = currentTimeToLong()
     val diff = now - timestamp
     val minutes = diff / 60000
     

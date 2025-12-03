@@ -9,8 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.ExtensionStatistics
-import java.text.SimpleDateFormat
-import java.util.*
+import ireader.domain.utils.extensions.formatDateTime
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
@@ -134,8 +133,7 @@ private fun StatisticItem(
 }
 
 private fun formatDate(timestamp: Long): String {
-    val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
-    return sdf.format(Date(timestamp))
+    return timestamp.formatDateTime()
 }
 
 private fun formatBytes(bytes: Long): String {

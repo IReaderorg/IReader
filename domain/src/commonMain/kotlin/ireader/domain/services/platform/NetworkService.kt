@@ -1,8 +1,9 @@
-package ireader.domain.services.platform
+﻿package ireader.domain.services.platform
 
 import ireader.domain.services.common.PlatformService
 import ireader.domain.services.common.ServiceResult
 import kotlinx.coroutines.flow.Flow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Platform-agnostic network monitoring service
@@ -85,7 +86,7 @@ data class NetworkState(
     val type: NetworkType,
     val isMetered: Boolean,
     val signalStrength: SignalStrength = SignalStrength.UNKNOWN,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = currentTimeToLong()
 )
 
 /**
@@ -120,7 +121,7 @@ data class NetworkSpeed(
     val downloadMbps: Float,
     val uploadMbps: Float,
     val latencyMs: Long,
-    val measuredAt: Long = System.currentTimeMillis()
+    val measuredAt: Long = currentTimeToLong()
 ) {
     val isFast: Boolean
         get() = downloadMbps >= 10f && latencyMs < 100

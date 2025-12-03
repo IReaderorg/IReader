@@ -1,10 +1,11 @@
-package ireader.presentation.ui.settings.sync
+﻿package ireader.presentation.ui.settings.sync
 
 
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 data class SupabaseConfigState(
     val autoSyncEnabled: Boolean = true,
@@ -219,7 +220,7 @@ class SupabaseConfigViewModel(
                 if (books.isEmpty()) {
                     updateState { it.copy(
                         isSyncing = false,
-                        lastSyncTime = System.currentTimeMillis(),
+                        lastSyncTime = currentTimeToLong(),
                         error = "No books to sync"
                     )}
                     return@launch
@@ -229,7 +230,7 @@ class SupabaseConfigViewModel(
                 val syncResult = syncManager.performFullSync(user.id, books)
                 
                 if (syncResult.isSuccess) {
-                    val currentTime = System.currentTimeMillis()
+                    val currentTime = currentTimeToLong()
                     supabasePreferences.lastSyncTime().set(currentTime)
                     
                     val favoriteCount = books.count { it.favorite }

@@ -1,4 +1,6 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Data class representing trial period information for premium plugins
@@ -14,14 +16,14 @@ data class TrialInfo(
      * Check if the trial has expired
      */
     fun isExpired(): Boolean {
-        return System.currentTimeMillis() > expirationDate
+        return currentTimeToLong() > expirationDate
     }
     
     /**
      * Get remaining days in trial
      */
     fun getRemainingDays(): Int {
-        val remaining = expirationDate - System.currentTimeMillis()
+        val remaining = expirationDate - currentTimeToLong()
         return (remaining / (1000 * 60 * 60 * 24)).toInt().coerceAtLeast(0)
     }
 }

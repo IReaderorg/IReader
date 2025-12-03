@@ -1,10 +1,11 @@
-package ireader.domain.data.repository
+﻿package ireader.domain.data.repository
 
 import ireader.domain.models.library.LibraryAnalytics
 import ireader.domain.models.library.LibraryStatistics
 import ireader.domain.models.library.MonthlyReadingStats
 import ireader.domain.models.library.ReadingProgress
 import kotlinx.coroutines.flow.Flow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Repository for managing library statistics and analytics
@@ -123,5 +124,5 @@ data class StatisticsExport(
     val monthlyStats: List<MonthlyReadingStats>,
     val readingSessions: List<ReadingSession>,
     val achievements: List<Achievement>,
-    val exportTimestamp: Long = System.currentTimeMillis()
+    val exportTimestamp: Long = currentTimeToLong()
 )

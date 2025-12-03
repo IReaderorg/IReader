@@ -1,4 +1,6 @@
-package ireader.domain.models.reader
+﻿package ireader.domain.models.reader
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Reader statistics for tracking reading progress and analytics
@@ -61,7 +63,7 @@ data class ReadingSession(
     val endPage: Int = 0,
 ) {
     val durationMillis: Long
-        get() = (endTime ?: System.currentTimeMillis()) - startTime
+        get() = (endTime ?: currentTimeToLong()) - startTime
 
     val isActive: Boolean
         get() = endTime == null
@@ -75,7 +77,7 @@ data class PageProgress(
     val totalPages: Int,
     val chapterId: Long,
     val bookId: Long,
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = currentTimeToLong(),
 ) {
     val progressPercentage: Float
         get() = if (totalPages > 0) (currentPage.toFloat() / totalPages) * 100f else 0f

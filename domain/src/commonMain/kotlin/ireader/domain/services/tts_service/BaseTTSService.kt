@@ -1,4 +1,4 @@
-package ireader.domain.services.tts_service
+﻿package ireader.domain.services.tts_service
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.CatalogStore
@@ -21,6 +21,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration.Companion.minutes
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Base TTS Service Implementation
@@ -461,7 +462,7 @@ abstract class BaseTTSService(
                 scope.launch {
                     // Update the speaking start time when TTS actually starts speaking
                     // This is critical for highlighter synchronization
-                    _paragraphSpeakingStartTime.value = System.currentTimeMillis()
+                    _paragraphSpeakingStartTime.value = currentTimeToLong()
                     updateNotification()
                 }
             }

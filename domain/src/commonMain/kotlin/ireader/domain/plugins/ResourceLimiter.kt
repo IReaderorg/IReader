@@ -1,9 +1,10 @@
-package ireader.domain.plugins
+﻿package ireader.domain.plugins
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Enforces resource limits for plugins
@@ -256,7 +257,7 @@ data class ResourceViolation(
     val type: ViolationType,
     val message: String,
     val usage: PluginResourceUsage? = null,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = currentTimeToLong()
 )
 
 /**

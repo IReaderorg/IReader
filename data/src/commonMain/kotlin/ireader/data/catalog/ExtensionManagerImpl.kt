@@ -1,10 +1,11 @@
-package ireader.data.catalog
+﻿package ireader.data.catalog
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.interactor.*
 import ireader.domain.models.entities.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Comprehensive extension manager implementation
@@ -73,7 +74,7 @@ class ExtensionManagerImpl(
             // Initialize statistics
             extensionStatistics[catalog.sourceId] = ExtensionStatistics(
                 extensionId = catalog.sourceId,
-                installDate = System.currentTimeMillis(),
+                installDate = currentTimeToLong(),
                 lastUsed = 0,
                 usageCount = 0,
                 errorCount = 0,
@@ -187,7 +188,7 @@ class ExtensionManagerImpl(
         val stats = extensionStatistics[extensionId] ?: return
         
         extensionStatistics[extensionId] = stats.copy(
-            lastUsed = System.currentTimeMillis(),
+            lastUsed = currentTimeToLong(),
             usageCount = stats.usageCount + 1
         )
     }

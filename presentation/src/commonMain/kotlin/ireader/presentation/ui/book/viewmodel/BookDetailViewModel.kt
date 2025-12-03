@@ -1,4 +1,4 @@
-package ireader.presentation.ui.book.viewmodel
+﻿package ireader.presentation.ui.book.viewmodel
 
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -64,7 +64,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Calendar
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * BookDetailViewModel using sealed state pattern (Mihon architecture).
@@ -598,7 +598,7 @@ class BookDetailViewModel(
                                 localInsertUseCases.updateBook.update(
                                     book.copy(
                                         favorite = true,
-                                        dateAdded = Calendar.getInstance().timeInMillis,
+                                        dateAdded = currentTimeToLong(),
                                     )
                                 )
                             } else {

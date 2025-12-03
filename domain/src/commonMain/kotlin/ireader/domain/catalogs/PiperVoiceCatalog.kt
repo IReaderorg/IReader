@@ -1,4 +1,4 @@
-package ireader.domain.catalogs
+﻿package ireader.domain.catalogs
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -19,6 +19,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import kotlinx.serialization.json.longOrNull
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Dynamic catalog of Piper TTS voices fetched from official source.
@@ -50,7 +51,7 @@ object PiperVoiceCatalog {
     suspend fun fetchVoices(httpClient: HttpClient): Result<List<VoiceModel>> {
         return mutex.withLock {
             // Return cached if still valid
-            val now = System.currentTimeMillis()
+            val now = currentTimeToLong()
             if (cachedVoices != null && (now - lastFetchTime) < CACHE_DURATION_MS) {
                 return@withLock Result.success(cachedVoices!!)
             }

@@ -82,9 +82,7 @@ import ireader.i18n.resources.restore
 import ireader.i18n.resources.restore_backup_1
 import ireader.i18n.resources.restoring_backup_1
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import ireader.domain.utils.extensions.formatDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -578,8 +576,7 @@ private fun EmptyBackupsCard() {
 }
 
 private fun formatTimestamp(timestamp: Long): String {
-    val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
-    return sdf.format(Date(timestamp))
+    return timestamp.formatDateTime()
 }
 
 private fun formatFileSize(bytes: Long): String {

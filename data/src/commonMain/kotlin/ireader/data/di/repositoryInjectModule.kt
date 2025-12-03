@@ -257,4 +257,11 @@ val repositoryInjectModule = module {
             }
         }
     }
+    
+    // Character Art Gallery repository
+    single<ireader.domain.data.repository.CharacterArtRepository> {
+        // Use in-memory implementation for now
+        // Can be replaced with Supabase + R2 implementation later
+        ireader.data.repository.CharacterArtRepositoryImpl()
+    }
 }

@@ -1,4 +1,4 @@
-package ireader.domain.catalogs
+﻿package ireader.domain.catalogs
 
 import ireader.core.log.Log
 import ireader.core.source.LocalCatalogSource
@@ -27,6 +27,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Optimized CatalogStore with improved performance for catalog and JS plugin loading.
@@ -151,7 +152,7 @@ class CatalogStore(
      */
     private suspend fun initializeCatalogs() {
         withContext(Dispatchers.Default) {
-            val startTime = System.currentTimeMillis()
+            val startTime = currentTimeToLong()
             
             // Load all catalogs
             val loadedCatalogs = loader.loadAll()
@@ -168,7 +169,7 @@ class CatalogStore(
             catalogs = processedCatalogs
             _isInitialized.value = true
             
-            val loadTime = System.currentTimeMillis() - startTime
+            val loadTime = currentTimeToLong() - startTime
             Log.debug { "CatalogStore: Initial load completed in ${loadTime}ms (${processedCatalogs.size} catalogs)" }
             
             // Start background plugin loading after initial load

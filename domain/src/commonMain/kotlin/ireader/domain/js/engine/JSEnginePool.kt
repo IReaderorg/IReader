@@ -1,18 +1,19 @@
-package ireader.domain.js.engine
+﻿package ireader.domain.js.engine
 
 import ireader.domain.js.models.PluginPerformanceMetrics
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Compiled code cache entry.
  */
 private data class CompiledCode(
     val code: String,
-    val compiledAt: Long = System.currentTimeMillis(),
-    var lastAccessTime: Long = System.currentTimeMillis(),
+    val compiledAt: Long = currentTimeToLong(),
+    var lastAccessTime: Long = currentTimeToLong(),
     val sizeBytes: Long = code.length.toLong()
 )
 
@@ -29,7 +30,7 @@ class JSEnginePool(
     
     private data class EngineEntry(
         val engine: JSEngine,
-        var lastUsedTime: Long = System.currentTimeMillis()
+        var lastUsedTime: Long = currentTimeToLong()
     )
     
     private val engines = mutableMapOf<String, EngineEntry>()
@@ -56,9 +57,9 @@ class JSEnginePool(
         val entry = engines[pluginId]
         if (entry != null) {
             // Update last used time to prevent cleanup
-            val idleTime = System.currentTimeMillis() - entry.lastUsedTime
+            val idleTime = currentTimeToLong() - entry.lastUsedTime
             println("[JSEnginePool] Reusing existing engine for plugin: $pluginId (was idle for ${idleTime}ms)")
-            entry.lastUsedTime = System.currentTimeMillis()
+            entry.lastUsedTime = currentTimeToLong()
             return entry.engine
         }
         
@@ -84,7 +85,7 @@ class JSEnginePool(
      * @param pluginId The plugin identifier
      */
     suspend fun returnEngine(pluginId: String) = mutex.withLock {
-        engines[pluginId]?.lastUsedTime = System.currentTimeMillis()
+        engines[pluginId]?.lastUsedTime = currentTimeToLong()
     }
     
     /**
@@ -128,7 +129,7 @@ class JSEnginePool(
         // holds a reference to an engine that gets disposed.
         
         /* Original code (disabled):
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val toRemove = engines.filter { (_, entry) ->
             val idleTime = now - entry.lastUsedTime
             idleTime > idleTimeoutMillis
@@ -166,7 +167,7 @@ class JSEnginePool(
      */
     suspend fun <T> executeWithLimit(pluginId: String, operation: suspend () -> T): T {
         return executionSemaphore.withPermit {
-            val startTime = System.currentTimeMillis()
+            val startTime = currentTimeToLong()
             var success = false
             
             try {
@@ -174,7 +175,7 @@ class JSEnginePool(
                 success = true
                 return@withPermit result
             } finally {
-                val executionTime = System.currentTimeMillis() - startTime
+                val executionTime = currentTimeToLong() - startTime
                 recordMetrics(pluginId, executionTime, success)
             }
         }
@@ -190,7 +191,7 @@ class JSEnginePool(
     suspend fun getCachedCode(cacheKey: String, code: String): String = cacheMutex.withLock {
         val cached = codeCache[cacheKey]
         if (cached != null) {
-            cached.lastAccessTime = System.currentTimeMillis()
+            cached.lastAccessTime = currentTimeToLong()
             return cached.code
         }
         

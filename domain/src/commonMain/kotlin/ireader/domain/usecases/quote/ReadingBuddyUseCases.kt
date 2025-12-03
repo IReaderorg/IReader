@@ -1,8 +1,9 @@
-package ireader.domain.usecases.quote
+﻿package ireader.domain.usecases.quote
 
 import ireader.domain.models.quote.*
 import ireader.domain.preferences.prefs.ReadingBuddyPreferences
 import kotlin.math.sqrt
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use cases for the Reading Buddy feature
@@ -21,7 +22,7 @@ class ReadingBuddyUseCases(
         val level = preferences.buddyLevel().get()
         val experience = preferences.buddyExperience().get()
         
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val hoursSinceLastRead = (now - lastReadDate) / (1000 * 60 * 60)
         
         val mood = when {
@@ -52,7 +53,7 @@ class ReadingBuddyUseCases(
      * Record that user started reading
      */
     suspend fun onReadingStarted() {
-        preferences.lastInteractionTime().set(System.currentTimeMillis())
+        preferences.lastInteractionTime().set(currentTimeToLong())
         updateStreak()
     }
     
@@ -120,7 +121,7 @@ class ReadingBuddyUseCases(
      * Update reading streak
      */
     private suspend fun updateStreak() {
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val lastRead = preferences.lastReadDate().get()
         val currentStreak = preferences.currentStreak().get()
         

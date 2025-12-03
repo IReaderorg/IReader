@@ -1,7 +1,8 @@
-package ireader.core.io
+﻿package ireader.core.io
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import ireader.core.util.currentTimeMillis
 
 /**
  * In-memory fake implementation of FileSystem for testing.
@@ -64,7 +65,7 @@ class FakeFileSystem : FileSystem {
         val path: String,
         var isDirectory: Boolean = false,
         var content: ByteArray? = null,
-        var lastModified: Long = System.currentTimeMillis()
+        var lastModified: Long = currentTimeMillis()
     ) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true

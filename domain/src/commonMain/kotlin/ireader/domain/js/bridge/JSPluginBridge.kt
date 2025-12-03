@@ -1,4 +1,4 @@
-package ireader.domain.js.bridge
+﻿package ireader.domain.js.bridge
 
 import io.ktor.client.HttpClient
 import ireader.core.log.Log
@@ -14,6 +14,7 @@ import ireader.domain.js.models.JSSourceNovel
 import ireader.domain.js.models.PluginMetadata
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Bridge between JavaScript plugin API and Kotlin domain models.
@@ -134,9 +135,9 @@ class JSPluginBridge(
         }
 
         // Use a synchronous wrapper that waits for Promise resolution
-        val resultVar = "__pluginResult_${System.currentTimeMillis()}"
-        val errorVar = "__pluginError_${System.currentTimeMillis()}"
-        val doneVar = "__pluginDone_${System.currentTimeMillis()}"
+        val resultVar = "__pluginResult_${currentTimeToLong()}"
+        val errorVar = "__pluginError_${currentTimeToLong()}"
+        val doneVar = "__pluginDone_${currentTimeToLong()}"
 
         val script = """
             (function() {
@@ -408,7 +409,7 @@ class JSPluginBridge(
         return kotlinx.coroutines.withContext(jsDispatcher) {
             withTimeout(30000L) {
                 try {
-                    val startTime = System.currentTimeMillis()
+                    val startTime = currentTimeToLong()
 
                     // Validate and normalize filters - ensure all filter values are properly structured
                     val normalizedFilters = validateAndNormalizeFilters(filters)
@@ -506,7 +507,7 @@ class JSPluginBridge(
 
                     val novels = parseNovelList(result)
 
-                    val duration = System.currentTimeMillis() - startTime
+                    val duration = currentTimeToLong() - startTime
                     Log.info { "[JSPlugin] popularNovels returned ${novels.size} items in ${duration}ms" }
 
                     novels
@@ -538,7 +539,7 @@ class JSPluginBridge(
                         return@withTimeout emptyList()
                     }
 
-                    val startTime = System.currentTimeMillis()
+                    val startTime = currentTimeToLong()
 
                     // Use async execution for better performance
                     val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
@@ -630,7 +631,7 @@ class JSPluginBridge(
 
                     val novels = parseNovelList(result)
 
-                    val duration = System.currentTimeMillis() - startTime
+                    val duration = currentTimeToLong() - startTime
                     Log.info { "[JSPlugin] searchNovels returned ${novels.size} items in ${duration}ms" }
 
                     novels
@@ -657,7 +658,7 @@ class JSPluginBridge(
                         throw IllegalArgumentException("Novel path cannot be blank")
                     }
 
-                    val startTime = System.currentTimeMillis()
+                    val startTime = currentTimeToLong()
                     val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
                     val escapedPath = novelPath.replace("'", "\\'").replace("\"", "\\\"")
                         .replace("\n", "\\n")
@@ -735,7 +736,7 @@ class JSPluginBridge(
 
                     val novel = parseSourceNovel(result)
 
-                    val duration = System.currentTimeMillis() - startTime
+                    val duration = currentTimeToLong() - startTime
                     Log.info { "[JSPlugin] parseNovel returned novel with ${novel.chapters.size} chapters in ${duration}ms" }
 
                     novel
@@ -761,7 +762,7 @@ class JSPluginBridge(
                     throw IllegalArgumentException("Chapter path cannot be blank")
                 }
 
-                val startTime = System.currentTimeMillis()
+                val startTime = currentTimeToLong()
                 val sanitizedId = pluginId.replace(Regex("[^a-zA-Z0-9_]"), "_")
                 val escapedPath = chapterPath.replace("'", "\\'").replace("\"", "\\\"")
                     .replace("\n", "\\n")
@@ -840,7 +841,7 @@ class JSPluginBridge(
 
                 val content = result?.toString() ?: ""
 
-                val duration = System.currentTimeMillis() - startTime
+                val duration = currentTimeToLong() - startTime
                 Log.info { "[JSPlugin] parseChapter returned ${content.length} characters in ${duration}ms" }
 
                 content

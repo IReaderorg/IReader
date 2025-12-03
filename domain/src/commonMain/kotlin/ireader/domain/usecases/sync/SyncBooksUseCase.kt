@@ -1,8 +1,9 @@
-package ireader.domain.usecases.sync
+﻿package ireader.domain.usecases.sync
 
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.remote.SyncedBook
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case for syncing books to remote backend
@@ -22,7 +23,7 @@ class SyncBooksUseCase(
                 SyncedBook(
                     userId = userId,
                     bookId = "${book.sourceId}-${book.id}",
-                    lastRead = System.currentTimeMillis(),
+                    lastRead = currentTimeToLong(),
                     title = book.title,
                     bookUrl = book.key,
                     sourceId = book.sourceId,
@@ -76,7 +77,7 @@ class SyncBooksUseCase(
                     sourceId = book.sourceId,
                     title = book.title,
                     bookUrl = book.key,
-                    lastRead = System.currentTimeMillis()
+                    lastRead = currentTimeToLong()
                 )
                 
                 remoteRepository.syncBook(syncedBook)

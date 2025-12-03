@@ -1,10 +1,11 @@
-package ireader.domain.usecases.reader
+﻿package ireader.domain.usecases.reader
 
 import ireader.domain.models.reader.ReadingSession
 import ireader.domain.models.reader.ReaderStatistics
 import ireader.domain.preferences.prefs.ReaderPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case for tracking reading statistics
@@ -17,7 +18,7 @@ class TrackReadingStatistics(
      * Start a new reading session
      */
     suspend fun startSession(bookId: Long, chapterId: Long): ReadingSession {
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         readerPreferences.currentSessionStartTime().set(startTime)
         
         return ReadingSession(
@@ -31,7 +32,7 @@ class TrackReadingStatistics(
      * End the current reading session and update statistics
      */
     suspend fun endSession(session: ReadingSession, pagesRead: Int) {
-        val endTime = System.currentTimeMillis()
+        val endTime = currentTimeToLong()
         val duration = endTime - session.startTime
         
         // Update total reading time
@@ -72,7 +73,7 @@ class TrackReadingStatistics(
         val sessionStart = readerPreferences.currentSessionStartTime().get()
         
         val currentSessionDuration = if (sessionStart > 0) {
-            System.currentTimeMillis() - sessionStart
+            currentTimeToLong() - sessionStart
         } else {
             0L
         }
@@ -83,7 +84,7 @@ class TrackReadingStatistics(
             chaptersCompleted = chaptersCompleted,
             currentSessionStartTime = sessionStart,
             currentSessionDurationMillis = currentSessionDuration,
-            lastReadTimestamp = System.currentTimeMillis()
+            lastReadTimestamp = currentTimeToLong()
         )
     }
 
@@ -98,7 +99,7 @@ class TrackReadingStatistics(
             readerPreferences.currentSessionStartTime().changes()
         ) { totalTime, pagesRead, chaptersCompleted, sessionStart ->
             val currentSessionDuration = if (sessionStart > 0) {
-                System.currentTimeMillis() - sessionStart
+                currentTimeToLong() - sessionStart
             } else {
                 0L
             }
@@ -109,7 +110,7 @@ class TrackReadingStatistics(
                 chaptersCompleted = chaptersCompleted,
                 currentSessionStartTime = sessionStart,
                 currentSessionDurationMillis = currentSessionDuration,
-                lastReadTimestamp = System.currentTimeMillis()
+                lastReadTimestamp = currentTimeToLong()
             )
         }
     }

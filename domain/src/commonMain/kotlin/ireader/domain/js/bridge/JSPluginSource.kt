@@ -1,4 +1,4 @@
-package ireader.domain.js.bridge
+﻿package ireader.domain.js.bridge
 
 import ireader.core.log.Log
 import ireader.core.source.Dependencies
@@ -7,6 +7,7 @@ import ireader.core.source.SourceHelpers
 import ireader.core.source.model.*
 import ireader.domain.js.models.PluginMetadata
 import ireader.domain.js.util.JSFilterConverter
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Wrapper that adapts a Zipline LNReaderPlugin to IReader's HttpSource interface.
@@ -385,6 +386,6 @@ class JSPluginSource(
         
         // TODO: Implement proper date parsing
         // For now, return current time
-        return System.currentTimeMillis()
+        return currentTimeToLong()
     }
 }

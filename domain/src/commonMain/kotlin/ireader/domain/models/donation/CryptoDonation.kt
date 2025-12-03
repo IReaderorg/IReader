@@ -1,4 +1,6 @@
-package ireader.domain.models.donation
+﻿package ireader.domain.models.donation
+
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Represents a cryptocurrency donation transaction
@@ -15,7 +17,7 @@ data class CryptoDonation(
     val currency: String,
     val amount: Double,
     val txHash: String? = null,
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = currentTimeToLong(),
     val goalId: String? = null
 ) {
     /**

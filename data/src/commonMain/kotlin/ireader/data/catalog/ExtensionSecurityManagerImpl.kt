@@ -1,4 +1,4 @@
-package ireader.data.catalog
+﻿package ireader.data.catalog
 
 import ireader.core.log.Log
 import ireader.domain.catalogs.interactor.ExtensionSecurityManager
@@ -6,6 +6,7 @@ import ireader.domain.models.entities.Catalog
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.ExtensionSecurity
 import ireader.domain.models.entities.ExtensionTrustLevel
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Implementation of extension security management
@@ -34,7 +35,7 @@ class ExtensionSecurityManagerImpl(
             hasNetworkAccess = permissions.contains("INTERNET"),
             hasStorageAccess = permissions.any { it.contains("STORAGE") },
             securityWarnings = warnings,
-            lastSecurityCheck = System.currentTimeMillis()
+            lastSecurityCheck = currentTimeToLong()
         )
     }
     

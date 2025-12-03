@@ -186,6 +186,17 @@ val PresentationModules = module {
         )
     }
     
+    // Character Art Gallery ViewModel
+    factory {
+        ireader.presentation.ui.characterart.CharacterArtViewModel(
+            repository = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            }
+        )
+    }
+    
     // Voice Selection ViewModel
     factory { ireader.presentation.ui.settings.viewmodels.VoiceSelectionViewModel(get(), get(), get(), get()) }
     

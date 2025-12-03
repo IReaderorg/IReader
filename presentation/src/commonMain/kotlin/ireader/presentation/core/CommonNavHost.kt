@@ -135,6 +135,19 @@ fun CommonNavHost(
             ireader.presentation.core.ui.CommunityHubScreenSpec().Content()
         }
         
+        // Character Art Gallery
+        composable(NavigationRoutes.characterArtGallery) {
+            ireader.presentation.core.ui.CharacterArtGalleryScreenSpec().Content()
+        }
+        
+        composable(NavigationRoutes.characterArtUpload) {
+            ireader.presentation.core.ui.CharacterArtUploadScreenSpec().Content()
+        }
+        
+        composable(NavigationRoutes.adminCharacterArtVerification) {
+            ireader.presentation.core.ui.AdminCharacterArtVerificationScreenSpec().Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }

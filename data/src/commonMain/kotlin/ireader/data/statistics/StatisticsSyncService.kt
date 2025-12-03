@@ -1,4 +1,4 @@
-package ireader.data.statistics
+﻿package ireader.data.statistics
 
 import ireader.core.log.Log
 import ireader.data.remote.MultiSupabaseClientProvider
@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Service for syncing reading statistics with Supabase Analytics (Project 7)
@@ -109,7 +110,7 @@ class StatisticsSyncService(
                 updateLocalStatisticsIfNeeded(localStats, remoteStats)
             }
             
-            _syncState.value = SyncState.Success(System.currentTimeMillis())
+            _syncState.value = SyncState.Success(currentTimeToLong())
             Log.info("Statistics synced successfully for user $userId")
             Result.success(Unit)
         } catch (e: Exception) {
@@ -183,7 +184,7 @@ class StatisticsSyncService(
         
         // Update streak if remote is higher
         if (remote.reading_streak > local.readingStreak) {
-            val lastReadDate = statisticsRepository.getLastReadDate() ?: System.currentTimeMillis()
+            val lastReadDate = statisticsRepository.getLastReadDate() ?: currentTimeToLong()
             statisticsRepository.updateStreak(remote.reading_streak, lastReadDate)
         }
     }

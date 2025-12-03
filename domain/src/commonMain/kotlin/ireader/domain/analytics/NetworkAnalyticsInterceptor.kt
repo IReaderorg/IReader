@@ -1,6 +1,7 @@
-package ireader.domain.analytics
+﻿package ireader.domain.analytics
 
 import ireader.core.log.Log
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Network analytics interceptor for tracking request latency
@@ -17,7 +18,7 @@ class NetworkAnalyticsInterceptor(
         return NetworkRequestTracker(
             url = url,
             method = method,
-            startTime = System.currentTimeMillis(),
+            startTime = currentTimeToLong(),
             analyticsManager = analyticsManager
         )
     }
@@ -37,7 +38,7 @@ class NetworkRequestTracker(
      */
     fun complete(success: Boolean = true, statusCode: Int? = null) {
         try {
-            val duration = System.currentTimeMillis() - startTime
+            val duration = currentTimeToLong() - startTime
             
             val context = buildMap {
                 put("method", method)
@@ -63,7 +64,7 @@ class NetworkRequestTracker(
      */
     fun fail(error: Throwable) {
         try {
-            val duration = System.currentTimeMillis() - startTime
+            val duration = currentTimeToLong() - startTime
             
             val context = buildMap {
                 put("method", method)

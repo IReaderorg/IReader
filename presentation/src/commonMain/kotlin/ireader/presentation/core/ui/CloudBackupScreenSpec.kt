@@ -1,4 +1,4 @@
-package ireader.presentation.core.ui
+﻿package ireader.presentation.core.ui
 
 import ireader.presentation.core.LocalNavigator
 
@@ -13,6 +13,7 @@ import ireader.presentation.ui.settings.backups.CloudBackupScreen
 import ireader.presentation.ui.settings.backups.CloudBackupViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class CloudBackupScreenSpec {
 
@@ -68,7 +69,7 @@ class CloudBackupScreenSpec {
                 scope.launch {
                     try {
                         // Create a temporary backup file
-                        val timestamp = System.currentTimeMillis()
+                        val timestamp = currentTimeToLong()
                         val fileName = "IReader_cloud_backup_$timestamp.proto.gz"
                         
                         // Get platform-specific temp directory

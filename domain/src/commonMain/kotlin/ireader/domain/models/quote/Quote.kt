@@ -1,6 +1,7 @@
-package ireader.domain.models.quote
+﻿package ireader.domain.models.quote
 
 import kotlinx.serialization.Serializable
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Represents a quote from a book that can be shared
@@ -17,7 +18,7 @@ data class Quote(
     val likesCount: Int = 0,
     val isLikedByUser: Boolean = false,
     val status: QuoteStatus = QuoteStatus.APPROVED,
-    val submittedAt: Long = System.currentTimeMillis(),
+    val submittedAt: Long = currentTimeToLong(),
     val isFeatured: Boolean = false
 )
 
@@ -36,7 +37,7 @@ enum class QuoteStatus {
 @Serializable
 data class DailyQuote(
     val quote: Quote,
-    val dateShown: Long = System.currentTimeMillis(),
+    val dateShown: Long = currentTimeToLong(),
     val cardStyle: QuoteCardStyle = QuoteCardStyle.GRADIENT_SUNSET
 )
 

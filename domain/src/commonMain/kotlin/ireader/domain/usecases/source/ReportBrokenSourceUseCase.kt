@@ -1,8 +1,9 @@
-package ireader.domain.usecases.source
+﻿package ireader.domain.usecases.source
 
 import ireader.domain.data.repository.SourceReportRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ireader.domain.utils.extensions.currentTimeToLong
 
 class ReportBrokenSourceUseCase(
     private val sourceReportRepository: SourceReportRepository
@@ -28,7 +29,7 @@ class ReportBrokenSourceUseCase(
                 packageName = packageName,
                 version = version,
                 reason = reason,
-                timestamp = System.currentTimeMillis(),
+                timestamp = currentTimeToLong(),
                 status = "pending"
             )
             

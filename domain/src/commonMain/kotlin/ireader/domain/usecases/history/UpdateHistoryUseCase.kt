@@ -1,7 +1,8 @@
-package ireader.domain.usecases.history
+﻿package ireader.domain.usecases.history
 
 import ireader.domain.data.repository.HistoryRepository
 import ireader.domain.models.entities.History
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Use case for updating reading history
@@ -21,7 +22,7 @@ class UpdateHistoryUseCase(
      */
     suspend fun recordProgress(
         chapterId: Long,
-        readAt: Long = System.currentTimeMillis()
+        readAt: Long = currentTimeToLong()
     ) {
         val history = History(
             id = 0,

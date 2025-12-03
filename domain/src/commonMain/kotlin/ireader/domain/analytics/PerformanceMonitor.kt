@@ -1,10 +1,11 @@
-package ireader.domain.analytics
+﻿package ireader.domain.analytics
 
 import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * Performance monitor for tracking various performance metrics
@@ -204,11 +205,11 @@ class PerformanceMonitor(
         context: Map<String, String> = emptyMap(),
         block: () -> T
     ): T {
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         try {
             return block()
         } finally {
-            val duration = System.currentTimeMillis() - startTime
+            val duration = currentTimeToLong() - startTime
             when (metricType) {
                 MetricType.SYNTHESIS_TIME -> recordSynthesisTime(duration, context)
                 MetricType.NETWORK_LATENCY -> recordNetworkLatency(duration, context)
@@ -236,11 +237,11 @@ class PerformanceMonitor(
         context: Map<String, String> = emptyMap(),
         crossinline block: suspend () -> T
     ): T {
-        val startTime = System.currentTimeMillis()
+        val startTime = currentTimeToLong()
         try {
             return block()
         } finally {
-            val duration = System.currentTimeMillis() - startTime
+            val duration = currentTimeToLong() - startTime
             when (metricType) {
                 MetricType.SYNTHESIS_TIME -> recordSynthesisTime(duration, context)
                 MetricType.NETWORK_LATENCY -> recordNetworkLatency(duration, context)

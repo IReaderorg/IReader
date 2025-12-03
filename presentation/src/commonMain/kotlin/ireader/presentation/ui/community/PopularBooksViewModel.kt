@@ -1,4 +1,4 @@
-package ireader.presentation.ui.community
+﻿package ireader.presentation.ui.community
 
 import androidx.compose.runtime.Stable
 import ireader.domain.data.repository.BookRepository
@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel for the Popular Books screen following Mihon's StateScreenModel pattern.
@@ -52,7 +53,7 @@ class PopularBooksViewModel(
                             currentPage = 1
                         )
                     }
-                    lastLoadTime = System.currentTimeMillis()
+                    lastLoadTime = currentTimeToLong()
                     // Lookup local books for covers
                     lookupLocalBooks(books)
                 }
@@ -72,7 +73,7 @@ class PopularBooksViewModel(
         if (currentState.isLoadingMore || !currentState.hasMore || currentState.isRateLimited) return
         
         // Rate limiting check
-        val now = System.currentTimeMillis()
+        val now = currentTimeToLong()
         val timeSinceLastLoad = now - lastLoadTime
         
         if (timeSinceLastLoad < minLoadInterval) {
@@ -104,7 +105,7 @@ class PopularBooksViewModel(
                             currentPage = nextPage
                         )
                     }
-                    lastLoadTime = System.currentTimeMillis()
+                    lastLoadTime = currentTimeToLong()
                 }
                 .onFailure { error ->
                     _state.update { current ->
