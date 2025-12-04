@@ -44,18 +44,28 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "presentation"
             isStatic = true
+            
+            // Export all transitive dependencies for iOS
+            export(project(Modules.domain))
+            export(project(Modules.coreApi))
+            export(project(Modules.sourceApi))
+            export(project(Modules.data))
+            export(project(Modules.presentationCore))
+            
+            // Link SQLite for sqliter-driver
+            linkerOpts("-lsqlite3")
         }
     }
 
     sourceSets {
          commonMain {
             dependencies {
-                implementation(project(Modules.domain))
-                implementation(project(Modules.coreApi))
-                implementation(project(Modules.sourceApi))
-                implementation(project(Modules.data))
-                implementation(project(Modules.commonResources))
-                implementation(project(Modules.presentationCore))
+                api(project(Modules.domain))
+                api(project(Modules.coreApi))
+                api(project(Modules.sourceApi))
+                api(project(Modules.data))
+                api(project(Modules.commonResources))
+                api(project(Modules.presentationCore))
 
                 api(compose.foundation)
                 api(compose.runtime)
