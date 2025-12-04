@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.experimental.ExperimentalObjCName::class)
+
 package ireader.presentation
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,13 +22,22 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import platform.UIKit.UIViewController
+import kotlin.experimental.ExperimentalObjCName
+import kotlin.native.ObjCName
 
 /**
- * Creates the main UIViewController for the iOS app that hosts Compose UI.
- * This is called from Swift to get the Compose-based UI.
+ * Object to expose iOS entry points with clean Swift names.
  */
-fun MainViewController(): UIViewController = ComposeUIViewController {
-    IReaderApp()
+@ObjCName("IosMainViewControllerKt")
+object IosMainViewController {
+    /**
+     * Creates the main UIViewController for the iOS app that hosts Compose UI.
+     * This is called from Swift to get the Compose-based UI.
+     */
+    @ObjCName("MainViewController")
+    fun MainViewController(): UIViewController = ComposeUIViewController {
+        IReaderApp()
+    }
 }
 
 /**

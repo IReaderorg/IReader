@@ -1,0 +1,46 @@
+{
+  "name": "Infinity Reader",
+  "identifier": "com.infinity.altstore",
+  "subtitle": "Novel Reader App",
+  "description": "A feature-rich novel reader application built with Kotlin Multiplatform.",
+  "iconURL": "https://raw.githubusercontent.com/user/repo/main/assets/icon.png",
+  "headerURL": "https://raw.githubusercontent.com/user/repo/main/assets/header.png",
+  "website": "https://github.com/user/repo",
+  "tintColor": "#6366F1",
+  "featuredApps": [
+    "com.infinity.iosApp"
+  ],
+  "apps": [
+    {
+      "name": "Infinity",
+      "bundleIdentifier": "com.infinity.iosApp",
+      "developerName": "Infinity Team",
+      "subtitle": "Novel Reader",
+      "localizedDescription": "A beautiful and feature-rich novel reader app.\n\nFeatures:\n• Read novels from multiple sources\n• Sync reading progress across devices\n• Customizable reading experience\n• Text-to-speech support\n• Offline reading\n• And much more!",
+      "iconURL": "https://raw.githubusercontent.com/user/repo/main/assets/icon.png",
+      "tintColor": "#6366F1",
+      "screenshotURLs": [
+        "https://raw.githubusercontent.com/user/repo/main/screenshots/ios/1.png",
+        "https://raw.githubusercontent.com/user/repo/main/screenshots/ios/2.png"
+      ],
+      "versions": [
+        {
+          "version": "1.0.0",
+          "date": "2024-01-01",
+          "localizedDescription": "Initial release",
+          "downloadURL": "https://github.com/user/repo/releases/download/v1.0.0/Infinity-unsigned.ipa",
+          "size": 50000000,
+          "minOSVersion": "15.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSPhotoLibraryUsageDescription": "Used to save images and covers",
+          "NSDocumentsFolderUsageDescription": "Used to import and export books"
+        }
+      }
+    }
+  ],
+  "news": []
+}

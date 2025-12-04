@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.experimental.ExperimentalObjCName::class)
+
 package ireader.presentation
 
 import ireader.data.di.DataModule
@@ -19,43 +21,50 @@ import ireader.presentation.core.di.presentationPlatformModule
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import kotlin.experimental.ExperimentalObjCName
+import kotlin.native.ObjCName
 
 /**
  * Initialize Koin for iOS
  * This should be called from Swift before using any Kotlin code
  */
-fun initKoin(additionalModules: List<Module> = emptyList()) {
-    startKoin {
-        modules(
-            listOf(
-                // Data layer
-                dataPlatformModule,
-                DataModule,
-                repositoryInjectModule,
-                remotePlatformModule,
-                remoteModule,
-                reviewModule,
-                // Domain layer
-                preferencesInjectModule,
-                localModule,
-                platformServiceModule,
-                ireader.domain.di.ServiceModule,
-                UseCasesInject,
-                DomainServices,
-                DomainModule,
-                CatalogModule,
-                PluginModule,
-                // Presentation layer
-                PresentationModules,
-                presentationPlatformModule,
-            ) + additionalModules
-        )
+@ObjCName("IosKoinInitKt")
+object IosKoinInit {
+    @ObjCName("initKoin")
+    fun initKoin(additionalModules: List<Module> = emptyList()) {
+        startKoin {
+            modules(
+                listOf(
+                    // Data layer
+                    dataPlatformModule,
+                    DataModule,
+                    repositoryInjectModule,
+                    remotePlatformModule,
+                    remoteModule,
+                    reviewModule,
+                    // Domain layer
+                    preferencesInjectModule,
+                    localModule,
+                    platformServiceModule,
+                    ireader.domain.di.ServiceModule,
+                    UseCasesInject,
+                    DomainServices,
+                    DomainModule,
+                    CatalogModule,
+                    PluginModule,
+                    // Presentation layer
+                    PresentationModules,
+                    presentationPlatformModule,
+                ) + additionalModules
+            )
+        }
     }
-}
 
-/**
- * Helper function to create a Koin module from Swift
- */
-fun createModule(configure: Module.() -> Unit): Module {
-    return module(createdAtStart = false, moduleDeclaration = configure)
+    /**
+     * Helper function to create a Koin module from Swift
+     */
+    @ObjCName("createModule")
+    fun createModule(configure: Module.() -> Unit): Module {
+        return module(createdAtStart = false, moduleDeclaration = configure)
+    }
 }

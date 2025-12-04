@@ -89,6 +89,11 @@ workflows:
             SIMULATOR_ID=$(xcrun simctl list devices available | grep -oE '[A-F0-9-]{36}' | head -1)
           fi
           
+          # List framework location for debugging
+          echo "Framework location:"
+          ls -la presentation/build/xcode-frameworks/Debug/iphonesimulator/ || echo "xcode-frameworks not found"
+          ls -la presentation/build/bin/iosSimulatorArm64/debugFramework/ || echo "debugFramework not found"
+          
           xcodebuild build \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
@@ -96,8 +101,7 @@ workflows:
             -destination "id=$SIMULATOR_ID" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../presentation/build/bin/iosSimulatorArm64/releaseFramework"
+            CODE_SIGNING_ALLOWED=NO
       
       # Run iOS tests (if available)
       - name: Run iOS Tests
@@ -208,18 +212,18 @@ workflows:
       
       - name: Build Unsigned App
         script: |
-          # Build for real device without signing
+          # Build for real device without signing (using Debug framework)
           xcodebuild build \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
-            -configuration Release \
+            -configuration Debug \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build/DerivedData \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             AD_HOC_CODE_SIGNING_ALLOWED=YES \
-            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../presentation/build/bin/iosArm64/releaseFramework"
+            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../presentation/build/bin/iosArm64/debugFramework"
       
       - name: Create Unsigned IPA
         script: |
