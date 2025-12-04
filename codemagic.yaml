@@ -62,12 +62,12 @@ workflows:
       # Build Kotlin framework for iOS Simulator
       - name: Build Kotlin Framework
         script: |
-          # Build the iOS framework directly (not via Xcode task)
-          ./gradlew :ios-build-check:linkReleaseFrameworkIosSimulatorArm64 --no-daemon
+          # Build the presentation iOS framework (contains the actual Compose UI)
+          ./gradlew :presentation:linkReleaseFrameworkIosSimulatorArm64 --no-daemon
           
           # Copy framework to expected location for Xcode
-          FRAMEWORK_PATH="ios-build-check/build/bin/iosSimulatorArm64/releaseFramework"
-          DEST_PATH="ios-build-check/build/xcode-frameworks/Release/iphonesimulator"
+          FRAMEWORK_PATH="presentation/build/bin/iosSimulatorArm64/releaseFramework"
+          DEST_PATH="presentation/build/xcode-frameworks/Release/iphonesimulator"
           mkdir -p "$DEST_PATH"
           cp -R "$FRAMEWORK_PATH"/* "$DEST_PATH/" || echo "Framework copy skipped"
       
@@ -91,7 +91,7 @@ workflows:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../ios-build-check/build/bin/iosSimulatorArm64/releaseFramework"
+            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../presentation/build/bin/iosSimulatorArm64/releaseFramework"
       
       # Run iOS tests (if available)
       - name: Run iOS Tests
@@ -111,7 +111,7 @@ workflows:
     
     artifacts:
       - iosApp/build/ios/**/*.app
-      - ios-build-check/build/**/*.framework
+      - presentation/build/**/*.framework
       - /tmp/xcodebuild_logs/*.log
     
     publishing:
@@ -185,12 +185,12 @@ workflows:
       
       - name: Build Kotlin Framework
         script: |
-          # Build the iOS framework for real devices (arm64)
-          ./gradlew :ios-build-check:linkReleaseFrameworkIosArm64 --no-daemon
+          # Build the presentation iOS framework for real devices (arm64)
+          ./gradlew :presentation:linkReleaseFrameworkIosArm64 --no-daemon
           
           # Copy framework to expected location
-          FRAMEWORK_PATH="ios-build-check/build/bin/iosArm64/releaseFramework"
-          DEST_PATH="ios-build-check/build/xcode-frameworks/Release/iphoneos"
+          FRAMEWORK_PATH="presentation/build/bin/iosArm64/releaseFramework"
+          DEST_PATH="presentation/build/xcode-frameworks/Release/iphoneos"
           mkdir -p "$DEST_PATH"
           cp -R "$FRAMEWORK_PATH"/* "$DEST_PATH/" || echo "Framework copy skipped"
       
@@ -207,7 +207,7 @@ workflows:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             AD_HOC_CODE_SIGNING_ALLOWED=YES \
-            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../ios-build-check/build/bin/iosArm64/releaseFramework"
+            FRAMEWORK_SEARCH_PATHS="\$(inherited) \$(SRCROOT)/../presentation/build/bin/iosArm64/releaseFramework"
       
       - name: Create Unsigned IPA
         script: |

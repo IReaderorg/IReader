@@ -153,7 +153,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :ios-build-check:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :presentation:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -306,7 +306,7 @@
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../ios-build-check/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
+					"$(SRCROOT)/../presentation/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -316,7 +316,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
-					iosBuildCheck,
+					presentation,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.infinity.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -334,7 +334,7 @@
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../ios-build-check/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
+					"$(SRCROOT)/../presentation/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -344,7 +344,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
-					iosBuildCheck,
+					presentation,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.infinity.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
