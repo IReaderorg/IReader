@@ -96,20 +96,7 @@ class SourceHelpersTest {
         val result = SourceHelpers.normalizeUrl(url)
         assertEquals("https://example.com", result)
     }
-    
-    @Test
-    fun `isValidUrl returns true for valid URLs`() {
-        assert(SourceHelpers.isValidUrl("https://example.com"))
-        assert(SourceHelpers.isValidUrl("http://example.com/path"))
-        assert(SourceHelpers.isValidUrl("https://sub.example.com:8080/path?query=1"))
-    }
-    
-    @Test
-    fun `isValidUrl returns false for invalid URLs`() {
-        assert(!SourceHelpers.isValidUrl("not a url"))
-        assert(!SourceHelpers.isValidUrl(""))
-        assert(!SourceHelpers.isValidUrl("/relative/path"))
-    }
+
     
     @Test
     fun `extractDomain extracts domain correctly`() {

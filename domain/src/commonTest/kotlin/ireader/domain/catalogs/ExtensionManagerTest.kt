@@ -1,9 +1,17 @@
 package ireader.domain.catalogs
 
-import ireader.domain.catalogs.interactor.*
-import ireader.domain.models.entities.*
+import ireader.domain.catalogs.interactor.ExtensionManager
+import ireader.domain.catalogs.interactor.ExtensionSecurityManager
+import ireader.domain.models.entities.CatalogInstalled
+import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.models.entities.ExtensionInstallMethod
+import ireader.domain.models.entities.ExtensionSecurity
+import ireader.domain.models.entities.ExtensionTrustLevel
 import kotlinx.coroutines.test.runTest
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Unit tests for ExtensionManager
@@ -38,6 +46,7 @@ class ExtensionManagerTest {
         // assertTrue(result.isSuccess)
     }
     
+    @OptIn(ExperimentalTime::class)
     @Test
     fun `installExtension should fail if extension is blocked`() = runTest {
         // Given
@@ -49,7 +58,7 @@ class ExtensionManagerTest {
             hasNetworkAccess = false,
             hasStorageAccess = false,
             securityWarnings = listOf("Extension is blocked"),
-            lastSecurityCheck = System.currentTimeMillis()
+            lastSecurityCheck = Clock.System.now().toEpochMilliseconds()
         )
         
         // When

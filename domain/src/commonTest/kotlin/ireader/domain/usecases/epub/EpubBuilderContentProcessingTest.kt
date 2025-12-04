@@ -482,7 +482,7 @@ class EpubBuilderContentProcessingTest {
             read = false,
             bookmark = false,
             dateUpload = 0L,
-            dateFetch = System.currentTimeMillis(),
+            dateFetch = Clock.System.now().toEpochMilliseconds(),
             sourceOrder = id,
             number = id.toFloat(),
             translator = "",

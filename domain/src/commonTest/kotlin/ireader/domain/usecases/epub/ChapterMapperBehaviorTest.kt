@@ -316,7 +316,7 @@ class ChapterMapperBehaviorTest {
         lastPageRead: Long = 0L,
         chapterNumber: Float = id.toFloat(),
         sourceOrder: Long = id,
-        dateFetch: Long = if (isDownloaded) System.currentTimeMillis() else 0L,
+        dateFetch: Long = if (isDownloaded) Clock.System.now().toEpochMilliseconds() else 0L,
         dateUpload: Long = 0L,
         type: Long = 0L,
         scanlator: String = ""
@@ -357,7 +357,7 @@ class ChapterMapperBehaviorTest {
         lastPageRead: Long = 0L,
         chapterNumber: Float = id.toFloat(),
         sourceOrder: Long = id,
-        dateFetch: Long = System.currentTimeMillis(),
+        dateFetch: Long = Clock.System.now().toEpochMilliseconds(),
         dateUpload: Long = 0L,
         type: Long = 0L,
         scanlator: String = ""

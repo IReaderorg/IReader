@@ -1,11 +1,14 @@
 
-
 package ireader.core.source.model
 
+import kotlinx.serialization.Serializable
+
 /**
- * Model for a manga given by a source
- *
+ * Model for a manga given by a source.
+ * 
+ * This class is serializable for iOS JS bridge support.
  */
+@Serializable
 data class MangaInfo(
     val key: String,
     val title: String,

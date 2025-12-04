@@ -1,6 +1,13 @@
 package ireader.domain.models.entities
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Unit tests for SourceHealth and SourceStatus
@@ -55,14 +62,15 @@ class SourceHealthTest {
         assertEquals("Connection timeout", (health.status as SourceStatus.Error).message)
     }
 
+    @OptIn(ExperimentalTime::class)
     @Test
     fun `SourceHealth lastChecked has default value`() {
-        val beforeCreation = System.currentTimeMillis()
+        val beforeCreation = Clock.System.now().toEpochMilliseconds()
         val health = SourceHealth(
             sourceId = 1L,
             status = SourceStatus.Online
         )
-        val afterCreation = System.currentTimeMillis()
+        val afterCreation = Clock.System.now().toEpochMilliseconds()
         
         assertTrue(health.lastChecked >= beforeCreation)
         assertTrue(health.lastChecked <= afterCreation)

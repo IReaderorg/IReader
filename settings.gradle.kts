@@ -20,11 +20,35 @@ include(":core")
 include(":i18n")
 include(":desktop")
 include(":source-api")
+include(":source-runtime-js")
 include(":ios-build-check")
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    // Use PREFER_SETTINGS to allow Kotlin/JS Node.js repository while preferring settings repos
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
+        // Node.js distribution for Kotlin/JS
+        exclusiveContent {
+            forRepository {
+                ivy("https://nodejs.org/dist") {
+                    patternLayout { artifact("v[revision]/[artifact](-v[revision]-[classifier]).[ext]") }
+                    metadataSources { artifact() }
+                    content { includeModule("org.nodejs", "node") }
+                }
+            }
+            filter { includeGroup("org.nodejs") }
+        }
+        // Yarn distribution for Kotlin/JS
+        exclusiveContent {
+            forRepository {
+                ivy("https://github.com/yarnpkg/yarn/releases/download") {
+                    patternLayout { artifact("v[revision]/[artifact](-v[revision]).[ext]") }
+                    metadataSources { artifact() }
+                    content { includeModule("com.yarnpkg", "yarn") }
+                }
+            }
+            filter { includeGroup("com.yarnpkg") }
+        }
         mavenCentral()
         google()
         // JetBrains Compose repository for Compose Multiplatform

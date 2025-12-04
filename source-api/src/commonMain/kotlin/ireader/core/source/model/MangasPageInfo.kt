@@ -1,7 +1,14 @@
 
-
 package ireader.core.source.model
 
+import kotlinx.serialization.Serializable
+
+/**
+ * Paginated list of manga results.
+ * 
+ * This class is serializable for iOS JS bridge support.
+ */
+@Serializable
 data class MangasPageInfo(
     val mangas: List<MangaInfo>,
     val hasNextPage: Boolean

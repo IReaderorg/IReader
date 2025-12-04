@@ -8,15 +8,17 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Comprehensive tests for EPUB export functionality.
- * 
+ *
  * These tests verify that chapter content is properly included in EPUB exports.
  * This addresses the critical bug where chapters were exported with only titles
  * and no text content because the lightweight query was being used instead of
  * the full query that includes content.
- * 
+ *
  * Key scenarios tested:
  * 1. Chapter content extraction for EPUB
  * 2. Difference between light and full chapter data
@@ -36,7 +38,7 @@ class EpubExportContentTest {
             name = "Chapter 1",
             content = "This is the actual chapter content that should appear in the EPUB."
         )
-        
+
         // Then: Content should not be empty
         assertFalse(chapter.isEmpty(), "Chapter with content should not be empty")
         assertTrue(chapter.content.isNotEmpty(), "Content list should not be empty")
@@ -46,7 +48,7 @@ class EpubExportContentTest {
     fun `chapter without content should be detected as empty`() {
         // Given: A chapter without content (simulating light query result)
         val chapter = createChapterWithoutContent(id = 1L, name = "Chapter 1")
-        
+
         // Then: Should be detected as empty
         assertTrue(chapter.isEmpty(), "Chapter without content should be empty")
         assertTrue(chapter.content.isEmpty(), "Content list should be empty")
@@ -71,7 +73,7 @@ class EpubExportContentTest {
             lastPageRead = 0L,
             type = 0L
         )
-        
+
         // Then: Should be detected as empty (placeholder has no actual content)
         assertTrue(chapter.isEmpty(), "Chapter with empty placeholder should be empty")
     }
@@ -100,7 +102,7 @@ class EpubExportContentTest {
             lastPageRead = 0L,
             type = 0L
         )
-        
+
         // When: Extracting text content (simulating EpubBuilder.processChapters)
         val extractedContent = chapter.content.mapNotNull {
             when (it) {
@@ -108,7 +110,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.joinToString("\n\n")
-        
+
         // Then: All paragraphs should be extracted
         paragraphs.forEach { paragraph ->
             assertTrue(
@@ -128,7 +130,7 @@ class EpubExportContentTest {
             name = "Chapter 1",
             isDownloaded = true
         )
-        
+
         // Then: Content should be empty or just a placeholder
         val actualContent = lightChapter.content.mapNotNull {
             when (it) {
@@ -136,7 +138,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.joinToString("")
-        
+
         assertTrue(
             actualContent.isBlank(),
             "Light query result should have no actual content, but had: '$actualContent'"
@@ -151,7 +153,7 @@ class EpubExportContentTest {
             name = "Chapter 1",
             content = "This is the full chapter content from the database."
         )
-        
+
         // Then: Content should be present
         val actualContent = fullChapter.content.mapNotNull {
             when (it) {
@@ -159,7 +161,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.joinToString("")
-        
+
         assertTrue(
             actualContent.isNotBlank(),
             "Full query result should have actual content"
@@ -178,7 +180,7 @@ class EpubExportContentTest {
             simulateLightQueryResult(2L, "Chapter 2", true),
             simulateLightQueryResult(3L, "Chapter 3", true)
         )
-        
+
         // When: Processing for EPUB (simulating EpubBuilder behavior)
         val processedChapters = chapters.map { chapter ->
             val content = chapter.content.mapNotNull {
@@ -187,10 +189,10 @@ class EpubExportContentTest {
                     else -> null
                 }
             }.joinToString("\n\n")
-            
+
             chapter to content
         }
-        
+
         // Then: All chapters should have empty content (the bug scenario)
         processedChapters.forEach { (chapter, content) ->
             assertTrue(
@@ -208,7 +210,7 @@ class EpubExportContentTest {
             simulateFullQueryResult(2L, "Chapter 2", "Content of chapter 2"),
             simulateFullQueryResult(3L, "Chapter 3", "Content of chapter 3")
         )
-        
+
         // When: Processing for EPUB (simulating EpubBuilder behavior)
         val processedChapters = chapters.map { chapter ->
             val content = chapter.content.mapNotNull {
@@ -217,10 +219,10 @@ class EpubExportContentTest {
                     else -> null
                 }
             }.joinToString("\n\n")
-            
+
             chapter to content
         }
-        
+
         // Then: All chapters should have content
         processedChapters.forEach { (chapter, content) ->
             assertTrue(
@@ -237,7 +239,7 @@ class EpubExportContentTest {
         // Given: Chapter with HTML content
         val htmlContent = "<p>This is a paragraph.</p><p>This is another paragraph.</p>"
         val chapter = createChapterWithContent(1L, "Chapter 1", htmlContent)
-        
+
         // When: Extracting content
         val extractedContent = chapter.content.mapNotNull {
             when (it) {
@@ -245,7 +247,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.joinToString("\n\n")
-        
+
         // Then: HTML content should be preserved (cleaning happens later)
         assertTrue(extractedContent.contains("<p>"), "HTML should be preserved for later processing")
     }
@@ -255,7 +257,7 @@ class EpubExportContentTest {
         // Given: Chapter with special characters
         val specialContent = "Chapter with special chars: é, ñ, 中文, 日本語, emoji: 📚"
         val chapter = createChapterWithContent(1L, "Chapter 1", specialContent)
-        
+
         // When: Extracting content
         val extractedContent = chapter.content.mapNotNull {
             when (it) {
@@ -263,7 +265,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.joinToString("\n\n")
-        
+
         // Then: Special characters should be preserved
         assertEquals(specialContent, extractedContent, "Special characters should be preserved")
     }
@@ -288,7 +290,7 @@ class EpubExportContentTest {
             lastPageRead = 0L,
             type = 0L
         )
-        
+
         // When: Joining with double newlines (EPUB format)
         val joinedContent = chapter.content.mapNotNull {
             when (it) {
@@ -296,7 +298,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.joinToString("\n\n")
-        
+
         // Then: Should be properly joined
         assertEquals("Para 1\n\nPara 2\n\nPara 3", joinedContent)
     }
@@ -307,7 +309,7 @@ class EpubExportContentTest {
     fun `empty chapter list should be handled`() {
         // Given: Empty chapter list
         val chapters = emptyList<Chapter>()
-        
+
         // When: Processing for EPUB
         val hasContent = chapters.any { chapter ->
             chapter.content.mapNotNull {
@@ -317,7 +319,7 @@ class EpubExportContentTest {
                 }
             }.isNotEmpty()
         }
-        
+
         // Then: Should indicate no content
         assertFalse(hasContent, "Empty chapter list should have no content")
     }
@@ -341,7 +343,7 @@ class EpubExportContentTest {
             lastPageRead = 0L,
             type = 0L
         )
-        
+
         // When: Checking for actual content
         val hasActualContent = chapter.content.mapNotNull {
             when (it) {
@@ -349,7 +351,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.isNotEmpty()
-        
+
         // Then: Should be detected as having no actual content
         assertFalse(hasActualContent, "Whitespace-only content should be detected as empty")
     }
@@ -359,7 +361,7 @@ class EpubExportContentTest {
         // Given: Chapter with very long content
         val longContent = "A".repeat(100_000) // 100KB of content
         val chapter = createChapterWithContent(1L, "Long Chapter", longContent)
-        
+
         // When: Extracting content
         val extractedContent = chapter.content.mapNotNull {
             when (it) {
@@ -367,7 +369,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.joinToString("\n\n")
-        
+
         // Then: Full content should be preserved
         assertEquals(100_000, extractedContent.length, "Long content should be fully preserved")
     }
@@ -379,7 +381,7 @@ class EpubExportContentTest {
         // This test documents the bug that was fixed:
         // When using findChaptersByBookId (light query), chapters had no content
         // EPUB export requires findChaptersByBookIdWithContent (full query)
-        
+
         // Given: A book with downloaded chapters
         val book = Book(
             id = 1L,
@@ -399,13 +401,13 @@ class EpubExportContentTest {
             viewer = 0,
             flags = 0
         )
-        
+
         // Simulating the FIXED behavior: using full query
         val chaptersWithContent = listOf(
             simulateFullQueryResult(1L, "Chapter 1", "Content 1"),
             simulateFullQueryResult(2L, "Chapter 2", "Content 2")
         )
-        
+
         // When: Validating for EPUB export
         val allChaptersHaveContent = chaptersWithContent.all { chapter ->
             chapter.content.mapNotNull {
@@ -415,7 +417,7 @@ class EpubExportContentTest {
                 }
             }.isNotEmpty()
         }
-        
+
         // Then: All chapters should have content (the fix ensures this)
         assertTrue(
             allChaptersHaveContent,
@@ -427,10 +429,10 @@ class EpubExportContentTest {
     @Test
     fun `regression - light query placeholder should not be treated as content`() {
         // This test ensures the light query placeholder is not mistaken for actual content
-        
+
         // Given: Light query result with placeholder
         val lightChapter = simulateLightQueryResult(1L, "Chapter 1", isDownloaded = true)
-        
+
         // When: Checking if it has exportable content
         val hasExportableContent = lightChapter.content.mapNotNull {
             when (it) {
@@ -438,7 +440,7 @@ class EpubExportContentTest {
                 else -> null
             }
         }.isNotEmpty()
-        
+
         // Then: Should NOT have exportable content
         assertFalse(
             hasExportableContent,
@@ -448,6 +450,7 @@ class EpubExportContentTest {
 
     // ==================== Helper Functions ====================
 
+    @OptIn(ExperimentalTime::class)
     private fun createChapterWithContent(id: Long, name: String, content: String): Chapter {
         return Chapter(
             id = id,
@@ -458,7 +461,7 @@ class EpubExportContentTest {
             read = false,
             bookmark = false,
             dateUpload = 0L,
-            dateFetch = System.currentTimeMillis(),
+            dateFetch = Clock.System.now().toEpochMilliseconds(),
             sourceOrder = id,
             number = id.toFloat(),
             translator = "",
@@ -490,6 +493,7 @@ class EpubExportContentTest {
      * Simulates the result of the light query (getChaptersByMangaIdLight)
      * which does NOT include actual content, only a placeholder if downloaded
      */
+    @OptIn(ExperimentalTime::class)
     private fun simulateLightQueryResult(id: Long, name: String, isDownloaded: Boolean): Chapter {
         return Chapter(
             id = id,
@@ -501,7 +505,7 @@ class EpubExportContentTest {
             read = false,
             bookmark = false,
             dateUpload = 0L,
-            dateFetch = if (isDownloaded) System.currentTimeMillis() else 0L,
+            dateFetch = if (isDownloaded) Clock.System.now().toEpochMilliseconds() else 0L,
             sourceOrder = id,
             number = id.toFloat(),
             translator = "",
@@ -524,7 +528,7 @@ class EpubExportContentTest {
             read = false,
             bookmark = false,
             dateUpload = 0L,
-            dateFetch = System.currentTimeMillis(),
+            dateFetch = Clock.System.now().toEpochMilliseconds(),
             sourceOrder = id,
             number = id.toFloat(),
             translator = "",

@@ -1,6 +1,13 @@
 package ireader.domain.plugins
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Unit tests for Plugin-related classes
@@ -321,6 +328,7 @@ class PluginInfoTest {
         )
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun createPluginInfo(
         id: String,
         type: PluginType = PluginType.THEME,
@@ -331,7 +339,7 @@ class PluginInfoTest {
             id = id,
             manifest = createTestManifest(id, type),
             status = status,
-            installDate = System.currentTimeMillis(),
+            installDate = Clock.System.now().toEpochMilliseconds(),
             lastUpdate = null,
             isPurchased = false,
             rating = null,

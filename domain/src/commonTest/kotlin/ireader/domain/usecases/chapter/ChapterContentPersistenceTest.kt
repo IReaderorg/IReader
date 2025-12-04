@@ -3,8 +3,9 @@ package ireader.domain.usecases.chapter
 import ireader.domain.models.entities.Chapter
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Tests for chapter content persistence and ordering fixes.
@@ -91,6 +92,7 @@ class ChapterContentPersistenceTest {
         assertEquals(1L, sorted[2].id, "Third chapter should have sourceOrder 3")
     }
 
+    @OptIn(ExperimentalTime::class)
     @Test
     fun `updating chapter content should not change sourceOrder`() {
         // Given: A chapter with specific sourceOrder
@@ -99,7 +101,7 @@ class ChapterContentPersistenceTest {
         // When: Updating only the content
         val updated = chapter.copy(
             content = listOf(ireader.core.source.model.Text("New content")),
-            dateFetch = System.currentTimeMillis()
+            dateFetch = Clock.System.now().toEpochMilliseconds()
         )
         
         // Then: sourceOrder should remain unchanged

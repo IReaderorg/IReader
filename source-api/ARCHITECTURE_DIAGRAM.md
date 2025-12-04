@@ -435,3 +435,166 @@ Override in Koin:
 (STUB)      Stub implementation
 (NO-OP)     No-operation implementation
 ```
+
+
+---
+
+## Enhanced HTTP Layer (New)
+
+The enhanced HTTP layer provides additional features on top of the base HttpClients:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  EnhancedHttpClientsWrapper                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ Delegates to: HttpClientsInterface                         │ │
+│  │  • default, cloudflareClient, browser, config, etc.        │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ rateLimiter: AdaptiveRateLimiter                           │ │
+│  │  • Token bucket algorithm                                  │ │
+│  │  • Per-domain rate limiting                                │ │
+│  │  • Automatic backoff on 429/503                            │ │
+│  │  • Gradual recovery after success                          │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ cloudflareBypass: CloudflareBypassManager                  │ │
+│  │  • Multi-strategy bypass system                            │ │
+│  │  • Challenge detection & classification                    │ │
+│  │  • Cookie caching & reuse                                  │ │
+│  │  • Fingerprint-aware requests                              │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ fingerprintManager: FingerprintManager                     │ │
+│  │  • Browser profile management                              │ │
+│  │  • Per-domain fingerprint consistency                      │ │
+│  │  • Chrome/Firefox/Safari profiles                          │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ cookieStore: CloudflareCookieStore                         │ │
+│  │  • cf_clearance cookie persistence                         │ │
+│  │  • Automatic expiry handling                               │ │
+│  │  • User agent association                                  │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ requestQueue: RequestQueue (optional)                      │ │
+│  │  • Priority-based queuing                                  │ │
+│  │  • Concurrency control                                     │ │
+│  │  • Rate limiter integration                                │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+## Cloudflare Bypass Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   CloudflareBypassManager                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Strategies (tried in priority order):                          │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ 1. CookieReplayStrategy (priority: 200)                    │ │
+│  │    • Reuses valid cached cf_clearance cookies              │ │
+│  │    • Checks user agent consistency                         │ │
+│  │    • Fastest - no network request needed                   │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ 2. WebViewBypassStrategy (priority: 100) [Android]         │ │
+│  │    • Uses BrowserEngine/WebView                            │ │
+│  │    • Injects fingerprint evasion scripts                   │ │
+│  │    • Waits for challenge resolution                        │ │
+│  │    • Extracts cookies from WebView                         │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+│  ┌────────────────────────────────────────────────────────────┐ │
+│  │ 3. FlareSolverrStrategy (priority: 80) [Desktop]           │ │
+│  │    • Connects to FlareSolverr service                      │ │
+│  │    • External browser-based solving                        │ │
+│  │    • Supports sessions for efficiency                      │ │
+│  └────────────────────────────────────────────────────────────┘ │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+
+Challenge Types Detected:
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│   JSChallenge    │  │ TurnstileChall.  │  │  CaptchaChall.   │
+│ • Auto-solvable  │  │ • Needs solver   │  │ • Needs solver   │
+│ • 5-10 seconds   │  │ • Site key req.  │  │ • Site key req.  │
+└──────────────────┘  └──────────────────┘  └──────────────────┘
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│ ManagedChallenge │  │   RateLimited    │  │    BlockedIP     │
+│ • Interactive    │  │ • Wait & retry   │  │ • Cannot bypass  │
+│ • May auto-solve │  │ • Retry-After    │  │ • Need new IP    │
+└──────────────────┘  └──────────────────┘  └──────────────────┘
+```
+
+## Fingerprint Evasion
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  FingerprintEvasionScripts                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Scripts injected before page load:                             │
+│                                                                  │
+│  • webdriverEvasion    - Remove automation detection flags      │
+│  • navigatorEvasion    - Spoof navigator properties             │
+│  • canvasEvasion       - Add noise to canvas fingerprint        │
+│  • webglEvasion        - Spoof WebGL vendor/renderer            │
+│  • audioEvasion        - Add noise to audio fingerprint         │
+│  • screenEvasion       - Spoof screen dimensions                │
+│  • permissionsEvasion  - Spoof permission states                │
+│  • batteryEvasion      - Spoof battery API                      │
+│                                                                  │
+│  Usage:                                                         │
+│  • fullEvasion    - All scripts combined                        │
+│  • minimalEvasion - Just webdriver + navigator (faster)         │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+## Usage Flow
+
+```
+Application
+    │
+    ├─> httpClients.enhanced()  // Upgrade to enhanced
+    │       │
+    │       └─> EnhancedHttpClientsWrapper
+    │
+    ├─> enhancedClients.fetchWithBypass(url)
+    │       │
+    │       ├─> rateLimiter.acquire(domain)
+    │       │
+    │       ├─> Apply fingerprint & cached cookies
+    │       │
+    │       ├─> Make HTTP request
+    │       │       │
+    │       │       ├─> Success (200) → Return response
+    │       │       │
+    │       │       └─> Cloudflare detected (403/503)
+    │       │               │
+    │       │               ├─> CloudflareDetector.detect()
+    │       │               │
+    │       │               └─> CloudflareBypassManager.bypass()
+    │       │                       │
+    │       │                       ├─> Try CookieReplayStrategy
+    │       │                       ├─> Try WebViewBypassStrategy
+    │       │                       └─> Try FlareSolverrStrategy
+    │       │
+    │       └─> Return FetchResult<String>
+    │
+    ▼
+Application processes result
+```

@@ -3,7 +3,14 @@ package ireader.data.remote
 import ireader.domain.models.remote.ReadingProgress
 import ireader.domain.models.remote.User
 import kotlinx.coroutines.test.runTest
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Comprehensive tests for RemoteCache
@@ -158,6 +165,7 @@ class RemoteCacheTest {
         assertEquals(0.9f, result.lastScrollPosition)
     }
     
+    @OptIn(ExperimentalTime::class)
     private fun createTestUser(
         id: String,
         email: String = "test@example.com"
@@ -167,12 +175,13 @@ class RemoteCacheTest {
             email = email,
             username = "testuser",
             ethWalletAddress = null,
-            createdAt = System.currentTimeMillis(),
+            createdAt = Clock.System.now().toEpochMilliseconds(),
             isSupporter = false,
             isAdmin = false
         )
     }
     
+    @OptIn(ExperimentalTime::class)
     private fun createTestProgress(
         userId: String,
         bookId: String,
@@ -184,7 +193,7 @@ class RemoteCacheTest {
             bookId = bookId,
             lastChapterSlug = "chapter-1",
             lastScrollPosition = scrollPosition,
-            updatedAt = System.currentTimeMillis()
+            updatedAt = Clock.System.now().toEpochMilliseconds()
         )
     }
 }

@@ -4,6 +4,8 @@ import ireader.domain.models.entities.Chapter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Tests for download service chapter preservation fixes.
@@ -95,6 +97,7 @@ class DownloadChapterPreservationTest {
         assertEquals(downloadedContent, finalChapter.content)
     }
 
+    @OptIn(ExperimentalTime::class)
     @Test
     fun `using downloaded chapter directly would lose original id`() {
         // This test demonstrates the bug that was fixed
@@ -128,7 +131,7 @@ class DownloadChapterPreservationTest {
             read = false,
             bookmark = false,
             dateUpload = 0L,
-            dateFetch = System.currentTimeMillis(),
+            dateFetch = Clock.System.now().toEpochMilliseconds(),
             number = 1f,
             translator = "",
             lastPageRead = 0L,

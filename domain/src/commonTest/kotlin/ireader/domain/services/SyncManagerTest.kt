@@ -28,7 +28,7 @@ class SyncManagerTest {
     @Test
     fun `debounce mechanism should prevent rapid successive syncs`() {
         // This test documents the debounce fix
-        // The fix added: lastSyncRequestTime = System.currentTimeMillis()
+        // The fix added: lastSyncRequestTime = Clock.System.now().toEpochMilliseconds()
         // after the delayed sync runs, ensuring proper debounce tracking
         
         assertTrue(true, "Debounce should update lastSyncRequestTime after delayed sync")

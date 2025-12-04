@@ -1,7 +1,14 @@
 
-
 package ireader.core.source.model
 
+import kotlinx.serialization.Serializable
+
+/**
+ * Model for a chapter given by a source.
+ * 
+ * This class is serializable for iOS JS bridge support.
+ */
+@Serializable
 data class ChapterInfo(
     var key: String,
     var name: String,

@@ -142,7 +142,7 @@ class IosCatalogLoader(
         
         return try {
             // Parse source info and create catalog
-            val sourceInfo = json.decodeFromString<JsSourceInfo>(infoJson)
+            val sourceInfo = json.decodeFromString(JsSourceInfo.serializer(), infoJson)
             val source = JsSourceWrapper(sourceId, sourceInfo, this)
             
             CatalogBundled(
