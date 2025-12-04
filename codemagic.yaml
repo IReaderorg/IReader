@@ -141,6 +141,19 @@ workflows:
           
           # Save the simulator ID for screenshot step
           echo "$SIMULATOR_ID" > /tmp/simulator_id.txt
+          
+          # Copy .app to build folder for artifacts
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "iosApp.app" -path "*/Debug-iphonesimulator/*" | head -1)
+          if [ -n "$APP_PATH" ]; then
+            mkdir -p build
+            cp -R "$APP_PATH" build/
+            # Create zip for Appetize.io (they accept .zip containing .app)
+            cd build
+            zip -r iosApp-simulator.zip iosApp.app
+            echo "✅ App copied and zipped for Appetize.io"
+            ls -la
+            cd ..
+          fi
       
       # Capture screenshot of the running app
       - name: Capture App Screenshot
@@ -197,7 +210,9 @@ workflows:
         ignore_failure: true
     
     artifacts:
-      - iosApp/build/ios/**/*.app
+      - ~/Library/Developer/Xcode/DerivedData/**/Debug-iphonesimulator/*.app
+      - build/*.app
+      - build/*.zip
       - presentation/build/**/*.framework
       - screenshots/*.png
       - /tmp/xcodebuild_logs/*.log
