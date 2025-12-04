@@ -45,15 +45,8 @@ kotlin {
             baseName = "presentation"
             isStatic = true
             
-            // Export all transitive dependencies for iOS
-            export(project(Modules.domain))
-            export(project(Modules.coreApi))
-            export(project(Modules.sourceApi))
-            export(project(Modules.data))
-            export(project(Modules.presentationCore))
-            
-            // Link SQLite for sqliter-driver
-            linkerOpts("-lsqlite3")
+            // Note: We don't export data module to avoid SQLDelight cinterop issues
+            // The Main.kt entry point is self-contained for now
         }
     }
 
