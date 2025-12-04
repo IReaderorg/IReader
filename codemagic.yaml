@@ -99,12 +99,14 @@ workflows:
           echo "=== Framework headers ==="
           ls -la presentation/build/bin/iosSimulatorArm64/debugFramework/presentation.framework/Headers/ || echo "No headers"
           
-          # Show exported symbols (first 50)
-          echo "=== Exported symbols (sample) ==="
-          nm -g presentation/build/bin/iosSimulatorArm64/debugFramework/presentation.framework/presentation 2>/dev/null | head -50 || echo "Cannot read symbols"
+          # Show exported symbols - look for MainKt specifically
+          echo "=== Looking for MainKt in symbols ==="
+          nm -g presentation/build/bin/iosSimulatorArm64/debugFramework/presentation.framework/presentation 2>/dev/null | grep -i "main" | head -20 || echo "No MainKt symbols found"
+          
+          echo "=== All exported Kt symbols (sample) ==="
+          nm -g presentation/build/bin/iosSimulatorArm64/debugFramework/presentation.framework/presentation 2>/dev/null | grep "Kt" | head -30 || echo "No Kt symbols"
           
           # Run xcodebuild and capture output
-          set +e
           xcodebuild build \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
@@ -114,18 +116,59 @@ workflows:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             2>&1 | tee xcodebuild.log
-          BUILD_RESULT=$?
-          set -e
           
-          # Always show errors if any
-          echo "=== Build Result: $BUILD_RESULT ==="
-          echo "=== Swift/Clang Errors ==="
-          grep -E "(error:|warning:.*error)" xcodebuild.log | head -30 || echo "No errors found in grep"
-          echo "=== Full error context ==="
-          grep -B2 -A5 "error:" xcodebuild.log | head -100 || echo "No error context"
+          # Check for BUILD FAILED in output (xcodebuild sometimes returns 0 even on failure)
+          if grep -q "BUILD FAILED" xcodebuild.log; then
+            echo "=== BUILD FAILED detected ==="
+            echo "=== Swift/Clang Errors ==="
+            grep -E "error:" xcodebuild.log | head -30 || echo "No errors found"
+            echo "=== Full error context ==="
+            grep -B2 -A5 "error:" xcodebuild.log | head -100 || echo "No error context"
+            exit 1
+          fi
           
-          # Exit with build result
-          exit $BUILD_RESULT
+          echo "=== Build succeeded ==="
+          
+          # Save the simulator ID for screenshot step
+          echo "$SIMULATOR_ID" > /tmp/simulator_id.txt
+      
+      # Capture screenshot of the running app
+      - name: Capture App Screenshot
+        script: |
+          # Get simulator ID from previous step
+          SIMULATOR_ID=$(cat /tmp/simulator_id.txt)
+          echo "Using simulator: $SIMULATOR_ID"
+          
+          # Boot the simulator
+          xcrun simctl boot "$SIMULATOR_ID" || echo "Simulator already booted"
+          
+          # Wait for simulator to be ready
+          sleep 5
+          
+          # Find the built app
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "iosApp.app" -path "*/Debug-iphonesimulator/*" | head -1)
+          echo "Found app at: $APP_PATH"
+          
+          if [ -n "$APP_PATH" ]; then
+            # Install the app
+            xcrun simctl install "$SIMULATOR_ID" "$APP_PATH"
+            
+            # Launch the app
+            xcrun simctl launch "$SIMULATOR_ID" com.infinity.iosApp
+            
+            # Wait for app to render
+            sleep 5
+            
+            # Take screenshot
+            mkdir -p screenshots
+            xcrun simctl io "$SIMULATOR_ID" screenshot screenshots/ios-app-screenshot.png
+            
+            echo "✅ Screenshot captured!"
+            ls -la screenshots/
+          else
+            echo "⚠️ App not found, skipping screenshot"
+          fi
+        ignore_failure: true
       
       # Run iOS tests (if available)
       - name: Run iOS Tests
@@ -146,6 +189,7 @@ workflows:
     artifacts:
       - iosApp/build/ios/**/*.app
       - presentation/build/**/*.framework
+      - screenshots/*.png
       - /tmp/xcodebuild_logs/*.log
     
     publishing:
