@@ -16,7 +16,6 @@ workflows:
         CI: "true"
       xcode: latest
       java: 17
-      cocoapods: default
     
     triggering:
       events:
@@ -54,11 +53,12 @@ workflows:
           echo "supabase.analytics.url=https://placeholder.supabase.co" >> local.properties
           echo "supabase.analytics.key=placeholder-key" >> local.properties
       
-      # Install CocoaPods dependencies
-      - name: Install CocoaPods
-        script: |
-          cd iosApp
-          pod install --repo-update || echo "No Pods to install"
+      # Skip CocoaPods - no pods needed for this project
+      # If you add pods later, uncomment the following:
+      # - name: Install CocoaPods
+      #   script: |
+      #     cd iosApp
+      #     pod install --repo-update
       
       # Build Kotlin framework for iOS Simulator
       - name: Build Kotlin Framework
@@ -221,7 +221,6 @@ workflows:
         CI: "true"
       xcode: latest
       java: 17
-      cocoapods: default
     
     triggering:
       events:
@@ -257,10 +256,7 @@ workflows:
           echo "supabase.analytics.url=${SUPABASE_URL:-https://placeholder.supabase.co}" >> local.properties
           echo "supabase.analytics.key=${SUPABASE_KEY:-placeholder-key}" >> local.properties
       
-      - name: Install CocoaPods
-        script: |
-          cd iosApp
-          pod install --repo-update || echo "No Pods to install"
+      # Skip CocoaPods - no pods needed
       
       - name: Build Kotlin Framework
         script: |
