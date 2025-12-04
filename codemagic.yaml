@@ -13,6 +13,7 @@ workflows:
         XCODE_WORKSPACE: "iosApp/iosApp.xcodeproj"
         XCODE_SCHEME: "iosApp"
         BUNDLE_ID: "com.infinity.iosApp"
+        CI: "true"
       xcode: latest
       java: 17
       cocoapods: default
@@ -90,9 +91,17 @@ workflows:
           fi
           
           # List framework location for debugging
-          echo "Framework location:"
+          echo "=== Framework location ==="
           ls -la presentation/build/xcode-frameworks/Debug/iphonesimulator/ || echo "xcode-frameworks not found"
           ls -la presentation/build/bin/iosSimulatorArm64/debugFramework/ || echo "debugFramework not found"
+          
+          # Check framework headers
+          echo "=== Framework headers ==="
+          ls -la presentation/build/bin/iosSimulatorArm64/debugFramework/presentation.framework/Headers/ || echo "No headers"
+          
+          # Show exported symbols (first 50)
+          echo "=== Exported symbols (sample) ==="
+          nm -g presentation/build/bin/iosSimulatorArm64/debugFramework/presentation.framework/presentation 2>/dev/null | head -50 || echo "Cannot read symbols"
           
           xcodebuild build \
             -project iosApp/iosApp.xcodeproj \
@@ -101,7 +110,16 @@ workflows:
             -destination "id=$SIMULATOR_ID" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            SKIP_INSTALL=NO \
+            OTHER_SWIFT_FLAGS="-Xfrontend -warn-long-function-bodies=200" \
+            2>&1 | tee xcodebuild.log
+          
+          # If build failed, show Swift errors
+          if [ $? -ne 0 ]; then
+            echo "=== Swift Compilation Errors ==="
+            grep -A5 "error:" xcodebuild.log || echo "No specific errors found"
+          fi
       
       # Run iOS tests (if available)
       - name: Run iOS Tests
@@ -150,6 +168,7 @@ workflows:
       vars:
         XCODE_SCHEME: "iosApp"
         BUNDLE_ID: "com.infinity.iosApp"
+        CI: "true"
       xcode: latest
       java: 17
       cocoapods: default

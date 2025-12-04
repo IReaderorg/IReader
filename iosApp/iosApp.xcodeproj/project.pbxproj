@@ -153,7 +153,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :presentation:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "# Skip Gradle build in CI if framework already exists\nif [ -n \"$CI\" ] && [ -d \"$SRCROOT/../presentation/build/xcode-frameworks/$CONFIGURATION/$SDK_NAME/presentation.framework\" ]; then\n    echo \"Framework already built in CI, skipping Gradle\"\n    exit 0\nfi\n\ncd \"$SRCROOT/..\"\n./gradlew :presentation:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
