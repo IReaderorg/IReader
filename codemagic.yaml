@@ -62,19 +62,18 @@ workflows:
       # Build Kotlin framework for iOS Simulator
       - name: Build Kotlin Framework
         script: |
-          # Increase memory for Kotlin/Native compilation
-          export GRADLE_OPTS="-Xmx4g -XX:+UseG1GC -XX:MaxMetaspaceSize=512m"
-          
-          # Build the presentation iOS framework (contains the actual Compose UI)
-          # Use --no-daemon and explicit memory settings to avoid OOM
-          ./gradlew :presentation:linkReleaseFrameworkIosSimulatorArm64 \
+          # Build Debug framework to avoid heavy LTO/devirtualization optimizations that cause OOM
+          # Debug builds are faster and use less memory
+          ./gradlew :presentation:linkDebugFrameworkIosSimulatorArm64 \
             --no-daemon \
-            -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseG1GC" \
-            -Pkotlin.native.cacheKind=none
+            --no-configuration-cache \
+            -Dorg.gradle.jvmargs="-Xmx6g -XX:+UseG1GC -XX:MaxMetaspaceSize=1g" \
+            -Pkotlin.native.cacheKind=none \
+            -Pkotlin.native.binary.memoryModel=experimental
           
           # Copy framework to expected location for Xcode
-          FRAMEWORK_PATH="presentation/build/bin/iosSimulatorArm64/releaseFramework"
-          DEST_PATH="presentation/build/xcode-frameworks/Release/iphonesimulator"
+          FRAMEWORK_PATH="presentation/build/bin/iosSimulatorArm64/debugFramework"
+          DEST_PATH="presentation/build/xcode-frameworks/Debug/iphonesimulator"
           mkdir -p "$DEST_PATH"
           cp -R "$FRAMEWORK_PATH"/* "$DEST_PATH/" || echo "Framework copy skipped"
       
@@ -192,18 +191,18 @@ workflows:
       
       - name: Build Kotlin Framework
         script: |
-          # Increase memory for Kotlin/Native compilation
-          export GRADLE_OPTS="-Xmx4g -XX:+UseG1GC -XX:MaxMetaspaceSize=512m"
-          
-          # Build the presentation iOS framework for real devices (arm64)
-          ./gradlew :presentation:linkReleaseFrameworkIosArm64 \
+          # Build Debug framework first to verify it works, then try Release
+          # Debug builds skip heavy LTO/devirtualization that cause OOM
+          ./gradlew :presentation:linkDebugFrameworkIosArm64 \
             --no-daemon \
-            -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseG1GC" \
-            -Pkotlin.native.cacheKind=none
+            --no-configuration-cache \
+            -Dorg.gradle.jvmargs="-Xmx6g -XX:+UseG1GC -XX:MaxMetaspaceSize=1g" \
+            -Pkotlin.native.cacheKind=none \
+            -Pkotlin.native.binary.memoryModel=experimental
           
           # Copy framework to expected location
-          FRAMEWORK_PATH="presentation/build/bin/iosArm64/releaseFramework"
-          DEST_PATH="presentation/build/xcode-frameworks/Release/iphoneos"
+          FRAMEWORK_PATH="presentation/build/bin/iosArm64/debugFramework"
+          DEST_PATH="presentation/build/xcode-frameworks/Debug/iphoneos"
           mkdir -p "$DEST_PATH"
           cp -R "$FRAMEWORK_PATH"/* "$DEST_PATH/" || echo "Framework copy skipped"
       
