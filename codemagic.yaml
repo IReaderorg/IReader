@@ -5,7 +5,7 @@ workflows:
   ios-build:
     name: iOS Build
     max_build_duration: 120
-    instance_type: mac_mini_m1
+    instance_type: mac_mini_m2
     
     environment:
       # No ios_signing needed for simulator builds!
@@ -62,8 +62,15 @@ workflows:
       # Build Kotlin framework for iOS Simulator
       - name: Build Kotlin Framework
         script: |
+          # Increase memory for Kotlin/Native compilation
+          export GRADLE_OPTS="-Xmx4g -XX:+UseG1GC -XX:MaxMetaspaceSize=512m"
+          
           # Build the presentation iOS framework (contains the actual Compose UI)
-          ./gradlew :presentation:linkReleaseFrameworkIosSimulatorArm64 --no-daemon
+          # Use --no-daemon and explicit memory settings to avoid OOM
+          ./gradlew :presentation:linkReleaseFrameworkIosSimulatorArm64 \
+            --no-daemon \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseG1GC" \
+            -Pkotlin.native.cacheKind=none
           
           # Copy framework to expected location for Xcode
           FRAMEWORK_PATH="presentation/build/bin/iosSimulatorArm64/releaseFramework"
@@ -133,7 +140,7 @@ workflows:
   ios-sideload:
     name: iOS Sideload Build (AltStore)
     max_build_duration: 120
-    instance_type: mac_mini_m1
+    instance_type: mac_mini_m2
     
     environment:
       # No signing needed - AltStore will sign with user's Apple ID
@@ -185,8 +192,14 @@ workflows:
       
       - name: Build Kotlin Framework
         script: |
+          # Increase memory for Kotlin/Native compilation
+          export GRADLE_OPTS="-Xmx4g -XX:+UseG1GC -XX:MaxMetaspaceSize=512m"
+          
           # Build the presentation iOS framework for real devices (arm64)
-          ./gradlew :presentation:linkReleaseFrameworkIosArm64 --no-daemon
+          ./gradlew :presentation:linkReleaseFrameworkIosArm64 \
+            --no-daemon \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseG1GC" \
+            -Pkotlin.native.cacheKind=none
           
           # Copy framework to expected location
           FRAMEWORK_PATH="presentation/build/bin/iosArm64/releaseFramework"
