@@ -11,7 +11,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         // Initialize Koin for dependency injection
-        IosEntryPointsKt.doInitKoin(additionalModules: [])
+        IosEntryPointsKt.doInitKoin()
         
         window = UIWindow(frame: UIScreen.main.bounds)
         

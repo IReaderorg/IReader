@@ -103,6 +103,8 @@ workflows:
           echo "=== Exported symbols (sample) ==="
           nm -g presentation/build/bin/iosSimulatorArm64/debugFramework/presentation.framework/presentation 2>/dev/null | head -50 || echo "Cannot read symbols"
           
+          # Run xcodebuild and capture output
+          set +e
           xcodebuild build \
             -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
@@ -111,15 +113,19 @@ workflows:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            SKIP_INSTALL=NO \
-            OTHER_SWIFT_FLAGS="-Xfrontend -warn-long-function-bodies=200" \
             2>&1 | tee xcodebuild.log
+          BUILD_RESULT=$?
+          set -e
           
-          # If build failed, show Swift errors
-          if [ $? -ne 0 ]; then
-            echo "=== Swift Compilation Errors ==="
-            grep -A5 "error:" xcodebuild.log || echo "No specific errors found"
-          fi
+          # Always show errors if any
+          echo "=== Build Result: $BUILD_RESULT ==="
+          echo "=== Swift/Clang Errors ==="
+          grep -E "(error:|warning:.*error)" xcodebuild.log | head -30 || echo "No errors found in grep"
+          echo "=== Full error context ==="
+          grep -B2 -A5 "error:" xcodebuild.log | head -100 || echo "No error context"
+          
+          # Exit with build result
+          exit $BUILD_RESULT
       
       # Run iOS tests (if available)
       - name: Run iOS Tests

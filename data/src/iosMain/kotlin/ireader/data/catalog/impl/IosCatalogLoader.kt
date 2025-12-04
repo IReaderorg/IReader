@@ -142,8 +142,14 @@ class IosCatalogLoader(
         
         return try {
             // Parse source info and create catalog
-            // This would create a JsSourceCatalog wrapper
-            null // Placeholder - full implementation requires JsSourceWrapper
+            val sourceInfo = json.decodeFromString<JsSourceInfo>(infoJson)
+            val source = JsSourceWrapper(sourceId, sourceInfo, this)
+            
+            CatalogBundled(
+                source = source,
+                description = "JS Source: ${sourceInfo.name}",
+                name = sourceInfo.name
+            )
         } catch (e: Exception) {
             println("[JSCatalogLoader] Failed to create catalog for $sourceId: ${e.message}")
             null
