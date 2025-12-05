@@ -37,7 +37,8 @@ class DesktopTranslationService : TranslationService, KoinComponent {
         sourceLanguage: String,
         targetLanguage: String,
         engineId: Long,
-        bypassWarning: Boolean
+        bypassWarning: Boolean,
+        priority: Boolean
     ): ServiceResult<TranslationQueueResult> {
         return translationServiceImpl.queueChapters(
             bookId = bookId,
@@ -45,7 +46,8 @@ class DesktopTranslationService : TranslationService, KoinComponent {
             sourceLanguage = sourceLanguage,
             targetLanguage = targetLanguage,
             engineId = engineId,
-            bypassWarning = bypassWarning
+            bypassWarning = bypassWarning,
+            priority = priority
         )
     }
     

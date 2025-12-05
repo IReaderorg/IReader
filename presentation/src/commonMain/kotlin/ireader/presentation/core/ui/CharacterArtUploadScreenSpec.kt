@@ -55,15 +55,14 @@ class CharacterArtUploadScreenSpec {
                 navController.popBackStack()
             },
             onPickImage = {
+                // Launch the picker and handle the result
                 scope.launch {
                     imagePicker.pickImage(
-                        onImagePicked = { bytes, name ->
+                        onImagePicked = { bytes, _ ->
                             selectedImageBytes = bytes
                             selectedImagePath = imagePicker.getSelectedImagePath()
                         },
-                        onError = { error ->
-                            // Handle error - could show snackbar
-                        }
+                        onError = { /* Handle error */ }
                     )
                 }
             },

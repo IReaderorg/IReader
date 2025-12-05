@@ -113,4 +113,15 @@ object NotificationsIds {
      */
     const val ID_MIGRATION_BATCH_PROGRESS = -904
     const val ID_MIGRATION_BATCH_COMPLETE = -905
+
+    /**
+     * Notification channel and ids used by the translation service.
+     */
+    const val GROUP_TRANSLATION = "group_translation"
+    const val CHANNEL_TRANSLATION_PROGRESS = "translation_progress_channel"
+    const val ID_TRANSLATION_PROGRESS = -1001
+    const val CHANNEL_TRANSLATION_COMPLETE = "translation_complete_channel"
+    const val ID_TRANSLATION_COMPLETE = -1002
+    const val CHANNEL_TRANSLATION_ERROR = "translation_error_channel"
+    const val ID_TRANSLATION_ERROR = -1003
 }

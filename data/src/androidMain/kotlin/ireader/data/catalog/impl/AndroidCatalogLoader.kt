@@ -48,7 +48,8 @@ class AndroidCatalogLoader(
     val uiPreferences: UiPreferences,
     val simpleStorage: GetSimpleStorage,
     val localizeHelper: LocalizeHelper,
-    private val preferenceStore: PreferenceStoreFactory
+    private val preferenceStore: PreferenceStoreFactory,
+    private val communitySource: ireader.domain.community.CommunitySource? = null
 ) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
 
     private val pkgManager = context.packageManager
@@ -129,6 +130,15 @@ class AndroidCatalogLoader(
             name = "Local Source"
         )
         bundled.add(localSourceCatalog)
+        
+        // Add Community Source for community-translated content
+        communitySource?.let { source ->
+            val communityCatalog = ireader.domain.models.entities.CommunityCatalog(
+                source = source,
+                description = "Browse and read community-translated novels"
+            )
+            bundled.add(communityCatalog)
+        }
 
         if (BuildKonfig.DEBUG) {
             val testCatalog = CatalogBundled(

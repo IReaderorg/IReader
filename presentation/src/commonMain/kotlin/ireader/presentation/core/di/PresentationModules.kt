@@ -125,7 +125,7 @@ val PresentationModules = module {
     // Updated to Mihon-style StateFlow pattern (no separate state impl needed)
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }
+    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get(),getOrNull(),get(),) }
     // Changed from single to factory - settings screen is not always needed
     factory  { 
         MainSettingScreenViewModel(
@@ -223,7 +223,7 @@ val PresentationModules = module {
 
     // Reader sub-viewmodels
     factory { ireader.presentation.ui.reader.viewmodel.ReaderSettingsViewModel(get(), get(), get(), get(), get(), get()) }
-    factory { ReaderTranslationViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { ReaderTranslationViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ReaderTTSViewModel(get(), get()) }
     factory { ReaderStatisticsViewModel(get(), get()) }
 

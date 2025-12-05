@@ -29,7 +29,8 @@ import java.net.URLClassLoader
 class DesktopCatalogLoader(
     private val httpClients: HttpClients,
     val uiPreferences: UiPreferences,
-    preferences: PreferenceStoreFactory
+    preferences: PreferenceStoreFactory,
+    private val communitySource: ireader.domain.community.CommunitySource? = null
 ) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
     private val catalogPreferences = preferences.create("catalogs_data")
     
@@ -58,7 +59,7 @@ class DesktopCatalogLoader(
      */
     fun getJSPluginLoader(): JSPluginLoader = jsPluginLoader
     override suspend fun loadAll(): List<CatalogLocal> {
-        val bundled = mutableListOf<ireader.domain.models.entities.CatalogBundled>()
+        val bundled = mutableListOf<CatalogLocal>()
         
         // Add Local Source for reading local novels
         val localSourceCatalog = ireader.domain.models.entities.CatalogBundled(
@@ -67,6 +68,15 @@ class DesktopCatalogLoader(
             name = "Local Source"
         )
         bundled.add(localSourceCatalog)
+        
+        // Add Community Source for community-translated content
+        communitySource?.let { source ->
+            val communityCatalog = ireader.domain.models.entities.CommunityCatalog(
+                source = source,
+                description = "Browse and read community-translated novels"
+            )
+            bundled.add(communityCatalog)
+        }
         
         val localPkgs = ExtensionDir.listFiles()
             .orEmpty()

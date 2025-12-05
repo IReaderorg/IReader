@@ -80,6 +80,25 @@ abstract class TranslateEngine {
     open val supportsStylePreservation: Boolean = false
     
     open val requiresApiKey: Boolean = false
+    
+    /**
+     * Maximum characters per request for this engine.
+     * Used to chunk large texts before sending to the API.
+     * Default: 4000 characters (safe for most APIs)
+     */
+    open val maxCharsPerRequest: Int = 4000
+    
+    /**
+     * Minimum delay between requests in milliseconds.
+     * Used to prevent rate limiting from online APIs.
+     * Default: 3000ms (3 seconds) for online engines
+     */
+    open val rateLimitDelayMs: Long = 3000L
+    
+    /**
+     * Whether this engine is offline/local (no rate limiting needed)
+     */
+    open val isOffline: Boolean = false
 
     abstract suspend fun translate(
         texts: List<String>,

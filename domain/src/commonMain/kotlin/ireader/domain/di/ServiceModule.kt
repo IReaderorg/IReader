@@ -60,9 +60,13 @@ val ServiceModule = module {
     }
     
     // Translation Service - shared state holder and implementation
+    // Note: TranslationStateHolder is shared between TranslationServiceImpl and platform services
     single<TranslationStateHolder> { TranslationStateHolder() }
     
-    single<TranslationServiceImpl> {
+    // TranslationServiceImpl is the core implementation (used internally by platform services)
+    // IMPORTANT: This is bound ONLY as TranslationServiceImpl, not as TranslationService
+    // The TranslationService interface binding below takes precedence for interface injection
+    single {
         TranslationServiceImpl(
             chapterRepository = get(),
             bookRepository = get(),
@@ -77,6 +81,8 @@ val ServiceModule = module {
         )
     }
     
+    // TranslationService is the public interface - on Android this wraps TranslationServiceImpl
+    // with notification support. This binding is used when injecting TranslationService interface.
     single<TranslationService> { 
         ServiceFactory.createTranslationService()
     }

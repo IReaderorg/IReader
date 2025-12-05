@@ -13,6 +13,31 @@ import javax.swing.filechooser.FileNameExtensionFilter
 actual class ImagePicker {
     private var selectedFile: File? = null
     private var selectedBytes: ByteArray? = null
+    private var pendingOnImagePicked: ((ByteArray, String) -> Unit)? = null
+    private var pendingOnError: ((String) -> Unit)? = null
+    
+    actual fun launchPicker() {
+        try {
+            val file = showFileChooser()
+            
+            if (file != null) {
+                // Validate it's an image
+                val image = ImageIO.read(file)
+                if (image == null) {
+                    pendingOnError?.invoke("Invalid image file")
+                    return
+                }
+                
+                val bytes = file.readBytes()
+                selectedFile = file
+                selectedBytes = bytes
+                
+                pendingOnImagePicked?.invoke(bytes, file.name)
+            }
+        } catch (e: Exception) {
+            pendingOnError?.invoke(e.message ?: "Failed to load image")
+        }
+    }
     
     actual suspend fun pickImage(
         onImagePicked: (bytes: ByteArray, fileName: String) -> Unit,

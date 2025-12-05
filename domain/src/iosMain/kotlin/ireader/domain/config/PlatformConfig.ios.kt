@@ -20,4 +20,11 @@ actual object PlatformConfig {
     actual fun getSupabaseBadgesKey(): String = ""
     actual fun getSupabaseAnalyticsUrl(): String = ""
     actual fun getSupabaseAnalyticsKey(): String = ""
+    
+    // Cloudflare R2 Storage (Character Art)
+    actual fun getR2AccountId(): String = ""
+    actual fun getR2AccessKeyId(): String = ""
+    actual fun getR2SecretAccessKey(): String = ""
+    actual fun getR2BucketName(): String = "ireader-character-art"
+    actual fun getR2PublicUrl(): String = ""
 }

@@ -40,7 +40,10 @@ data class SupabaseConfigState(
     val badgesApiKey: String = "",
     // Project 7 - Analytics
     val analyticsUrl: String = "",
-    val analyticsApiKey: String = ""
+    val analyticsApiKey: String = "",
+    // Project 8 - Community Source
+    val communityUrl: String = "",
+    val communityApiKey: String = ""
 )
 
 class SupabaseConfigViewModel(
@@ -84,7 +87,9 @@ class SupabaseConfigViewModel(
                 badgesUrl = supabasePreferences.supabaseBadgesUrl().get(),
                 badgesApiKey = supabasePreferences.supabaseBadgesKey().get(),
                 analyticsUrl = supabasePreferences.supabaseAnalyticsUrl().get(),
-                analyticsApiKey = supabasePreferences.supabaseAnalyticsKey().get()
+                analyticsApiKey = supabasePreferences.supabaseAnalyticsKey().get(),
+                communityUrl = supabasePreferences.supabaseCommunityUrl().get(),
+                communityApiKey = supabasePreferences.supabaseCommunityKey().get()
             )}
         }
     }
@@ -111,7 +116,9 @@ class SupabaseConfigViewModel(
             badgesUrl = url,
             badgesApiKey = apiKey,
             analyticsUrl = url,
-            analyticsApiKey = apiKey
+            analyticsApiKey = apiKey,
+            communityUrl = url,
+            communityApiKey = apiKey
         )}
     }
     
@@ -147,6 +154,8 @@ class SupabaseConfigViewModel(
                 supabasePreferences.supabaseBadgesKey().set(currentState.badgesApiKey)
                 supabasePreferences.supabaseAnalyticsUrl().set(currentState.analyticsUrl)
                 supabasePreferences.supabaseAnalyticsKey().set(currentState.analyticsApiKey)
+                supabasePreferences.supabaseCommunityUrl().set(currentState.communityUrl)
+                supabasePreferences.supabaseCommunityKey().set(currentState.communityApiKey)
                 
                 updateState { it.copy(
                     testResult = "? Configuration saved successfully! Total storage: 3.5GB",
@@ -314,5 +323,13 @@ class SupabaseConfigViewModel(
     
     fun setAnalyticsApiKey(apiKey: String) {
         updateState { it.copy(analyticsApiKey = apiKey) }
+    }
+    
+    fun setCommunityUrl(url: String) {
+        updateState { it.copy(communityUrl = url) }
+    }
+    
+    fun setCommunityApiKey(apiKey: String) {
+        updateState { it.copy(communityApiKey = apiKey) }
     }
 }

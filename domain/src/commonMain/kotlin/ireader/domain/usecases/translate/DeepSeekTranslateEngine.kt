@@ -32,6 +32,14 @@ class DeepSeekTranslateEngine(
     override val supportsStylePreservation: Boolean = true
     override val requiresApiKey: Boolean = true
     
+    // DeepSeek has 64k context window, but we keep it conservative
+    override val maxCharsPerRequest: Int = 8000
+    
+    // DeepSeek has generous rate limits, 3 seconds is safe
+    override val rateLimitDelayMs: Long = 3000L
+    
+    override val isOffline: Boolean = false
+    
     // DeepSeek has excellent language support similar to OpenAI
     override val supportedLanguages: List<Pair<String, String>> = listOf(
         "auto" to "Auto-detect",

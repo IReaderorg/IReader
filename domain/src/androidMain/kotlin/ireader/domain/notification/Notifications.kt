@@ -37,6 +37,10 @@ import ireader.domain.notification.NotificationsIds.GROUP_INSTALLER
 import ireader.domain.notification.NotificationsIds.GROUP_BACKUP_RESTORE
 import ireader.domain.notification.NotificationsIds.GROUP_LIBRARY
 import ireader.domain.notification.NotificationsIds.GROUP_TTS
+import ireader.domain.notification.NotificationsIds.GROUP_TRANSLATION
+import ireader.domain.notification.NotificationsIds.CHANNEL_TRANSLATION_PROGRESS
+import ireader.domain.notification.NotificationsIds.CHANNEL_TRANSLATION_COMPLETE
+import ireader.domain.notification.NotificationsIds.CHANNEL_TRANSLATION_ERROR
 import ireader.domain.utils.extensions.buildNotificationChannel
 import ireader.domain.utils.extensions.buildNotificationChannelGroup
 import ireader.i18n.LocalizeHelper
@@ -89,6 +93,9 @@ object Notifications {
                 },
                 buildNotificationChannelGroup(GROUP_APK_UPDATES) {
                     setName(localizeHelper.localize(Res.string.label_recent_updates))
+                },
+                buildNotificationChannelGroup(GROUP_TRANSLATION) {
+                    setName("Translation")
                 },
             )
         )
@@ -232,6 +239,30 @@ object Notifications {
                 ) {
                     setGroup(GROUP_APK_UPDATES)
                     setName(localizeHelper.localize(Res.string.channel_ext_updates))
+                },
+                buildNotificationChannel(
+                    CHANNEL_TRANSLATION_PROGRESS,
+                    IMPORTANCE_LOW
+                ) {
+                    setName("Translation Progress")
+                    setGroup(GROUP_TRANSLATION)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(
+                    CHANNEL_TRANSLATION_COMPLETE,
+                    IMPORTANCE_DEFAULT
+                ) {
+                    setName("Translation Complete")
+                    setGroup(GROUP_TRANSLATION)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(
+                    CHANNEL_TRANSLATION_ERROR,
+                    IMPORTANCE_HIGH
+                ) {
+                    setName("Translation Errors")
+                    setGroup(GROUP_TRANSLATION)
+                    setShowBadge(false)
                 },
             )
         )

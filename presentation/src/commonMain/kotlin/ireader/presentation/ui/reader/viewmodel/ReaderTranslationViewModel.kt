@@ -9,6 +9,10 @@ import ireader.domain.data.engines.ToneType
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.Glossary
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.services.common.ServiceResult
+import ireader.domain.services.common.TranslationService
+import ireader.domain.services.common.TranslationQueueResult
+import ireader.domain.services.common.TranslationStatus
 import ireader.domain.usecases.glossary.*
 import ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase
 import ireader.domain.usecases.translate.TranslateParagraphUseCase
@@ -18,13 +22,14 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
  * ViewModel responsible for translation and glossary management
  * 
  * Handles:
- * - Chapter translation
+ * - Chapter translation (via unified TranslationService)
  * - Paragraph translation
  * - Glossary management
  * - Translation progress tracking
@@ -41,6 +46,7 @@ class ReaderTranslationViewModel(
     private val importGlossaryUseCase: ImportGlossaryUseCase,
     private val translationEnginesManager: TranslationEnginesManager,
     private val readerPreferences: ReaderPreferences,
+    private val translationService: TranslationService? = null,
 ) : BaseViewModel() {
     
     // Translation state
@@ -90,8 +96,8 @@ class ReaderTranslationViewModel(
     // ==================== Translation ====================
     
     /**
-     * Translate current chapter
-     * Uses TranslateChapterWithStorageUseCase to translate AND save to database
+     * Translate current chapter using the unified TranslationService
+     * This ensures notifications are shown and translation is handled consistently
      */
     suspend fun translateChapter(
         chapter: Chapter,
@@ -102,79 +108,242 @@ class ReaderTranslationViewModel(
             return
         }
         
+        // Check if chapter has content
+        val content = chapter.content ?: emptyList()
+        val texts = content.filterIsInstance<ireader.core.source.model.Text>()
+        
+        if (texts.isEmpty()) {
+            showSnackBar(UiText.MStringResource(Res.string.no_text_to_translate))
+            return
+        }
+        
         isTranslating = true
         translationProgress = 0f
         translationCompleted = 0
+        translationTotal = 1 // Single chapter
         
         try {
-            showSnackBar(UiText.MStringResource(Res.string.translating))
-            
-            // Get translation settings
-            val contentType = ContentType.values().getOrElse(translatorContentType.value) {
-                ContentType.GENERAL
-            }
-            
-            val toneType = ToneType.values().getOrElse(translatorToneType.value) {
-                ToneType.NEUTRAL
-            }
-            
-            val preserveStyle = translatorPreserveStyle.value
-            
-            // Extract text content for progress tracking
-            val content = chapter.content ?: emptyList()
-            val texts = content.filterIsInstance<ireader.core.source.model.Text>()
-            
-            if (texts.isEmpty()) {
-                showSnackBar(UiText.MStringResource(Res.string.no_text_to_translate))
-                isTranslating = false
-                return
-            }
-            
-            translationTotal = texts.size
-            
-            Log.debug("Starting translation with storage for chapter ${chapter.id}, ${texts.size} paragraphs")
-            
-            // Use TranslateChapterWithStorageUseCase which handles both translation AND saving
-            translateChapterWithStorageUseCase.execute(
-                chapter = chapter,
-                sourceLanguage = translatorOriginLanguage.value,
-                targetLanguage = translatorTargetLanguage.value,
-                contentType = contentType,
-                toneType = toneType,
-                preserveStyle = preserveStyle,
-                applyGlossary = applyGlossaryToTranslations.value,
-                forceRetranslate = forceRetranslate,
-                scope = scope,
-                onProgress = { progress ->
-                    // Progress is 0-100, clamp it to avoid > 100%
-                    val clampedProgress = progress.coerceIn(0, 100)
-                    translationCompleted = (clampedProgress * translationTotal) / 100
-                    translationProgress = clampedProgress / 100f
-                },
-                onSuccess = { translatedChapter ->
-                    // Use atomic update to prevent race conditions
-                    translationState.setTranslation(translatedChapter.translatedContent)
-                    
-                    Log.debug("Translation saved successfully for chapter ${chapter.id} with ${translatedChapter.translatedContent.size} paragraphs")
-                    showSnackBar(UiText.DynamicString("Translation complete and saved"))
-                    translationProgress = 1f
-                    isTranslating = false
-                },
-                onError = { errorMessage ->
-                    Log.error("Translation failed: $errorMessage")
-                    showSnackBar(errorMessage)
-                    // Use atomic clear with error
-                    translationState.clearTranslation(errorMessage.toString())
-                    isTranslating = false
-                    translationProgress = 0f
+            // Use unified TranslationService if available (shows notifications)
+            if (translationService != null) {
+                Log.info { "ReaderTranslationViewModel: Using unified TranslationService for chapter ${chapter.id}" }
+                
+                val engineId = translationEnginesManager.get().id
+                
+                // Queue single chapter with priority flag (adds to front of queue)
+                val result = translationService.queueChapters(
+                    bookId = chapter.bookId,
+                    chapterIds = listOf(chapter.id),
+                    sourceLanguage = translatorOriginLanguage.value,
+                    targetLanguage = translatorTargetLanguage.value,
+                    engineId = engineId,
+                    bypassWarning = true, // Single chapter, no warning needed
+                    priority = true // Priority for reader - add to front of queue
+                )
+                
+                when (result) {
+                    is ServiceResult.Success -> {
+                        when (val queueResult = result.data) {
+                            is TranslationQueueResult.Success -> {
+                                Log.info { "ReaderTranslationViewModel: Chapter queued for translation" }
+                                // Observe progress from service
+                                observeTranslationProgress(chapter.id)
+                            }
+                            is TranslationQueueResult.RateLimitWarning -> {
+                                showSnackBar(UiText.DynamicString(queueResult.message))
+                                isTranslating = false
+                            }
+                            is TranslationQueueResult.PreviousTranslationCancelled -> {
+                                showSnackBar(UiText.DynamicString("Previous translation cancelled. Please try again."))
+                                isTranslating = false
+                            }
+                        }
+                    }
+                    is ServiceResult.Error -> {
+                        Log.error { "ReaderTranslationViewModel: Translation failed: ${result.message}" }
+                        showSnackBar(UiText.DynamicString("Translation failed: ${result.message ?: "Unknown error"}"))
+                        isTranslating = false
+                    }
+                    else -> {
+                        isTranslating = false
+                    }
                 }
-            )
+            } else {
+                // Fallback to direct use case if service not available
+                Log.info { "ReaderTranslationViewModel: TranslationService not available, using direct use case" }
+                translateChapterDirect(chapter, forceRetranslate)
+            }
             
         } catch (e: Exception) {
             Log.error("Translation failed", e)
             showSnackBar(UiText.DynamicString("Translation error: ${e.message ?: "Unknown error"}"))
             isTranslating = false
         }
+    }
+    
+    // Callback to get next chapter for auto-translation
+    private var getNextChapterCallback: (() -> Chapter?)? = null
+    private var currentTranslatingChapterId: Long? = null
+    
+    /**
+     * Set callback to get next chapter for auto-translation feature
+     */
+    fun setNextChapterProvider(provider: () -> Chapter?) {
+        getNextChapterCallback = provider
+    }
+    
+    /**
+     * Observe translation progress from the unified service
+     */
+    private fun observeTranslationProgress(chapterId: Long) {
+        currentTranslatingChapterId = chapterId
+        
+        scope.launch {
+            translationService?.translationProgress?.collectLatest { progressMap ->
+                val progress = progressMap[chapterId]
+                if (progress != null) {
+                    when (progress.status) {
+                        TranslationStatus.QUEUED -> {
+                            translationProgress = 0.1f
+                        }
+                        TranslationStatus.DOWNLOADING_CONTENT -> {
+                            translationProgress = 0.2f
+                        }
+                        TranslationStatus.TRANSLATING -> {
+                            translationProgress = progress.progress.coerceIn(0.3f, 0.9f)
+                        }
+                        TranslationStatus.COMPLETED -> {
+                            translationProgress = 1f
+                            isTranslating = false
+                            // Load the saved translation
+                            loadTranslationForChapter(chapterId)
+                            showSnackBar(UiText.DynamicString("Translation complete"))
+                            
+                            // Auto-translate next chapter if enabled
+                            if (autoTranslateNextChapter.value) {
+                                queueNextChapterForTranslation()
+                            }
+                        }
+                        TranslationStatus.FAILED -> {
+                            translationProgress = 0f
+                            isTranslating = false
+                            translationState.clearTranslation(progress.errorMessage)
+                            showSnackBar(UiText.DynamicString("Translation failed: ${progress.errorMessage ?: "Unknown error"}"))
+                        }
+                        TranslationStatus.CANCELLED -> {
+                            translationProgress = 0f
+                            isTranslating = false
+                            showSnackBar(UiText.DynamicString("Translation cancelled"))
+                        }
+                        TranslationStatus.PAUSED, TranslationStatus.RATE_LIMITED -> {
+                            // Keep current progress
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Queue next chapter for translation (auto-translate feature)
+     */
+    private fun queueNextChapterForTranslation() {
+        val nextChapter = getNextChapterCallback?.invoke()
+        
+        if (nextChapter == null) {
+            Log.info { "ReaderTranslationViewModel: No next chapter available for auto-translation" }
+            return
+        }
+        
+        // Check if next chapter has content
+        val content = nextChapter.content ?: emptyList()
+        val texts = content.filterIsInstance<ireader.core.source.model.Text>()
+        
+        if (texts.isEmpty()) {
+            Log.info { "ReaderTranslationViewModel: Next chapter has no content, queuing for download and translation" }
+        }
+        
+        Log.info { "ReaderTranslationViewModel: Auto-translating next chapter: ${nextChapter.name}" }
+        
+        scope.launch {
+            try {
+                val engineId = translationEnginesManager.get().id
+                
+                // Queue next chapter (not priority - goes to back of queue)
+                val result = translationService?.queueChapters(
+                    bookId = nextChapter.bookId,
+                    chapterIds = listOf(nextChapter.id),
+                    sourceLanguage = translatorOriginLanguage.value,
+                    targetLanguage = translatorTargetLanguage.value,
+                    engineId = engineId,
+                    bypassWarning = true,
+                    priority = false // Not priority - background translation
+                )
+                
+                when (result) {
+                    is ServiceResult.Success -> {
+                        Log.info { "ReaderTranslationViewModel: Next chapter queued for auto-translation" }
+                        showSnackBar(UiText.DynamicString("Auto-translating: ${nextChapter.name}"))
+                    }
+                    is ServiceResult.Error -> {
+                        Log.error { "ReaderTranslationViewModel: Failed to queue next chapter: ${result.message}" }
+                    }
+                    else -> {}
+                }
+            } catch (e: Exception) {
+                Log.error("Failed to queue next chapter for auto-translation", e)
+            }
+        }
+    }
+    
+    /**
+     * Fallback: Translate chapter directly without service (no notifications)
+     */
+    private suspend fun translateChapterDirect(
+        chapter: Chapter,
+        forceRetranslate: Boolean = false
+    ) {
+        showSnackBar(UiText.MStringResource(Res.string.translating))
+        
+        val contentType = ContentType.values().getOrElse(translatorContentType.value) {
+            ContentType.GENERAL
+        }
+        
+        val toneType = ToneType.values().getOrElse(translatorToneType.value) {
+            ToneType.NEUTRAL
+        }
+        
+        val preserveStyle = translatorPreserveStyle.value
+        
+        translateChapterWithStorageUseCase.execute(
+            chapter = chapter,
+            sourceLanguage = translatorOriginLanguage.value,
+            targetLanguage = translatorTargetLanguage.value,
+            contentType = contentType,
+            toneType = toneType,
+            preserveStyle = preserveStyle,
+            applyGlossary = applyGlossaryToTranslations.value,
+            forceRetranslate = forceRetranslate,
+            scope = scope,
+            onProgress = { progress ->
+                val clampedProgress = progress.coerceIn(0, 100)
+                translationCompleted = (clampedProgress * translationTotal) / 100
+                translationProgress = clampedProgress / 100f
+            },
+            onSuccess = { translatedChapter ->
+                translationState.setTranslation(translatedChapter.translatedContent)
+                Log.debug("Translation saved successfully for chapter ${chapter.id}")
+                showSnackBar(UiText.DynamicString("Translation complete and saved"))
+                translationProgress = 1f
+                isTranslating = false
+            },
+            onError = { errorMessage ->
+                Log.error("Translation failed: $errorMessage")
+                showSnackBar(errorMessage)
+                translationState.clearTranslation(errorMessage.toString())
+                isTranslating = false
+                translationProgress = 0f
+            }
+        )
     }
     
     /**

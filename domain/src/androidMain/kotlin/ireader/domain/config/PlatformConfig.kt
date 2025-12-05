@@ -35,4 +35,11 @@ actual object PlatformConfig {
     // Project 7 - Analytics
     actual fun getSupabaseAnalyticsUrl(): String = BuildConfig.SUPABASE_ANALYTICS_URL
     actual fun getSupabaseAnalyticsKey(): String = BuildConfig.SUPABASE_ANALYTICS_KEY
+    
+    // Cloudflare R2 Storage (Character Art)
+    actual fun getR2AccountId(): String = BuildConfig.R2_ACCOUNT_ID
+    actual fun getR2AccessKeyId(): String = BuildConfig.R2_ACCESS_KEY_ID
+    actual fun getR2SecretAccessKey(): String = BuildConfig.R2_SECRET_ACCESS_KEY
+    actual fun getR2BucketName(): String = BuildConfig.R2_BUCKET_NAME
+    actual fun getR2PublicUrl(): String = BuildConfig.R2_PUBLIC_URL
 }

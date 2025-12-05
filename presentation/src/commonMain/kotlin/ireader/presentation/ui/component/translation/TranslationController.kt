@@ -25,6 +25,12 @@ class TranslationController(
     // Available engines
     val availableEngines: List<TranslationEngine> = TranslationEngines.ALL
     
+    // Check if service is available
+    val isServiceAvailable: Boolean get() = translationService != null
+    
+    // Check if translation is in progress
+    val isTranslating: Boolean get() = dialogState.isTranslating
+    
     /**
      * Show translation dialog for single chapter (reader/TTS)
      */
@@ -88,6 +94,114 @@ class TranslationController(
     }
     
     /**
+     * Quick translate with saved settings (no dialog)
+     * Used for single tap on translate button
+     */
+    fun quickTranslate(
+        chapterIds: List<Long>,
+        bookId: Long,
+        priority: Boolean = false,
+        onComplete: (() -> Unit)? = null
+    ) {
+        if (translationService == null) {
+            onShowSnackbar("Translation service not available")
+            return
+        }
+        
+        if (chapterIds.isEmpty()) {
+            onShowSnackbar("No chapters to translate")
+            return
+        }
+        
+        val engineId = readerPreferences.translatorEngine().get()
+        if (engineId < 0) {
+            // No engine configured, show dialog instead
+            showForMassTranslation(chapterIds, bookId)
+            return
+        }
+        
+        val sourceLang = readerPreferences.translatorOriginLanguage().get()
+        val targetLang = readerPreferences.translatorTargetLanguage().get()
+        
+        scope.launch {
+            onShowSnackbar("Starting translation...")
+            
+            val result = translationService.queueChapters(
+                bookId = bookId,
+                chapterIds = chapterIds,
+                sourceLanguage = sourceLang,
+                targetLanguage = targetLang,
+                engineId = engineId,
+                bypassWarning = priority, // Priority requests bypass warning
+                priority = priority
+            )
+            
+            when (result) {
+                is ServiceResult.Success -> {
+                    when (val queueResult = result.data) {
+                        is TranslationQueueResult.Success -> {
+                            val msg = if (priority) {
+                                "Translating chapter (priority)"
+                            } else {
+                                "${queueResult.queuedCount} chapters queued for translation"
+                            }
+                            onShowSnackbar(msg)
+                            
+                            // Update dialog state for progress tracking
+                            dialogState.isTranslating = true
+                            dialogState.totalChapters = queueResult.queuedCount
+                            dialogState.completedChapters = 0
+                            dialogState.chapterIds = chapterIds
+                            dialogState.bookId = bookId
+                            
+                            // Observe progress
+                            observeProgress(onComplete)
+                        }
+                        is TranslationQueueResult.RateLimitWarning -> {
+                            // Show dialog with warning
+                            dialogState.show(
+                                mode = if (chapterIds.size == 1) TranslationMode.SINGLE_CHAPTER else TranslationMode.MASS_CHAPTERS,
+                                chapterIds = chapterIds,
+                                bookId = bookId,
+                                defaultEngineId = engineId,
+                                defaultSourceLang = sourceLang,
+                                defaultTargetLang = targetLang
+                            )
+                            dialogState.showWarning = true
+                            dialogState.warningMessage = queueResult.message
+                            dialogState.estimatedTimeMinutes = queueResult.estimatedTime / 60000
+                        }
+                        is TranslationQueueResult.PreviousTranslationCancelled -> {
+                            onShowSnackbar("Previous translation cancelled. Please try again.")
+                        }
+                    }
+                }
+                is ServiceResult.Error -> {
+                    onShowSnackbar("Translation failed: ${result.message ?: "Unknown error"}")
+                }
+                else -> {}
+            }
+        }
+    }
+    
+    /**
+     * Translate single chapter with priority (for reader screen)
+     * Adds to front of queue if translation is already in progress
+     */
+    fun translateSingleChapterWithPriority(
+        chapterId: Long,
+        bookId: Long,
+        onComplete: (() -> Unit)? = null
+    ) {
+        quickTranslate(
+            chapterIds = listOf(chapterId),
+            bookId = bookId,
+            priority = true,
+            onComplete = onComplete
+        )
+    }
+    
+    /**
      * Start translation with current dialog settings
      */
     fun translate(
@@ -104,6 +218,8 @@ class TranslationController(
         readerPreferences.translatorOriginLanguage().set(sourceLang)
         readerPreferences.translatorTargetLanguage().set(targetLang)
         
+        val isPriority = dialogState.mode == TranslationMode.SINGLE_CHAPTER
+        
         scope.launch {
             val result = service.queueChapters(
                 bookId = bookId,
@@ -111,7 +227,8 @@ class TranslationController(
                 sourceLanguage = sourceLang,
                 targetLanguage = targetLang,
                 engineId = engineId,
-                bypassWarning = bypassWarning
+                bypassWarning = bypassWarning,
+                priority = isPriority
             )
             
             when (result) {
@@ -148,11 +265,13 @@ class TranslationController(
         }
     }
     
-    private fun observeProgress() {
+    private fun observeProgress(onComplete: (() -> Unit)? = null) {
         scope.launch {
             translationService?.translationProgress?.collectLatest { progressMap ->
-                val completed = progressMap.values.count { it.status == TranslationStatus.COMPLETED }
-                val current = progressMap.values.find { 
+                // Only track progress for chapters we're interested in
+                val relevantProgress = progressMap.filterKeys { it in dialogState.chapterIds }
+                val completed = relevantProgress.values.count { it.status == TranslationStatus.COMPLETED }
+                val current = relevantProgress.values.find { 
                     it.status == TranslationStatus.TRANSLATING || 
                     it.status == TranslationStatus.DOWNLOADING_CONTENT 
                 }
@@ -161,16 +280,17 @@ class TranslationController(
                 dialogState.currentChapterName = current?.chapterName ?: ""
                 
                 // Check for errors
-                val failed = progressMap.values.find { it.status == TranslationStatus.FAILED }
+                val failed = relevantProgress.values.find { it.status == TranslationStatus.FAILED }
                 if (failed != null) {
                     dialogState.errorMessage = failed.errorMessage
                 }
                 
-                // Check if all done
-                if (completed >= dialogState.totalChapters && dialogState.totalChapters > 0) {
+                // Check if all our chapters are done
+                if (completed >= dialogState.chapterIds.size && dialogState.chapterIds.isNotEmpty()) {
                     dialogState.isTranslating = false
                     onShowSnackbar("Translation completed!")
                     dialogState.hide()
+                    onComplete?.invoke()
                 }
             }
         }

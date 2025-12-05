@@ -2,8 +2,11 @@
 
 import ireader.core.log.Log
 import ireader.core.source.LocalCatalogSource
+import ireader.core.util.SynchronizedMap
 import ireader.core.util.createICoroutineScope
 import ireader.core.util.replace
+import ireader.core.util.synchronizedMapOf
+import ireader.core.util.synchronizedSetOf
 import ireader.domain.catalogs.service.CatalogInstallationChange
 import ireader.domain.catalogs.service.CatalogInstallationChanges
 import ireader.domain.catalogs.service.CatalogLoader
@@ -12,9 +15,9 @@ import ireader.domain.models.entities.CatalogBundled
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.CatalogRemote
+import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,12 +29,6 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import ireader.core.util.SynchronizedMap
-import ireader.core.util.SynchronizedSet
-import ireader.core.util.synchronizedMapOf
-import ireader.core.util.synchronizedSetOf
-import ireader.domain.utils.extensions.currentTimeToLong
-import kotlinx.coroutines.FlowPreview
 
 /**
  * Optimized CatalogStore with improved performance for catalog and JS plugin loading.
@@ -120,10 +117,9 @@ class CatalogStore(
 
     private val lock = Mutex()
 
-    // Lazy initialization flag - prevents blocking startup (using volatile + synchronized for thread safety)
+    // Lazy initialization flag - prevents blocking startup
     @kotlin.concurrent.Volatile
     private var initializationStarted = false
-    private val initLock = Any()
     
     init {
         // Only start batch update processor - everything else is deferred
@@ -133,39 +129,44 @@ class CatalogStore(
     /**
      * Trigger lazy initialization - call this when catalogs are first needed.
      * This is safe to call multiple times - only the first call will initialize.
+     * Uses double-checked locking pattern with coroutine mutex.
      */
     fun ensureInitialized() {
         if (initializationStarted) return
-        synchronized(initLock) {
-            if (initializationStarted) return
-            initializationStarted = true
-        }
         
-        // Load catalogs with optimized initialization
+        // Use scope.launch to handle the mutex-based initialization
         scope.launch {
-            initializeCatalogs()
-        }
-        
-        // Listen for installation changes
-        scope.launch {
-            installationChanges.flow.collect { change ->
-                handleInstallationChange(change)
-            }
-        }
-        
-        // Listen for remote catalog updates with debouncing
-        scope.launch {
-            catalogRemoteRepository.getRemoteCatalogsFlow()
-                .debounce(FLOW_DEBOUNCE_MS)
-                .distinctUntilChanged()
-                .collect { remotes ->
-                    updateRemoteCatalogs(remotes)
+            lock.withLock {
+                if (initializationStarted) return@withLock
+                initializationStarted = true
+                
+                // Load catalogs with optimized initialization
+                launch {
+                    initializeCatalogs()
                 }
-        }
-        
-        // Cache pinned IDs
-        scope.launch {
-            cachedPinnedIds = pinnedCatalogsPreference.get()
+                
+                // Listen for installation changes
+                launch {
+                    installationChanges.flow.collect { change ->
+                        handleInstallationChange(change)
+                    }
+                }
+                
+                // Listen for remote catalog updates with debouncing
+                launch {
+                    catalogRemoteRepository.getRemoteCatalogsFlow()
+                        .debounce(FLOW_DEBOUNCE_MS)
+                        .distinctUntilChanged()
+                        .collect { remotes ->
+                            updateRemoteCatalogs(remotes)
+                        }
+                }
+                
+                // Cache pinned IDs
+                launch {
+                    cachedPinnedIds = pinnedCatalogsPreference.get()
+                }
+            }
         }
     }
     
@@ -497,6 +498,7 @@ class CatalogStore(
             is CatalogInstalled.Locally -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
             is CatalogInstalled.SystemWide -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
             is ireader.domain.models.entities.JSPluginCatalog -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
+            is ireader.domain.models.entities.CommunityCatalog -> copy(isPinned = isPinned)
         }
     }
 

@@ -223,6 +223,11 @@ class ReaderScreenViewModel(
         scope.launch {
             customFonts = fontManagementUseCase.getCustomFonts()
         }
+        
+        // Set up next chapter provider for auto-translate feature
+        translationViewModel.setNextChapterProvider {
+            nextChapter()
+        }
     }
     
     // ==================== TTS Chapter Sync ====================

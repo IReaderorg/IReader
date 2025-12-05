@@ -8,7 +8,7 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 actual val presentationPlatformModule: Module = module {
-    single { LocaleHelper() }
+    single { LocaleHelper(get()) }
     single { ireader.presentation.ui.book.helpers.PlatformHelper() }
     single<PlatformReaderSettingReader> { PlatformReaderSettingReader() }
     single<IUseController> { IUseController() }

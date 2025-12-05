@@ -184,6 +184,10 @@ class EpubBuilder(
                 appendLine("    <dc:description>${metadata.description.escapeXml()}</dc:description>")
             }
             appendLine("    <meta property=\"dcterms:modified\">$currentDate</meta>")
+            // Add cover meta tag for EPUB 2.0 compatibility (required by Google Books)
+            if (options.includeCover && book.cover.isNotEmpty()) {
+                appendLine("    <meta name=\"cover\" content=\"cover-image\"/>")
+            }
             appendLine("  </metadata>")
             
             // Manifest section

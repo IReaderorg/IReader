@@ -36,4 +36,11 @@ expect object PlatformConfig {
     // Project 7 - Analytics
     fun getSupabaseAnalyticsUrl(): String
     fun getSupabaseAnalyticsKey(): String
+    
+    // Cloudflare R2 Storage (Character Art)
+    fun getR2AccountId(): String
+    fun getR2AccessKeyId(): String
+    fun getR2SecretAccessKey(): String
+    fun getR2BucketName(): String
+    fun getR2PublicUrl(): String
 }

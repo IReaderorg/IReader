@@ -1,5 +1,6 @@
 package ireader.presentation.ui.settings.general
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,7 +22,8 @@ sealed class TestConnectionState {
 
 class TranslationSettingsViewModel(
     private val readerPreferences: ReaderPreferences,
-    val translationEnginesManager: TranslationEnginesManager
+    val translationEnginesManager: TranslationEnginesManager,
+    private val communityPreferences: ireader.domain.community.CommunityPreferences? = null
 ) : BaseViewModel() {
 
     val translatorEngine = readerPreferences.translatorEngine().asState()
@@ -34,6 +36,16 @@ class TranslationSettingsViewModel(
     val translatorPreserveStyle = readerPreferences.translatorPreserveStyle().asState()
     val ollamaUrl = readerPreferences.ollamaServerUrl().asState()
     val ollamaModel = readerPreferences.ollamaModel().asState()
+    
+    // Community sharing preferences
+    val autoShareTranslations = communityPreferences?.autoShareTranslations()?.asState() 
+        ?: mutableStateOf(false)
+    val contributorName = communityPreferences?.contributorName()?.asState()
+        ?: mutableStateOf("")
+    
+    fun setContributorName(name: String) {
+        contributorName.value = name
+    }
     
     var testConnectionState by mutableStateOf<TestConnectionState>(TestConnectionState.Idle)
         private set

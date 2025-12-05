@@ -350,7 +350,8 @@ private class IosTranslationService : TranslationService {
         sourceLanguage: String,
         targetLanguage: String,
         engineId: Long,
-        bypassWarning: Boolean
+        bypassWarning: Boolean,
+        priority: Boolean
     ): ServiceResult<TranslationQueueResult> = ServiceResult.Success(TranslationQueueResult.Success(0))
     
     override suspend fun pause() { _state.value = ServiceState.PAUSED }

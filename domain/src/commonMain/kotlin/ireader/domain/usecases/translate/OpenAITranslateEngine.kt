@@ -31,6 +31,15 @@ class OpenAITranslateEngine(
     override val supportsStylePreservation: Boolean = true
     override val requiresApiKey: Boolean = true
     
+    // GPT-4 has 8k token context, GPT-3.5 has 4k
+    // ~4 chars per token, so ~6000 chars is safe
+    override val maxCharsPerRequest: Int = 6000
+    
+    // OpenAI rate limits vary by tier, 3 seconds is safe for most
+    override val rateLimitDelayMs: Long = 3000L
+    
+    override val isOffline: Boolean = false
+    
     override val supportedLanguages: List<Pair<String, String>> = listOf(
         "auto" to "Auto-detect",
         "af" to "Afrikaans",

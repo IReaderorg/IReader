@@ -146,6 +146,9 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
                 DomainServices,
                 PluginModule
             ))
+            // Mark modules as fully initialized
+            ireader.domain.di.ModuleInitializationState.markFullyInitialized()
+            println("=== Background modules loaded, app fully initialized ===")
         }
         
         println("=== Koin initialization: ${System.currentTimeMillis() - totalStart}ms ===")

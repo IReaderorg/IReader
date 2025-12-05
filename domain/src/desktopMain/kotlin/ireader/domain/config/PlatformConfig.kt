@@ -98,4 +98,35 @@ actual object PlatformConfig {
             ?: System.getenv("SUPABASE_ANALYTICS_KEY")
             ?: ConfigLoader.get("supabase.analytics.key", "")
     }
+    
+    // Cloudflare R2 Storage (Character Art)
+    actual fun getR2AccountId(): String {
+        return System.getProperty("r2.accountId")
+            ?: System.getenv("R2_ACCOUNT_ID")
+            ?: ConfigLoader.get("r2.accountId", "")
+    }
+    
+    actual fun getR2AccessKeyId(): String {
+        return System.getProperty("r2.accessKeyId")
+            ?: System.getenv("R2_ACCESS_KEY_ID")
+            ?: ConfigLoader.get("r2.accessKeyId", "")
+    }
+    
+    actual fun getR2SecretAccessKey(): String {
+        return System.getProperty("r2.secretAccessKey")
+            ?: System.getenv("R2_SECRET_ACCESS_KEY")
+            ?: ConfigLoader.get("r2.secretAccessKey", "")
+    }
+    
+    actual fun getR2BucketName(): String {
+        return System.getProperty("r2.bucketName")
+            ?: System.getenv("R2_BUCKET_NAME")
+            ?: ConfigLoader.get("r2.bucketName", "ireader-character-art")
+    }
+    
+    actual fun getR2PublicUrl(): String {
+        return System.getProperty("r2.publicUrl")
+            ?: System.getenv("R2_PUBLIC_URL")
+            ?: ConfigLoader.get("r2.publicUrl", "")
+    }
 }

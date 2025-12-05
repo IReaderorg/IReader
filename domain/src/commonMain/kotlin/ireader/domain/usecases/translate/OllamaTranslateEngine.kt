@@ -36,6 +36,15 @@ class OllamaTranslateEngine(
     override val supportsStylePreservation: Boolean = true
     override val requiresApiKey: Boolean = false // Doesn't require an API key, but requires URL
     
+    // Ollama is local, so we can handle larger chunks
+    override val maxCharsPerRequest: Int = 10000
+    
+    // Local engine, no rate limiting needed
+    override val rateLimitDelayMs: Long = 0L
+    
+    // Ollama runs locally
+    override val isOffline: Boolean = true
+    
     // Default Ollama API endpoint (typically local)
     private val defaultApiUrl = "http://localhost:11434/api/generate"
     

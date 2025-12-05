@@ -8,6 +8,11 @@ import androidx.compose.runtime.Composable
  */
 expect class ImagePicker {
     /**
+     * Launch the image picker UI
+     */
+    fun launchPicker()
+    
+    /**
      * Pick an image from the device
      * @param onImagePicked Called with image bytes and file name when successful
      * @param onError Called when picking fails

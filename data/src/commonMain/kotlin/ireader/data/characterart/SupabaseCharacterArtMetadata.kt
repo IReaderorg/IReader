@@ -1,7 +1,6 @@
 package ireader.data.characterart
 
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
 import ireader.data.backend.BackendService
 import ireader.data.remote.RemoteErrorMapper
 import ireader.domain.models.characterart.ArtStyleFilter
@@ -9,8 +8,6 @@ import ireader.domain.models.characterart.CharacterArt
 import ireader.domain.models.characterart.CharacterArtSort
 import ireader.domain.models.characterart.CharacterArtStatus
 import ireader.domain.models.characterart.SubmitCharacterArtRequest
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 
 /**
@@ -33,71 +30,66 @@ class SupabaseCharacterArtMetadata(
         coerceInputValues = true
     }
     
-    @Serializable
-    private data class CharacterArtDto(
-        val id: String = "",
-        @SerialName("character_name") val characterName: String = "",
-        @SerialName("book_title") val bookTitle: String = "",
-        @SerialName("book_author") val bookAuthor: String = "",
-        val description: String = "",
-        @SerialName("image_url") val imageUrl: String = "",
-        @SerialName("thumbnail_url") val thumbnailUrl: String = "",
-        @SerialName("submitter_id") val submitterId: String = "",
-        @SerialName("submitter_username") val submitterUsername: String = "",
-        @SerialName("ai_model") val aiModel: String = "",
-        val prompt: String = "",
-        @SerialName("likes_count") val likesCount: Int = 0,
-        val status: String = "PENDING",
-        @SerialName("submitted_at") val submittedAt: Long = 0,
-        @SerialName("is_featured") val isFeatured: Boolean = false,
-        val tags: String = "[]" // Store as JSON string to avoid reflection
-    )
-
-    @Serializable
-    private data class CharacterArtInsertDto(
-        @SerialName("character_name") val characterName: String,
-        @SerialName("book_title") val bookTitle: String,
-        @SerialName("book_author") val bookAuthor: String = "",
-        val description: String = "",
-        @SerialName("image_url") val imageUrl: String,
-        @SerialName("thumbnail_url") val thumbnailUrl: String = "",
-        @SerialName("submitter_id") val submitterId: String,
-        @SerialName("ai_model") val aiModel: String = "",
-        val prompt: String = "",
-        val tags: String = "[]", // Store as JSON string
-        val status: String = "PENDING"
-    )
-    
-    private fun CharacterArtDto.toDomain(isLikedByUser: Boolean): CharacterArt {
-        val tagsList = try {
-            json.decodeFromString<List<String>>(tags)
-        } catch (e: Exception) {
-            emptyList()
+    /**
+     * Parse tags from JSON response - handles both array and string formats
+     */
+    private fun parseTagsFromJson(jsonElement: JsonElement?): List<String> {
+        if (jsonElement == null) return emptyList()
+        return when (jsonElement) {
+            is JsonArray -> jsonElement.mapNotNull { 
+                (it as? JsonPrimitive)?.contentOrNull 
+            }
+            is JsonPrimitive -> {
+                val content = jsonElement.contentOrNull ?: return emptyList()
+                // Handle PostgreSQL array format: {tag1,tag2}
+                if (content.startsWith("{") && content.endsWith("}")) {
+                    content.removeSurrounding("{", "}").split(",").map { it.trim('"') }
+                } else {
+                    try { json.decodeFromString<List<String>>(content) } catch (e: Exception) { emptyList() }
+                }
+            }
+            else -> emptyList()
         }
+    }
+    
+    /**
+     * Convert JSON element to CharacterArt domain model
+     */
+    private fun JsonElement.toDomain(isLikedByUser: Boolean): CharacterArt {
+        val obj = this.jsonObject
+        val tagsList = parseTagsFromJson(obj["tags"])
+        val statusStr = obj["status"]?.jsonPrimitive?.contentOrNull ?: "PENDING"
+        
         return CharacterArt(
-            id = id,
-            characterName = characterName,
-            bookTitle = bookTitle,
-            bookAuthor = bookAuthor,
-            description = description,
-            imageUrl = imageUrl,
-            thumbnailUrl = thumbnailUrl,
-            submitterId = submitterId,
-            submitterUsername = submitterUsername,
-            aiModel = aiModel,
-            prompt = prompt,
-            likesCount = likesCount,
+            id = obj["id"]?.jsonPrimitive?.contentOrNull ?: "",
+            characterName = obj["character_name"]?.jsonPrimitive?.contentOrNull ?: "",
+            bookTitle = obj["book_title"]?.jsonPrimitive?.contentOrNull ?: "",
+            bookAuthor = obj["book_author"]?.jsonPrimitive?.contentOrNull ?: "",
+            description = obj["description"]?.jsonPrimitive?.contentOrNull ?: "",
+            imageUrl = obj["image_url"]?.jsonPrimitive?.contentOrNull ?: "",
+            thumbnailUrl = obj["thumbnail_url"]?.jsonPrimitive?.contentOrNull ?: "",
+            submitterId = obj["submitter_id"]?.jsonPrimitive?.contentOrNull ?: "",
+            submitterUsername = obj["submitter_username"]?.jsonPrimitive?.contentOrNull ?: "",
+            aiModel = obj["ai_model"]?.jsonPrimitive?.contentOrNull ?: "",
+            prompt = obj["prompt"]?.jsonPrimitive?.contentOrNull ?: "",
+            likesCount = obj["likes_count"]?.jsonPrimitive?.intOrNull ?: 0,
             isLikedByUser = isLikedByUser,
-            status = try { CharacterArtStatus.valueOf(status) } catch (e: Exception) { CharacterArtStatus.PENDING },
-            submittedAt = submittedAt,
-            isFeatured = isFeatured,
+            status = try { CharacterArtStatus.valueOf(statusStr) } catch (e: Exception) { CharacterArtStatus.PENDING },
+            submittedAt = obj["submitted_at"]?.jsonPrimitive?.longOrNull ?: 0L,
+            isFeatured = obj["is_featured"]?.jsonPrimitive?.booleanOrNull ?: false,
             tags = tagsList
         )
     }
     
-    private fun JsonElement.toDto(): CharacterArtDto {
-        return json.decodeFromJsonElement(CharacterArtDto.serializer(), this)
-    }
+    /** Get ID from JSON element */
+    private fun JsonElement.getId(): String = jsonObject["id"]?.jsonPrimitive?.contentOrNull ?: ""
+    
+    /** Get book_title from JSON element */
+    private fun JsonElement.getBookTitle(): String = jsonObject["book_title"]?.jsonPrimitive?.contentOrNull ?: ""
+    
+    /** Get character_name from JSON element */
+    private fun JsonElement.getCharacterName(): String = jsonObject["character_name"]?.jsonPrimitive?.contentOrNull ?: ""
+
     
     override suspend fun getApprovedArt(
         filter: ArtStyleFilter,
@@ -108,16 +100,9 @@ class SupabaseCharacterArtMetadata(
     ): Result<List<CharacterArt>> = RemoteErrorMapper.withErrorMapping {
         val userId = getCurrentUserId()
         
-        val filters = mutableMapOf<String, Any>(
-            "status" to CharacterArtStatus.APPROVED.name
-        )
-        
-        // Note: Complex filters like tags contains and OR search need raw query
-        // For now, we filter in memory for tags and search
-        
         val queryResult = backendService.query(
             table = tableName,
-            filters = filters,
+            filters = mapOf("status" to CharacterArtStatus.APPROVED.name),
             orderBy = getSortColumn(sort),
             ascending = sort == CharacterArtSort.OLDEST,
             limit = limit,
@@ -125,9 +110,8 @@ class SupabaseCharacterArtMetadata(
         ).getOrThrow()
         
         var artList = queryResult.map { jsonElement ->
-            val dto = jsonElement.toDto()
-            val isLiked = userId?.let { checkIfLiked(dto.id, it) } ?: false
-            dto.toDomain(isLiked)
+            val isLiked = userId?.let { checkIfLiked(jsonElement.getId(), it) } ?: false
+            jsonElement.toDomain(isLiked)
         }
         
         // Apply tag filter in memory
@@ -146,49 +130,40 @@ class SupabaseCharacterArtMetadata(
         
         artList
     }
-
     
     override suspend fun getArtByBook(bookTitle: String): Result<List<CharacterArt>> = 
         RemoteErrorMapper.withErrorMapping {
             val userId = getCurrentUserId()
+            val searchLower = bookTitle.lowercase()
             
             val queryResult = backendService.query(
                 table = tableName,
-                filters = mapOf(
-                    "status" to CharacterArtStatus.APPROVED.name
-                )
+                filters = mapOf("status" to CharacterArtStatus.APPROVED.name)
             ).getOrThrow()
             
-            // Filter by book title in memory (case-insensitive partial match)
-            val searchLower = bookTitle.lowercase()
             queryResult
-                .map { it.toDto() }
-                .filter { it.bookTitle.lowercase().contains(searchLower) }
-                .map { dto ->
-                    val isLiked = userId?.let { checkIfLiked(dto.id, it) } ?: false
-                    dto.toDomain(isLiked)
+                .filter { it.getBookTitle().lowercase().contains(searchLower) }
+                .map { jsonElement ->
+                    val isLiked = userId?.let { checkIfLiked(jsonElement.getId(), it) } ?: false
+                    jsonElement.toDomain(isLiked)
                 }
         }
     
     override suspend fun getArtByCharacter(characterName: String): Result<List<CharacterArt>> = 
         RemoteErrorMapper.withErrorMapping {
             val userId = getCurrentUserId()
+            val searchLower = characterName.lowercase()
             
             val queryResult = backendService.query(
                 table = tableName,
-                filters = mapOf(
-                    "status" to CharacterArtStatus.APPROVED.name
-                )
+                filters = mapOf("status" to CharacterArtStatus.APPROVED.name)
             ).getOrThrow()
             
-            // Filter by character name in memory (case-insensitive partial match)
-            val searchLower = characterName.lowercase()
             queryResult
-                .map { it.toDto() }
-                .filter { it.characterName.lowercase().contains(searchLower) }
-                .map { dto ->
-                    val isLiked = userId?.let { checkIfLiked(dto.id, it) } ?: false
-                    dto.toDomain(isLiked)
+                .filter { it.getCharacterName().lowercase().contains(searchLower) }
+                .map { jsonElement ->
+                    val isLiked = userId?.let { checkIfLiked(jsonElement.getId(), it) } ?: false
+                    jsonElement.toDomain(isLiked)
                 }
         }
     
@@ -208,9 +183,8 @@ class SupabaseCharacterArtMetadata(
             ).getOrThrow()
             
             queryResult.map { jsonElement ->
-                val dto = jsonElement.toDto()
-                val isLiked = userId?.let { checkIfLiked(dto.id, it) } ?: false
-                dto.toDomain(isLiked)
+                val isLiked = userId?.let { checkIfLiked(jsonElement.getId(), it) } ?: false
+                jsonElement.toDomain(isLiked)
             }
         }
     
@@ -226,9 +200,8 @@ class SupabaseCharacterArtMetadata(
             ).getOrThrow()
             
             queryResult.map { jsonElement ->
-                val dto = jsonElement.toDto()
-                val isLiked = checkIfLiked(dto.id, userId)
-                dto.toDomain(isLiked)
+                val isLiked = checkIfLiked(jsonElement.getId(), userId)
+                jsonElement.toDomain(isLiked)
             }
         }
     
@@ -241,7 +214,7 @@ class SupabaseCharacterArtMetadata(
                 ascending = true
             ).getOrThrow()
             
-            queryResult.map { it.toDto().toDomain(false) }
+            queryResult.map { it.toDomain(false) }
         }
     
     override suspend fun getArtById(id: String): Result<CharacterArt> = 
@@ -253,10 +226,9 @@ class SupabaseCharacterArtMetadata(
                 filters = mapOf("id" to id)
             ).getOrThrow()
             
-            val dto = queryResult.firstOrNull()?.toDto() 
-                ?: throw Exception("Art not found")
+            val jsonElement = queryResult.firstOrNull() ?: throw Exception("Art not found")
             val isLiked = userId?.let { checkIfLiked(id, it) } ?: false
-            dto.toDomain(isLiked)
+            jsonElement.toDomain(isLiked)
         }
 
     
@@ -267,7 +239,10 @@ class SupabaseCharacterArtMetadata(
     ): Result<CharacterArt> = RemoteErrorMapper.withErrorMapping {
         val userId = getCurrentUserId() ?: throw Exception("Not logged in")
         
-        val tagsJson = json.encodeToString(request.tags)
+        // Convert tags list to JSON array for PostgreSQL
+        val tagsArray = buildJsonArray {
+            request.tags.forEach { add(it) }
+        }
         
         val data = buildJsonObject {
             put("character_name", request.characterName)
@@ -279,7 +254,7 @@ class SupabaseCharacterArtMetadata(
             put("submitter_id", userId)
             put("ai_model", request.aiModel)
             put("prompt", request.prompt)
-            put("tags", tagsJson)
+            put("tags", tagsArray)
             put("status", CharacterArtStatus.PENDING.name)
         }
         
@@ -289,45 +264,28 @@ class SupabaseCharacterArtMetadata(
             returning = true
         ).getOrThrow()
         
-        val dto = insertResult?.toDto() ?: throw Exception("No result returned from insert")
-        dto.toDomain(false)
+        insertResult?.toDomain(false) ?: throw Exception("No result returned from insert")
     }
     
     override suspend fun toggleLike(artId: String): Result<Boolean> = 
         RemoteErrorMapper.withErrorMapping {
             val userId = getCurrentUserId() ?: throw Exception("Not logged in")
-            
             val isCurrentlyLiked = checkIfLiked(artId, userId)
             
             if (isCurrentlyLiked) {
-                // Remove like
                 backendService.delete(
                     table = likesTable,
-                    filters = mapOf(
-                        "art_id" to artId,
-                        "user_id" to userId
-                    )
+                    filters = mapOf("art_id" to artId, "user_id" to userId)
                 ).getOrThrow()
-                
-                // Decrement likes count
                 backendService.rpc("decrement_art_likes", mapOf("art_id" to artId))
-                
                 false
             } else {
-                // Add like
                 val likeData = buildJsonObject {
                     put("art_id", artId)
                     put("user_id", userId)
                 }
-                backendService.insert(
-                    table = likesTable,
-                    data = likeData,
-                    returning = false
-                ).getOrThrow()
-                
-                // Increment likes count
+                backendService.insert(table = likesTable, data = likeData, returning = false).getOrThrow()
                 backendService.rpc("increment_art_likes", mapOf("art_id" to artId))
-                
                 true
             }
         }
@@ -339,13 +297,7 @@ class SupabaseCharacterArtMetadata(
                 put("is_featured", featured)
                 put("image_url", newImageUrl)
             }
-            
-            backendService.update(
-                table = tableName,
-                filters = mapOf("id" to artId),
-                data = data,
-                returning = false
-            ).getOrThrow()
+            backendService.update(table = tableName, filters = mapOf("id" to artId), data = data, returning = false).getOrThrow()
         }
     
     override suspend fun rejectArt(artId: String, reason: String): Result<Unit> = 
@@ -354,69 +306,42 @@ class SupabaseCharacterArtMetadata(
                 put("status", CharacterArtStatus.REJECTED.name)
                 put("rejection_reason", reason)
             }
-            
-            backendService.update(
-                table = tableName,
-                filters = mapOf("id" to artId),
-                data = data,
-                returning = false
-            ).getOrThrow()
+            backendService.update(table = tableName, filters = mapOf("id" to artId), data = data, returning = false).getOrThrow()
         }
     
     override suspend fun deleteArt(artId: String): Result<Unit> = 
         RemoteErrorMapper.withErrorMapping {
-            // Delete likes first
-            backendService.delete(
-                table = likesTable,
-                filters = mapOf("art_id" to artId)
-            )
-            
-            // Delete art
-            backendService.delete(
-                table = tableName,
-                filters = mapOf("id" to artId)
-            ).getOrThrow()
+            backendService.delete(table = likesTable, filters = mapOf("art_id" to artId))
+            backendService.delete(table = tableName, filters = mapOf("id" to artId)).getOrThrow()
         }
     
     override suspend fun reportArt(artId: String, reason: String): Result<Unit> = 
         RemoteErrorMapper.withErrorMapping {
             val userId = getCurrentUserId() ?: throw Exception("Not logged in")
-            
             val data = buildJsonObject {
                 put("art_id", artId)
                 put("reporter_id", userId)
                 put("reason", reason)
             }
-            
-            backendService.insert(
-                table = reportsTable,
-                data = data,
-                returning = false
-            ).getOrThrow()
+            backendService.insert(table = reportsTable, data = data, returning = false).getOrThrow()
         }
     
     private suspend fun checkIfLiked(artId: String, userId: String): Boolean {
         return try {
             val result = backendService.query(
                 table = likesTable,
-                filters = mapOf(
-                    "art_id" to artId,
-                    "user_id" to userId
-                )
+                filters = mapOf("art_id" to artId, "user_id" to userId)
             ).getOrNull()
-            
             !result.isNullOrEmpty()
         } catch (e: Exception) {
             false
         }
     }
     
-    private fun getSortColumn(sort: CharacterArtSort): String {
-        return when (sort) {
-            CharacterArtSort.NEWEST, CharacterArtSort.OLDEST -> "submitted_at"
-            CharacterArtSort.MOST_LIKED -> "likes_count"
-            CharacterArtSort.BOOK_TITLE -> "book_title"
-            CharacterArtSort.CHARACTER_NAME -> "character_name"
-        }
+    private fun getSortColumn(sort: CharacterArtSort): String = when (sort) {
+        CharacterArtSort.NEWEST, CharacterArtSort.OLDEST -> "submitted_at"
+        CharacterArtSort.MOST_LIKED -> "likes_count"
+        CharacterArtSort.BOOK_TITLE -> "book_title"
+        CharacterArtSort.CHARACTER_NAME -> "character_name"
     }
 }

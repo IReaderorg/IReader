@@ -47,6 +47,13 @@ android {
         buildConfigField("String", "SUPABASE_BADGES_KEY", "\"${getConfigProperty("SUPABASE_BADGES_KEY", "supabase.badges.key")}\"")
         buildConfigField("String", "SUPABASE_ANALYTICS_URL", "\"${getConfigProperty("SUPABASE_ANALYTICS_URL", "supabase.analytics.url")}\"")
         buildConfigField("String", "SUPABASE_ANALYTICS_KEY", "\"${getConfigProperty("SUPABASE_ANALYTICS_KEY", "supabase.analytics.key")}\"")
+        
+        // Cloudflare R2 Storage Configuration
+        buildConfigField("String", "R2_ACCOUNT_ID", "\"${getConfigProperty("R2_ACCOUNT_ID", "r2.accountId")}\"")
+        buildConfigField("String", "R2_ACCESS_KEY_ID", "\"${getConfigProperty("R2_ACCESS_KEY_ID", "r2.accessKeyId")}\"")
+        buildConfigField("String", "R2_SECRET_ACCESS_KEY", "\"${getConfigProperty("R2_SECRET_ACCESS_KEY", "r2.secretAccessKey")}\"")
+        buildConfigField("String", "R2_BUCKET_NAME", "\"${getConfigProperty("R2_BUCKET_NAME", "r2.bucketName")}\"")
+        buildConfigField("String", "R2_PUBLIC_URL", "\"${getConfigProperty("R2_PUBLIC_URL", "r2.publicUrl")}\"")
 
         // Use standard flavor by default when consumed by modules with flavors
         missingDimensionStrategy("default", "standard")

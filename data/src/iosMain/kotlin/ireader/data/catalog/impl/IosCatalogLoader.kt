@@ -31,7 +31,8 @@ import io.ktor.client.statement.*
 class IosCatalogLoader(
     private val httpClients: HttpClients,
     private val uiPreferences: UiPreferences,
-    private val preferences: PreferenceStoreFactory
+    private val preferences: PreferenceStoreFactory,
+    private val communitySource: ireader.domain.community.CommunitySource? = null
 ) : CatalogLoader {
     
     private val catalogPreferences = preferences.create("catalogs_data")
@@ -119,6 +120,15 @@ class IosCatalogLoader(
                 name = "Local Source"
             )
         )
+        
+        // Add Community Source for community-translated content
+        communitySource?.let { source ->
+            val communityCatalog = ireader.domain.models.entities.CommunityCatalog(
+                source = source,
+                description = "Browse and read community-translated novels"
+            )
+            bundled.add(communityCatalog)
+        }
         
         // Load JS runtime
         loadRuntime()

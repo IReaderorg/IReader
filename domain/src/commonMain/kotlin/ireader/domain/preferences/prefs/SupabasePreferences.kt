@@ -46,6 +46,10 @@ class SupabasePreferences(
         const val ANALYTICS_URL = "supabase_analytics_url"
         const val ANALYTICS_API_KEY = "supabase_analytics_api_key"
         
+        // Project 8 - Community Source
+        const val COMMUNITY_URL = "supabase_community_url"
+        const val COMMUNITY_API_KEY = "supabase_community_api_key"
+        
         // Sync settings
         const val AUTO_SYNC_ENABLED = "auto_sync_enabled"
         const val SYNC_ON_WIFI_ONLY = "sync_on_wifi_only"
@@ -168,5 +172,14 @@ class SupabasePreferences(
     
     fun supabaseAnalyticsKey(): Preference<String> {
         return preferenceStore.getString(ANALYTICS_API_KEY, "")
+    }
+    
+    // Project 8 - Community Source
+    fun supabaseCommunityUrl(): Preference<String> {
+        return preferenceStore.getString(COMMUNITY_URL, "")
+    }
+    
+    fun supabaseCommunityKey(): Preference<String> {
+        return preferenceStore.getString(COMMUNITY_API_KEY, "")
     }
 }

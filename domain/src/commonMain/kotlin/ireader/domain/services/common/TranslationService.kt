@@ -30,6 +30,7 @@ interface TranslationService : PlatformService {
      * @param targetLanguage Target language code
      * @param engineId Translation engine ID
      * @param bypassWarning Whether to bypass the rate limit warning
+     * @param priority If true, add to front of queue (for single chapter in reader)
      */
     suspend fun queueChapters(
         bookId: Long,
@@ -37,7 +38,8 @@ interface TranslationService : PlatformService {
         sourceLanguage: String,
         targetLanguage: String,
         engineId: Long,
-        bypassWarning: Boolean = false
+        bypassWarning: Boolean = false,
+        priority: Boolean = false
     ): ServiceResult<TranslationQueueResult>
     
     /**
@@ -107,7 +109,12 @@ data class TranslationProgress(
     val errorMessage: String? = null,
     val retryCount: Int = 0,
     val totalRetries: Int = 3,
-    val estimatedTimeRemaining: Long? = null // in milliseconds
+    val estimatedTimeRemaining: Long? = null, // in milliseconds
+    // Chunk-based progress for detailed notification
+    val currentChunk: Int = 0,
+    val totalChunks: Int = 0,
+    val translatedParagraphs: Int = 0,
+    val totalParagraphs: Int = 0
 )
 
 /**

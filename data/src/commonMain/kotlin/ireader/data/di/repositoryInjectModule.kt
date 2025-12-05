@@ -269,19 +269,46 @@ val repositoryInjectModule = module {
                 // Get library client from multi-project provider for character art
                 val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).libraryClient
                 val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                val backendService: ireader.data.backend.BackendService = get()
                 
-                // Create Supabase metadata storage
+                // Create Supabase metadata storage using BackendService (pure HTTP, no reflection)
                 val metadataStorage = ireader.data.characterart.SupabaseCharacterArtMetadata(
                     supabaseClient = supabaseClient,
+                    backendService = backendService,
                     getCurrentUserId = { getCurrentUserUseCase().getOrNull()?.id }
                 )
                 
-                // Create image storage - use local storage by default
-                // R2 configuration should be done via platform-specific setup
+                // Create image storage using Cloudflare R2
+                val r2AccountId = ireader.domain.config.PlatformConfig.getR2AccountId()
+                val r2AccessKeyId = ireader.domain.config.PlatformConfig.getR2AccessKeyId()
+                val r2SecretAccessKey = ireader.domain.config.PlatformConfig.getR2SecretAccessKey()
+                val r2BucketName = ireader.domain.config.PlatformConfig.getR2BucketName()
+                val r2PublicUrl = ireader.domain.config.PlatformConfig.getR2PublicUrl()
+                
                 val imageStorage: ireader.data.characterart.ImageStorageProvider = 
-                    ireader.data.characterart.LocalImageStorage(
-                        basePath = "${AppDataDirectory.getPathString()}/character-art"
-                    )
+                    if (r2AccountId.isNotEmpty() && r2AccessKeyId.isNotEmpty() && r2SecretAccessKey.isNotEmpty()) {
+                        // Use Cloudflare R2 if configured
+                        val r2Config = ireader.data.characterart.R2Config(
+                            accountId = r2AccountId,
+                            accessKeyId = r2AccessKeyId,
+                            secretAccessKey = r2SecretAccessKey,
+                            bucketName = r2BucketName,
+                            publicUrl = r2PublicUrl
+                        )
+                        val r2DataSource = ireader.data.characterart.CloudflareR2DataSource(
+                            httpClient = get<ireader.core.http.HttpClients>().default,
+                            config = r2Config
+                        )
+                        ireader.data.characterart.CloudflareR2ImageStorage(r2DataSource)
+                    } else {
+                        // Fallback to Supabase Storage
+                        ireader.data.characterart.SupabaseImageStorage(
+                            httpClient = get<ireader.core.http.HttpClients>().default,
+                            supabaseUrl = supabaseClient.supabaseUrl,
+                            supabaseKey = supabaseClient.supabaseKey,
+                            bucketName = "character-art"
+                        )
+                    }
                 
                 // Create the combined data source
                 val dataSource = ireader.data.characterart.CharacterArtDataSource(

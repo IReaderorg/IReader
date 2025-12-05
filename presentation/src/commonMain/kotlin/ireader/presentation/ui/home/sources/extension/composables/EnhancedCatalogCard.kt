@@ -80,6 +80,7 @@ fun EnhancedCatalogCard(
 
     val lang = when (catalog) {
         is CatalogBundled -> null
+        is ireader.domain.models.entities.CommunityCatalog -> catalog.source.lang
         is CatalogInstalled -> catalog.source?.lang
         is CatalogRemote -> catalog.lang
     }?.let { Language(it) }

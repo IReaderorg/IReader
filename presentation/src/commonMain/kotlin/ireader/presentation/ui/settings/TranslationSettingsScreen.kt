@@ -768,6 +768,67 @@ fun TranslationSettingsScreen(
         })
     }
 
+    // Community Sharing Section
+    items.add(Components.Space)
+    items.add(
+        Components.Header(
+            "Community Sharing"
+        )
+    )
+    
+    items.add(Components.Dynamic {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Share Translations with Community",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "When enabled, your translations will be automatically shared with the community so others can benefit from your work.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        }
+    })
+    
+    // Auto-share toggle - controlled by viewModel if available
+    if (viewModel != null) {
+        items.add(
+            Components.Switch(
+                title = "Auto-share Translations",
+                icon = Icons.Default.Translate,
+                subtitle = "Automatically share completed translations to the community source",
+                preference = viewModel.autoShareTranslations,
+            )
+        )
+        
+        // Contributor name field
+        items.add(Components.Dynamic {
+            OutlinedTextField(
+                value = viewModel.contributorName.value,
+                onValueChange = { viewModel.setContributorName(it) },
+                label = { Text("Contributor Name") },
+                placeholder = { Text("Your display name for contributions") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                singleLine = true
+            )
+        })
+    }
+    
+    items.add(Components.Space)
+
     // Gemini API section
     if (currentEngine?.id == 8L) { // Check if Gemini is the selected engine (ID 8)
         items.add(Components.Header("Gemini Settings"))

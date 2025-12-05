@@ -608,32 +608,11 @@ class GeneralSettingScreenViewModel(
      */
     @Composable
     fun getLanguageChoices(): Map<String, String> {
-        // Available locales in the app (from i18n/src/commonMain/composeResources/values-*)
-        val availableLocales = setOf(
-            "en",      // English (default)
-            "ar",      // Arabic
-            "fa",      // Persian/Farsi
-            "fr",      // French
-            "ko",      // Korean
-            "ru",      // Russian
-            "tr",      // Turkish
-            "zh",      // Chinese (Simplified)
-        )
-        
-        // Filter languages to only include those with available translations
-        val languages = localeHelper.languages
-            .filter { locale -> 
-                // Handle locale codes like "zh-CN" -> "zh"
-                val baseLocale = locale.substringBefore("-").substringBefore("_").lowercase()
-                availableLocales.contains(baseLocale)
+        // Use the predefined list of available locales from AppLocales
+        return ireader.presentation.core.theme.AppLocales.AVAILABLE_LOCALES
+            .associateWith { code ->
+                ireader.presentation.core.theme.AppLocales.getDisplayName(code)
             }
-            .mapNotNull { locale ->
-                LanguageHelper.fromTwoLettersToLanguage(locale)?.let { langName ->
-                    locale to langName 
-                }
-            }
-        
-        return languages.toMap()
     }
     
     /**

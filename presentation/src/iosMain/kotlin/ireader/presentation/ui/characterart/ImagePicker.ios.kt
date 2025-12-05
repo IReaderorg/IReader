@@ -39,6 +39,19 @@ actual class ImagePicker {
     private var pendingErrorCallback: ((String) -> Unit)? = null
     private var delegate: ImagePickerDelegateImpl? = null
     
+    actual fun launchPicker() {
+        MainScope().launch {
+            pickImage(
+                onImagePicked = { bytes, name ->
+                    pendingCallback?.invoke(bytes, name)
+                },
+                onError = { error ->
+                    pendingErrorCallback?.invoke(error)
+                }
+            )
+        }
+    }
+    
     actual suspend fun pickImage(
         onImagePicked: (bytes: ByteArray, fileName: String) -> Unit,
         onError: (String) -> Unit

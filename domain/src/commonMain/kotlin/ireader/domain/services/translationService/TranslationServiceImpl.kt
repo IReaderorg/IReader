@@ -1,23 +1,34 @@
 package ireader.domain.services.translationService
 
 import ireader.core.log.Log
-import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.data.repository.BookRepository
-import ireader.domain.models.entities.Chapter
-import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.preferences.prefs.TranslationPreferences
-import ireader.domain.services.common.*
-import ireader.domain.usecases.translate.TranslationEnginesManager
-import ireader.domain.usecases.translation.SaveTranslatedChapterUseCase
-import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
-import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.catalogs.interactor.GetLocalCatalog
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
-import kotlinx.coroutines.*
+import ireader.domain.catalogs.interactor.GetLocalCatalog
+import ireader.domain.data.repository.BookRepository
+import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.preferences.prefs.TranslationPreferences
+import ireader.domain.services.common.ServiceResult
+import ireader.domain.services.common.ServiceState
+import ireader.domain.services.common.TranslationProgress
+import ireader.domain.services.common.TranslationQueueResult
+import ireader.domain.services.common.TranslationService
+import ireader.domain.services.common.TranslationServiceConstants
+import ireader.domain.services.common.TranslationStatus
+import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
+import ireader.domain.usecases.translation.SaveTranslatedChapterUseCase
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 
 /**
@@ -34,7 +45,9 @@ class TranslationServiceImpl(
     private val readerPreferences: ReaderPreferences,
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
-    private val stateHolder: TranslationStateHolder = TranslationStateHolder()
+    private val stateHolder: TranslationStateHolder = TranslationStateHolder(),
+    private val submitTranslationUseCase: ireader.domain.community.SubmitTranslationUseCase? = null,
+    private val communityPreferences: ireader.domain.community.CommunityPreferences? = null
 ) : TranslationService {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -103,25 +116,30 @@ class TranslationServiceImpl(
         sourceLanguage: String,
         targetLanguage: String,
         engineId: Long,
-        bypassWarning: Boolean
+        bypassWarning: Boolean,
+        priority: Boolean
     ): ServiceResult<TranslationQueueResult> {
         if (chapterIds.isEmpty()) {
             return ServiceResult.Error("No chapters to translate")
         }
         
-        // Check if another book is being translated
+        Log.info { "Queueing ${chapterIds.size} chapters for translation (priority=$priority)" }
+        
+        // For priority requests (single chapter in reader), don't cancel existing translations
+        // Just add to front of queue
         val currentBook = stateHolder.currentBookId.value
-        if (currentBook != null && currentBook != bookId && stateHolder.isRunning.value) {
-            // Cancel previous translation
+        if (!priority && currentBook != null && currentBook != bookId && stateHolder.isRunning.value) {
+            // Cancel previous translation only for non-priority requests
             cancelAll()
             return ServiceResult.Success(TranslationQueueResult.PreviousTranslationCancelled(currentBook))
         }
         
-        // Check rate limit warning
+        // Check rate limit warning (skip for priority/single chapter)
         val threshold = translationPreferences.translationWarningThreshold().get()
         val shouldBypass = bypassWarning || 
             translationPreferences.bypassTranslationWarning().get() ||
-            isOfflineEngine(engineId)
+            isOfflineEngine(engineId) ||
+            priority // Skip warning for priority (single chapter) requests
         
         if (!shouldBypass && chapterIds.size >= threshold && requiresRateLimiting(engineId)) {
             val delayMs = translationPreferences.translationRateLimitDelayMs().get()
@@ -149,6 +167,43 @@ class TranslationServiceImpl(
         currentSourceLang = sourceLanguage
         currentTargetLang = targetLanguage
         currentEngineId = engineId
+        
+        // For priority requests, add to existing queue instead of clearing
+        if (priority && stateHolder.isRunning.value) {
+            // Add to front of queue (priority)
+            val newTasks = chapters.map { chapter ->
+                TranslationTask(
+                    chapterId = chapter.id,
+                    bookId = bookId,
+                    chapterName = chapter.name,
+                    bookName = book.title,
+                    needsDownload = chapter.isEmpty()
+                )
+            }
+            // Insert at front of queue
+            translationQueue.addAll(0, newTasks)
+            
+            // Update progress for new chapters
+            chapters.forEach { chapter ->
+                stateHolder.updateChapterProgress(
+                    chapter.id,
+                    TranslationProgress(
+                        chapterId = chapter.id,
+                        chapterName = chapter.name,
+                        bookName = book.title,
+                        status = TranslationStatus.QUEUED
+                    )
+                )
+            }
+            
+            // Update total count
+            stateHolder.setTotalChapters(stateHolder.totalChapters.value + chapters.size)
+            
+            Log.info { "Added ${chapters.size} priority chapters to front of queue" }
+            return ServiceResult.Success(TranslationQueueResult.Success(chapters.size))
+        }
+        
+        // Normal flow: clear queue and start fresh
         stateHolder.setCurrentBookId(bookId)
         stateHolder.setTotalChapters(chapters.size)
         stateHolder.setCompletedChapters(0)
@@ -297,19 +352,11 @@ class TranslationServiceImpl(
             throw Exception("Chapter has no text content to translate")
         }
         
-        // Translate content
-        val translatedContent = translateContent(textContent)
-        
-        // Update progress
-        stateHolder.updateChapterProgress(
-            task.chapterId,
-            TranslationProgress(
-                chapterId = task.chapterId,
-                chapterName = task.chapterName,
-                bookName = task.bookName,
-                status = TranslationStatus.TRANSLATING,
-                progress = 0.8f
-            )
+        // Translate content with progress tracking
+        val translatedContent = translateContentWithProgress(
+            content = textContent,
+            task = task,
+            totalParagraphs = textContent.size
         )
         
         // Save translated content to translatedChapter table (not chapter table)
@@ -319,6 +366,15 @@ class TranslationServiceImpl(
             sourceLanguage = currentSourceLang,
             targetLanguage = currentTargetLang,
             engineId = currentEngineId
+        )
+        
+        // Submit to community if auto-share is enabled
+        submitToCommunityIfEnabled(
+            bookId = task.bookId,
+            chapter = chapter,
+            translatedContent = translatedContent.joinToString("\n\n"),
+            sourceLanguage = currentSourceLang,
+            targetLanguage = currentTargetLang
         )
         
         // Mark as completed
@@ -361,30 +417,213 @@ class TranslationServiceImpl(
             throw Exception("Failed to download chapter: $downloadError")
         }
         
-        // Return downloaded content for translation
-        // The original chapter content is not modified - translations go to translatedChapter table
-        return downloadedContent ?: throw Exception("Failed to download chapter content")
+        val content = downloadedContent ?: throw Exception("Failed to download chapter content")
+        
+        // Save downloaded content to the chapter table before translation
+        // This ensures the original content is persisted even if translation fails
+        Log.info { "TranslationServiceImpl: Saving downloaded content for chapter ${task.chapterId}" }
+        val updatedChapter = chapter.copy(content = content)
+        chapterRepository.insertChapter(updatedChapter)
+        
+        return content
     }
 
-    private suspend fun translateContent(content: List<String>): List<String> {
+    private suspend fun translateContentWithProgress(
+        content: List<String>,
+        task: TranslationTask,
+        totalParagraphs: Int
+    ): List<String> {
+        val engine = translationEnginesManager.get()
+        val maxChars = engine.maxCharsPerRequest
+        val delayMs = if (engine.isOffline) 0L else maxOf(engine.rateLimitDelayMs, 3000L)
+        
+        // Chunk content based on engine's max character limit
+        val chunks = chunkContent(content, maxChars)
         val result = mutableListOf<String>()
         var error: String? = null
+        val totalChunks = chunks.size
+        var translatedParagraphCount = 0
         
-        translationEnginesManager.translateWithContext(
-            texts = content,
-            source = currentSourceLang,
-            target = currentTargetLang,
-            onProgress = { /* Progress tracking */ },
-            onSuccess = { translations ->
-                result.addAll(translations)
-            },
-            onError = { uiText ->
-                error = uiText.toString()
+        Log.info { "Translating $totalParagraphs paragraphs in $totalChunks chunks (max $maxChars chars per chunk)" }
+        
+        for ((index, chunk) in chunks.withIndex()) {
+            // Update progress with chunk info
+            val progress = (index.toFloat() / totalChunks.toFloat()).coerceIn(0.3f, 0.9f)
+            stateHolder.updateChapterProgress(
+                task.chapterId,
+                TranslationProgress(
+                    chapterId = task.chapterId,
+                    chapterName = task.chapterName,
+                    bookName = task.bookName,
+                    status = TranslationStatus.TRANSLATING,
+                    progress = progress,
+                    currentChunk = index + 1,
+                    totalChunks = totalChunks,
+                    translatedParagraphs = translatedParagraphCount,
+                    totalParagraphs = totalParagraphs
+                )
+            )
+            
+            // Apply rate limiting between chunks for online engines
+            if (index > 0 && !engine.isOffline) {
+                Log.info { "Rate limiting: waiting ${delayMs}ms before next chunk" }
+                delay(delayMs)
             }
-        )
+            
+            var chunkResult: List<String>? = null
+            var chunkError: String? = null
+            
+            translationEnginesManager.translateWithContext(
+                texts = chunk,
+                source = currentSourceLang,
+                target = currentTargetLang,
+                onProgress = { /* Progress tracking */ },
+                onSuccess = { translations ->
+                    chunkResult = translations
+                },
+                onError = { uiText ->
+                    chunkError = uiText.toString()
+                }
+            )
+            
+            if (chunkError != null) {
+                error = chunkError
+                break
+            }
+            
+            chunkResult?.let { 
+                result.addAll(it)
+                translatedParagraphCount += chunk.size
+            }
+        }
         
         if (error != null) {
             throw Exception("Translation failed: $error")
+        }
+        
+        return result
+    }
+    
+    // Keep old method for backward compatibility
+    private suspend fun translateContent(content: List<String>): List<String> {
+        val engine = translationEnginesManager.get()
+        val maxChars = engine.maxCharsPerRequest
+        val delayMs = if (engine.isOffline) 0L else maxOf(engine.rateLimitDelayMs, 3000L)
+        
+        val chunks = chunkContent(content, maxChars)
+        val result = mutableListOf<String>()
+        var error: String? = null
+        
+        for ((index, chunk) in chunks.withIndex()) {
+            if (index > 0 && !engine.isOffline) {
+                delay(delayMs)
+            }
+            
+            var chunkResult: List<String>? = null
+            var chunkError: String? = null
+            
+            translationEnginesManager.translateWithContext(
+                texts = chunk,
+                source = currentSourceLang,
+                target = currentTargetLang,
+                onProgress = { },
+                onSuccess = { translations -> chunkResult = translations },
+                onError = { uiText -> chunkError = uiText.toString() }
+            )
+            
+            if (chunkError != null) {
+                error = chunkError
+                break
+            }
+            
+            chunkResult?.let { result.addAll(it) }
+        }
+        
+        if (error != null) {
+            throw Exception("Translation failed: $error")
+        }
+        
+        return result
+    }
+    
+    /**
+     * Chunk content into smaller pieces based on max character limit.
+     * Tries to keep paragraphs together when possible.
+     */
+    private fun chunkContent(content: List<String>, maxChars: Int): List<List<String>> {
+        val chunks = mutableListOf<List<String>>()
+        var currentChunk = mutableListOf<String>()
+        var currentChunkSize = 0
+        
+        for (text in content) {
+            val textSize = text.length
+            
+            // If single text exceeds max, split it
+            if (textSize > maxChars) {
+                // First, add current chunk if not empty
+                if (currentChunk.isNotEmpty()) {
+                    chunks.add(currentChunk.toList())
+                    currentChunk = mutableListOf()
+                    currentChunkSize = 0
+                }
+                
+                // Split large text into smaller pieces
+                val splitTexts = splitLargeText(text, maxChars)
+                for (splitText in splitTexts) {
+                    chunks.add(listOf(splitText))
+                }
+            } else if (currentChunkSize + textSize > maxChars) {
+                // Current chunk is full, start new one
+                if (currentChunk.isNotEmpty()) {
+                    chunks.add(currentChunk.toList())
+                }
+                currentChunk = mutableListOf(text)
+                currentChunkSize = textSize
+            } else {
+                // Add to current chunk
+                currentChunk.add(text)
+                currentChunkSize += textSize
+            }
+        }
+        
+        // Add remaining chunk
+        if (currentChunk.isNotEmpty()) {
+            chunks.add(currentChunk.toList())
+        }
+        
+        return chunks
+    }
+    
+    /**
+     * Split a large text into smaller pieces, trying to break at sentence boundaries.
+     */
+    private fun splitLargeText(text: String, maxChars: Int): List<String> {
+        if (text.length <= maxChars) return listOf(text)
+        
+        val result = mutableListOf<String>()
+        var remaining = text
+        
+        while (remaining.length > maxChars) {
+            // Try to find a good break point (sentence end)
+            var breakPoint = remaining.lastIndexOf(". ", maxChars)
+            if (breakPoint == -1) breakPoint = remaining.lastIndexOf("。", maxChars)
+            if (breakPoint == -1) breakPoint = remaining.lastIndexOf("! ", maxChars)
+            if (breakPoint == -1) breakPoint = remaining.lastIndexOf("? ", maxChars)
+            if (breakPoint == -1) breakPoint = remaining.lastIndexOf("\n", maxChars)
+            
+            // If no good break point, just break at max chars
+            if (breakPoint == -1 || breakPoint < maxChars / 2) {
+                breakPoint = maxChars
+            } else {
+                breakPoint += 1 // Include the punctuation
+            }
+            
+            result.add(remaining.substring(0, breakPoint).trim())
+            remaining = remaining.substring(breakPoint).trim()
+        }
+        
+        if (remaining.isNotEmpty()) {
+            result.add(remaining)
         }
         
         return result
@@ -490,6 +729,50 @@ class TranslationServiceImpl(
 
     override fun isOfflineEngine(engineId: Long): Boolean {
         return engineId in offlineEngineIds
+    }
+    
+    /**
+     * Submit translation to community if auto-share is enabled.
+     * This is a fire-and-forget operation - failures are logged but don't affect the main translation flow.
+     */
+    private suspend fun submitToCommunityIfEnabled(
+        bookId: Long,
+        chapter: ireader.domain.models.entities.Chapter,
+        translatedContent: String,
+        sourceLanguage: String,
+        targetLanguage: String
+    ) {
+        // Check if auto-share is enabled
+        val autoShare = communityPreferences?.autoShareTranslations()?.get() ?: false
+        if (!autoShare) {
+            return
+        }
+        
+        // Check if we have the use case
+        val useCase = submitTranslationUseCase ?: return
+        
+        try {
+            val book = bookRepository.findBookById(bookId) ?: return
+            
+            Log.info { "TranslationServiceImpl: Submitting translation to community for chapter ${chapter.name}" }
+            
+            val result = useCase.submitChapter(
+                book = book,
+                chapter = chapter,
+                translatedContent = translatedContent,
+                targetLanguage = targetLanguage,
+                sourceLanguage = sourceLanguage
+            )
+            
+            if (result.isSuccess) {
+                Log.info { "TranslationServiceImpl: Successfully submitted translation to community" }
+            } else {
+                Log.warn { "TranslationServiceImpl: Failed to submit translation to community: ${result.exceptionOrNull()?.message}" }
+            }
+        } catch (e: Exception) {
+            // Don't fail the main translation if community submission fails
+            Log.warn { "TranslationServiceImpl: Error submitting to community: ${e.message}" }
+        }
     }
 }
 

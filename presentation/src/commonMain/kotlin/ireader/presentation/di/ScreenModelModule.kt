@@ -162,8 +162,7 @@ val screenModelModule = module {
     // GeminiImageGenerator - singleton for image generation
     single {
         GeminiImageGenerator(
-            httpClient = get()
-            // Uses default Json { ignoreUnknownKeys = true }
+            httpClient = get<ireader.core.http.HttpClients>().default
         )
     }
     

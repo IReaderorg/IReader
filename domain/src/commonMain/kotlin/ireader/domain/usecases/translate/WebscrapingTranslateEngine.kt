@@ -874,6 +874,14 @@ class DeepSeekWebViewTranslateEngine(httpClients: HttpClients, readerPreferences
     }
     override val id: Long = 7L
     override val engineName: String = "DeepSeek WebView (No API Key)"
+    
+    // WebView engines have similar limits
+    override val maxCharsPerRequest: Int = 6000
+    
+    // WebView needs longer delays to avoid detection
+    override val rateLimitDelayMs: Long = 5000L
+    
+    override val isOffline: Boolean = false
 }
 class GeminiTranslateEngine(httpClients: HttpClients, readerPreferences: ReaderPreferences) :
     WebscrapingTranslateEngine(httpClients, readerPreferences) {
@@ -883,4 +891,15 @@ class GeminiTranslateEngine(httpClients: HttpClients, readerPreferences: ReaderP
 
     override val id: Long = 8L
     override val engineName: String = "Google Gemini API"
+    override val requiresApiKey: Boolean = true
+    
+    // Gemini has a 30k token limit, but we use characters as approximation
+    // ~4 chars per token, so ~8000 chars is safe for input + output
+    override val maxCharsPerRequest: Int = 6000
+    
+    // Gemini free tier: 15 RPM (requests per minute) = 4 seconds between requests
+    // We use 5 seconds to be safe
+    override val rateLimitDelayMs: Long = 5000L
+    
+    override val isOffline: Boolean = false
 }

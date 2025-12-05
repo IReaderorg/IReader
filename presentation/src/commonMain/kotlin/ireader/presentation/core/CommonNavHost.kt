@@ -226,7 +226,12 @@ fun CommonNavHost(
                 backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
             }
             if (bookId != null && chapterId != null) {
+                // Reader depends on background-loaded modules, show loading until ready
+                ireader.presentation.core.ui.ModuleLoadingGuard(
+                    loadingMessage = "Preparing reader..."
+                ) {
                     ReaderScreenSpec(bookId, chapterId).Content()
+                }
             }
         }
         
