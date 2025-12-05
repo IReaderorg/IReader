@@ -875,7 +875,20 @@ class ReaderScreenViewModel(
     // ==================== Translation ====================
 
     fun toggleTranslation() {
-        translationViewModel.toggleTranslation()
+        val newValue = !showTranslatedContent.value
+        // Update preference
+        scope.launch {
+            readerPreferences.showTranslatedContent().set(newValue)
+        }
+        // Sync translation state from translationViewModel and update showTranslatedContent
+        val translationState = translationViewModel.translationState
+        updateSuccessState { state ->
+            state.copy(
+                showTranslatedContent = newValue,
+                hasTranslation = translationState.hasTranslation,
+                translatedContent = translationState.translatedContent
+            )
+        }
     }
 
     fun toggleBilingualMode() {

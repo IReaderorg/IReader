@@ -471,7 +471,12 @@ private fun OptimizedPagedReaderText(
     }
     
     // Memoize content to prevent unnecessary recomposition
-    val content = remember(vm.stateChapter?.id, vm.translationViewModel.translationState.hasTranslation) {
+    // Include showTranslatedContent in key so content updates when translation is toggled
+    val content = remember(
+        vm.stateChapter?.id, 
+        vm.translationViewModel.translationState.hasTranslation,
+        vm.showTranslatedContent.value
+    ) {
         vm.getCurrentContent()
     }
     
@@ -605,7 +610,12 @@ private fun LegacyPagedReaderText(
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right
         ) {
             // Memoize content to prevent unnecessary recomposition
-            val content = remember(vm.stateChapter?.id, vm.translationViewModel.translationState.hasTranslation) {
+            // Include showTranslatedContent in key so content updates when translation is toggled
+            val content = remember(
+                vm.stateChapter?.id, 
+                vm.translationViewModel.translationState.hasTranslation,
+                vm.showTranslatedContent.value
+            ) {
                 vm.getCurrentContent()
             }
             
@@ -733,7 +743,12 @@ private fun StyleText(
     enableBioReading: Boolean
 ) {
     // Cache the content to avoid race conditions from multiple getCurrentContent() calls
-    val currentContent = remember(vm.stateChapter?.id, vm.translationViewModel.translationState.hasTranslation) {
+    // Include showTranslatedContent in key so content updates when translation is toggled
+    val currentContent = remember(
+        vm.stateChapter?.id, 
+        vm.translationViewModel.translationState.hasTranslation,
+        vm.showTranslatedContent.value
+    ) {
         vm.getCurrentContent()
     }
     val isLastIndex = index == currentContent.lastIndex
@@ -862,7 +877,12 @@ private fun StyleTextOptimized(
     styleParams: TextStyleParams
 ) {
     // Cache the content to avoid race conditions from multiple getCurrentContent() calls
-    val currentContent = remember(vm.stateChapter?.id, vm.translationViewModel.translationState.hasTranslation) {
+    // Include showTranslatedContent in key so content updates when translation is toggled
+    val currentContent = remember(
+        vm.stateChapter?.id, 
+        vm.translationViewModel.translationState.hasTranslation,
+        vm.showTranslatedContent.value
+    ) {
         vm.getCurrentContent()
     }
     val isLastIndex = index == currentContent.lastIndex

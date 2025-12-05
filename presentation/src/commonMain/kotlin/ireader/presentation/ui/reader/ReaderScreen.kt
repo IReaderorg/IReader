@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
@@ -287,14 +288,16 @@ private fun ReadingScreenContent(
                             }
                             
                             // Translation toggle button
+                            // Directly observe translationViewModel.translationState.hasTranslation for reactivity
+                            // This ensures the button shows/hides immediately when translation is loaded
                             TranslationToggleButton(
                                 isTranslated = vm.showTranslatedContent.value,
                                 hasTranslation = vm.translationViewModel.translationState.hasTranslation,
                                 onToggle = { vm.toggleTranslation() },
                                 modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(paddingValues)
-
+                                    .align(Alignment.TopEnd)
+                                    .statusBarsPadding()
+                                    .padding(top = 56.dp, end = 16.dp) // Below top bar
                             )
                             
                             // Translation badge

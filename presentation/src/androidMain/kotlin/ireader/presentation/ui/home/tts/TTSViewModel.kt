@@ -80,11 +80,11 @@ class TTSViewModel(
      */
     fun toggleTranslation() {
         showTranslatedText = !showTranslatedText
-        // Save preference
+        // Save preference - this will be picked up by TTS service's getCurrentContent()
         scope.launch {
             readerPreferences.useTTSWithTranslatedText().set(showTranslatedText)
         }
-        // Update TTS service with new content
+        // Restart current paragraph to use new content source
         updateTTSContent()
     }
     
@@ -97,13 +97,18 @@ class TTSViewModel(
     
     /**
      * Update the TTS service content based on translation toggle
+     * Restarts the current paragraph to use the new content source (original or translated)
      */
     private fun updateTTSContent() {
-        // The TTS service will use translatedTTSContent when showTranslatedText is true
-        // We need to restart the service to pick up the new content
-        if (ttsState.isPlaying.value) {
-            // Pause and resume to refresh content
+        val wasPlaying = ttsState.isPlaying.value
+        if (wasPlaying) {
+            // Stop current playback
             controller?.transportControls?.pause()
+            // Small delay to ensure preference is saved, then resume
+            scope.launch {
+                kotlinx.coroutines.delay(100)
+                controller?.transportControls?.play()
+            }
         }
     }
     
