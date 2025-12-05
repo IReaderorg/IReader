@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -354,8 +355,7 @@
     <string name="color_theme">색상 테마</string>
     <string name="colors">색상</string>
     <string name="columns">열</string>
-    <string name="comfortable_grid_layout_description">큰 표지 이미지와 함께 격자 모양의 3열
-    </string>
+    <string name="comfortable_grid_layout_description">큰 표지 이미지와 함께 격자 모양의 3열</string>
     <string name="comfortable_layout">편안한 그리드</string>
     <string name="commit">커밋</string>
     <string name="community">커뮤니티</string>
@@ -363,8 +363,7 @@
     <string name="community_leaderboard">커뮤니티 &amp; 리더보드</string>
     <string name="community_reviews">커뮤니티 리뷰</string>
     <string name="community_reviews_desc">책 및 챕터에 대한 리뷰를 읽고 쓰기</string>
-    <string name="compact_grid_layout_description">작은 표지 이미지와 함께 격자 모양의 2열
-    </string>
+    <string name="compact_grid_layout_description">작은 표지 이미지와 함께 격자 모양의 2열</string>
     <string name="compact_layout">컴팩트 레이아웃</string>
     <string name="complete">완료</string>
     <string name="complete_captcha">계속하려면 CAPTCHA를 완료하십시오.</string>
@@ -466,8 +465,7 @@
     <string name="decrease_speed">속도 줄이기</string>
     <string name="deepseek_api_key">DeepSeek API 키</string>
     <string name="deepseek_api_key_invalid">DeepSeek API 키가 유효하지 않습니다.</string>
-    <string name="deepseek_api_key_not_set">DeepSeek API 키가 설정되지 않았습니다. 설정에서 구성하십시오.
-    </string>
+    <string name="deepseek_api_key_not_set">DeepSeek API 키가 설정되지 않았습니다. 설정에서 구성하십시오.</string>
     <string name="deepseek_login_required">DeepSeek 로그인 필요</string>
     <string name="deepseek_payment_required">DeepSeek 결제가 필요하거나 API 할당량이 초과되었습니다.</string>
     <string name="default_chapter_sort">기본 챕터 정렬</string>
@@ -558,8 +556,7 @@
     <string name="download_notifier_no_network">네트워크 연결이 없습니다.</string>
     <string name="download_notifier_text_only_wifi">Wi-Fi 연결을 사용할 수 없습니다.</string>
     <string name="download_notifier_title_error">오류</string>
-    <string name="download_notifier_unknown_error">예상치 못한 오류로 챕터를 다운로드할 수 없습니다.
-    </string>
+    <string name="download_notifier_unknown_error">예상치 못한 오류로 챕터를 다운로드할 수 없습니다.</string>
     <string name="download_of">다운로드</string>
     <string name="download_only_over_wifi">Wi-Fi에서만 다운로드</string>
     <string name="download_progress">다운로드 진행률</string>
@@ -597,9 +594,7 @@
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">18+ 소스 잠금</string>
     <string name="email">이메일</string>
-    <string name="empty_library">라이브러리에 책이 없습니다. 탐색
-        화면에서 책을 추가할 수 있습니다.
-    </string>
+    <string name="empty_library">라이브러리에 책이 없습니다. 탐색 화면에서 책을 추가할 수 있습니다.</string>
     <string name="empty_response">번역 서비스에서 빈 응답을 받았습니다.</string>
     <string name="enable">활성화</string>
     <string name="enable_app_lock">앱 잠금 활성화</string>
@@ -684,7 +679,7 @@
     <string name="example_url">예시 URL:</string>
     <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">예:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">제외할 카테고리</string>
-    <string name="excluded"> (제외됨)</string>
+    <string name="excluded">(제외됨)</string>
     <string name="exclusive">독점</string>
     <string name="exclusive_designs">독점 디자인</string>
     <string name="execution_timeout">실행 시간 초과</string>
@@ -824,8 +819,7 @@
     <string name="gb_total_storage_7_500mb">총 3.5GB 저장 공간 (7 × 500MB) - 각 프로젝트를 구성하거나 모든 프로젝트에 동일한 URL을 사용하세요</string>
     <string name="gemini_api_information">Gemini API 정보</string>
     <string name="gemini_api_key">Gemini API 키</string>
-    <string name="gemini_api_key_not_set">Gemini API 키가 설정되지 않았습니다. 설정에서 구성하십시오.
-    </string>
+    <string name="gemini_api_key_not_set">Gemini API 키가 설정되지 않았습니다. 설정에서 구성하십시오.</string>
     <string name="gemini_model">Gemini 모델</string>
     <string name="gemini_payment_required">Gemini API에 대한 현재 할당량을 초과했습니다. https://ai.google.dev/gemini-api/docs/rate-limits에서 요금제 및 청구 정보를 확인하십시오.</string>
     <string name="gender">성별</string>
@@ -853,7 +847,7 @@
     <string name="go_to_badge_store">배지 스토어로 이동</string>
     <string name="go_to_chapter">챕터로 이동</string>
     <string name="go_to_last_chapter">마지막 챕터로 이동</string>
-    <string name="go_to_settings_generaln2_toggle">1. 설정 → 일반으로 이동하세요\n2. 전환 \</string>
+    <string name="go_to_settings_generaln2_toggle">1. 설정 → 일반으로 이동하세요\n2. 전환 \\</string>
     <string name="goal_reached">목표 달성</string>
     <string name="goal_reached_1">목표 달성!</string>
     <string name="goal_reached_thank_you">목표 달성! 감사합니다!</string>
@@ -873,7 +867,7 @@
     <string name="header_alpha">헤더 알파</string>
     <string name="hello_this_is_a_test">안녕하세요, 테스트입니다.</string>
     <string name="help">도움말</string>
-    <string name="help_us_improve">개선을 도와주세요 \</string>
+    <string name="help_us_improve">개선을 도와주세요 \\</string>
     <string name="helpful">도움이 됨</string>
     <string name="hide">숨기기</string>
     <string name="hide_backdrop">배경 숨기기</string>
@@ -923,7 +917,7 @@
     <string name="in_library_1">라이브러리에 있음</string>
     <string name="in_progress">진행 중</string>
     <string name="include_cover_image">표지 이미지 포함</string>
-    <string name="included"> (포함됨)</string>
+    <string name="included">(포함됨)</string>
     <string name="incognito_mode">시크릿 모드</string>
     <string name="increase">늘리기</string>
     <string name="increase_font_size">글꼴 크기 늘리기</string>
@@ -945,14 +939,9 @@
     <string name="installation_error_Storage">패키지 관리자: 저장 공간 부족</string>
     <string name="installation_error_aborted">패키지 관리자: 취소됨</string>
     <string name="installation_error_blocked">패키지 관리자: 설치 프로그램이 차단되었습니다.</string>
-    <string name="installation_error_conflicted">패키지 관리자: 설치된 패키지와 충돌합니다.
-    </string>
-    <string name="installation_error_incompatible">패키지 관리자: 설치된 항목과 호환되지 않음
-        패키지
-    </string>
-    <string name="installation_error_invalid">패키지 관리자: 더 높은 버전의 다른 apk가 설치되어 있습니다.
-        이 패키지보다
-    </string>
+    <string name="installation_error_conflicted">패키지 관리자: 설치된 패키지와 충돌합니다.</string>
+    <string name="installation_error_incompatible">패키지 관리자: 설치된 항목과 호환되지 않음 패키지</string>
+    <string name="installation_error_invalid">패키지 관리자: 더 높은 버전의 다른 apk가 설치되어 있습니다. 이 패키지보다</string>
     <string name="installation_failed">설치 실패: %1$s</string>
     <string name="installation_failed_generic">설치 실패</string>
     <string name="installation_in_progress_this_may">설치 진행 중... 몇 분 정도 걸릴 수 있습니다.</string>
@@ -1004,8 +993,7 @@
     <string name="last_verified">최근 확인:</string>
     <string name="latest_book">최신</string>
     <string name="layout">레이아웃</string>
-    <string name="layout_description_comfortable">큰 표지 이미지와 함께 격자 모양의 3열
-    </string>
+    <string name="layout_description_comfortable">큰 표지 이미지와 함께 격자 모양의 3열</string>
     <string name="layout_description_compact">작은 표지 이미지와 함께 격자 모양의 2열</string>
     <string name="layout_description_cover_only">표지 이미지 전용 2열 (텍스트 없음)</string>
     <string name="layout_description_list">세로 목록에 표시되는 책</string>
@@ -1238,7 +1226,7 @@
     <string name="no_repositories_added">저장소가 추가되지 않았습니다.</string>
     <string name="no_repositories_added_subtitle">추가 소스에 액세스하려면 저장소를 추가하세요.</string>
     <string name="no_repositories_configured">구성된 저장소가 없습니다</string>
-    <string name="no_results_for">\에 대한 결과가 없습니다</string>
+    <string name="no_results_for">" 대한 결과가 없습니다"</string>
     <string name="no_results_found">결과가 없습니다.</string>
     <string name="no_results_found_1">결과가 없습니다</string>
     <string name="no_reviews">리뷰 없음</string>
@@ -1277,7 +1265,7 @@
     <string name="offset">오프셋</string>
     <string name="ok">확인</string>
     <string name="ollama_information">Ollama 정보</string>
-    <string name="ollama_is_a_local_llm">Ollama는 번역을 위한 로컬 LLM 서버입니다. Ollama가 장치 또는 네트워크에 설치되어 실행 중인지 확인하십시오. 'ollama pull modelname'으로 먼저 모델을 가져와야 합니다.</string>
+    <string name="ollama_is_a_local_llm">Ollama는 번역을 위한 로컬 LLM 서버입니다. Ollama가 장치 또는 네트워크에 설치되어 실행 중인지 확인하십시오. \'ollama pull modelname\'으로 먼저 모델을 가져와야 합니다.</string>
     <string name="ollama_model">Ollama 모델</string>
     <string name="ollama_server_url_not_set">OOllama 서버 URL이 설정되지 않았습니다.</string>
     <string name="ollama_url">Ollama URL</string>
@@ -1300,8 +1288,7 @@
     <string name="open_tts_settings">TTS 설정 열기</string>
     <string name="openai_api_key">OpenAI API 키</string>
     <string name="openai_api_key_invalid">OpenAI API 키가 유효하지 않습니다.</string>
-    <string name="openai_api_key_not_set">OpenAI API 키가 설정되지 않았습니다. 설정에서 구성하십시오.
-    </string>
+    <string name="openai_api_key_not_set">OpenAI API 키가 설정되지 않았습니다. 설정에서 구성하십시오.</string>
     <string name="openai_quota_exceeded">OpenAI 할당량 초과</string>
     <string name="optimize">최적화</string>
     <string name="optimize_database">데이터베이스 최적화</string>
@@ -1320,9 +1307,7 @@
     <string name="other_source">기타</string>
     <string name="overall_progress">전체 진행률</string>
     <string name="owner">소유자</string>
-    <string name="package_installer_failed_to_install_packages">패키지 설치 프로그램이 설치에 실패했습니다.
-        패키지: 상태 코드:
-    </string>
+    <string name="package_installer_failed_to_install_packages">패키지 설치 프로그램이 설치에 실패했습니다. 패키지: 상태 코드:</string>
     <string name="package_manager">패키지 관리자</string>
     <string name="package_name">패키지 이름</string>
     <string name="padding">패딩</string>
@@ -1367,7 +1352,7 @@
     <string name="pitch">음높이</string>
     <string name="play">재생</string>
     <string name="playback">재생</string>
-    <string name="please_click_refresh_available_models">Gemini API에서 모델을 로드하려면 위의 '사용 가능한 모델 새로 고침'을 클릭하십시오.</string>
+    <string name="please_click_refresh_available_models">Gemini API에서 모델을 로드하려면 위의 \'사용 가능한 모델 새로 고침\'을 클릭하십시오.</string>
     <string name="please_describe_the_issue">문제를 설명해주세요:</string>
     <string name="please_download_and_select_a">TTS를 활성화하려면 음성 모델을 다운로드하고 선택하세요</string>
     <string name="please_enter_a_valid_repository">.json으로 끝나는 유효한 저장소 URL을 입력하세요.</string>
@@ -1705,7 +1690,7 @@
     <string name="shimmer">shimmer</string>
     <string name="shimmeranimation">shimmerAnimation</string>
     <string name="shimmertransition">shimmerTransition</string>
-    <string name="show_all_category_tab">"전체" 카테고리 탭 표시</string>
+    <string name="show_all_category_tab">전체 카테고리 탭 표시</string>
     <string name="show_archived">보관된 항목 표시</string>
     <string name="show_archived_books">보관된 책 표시</string>
     <string name="show_category_tabs">카테고리 탭 표시</string>
@@ -1759,8 +1744,7 @@
     <string name="snooze">다시 알림</string>
     <string name="snooze_reminder">알림 일시 중지</string>
     <string name="something_is_wrong_with_this_book">이 책에 문제가 있습니다.</string>
-    <string name="something_is_wrong_with_this_chapter">이 챕터에 문제가 있습니다.
-    </string>
+    <string name="something_is_wrong_with_this_chapter">이 챕터에 문제가 있습니다.</string>
     <string name="something_went_wrong">문제가 발생했습니다.</string>
     <string name="something_wrong_with_book">이 책에 문제가 있습니다</string>
     <string name="sort">정렬</string>
@@ -1789,8 +1773,7 @@
     <string name="status">상태</string>
     <string name="stop">중지</string>
     <string name="storage">저장 공간</string>
-    <string name="storage_permission_required_explanation">저장소 권한 필요 설명
-    </string>
+    <string name="storage_permission_required_explanation">저장소 권한 필요 설명</string>
     <string name="storage_usage">저장 공간 사용량</string>
     <string name="storage_used">사용된 저장 공간</string>
     <string name="style_features">스타일 기능</string>
@@ -1889,8 +1872,7 @@
     <string name="themes">테마</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">이 소스에는 마이그레이션할 소설이 없습니다.</string>
     <string name="there_is_no_chapter">챕터가 없습니다.</string>
-    <string name="there_was_a_problem_in_getting_chapter">챕터를 가져오는 데 문제가 발생했습니다.
-    </string>
+    <string name="there_was_a_problem_in_getting_chapter">챕터를 가져오는 데 문제가 발생했습니다.</string>
     <string name="these_actions_are_destructive_and">이러한 작업은 파괴적이며 되돌릴 수 없습니다. 주의해서 진행하십시오.</string>
     <string name="these_are_all_the_popular_books">이것들은 모두 인기있는 책들입니다</string>
     <string name="these_are_all_the_reviews">이것들은 모든 리뷰입니다</string>
@@ -1991,7 +1973,7 @@
     <string name="tts_with_translated_text">번역된 텍스트와 함께 TTS</string>
     <string name="turn_off_vibration_feedback_for_interactions">상호 작용에 대한 진동 피드백 끄기</string>
     <string name="type">유형</string>
-    <string name="type_1">유형 \</string>
+    <string name="type_1">유형 \\</string>
     <string name="typography">타이포그래피</string>
     <string name="ui_improvements">UI 개선 사항</string>
     <string name="unable_to_get_package_version">패키지 버전을 가져올 수 없습니다.</string>
@@ -2137,7 +2119,7 @@
     <string name="yesterday">어제</string>
     <string name="you">(당신)</string>
     <string name="you_1">당신</string>
-    <string name="you_are_about_to_report">신고하려고 합니다 \</string>
+    <string name="you_are_about_to_report">신고하려고 합니다 \\</string>
     <string name="you_are_on_latest_version">최신 버전을 사용 중입니다.</string>
     <string name="you_dont_have_any_badges_yet">아직 배지가 없습니다.</string>
     <string name="you_own_an_ireader_nft">IReader NFT를 소유하고 있습니다!</string>
