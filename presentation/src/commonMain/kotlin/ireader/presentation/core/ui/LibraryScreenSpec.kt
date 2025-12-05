@@ -10,11 +10,13 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import ireader.core.startup.ScreenProfiler
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
@@ -53,8 +55,38 @@ object LibraryScreenSpec {
     )
     @Composable
     fun TabContent() {
+        // Mark when TabContent composable starts
+        LaunchedEffect(Unit) {
+            ScreenProfiler.mark("Library", "tab_content_composable_start")
+        }
         val vm: LibraryViewModel = getIViewModel(key = "library")
+        // Mark after VM is obtained
+        LaunchedEffect(vm) {
+            ScreenProfiler.mark("Library", "vm_obtained")
+        }
         val state by vm.state.collectAsState()
+        
+        // Track screen entry for profiling when returning to library
+        LaunchedEffect(Unit) {
+            // Check if returning from detail screen
+            if (ScreenProfiler.isScreenActive("Navigation_DetailToLibrary")) {
+                ScreenProfiler.mark("Navigation_DetailToLibrary", "library_content_entered")
+                ScreenProfiler.finishScreen("Navigation_DetailToLibrary")
+            }
+            // Also track general library return
+            if (!ScreenProfiler.isScreenActive("Library")) {
+                ScreenProfiler.startScreen("Library_return")
+                ScreenProfiler.mark("Library_return", "tab_content_entered")
+            }
+        }
+        
+        // Mark when books are loaded (not loading anymore)
+        LaunchedEffect(state.isLoading) {
+            if (!state.isLoading && ScreenProfiler.isScreenActive("Library_return")) {
+                ScreenProfiler.mark("Library_return", "content_ready")
+                ScreenProfiler.finishScreen("Library_return")
+            }
+        }
         
         LaunchedEffect(state.selectionMode) {
             MainStarterScreen.showBottomNav(!state.selectionMode)
@@ -136,7 +168,11 @@ object LibraryScreenSpec {
                             )
                         },
                         goToDetail = { book ->
+                            // Start navigation profiling
+                            ScreenProfiler.startScreen("Navigation_LibraryToDetail")
+                            ScreenProfiler.mark("Navigation_LibraryToDetail", "click_detected")
                             navController.navigateTo(BookDetailScreenSpec(bookId = book.id))
+                            ScreenProfiler.mark("Navigation_LibraryToDetail", "navigate_called")
                         },
                         scaffoldPadding = scaffoldPadding,
                         sheetState = sheetState,

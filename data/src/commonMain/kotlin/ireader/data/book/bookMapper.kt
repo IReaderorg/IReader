@@ -185,3 +185,52 @@ val getLibraryMapper = { _id: Long,
     }
 
 }
+
+
+/**
+ * Fast mapper for getLibraryFast query - doesn't include chapter counts
+ * Chapter counts are loaded lazily to improve initial load time on low-end devices
+ */
+val getLibraryFastMapper = { _id: Long,
+                              source: Long,
+                              url: String,
+                              artist: String?,
+                              author: String?,
+                              description: String?,
+                              genre: List<String>?,
+                              title: String,
+                              status: Long,
+                              thumbnail_url: String?,
+                              favorite: Boolean,
+                              last_update: Long?,
+                              next_update: Long?,
+                              initialized: Boolean,
+                              viewer: Long,
+                              chapter_flags: Long,
+                              cover_last_modified: Long,
+                              date_added: Long,
+                              is_pinned: Boolean,
+                              pinned_order: Long,
+                              is_archived: Boolean,
+                              category: Long,
+                              unread_count: Long,
+                              read_count: Long, ->
+
+    LibraryBook(
+        _id,
+        source,
+        url,
+        title,
+        status,
+        thumbnail_url ?: "",
+        last_update ?: 0L,
+    ).apply {
+        // Chapter counts are 0 from the fast query (hardcoded in SQL)
+        this.unreadCount = unread_count.toInt()
+        this.readCount = read_count.toInt()
+        this.category = category.toInt()
+        this.isPinned = is_pinned
+        this.pinnedOrder = pinned_order.toInt()
+        this.isArchived = is_archived
+    }
+}

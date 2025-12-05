@@ -62,7 +62,21 @@ object MainStarterScreen {
     operator fun invoke() {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val vm: ScreenContentViewModel = getIViewModel()
-        val libraryVm: LibraryViewModel = getIViewModel(key = "library")
+        
+        // Defer LibraryViewModel creation until after first frame
+        var libraryVmInitialized by remember { mutableStateOf(false) }
+        val libraryVm: LibraryViewModel? = if (libraryVmInitialized) {
+            getIViewModel(key = "library")
+        } else {
+            null
+        }
+        
+        // Initialize LibraryViewModel after first frame
+        LaunchedEffect(Unit) {
+            delay(100)
+            libraryVmInitialized = true
+        }
+        
         val scope = rememberCoroutineScope()
         
         // Use Int index for faster comparison
@@ -115,7 +129,7 @@ object MainStarterScreen {
             {
                 currentTabIndex = 2
                 scope.launch {
-                    libraryVm.lastReadInfo?.let { info ->
+                    libraryVm?.lastReadInfo?.let { info ->
                         navController.navigateTo(ReaderScreenSpec(info.novelId, info.chapterId))
                     }
                 }
@@ -284,10 +298,7 @@ private class TabClickHandlers(
 
 /**
  * Persistent tab container - tabs are initialized on first visit and kept in memory.
- * Shows shimmer loading while tab content is being initialized.
- * 
- * Uses movableContentOf to preserve composition state across recompositions,
- * which helps maintain scroll positions and loaded content when navigating back.
+ * Uses movableContentOf to preserve composition state across recompositions.
  */
 @Composable
 private fun PersistentTabContainer(
@@ -295,7 +306,7 @@ private fun PersistentTabContainer(
     visitedTabs: Set<Int>,
     showUpdates: Boolean
 ) {
-    // Create movable content for each tab - this preserves state across recompositions
+    // Create movable content for each tab
     val libraryContent = remember { movableContentOf { AppTab.Library.Content() } }
     val updatesContent = remember { movableContentOf { AppTab.Updates.Content() } }
     val historyContent = remember { movableContentOf { AppTab.History.Content() } }

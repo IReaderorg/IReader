@@ -103,10 +103,13 @@ class DatabasePreloader(
     
     private suspend fun preloadLibraryBooks() {
         try {
-            handler.awaitList {
-                bookQueries.findInLibraryBooks(ireader.data.book.booksMapper)
+            // Use ultra-fast query for preloading - same as Library screen uses
+            val books = handler.awaitList {
+                bookQueries.getLibraryUltraFast(ireader.data.book.getLibraryFastMapper)
             }
-            Log.debug("Library books preloaded", TAG)
+            // Update the in-memory cache for instant display
+            ireader.domain.data.cache.LibraryDataCache.updateCache(books)
+            Log.debug("Library books preloaded: ${books.size} books", TAG)
         } catch (e: Exception) {
             Log.error("Failed to preload library books: ${e.message}", TAG)
         }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import ireader.core.log.Log
 import ireader.core.source.CatalogSource
+import ireader.core.startup.ScreenProfiler
 import ireader.core.source.Source
 import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
@@ -165,6 +166,10 @@ class BookDetailViewModel(
     init {
         val bookId = param.bookId
         if (bookId != null) {
+            // Start screen profiling for performance benchmarking
+            ScreenProfiler.startScreen("BookDetail_$bookId")
+            ScreenProfiler.mark("BookDetail_$bookId", "vm_init_start")
+            
             // OPTIMIZATION: Show placeholder immediately - no shimmer needed
             _state.value = BookDetailState.Placeholder(bookId = bookId)
             initializeBook(bookId)
@@ -179,15 +184,19 @@ class BookDetailViewModel(
     // ==================== Initialization ====================
     
     private fun initializeBook(bookId: Long) {
+        val screenTag = "BookDetail_$bookId"
         // OPTIMIZATION: Use immediate dispatcher for first frame
         // This ensures the book data is shown as fast as possible
         scope.launch(kotlinx.coroutines.Dispatchers.Main.immediate) {
             try {
+                ScreenProfiler.mark(screenTag, "coroutine_started")
+                
                 // OPTIMIZATION: Check prefetch cache first for instant display
                 val prefetchedData = bookPrefetchService?.getPrefetchedData(bookId)
                 
                 if (prefetchedData != null) {
                     // Use prefetched data for instant display
+                    ScreenProfiler.mark(screenTag, "prefetch_cache_hit")
                     Log.info { "Using prefetched data for book $bookId" }
                     val book = prefetchedData.book
                     val chapters = prefetchedData.chapters
@@ -200,6 +209,7 @@ class BookDetailViewModel(
                         Log.error("Failed to get catalog for source ${book.sourceId}", e)
                         null
                     }
+                    ScreenProfiler.mark(screenTag, "catalog_source_loaded")
                     
                     val source = catalogSource?.source
                     val commands = try {
@@ -221,6 +231,8 @@ class BookDetailViewModel(
                         modifiedCommands = commands,
                     )
                     _state.value = initialState
+                    ScreenProfiler.mark(screenTag, "state_set_from_prefetch")
+                    ScreenProfiler.finishScreen(screenTag)
                     Log.info { "BookDetailState.Success (prefetched): book=${book.title}, chapters=${chapters.size}" }
                     
                     // Subscribe for updates in background
@@ -245,9 +257,11 @@ class BookDetailViewModel(
                 }
                 
                 // No prefetch data - load from database
+                ScreenProfiler.mark(screenTag, "prefetch_cache_miss")
                 // First, try to get the book directly for immediate display
                 // Use withContext(IO) only for the actual DB call
                 val book = withIOContext { getBookUseCases.findBookById(bookId) }
+                ScreenProfiler.mark(screenTag, "book_loaded_from_db")
                 val sourceId = book?.sourceId
                 
                 // OPTIMIZATION: Update placeholder with book info immediately
@@ -259,6 +273,7 @@ class BookDetailViewModel(
                         author = book.author,
                         isLoading = true
                     )
+                    ScreenProfiler.mark(screenTag, "placeholder_updated")
                 }
                 
                 // Get catalog source in parallel with chapters if possible
@@ -284,8 +299,11 @@ class BookDetailViewModel(
                     }
                     
                     val catalogSource = catalogSourceDeferred?.await()
+                    ScreenProfiler.mark(screenTag, "catalog_source_loaded")
                     val chapters = chaptersDeferred.await()
+                    ScreenProfiler.mark(screenTag, "chapters_loaded_from_db")
                     val history = historyDeferred.await()
+                    ScreenProfiler.mark(screenTag, "history_loaded")
                     
                     val source = catalogSource?.source
                     val commands = try {
@@ -307,6 +325,8 @@ class BookDetailViewModel(
                         modifiedCommands = commands,
                     )
                     _state.value = initialState
+                    ScreenProfiler.mark(screenTag, "state_set_success")
+                    ScreenProfiler.finishScreen(screenTag)
                     Log.info { "BookDetailState.Success (immediate): book=${book.title}, chapters=${chapters.size}" }
                     
                     // Subscribe for updates AFTER initial state is set

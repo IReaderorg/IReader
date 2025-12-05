@@ -72,7 +72,7 @@ data class EpubExportState(
 @Immutable
 data class LibraryScreenState(
     // Loading states
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val isUpdatingLibrary: Boolean = false,
     

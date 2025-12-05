@@ -1,15 +1,13 @@
 package ireader.presentation.ui.home.library.viewmodel
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.state.ToggleableState
 import ireader.domain.models.DisplayMode
-import ireader.domain.models.entities.BookCategory
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.domain.models.library.LibraryFilter
@@ -23,10 +21,9 @@ import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
 import ireader.domain.usecases.local.book_usecases.MarkResult
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import ireader.domain.usecases.services.ServiceUseCases
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.Res
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
@@ -34,21 +31,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
  * ViewModel for the Library screen following Mihon's StateScreenModel pattern.
@@ -288,7 +279,6 @@ class LibraryViewModel(
         }
         
         filters.value = newFilters
-        invalidateCategoryCache() // Clear cache when filters change
         _state.update { current ->
             current.copy(
                 filters = newFilters.toImmutableList(),
@@ -313,7 +303,7 @@ class LibraryViewModel(
         }
         
         filters.value = newFilters
-        invalidateCategoryCache() // Clear cache when filters change
+
         _state.update { it.copy(
             filters = newFilters.toImmutableList(),
             activeFilters = newActive.toImmutableSet()
@@ -330,7 +320,7 @@ class LibraryViewModel(
             currentSort.copy(type = type)
         }
         sorting.value = newSort
-        invalidateCategoryCache() // Clear cache when sorting changes
+
         _state.update { it.copy(sort = newSort) }
         scope.launch { libraryPreferences.sorting().set(newSort) }
     }
@@ -338,7 +328,7 @@ class LibraryViewModel(
     fun toggleSortDirection() {
         val newSort = sorting.value.copy(isAscending = !sorting.value.isAscending)
         sorting.value = newSort
-        invalidateCategoryCache() // Clear cache when sorting changes
+
         _state.update { it.copy(sort = newSort) }
         scope.launch { libraryPreferences.sorting().set(newSort) }
     }
@@ -560,8 +550,14 @@ class LibraryViewModel(
 
     // ==================== Library Data ====================
     
-    // Cache for category flows to avoid recreating them
-    private val categoryFlowCache = mutableMapOf<Long, kotlinx.coroutines.flow.Flow<List<BookItem>>>()
+    // MutableStateFlow for each category's books - allows instant updates
+    private val categoryBooksState = mutableMapOf<Long, MutableStateFlow<List<BookItem>>>()
+    
+    private fun getCategoryBooksFlow(categoryId: Long): MutableStateFlow<List<BookItem>> {
+        return categoryBooksState.getOrPut(categoryId) {
+            MutableStateFlow(loadedManga[categoryId] ?: emptyList())
+        }
+    }
     
     @Composable
     fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
@@ -575,48 +571,36 @@ class LibraryViewModel(
             return remember { androidx.compose.runtime.mutableStateOf(emptyList<BookItem>()) }
         }
 
-        // Use cached data as initial value for instant display when returning to screen
-        val cachedData = loadedManga[categoryId] ?: emptyList()
+        // Get or create the state flow for this category
+        val booksFlow = remember(categoryId) { getCategoryBooksFlow(categoryId) }
         
-        // Get or create cached flow for this category - avoids recreating flow on every recomposition
-        val categoryFlow = remember(categoryId, sorting.value, filters.value, showArchivedBooks.value) {
-            categoryFlowCache.getOrPut(categoryId) {
-                getLibraryCategory.subscribe(categoryId, sorting.value, filters.value, showArchivedBooks.value)
-                    .map { list ->
-                        // Update state in a single batch to minimize recompositions
-                        list.mapIndexed { index, libraryBook ->
+        // Subscribe to the full data flow with all filters, sorts, and search
+        androidx.compose.runtime.LaunchedEffect(categoryId, sorting.value, filters.value, showArchivedBooks.value) {
+            getLibraryCategory.subscribe(categoryId, sorting.value, filters.value, showArchivedBooks.value)
+                .combine(searchQueryFlow) { mangas, query ->
+                    if (query.isBlank()) {
+                        mangas.mapIndexed { index, libraryBook ->
                             libraryBook.toBookItem().copy(column = index.toLong())
                         }
+                    } else {
+                        mangas.asSequence()
+                            .filter { it.title.contains(query, true) }
+                            .mapIndexed { index, libraryBook ->
+                                libraryBook.toBookItem().copy(column = index.toLong())
+                            }
+                            .toList()
                     }
-                    .combine(searchQueryFlow) { mangas, query ->
-                        if (query.isBlank()) {
-                            mangas
-                        } else {
-                            // Use sequence for efficient filtering of large lists
-                            mangas.asSequence()
-                                .filter { it.title.contains(query, true) }
-                                .toList()
-                        }
-                    }
-                    .onEach { items ->
-                        loadedManga[categoryId] = items
-                        // Batch state update - only update isLoading, books state is managed separately
-                        _state.update { it.copy(isLoading = false) }
-                    }
-                    // Share the flow to avoid multiple subscriptions
-                    .shareIn(scope, SharingStarted.WhileSubscribed(5000), replay = 1)
-            }
+                }
+                .collect { items ->
+                    loadedManga[categoryId] = items
+                    booksFlow.value = items
+                    // Mark loading complete when we receive data
+                    _state.update { it.copy(isLoading = false) }
+                }
         }
         
-        // Use produceState with cached initial value for instant display
-        return androidx.compose.runtime.produceState(initialValue = cachedData, categoryFlow) {
-            categoryFlow.collect { value = it }
-        }
-    }
-    
-    // Clear category flow cache when filters/sorting change
-    private fun invalidateCategoryCache() {
-        categoryFlowCache.clear()
+        // Return the state flow as State for Compose
+        return booksFlow.collectAsState()
     }
     
     fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {

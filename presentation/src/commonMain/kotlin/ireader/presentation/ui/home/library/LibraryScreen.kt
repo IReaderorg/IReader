@@ -24,7 +24,6 @@ import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.core.ui.EmptyScreen
-import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
 import ireader.presentation.ui.home.library.components.LibraryFilterBottomSheet
 import ireader.presentation.ui.home.library.ui.LibraryContent
@@ -33,13 +32,6 @@ import ireader.presentation.ui.home.library.viewmodel.LibraryScreenState
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
-
-/**
- * Screen state enum for efficient rendering
- */
-private enum class ScreenState {
-    Loading, Empty, Content
-}
 
 @ExperimentalAnimationApi
 @Composable
@@ -78,13 +70,6 @@ fun LibraryScreen(
     val fillMaxSizeModifier = remember { Modifier.fillMaxSize() }
     val selectionBarModifier = remember {
         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-    }
-    
-    // Derive screen state
-    val screenState = when {
-        state.isLoading -> ScreenState.Loading
-        state.isEmpty && state.filters.isEmpty() -> ScreenState.Empty
-        else -> ScreenState.Content
     }
     
     // Show resume card when not in selection mode
@@ -159,11 +144,9 @@ fun LibraryScreen(
                 )
             }
             
-            // Screen state rendering - no animation for instant display when navigating back
-            when (screenState) {
-                ScreenState.Loading -> LoadingScreen()
-                ScreenState.Empty -> EmptyScreen(text = localize(Res.string.empty_library))
-                ScreenState.Content -> { /* Content rendered above */ }
+            // Show empty screen only when not loading and truly empty
+            if (!state.isLoading && state.isEmpty && state.filters.isEmpty()) {
+                EmptyScreen(text = localize(Res.string.empty_library))
             }
 
             // Selection bar

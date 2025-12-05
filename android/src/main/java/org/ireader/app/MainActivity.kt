@@ -7,27 +7,10 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
@@ -51,7 +33,6 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
-import ireader.presentation.ui.settings.FirstLaunchDialog
 import ireader.domain.usecases.files.AndroidGetSimpleStorage
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.Args
@@ -71,6 +52,7 @@ import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.getPerformanceConfigForDevice
 import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.core.ui.asStateIn
+import ireader.presentation.ui.settings.FirstLaunchDialog
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
@@ -97,47 +79,41 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Install splash screen FIRST - dismiss immediately for fastest startup
+        // Install splash screen
+        var isContentReady = false
         installSplashScreen().apply {
-            setKeepOnScreenCondition { false }
+            setKeepOnScreenCondition { !isContentReady }
         }
         
-        // Critical UI setup only
+        // Critical UI setup
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         
         // MUST be on main thread
         registerSecureActivity(this, uiPreferences, initializers)
         getSimpleStorage.provideActivity(this, null)
-        
-        // Fast initialization on main thread
-        // Kermit logging is auto-configured with platform defaults
-        // For debug builds, logs go to Logcat automatically
         localeHelper.setLocaleLang()
         
-        // Trigger lazy initialization now that UI is about to be visible
+        // Trigger lazy initialization
         (application as? MyApplication)?.onAppVisible()
         
         // Defer heavy initialization to background
         lifecycleScope.launchIO {
-            delay(2000) // Wait until app is fully loaded
+            delay(2000)
             automaticBackup.initialize()
             org.ireader.app.util.ExtensionCacheValidator.validateAndCleanExtensionCache(this@MainActivity)
         }
 
-        // Request permissions much later
-        lifecycleScope.launch {
-            delay(3000)
-            requestNecessaryPermissions()
-        }
-
+        
         setContent {
+            // Mark content ready immediately
+            LaunchedEffect(Unit) {
+                isContentReady = true
+            }
+            
+            // Full UI
             val context = LocalContext.current
-            
-            // Check if user has enabled max performance mode
             val maxPerformanceEnabled = uiPreferences.maxPerformanceMode().get()
-            
-            // Get performance config - use MaxPerformance if user enabled it, otherwise device-based
             val performanceConfig = remember(maxPerformanceEnabled) { 
                 if (maxPerformanceEnabled) {
                     PerformanceConfig.MaxPerformance
@@ -153,7 +129,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                         context = context
                     )
                 }
-                // Provide performance config to entire app for device-appropriate optimizations
                 androidx.compose.runtime.CompositionLocalProvider(
                     LocalPerformanceConfig provides performanceConfig
                 ) {
@@ -165,7 +140,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                         val navController = rememberNavController()
                         
                         ProvideNavigator(navController) {
-                            // Handle exit confirmation when on main screen
                             if (navController.previousBackStackEntry == null) {
                                 ConfirmExit()
                             }
@@ -176,32 +150,16 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             
                             IScaffold {
                                 CommonNavHost(navController)
-                                
-                                // Pass the application context to GetPermissions
                                 GetPermissions(uiPreferences, context = this@MainActivity)
                             }
                             
-                            // First Launch Dialog
                             FirstLaunchDialogHandler()
-
                             HandleOnNewIntent(this, navController)
                         }
                     }
                 }
                 }
             }
-        }
-    }
-
-    /**
-     * Request necessary permissions based on Android version
-     */
-    private fun requestNecessaryPermissions() {
-        // Handled by GetPermissions composable, but we want to 
-        // trigger system dialogs as early as possible
-        if (!uiPreferences.savedLocalCatalogLocation().get()) {
-            // Let the GetPermissions composable handle the actual permission requests
-            // as it has proper UI feedback
         }
     }
 
@@ -427,46 +385,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         }
     }
 
-    @Composable
-    private fun CustomSplashScreen() {
-        val isDark = isSystemInDarkTheme()
-        
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(if (isDark) Color.Black else Color.White),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                // Logo
-                Image(
-                    painter = if (isDark) {
-                        painterResource(ireader.i18n.R.drawable.ic_eternity_dark)
-                    } else {
-                        painterResource(ireader.i18n.R.drawable.ic_eternity_light)
-                    },
-                    contentDescription = "App Logo",
-                    modifier = Modifier.size(160.dp)
-                )
-                
-                Spacer(modifier = Modifier.height(40.dp))
-                
-                // Tagline
-                Text(
-                    text = "Created by a reader, for readers",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    ),
-                    color = if (isDark) Color.White else Color.Black
-                )
-            }
-        }
-    }
 }
 
 

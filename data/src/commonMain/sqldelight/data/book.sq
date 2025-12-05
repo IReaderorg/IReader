@@ -146,6 +146,42 @@ WHERE book.favorite = 1
 GROUP BY book._id, MC.category_id
 ORDER BY book.title;
 
+-- Optimized query for low-end devices: fetch books without chapter counts
+-- Chapter counts can be loaded separately/lazily
+getLibraryFast:
+SELECT 
+    book.*,
+    COALESCE(MC.category_id, 0) AS category,
+    0 AS unread_count,
+    0 AS read_count
+FROM book
+LEFT JOIN bookcategories MC ON book._id = MC.book_id
+WHERE book.favorite = 1
+GROUP BY book._id, MC.category_id
+ORDER BY book.title;
+
+-- Ultra-fast query: just books, no joins at all
+-- Use this for maximum performance on low-end devices
+getLibraryUltraFast:
+SELECT 
+    book.*,
+    0 AS category,
+    0 AS unread_count,
+    0 AS read_count
+FROM book
+WHERE book.favorite = 1
+ORDER BY book.title;
+
+-- Get chapter counts for specific books (batch query)
+getChapterCountsForBooks:
+SELECT 
+    book_id,
+    SUM(CASE WHEN read = 0 THEN 1 ELSE 0 END) AS unread_count,
+    SUM(CASE WHEN read = 1 THEN 1 ELSE 0 END) AS read_count
+FROM chapter
+WHERE book_id IN :bookIds
+GROUP BY book_id;
+
 getDownloaded:
 SELECT book.* FROM book
  JOIN chapter

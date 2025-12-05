@@ -19,6 +19,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import ireader.core.startup.ScreenProfiler
 import androidx.compose.ui.unit.dp
 import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
@@ -88,15 +90,37 @@ data class BookDetailScreenSpec constructor(
     )
     @Composable
     fun Content() {
+        // Mark navigation arrival - finish the navigation profiling
+        LaunchedEffect(Unit) {
+            if (ScreenProfiler.isScreenActive("Navigation_LibraryToDetail")) {
+                ScreenProfiler.mark("Navigation_LibraryToDetail", "detail_content_started")
+            }
+        }
+        
         val vm: BookDetailViewModel = getIViewModel(
             key = bookId,
             parameters = { parametersOf(BookDetailViewModel.Param(bookId)) }
         )
         
+        // Mark after ViewModel obtained
+        LaunchedEffect(Unit) {
+            if (ScreenProfiler.isScreenActive("Navigation_LibraryToDetail")) {
+                ScreenProfiler.mark("Navigation_LibraryToDetail", "detail_vm_obtained")
+            }
+        }
+        
         val state by vm.state.collectAsState()
         val snackbarHostState = remember { SnackbarHostState() }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val scope = rememberCoroutineScope()
+        
+        // Finish navigation profiling when state is ready
+        LaunchedEffect(state) {
+            if (ScreenProfiler.isScreenActive("Navigation_LibraryToDetail") && state is BookDetailState.Success) {
+                ScreenProfiler.mark("Navigation_LibraryToDetail", "detail_state_ready")
+                ScreenProfiler.finishScreen("Navigation_LibraryToDetail")
+            }
+        }
         
         // Handle events
         LaunchedEffect(vm) {
@@ -152,7 +176,12 @@ data class BookDetailScreenSpec constructor(
                         )
                     )
                 },
-                onPopBackStack = { navController.popBackStack() }
+                onPopBackStack = { 
+                    // Start navigation profiling for back navigation
+                    ScreenProfiler.startScreen("Navigation_DetailToLibrary")
+                    ScreenProfiler.mark("Navigation_DetailToLibrary", "back_pressed")
+                    navController.popBackStack() 
+                }
             )
         }
         
@@ -180,6 +209,11 @@ data class BookDetailScreenSpec constructor(
                 }
                 
                 is BookDetailState.Success -> {
+                    // Mark UI composition for profiling
+                    LaunchedEffect(Unit) {
+                        ScreenProfiler.mark("BookDetail_$bookId", "ui_composition_started")
+                    }
+                    
                     BookDetailContent(
                         vm = vm,
                         state = s,
