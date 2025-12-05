@@ -35,6 +35,7 @@ fun AppTheme(
     val customStatusColor = LocalCustomSystemColor.current
     val isCustomColorEnable = customStatusColor?.enabled ?: false
     val mainLocalizeHelper = koinInject<LocalizeHelper>()
+    val localeHelper = koinInject<LocaleHelper>()
     
     val isLight = materialColors.isLight()
     
@@ -115,19 +116,22 @@ fun AppTheme(
     }
     val isRtl = layoutDirection == LayoutDirection.Rtl
     
-    AppColors(
-        materialColors = materialColors,
-        extraColors = customColors,
-        typography = typography,
-        shape = Shapes
-    ) {
-        CompositionLocalProvider(
-            LocalLayoutDirection provides layoutDirection,
-            LocalIsRtl provides isRtl,
-            LocalLocalizeHelper provides mainLocalizeHelper,
-            LocalGlobalCoroutineScope provides scope,
-            LocalPerformanceConfig provides performanceConfig,
-            content = content
-        )
+    // Wrap with AppLocaleProvider to enable runtime language switching
+    AppLocaleProvider(localeHelper = localeHelper) {
+        AppColors(
+            materialColors = materialColors,
+            extraColors = customColors,
+            typography = typography,
+            shape = Shapes
+        ) {
+            CompositionLocalProvider(
+                LocalLayoutDirection provides layoutDirection,
+                LocalIsRtl provides isRtl,
+                LocalLocalizeHelper provides mainLocalizeHelper,
+                LocalGlobalCoroutineScope provides scope,
+                LocalPerformanceConfig provides performanceConfig,
+                content = content
+            )
+        }
     }
 }
