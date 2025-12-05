@@ -13,9 +13,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import ireader.domain.models.characterart.CharacterArt
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.characterart.CharacterArtViewModel
@@ -35,6 +36,11 @@ class AdminCharacterArtVerificationScreenSpec {
         var selectedArt by remember { mutableStateOf<CharacterArt?>(null) }
         var showRejectDialog by remember { mutableStateOf(false) }
         var rejectReason by remember { mutableStateOf("") }
+        
+        // Refresh pending art when screen is shown
+        LaunchedEffect(Unit) {
+            vm.refresh()
+        }
         
         // Reject dialog
         if (showRejectDialog && selectedArt != null) {
@@ -153,7 +159,7 @@ private fun PendingArtCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Image placeholder
+            // Image
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -162,13 +168,21 @@ private fun PendingArtCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.Image,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                // TODO: Load actual image
+                if (art.imageUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = art.imageUrl,
+                        contentDescription = "${art.characterName} from ${art.bookTitle}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Image,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
             
             Spacer(Modifier.height(12.dp))

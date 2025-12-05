@@ -803,14 +803,31 @@ fun TranslationSettingsScreen(
     
     // Auto-share toggle - controlled by viewModel if available
     if (viewModel != null) {
-        items.add(
-            Components.Switch(
-                title = "Auto-share Translations",
-                icon = Icons.Default.Translate,
-                subtitle = "Automatically share completed translations to the community source",
-                preference = viewModel.autoShareTranslations,
-            )
-        )
+        items.add(Components.Dynamic {
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Auto-share Translations",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "Automatically share completed translations to the community source",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                androidx.compose.material3.Switch(
+                    checked = viewModel.autoShareTranslations.value,
+                    onCheckedChange = { viewModel.autoShareTranslations.value = it }
+                )
+            }
+        })
         
         // Contributor name field
         items.add(Components.Dynamic {

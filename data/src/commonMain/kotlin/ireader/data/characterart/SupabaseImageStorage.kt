@@ -9,6 +9,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -34,7 +35,7 @@ class SupabaseImageStorage(
     
     override suspend fun uploadImage(imageBytes: ByteArray, fileName: String): Result<String> {
         return try {
-            val timestamp = System.currentTimeMillis()
+            val timestamp = currentTimeToLong()
             val objectPath = "pending/${timestamp}_$fileName"
             val contentType = getContentType(fileName)
             

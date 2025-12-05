@@ -94,6 +94,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import ireader.domain.models.characterart.ArtStyleFilter
 import ireader.domain.models.characterart.CharacterArt
 import ireader.domain.models.characterart.CharacterArtSort
@@ -164,7 +166,7 @@ fun CharacterArtGalleryScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(innerPadding)
         ) {
             // Filter chips row
             FilterChipsRow(
@@ -537,7 +539,7 @@ private fun GridViewCard(
     onLikeClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        // Image placeholder with gradient
+        // Image with gradient background fallback
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -550,18 +552,24 @@ private fun GridViewCard(
                     )
                 )
         ) {
-            // Placeholder icon
-            Icon(
-                Icons.Outlined.Image,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(48.dp)
-                    .align(Alignment.Center),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
-            
-            // TODO: Replace with actual image loading
-            // AsyncImage(model = art.imageUrl, ...)
+            if (art.imageUrl.isNotBlank()) {
+                AsyncImage(
+                    model = art.thumbnailUrl.ifBlank { art.imageUrl },
+                    contentDescription = "${art.characterName} from ${art.bookTitle}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Placeholder icon when no image
+                Icon(
+                    Icons.Outlined.Image,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .align(Alignment.Center),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
         }
         
         // Featured badge
@@ -674,12 +682,21 @@ private fun ListViewCard(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                Icons.Outlined.Image,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
+            if (art.imageUrl.isNotBlank()) {
+                AsyncImage(
+                    model = art.thumbnailUrl.ifBlank { art.imageUrl },
+                    contentDescription = "${art.characterName} from ${art.bookTitle}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    Icons.Outlined.Image,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                )
+            }
             
             if (art.isFeatured) {
                 Surface(

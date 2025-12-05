@@ -140,12 +140,16 @@ class AndroidTranslationService(
             it.status == TranslationStatus.TRANSLATING || 
             it.status == TranslationStatus.DOWNLOADING_CONTENT 
         }
+        // For single chapter, also check QUEUED status to get chapter name
+        val activeOrQueued = current ?: progressMap.values.find { 
+            it.status == TranslationStatus.QUEUED 
+        }
         val firstFailed = progressMap.values.find { it.status == TranslationStatus.FAILED }
         val isPaused = state.value == ServiceState.PAUSED
         
-        // Get book title from any progress item
+        // Get book title and chapter name from any progress item
         val bookTitle = progressMap.values.firstOrNull()?.bookName ?: "Unknown Book"
-        val currentChapter = current?.chapterName ?: ""
+        val currentChapter = activeOrQueued?.chapterName ?: progressMap.values.firstOrNull()?.chapterName ?: ""
         
         // Check if all items are in terminal state (completed, failed, or cancelled)
         val allTerminal = progressMap.values.all { 
@@ -200,42 +204,52 @@ class AndroidTranslationService(
         // Register cancel receiver if not already registered
         registerCancelReceiver()
         
-        val title = if (isPaused) {
-            "Translation Paused - $bookTitle"
-        } else {
-            "Translating - $bookTitle"
+        // Title format - put all info in title since some Android versions don't show subtitle
+        // - Single chapter: "Translating 2/5" (chunk progress)
+        // - Mass translation: "Translating 20/100 - ChapterName"
+        val title = buildString {
+            if (isPaused) {
+                append("Paused")
+            } else {
+                append("Translating")
+            }
+            
+            if (total > 1) {
+                // Mass translation: show chapter progress and name
+                append(" ${completed + 1}/$total")
+                if (currentChapter.isNotEmpty()) {
+                    append(" - $currentChapter")
+                }
+            } else {
+                // Single chapter: show chunk progress in title
+                if (totalChunks > 0) {
+                    append(" $currentChunk/$totalChunks")
+                }
+            }
         }
         
-        // Build detailed progress text
-        val text = buildString {
-            if (currentChapter.isNotEmpty()) {
-                append(currentChapter)
-            }
-            
-            // Show chunk progress if available
-            if (totalChunks > 0) {
-                if (isNotEmpty()) append(" • ")
-                append("Chunk $currentChunk/$totalChunks")
-            }
-            
-            // Show paragraph progress if available
-            if (totalParagraphs > 0) {
-                if (isNotEmpty()) append(" • ")
-                append("$translatedParagraphs/$totalParagraphs paragraphs")
-            }
-            
-            // Show chapter progress
+        // Subtitle (contentText) - additional details
+        val subtitle = buildString {
             if (total > 1) {
-                if (isNotEmpty()) append("\n")
-                append("Chapter ${completed + 1}/$total")
+                // Mass translation: show book name and paragraph progress
+                append(bookTitle)
+                if (totalParagraphs > 0) {
+                    append(" • $translatedParagraphs/$totalParagraphs paragraphs")
+                }
+            } else {
+                // Single chapter: show paragraph progress
+                if (totalParagraphs > 0) {
+                    append("$translatedParagraphs/$totalParagraphs paragraphs")
+                } else {
+                    append("Processing...")
+                }
             }
-        }.ifEmpty { "$completed/$total chapters" }
-        
-        Log.info { "AndroidTranslationService: Showing progress notification - $title: $text" }
+        }
         
         val notification = NotificationCompat.Builder(context, NotificationsIds.CHANNEL_TRANSLATION_PROGRESS)
             .setContentTitle(title)
-            .setContentText(text)
+            .setContentText(subtitle)
+            .setSubText(if (total > 1) bookTitle else null)
             .setSmallIcon(ireader.i18n.R.drawable.ic_downloading)
             .setProgress(total, completed, false)
             .setOngoing(true)
@@ -257,9 +271,15 @@ class AndroidTranslationService(
     }
     
     private fun showTranslationCompleted(bookTitle: String, completedCount: Int) {
+        val title = if (completedCount == 1) {
+            "Translation Complete"
+        } else {
+            "Translation Complete - $completedCount chapters"
+        }
+        
         val notification = NotificationCompat.Builder(context, NotificationsIds.CHANNEL_TRANSLATION_COMPLETE)
-            .setContentTitle("Translation Completed")
-            .setContentText("$completedCount chapters translated in $bookTitle")
+            .setContentTitle(title)
+            .setContentText(bookTitle)
             .setSmallIcon(ireader.i18n.R.drawable.ic_downloading)
             .setAutoCancel(true)
             .build()
@@ -274,7 +294,8 @@ class AndroidTranslationService(
     private fun showTranslationError(bookTitle: String, errorMessage: String) {
         val notification = NotificationCompat.Builder(context, NotificationsIds.CHANNEL_TRANSLATION_ERROR)
             .setContentTitle("Translation Failed")
-            .setContentText("$bookTitle: $errorMessage")
+            .setContentText(bookTitle)
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$bookTitle\n$errorMessage"))
             .setSmallIcon(ireader.i18n.R.drawable.ic_downloading)
             .setAutoCancel(true)
             .build()

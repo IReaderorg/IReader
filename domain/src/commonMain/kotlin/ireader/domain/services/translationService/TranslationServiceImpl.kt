@@ -183,7 +183,7 @@ class TranslationServiceImpl(
             // Insert at front of queue
             translationQueue.addAll(0, newTasks)
             
-            // Update progress for new chapters
+            // Update progress for new chapters (this overwrites any old failed/completed status)
             chapters.forEach { chapter ->
                 stateHolder.updateChapterProgress(
                     chapter.id,
@@ -207,6 +207,10 @@ class TranslationServiceImpl(
         stateHolder.setCurrentBookId(bookId)
         stateHolder.setTotalChapters(chapters.size)
         stateHolder.setCompletedChapters(0)
+        
+        // IMPORTANT: Clear progress map to remove old entries from previous translations
+        // This prevents "Translation Failed" notification from showing due to old failed entries
+        stateHolder.setTranslationProgress(emptyMap())
         
         // Create translation tasks
         translationQueue.clear()
@@ -294,6 +298,17 @@ class TranslationServiceImpl(
         // Reset state when done
         if (translationQueue.isEmpty()) {
             stateHolder.setCurrentBookId(null)
+            
+            // Clear progress map after a short delay to allow notification to show completion
+            // This prevents old entries from affecting future translations
+            scope.launch {
+                delay(3000) // Wait 3 seconds for notification to be shown
+                // Only clear if no new translation has started
+                if (!stateHolder.isRunning.value && translationQueue.isEmpty()) {
+                    stateHolder.setTranslationProgress(emptyMap())
+                    Log.info { "TranslationServiceImpl: Cleared progress map after completion" }
+                }
+            }
         }
     }
 

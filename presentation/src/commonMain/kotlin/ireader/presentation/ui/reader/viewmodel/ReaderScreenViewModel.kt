@@ -923,8 +923,22 @@ class ReaderScreenViewModel(
     }
 
     private suspend fun loadTranslationForChapter(chapterId: Long) {
+        // First, clear any existing translation state to prevent showing stale content
+        // This is critical to fix the sync bug where chapter 200's translation shows for chapter 220
+        translationViewModel.translationState.clearTranslation()
+        updateSuccessState { state ->
+            state.copy(
+                hasTranslation = false,
+                translatedContent = emptyList(),
+                isTranslating = false,
+                translationProgress = 0f
+            )
+        }
+        
+        // Now load the translation for the new chapter
         translationViewModel.loadTranslationForChapter(chapterId)
 
+        // After loading completes, sync the state
         val translationState = translationViewModel.translationState
         updateSuccessState { state ->
             state.copy(

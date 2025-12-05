@@ -49,6 +49,7 @@ import ireader.presentation.ui.book.components.ModernBookBackdrop
 import ireader.presentation.ui.book.components.ModernBookHeader
 import ireader.presentation.ui.book.components.ModernBookSummary
 import ireader.presentation.ui.book.components.NovelInfoFab
+import ireader.presentation.ui.book.components.TranslationWarningDialog
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
@@ -194,6 +195,16 @@ fun BookDetailScreen(
                 vm.exportAsEpub(options)
             },
             onDismiss = { vm.showEpubExportDialog = false }
+        )
+    }
+    
+    // Translation rate limit warning dialog
+    if (vm.showTranslationWarningDialog) {
+        TranslationWarningDialog(
+            chapterCount = vm.translationWarningChapterCount,
+            estimatedMinutes = vm.translationWarningEstimatedTime,
+            onConfirm = { vm.confirmMassTranslation() },
+            onDismiss = { vm.showTranslationWarningDialog = false }
         )
     }
 

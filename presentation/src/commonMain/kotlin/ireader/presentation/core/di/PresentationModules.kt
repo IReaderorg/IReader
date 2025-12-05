@@ -222,10 +222,10 @@ val PresentationModules = module {
 
 
     // Reader sub-viewmodels
+    // NOTE: ReaderTranslationViewModel, ReaderTTSViewModel, ReaderStatisticsViewModel are registered
+    // in screenModelModule (included at the end of this module) with proper named parameters.
+    // Only ReaderSettingsViewModel is registered here.
     factory { ireader.presentation.ui.reader.viewmodel.ReaderSettingsViewModel(get(), get(), get(), get(), get(), get()) }
-    factory { ReaderTranslationViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory { ReaderTTSViewModel(get(), get()) }
-    factory { ReaderStatisticsViewModel(get(), get()) }
 
     factory<ReaderScreenViewModel> { (params: ReaderScreenViewModel.Param) -> 
         ReaderScreenViewModel(

@@ -1,13 +1,14 @@
 package ireader.presentation.di
 
-import ireader.domain.services.tts_service.GradioTTSManager
-import ireader.presentation.ui.settings.statistics.StatsScreenModel
-import ireader.presentation.ui.reader.viewmodel.*
-import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
-import ireader.presentation.ui.characterart.CharacterArtViewModel
 import ireader.data.characterart.GeminiImageGenerator
+import ireader.presentation.ui.characterart.CharacterArtViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderSettingsViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderStatisticsViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderTTSViewModel
+import ireader.presentation.ui.reader.viewmodel.ReaderTranslationViewModel
+import ireader.presentation.ui.settings.statistics.StatsScreenModel
+import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
 import org.koin.core.module.dsl.factoryOf
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 /**
@@ -15,10 +16,10 @@ import org.koin.dsl.module
  * Provides screen models following Mihon's StateScreenModel pattern.
  */
 val screenModelModule = module {
-    
+
     // Statistics screen model
     factoryOf(::StatsScreenModel)
-    
+
     // Main settings screen - changed to factory to reduce startup memory
     factory { 
         ireader.presentation.ui.settings.MainSettingScreenViewModel(
@@ -88,6 +89,7 @@ val screenModelModule = module {
     /**
      * Reader translation ViewModel
      * Handles translation and glossary management
+     * IMPORTANT: translationService must be injected for notifications to work!
      */
     factory {
         ReaderTranslationViewModel(
@@ -100,7 +102,8 @@ val screenModelModule = module {
             exportGlossaryUseCase = get(),
             importGlossaryUseCase = get(),
             translationEnginesManager = get(),
-            readerPreferences = get()
+            readerPreferences = get(),
+            translationService = get() // Required for notifications!
         )
     }
     

@@ -64,8 +64,8 @@ val ServiceModule = module {
     single<TranslationStateHolder> { TranslationStateHolder() }
     
     // TranslationServiceImpl is the core implementation (used internally by platform services)
-    // IMPORTANT: This is bound ONLY as TranslationServiceImpl, not as TranslationService
-    // The TranslationService interface binding below takes precedence for interface injection
+    // IMPORTANT: This MUST be a singleton to ensure AndroidTranslationService and all consumers
+    // share the same instance. Otherwise, progress updates won't reach the notification observer!
     single {
         TranslationServiceImpl(
             chapterRepository = get(),
@@ -77,7 +77,9 @@ val ServiceModule = module {
             readerPreferences = get(),
             remoteUseCases = get(),
             getLocalCatalog = get(),
-            stateHolder = get()
+            stateHolder = get(),
+            submitTranslationUseCase = getOrNull(),
+            communityPreferences = getOrNull()
         )
     }
     

@@ -142,8 +142,15 @@ class TTSViewModel(
     
     /**
      * Load translated content for the current chapter
+     * 
+     * IMPORTANT: Clears existing translation first to prevent showing stale content
+     * from the previous chapter while the new translation loads.
      */
     private fun loadTranslationForChapter(chapterId: Long) {
+        // Clear existing translation FIRST to prevent sync bug
+        // This ensures we don't show chapter 200's translation for chapter 220
+        ttsState.setTranslatedTTSContent(null)
+        
         scope.launch {
             try {
                 val translations = getAllTranslationsForChapterUseCase.execute(chapterId)
@@ -159,16 +166,16 @@ class TTSViewModel(
                         
                         if (translatedStrings.isNotEmpty()) {
                             ttsState.setTranslatedTTSContent(translatedStrings)
-                            ireader.core.log.Log.debug { "Loaded ${translatedStrings.size} translated paragraphs for TTS" }
+                            ireader.core.log.Log.debug { "Loaded ${translatedStrings.size} translated paragraphs for TTS chapter $chapterId" }
                         }
                     }
                 } else {
-                    // No translation available, clear any existing
-                    ttsState.setTranslatedTTSContent(null)
+                    // No translation available - already cleared above
+                    ireader.core.log.Log.debug { "No translation found for TTS chapter $chapterId" }
                 }
             } catch (e: Exception) {
-                ireader.core.log.Log.error { "Failed to load translation for TTS: ${e.message}" }
-                ttsState.setTranslatedTTSContent(null)
+                ireader.core.log.Log.error { "Failed to load translation for TTS chapter $chapterId: ${e.message}" }
+                // Already cleared above, no need to clear again
             }
         }
     }
@@ -443,6 +450,9 @@ class TTSViewModel(
                 scope.launch {
                     getChapterUseCase.findChapterById(chapterId)?.let { chapter ->
                         ttsState.setTtsChapter(chapter)
+                        // CRITICAL: Load translation for the new chapter
+                        // This ensures translation is synced when chapter changes via TTS service
+                        loadTranslationForChapter(chapterId)
                     }
                 }
             }

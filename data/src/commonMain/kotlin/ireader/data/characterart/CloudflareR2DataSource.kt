@@ -5,6 +5,7 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.headers
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HeadersBuilder
 import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
@@ -13,8 +14,10 @@ import ireader.domain.models.characterart.ArtStyleFilter
 import ireader.domain.models.characterart.CharacterArt
 import ireader.domain.models.characterart.CharacterArtSort
 import ireader.domain.models.characterart.SubmitCharacterArtRequest
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 /**
@@ -89,8 +92,9 @@ class CloudflareR2DataSource(
         return try {
             val objectKey = "character-art/pending/${kotlin.time.Clock.System.now().toEpochMilliseconds()}_$fileName"
             val contentType = getContentType(fileName)
+            val uploadUrl = "$endpoint/${config.bucketName}/$objectKey"
             
-            val response = httpClient.put("$endpoint/${config.bucketName}/$objectKey") {
+            val response = httpClient.put(uploadUrl) {
                 headers {
                     appendAwsHeaders(
                         method = "PUT",
@@ -107,7 +111,8 @@ class CloudflareR2DataSource(
                 val publicUrl = "${config.publicUrl}/$objectKey"
                 Result.success(publicUrl)
             } else {
-                Result.failure(Exception("Upload failed: ${response.status}"))
+                val errorBody = try { response.bodyAsText() } catch (e: Exception) { "" }
+                Result.failure(Exception("Upload failed: ${response.status} - $errorBody"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -195,39 +200,69 @@ class CloudflareR2DataSource(
         contentType: String = "",
         payloadHash: String = EMPTY_PAYLOAD_HASH
     ) {
-        val now = kotlin.time.Clock.System.now()
-        val dateStamp = now.toString().substring(0, 10).replace("-", "")
-        val amzDate = now.toString().replace("-", "").replace(":", "").substring(0, 15) + "Z"
+        val now = Clock.System.now()
+        val instant = now.toLocalDateTime(kotlinx.datetime.TimeZone.UTC)
+        // AWS date format: YYYYMMDD
+        val dateStamp = "${instant.year}${instant.monthNumber.toString().padStart(2, '0')}${instant.dayOfMonth.toString().padStart(2, '0')}"
+        // AWS datetime format: YYYYMMDD'T'HHMMSS'Z'
+        val amzDate = "${dateStamp}T${instant.hour.toString().padStart(2, '0')}${instant.minute.toString().padStart(2, '0')}${instant.second.toString().padStart(2, '0')}Z"
         
         append("x-amz-date", amzDate)
         append("x-amz-content-sha256", payloadHash)
         append("Host", "${config.accountId}.r2.cloudflarestorage.com")
         
-        val canonicalHeaders = buildString {
-            append("host:${config.accountId}.r2.cloudflarestorage.com\n")
-            append("x-amz-content-sha256:$payloadHash\n")
-            append("x-amz-date:$amzDate\n")
+        // Build canonical headers (must be sorted alphabetically by header name)
+        val canonicalHeaders: String
+        val signedHeaders: String
+        
+        if (contentType.isNotEmpty()) {
+            canonicalHeaders = buildString {
+                append("content-type:$contentType\n")
+                append("host:${config.accountId}.r2.cloudflarestorage.com\n")
+                append("x-amz-content-sha256:$payloadHash\n")
+                append("x-amz-date:$amzDate\n")
+            }
+            signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date"
+        } else {
+            canonicalHeaders = buildString {
+                append("host:${config.accountId}.r2.cloudflarestorage.com\n")
+                append("x-amz-content-sha256:$payloadHash\n")
+                append("x-amz-date:$amzDate\n")
+            }
+            signedHeaders = "host;x-amz-content-sha256;x-amz-date"
         }
         
-        val signedHeaders = "host;x-amz-content-sha256;x-amz-date"
-        
+        // Canonical request format (per AWS Sig V4 spec):
+        // HTTPMethod\n
+        // CanonicalURI\n
+        // CanonicalQueryString\n
+        // CanonicalHeaders\n (each header ends with \n, then one more \n after all headers)
+        // SignedHeaders\n
+        // HashedPayload
         val canonicalRequest = buildString {
-            append("$method\n")
-            append("$path\n")
-            append("\n") // query string
-            append(canonicalHeaders)
+            append(method)
             append("\n")
+            append(path)
+            append("\n")
+            append("") // empty query string
+            append("\n")
+            append(canonicalHeaders) // already ends with \n for each header
+            append("\n") // blank line separating headers from signed headers
             append(signedHeaders)
             append("\n")
             append(payloadHash)
         }
         
+        val canonicalRequestHash = sha256Hex(canonicalRequest.encodeToByteArray())
+        
         val credentialScope = "$dateStamp/auto/s3/aws4_request"
         val stringToSign = buildString {
             append("AWS4-HMAC-SHA256\n")
-            append("$amzDate\n")
-            append("$credentialScope\n")
-            append(sha256Hex(canonicalRequest.encodeToByteArray()))
+            append(amzDate)
+            append("\n")
+            append(credentialScope)
+            append("\n")
+            append(canonicalRequestHash)
         }
         
         val signingKey = getSignatureKey(config.secretAccessKey, dateStamp, "auto", "s3")
@@ -242,28 +277,37 @@ class CloudflareR2DataSource(
     }
     
     private fun getSignatureKey(key: String, dateStamp: String, region: String, service: String): ByteArray {
-        val kDate = hmacSha256("AWS4$key".encodeToByteArray(), dateStamp)
-        val kRegion = hmacSha256(kDate, region)
-        val kService = hmacSha256(kRegion, service)
-        return hmacSha256(kService, "aws4_request")
+        val kSecret = "AWS4$key".encodeToByteArray()
+        val kDate = hmacSha256(kSecret, dateStamp.encodeToByteArray())
+        val kRegion = hmacSha256(kDate, region.encodeToByteArray())
+        val kService = hmacSha256(kRegion, service.encodeToByteArray())
+        
+        return hmacSha256(kService, "aws4_request".encodeToByteArray())
     }
     
     /**
      * HMAC-SHA256 using Okio (KMP compatible)
+     * Okio's hmacSha256 signature: data.hmacSha256(key) 
+     * The ByteString you call it on is the DATA, the parameter is the KEY
      */
-    private fun hmacSha256(key: ByteArray, data: String): ByteArray {
-        val dataBytes = okio.ByteString.of(*data.encodeToByteArray())
-        return okio.ByteString.of(*key).hmacSha256(dataBytes).toByteArray()
+    private fun hmacSha256(key: ByteArray, data: ByteArray): ByteArray {
+        // In Okio: data.hmacSha256(key) - ByteString is DATA, parameter is KEY
+        val keyByteString = okio.ByteString.Companion.of(*key)
+        val dataByteString = okio.ByteString.Companion.of(*data)
+        
+        return dataByteString.hmacSha256(keyByteString).toByteArray()
     }
     
     @OptIn(ExperimentalEncodingApi::class)
     private fun hmacSha256Hex(key: ByteArray, data: String): String {
-        val dataBytes = okio.ByteString.of(*data.encodeToByteArray())
-        return okio.ByteString.of(*key).hmacSha256(dataBytes).hex()
+        // In Okio: data.hmacSha256(key) - ByteString is DATA, parameter is KEY
+        val keyByteString = okio.ByteString.Companion.of(*key)
+        val dataByteString = okio.ByteString.Companion.of(*data.encodeToByteArray())
+        return dataByteString.hmacSha256(keyByteString).hex()
     }
     
     private fun sha256Hex(data: ByteArray): String {
-        return okio.ByteString.of(*data).sha256().hex()
+        return okio.ByteString.Companion.of(*data).sha256().hex()
     }
     
     private fun getContentType(fileName: String): String {

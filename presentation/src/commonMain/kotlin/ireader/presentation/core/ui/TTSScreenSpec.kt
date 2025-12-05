@@ -14,7 +14,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.*
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +30,10 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.CommonTTSService
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
+import ireader.domain.services.common.TranslationService
+import ireader.domain.services.common.ServiceResult
+import ireader.domain.services.common.TranslationQueueResult
+import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
@@ -85,8 +91,13 @@ class TTSScreenSpec(
         val appPreferences: ireader.domain.preferences.prefs.AppPreferences = koinInject()
         val chapterRepository: ChapterRepository = koinInject()
         val getAllTranslationsUseCase: GetAllTranslationsForChapterUseCase = koinInject()
+        val translationService: TranslationService = koinInject()
+        val translationEnginesManager: TranslationEnginesManager = koinInject()
         val scope = rememberCoroutineScope()
         val isTabletOrDesktop = isTableUi()
+        
+        // Translation in progress state
+        var isTranslatingChapter by remember { mutableStateOf(false) }
         
         // Translation state
         var translatedContent by remember { mutableStateOf<List<String>?>(null) }
@@ -173,6 +184,12 @@ class TTSScreenSpec(
         
         // Initialize TTS with the chapter and load chapters list
         LaunchedEffect(bookId, chapterId) {
+            // IMPORTANT: Clear existing translation state FIRST to prevent sync bug
+            // This ensures we don't show chapter 200's translation for chapter 220
+            translatedContent = null
+            showTranslation = false
+            ttsService.setCustomContent(null) // Clear TTS custom content too
+            
             // Load chapters list for drawer first
             try {
                 chapters = chapterRepository.findChaptersByBookId(bookId)
@@ -237,6 +254,45 @@ class TTSScreenSpec(
             }
         }
         
+        // CRITICAL: Watch for chapter changes WITHIN the TTS screen (e.g., auto-next chapter)
+        // The initial LaunchedEffect only triggers on screen entry, not when chapter changes internally
+        LaunchedEffect(currentChapter?.id) {
+            val chapter = currentChapter ?: return@LaunchedEffect
+            // Skip if this is the initial chapter (already handled by the LaunchedEffect above)
+            if (chapter.id == chapterId) return@LaunchedEffect
+            
+            // Clear existing translation state FIRST to prevent sync bug
+            // This ensures we don't show chapter 200's translation for chapter 220
+            translatedContent = null
+            showTranslation = false
+            ttsService.setCustomContent(null)
+            
+            // Load translation for the new chapter
+            try {
+                val translations = getAllTranslationsUseCase.execute(chapter.id)
+                if (translations.isNotEmpty()) {
+                    val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                    latestTranslation?.let { translation ->
+                        val translatedStrings = translation.translatedContent
+                            .filterIsInstance<ireader.core.source.model.Text>()
+                            .map { it.text }
+                            .filter { it.isNotBlank() }
+                        if (translatedStrings.isNotEmpty()) {
+                            translatedContent = translatedStrings
+                            // Only show translation if user preference is enabled
+                            if (readTranslatedText) {
+                                showTranslation = true
+                                ttsService.setCustomContent(translatedStrings)
+                            }
+                        }
+                    }
+                }
+                // If no translation found, translatedContent stays null (cleared above)
+            } catch (e: Exception) {
+                // Translation not available for this chapter
+            }
+        }
+        
         // Auto-scroll to current paragraph when playing - optimized with debounce for low-end devices
         LaunchedEffect(currentParagraph, isPlaying) {
             if (isPlaying && content.isNotEmpty() && currentParagraph < content.size) {
@@ -250,6 +306,68 @@ class TTSScreenSpec(
                 } catch (e: Exception) {
                     // Fallback to non-animated scroll if animation fails on low-end device
                     lazyListState.scrollToItem(currentParagraph)
+                }
+            }
+        }
+        
+        // Auto-translate next chapter preference
+        var autoTranslateNextChapter by remember { mutableStateOf(readerPreferences.autoTranslateNextChapter().get()) }
+        
+        // Observe translation progress and reload when complete
+        val translationProgress by translationService.translationProgress.collectAsState()
+        LaunchedEffect(translationProgress) {
+            val chapter = currentChapter ?: return@LaunchedEffect
+            val progress = translationProgress[chapter.id] ?: return@LaunchedEffect
+            
+            // When translation completes, reload the translated content
+            if (progress.status == ireader.domain.services.common.TranslationStatus.COMPLETED) {
+                try {
+                    val translations = getAllTranslationsUseCase.execute(chapter.id)
+                    if (translations.isNotEmpty()) {
+                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                        latestTranslation?.let { translation ->
+                            val translatedStrings = translation.translatedContent
+                                .filterIsInstance<ireader.core.source.model.Text>()
+                                .map { it.text }
+                                .filter { it.isNotBlank() }
+                            if (translatedStrings.isNotEmpty()) {
+                                translatedContent = translatedStrings
+                                if (readTranslatedText) {
+                                    showTranslation = true
+                                    ttsService.setCustomContent(translatedStrings)
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Auto-translate next chapter if enabled
+                    if (autoTranslateNextChapter) {
+                        val currentIndex = chapters.indexOfFirst { it.id == chapter.id }
+                        if (currentIndex != -1 && currentIndex < chapters.size - 1) {
+                            val nextChapter = chapters[currentIndex + 1]
+                            
+                            // Check if next chapter already has translation
+                            val nextTranslations = getAllTranslationsUseCase.execute(nextChapter.id)
+                            if (nextTranslations.isEmpty()) {
+                                // Queue next chapter for translation
+                                val engineId = translationEnginesManager.get().id
+                                val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                                val targetLang = readerPreferences.translatorTargetLanguage().get()
+                                
+                                translationService.queueChapters(
+                                    bookId = bookId,
+                                    chapterIds = listOf(nextChapter.id),
+                                    sourceLanguage = sourceLang,
+                                    targetLanguage = targetLang,
+                                    engineId = engineId,
+                                    bypassWarning = true,
+                                    priority = false // Background translation
+                                )
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Failed to load translation or queue next chapter
                 }
             }
         }
@@ -459,12 +577,46 @@ class TTSScreenSpec(
                             chaptersAscending = !chaptersAscending
                         },
                         onChapter = { ch ->
+                            // Capture playing state BEFORE any changes
+                            val wasPlaying = isPlaying
+                            
                             scope.launch {
                                 drawerState.close()
-                                // Stop current playback first
-                                ttsService.pause()
-                                // Start reading the new chapter with autoPlay if was playing
-                                ttsService.startReading(bookId, ch.id, autoPlay = isPlaying)
+                                
+                                // CRITICAL: Clear translation state IMMEDIATELY when user selects a new chapter
+                                // Don't wait for LaunchedEffect - clear it here to prevent showing wrong translation
+                                translatedContent = null
+                                showTranslation = false
+                                
+                                // Load translation for the new chapter FIRST (before starting TTS)
+                                var translatedStringsToUse: List<String>? = null
+                                try {
+                                    val translations = getAllTranslationsUseCase.execute(ch.id)
+                                    if (translations.isNotEmpty()) {
+                                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                                        latestTranslation?.let { translation ->
+                                            val translatedStrings = translation.translatedContent
+                                                .filterIsInstance<ireader.core.source.model.Text>()
+                                                .map { it.text }
+                                                .filter { it.isNotBlank() }
+                                            if (translatedStrings.isNotEmpty()) {
+                                                translatedContent = translatedStrings
+                                                if (readTranslatedText) {
+                                                    showTranslation = true
+                                                    translatedStringsToUse = translatedStrings
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    // Translation not available for this chapter
+                                }
+                                
+                                // Set translated content BEFORE starting TTS
+                                ttsService.setCustomContent(translatedStringsToUse)
+                                
+                                // Start reading the new chapter (this will stop current playback internally)
+                                ttsService.startReading(bookId, ch.id, autoPlay = wasPlaying)
                             }
                         },
                         chapter = currentChapter,
@@ -512,6 +664,61 @@ class TTSScreenSpec(
                             TopAppBarBackButton(onClick = { navController.popBackStack() })
                         },
                         actions = {
+                            // Translate current chapter button
+                            IconButton(
+                                onClick = {
+                                    val chapter = currentChapter ?: return@IconButton
+                                    if (isTranslatingChapter) return@IconButton
+                                    
+                                    scope.launch {
+                                        isTranslatingChapter = true
+                                        try {
+                                            val engineId = translationEnginesManager.get().id
+                                            val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                                            val targetLang = readerPreferences.translatorTargetLanguage().get()
+                                            
+                                            val result = translationService.queueChapters(
+                                                bookId = bookId,
+                                                chapterIds = listOf(chapter.id),
+                                                sourceLanguage = sourceLang,
+                                                targetLanguage = targetLang,
+                                                engineId = engineId,
+                                                bypassWarning = true,
+                                                priority = true
+                                            )
+                                            
+                                            when (result) {
+                                                is ServiceResult.Success -> {
+                                                    // Translation started - will show notification
+                                                }
+                                                is ServiceResult.Error -> {
+                                                    // Show error (could add snackbar here)
+                                                }
+                                                else -> {}
+                                            }
+                                        } finally {
+                                            isTranslatingChapter = false
+                                        }
+                                    }
+                                },
+                                enabled = currentChapter != null && !isTranslatingChapter
+                            ) {
+                                if (isTranslatingChapter) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Icon(
+                                        Icons.Default.Translate,
+                                        contentDescription = "Translate Chapter",
+                                        tint = if (translatedContent != null) 
+                                            MaterialTheme.colorScheme.primary 
+                                        else 
+                                            LocalContentColor.current
+                                    )
+                                }
+                            }
                             // Chapter drawer button
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                 Icon(Icons.Default.List, "Chapters")

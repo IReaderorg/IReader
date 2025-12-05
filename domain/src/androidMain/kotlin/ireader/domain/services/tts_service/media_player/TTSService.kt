@@ -619,9 +619,17 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         
         // Check if we're resuming from pause or starting fresh
         if (isPlaybackPaused) {
-            // Resume paused playback - just resume the engine, don't start new request
             isPlaybackPaused = false
-            ttsEngine?.resume()
+            
+            // For Gradio TTS, try resume() first (it supports true pause/resume)
+            if (currentEngineType == TTSEngineType.GRADIO) {
+                ttsEngine?.resume()
+            } else {
+                // For Native Android TTS, resume() does nothing because Android's TextToSpeech
+                // doesn't support pause/resume - it only has stop(). We need to re-read the
+                // current paragraph from the beginning.
+                readText(this@TTSService, mediaSession)
+            }
         } else {
             // Start fresh playback
             readText(this@TTSService, mediaSession)

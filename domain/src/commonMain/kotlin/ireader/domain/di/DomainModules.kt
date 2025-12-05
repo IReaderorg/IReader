@@ -55,24 +55,9 @@ val DomainServices = module {
     // Translation use cases - FACTORY: not needed at startup
     factory { GetAllTranslationsForChapterUseCase(get()) }
     
-    // Translation Service Implementation - FACTORY: heavy dependencies, not needed at startup
-    single(createdAtStart = false) { 
-        ireader.domain.services.translationService.TranslationStateHolder()
-    }
-    factory {
-        ireader.domain.services.translationService.TranslationServiceImpl(
-            chapterRepository = get(),
-            bookRepository = get(),
-            translationEnginesManager = get(),
-            saveTranslatedChapter = get(),
-            getTranslatedChapter = get(),
-            translationPreferences = get(),
-            readerPreferences = get(),
-            remoteUseCases = get(),
-            getLocalCatalog = get(),
-            stateHolder = get()
-        )
-    }
+    // NOTE: TranslationServiceImpl and TranslationStateHolder are registered in ServiceModule.kt
+    // as singletons to ensure the same instance is shared across AndroidTranslationService
+    // and all other consumers. DO NOT register them here as factory - it will break notifications!
 
 
 
