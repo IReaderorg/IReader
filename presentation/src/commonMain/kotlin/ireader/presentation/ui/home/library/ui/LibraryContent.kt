@@ -14,7 +14,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.BookItem
-import ireader.presentation.ui.core.ui.LoadingScreen
 import ireader.presentation.ui.home.library.components.ScrollableTabs
 import ireader.presentation.ui.home.library.components.visibleName
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
@@ -70,7 +69,7 @@ internal fun LibraryContent(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                LoadingScreen()
+//                LoadingScreen()
             }
         } else {
             // Show tabs only when not loading

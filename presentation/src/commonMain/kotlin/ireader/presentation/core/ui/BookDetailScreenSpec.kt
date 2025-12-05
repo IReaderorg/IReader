@@ -50,7 +50,6 @@ import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
 import ireader.presentation.ui.book.components.BookDetailPlaceholder
-import ireader.presentation.ui.book.components.BookDetailShimmerLoading
 import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
 import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.presentation.ui.book.viewmodel.BookDetailEvent
