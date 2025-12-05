@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -48,7 +49,7 @@
     <string name="all_category">Semua</string>
     <string name="all_chapters">Semua Bab</string>
     <string name="all_chapters_already_downloaded">Semua bab telah dimuat turun</string>
-    <string name="all_data_collection_is_optional">Semua pengumpulan data adalah pilihan dan boleh dilumpuhkan pada bila-bila masa. </string>
+    <string name="all_data_collection_is_optional">Semua pengumpulan data adalah pilihan dan boleh dilumpuhkan pada bila-bila masa.</string>
     <string name="all_donors">Semua Penderma</string>
     <string name="all_extensions_up_to_date">Semua sambungan terkini</string>
     <string name="all_google_fonts">Semua Fon Google</string>
@@ -195,7 +196,7 @@
     <string name="block">Sekat</string>
     <string name="block_screenshots_and_screen_recording">Sekat tangkapan skrin dan rakaman skrin</string>
     <string name="blur_library_covers_until_tapped">Kaburkan kulit pustaka sehingga diketuk</string>
-    <string name="book_added_to_library">Buku '%1$s' ditambah ke pustaka</string>
+    <string name="book_added_to_library">Buku \'%1$s\' ditambah ke pustaka</string>
     <string name="book_archived">%1$s telah diarkibkan</string>
     <string name="book_cover">Kulit Buku</string>
     <string name="book_cover_1">Kulit buku</string>
@@ -241,7 +242,7 @@
     <string name="cached">Cache</string>
     <string name="cancel">Batal</string>
     <string name="cancel_all">Batal semua</string>
-    <string name="cancel_all_for_this_series">"Batal semua untuk siri ini</string>
+    <string name="cancel_all_for_this_series">Batal semua untuk siri ini</string>
     <string name="cancel_export">Batal Eksport</string>
     <string name="cancel_export_confirmation">Anda pasti mahu membatalkan eksport?</string>
     <string name="cancel_import">Batal Import</string>
@@ -258,13 +259,13 @@
     <string name="catalog_not_found_error">Tidak menemui sebarang Sambungan.</string>
     <string name="catalog_settings">Tetapan Katalog</string>
     <string name="category">Kategori</string>
-    <string name="category_already_exists">Kategori '%1$s' sudah wujud</string>
+    <string name="category_already_exists">Kategori \'%1$s\' sudah wujud</string>
     <string name="category_hint">Nama…</string>
     <string name="category_management">Pengurusan Kategori</string>
     <string name="category_name">Nama Kategori</string>
     <string name="category_name_empty">Nama kategori tidak boleh kosong</string>
     <string name="category_not_found">Kategori tidak ditemui</string>
-    <string name="category_renamed">Kategori dinamakan semula kepada '%1$s'</string>
+    <string name="category_renamed">Kategori dinamakan semula kepada \'%1$s\'</string>
     <string name="center">Tengah</string>
     <string name="change_category">Tukar kategori</string>
     <string name="change_category_1">Tukar Kategori</string>
@@ -354,8 +355,7 @@
     <string name="color_theme">Tema Warna</string>
     <string name="colors">Warna</string>
     <string name="columns">Lajur</string>
-    <string name="comfortable_grid_layout_description">3 lajur dalam grid dengan imej kulit yang lebih besar
-    </string>
+    <string name="comfortable_grid_layout_description">3 lajur dalam grid dengan imej kulit yang lebih besar</string>
     <string name="comfortable_layout">Grid Selesa</string>
     <string name="commit">Komit</string>
     <string name="community">Komuniti</string>
@@ -363,8 +363,7 @@
     <string name="community_leaderboard">Komuniti &amp; Papan Pendahulu</string>
     <string name="community_reviews">Ulasan Komuniti</string>
     <string name="community_reviews_desc">Baca dan tulis ulasan untuk buku dan bab</string>
-    <string name="compact_grid_layout_description">2 lajur dalam grid dengan imej kulit yang lebih kecil
-    </string>
+    <string name="compact_grid_layout_description">2 lajur dalam grid dengan imej kulit yang lebih kecil</string>
     <string name="compact_layout">Reka Letak Padat</string>
     <string name="complete">Selesai</string>
     <string name="complete_captcha">Lengkapkan CAPTCHA untuk meneruskan</string>
@@ -466,9 +465,7 @@
     <string name="decrease_speed">Kurangkan kelajuan</string>
     <string name="deepseek_api_key">Kunci API DeepSeek</string>
     <string name="deepseek_api_key_invalid">Kunci api DeepSeek tidak sah</string>
-    <string name="deepseek_api_key_not_set">Kunci API DeepSeek tidak ditetapkan. Sila konfigurasikannya dalam
-        tetapan.
-    </string>
+    <string name="deepseek_api_key_not_set">Kunci API DeepSeek tidak ditetapkan. Sila konfigurasikannya dalam tetapan.</string>
     <string name="deepseek_login_required">Log Masuk DeepSeek Diperlukan</string>
     <string name="deepseek_payment_required">Pembayaran DeepSeek diperlukan atau kuota API melebihi</string>
     <string name="default_chapter_sort">Isihan Bab Lalai</string>
@@ -501,15 +498,9 @@
     <string name="developer">Pembangun</string>
     <string name="diagnostic_data">Data Diagnostik</string>
     <string name="diagnostic_report">Laporan Diagnostik</string>
-    <string name="dialog_remove_chapter_book_description">Ini akan mengalih keluar tarikh bacaan ini
-        buku. Anda pasti?
-    </string>
-    <string name="dialog_remove_chapter_books_description">Ini akan mengalih keluar tarikh bacaan semua
-        buku. Anda pasti?
-    </string>
-    <string name="dialog_remove_chapter_history_description">Ini akan mengalih keluar tarikh bacaan ini
-        bab. Anda pasti?
-    </string>
+    <string name="dialog_remove_chapter_book_description">Ini akan mengalih keluar tarikh bacaan ini buku. Anda pasti?</string>
+    <string name="dialog_remove_chapter_books_description">Ini akan mengalih keluar tarikh bacaan semua buku. Anda pasti?</string>
+    <string name="dialog_remove_chapter_history_description">Ini akan mengalih keluar tarikh bacaan ini bab. Anda pasti?</string>
     <string name="did_not_get_anything">Saya tidak mendapat apa-apa.</string>
     <string name="disable">Lumpuhkan</string>
     <string name="disable_haptic_feedback">Lumpuhkan Maklum Balas Haptik</string>
@@ -565,9 +556,7 @@
     <string name="download_notifier_no_network">Tiada sambungan rangkaian tersedia</string>
     <string name="download_notifier_text_only_wifi">Tiada sambungan Wi-Fi tersedia</string>
     <string name="download_notifier_title_error">Ralat</string>
-    <string name="download_notifier_unknown_error">Tidak dapat memuat turun bab disebabkan oleh yang tidak dijangka
-        ralat
-    </string>
+    <string name="download_notifier_unknown_error">Tidak dapat memuat turun bab disebabkan oleh yang tidak dijangka ralat</string>
     <string name="download_of">Muat Turun</string>
     <string name="download_only_over_wifi">Muat Turun Hanya Melalui WiFi</string>
     <string name="download_progress">Kemajuan Muat Turun</string>
@@ -605,8 +594,7 @@
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">Kunci Sumber 18+</string>
     <string name="email">E-mel</string>
-    <string name="empty_library">Tiada buku dalam Perpustakaan, anda boleh menambah buku dalam skrin Teroka.
-    </string>
+    <string name="empty_library">Tiada buku dalam Perpustakaan, anda boleh menambah buku dalam skrin Teroka.</string>
     <string name="empty_response">Menerima respons kosong daripada perkhidmatan terjemahan.</string>
     <string name="enable">Dayakan</string>
     <string name="enable_app_lock">Dayakan Kunci Aplikasi</string>
@@ -691,7 +679,7 @@
     <string name="example_url">Contoh URL:</string>
     <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Contoh:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Kecualikan Kategori</string>
-    <string name="excluded"> (dikecualikan)</string>
+    <string name="excluded">(dikecualikan)</string>
     <string name="exclusive">Eksklusif</string>
     <string name="exclusive_designs">Reka Bentuk Eksklusif</string>
     <string name="execution_timeout">Masa Tamat Pelaksanaan</string>
@@ -831,9 +819,7 @@
     <string name="gb_total_storage_7_500mb">Jumlah storan 3.5GB (7 × 500MB) - Konfigurasikan setiap projek atau gunakan URL yang sama untuk semua</string>
     <string name="gemini_api_information">Maklumat API Gemini</string>
     <string name="gemini_api_key">Kunci API Gemini</string>
-    <string name="gemini_api_key_not_set">Kunci API Gemini tidak ditetapkan. Sila konfigurasikannya dalam
-        tetapan.
-    </string>
+    <string name="gemini_api_key_not_set">Kunci API Gemini tidak ditetapkan. Sila konfigurasikannya dalam tetapan.</string>
     <string name="gemini_model">Model Gemini</string>
     <string name="gemini_payment_required">Anda telah melebihi kuota semasa anda untuk Gemini API. Sila semak pelan dan butiran pengebilan anda di https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="gender">Jantina</string>
@@ -861,7 +847,7 @@
     <string name="go_to_badge_store">Pergi ke Kedai Lencana</string>
     <string name="go_to_chapter">Pergi ke Bab</string>
     <string name="go_to_last_chapter">Pergi ke bab terakhir</string>
-    <string name="go_to_settings_generaln2_toggle">1. Pergi ke Tetapan → Umum\n2. Togol \</string>
+    <string name="go_to_settings_generaln2_toggle">1. Pergi ke Tetapan → Umum\n2. Togol \\</string>
     <string name="goal_reached">Matlamat Tercapai</string>
     <string name="goal_reached_1">Matlamat Tercapai!</string>
     <string name="goal_reached_thank_you">Matlamat Tercapai! Terima kasih!</string>
@@ -881,7 +867,7 @@
     <string name="header_alpha">header_alpha</string>
     <string name="hello_this_is_a_test">Hello, ini ialah ujian.</string>
     <string name="help">Bantuan</string>
-    <string name="help_us_improve">Bantu kami menambah baik \</string>
+    <string name="help_us_improve">Bantu kami menambah baik \\</string>
     <string name="helpful">Membantu</string>
     <string name="hide">Sembunyi</string>
     <string name="hide_backdrop">Sembunyikan Latar Belakang</string>
@@ -931,7 +917,7 @@
     <string name="in_library_1">Dalam Pustaka</string>
     <string name="in_progress">Sedang Berlangsung</string>
     <string name="include_cover_image">Sertakan Imej Muka Depan</string>
-    <string name="included"> (dimasukkan)</string>
+    <string name="included">(dimasukkan)</string>
     <string name="incognito_mode">Mod Inkognito</string>
     <string name="increase">Tingkatkan</string>
     <string name="increase_font_size">Besarkan saiz fon</string>
@@ -953,13 +939,9 @@
     <string name="installation_error_Storage">Pengurus Pakej: Storan Tidak Mencukupi</string>
     <string name="installation_error_aborted">Pengurus Pakej: Dibatalkan</string>
     <string name="installation_error_blocked">Pengurus Pakej: Pemasang telah disekat</string>
-    <string name="installation_error_conflicted">Pengurus Pakej: Bercanggah dengan pakej yang dipasang
-    </string>
-    <string name="installation_error_incompatible">Pengurus Pakej: Tidak serasi dengan pakej yang dipasang
-    </string>
-    <string name="installation_error_invalid">Pengurus Pakej: Terdapat apk lain yang dipasang dengan
-        versi lebih tinggi daripada pakej ini
-    </string>
+    <string name="installation_error_conflicted">Pengurus Pakej: Bercanggah dengan pakej yang dipasang</string>
+    <string name="installation_error_incompatible">Pengurus Pakej: Tidak serasi dengan pakej yang dipasang</string>
+    <string name="installation_error_invalid">Pengurus Pakej: Terdapat apk lain yang dipasang dengan versi lebih tinggi daripada pakej ini</string>
     <string name="installation_failed">Pemasangan gagal: %1$s</string>
     <string name="installation_failed_generic">Pemasangan gagal</string>
     <string name="installation_in_progress_this_may">Pemasangan sedang dijalankan... Ini mungkin mengambil masa beberapa minit.</string>
@@ -1011,8 +993,7 @@
     <string name="last_verified">Disahkan Terakhir:</string>
     <string name="latest_book">Terbaharu</string>
     <string name="layout">Tataletak</string>
-    <string name="layout_description_comfortable">3 lajur dalam grid dengan imej kulit yang lebih besar
-    </string>
+    <string name="layout_description_comfortable">3 lajur dalam grid dengan imej kulit yang lebih besar</string>
     <string name="layout_description_compact">2 lajur dalam grid dengan imej kulit yang lebih kecil</string>
     <string name="layout_description_cover_only">2 lajur imej kulit sahaja (tiada teks)</string>
     <string name="layout_description_list">Buku dipaparkan dalam senarai menegak</string>
@@ -1203,9 +1184,7 @@
     <string name="no_active_funding_goals_at_the_moment">Tiada matlamat pendanaan aktif pada masa ini</string>
     <string name="no_alternative_sources_available">Tiada sumber alternatif tersedia. Jumlah sumber: %1$s, Semasa: %2$s</string>
     <string name="no_alternative_sources_available_1">Tiada sumber alternatif tersedia</string>
-    <string name="no_app_was_found_to_lauch">Sesuatu telah berlaku. anda tidak mempunyai yang diperlukan
-        aplikasi.
-    </string>
+    <string name="no_app_was_found_to_lauch">Sesuatu telah berlaku. anda tidak mempunyai yang diperlukan aplikasi.</string>
     <string name="no_backups_found">Tiada sandaran ditemui</string>
     <string name="no_badge">Tiada lencana</string>
     <string name="no_badges_available">Tiada lencana tersedia</string>
@@ -1247,7 +1226,7 @@
     <string name="no_repositories_added">Tiada repositori ditambah</string>
     <string name="no_repositories_added_subtitle">Tambah repositori untuk mengakses sumber tambahan</string>
     <string name="no_repositories_configured">Tiada repositori dikonfigurasi</string>
-    <string name="no_results_for">Tiada hasil untuk \</string>
+    <string name="no_results_for">Tiada hasil untuk \\</string>
     <string name="no_results_found">Tiada hasil Dijumpai</string>
     <string name="no_results_found_1">Tiada hasil ditemui</string>
     <string name="no_reviews">Tiada ulasan</string>
@@ -1286,7 +1265,7 @@
     <string name="offset">Ofset</string>
     <string name="ok">OK</string>
     <string name="ollama_information">Maklumat Ollama</string>
-    <string name="ollama_is_a_local_llm">Ollama ialah pelayan LLM tempatan untuk terjemahan. Pastikan Ollama dipasang dan berjalan pada peranti atau rangkaian anda. Anda perlu menarik model terlebih dahulu dengan 'ollama pull modelname'.</string>
+    <string name="ollama_is_a_local_llm">Ollama ialah pelayan LLM tempatan untuk terjemahan. Pastikan Ollama dipasang dan berjalan pada peranti atau rangkaian anda. Anda perlu menarik model terlebih dahulu dengan \'ollama pull modelname\'.</string>
     <string name="ollama_model">Model Ollama</string>
     <string name="ollama_server_url_not_set">Url pelayan OLLama tidak ditetapkan</string>
     <string name="ollama_url">URL Ollama</string>
@@ -1309,9 +1288,7 @@
     <string name="open_tts_settings">Buka Tetapan TTS</string>
     <string name="openai_api_key">Kunci API OpenAI</string>
     <string name="openai_api_key_invalid">Kunci api Openai tidak sah</string>
-    <string name="openai_api_key_not_set">Kunci API OpenAI tidak ditetapkan. Sila konfigurasikannya dalam
-        tetapan.
-    </string>
+    <string name="openai_api_key_not_set">Kunci API OpenAI tidak ditetapkan. Sila konfigurasikannya dalam tetapan.</string>
     <string name="openai_quota_exceeded">Kuota Openai melebihi</string>
     <string name="optimize">Optimumkan</string>
     <string name="optimize_database">Optimumkan Pangkalan Data</string>
@@ -1330,9 +1307,7 @@
     <string name="other_source">Lain-lain</string>
     <string name="overall_progress">Kemajuan Keseluruhan</string>
     <string name="owner">Pemilik</string>
-    <string name="package_installer_failed_to_install_packages">Pemasang pakej gagal memasang
-        pakej: KOD_STATUS:
-    </string>
+    <string name="package_installer_failed_to_install_packages">Pemasang pakej gagal memasang pakej: KOD_STATUS:</string>
     <string name="package_manager">Pengurus Pakej</string>
     <string name="package_name">Nama Pakej</string>
     <string name="padding">Lapik</string>
@@ -1360,9 +1335,7 @@
     <string name="performance_metrics">Metrik Prestasi</string>
     <string name="performance_monitoring">Pemantauan Prestasi</string>
     <string name="permanently_delete_entire_database">⚠️ Padamkan pangkalan data keseluruhan secara kekal</string>
-    <string name="permission_not_given">Kebenaran yang mencukupi tidak diberikan, Sila semak
-        kebenaran anda
-    </string>
+    <string name="permission_not_given">Kebenaran yang mencukupi tidak diberikan, Sila semak kebenaran anda</string>
     <string name="permission_required">Kebenaran Diperlukan</string>
     <string name="permissions">Kebenaran</string>
     <string name="pill_offset">pill_offset</string>
@@ -1379,7 +1352,7 @@
     <string name="pitch">Laras Suara</string>
     <string name="play">Main</string>
     <string name="playback">Main Balik</string>
-    <string name="please_click_refresh_available_models">Sila klik 'Muat Semula Model Tersedia' di atas untuk memuatkan model daripada API Gemini.</string>
+    <string name="please_click_refresh_available_models">Sila klik \'Muat Semula Model Tersedia\' di atas untuk memuatkan model daripada API Gemini.</string>
     <string name="please_describe_the_issue">Sila terangkan isu:</string>
     <string name="please_download_and_select_a">Sila muat turun dan pilih model suara untuk mendayakan TTS</string>
     <string name="please_enter_a_valid_repository">Sila masukkan URL repositori yang sah yang berakhir dengan .json</string>
@@ -1717,7 +1690,7 @@
     <string name="shimmer">berkilauan</string>
     <string name="shimmeranimation">animasi berkilauan</string>
     <string name="shimmertransition">transisi berkilauan</string>
-    <string name="show_all_category_tab">Tunjukkan Tab Kategori "Semua"</string>
+    <string name="show_all_category_tab">Tunjukkan Tab Kategori Semua</string>
     <string name="show_archived">Tunjukkan Diarkibkan</string>
     <string name="show_archived_books">Tunjukkan Buku Diarkibkan</string>
     <string name="show_category_tabs">Tunjukkan Tab Kategori</string>
@@ -1771,8 +1744,7 @@
     <string name="snooze">Tunda</string>
     <string name="snooze_reminder">Tunda Peringatan</string>
     <string name="something_is_wrong_with_this_book">Terdapat sesuatu yang salah dengan buku ini.</string>
-    <string name="something_is_wrong_with_this_chapter">Terdapat sesuatu yang salah dengan bab ini.
-    </string>
+    <string name="something_is_wrong_with_this_chapter">Terdapat sesuatu yang salah dengan bab ini.</string>
     <string name="something_went_wrong">Ada yang tak kena</string>
     <string name="something_wrong_with_book">Terdapat sesuatu yang salah dengan buku ini</string>
     <string name="sort">Isih</string>
@@ -1801,8 +1773,7 @@
     <string name="status">Status</string>
     <string name="stop">Berhenti</string>
     <string name="storage">Storan</string>
-    <string name="storage_permission_required_explanation">Penjelasan Kebenaran Storan Diperlukan
-    </string>
+    <string name="storage_permission_required_explanation">Penjelasan Kebenaran Storan Diperlukan</string>
     <string name="storage_usage">Penggunaan Storan</string>
     <string name="storage_used">Storan Digunakan</string>
     <string name="style_features">Ciri Gaya</string>
@@ -1901,9 +1872,7 @@
     <string name="themes">Tema</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">Tiada novel dalam sumber ini untuk dipindahkan</string>
     <string name="there_is_no_chapter">Tiada bab.</string>
-    <string name="there_was_a_problem_in_getting_chapter">Terdapat masalah dalam mendapatkan
-        bab.
-    </string>
+    <string name="there_was_a_problem_in_getting_chapter">Terdapat masalah dalam mendapatkan bab.</string>
     <string name="these_actions_are_destructive_and">Tindakan ini merosakkan dan tidak boleh dibuat asal. Teruskan dengan berhati-hati.</string>
     <string name="these_are_all_the_popular_books">Ini semua buku yang popular</string>
     <string name="these_are_all_the_reviews">Ini semua ulasan</string>
@@ -2004,7 +1973,7 @@
     <string name="tts_with_translated_text">TTS dengan Teks Terjemahan</string>
     <string name="turn_off_vibration_feedback_for_interactions">Matikan maklum balas getaran untuk interaksi</string>
     <string name="type">Jenis</string>
-    <string name="type_1">Taip \</string>
+    <string name="type_1">Taip \\</string>
     <string name="typography">Tipografi</string>
     <string name="ui_improvements">Penambahbaikan UI</string>
     <string name="unable_to_get_package_version">Tidak dapat memperoleh Versi Pakej</string>
@@ -2150,7 +2119,7 @@
     <string name="yesterday">Semalam</string>
     <string name="you">(Anda)</string>
     <string name="you_1">ANDA</string>
-    <string name="you_are_about_to_report">Anda akan melaporkan \</string>
+    <string name="you_are_about_to_report">Anda akan melaporkan \\</string>
     <string name="you_are_on_latest_version">Anda menggunakan versi terkini</string>
     <string name="you_dont_have_any_badges_yet">Anda belum mempunyai sebarang lencana</string>
     <string name="you_own_an_ireader_nft">Anda memiliki IReader NFT!</string>
