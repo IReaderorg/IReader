@@ -78,16 +78,19 @@ import org.koin.dsl.module
 
 val UseCasesInject = module {
 
-    single<RemoteUseCases> { RemoteUseCases(
+    // Remote use cases - factory for on-demand creation
+    factory<RemoteUseCases> { RemoteUseCases(
         getBookDetail = GetBookDetail(),
         getRemoteBooks = GetRemoteBooksUseCase(),
         getRemoteChapters = GetRemoteChapters(),
         getRemoteReadingContent = GetRemoteReadingContent(),
         globalSearch = get(),
     ) }
-    single<ireader.domain.usecases.reader.PreloadChapterUseCase> { ireader.domain.usecases.reader.PreloadChapterUseCase() }
-    single<ireader.domain.usecases.reader.ApplyDefaultReadingModeUseCase> { ireader.domain.usecases.reader.ApplyDefaultReadingModeUseCase(get(), get()) }
-    single<ireader.domain.usecases.local.LocalInsertUseCases> {
+    factory<ireader.domain.usecases.reader.PreloadChapterUseCase> { ireader.domain.usecases.reader.PreloadChapterUseCase() }
+    factory<ireader.domain.usecases.reader.ApplyDefaultReadingModeUseCase> { ireader.domain.usecases.reader.ApplyDefaultReadingModeUseCase(get(), get()) }
+    
+    // Local use cases - factory for on-demand creation
+    factory<ireader.domain.usecases.local.LocalInsertUseCases> {
         ireader.domain.usecases.local.LocalInsertUseCases(
             insertBook = InsertBook(get()),
             insertBookAndChapters = InsertBookAndChapters(get()),
@@ -97,7 +100,7 @@ val UseCasesInject = module {
             updateBook = UpdateBook(get())
         )
     }
-    single<ireader.domain.usecases.local.LocalGetBookUseCases> {
+    factory<ireader.domain.usecases.local.LocalGetBookUseCases> {
         ireader.domain.usecases.local.LocalGetBookUseCases(
             findAllInLibraryBooks = FindAllInLibraryBooks(get()),
             findBookById = FindBookById(get()),
@@ -108,7 +111,7 @@ val UseCasesInject = module {
             SubscribeInLibraryBooks = SubscribeInLibraryBooks(get()),
         )
     }
-    single<ireader.domain.usecases.local.LocalGetChapterUseCase> {
+    factory<ireader.domain.usecases.local.LocalGetChapterUseCase> {
         ireader.domain.usecases.local.LocalGetChapterUseCase(
             findAllInLibraryChapters = FindAllInLibraryChapters(get()),
             findChapterById = FindChapterById(get()),
@@ -122,7 +125,7 @@ val UseCasesInject = module {
             subscribeChapterById = SubscribeChapterById(get())
         )
     }
-    single<ireader.domain.usecases.local.DeleteUseCase> {
+    factory<ireader.domain.usecases.local.DeleteUseCase> {
         ireader.domain.usecases.local.DeleteUseCase(
             deleteAllBook = DeleteAllBooks(get()),
             deleteAllChapters = DeleteAllChapters(get()),
@@ -139,12 +142,13 @@ val UseCasesInject = module {
         )
     }
 
-    single<LibraryScreenPrefUseCases> { LibraryScreenPrefUseCases(
+    // Preference use cases - factory (lightweight but not needed at startup)
+    factory<LibraryScreenPrefUseCases> { LibraryScreenPrefUseCases(
         libraryLayoutTypeUseCase = LibraryLayoutTypeUseCase(get(), get()),
         sortersDescUseCase = SortersDescUseCase(get()),
         sortersUseCase = SortersUseCase(get())
     ) }
-    single<ReaderPrefUseCases> { ReaderPrefUseCases(
+    factory<ReaderPrefUseCases> { ReaderPrefUseCases(
         autoScrollMode = AutoScrollMode(get()),
         brightnessStateUseCase = BrightnessStateUseCase(get()),
         fontHeightUseCase = FontHeightUseCase(get()),
@@ -158,35 +162,35 @@ val UseCasesInject = module {
         textAlignmentUseCase = TextAlignmentUseCase(get()),
         backgroundColorUseCase = BackgroundColorUseCase(get())
     ) }
-    single<BrowseScreenPrefUseCase> { BrowseScreenPrefUseCase(
+    factory<BrowseScreenPrefUseCase> { BrowseScreenPrefUseCase(
         browseLayoutTypeUseCase = BrowseLayoutTypeUseCase(get())
     ) }
-    single<HistoryUseCase> { HistoryUseCase(
+    factory<HistoryUseCase> { HistoryUseCase(
         get()
     ) }
-    single<ireader.domain.usecases.history.GetLastReadNovelUseCase> { 
+    factory<ireader.domain.usecases.history.GetLastReadNovelUseCase> { 
         ireader.domain.usecases.history.GetLastReadNovelUseCase(
             historyRepository = get(),
             bookRepository = get(),
             chapterRepository = get()
         ) 
     }
-    single<UpdateUseCases> { UpdateUseCases(
+    factory<UpdateUseCases> { UpdateUseCases(
         subscribeUpdates = SubscribeUpdates(get()),
         deleteAllUpdates = DeleteAllUpdates(get()),
     ) }
     
-    // Download use cases
-    single<DeleteAllSavedDownload> { DeleteAllSavedDownload(get()) }
-    single<DeleteSavedDownloads> { DeleteSavedDownloads(get()) }
-    single<UpdateDownloadPriority> { UpdateDownloadPriority(get()) }
-    single<SubscribeDownloadsUseCase> { SubscribeDownloadsUseCase(get()) }
+    // Download use cases - factory
+    factory<DeleteAllSavedDownload> { DeleteAllSavedDownload(get()) }
+    factory<DeleteSavedDownloads> { DeleteSavedDownloads(get()) }
+    factory<UpdateDownloadPriority> { UpdateDownloadPriority(get()) }
+    factory<SubscribeDownloadsUseCase> { SubscribeDownloadsUseCase(get()) }
 
-    single<InsertDownload> { InsertDownload(get()) }
-    single<InsertDownloads> { InsertDownloads(get()) }
-    single<DeleteSavedDownload> { DeleteSavedDownload(get()) }
+    factory<InsertDownload> { InsertDownload(get()) }
+    factory<InsertDownloads> { InsertDownloads(get()) }
+    factory<DeleteSavedDownload> { DeleteSavedDownload(get()) }
     
-    single<DownloadUseCases> {
+    factory<DownloadUseCases> {
         DownloadUseCases(
             downloadChapter = ireader.domain.usecases.download.DownloadChapterUseCase(get()),
             downloadChapters = ireader.domain.usecases.download.DownloadChaptersUseCase(get()),
@@ -205,13 +209,13 @@ val UseCasesInject = module {
         )
     }
     
-    // Translation use cases
-    single { ireader.domain.usecases.translation.SaveTranslatedChapterUseCase(get()) }
-    single { ireader.domain.usecases.translation.GetTranslatedChapterUseCase(get()) }
-    single { ireader.domain.usecases.translation.DeleteTranslatedChapterUseCase(get()) }
-    single { ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase(get()) }
-    single { ireader.domain.usecases.translation.ApplyGlossaryToTextUseCase() }
-    single { 
+    // Translation use cases - factory (not needed at startup)
+    factory { ireader.domain.usecases.translation.SaveTranslatedChapterUseCase(get()) }
+    factory { ireader.domain.usecases.translation.GetTranslatedChapterUseCase(get()) }
+    factory { ireader.domain.usecases.translation.DeleteTranslatedChapterUseCase(get()) }
+    factory { ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase(get()) }
+    factory { ireader.domain.usecases.translation.ApplyGlossaryToTextUseCase() }
+    factory { 
         ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase(
             translationEnginesManager = get(),
             saveTranslatedChapterUseCase = get(),
@@ -220,83 +224,83 @@ val UseCasesInject = module {
             applyGlossaryToTextUseCase = get()
         ) 
     }
-    single { 
+    factory { 
         ireader.domain.usecases.translate.TranslateParagraphUseCase(
             translationEnginesManager = get()
         ) 
     }
     
-    // Glossary use cases
-    single { ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase(get()) }
-    single { ireader.domain.usecases.glossary.GetGlossaryByTypeUseCase(get()) }
-    single { ireader.domain.usecases.glossary.SearchGlossaryUseCase(get()) }
-    single { ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase(get()) }
-    single { ireader.domain.usecases.glossary.UpdateGlossaryEntryUseCase(get()) }
-    single { ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase(get()) }
-    single { ireader.domain.usecases.glossary.ExportGlossaryUseCase(get()) }
-    single { ireader.domain.usecases.glossary.ImportGlossaryUseCase(get()) }
-    single { ireader.domain.usecases.glossary.GetGlossaryAsMapUseCase(get()) }
+    // Glossary use cases - factory
+    factory { ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.GetGlossaryByTypeUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.SearchGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.UpdateGlossaryEntryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.ExportGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.ImportGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.GetGlossaryAsMapUseCase(get()) }
     
-    // Batch operations use cases
-    single { ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get()) }
-    single { ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase(get()) }
+    // Batch operations use cases - factory
+    factory { ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase(get(), get()) }
+    factory { ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase(get()) }
     
-    // Smart categories use case
-    single { ireader.domain.usecases.local.book_usecases.GetSmartCategoryBooksUseCase(get()) }
+    // Smart categories use case - factory
+    factory { ireader.domain.usecases.local.book_usecases.GetSmartCategoryBooksUseCase(get()) }
     
-    // Statistics use cases
-    single { GetReadingStatisticsUseCase(get()) }
-    single { TrackReadingProgressUseCase(get()) }
-    single { GetLibraryInsightsUseCase(get()) }
-    single { GetReadingAnalyticsUseCase(get()) }
-    single { GetUpcomingReleasesUseCase(get()) }
-    single { GetRecommendationsUseCase(get()) }
-    single { ExportStatisticsUseCase(get()) }
-    single { ApplyAdvancedFiltersUseCase(get()) }
-    single { GlobalSearchUseCase(get()) }
-    single { ireader.domain.usecases.statistics.SyncStatisticsUseCase(get()) }
-    single { StatisticsUseCases(
+    // Statistics use cases - factory (not needed at startup)
+    factory { GetReadingStatisticsUseCase(get()) }
+    factory { TrackReadingProgressUseCase(get()) }
+    factory { GetLibraryInsightsUseCase(get()) }
+    factory { GetReadingAnalyticsUseCase(get()) }
+    factory { GetUpcomingReleasesUseCase(get()) }
+    factory { GetRecommendationsUseCase(get()) }
+    factory { ExportStatisticsUseCase(get()) }
+    factory { ApplyAdvancedFiltersUseCase(get()) }
+    factory { GlobalSearchUseCase(get()) }
+    factory { ireader.domain.usecases.statistics.SyncStatisticsUseCase(get()) }
+    factory { StatisticsUseCases(
         getReadingStatistics = get(),
         trackReadingProgress = get(),
         syncStatistics = get()
     ) }
     
-    // Chapter report use cases
-    single { ireader.domain.usecases.chapter.ReportBrokenChapterUseCase(get()) }
+    // Chapter report use cases - factory
+    factory { ireader.domain.usecases.chapter.ReportBrokenChapterUseCase(get()) }
     
-    // Chapter health and repair use cases
-    single { ireader.domain.services.ChapterHealthChecker() }
-    single { ireader.domain.usecases.chapter.AutoRepairChapterUseCase(
+    // Chapter health and repair use cases - factory
+    factory { ireader.domain.services.ChapterHealthChecker() }
+    factory { ireader.domain.usecases.chapter.AutoRepairChapterUseCase(
         chapterRepository = get(),
         chapterHealthRepository = get(),
         catalogStore = get(),
         chapterHealthChecker = get()
     ) }
     
-    // Source report use cases
-    single { ireader.domain.usecases.source.ReportBrokenSourceUseCase(get()) }
+    // Source report use cases - factory
+    factory { ireader.domain.usecases.source.ReportBrokenSourceUseCase(get()) }
     
-    // Source switching use cases
-    single { ireader.domain.usecases.source.CheckSourceAvailabilityUseCase(
+    // Source switching use cases - factory
+    factory { ireader.domain.usecases.source.CheckSourceAvailabilityUseCase(
         bookRepository = get(),
         chapterRepository = get(),
         sourceComparisonRepository = get(),
         catalogStore = get()
     ) }
-    single { ireader.domain.usecases.source.MigrateToSourceUseCase(
+    factory { ireader.domain.usecases.source.MigrateToSourceUseCase(
         bookRepository = get(),
         chapterRepository = get(),
         sourceComparisonRepository = get(),
         catalogStore = get()
     ) }
     
-    // Migration use cases
-    single<ireader.domain.usecases.migration.BookMatcher> { ireader.domain.usecases.migration.BookMatcher() }
-    single<ireader.domain.usecases.migration.ChapterMapper> { ireader.domain.usecases.migration.ChapterMapper() }
-    single<ireader.domain.usecases.migration.SearchMigrationTargetsUseCase> { 
+    // Migration use cases - factory
+    factory<ireader.domain.usecases.migration.BookMatcher> { ireader.domain.usecases.migration.BookMatcher() }
+    factory<ireader.domain.usecases.migration.ChapterMapper> { ireader.domain.usecases.migration.ChapterMapper() }
+    factory<ireader.domain.usecases.migration.SearchMigrationTargetsUseCase> { 
         ireader.domain.usecases.migration.SearchMigrationTargetsUseCase(get()) 
     }
-    single<ireader.domain.usecases.migration.MigrateBookUseCase> { 
+    factory<ireader.domain.usecases.migration.MigrateBookUseCase> { 
         ireader.domain.usecases.migration.MigrateBookUseCase(
             bookRepository = get(),
             chapterRepository = get(),
@@ -306,7 +310,7 @@ val UseCasesInject = module {
             bookMatcher = get()
         )
     }
-    single<MigrateNovelUseCase> { 
+    factory<MigrateNovelUseCase> { 
       MigrateNovelUseCase(
             bookRepository = get(),
             chapterRepository = get(),
@@ -318,18 +322,18 @@ val UseCasesInject = module {
         ) 
     }
     
-    // Font management use cases
-    single { ireader.domain.usecases.fonts.SystemFontsInitializer(get()) }
+    // Font management use cases - factory
+    factory { ireader.domain.usecases.fonts.SystemFontsInitializer(get()) }
     
-    // Donation use cases
-    single { ireader.domain.usecases.donation.DonationTriggerManager(get(), get()) }
-    single<ireader.domain.usecases.donation.OpenWalletUseCase> { ireader.domain.usecases.donation.OpenWalletUseCase(get()) }
-    single<ireader.domain.usecases.donation.CheckWalletInstalledUseCase> { ireader.domain.usecases.donation.CheckWalletInstalledUseCase(get()) }
-    single<ireader.domain.usecases.donation.CopyAddressUseCase> { ireader.domain.usecases.donation.CopyAddressUseCase(get()) }
-    single<ireader.domain.usecases.donation.GeneratePaymentUriUseCase> { ireader.domain.usecases.donation.GeneratePaymentUriUseCase(get()) }
-    single<ireader.domain.usecases.donation.GetFundingGoalsUseCase> { ireader.domain.usecases.donation.GetFundingGoalsUseCase(get()) }
-    single<ireader.domain.usecases.donation.UpdateFundingGoalUseCase> { ireader.domain.usecases.donation.UpdateFundingGoalUseCase(get()) }
-    single<ireader.domain.usecases.donation.DonationUseCases> { ireader.domain.usecases.donation.DonationUseCases(
+    // Donation use cases - factory
+    factory { ireader.domain.usecases.donation.DonationTriggerManager(get(), get()) }
+    factory<ireader.domain.usecases.donation.OpenWalletUseCase> { ireader.domain.usecases.donation.OpenWalletUseCase(get()) }
+    factory<ireader.domain.usecases.donation.CheckWalletInstalledUseCase> { ireader.domain.usecases.donation.CheckWalletInstalledUseCase(get()) }
+    factory<ireader.domain.usecases.donation.CopyAddressUseCase> { ireader.domain.usecases.donation.CopyAddressUseCase(get()) }
+    factory<ireader.domain.usecases.donation.GeneratePaymentUriUseCase> { ireader.domain.usecases.donation.GeneratePaymentUriUseCase(get()) }
+    factory<ireader.domain.usecases.donation.GetFundingGoalsUseCase> { ireader.domain.usecases.donation.GetFundingGoalsUseCase(get()) }
+    factory<ireader.domain.usecases.donation.UpdateFundingGoalUseCase> { ireader.domain.usecases.donation.UpdateFundingGoalUseCase(get()) }
+    factory<ireader.domain.usecases.donation.DonationUseCases> { ireader.domain.usecases.donation.DonationUseCases(
         donationTriggerManager = get(),
         openWallet = get(),
         checkWalletInstalled = get(),
@@ -337,10 +341,10 @@ val UseCasesInject = module {
         generatePaymentUri = get()
     ) }
     
-    // ePub export use cases
-    single { ireader.domain.usecases.epub.ExportNovelAsEpubUseCase(get()) }
-    single { ireader.domain.epub.EpubBuilder(httpClient = get()) }
-    single { ireader.domain.usecases.epub.ExportBookAsEpubUseCase(
+    // ePub export use cases - factory
+    factory { ireader.domain.usecases.epub.ExportNovelAsEpubUseCase(get()) }
+    factory { ireader.domain.epub.EpubBuilder(httpClient = get()) }
+    factory { ireader.domain.usecases.epub.ExportBookAsEpubUseCase(
         findBookById = get<ireader.domain.usecases.local.LocalGetBookUseCases>().findBookById,
         chapterRepository = get(),
         epubBuilder = get()

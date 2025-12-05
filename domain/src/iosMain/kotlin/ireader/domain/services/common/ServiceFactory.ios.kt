@@ -50,6 +50,10 @@ actual object ServiceFactory {
     actual fun createCacheService(): CacheService {
         return IosCacheService()
     }
+    
+    actual fun createTranslationService(): TranslationService {
+        return IosTranslationService()
+    }
 }
 
 // Stub implementations for iOS
@@ -324,6 +328,39 @@ private class IosCacheService : CacheService {
     override suspend fun setCacheSizeLimit(bytes: Long): ServiceResult<Unit> = ServiceResult.Success(Unit)
     override suspend fun getAllKeys(): ServiceResult<List<String>> = ServiceResult.Success(emptyList())
     override suspend fun getKeysMatching(pattern: String): ServiceResult<List<String>> = ServiceResult.Success(emptyList())
+    override suspend fun initialize() {}
+    override suspend fun start() { _state.value = ServiceState.RUNNING }
+    override suspend fun stop() { _state.value = ServiceState.STOPPED }
+    override fun isRunning(): Boolean = _state.value == ServiceState.RUNNING
+    override suspend fun cleanup() {}
+}
+
+
+private class IosTranslationService : TranslationService {
+    private val _state = MutableStateFlow(ServiceState.IDLE)
+    override val state: StateFlow<ServiceState> = _state
+    private val _translationProgress = MutableStateFlow<Map<Long, TranslationProgress>>(emptyMap())
+    override val translationProgress: StateFlow<Map<Long, TranslationProgress>> = _translationProgress
+    private val _currentBookId = MutableStateFlow<Long?>(null)
+    override val currentBookId: StateFlow<Long?> = _currentBookId
+    
+    override suspend fun queueChapters(
+        bookId: Long,
+        chapterIds: List<Long>,
+        sourceLanguage: String,
+        targetLanguage: String,
+        engineId: Long,
+        bypassWarning: Boolean
+    ): ServiceResult<TranslationQueueResult> = ServiceResult.Success(TranslationQueueResult.Success(0))
+    
+    override suspend fun pause() { _state.value = ServiceState.PAUSED }
+    override suspend fun resume() { _state.value = ServiceState.RUNNING }
+    override suspend fun cancelTranslation(chapterId: Long): ServiceResult<Unit> = ServiceResult.Success(Unit)
+    override suspend fun cancelAll(): ServiceResult<Unit> = ServiceResult.Success(Unit)
+    override suspend fun retryTranslation(chapterId: Long): ServiceResult<Unit> = ServiceResult.Success(Unit)
+    override fun getTranslationStatus(chapterId: Long): TranslationStatus? = null
+    override fun requiresRateLimiting(engineId: Long): Boolean = engineId in setOf(2L, 3L, 6L, 7L, 8L)
+    override fun isOfflineEngine(engineId: Long): Boolean = engineId in setOf(0L, 4L, 5L)
     override suspend fun initialize() {}
     override suspend fun start() { _state.value = ServiceState.RUNNING }
     override suspend fun stop() { _state.value = ServiceState.STOPPED }

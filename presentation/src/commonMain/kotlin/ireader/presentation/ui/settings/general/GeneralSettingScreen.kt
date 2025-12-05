@@ -26,9 +26,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -247,6 +249,38 @@ fun GeneralSettingScreen(
                         subtitle = localizeHelper.localize(Res.string.automatically_download_newly_detected_chapters),
                         icon = Icons.Filled.Download
                 ),
+                
+                Components.Space,
+                
+                // Mass Translation Section
+                Components.Header(
+                        text = "Mass Translation",
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.Translate
+                ),
+                Components.Dynamic {
+                    vm.bypassTranslationWarning?.let { pref ->
+                        ireader.presentation.ui.component.components.SwitchPreference(
+                            preference = pref,
+                            title = "Bypass Translation Warning",
+                            subtitle = "Skip rate limit warnings when mass translating chapters. May exhaust API credits or cause IP blocks.",
+                            icon = Icons.Filled.Warning
+                        )
+                    }
+                },
+                Components.Dynamic {
+                    vm.translationRateLimitDelay?.let { pref ->
+                        ireader.presentation.ui.component.components.SliderPreference(
+                            preferenceAsLong = pref,
+                            title = "Translation Rate Limit Delay",
+                            subtitle = "Delay between translation requests to prevent rate limiting",
+                            icon = Icons.Filled.Timer,
+                            valueRange = 1000f..10000f,
+                            steps = 17,
+                            trailingFormatter = { value -> "${(value / 1000).toInt()}s" }
+                        )
+                    }
+                },
                 
                 Components.Space,
                 
@@ -520,6 +554,7 @@ class GeneralSettingScreenViewModel(
         private val uiPreferences: UiPreferences,
         private val downloadPreferences: ireader.domain.preferences.prefs.DownloadPreferences,
         private val libraryPreferences: ireader.domain.preferences.prefs.LibraryPreferences,
+        private val translationPreferences: ireader.domain.preferences.prefs.TranslationPreferences? = null,
         val localeHelper: LocaleHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
 
@@ -541,6 +576,10 @@ class GeneralSettingScreenViewModel(
     
     // Download preferences
     val downloadDelayMs = downloadPreferences.downloadDelayMs().asStateIn(scope)
+    
+    // Translation preferences
+    val bypassTranslationWarning = translationPreferences?.bypassTranslationWarning()?.asStateIn(scope)
+    val translationRateLimitDelay = translationPreferences?.translationRateLimitDelayMs()?.asStateIn(scope)
     
     // New General Settings Enhancements
     // Library preferences

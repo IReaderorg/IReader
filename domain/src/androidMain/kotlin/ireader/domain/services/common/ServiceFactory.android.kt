@@ -49,4 +49,8 @@ actual object ServiceFactory : KoinComponent {
     actual fun createCacheService(): CacheService {
         return AndroidCacheService(context)
     }
+    
+    actual fun createTranslationService(): TranslationService {
+        return AndroidTranslationService(context)
+    }
 }

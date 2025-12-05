@@ -44,4 +44,8 @@ actual object ServiceFactory {
     actual fun createCacheService(): CacheService {
         return DesktopCacheService()
     }
+    
+    actual fun createTranslationService(): TranslationService {
+        return DesktopTranslationService()
+    }
 }

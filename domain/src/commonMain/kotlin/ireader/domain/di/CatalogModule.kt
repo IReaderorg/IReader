@@ -16,10 +16,11 @@ import org.koin.dsl.module
 
 val CatalogModule = module {
 
-
-
+    // Preferences - lightweight, can be singleton
     single<CatalogPreferences> { CatalogPreferences(get()) }
 
+    // CatalogStore - now lazy-initialized internally, safe as singleton
+    // The actual catalog loading is deferred until first access
     single<CatalogStore> { CatalogStore(get(),get(),get(),get(),get()) }
 
     single {
@@ -28,22 +29,21 @@ val CatalogModule = module {
         )
     }
 
-
+    // Use cases - factory for on-demand creation
     factory <GetDefaultRepo> {
         GetDefaultRepo(
                 get(),
                 get()
         )
     }
-    single<GetCatalogsByType> { GetCatalogsByType(get(),get()) }
-    single<GetRemoteCatalogs> { GetRemoteCatalogs(get()) }
-    single<GetLocalCatalogs> { GetLocalCatalogs(get(),get()) }
-    single<GetLocalCatalog> { GetLocalCatalog(get()) }
-    single<UpdateCatalog> { UpdateCatalog(get(),get()) }
-
-    single<TogglePinnedCatalog> { TogglePinnedCatalog(get()) }
+    factory<GetCatalogsByType> { GetCatalogsByType(get(),get()) }
+    factory<GetRemoteCatalogs> { GetRemoteCatalogs(get()) }
+    factory<GetLocalCatalogs> { GetLocalCatalogs(get(),get()) }
+    factory<GetLocalCatalog> { GetLocalCatalog(get()) }
+    factory<UpdateCatalog> { UpdateCatalog(get(),get()) }
+    factory<TogglePinnedCatalog> { TogglePinnedCatalog(get()) }
     
-    single<LoadJSPluginsInBackgroundUseCase> {
+    factory<LoadJSPluginsInBackgroundUseCase> {
         LoadJSPluginsInBackgroundUseCase(get(), get())
     }
 

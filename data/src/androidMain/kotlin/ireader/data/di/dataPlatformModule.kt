@@ -31,21 +31,26 @@ import ireader.domain.monitoring.MemoryTracker
 import org.koin.dsl.module
 
 actual val dataPlatformModule = module {
-    single<AndroidDatabaseHandler> { 
-        val handler = AndroidDatabaseHandler(get(), get(), preferencesHelper = get())
-        handler.initialize()
-        handler
+    // SqlDriver - LAZY: Database driver creation is expensive
+    single<SqlDriver>(createdAtStart = false) { 
+        DatabaseDriverFactory(get()).create() 
     }
-    single<Transactions> { AndroidTransaction(get()) }
-    single<DatabaseHandler> { get<AndroidDatabaseHandler>() }
     
-    // Database optimizations - provides caching, batch operations, and performance monitoring
-    single<DatabaseOptimizations> { DatabaseOptimizations(get()) }
+    // Database handler - LAZY: depends on SqlDriver
+    single<AndroidDatabaseHandler>(createdAtStart = false) { 
+        AndroidDatabaseHandler(get(), get(), preferencesHelper = get())
+    }
+    single<Transactions>(createdAtStart = false) { AndroidTransaction(get()) }
+    single<DatabaseHandler>(createdAtStart = false) { get<AndroidDatabaseHandler>() }
     
-    // Database preloader - warms up cache during app startup
-    single<DatabasePreloader> { DatabasePreloader(get(), get()) }
-    single<SqlDriver> { DatabaseDriverFactory(get()).create() }
-    single<CatalogLoader> {
+    // Database optimizations - LAZY: not needed at startup
+    single<DatabaseOptimizations>(createdAtStart = false) { DatabaseOptimizations(get()) }
+    
+    // Database preloader - LAZY: runs in background
+    single<DatabasePreloader>(createdAtStart = false) { DatabasePreloader(get(), get()) }
+    
+    // CatalogLoader - LAZY: catalog loading is deferred
+    single<CatalogLoader>(createdAtStart = false) {
         ireader.data.catalog.impl.AndroidCatalogLoader(
             get(),
             get(),
@@ -55,14 +60,14 @@ actual val dataPlatformModule = module {
             get()
         )
     }
-    single<CatalogRemoteApi> { CatalogGithubApi(get(), get(), get()) }
-    single<UninstallCatalogs> {
+    single<CatalogRemoteApi>(createdAtStart = false) { CatalogGithubApi(get(), get(), get()) }
+    single<UninstallCatalogs>(createdAtStart = false) {
         ireader.data.catalog.impl.interactor.UninstallCatalogImpl(
             get(),
             get()
         )
     }
-    single<AndroidCatalogInstaller> {
+    single<AndroidCatalogInstaller>(createdAtStart = false) {
         AndroidCatalogInstaller(
             get(),
             get(),
@@ -73,11 +78,11 @@ actual val dataPlatformModule = module {
             get()
         )
     }
-    single<PackageInstaller> { PackageInstaller(get(), get()) }
-    single<WebViewCookieJar> { WebViewCookieJar(get()) }
-    single<InstallCatalog> { InstallCatalogImpl(get(), get(), get()) }
-    single<CatalogInstallationChanges> { get<AndroidCatalogInstallationChanges>() }
-    single<CatalogInstaller> {
+    single<PackageInstaller>(createdAtStart = false) { PackageInstaller(get(), get()) }
+    single<WebViewCookieJar>(createdAtStart = false) { WebViewCookieJar(get()) }
+    single<InstallCatalog>(createdAtStart = false) { InstallCatalogImpl(get(), get(), get()) }
+    single<CatalogInstallationChanges>(createdAtStart = false) { get<AndroidCatalogInstallationChanges>() }
+    single<CatalogInstaller>(createdAtStart = false) {
         AndroidCatalogInstaller(
             get(),
             get(),
@@ -88,7 +93,8 @@ actual val dataPlatformModule = module {
             get()
         )
     }
-    single<HttpClients> {
+    // HttpClients - LAZY: OkHttp client creation is expensive
+    single<HttpClients>(createdAtStart = false) {
         HttpClients(
             get(),
             BrowserEngine(get(), get()),
@@ -98,7 +104,7 @@ actual val dataPlatformModule = module {
             getOrNull() // WebViewManager is optional, may not be available yet
         )
     }
-    single<BiometricAuthenticator> { BiometricAuthenticatorImpl(get()) }
-    single<MemoryTracker> { AndroidMemoryTracker(get()) }
-    single<NotificationRepository> { NotificationRepositoryImpl(get()) }
+    single<BiometricAuthenticator>(createdAtStart = false) { BiometricAuthenticatorImpl(get()) }
+    single<MemoryTracker>(createdAtStart = false) { AndroidMemoryTracker(get()) }
+    single<NotificationRepository>(createdAtStart = false) { NotificationRepositoryImpl(get()) }
 }

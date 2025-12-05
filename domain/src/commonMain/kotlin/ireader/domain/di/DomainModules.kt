@@ -32,9 +32,8 @@ import org.koin.dsl.module
 
 val DomainServices = module {
     
-    // HTTP Client for general use (image downloads, etc.)
-    // Note: Platform-specific engine is configured via expect/actual or default engine
-    single {
+    // HTTP Client - LAZY: not needed at startup
+    single(createdAtStart = false) {
         HttpClient {
             install(ContentNegotiation) {
                 json(Json {
@@ -45,11 +44,35 @@ val DomainServices = module {
         }
     }
 
+    // Download state - lightweight, can be singleton
     single<DownloadStateHolder> { DownloadStateHolder() }
 
+    // Preferences - lightweight
     single { ireader.domain.preferences.prefs.PlayerPreferences(get()) }
     single { ireader.domain.preferences.prefs.DownloadPreferences(get()) }
-    single { GetAllTranslationsForChapterUseCase(get()) }
+    single { ireader.domain.preferences.prefs.TranslationPreferences(get()) }
+    
+    // Translation use cases - FACTORY: not needed at startup
+    factory { GetAllTranslationsForChapterUseCase(get()) }
+    
+    // Translation Service Implementation - FACTORY: heavy dependencies, not needed at startup
+    single(createdAtStart = false) { 
+        ireader.domain.services.translationService.TranslationStateHolder()
+    }
+    factory {
+        ireader.domain.services.translationService.TranslationServiceImpl(
+            chapterRepository = get(),
+            bookRepository = get(),
+            translationEnginesManager = get(),
+            saveTranslatedChapter = get(),
+            getTranslatedChapter = get(),
+            translationPreferences = get(),
+            readerPreferences = get(),
+            remoteUseCases = get(),
+            getLocalCatalog = get(),
+            stateHolder = get()
+        )
+    }
 
 
 

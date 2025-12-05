@@ -6,6 +6,8 @@ import ireader.domain.services.ChapterCacheServiceImpl
 import ireader.domain.services.SourceHealthChecker
 import ireader.domain.services.SourceHealthCheckerImpl
 import ireader.domain.services.platform.*
+import ireader.domain.services.translationService.TranslationServiceImpl
+import ireader.domain.services.translationService.TranslationStateHolder
 import org.koin.dsl.module
 
 /**
@@ -55,6 +57,28 @@ val ServiceModule = module {
     
     single<SyncService> { 
         ServiceFactory.createSyncService()
+    }
+    
+    // Translation Service - shared state holder and implementation
+    single<TranslationStateHolder> { TranslationStateHolder() }
+    
+    single<TranslationServiceImpl> {
+        TranslationServiceImpl(
+            chapterRepository = get(),
+            bookRepository = get(),
+            translationEnginesManager = get(),
+            saveTranslatedChapter = get(),
+            getTranslatedChapter = get(),
+            translationPreferences = get(),
+            readerPreferences = get(),
+            remoteUseCases = get(),
+            getLocalCatalog = get(),
+            stateHolder = get()
+        )
+    }
+    
+    single<TranslationService> { 
+        ServiceFactory.createTranslationService()
     }
     
     // NEW: Chapter Cache Service

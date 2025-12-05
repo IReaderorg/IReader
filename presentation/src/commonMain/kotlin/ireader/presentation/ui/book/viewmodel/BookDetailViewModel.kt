@@ -22,6 +22,11 @@ import ireader.domain.models.entities.isObsolete
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.common.DownloadService
 import ireader.domain.services.common.ServiceResult
+import ireader.domain.services.common.TranslationService
+import ireader.domain.services.common.TranslationQueueResult
+import ireader.domain.services.common.TranslationProgress
+import ireader.domain.services.common.TranslationStatus
+import ireader.domain.services.common.ServiceState
 import ireader.domain.services.platform.ClipboardService
 import ireader.domain.services.platform.ShareService
 import ireader.domain.usecases.book.BookUseCases
@@ -104,6 +109,7 @@ class BookDetailViewModel(
     private val shareService: ShareService,
     private val platformHelper: PlatformHelper,
     private val bookPrefetchService: BookPrefetchService? = null,
+    private val translationService: TranslationService? = null,
     val insertUseCases: LocalInsertUseCases = localInsertUseCases,
 ) : BaseViewModel() {
 
@@ -121,6 +127,17 @@ class BookDetailViewModel(
     private var getBookDetailJob: Job? = null
     private var getChapterDetailJob: Job? = null
     private var subscriptionJob: Job? = null
+    
+    // ==================== Mass Translation State ====================
+    var showTranslationOptionsDialog by mutableStateOf(false)
+    var showTranslationWarningDialog by mutableStateOf(false)
+    var showTranslationProgressDialog by mutableStateOf(false)
+    var translationWarningChapterCount by mutableStateOf(0)
+    var translationWarningEstimatedTime by mutableStateOf(0L)
+    var translationWarningEngineName by mutableStateOf("")
+    var selectedTranslationEngineId by mutableStateOf(-1L)
+    var translationSourceLanguage by mutableStateOf("en")
+    var translationTargetLanguage by mutableStateOf("en")
     
     // Preferences - exposed for UI compatibility
     var filters = mutableStateOf<List<ChaptersFilters>>(ChaptersFilters.getDefault(true))
@@ -844,6 +861,170 @@ class BookDetailViewModel(
             }
         }
     }
+
+    // ==================== Mass Translation ====================
+    
+    /**
+     * Shows the mass translation options dialog when user long-presses translate icon
+     */
+    fun showMassTranslationDialog() {
+        val selectedIds = selection.toList()
+        if (selectedIds.isEmpty()) {
+            emitEvent(BookDetailEvent.ShowSnackbar("No chapters selected"))
+            return
+        }
+        
+        if (translationService == null) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Translation service not available"))
+            return
+        }
+        
+        // Load default translation settings from preferences
+        selectedTranslationEngineId = readerPreferences.translatorEngine().get()
+        translationSourceLanguage = readerPreferences.translatorOriginLanguage().get()
+        translationTargetLanguage = readerPreferences.translatorTargetLanguage().get()
+        
+        showTranslationOptionsDialog = true
+    }
+    
+    /**
+     * Quick translate selected chapters with default settings (single tap)
+     */
+    fun quickTranslateSelectedChapters() {
+        val selectedIds = selection.toList()
+        val currentBook = book ?: return
+        
+        if (selectedIds.isEmpty()) {
+            emitEvent(BookDetailEvent.ShowSnackbar("No chapters selected"))
+            return
+        }
+        
+        if (translationService == null) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Translation service not available"))
+            return
+        }
+        
+        // Use saved preferences for quick translation
+        val engineId = readerPreferences.translatorEngine().get()
+        val sourceLang = readerPreferences.translatorOriginLanguage().get()
+        val targetLang = readerPreferences.translatorTargetLanguage().get()
+        
+        if (engineId < 0) {
+            // No engine configured, show options dialog instead
+            showMassTranslationDialog()
+            return
+        }
+        
+        startMassTranslation(
+            engineId = engineId,
+            sourceLang = sourceLang,
+            targetLang = targetLang,
+            bypassWarning = false
+        )
+    }
+    
+    /**
+     * Start mass translation with specified options
+     */
+    fun startMassTranslation(
+        engineId: Long = selectedTranslationEngineId,
+        sourceLang: String = translationSourceLanguage,
+        targetLang: String = translationTargetLanguage,
+        bypassWarning: Boolean = false
+    ) {
+        val selectedIds = selection.toList()
+        val currentBook = book ?: return
+        
+        if (translationService == null) {
+            emitEvent(BookDetailEvent.ShowSnackbar("Translation service not available"))
+            return
+        }
+        
+        showTranslationOptionsDialog = false
+        
+        // Save preferences
+        readerPreferences.translatorEngine().set(engineId)
+        readerPreferences.translatorOriginLanguage().set(sourceLang)
+        readerPreferences.translatorTargetLanguage().set(targetLang)
+        
+        scope.launch {
+            val result = translationService.queueChapters(
+                bookId = currentBook.id,
+                chapterIds = selectedIds,
+                sourceLanguage = sourceLang,
+                targetLanguage = targetLang,
+                engineId = engineId,
+                bypassWarning = bypassWarning
+            )
+            
+            when (result) {
+                is ServiceResult.Success -> {
+                    when (val queueResult = result.data) {
+                        is TranslationQueueResult.Success -> {
+                            showTranslationProgressDialog = true
+                            selection.clear()
+                            emitEvent(BookDetailEvent.ShowSnackbar("${queueResult.queuedCount} chapters queued for translation"))
+                        }
+                        is TranslationQueueResult.RateLimitWarning -> {
+                            // Show warning dialog
+                            translationWarningChapterCount = queueResult.chapterCount
+                            translationWarningEstimatedTime = queueResult.estimatedTime / 60000 // Convert to minutes
+                            showTranslationWarningDialog = true
+                        }
+                        is TranslationQueueResult.PreviousTranslationCancelled -> {
+                            emitEvent(BookDetailEvent.ShowSnackbar("Previous translation cancelled. Please try again."))
+                        }
+                    }
+                }
+                is ServiceResult.Error -> {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Translation failed: ${result.message ?: "Unknown error"}"))
+                }
+                else -> {}
+            }
+        }
+    }
+    
+    /**
+     * Confirm translation after warning dialog
+     */
+    fun confirmMassTranslation() {
+        showTranslationWarningDialog = false
+        startMassTranslation(bypassWarning = true)
+    }
+    
+    /**
+     * Pause ongoing translation
+     */
+    fun pauseTranslation() {
+        scope.launch {
+            translationService?.pause()
+        }
+    }
+    
+    /**
+     * Resume paused translation
+     */
+    fun resumeTranslation() {
+        scope.launch {
+            translationService?.resume()
+        }
+    }
+    
+    /**
+     * Cancel all ongoing translations
+     */
+    fun cancelTranslation() {
+        scope.launch {
+            translationService?.cancelAll()
+            showTranslationProgressDialog = false
+            emitEvent(BookDetailEvent.ShowSnackbar("Translation cancelled"))
+        }
+    }
+    
+    /**
+     * Get translation service for UI binding
+     */
+    fun getTranslationService(): TranslationService? = translationService
 
     // ==================== Source Switching ====================
     

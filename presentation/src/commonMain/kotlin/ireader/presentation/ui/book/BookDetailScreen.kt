@@ -384,6 +384,14 @@ fun BookDetailScreen(
                     onDownload = {},
                     onBookmark = {},
                     onMarkAsRead = {},
+                    onTranslate = { 
+                        // Quick translate with default settings
+                        vm.quickTranslateSelectedChapters()
+                    },
+                    onTranslateLongPress = {
+                        // Open translation options dialog
+                        vm.showMassTranslationDialog()
+                    },
                     visible = vm.hasSelection,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )

@@ -14,4 +14,5 @@ expect object ServiceFactory {
     fun createTTSService(): TTSService
     fun createSyncService(): SyncService
     fun createCacheService(): CacheService
+    fun createTranslationService(): TranslationService
 }

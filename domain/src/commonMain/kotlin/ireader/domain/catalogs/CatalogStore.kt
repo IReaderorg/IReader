@@ -48,8 +48,8 @@ import kotlinx.coroutines.FlowPreview
 class CatalogStore(
     private val loader: CatalogLoader,
     catalogPreferences: CatalogPreferences,
-    catalogRemoteRepository: CatalogRemoteRepository,
-    installationChanges: CatalogInstallationChanges,
+    private val catalogRemoteRepository: CatalogRemoteRepository,
+    private val installationChanges: CatalogInstallationChanges,
     private val localCatalogSource: LocalCatalogSource,
 ) {
     companion object {
@@ -120,9 +120,26 @@ class CatalogStore(
 
     private val lock = Mutex()
 
+    // Lazy initialization flag - prevents blocking startup (using volatile + synchronized for thread safety)
+    @kotlin.concurrent.Volatile
+    private var initializationStarted = false
+    private val initLock = Any()
+    
     init {
-        // Start batch update processor
+        // Only start batch update processor - everything else is deferred
         startBatchUpdateProcessor()
+    }
+    
+    /**
+     * Trigger lazy initialization - call this when catalogs are first needed.
+     * This is safe to call multiple times - only the first call will initialize.
+     */
+    fun ensureInitialized() {
+        if (initializationStarted) return
+        synchronized(initLock) {
+            if (initializationStarted) return
+            initializationStarted = true
+        }
         
         // Load catalogs with optimized initialization
         scope.launch {
@@ -146,7 +163,7 @@ class CatalogStore(
                 }
         }
         
-        // Cache pinned IDs and listen for changes
+        // Cache pinned IDs
         scope.launch {
             cachedPinnedIds = pinnedCatalogsPreference.get()
         }
@@ -283,6 +300,8 @@ class CatalogStore(
         if (sourceId == -200L) {
             return CatalogBundled(source = localCatalogSource)
         }
+        // Ensure initialized on first access
+        ensureInitialized()
         // Use efficient map lookup instead of list search
         return catalogsBySourceMap[sourceId]
     }
@@ -291,10 +310,12 @@ class CatalogStore(
      * Get catalog by package name - O(1) lookup.
      */
     fun getByPkgName(pkgName: String): CatalogLocal? {
+        ensureInitialized()
         return catalogsByPkgName[pkgName]
     }
 
     fun getCatalogsFlow(): Flow<List<CatalogLocal>> {
+        ensureInitialized()
         return catalogsFlow
     }
     

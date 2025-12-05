@@ -3,12 +3,17 @@ package ireader.presentation.ui.book.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -24,12 +29,22 @@ import ireader.presentation.ui.core.theme.AppColors
 import ireader.presentation.core.toComposeColor
 import kotlinx.coroutines.launch
 
+/**
+ * Bottom bar shown when chapters are selected in the detail screen.
+ * Contains actions: Download, Translate, Bookmark, Mark as Read, Mark Previous, Delete
+ * 
+ * @param onTranslate Called on single tap - starts quick translation with default settings
+ * @param onTranslateLongPress Called on long press - opens translation options dialog
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChapterDetailBottomBar(
     vm: BookDetailViewModel,
     onDownload: () -> Unit,
     onBookmark: () -> Unit,
     onMarkAsRead: () -> Unit,
+    onTranslate: () -> Unit = {},
+    onTranslateLongPress: () -> Unit = {},
     visible: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -50,7 +65,7 @@ fun ChapterDetailBottomBar(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppIconButton(
@@ -61,6 +76,22 @@ fun ChapterDetailBottomBar(
                         vm.selection.clear()
                     }
                 )
+                
+                // Translate button with long press support
+                IconButton(
+                    onClick = onTranslate,
+                    modifier = Modifier.combinedClickable(
+                        onClick = onTranslate,
+                        onLongClick = onTranslateLongPress
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Translate,
+                        contentDescription = localize(Res.string.translate_action),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                
                 AppIconButton(
                     imageVector = Icons.Default.BookmarkBorder,
                     contentDescription = localize(Res.string.bookmark),
