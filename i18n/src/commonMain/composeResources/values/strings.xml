@@ -2187,4 +2187,28 @@
     <string name="enter_author_name">Enter the author name...</string>
     <string name="enter_chapter_name">Enter the chapter name...</string>
     <string name="shared_via_ireader">Shared via IReader</string>
+    
+    <!-- Modern Notification UI -->
+    <string name="notification_dismiss">Dismiss</string>
+    <string name="notification_success">Success</string>
+    <string name="notification_error">Error</string>
+    <string name="notification_warning">Warning</string>
+    <string name="notification_info">Info</string>
+    <string name="notification_loading">Loading</string>
+    <string name="notification_retry">Retry</string>
+    <string name="notification_undo">Undo</string>
+    <string name="notification_view">View</string>
+    <string name="notification_download_complete">Download Complete</string>
+    <string name="notification_download_failed">Download Failed</string>
+    <string name="notification_sync_complete">Sync Complete</string>
+    <string name="notification_sync_failed">Sync Failed</string>
+    <string name="notification_update_available">Update Available</string>
+    <string name="notification_chapter_downloaded">Chapter Downloaded</string>
+    <string name="notification_book_added">Book Added to Library</string>
+    <string name="notification_book_removed">Book Removed from Library</string>
+    <string name="notification_settings_saved">Settings Saved</string>
+    <string name="notification_backup_complete">Backup Complete</string>
+    <string name="notification_restore_complete">Restore Complete</string>
+    <string name="notification_network_error">Network Error</string>
+    <string name="notification_connection_restored">Connection Restored</string>
 </resources>

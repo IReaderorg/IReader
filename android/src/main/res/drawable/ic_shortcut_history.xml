@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Background circle -->
+    <path
+        android:fillColor="@color/shortcut_background"
+        android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"/>
+    <!-- History icon (scaled and centered) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25,15c-4.97,0 -9,4.03 -9,9H13l3.89,3.89 0.07,0.14L21,24H18c0,-3.87 3.13,-7 7,-7s7,3.13 7,7 -3.13,7 -7,7c-1.93,0 -3.68,-0.79 -4.94,-2.06l-1.42,1.42C20.27,31.99 22.51,33 25,33c4.97,0 9,-4.03 9,-9s-4.03,-9 -9,-9zM24,20v5l4.28,2.54 0.72,-1.21 -3.5,-2.08V20H24z"/>
+</vector>

@@ -13,9 +13,12 @@ import kotlinx.serialization.json.*
 /**
  * Supabase implementation using BackendService for pure HTTP requests.
  * Avoids Kotlin reflection issues on Android.
+ * 
+ * Note: supabaseClient is kept for potential future use but all queries
+ * go through backendService which routes to the correct Supabase project.
  */
 class SupabaseCharacterArtMetadata(
-    private val supabaseClient: SupabaseClient,
+    @Suppress("unused") private val supabaseClient: SupabaseClient,
     private val backendService: BackendService,
     private val getCurrentUserId: suspend () -> String?
 ) : MetadataStorageProvider {

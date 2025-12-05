@@ -9,7 +9,7 @@ import kotlinx.serialization.json.JsonElement
  * This service routes requests to the appropriate Supabase client based on the table name:
  * - users → authClient (Project 1)
  * - reading_progress → readingClient (Project 2)
- * - synced_books → libraryClient (Project 3)
+ * - synced_books, character_art, character_art_likes, character_art_reports → libraryClient (Project 3)
  * - book_reviews → bookReviewsClient (Project 4)
  * - chapter_reviews → chapterReviewsClient (Project 5)
  * - badges, user_badges, payment_proofs, nft_wallets → badgesClient (Project 6)
@@ -39,8 +39,9 @@ class MultiProjectBackendService(
             // Project 2 - Reading
             "reading_progress" -> readingService
             
-            // Project 3 - Library
-            "synced_books" -> libraryService
+            // Project 3 - Library (includes character art gallery)
+            "synced_books",
+            "character_art", "character_art_likes", "character_art_reports" -> libraryService
             
             // Project 4 - Book Reviews
             "book_reviews" -> bookReviewsService
@@ -70,6 +71,9 @@ class MultiProjectBackendService(
             
             // Leaderboard functions → Project 7
             function.contains("leaderboard", ignoreCase = true) -> analyticsService
+            
+            // Character art functions → Project 3 (Library)
+            function.contains("art_likes", ignoreCase = true) -> libraryService
             
             // User functions → Project 1
             function.contains("user", ignoreCase = true) -> authService

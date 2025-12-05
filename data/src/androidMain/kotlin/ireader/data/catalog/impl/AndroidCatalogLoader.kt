@@ -49,7 +49,7 @@ class AndroidCatalogLoader(
     val simpleStorage: GetSimpleStorage,
     val localizeHelper: LocalizeHelper,
     private val preferenceStore: PreferenceStoreFactory,
-    private val communitySource: ireader.domain.community.CommunitySource? = null
+    private val communitySource: ireader.domain.community.CommunitySource
 ) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
 
     private val pkgManager = context.packageManager

@@ -45,5 +45,8 @@
     <color name="iconBackground">#FFE500</color>
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
+    
+    <!-- App Shortcuts background color -->
+    <color name="shortcut_background">#6750A4</color>
 
 </resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Background circle -->
+    <path
+        android:fillColor="@color/shortcut_background"
+        android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0"/>
+    <!-- Updates/Clock icon (scaled and centered) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,14C18.48,14 14,18.48 14,24s4.48,10 10,10 10,-4.48 10,-10S29.52,14 24,14zM28.03,28.03l-4.03,-2.42V19h1.5v5.92l3.53,2.11 -1,1z"/>
+</vector>

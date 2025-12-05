@@ -15,6 +15,11 @@ object SHORTCUTS {
     const val SHORTCUT_DOWNLOAD = "ireader.SHORTCUT_DOWNLOAD"
     const val SHORTCUT_READER = "ireader.SHORTCUT_READER"
     const val SHORTCUT_DETAIL = "ireader.SHORTCUT_DETAIL"
+    // App Shortcuts Menu actions
+    const val SHORTCUT_SEARCH = "ireader.SHORTCUT_SEARCH"
+    const val SHORTCUT_LIBRARY = "ireader.SHORTCUT_LIBRARY"
+    const val SHORTCUT_UPDATES = "ireader.SHORTCUT_UPDATES"
+    const val SHORTCUT_HISTORY = "ireader.SHORTCUT_HISTORY"
 }
 
 

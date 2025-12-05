@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- Search shortcut - Global search for books -->
+    <shortcut
+        android:shortcutId="shortcut_search"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_search"
+        android:shortcutShortLabel="@string/shortcut_search_short"
+        android:shortcutLongLabel="@string/shortcut_search_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="org.ireader.app.MainActivity"
+            android:data="ireader://shortcut/search" />
+    </shortcut>
+    
+    <!-- Library shortcut - Open library -->
+    <shortcut
+        android:shortcutId="shortcut_library"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_library"
+        android:shortcutShortLabel="@string/shortcut_library_short"
+        android:shortcutLongLabel="@string/shortcut_library_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="org.ireader.app.MainActivity"
+            android:data="ireader://shortcut/library" />
+    </shortcut>
+    
+    <!-- Updates shortcut - Check for updates -->
+    <shortcut
+        android:shortcutId="shortcut_updates"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_updates"
+        android:shortcutShortLabel="@string/shortcut_updates_short"
+        android:shortcutLongLabel="@string/shortcut_updates_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="org.ireader.app.MainActivity"
+            android:data="ireader://shortcut/updates" />
+    </shortcut>
+    
+    <!-- History shortcut - View reading history -->
+    <shortcut
+        android:shortcutId="shortcut_history"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_history"
+        android:shortcutShortLabel="@string/shortcut_history_short"
+        android:shortcutLongLabel="@string/shortcut_history_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="org.ireader.app.MainActivity"
+            android:data="ireader://shortcut/history" />
+    </shortcut>
+    
+    <!-- Downloads shortcut - View downloads -->
+    <shortcut
+        android:shortcutId="shortcut_downloads"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_downloads"
+        android:shortcutShortLabel="@string/shortcut_downloads_short"
+        android:shortcutLongLabel="@string/shortcut_downloads_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="org.ireader.app.MainActivity"
+            android:data="ireader://shortcut/downloads" />
+    </shortcut>
+    
+</shortcuts>

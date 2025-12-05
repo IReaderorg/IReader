@@ -249,6 +249,12 @@ fun CommonNavHost(
             }
         }
         
+        // Global search - base route without query
+        composable(route = "globalSearch") {
+            GlobalSearchScreenSpec(null).Content()
+        }
+        
+        // Global search with query parameter
         composable(
             route = "globalSearch?query={query}",
             arguments = listOf(
@@ -260,7 +266,7 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val query = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("query")
+                backStackEntry.arguments?.getString("query")
             }
             GlobalSearchScreenSpec(query).Content()
         }

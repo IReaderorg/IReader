@@ -57,13 +57,11 @@ class DownloaderService constructor(
      * This is critical for long-running downloads to prevent automatic restarts.
      */
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val notification = NotificationCompat.Builder(context, CHANNEL_DOWNLOADER_PROGRESS)
-            .setContentTitle("Downloading chapters...")
-            .setSmallIcon(R.drawable.ic_downloading)
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-            .build()
+        val notification = defaultNotificationHelper.createDownloadNotification(
+            workManagerId = id,
+            bookName = "Preparing download...",
+            isPaused = false
+        ).build()
         
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ForegroundInfo(
@@ -101,27 +99,21 @@ class DownloaderService constructor(
         notificationManager.cancel(ID_DOWNLOAD_CHAPTER_PROGRESS)
         ireader.core.log.Log.info { "DownloaderService: Cancelled notification $ID_DOWNLOAD_CHAPTER_PROGRESS" }
         
-        // Show dismissable cancellation notification
+        // Show cancellation notification
         val cancelMessage = if (completedCount > 0) {
-            "$completedCount of $totalDownloads chapters downloaded before cancellation"
+            "$completedCount of $totalDownloads downloaded"
         } else {
             "Download cancelled"
         }
         
         notificationManager.showPlatformNotification(
             ID_DOWNLOAD_CHAPTER_PROGRESS + 1,
-            NotificationCompat.Builder(
-                context,
-                ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_ERROR
-            ).apply {
-                setContentTitle("Download Cancelled")
-                setContentText(cancelMessage)
-                setSmallIcon(R.drawable.ic_downloading)
-                priority = NotificationCompat.PRIORITY_DEFAULT
-                setAutoCancel(true)
-                setOngoing(false)
-                setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-            }.build()
+            defaultNotificationHelper.createModernDownloadNotification(
+                workManagerId = java.util.UUID.randomUUID(),
+                bookName = bookName,
+                chapterName = cancelMessage,
+                status = DefaultNotificationHelper.DownloadNotificationStatus.CANCELLED
+            ).build()
         )
         ireader.core.log.Log.info { "DownloaderService: Showed cancellation notification: $cancelMessage" }
     }
@@ -149,9 +141,17 @@ class DownloaderService constructor(
             val inputtedBooksIds = inputData.getLongArray(DOWNLOADER_BOOKS_IDS)?.distinct()
             val inputtedDownloaderMode = inputData.getBoolean(DOWNLOADER_MODE, false)
             
-            val builder = defaultNotificationHelper.baseNotificationDownloader(
-                chapter = null,
-                id
+            // Track notification state
+            var currentBookName = ""
+            var currentChapterName: String? = null
+            var currentProgress = 0
+            var currentChapterIndex = 0
+            var totalChapters = 0
+            
+            val builder = defaultNotificationHelper.createDownloadNotification(
+                workManagerId = id,
+                bookName = "Preparing download...",
+                isPaused = false
             )
         
         val result = runDownloadService(
@@ -172,19 +172,12 @@ class DownloaderService constructor(
                 val errorMessage = error.message ?: "Download failed"
                 notificationManager.showPlatformNotification(
                     notificationId + 1,
-                    NotificationCompat.Builder(
-                        applicationContext,
-                        ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_ERROR
-                    ).apply {
-                        setContentTitle("Download Failed")
-                        setContentText("$bookName: $errorMessage")
-                        setSmallIcon(R.drawable.ic_downloading)
-                        priority = NotificationCompat.PRIORITY_DEFAULT
-                        setAutoCancel(true)
-                        setOngoing(false)
-                        setStyle(NotificationCompat.BigTextStyle().bigText(errorMessage))
-                        setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                    }.build()
+                    defaultNotificationHelper.createModernDownloadNotification(
+                        workManagerId = id,
+                        bookName = bookName.ifEmpty { "Download" },
+                        chapterName = errorMessage,
+                        status = DefaultNotificationHelper.DownloadNotificationStatus.FAILED
+                    ).build()
                 )
             },
             onSuccess = {
@@ -196,44 +189,51 @@ class DownloaderService constructor(
                 val failedCount = downloadServiceState.downloadProgress.value.values
                     .count { it.status == ireader.domain.services.downloaderService.DownloadStatus.FAILED }
                 
-                // Show completion notification
+                // Show modern completion notification
                 if (completedCount > 0 || failedCount > 0) {
-                    val summaryText = when {
-                        failedCount == 0 -> "$completedCount chapters downloaded successfully"
-                        completedCount == 0 -> "$failedCount chapters failed to download"
-                        else -> "$completedCount succeeded, $failedCount failed"
-                    }
-                    
+                    val bookName = downloadServiceState.downloads.value.firstOrNull()?.bookName ?: "Downloads"
                     notificationManager.showPlatformNotification(
                         notificationId + 1,
-                        NotificationCompat.Builder(
-                            applicationContext,
-                            CHANNEL_DOWNLOADER_COMPLETE
-                        ).apply {
-                            setContentTitle("Downloads completed")
-                            setContentText(summaryText)
-                            setSmallIcon(R.drawable.ic_downloading)
-                            priority = NotificationCompat.PRIORITY_DEFAULT
-                            setAutoCancel(true)
-                            setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                        }.build()
+                        defaultNotificationHelper.createCompletionNotification(
+                            bookName = bookName,
+                            completedCount = completedCount,
+                            failedCount = failedCount
+                        ).build()
                     )
                 }
             },
             remoteUseCases = remoteUseCases,
             updateProgress = { max, progress, inProgress ->
-                builder.setProgress(max, progress, inProgress)
+                currentProgress = if (max > 0) (progress * 100 / max) else 0
+                totalChapters = max
+                currentChapterIndex = progress
             },
-            updateSubtitle = {
-                builder.setSubText(it)
+            updateSubtitle = { subtitle ->
+                currentChapterName = subtitle
             },
-            updateTitle = {
-                builder.setContentText(it)
+            updateTitle = { title ->
+                currentBookName = title
             },
             updateNotification = {
                 // Only show notification if not cancelled
                 if (!isCancelled && !isStopped) {
-                    notificationManager.showPlatformNotification(notificationId, builder.build())
+                    val isPaused = downloadServiceState.isPaused.value
+                    val status = if (isPaused) {
+                        DefaultNotificationHelper.DownloadNotificationStatus.PAUSED
+                    } else {
+                        DefaultNotificationHelper.DownloadNotificationStatus.DOWNLOADING
+                    }
+                    
+                    val notification = defaultNotificationHelper.createDownloadNotification(
+                        workManagerId = id,
+                        bookName = currentBookName.ifEmpty { "Downloading..." },
+                        chapterName = currentChapterName,
+                        progress = currentProgress,
+                        currentChapter = currentChapterIndex,
+                        totalChapters = totalChapters,
+                        isPaused = isPaused
+                    )
+                    notificationManager.showPlatformNotification(notificationId, notification.build())
                 }
             },
             downloadDelayMs = downloadPreferences.downloadDelayMs().get(),
@@ -253,25 +253,20 @@ class DownloaderService constructor(
                         .count { it.status == DownloadStatus.COMPLETED }
                     
                     val cancelMessage = if (completedCount > 0) {
-                        "$completedCount of $totalDownloads chapters downloaded before cancellation"
+                        "$completedCount of $totalDownloads downloaded"
                     } else {
                         "Download cancelled"
                     }
                     
+                    val bookName = currentDownload?.bookName ?: "Downloads"
                     notificationManager.showPlatformNotification(
                         notificationId + 1,
-                        NotificationCompat.Builder(
-                            context,
-                            ireader.domain.notification.NotificationsIds.CHANNEL_DOWNLOADER_ERROR
-                        ).apply {
-                            setContentTitle("Download Cancelled")
-                            setContentText(cancelMessage)
-                            setSmallIcon(R.drawable.ic_downloading)
-                            priority = NotificationCompat.PRIORITY_DEFAULT
-                            setAutoCancel(true)
-                            setOngoing(false)
-                            setContentIntent(defaultNotificationHelper.openDownloadsPendingIntent)
-                        }.build()
+                        defaultNotificationHelper.createModernDownloadNotification(
+                            workManagerId = id,
+                            bookName = bookName,
+                            chapterName = cancelMessage,
+                            status = DefaultNotificationHelper.DownloadNotificationStatus.CANCELLED
+                        ).build()
                     )
                     
                     ireader.core.log.Log.info { "DownloaderService: Immediately showed cancellation notification" }

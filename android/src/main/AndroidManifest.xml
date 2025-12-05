@@ -94,6 +94,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
+            <!-- App Shortcuts Menu -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
             <intent-filter>
                 <data
                     android:host="www.ireader.org"
@@ -107,7 +112,15 @@
                     android:host="deeplink"
                     android:scheme="ireader" />
             </intent-filter>
-
+            
+            <!-- App Shortcuts deep link intent filter -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:scheme="ireader"
+                    android:host="shortcut" />
+            </intent-filter>
 
         </activity>
         <activity
@@ -192,6 +205,17 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+            </intent-filter>
+        </receiver>
+        
+        <!-- Download action receiver for pause/resume -->
+        <receiver
+            android:name="ireader.domain.services.downloaderService.DownloadActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ireader.action.DOWNLOAD_PAUSE" />
+                <action android:name="ireader.action.DOWNLOAD_RESUME" />
+                <action android:name="ireader.action.DOWNLOAD_CANCEL" />
             </intent-filter>
         </receiver>
     </application>

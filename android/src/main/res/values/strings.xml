@@ -3,4 +3,16 @@
     <string name="widget_library_description">Display your library updates on your home screen</string>
     <string name="app_logo">App Logo</string>
     <string name="splash_tagline">Created by a reader, for readers</string>
+    
+    <!-- App Shortcuts -->
+    <string name="shortcut_search_short">Search</string>
+    <string name="shortcut_search_long">Search for books</string>
+    <string name="shortcut_library_short">Library</string>
+    <string name="shortcut_library_long">Open library</string>
+    <string name="shortcut_updates_short">Updates</string>
+    <string name="shortcut_updates_long">Check for updates</string>
+    <string name="shortcut_history_short">History</string>
+    <string name="shortcut_history_long">View reading history</string>
+    <string name="shortcut_downloads_short">Downloads</string>
+    <string name="shortcut_downloads_long">View downloads</string>
 </resources>

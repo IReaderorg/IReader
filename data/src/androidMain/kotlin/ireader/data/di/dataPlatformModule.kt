@@ -48,10 +48,11 @@ actual val dataPlatformModule = module {
     
     // Database preloader - LAZY: runs in background
     single<DatabasePreloader>(createdAtStart = false) { DatabasePreloader(get(), get()) }
-    
+
     // CatalogLoader - LAZY: catalog loading is deferred
     single<CatalogLoader>(createdAtStart = false) {
         ireader.data.catalog.impl.AndroidCatalogLoader(
+            get(),
             get(),
             get(),
             get(),

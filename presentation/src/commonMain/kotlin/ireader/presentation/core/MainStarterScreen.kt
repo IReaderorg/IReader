@@ -54,8 +54,39 @@ import kotlinx.coroutines.launch
 object MainStarterScreen {
     private val showBottomNavEvent = Channel<Boolean>()
     private val libraryFilterSheetEvent = Channel<Boolean>()
+    private val switchTabEvent = Channel<Int>(Channel.BUFFERED)
+    
+    // Pending tab index to switch to (set before MainStarterScreen is composed)
+    @Volatile
+    private var pendingTabIndex: Int? = null
     
     fun libraryFilterSheetFlow() = libraryFilterSheetEvent.receiveAsFlow()
+    
+    /**
+     * Request to switch to a specific tab by index.
+     * Tab indices: 0=Library, 1=Updates, 2=History, 3=Extensions, 4=More
+     */
+    suspend fun switchToTab(tabIndex: Int) {
+        println("🔷 MainStarterScreen.switchToTab($tabIndex) called")
+        pendingTabIndex = tabIndex
+        switchTabEvent.send(tabIndex)
+        println("✅ Tab switch event sent")
+    }
+    
+    /**
+     * Set the initial tab to show when MainStarterScreen is first composed.
+     * This is useful for app shortcuts that need to open a specific tab.
+     */
+    fun setInitialTab(tabIndex: Int) {
+        println("🔷 MainStarterScreen.setInitialTab($tabIndex) called")
+        pendingTabIndex = tabIndex
+    }
+    
+    internal fun consumePendingTab(): Int? {
+        val tab = pendingTabIndex
+        pendingTabIndex = null
+        return tab
+    }
 
     @OptIn(ExperimentalLayoutApi::class)
     @Composable
@@ -80,7 +111,18 @@ object MainStarterScreen {
         val scope = rememberCoroutineScope()
         
         // Use Int index for faster comparison
-        var currentTabIndex by rememberSaveable { mutableIntStateOf(0) }
+        // Check for pending tab from app shortcuts
+        val initialTab = remember { consumePendingTab() ?: 0 }
+        var currentTabIndex by rememberSaveable { mutableIntStateOf(initialTab) }
+        
+        // Also check on recomposition in case tab was set after initial composition
+        LaunchedEffect(Unit) {
+            val pending = consumePendingTab()
+            if (pending != null) {
+                println("🔷 MainStarterScreen: Found pending tab $pending on launch")
+                currentTabIndex = pending
+            }
+        }
         
         // Track visited tabs - once visited, tab stays in memory
         var visitedTabs by rememberSaveable { mutableStateOf(setOf(0)) }
@@ -101,6 +143,18 @@ object MainStarterScreen {
                 if (tabIndex !in visitedTabs) {
                     delay(50) // Small delay between each tab
                     visitedTabs = visitedTabs + tabIndex
+                }
+            }
+        }
+        
+        // Listen for external tab switch requests (e.g., from app shortcuts)
+        LaunchedEffect(Unit) {
+            println("🔷 MainStarterScreen: Starting to listen for tab switch events")
+            switchTabEvent.receiveAsFlow().collectLatest { tabIndex ->
+                println("🔷 MainStarterScreen: Received tab switch request for index $tabIndex")
+                if (tabIndex in 0..4) {
+                    currentTabIndex = tabIndex
+                    println("✅ MainStarterScreen: Tab switched to $tabIndex")
                 }
             }
         }

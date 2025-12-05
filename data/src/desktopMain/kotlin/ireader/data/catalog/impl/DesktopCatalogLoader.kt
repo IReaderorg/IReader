@@ -30,7 +30,7 @@ class DesktopCatalogLoader(
     private val httpClients: HttpClients,
     val uiPreferences: UiPreferences,
     preferences: PreferenceStoreFactory,
-    private val communitySource: ireader.domain.community.CommunitySource? = null
+    private val communitySource: ireader.domain.community.CommunitySource
 ) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
     private val catalogPreferences = preferences.create("catalogs_data")
     
