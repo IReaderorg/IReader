@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -354,8 +355,7 @@
     <string name="color_theme">顏色主題</string>
     <string name="colors">顏色</string>
     <string name="columns">欄</string>
-    <string name="comfortable_grid_layout_description">網格中 3 欄，具有較大的封面圖片
-    </string>
+    <string name="comfortable_grid_layout_description">網格中 3 欄，具有較大的封面圖片</string>
     <string name="comfortable_layout">舒適網格</string>
     <string name="commit">提交</string>
     <string name="community">社群</string>
@@ -363,8 +363,7 @@
     <string name="community_leaderboard">社群 &amp; 排行榜</string>
     <string name="community_reviews">社群評論</string>
     <string name="community_reviews_desc">閱讀和撰寫書籍和章節的評論</string>
-    <string name="compact_grid_layout_description">網格中 2 欄，具有較小的封面圖片
-    </string>
+    <string name="compact_grid_layout_description">網格中 2 欄，具有較小的封面圖片</string>
     <string name="compact_layout">緊湊佈局</string>
     <string name="complete">完成</string>
     <string name="complete_captcha">完成驗證碼以繼續</string>
@@ -466,8 +465,7 @@
     <string name="decrease_speed">降低速度</string>
     <string name="deepseek_api_key">DeepSeek API 金鑰</string>
     <string name="deepseek_api_key_invalid">DeepSeek API 金鑰無效</string>
-    <string name="deepseek_api_key_not_set">DeepSeek API 金鑰未設定。 請在設定中配置。
-    </string>
+    <string name="deepseek_api_key_not_set">DeepSeek API 金鑰未設定。 請在設定中配置。</string>
     <string name="deepseek_login_required">需要 DeepSeek 登入</string>
     <string name="deepseek_payment_required">需要 DeepSeek 付款或超出 API 配額</string>
     <string name="default_chapter_sort">預設章節排序</string>
@@ -500,15 +498,9 @@
     <string name="developer">開發者</string>
     <string name="diagnostic_data">診斷資料</string>
     <string name="diagnostic_report">診斷報告</string>
-    <string name="dialog_remove_chapter_book_description">這將移除本書的閱讀日期。
-        您確定嗎？
-    </string>
-    <string name="dialog_remove_chapter_books_description">這將移除所有書籍的閱讀日期。
-        您確定嗎？
-    </string>
-    <string name="dialog_remove_chapter_history_description">這將移除此章節的閱讀日期。
-        您確定嗎？
-    </string>
+    <string name="dialog_remove_chapter_book_description">這將移除本書的閱讀日期。 您確定嗎？</string>
+    <string name="dialog_remove_chapter_books_description">這將移除所有書籍的閱讀日期。 您確定嗎？</string>
+    <string name="dialog_remove_chapter_history_description">這將移除此章節的閱讀日期。 您確定嗎？</string>
     <string name="did_not_get_anything">我沒有得到任何東西。</string>
     <string name="disable">停用</string>
     <string name="disable_haptic_feedback">停用觸覺回饋</string>
@@ -687,7 +679,7 @@
     <string name="example_url">範例 URL:</string>
     <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">範例:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">排除類別</string>
-    <string name="excluded"> (已排除)</string>
+    <string name="excluded">(已排除)</string>
     <string name="exclusive">獨家</string>
     <string name="exclusive_designs">獨家設計</string>
     <string name="execution_timeout">執行逾時</string>
@@ -827,8 +819,7 @@
     <string name="gb_total_storage_7_500mb">3.5GB 總儲存空間 (7 × 500MB) - 設定每個專案或為所有專案使用相同 URL</string>
     <string name="gemini_api_information">Gemini API 資訊</string>
     <string name="gemini_api_key">Gemini API 金鑰</string>
-    <string name="gemini_api_key_not_set">Gemini API 金鑰未設定。 請在設定中配置。
-    </string>
+    <string name="gemini_api_key_not_set">Gemini API 金鑰未設定。 請在設定中配置。</string>
     <string name="gemini_model">Gemini 模型</string>
     <string name="gemini_payment_required">您超出了 Gemini API 的目前配額。 請在 https://ai.google.dev/gemini-api/docs/rate-limits 檢查您的方案和帳單詳細資訊</string>
     <string name="gender">性別</string>
@@ -856,7 +847,7 @@
     <string name="go_to_badge_store">前往徽章商店</string>
     <string name="go_to_chapter">前往章節</string>
     <string name="go_to_last_chapter">前往最後章節</string>
-    <string name="go_to_settings_generaln2_toggle">1. 前往設定 → 一般\n2. 切換 \</string>
+    <string name="go_to_settings_generaln2_toggle">1. 前往設定 → 一般\n2. 切換 \\</string>
     <string name="goal_reached">目標已達成</string>
     <string name="goal_reached_1">目標達成！</string>
     <string name="goal_reached_thank_you">目標達成！謝謝你！</string>
@@ -876,7 +867,7 @@
     <string name="header_alpha">header_alpha</string>
     <string name="hello_this_is_a_test">你好，這是一個測試。</string>
     <string name="help">幫助</string>
-    <string name="help_us_improve">幫助我們改進 \</string>
+    <string name="help_us_improve">幫助我們改進 \\</string>
     <string name="helpful">有幫助</string>
     <string name="hide">隱藏</string>
     <string name="hide_backdrop">隱藏背景</string>
@@ -926,7 +917,7 @@
     <string name="in_library_1">在書庫中</string>
     <string name="in_progress">進行中</string>
     <string name="include_cover_image">包含封面圖片</string>
-    <string name="included"> (已包含)</string>
+    <string name="included">(已包含)</string>
     <string name="incognito_mode">無痕模式</string>
     <string name="increase">增加</string>
     <string name="increase_font_size">增大字體大小</string>
@@ -1002,8 +993,7 @@
     <string name="last_verified">上次驗證：</string>
     <string name="latest_book">最新</string>
     <string name="layout">佈局</string>
-    <string name="layout_description_comfortable">網格中 3 欄，具有較大的封面圖片
-    </string>
+    <string name="layout_description_comfortable">網格中 3 欄，具有較大的封面圖片</string>
     <string name="layout_description_compact">網格中 2 欄，具有較小的封面圖片</string>
     <string name="layout_description_cover_only">僅 2 欄封面圖片 (無文字)</string>
     <string name="layout_description_list">書籍以垂直列表顯示</string>
@@ -1194,8 +1184,7 @@
     <string name="no_active_funding_goals_at_the_moment">目前沒有進行中的募款目標</string>
     <string name="no_alternative_sources_available">沒有其他來源可用。總來源數：%1$s，目前：%2$s</string>
     <string name="no_alternative_sources_available_1">沒有其他來源可用</string>
-    <string name="no_app_was_found_to_lauch">發生錯誤。您沒有所需的
-應用程式。</string>
+    <string name="no_app_was_found_to_lauch">發生錯誤。您沒有所需的 應用程式。</string>
     <string name="no_backups_found">找不到備份</string>
     <string name="no_badge">無徽章</string>
     <string name="no_badges_available">沒有可用的徽章</string>
@@ -1237,7 +1226,7 @@
     <string name="no_repositories_added">尚未新增儲存庫</string>
     <string name="no_repositories_added_subtitle">新增儲存庫以存取其他來源</string>
     <string name="no_repositories_configured">未設定儲存庫</string>
-    <string name="no_results_for">找不到 \ 的結果</string>
+    <string name="no_results_for">"找不到  的結果"</string>
     <string name="no_results_found">找不到結果</string>
     <string name="no_results_found_1">找不到結果</string>
     <string name="no_reviews">沒有評論</string>
@@ -1276,7 +1265,7 @@
     <string name="offset">偏移</string>
     <string name="ok">確定</string>
     <string name="ollama_information">Ollama資訊</string>
-    <string name="ollama_is_a_local_llm">Ollama是用於翻譯的本地LLM伺服器。請確保Ollama已安裝並在您的裝置或網路上執行。您需要先使用'ollama pull modelname'來拉取模型。</string>
+    <string name="ollama_is_a_local_llm">Ollama是用於翻譯的本地LLM伺服器。請確保Ollama已安裝並在您的裝置或網路上執行。您需要先使用\'ollama pull modelname\'來拉取模型。</string>
     <string name="ollama_model">Ollama 模型</string>
     <string name="ollama_server_url_not_set">未設定 Ollama 伺服器 URL</string>
     <string name="ollama_url">Ollama URL</string>
@@ -1299,8 +1288,7 @@
     <string name="open_tts_settings">開啟TTS設定</string>
     <string name="openai_api_key">OpenAI API 金鑰</string>
     <string name="openai_api_key_invalid">OpenAI API 金鑰無效</string>
-    <string name="openai_api_key_not_set">OpenAI API 金鑰未設定。 請在設定中配置。
-    </string>
+    <string name="openai_api_key_not_set">OpenAI API 金鑰未設定。 請在設定中配置。</string>
     <string name="openai_quota_exceeded">OpenAI 配額已超出</string>
     <string name="optimize">最佳化</string>
     <string name="optimize_database">最佳化資料庫</string>
@@ -1756,8 +1744,7 @@
     <string name="snooze">稍後提醒</string>
     <string name="snooze_reminder">暫緩提醒</string>
     <string name="something_is_wrong_with_this_book">本書籍出現問題。</string>
-    <string name="something_is_wrong_with_this_chapter">此章節出現問題。
-    </string>
+    <string name="something_is_wrong_with_this_chapter">此章節出現問題。</string>
     <string name="something_went_wrong">發生了一些錯誤</string>
     <string name="something_wrong_with_book">這本書有些問題</string>
     <string name="sort">排序</string>
@@ -1786,8 +1773,7 @@
     <string name="status">狀態</string>
     <string name="stop">停止</string>
     <string name="storage">儲存空間</string>
-    <string name="storage_permission_required_explanation">需要儲存權限說明
-    </string>
+    <string name="storage_permission_required_explanation">需要儲存權限說明</string>
     <string name="storage_usage">儲存空間用量</string>
     <string name="storage_used">已用儲存空間</string>
     <string name="style_features">風格特色</string>
@@ -1886,8 +1872,7 @@
     <string name="themes">主題</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">此來源中沒有可轉移的小說</string>
     <string name="there_is_no_chapter">沒有章節。</string>
-    <string name="there_was_a_problem_in_getting_chapter">獲取章節時發生問題。
-    </string>
+    <string name="there_was_a_problem_in_getting_chapter">獲取章節時發生問題。</string>
     <string name="these_actions_are_destructive_and">這些操作具有破壞性且無法復原。請謹慎操作。</string>
     <string name="these_are_all_the_popular_books">這些都是熱門書籍</string>
     <string name="these_are_all_the_reviews">這些都是評論</string>
@@ -1988,7 +1973,7 @@
     <string name="tts_with_translated_text">具有翻譯文字的 TTS</string>
     <string name="turn_off_vibration_feedback_for_interactions">關閉互動的震動回饋</string>
     <string name="type">類型</string>
-    <string name="type_1">類型 \</string>
+    <string name="type_1">類型 \\</string>
     <string name="typography">排版</string>
     <string name="ui_improvements">UI 改善</string>
     <string name="unable_to_get_package_version">無法取得套件版本</string>
@@ -2134,7 +2119,7 @@
     <string name="yesterday">昨天</string>
     <string name="you">（您）</string>
     <string name="you_1">您</string>
-    <string name="you_are_about_to_report">您即將檢舉 \</string>
+    <string name="you_are_about_to_report">您即將檢舉 \\</string>
     <string name="you_are_on_latest_version">您已使用最新版本</string>
     <string name="you_dont_have_any_badges_yet">您還沒有任何徽章</string>
     <string name="you_own_an_ireader_nft">您擁有一個 IReader NFT！</string>
