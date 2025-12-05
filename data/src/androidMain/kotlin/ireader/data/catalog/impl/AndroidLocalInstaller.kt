@@ -50,9 +50,6 @@ class AndroidLocalInstaller(
      * The client used for http requests.
      */
     private val client get() = httpClients.default
-    init {
-        getSimpleStorage.checkPermission()
-    }
     /**
      * Adds the given extension to the downloads queue and returns an observable containing its
      * step in the installation process.

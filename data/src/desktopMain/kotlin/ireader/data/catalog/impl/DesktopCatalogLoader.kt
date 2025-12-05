@@ -1,19 +1,18 @@
 package ireader.data.catalog.impl
 
 
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.parser.Parser
 import com.googlecode.d2j.dex.Dex2jar
 import com.googlecode.d2j.reader.MultiDexFileReader
 import com.googlecode.dex2jar.tools.BaksmaliBaseDexExceptionHandler
 import ireader.core.http.HttpClients
-import ireader.core.log.Log
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.prefs.PrefixedPreferenceStore
 import ireader.core.source.Source
 import ireader.core.storage.ExtensionDir
 import ireader.domain.catalogs.service.CatalogLoader
-import ireader.domain.js.engine.JSEnginePool
 import ireader.domain.js.loader.JSPluginLoader
-import ireader.domain.js.util.JSPluginLogger
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.preferences.prefs.UiPreferences
@@ -23,8 +22,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.bean.ApkMeta
-import com.fleeksoft.ksoup.Ksoup
-import com.fleeksoft.ksoup.parser.Parser
 import okio.Path.Companion.toPath
 import java.io.File
 import java.net.URLClassLoader
@@ -286,7 +283,7 @@ class DesktopCatalogLoader(
         const val METADATA_DESCRIPTION = "source.description"
         const val METADATA_NSFW = "source.nsfw"
         const val METADATA_ICON = "source.icon"
-        const val LIB_VERSION_MIN = 1
-        const val LIB_VERSION_MAX = 1
+        const val LIB_VERSION_MIN = 2
+        const val LIB_VERSION_MAX = 2
     }
 }

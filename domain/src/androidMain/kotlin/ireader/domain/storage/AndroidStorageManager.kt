@@ -55,9 +55,11 @@ class AndroidStorageManager(
             }
         }
         
-        // Ensure subdirectories exist
-        listOf(booksDirectory, backupDirectory, automaticBackupDirectory, extensionsDirectory).forEach {
-            fileSystem.createDirectories(it)
+        // Ensure subdirectories exist - wrap in runCatching to handle permission issues gracefully
+        kotlin.runCatching {
+            listOf(booksDirectory, backupDirectory, automaticBackupDirectory, extensionsDirectory).forEach {
+                fileSystem.createDirectories(it)
+            }
         }
     }
     

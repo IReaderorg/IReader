@@ -501,8 +501,8 @@ class AndroidCatalogLoader(
         const val METADATA_DESCRIPTION = "source.description"
         const val METADATA_NSFW = "source.nsfw"
         const val METADATA_ICON = "source.icon"
-        const val LIB_VERSION_MIN = 1
-        const val LIB_VERSION_MAX = 1
+        const val LIB_VERSION_MIN = 2
+        const val LIB_VERSION_MAX = 2
 
         const val PACKAGE_FLAGS = PackageManager.GET_CONFIGURATIONS or PackageManager.GET_META_DATA
     }

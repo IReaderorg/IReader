@@ -61,7 +61,7 @@ internal fun AddingRepositoryScreen(
         listOf(
             QuickAddPreset(
                 name = "IReader Official",
-                url = "https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json",
+                url = "https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json",
                 owner = "IReaderorg",
                 source = "https://github.com/IReaderorg/IReader-extensions",
                 type = RepositoryType.IREADER
