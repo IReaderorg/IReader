@@ -688,7 +688,7 @@
     <string name="eth_wallet_address_api_key">عنوان محفظة ETH (مفتاح API)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">مثال: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">عنوان URL للمثال:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">أمثلة:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">أمثلة:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">استبعاد الفئات</string>
     <string name="excluded"> (مستبعد)</string>
     <string name="exclusive">حصري</string>

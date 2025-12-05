@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 19
+    const val CURRENT_VERSION = 20
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -84,6 +84,7 @@ object DatabaseMigrations {
             16 -> migrateV16toV17(driver)
             17 -> migrateV17toV18(driver)
             18 -> migrateV18toV19(driver)
+            19 -> migrateV19toV20(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -1219,6 +1220,37 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(19, e)
+        }
+    }
+    
+    /**
+     * Migration from version 19 to version 20
+     * Migrates extension repository URLs from old /repo branch to new /repov2 branch
+     * This ensures existing users automatically get the updated repository URL
+     */
+    private fun migrateV19toV20(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(19, 20)
+            
+            // Old URL pattern: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo
+            // New URL pattern: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2
+            val oldRepoUrl = "https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo"
+            val newRepoUrl = "https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2"
+            
+            // Update repository table - replace old URL with new URL in the key field
+            val updateRepositorySql = """
+                UPDATE repository 
+                SET key = REPLACE(key, '$oldRepoUrl', '$newRepoUrl')
+                WHERE key LIKE '%$oldRepoUrl%';
+            """.trimIndent()
+            
+            driver.execute(null, updateRepositorySql, 0)
+            Logger.logDebug("Updated repository URLs from /repo to /repov2")
+            
+            Logger.logMigrationSuccess(20)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(20, e)
         }
     }
 

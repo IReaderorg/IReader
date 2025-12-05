@@ -689,7 +689,7 @@
     <string name="eth_wallet_address_api_key">Alamat Dompet ETH (Kunci API)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Contoh: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">Contoh URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Contoh:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Contoh:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Kecualikan Kategori</string>
     <string name="excluded"> (dikecualikan)</string>
     <string name="exclusive">Eksklusif</string>

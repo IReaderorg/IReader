@@ -685,7 +685,7 @@
     <string name="eth_wallet_address_api_key">ETH 錢包地址 (API 金鑰)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">範例：https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">範例 URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">範例:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">範例:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">排除類別</string>
     <string name="excluded"> (已排除)</string>
     <string name="exclusive">獨家</string>

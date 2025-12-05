@@ -173,40 +173,67 @@ class TTSScreenSpec(
         
         // Initialize TTS with the chapter and load chapters list
         LaunchedEffect(bookId, chapterId) {
-            ttsService.startReading(bookId, chapterId)
-            if (readingParagraph > 0) {
-                ttsService.jumpToParagraph(readingParagraph)
-            }
-            
-            // Load chapters list for drawer
+            // Load chapters list for drawer first
             try {
                 chapters = chapterRepository.findChaptersByBookId(bookId)
             } catch (e: Exception) {
                 // Failed to load chapters
             }
             
-            // Load translation for this chapter
-            try {
-                val translations = getAllTranslationsUseCase.execute(chapterId)
-                if (translations.isNotEmpty()) {
-                    val latestTranslation = translations.maxByOrNull { it.updatedAt }
-                    latestTranslation?.let { translation ->
-                        val translatedStrings = translation.translatedContent
-                            .filterIsInstance<ireader.core.source.model.Text>()
-                            .map { it.text }
-                            .filter { it.isNotBlank() }
-                        if (translatedStrings.isNotEmpty()) {
-                            translatedContent = translatedStrings
-                            // If readTranslatedText preference is enabled, set TTS to read translated content
-                            if (readTranslatedText) {
+            // Load translation BEFORE starting TTS to ensure correct language from the start
+            var translatedStringsToUse: List<String>? = null
+            if (readTranslatedText) {
+                try {
+                    val translations = getAllTranslationsUseCase.execute(chapterId)
+                    if (translations.isNotEmpty()) {
+                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                        latestTranslation?.let { translation ->
+                            val translatedStrings = translation.translatedContent
+                                .filterIsInstance<ireader.core.source.model.Text>()
+                                .map { it.text }
+                                .filter { it.isNotBlank() }
+                            if (translatedStrings.isNotEmpty()) {
+                                translatedContent = translatedStrings
                                 showTranslation = true
-                                ttsService.setCustomContent(translatedStrings)
+                                translatedStringsToUse = translatedStrings
                             }
                         }
                     }
+                } catch (e: Exception) {
+                    // Translation not available, continue without it
                 }
-            } catch (e: Exception) {
-                // Translation not available, continue without it
+            }
+            
+            // Set translated content BEFORE starting TTS so it reads in correct language
+            if (translatedStringsToUse != null) {
+                ttsService.setCustomContent(translatedStringsToUse)
+            }
+            
+            // Now start TTS - it will use translated content if set
+            ttsService.startReading(bookId, chapterId)
+            if (readingParagraph > 0) {
+                ttsService.jumpToParagraph(readingParagraph)
+            }
+            
+            // If translation wasn't loaded yet (readTranslatedText was false), load it for display
+            if (translatedContent == null) {
+                try {
+                    val translations = getAllTranslationsUseCase.execute(chapterId)
+                    if (translations.isNotEmpty()) {
+                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                        latestTranslation?.let { translation ->
+                            val translatedStrings = translation.translatedContent
+                                .filterIsInstance<ireader.core.source.model.Text>()
+                                .map { it.text }
+                                .filter { it.isNotBlank() }
+                            if (translatedStrings.isNotEmpty()) {
+                                translatedContent = translatedStrings
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Translation not available
+                }
             }
         }
         

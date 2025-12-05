@@ -113,6 +113,12 @@ data class ReaderScreenSpec(
             }
         }
         
+        // Sync with TTS state when reader screen becomes active
+        // This handles the case where user was in TTS screen and navigated chapters there
+        LaunchedEffect(Unit) {
+            vm.syncWithTTSState()
+        }
+        
         // Track reading time - records time spent in reader screen
         DisposableEffect(key1 = Unit) {
             val startTime = currentTimeToLong()
@@ -228,15 +234,19 @@ data class ReaderScreenSpec(
             state = drawerState,
             sheetContent = {
                 val drawerScrollState = rememberLazyListState()
+                // Scroll to current chapter when drawer opens
                 LaunchedEffect(key1 = drawerState.targetValue) {
-                    if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open && chapters.isNotEmpty()) {
-                        val index = chapters.indexOfFirst { it.id == chapter.id }
-                        if (index != -1) {
-                            scope.launch {
-                                drawerScrollState.scrollToItem(
-                                    index,
-                                    -drawerScrollState.layoutInfo.viewportEndOffset / 2
-                                )
+                    if (chapter != null && drawerState.targetValue == androidx.compose.material3.DrawerValue.Open) {
+                        val drawerChapters = successState?.drawerChapters ?: emptyList()
+                        if (drawerChapters.isNotEmpty()) {
+                            val index = drawerChapters.indexOfFirst { it.id == chapter.id }
+                            if (index != -1) {
+                                scope.launch {
+                                    drawerScrollState.scrollToItem(
+                                        index,
+                                        -drawerScrollState.layoutInfo.viewportEndOffset / 2
+                                    )
+                                }
                             }
                         }
                     }

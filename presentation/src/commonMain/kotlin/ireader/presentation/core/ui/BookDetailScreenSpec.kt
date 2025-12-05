@@ -397,8 +397,11 @@ data class BookDetailScreenSpec constructor(
                     ) { scaffoldPadding ->
                         val appbarPadding = scaffoldPadding.calculateTopPadding()
                         
-                        // Apply filtering based on vm.query and vm.filters
-                        val filteredChapters by remember(state.chapters, vm.query, vm.filters.value) {
+                        // Apply filtering and sorting based on vm.query, vm.filters, vm.sorting, and read status
+                        // Note: Use vm.sorting (State object) not vm.sorting.value to properly track changes
+                        val currentSorting = vm.sorting.value
+                        val currentFilters = vm.filters.value
+                        val filteredChapters by remember(state.chapters, vm.query, currentFilters, currentSorting, state.hasReadChapters) {
                             derivedStateOf {
                                 var result = state.chapters.toList()
                                 
@@ -409,7 +412,7 @@ data class BookDetailScreenSpec constructor(
                                 }
                                 
                                 // Apply chapter filters
-                                for (filter in vm.filters.value) {
+                                for (filter in currentFilters) {
                                     if (filter.value == ireader.presentation.ui.book.viewmodel.ChaptersFilters.Value.Missing) continue
                                     
                                     val predicate: (Chapter) -> Boolean = when (filter.type) {
@@ -428,6 +431,35 @@ data class BookDetailScreenSpec constructor(
                                         ireader.presentation.ui.book.viewmodel.ChaptersFilters.Value.Included -> result.filter(predicate)
                                         ireader.presentation.ui.book.viewmodel.ChaptersFilters.Value.Excluded -> result.filterNot(predicate)
                                         ireader.presentation.ui.book.viewmodel.ChaptersFilters.Value.Missing -> result
+                                    }
+                                }
+                                
+                                // Apply sorting based on captured sorting preference
+                                // For Default sort: just reverse the original order when isAscending is false
+                                // For other sorts: use the appropriate comparator
+                                if (currentSorting.type == ireader.presentation.ui.book.viewmodel.ChapterSort.Type.Default) {
+                                    // Default sort: keep original order, reverse if not ascending
+                                    result = if (currentSorting.isAscending) {
+                                        result
+                                    } else {
+                                        result.reversed()
+                                    }
+                                } else {
+                                    val comparator: Comparator<Chapter> = when (currentSorting.type) {
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.Default -> compareBy { it.sourceOrder } // Won't be used
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.ByName -> compareBy { it.name }
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.BySource -> compareBy { it.sourceOrder }
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.ByChapterNumber -> compareBy { it.number }
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.DateFetched -> compareBy { it.dateFetch }
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.DateUpload -> compareBy { it.dateUpload }
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.Bookmark -> compareByDescending { it.bookmark }
+                                        ireader.presentation.ui.book.viewmodel.ChapterSort.Type.Read -> compareByDescending { it.read }
+                                    }
+                                    
+                                    result = if (currentSorting.isAscending) {
+                                        result.sortedWith(comparator)
+                                    } else {
+                                        result.sortedWith(comparator.reversed())
                                     }
                                 }
                                 

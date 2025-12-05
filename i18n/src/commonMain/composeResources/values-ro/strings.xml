@@ -689,7 +689,7 @@
     <string name="eth_wallet_address_api_key">Adresa portofelului ETH (Cheie API)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Exemplu: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">URL Exemplu:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Exemple:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Exemple:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Exclude Categorii</string>
     <string name="excluded"> (exclus)</string>
     <string name="exclusive">Exclusiv</string>

@@ -19,7 +19,7 @@ class SourceRepositoryViewModel(
     val default= uiPreferences.defaultRepository().asState()
 
 
-    /**     https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json?name=IReader 2?owner=KazemCodes?source=https://github.com/IReaderorg/IReader"
+    /**     https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json?name=IReader 2?owner=KazemCodes?source=https://github.com/IReaderorg/IReader"
      *
      */
     companion object {

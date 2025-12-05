@@ -690,7 +690,7 @@
     <string name="eth_wallet_address_api_key">ETH-lompakon osoite (API-avain)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Esimerkki: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">Esimerkki URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Esimerkkejä:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Esimerkkejä:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Sulje pois luokat</string>
     <string name="excluded"> (poissuljettu)</string>
     <string name="exclusive">Yksinomainen</string>

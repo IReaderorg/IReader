@@ -687,7 +687,7 @@
     <string name="eth_wallet_address_api_key">ETH Cüzdan Adresi (API Anahtarı)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Örnek: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">Örnek URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Örnekler:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Örnekler:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Kategorileri Hariç Tut</string>
     <string name="excluded"> (hariç tutuldu)</string>
     <string name="exclusive">Özel</string>

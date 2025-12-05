@@ -690,7 +690,7 @@
     <string name="eth_wallet_address_api_key">ETH Pénztárca Cím (API kulcs)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Példa: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">Példa URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Példák:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Példák:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Kategóriák kizárása</string>
     <string name="excluded"> (kizárva)</string>
     <string name="exclusive">Kizárólagos</string>

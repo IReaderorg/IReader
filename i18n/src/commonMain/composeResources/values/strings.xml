@@ -1461,7 +1461,7 @@
     <string name="eth_wallet_address_api_key">ETH Wallet Address (API Key)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Example: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">Example URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Examples:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Examples:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Exclude Categories</string>
     <string name="excluded"> (excluded)</string>
     <string name="exclusive">Exclusive</string>

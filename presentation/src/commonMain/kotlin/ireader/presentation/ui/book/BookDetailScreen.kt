@@ -2,11 +2,9 @@ package ireader.presentation.ui.book
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,16 +15,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -35,28 +30,31 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastAny
-import androidx.compose.ui.util.fastFilter
-import androidx.compose.ui.util.fastForEach
 import ireader.core.source.Source
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.core.ui.TwoPanelBoxStandalone
-import ireader.presentation.core.util.selectedBackground
-import ireader.presentation.ui.book.components.*
+import ireader.presentation.ui.book.components.BookReviewsIntegration
+import ireader.presentation.ui.book.components.BookStatsCard
+import ireader.presentation.ui.book.components.ChapterBar
+import ireader.presentation.ui.book.components.ChapterDetailBottomBar
+import ireader.presentation.ui.book.components.ChapterListFilterBar
+import ireader.presentation.ui.book.components.EditInfoAlertDialog
+import ireader.presentation.ui.book.components.EpubExportDialog
+import ireader.presentation.ui.book.components.MigrationSourceDialog
+import ireader.presentation.ui.book.components.ModernActionButtons
+import ireader.presentation.ui.book.components.ModernBookBackdrop
+import ireader.presentation.ui.book.components.ModernBookHeader
+import ireader.presentation.ui.book.components.ModernBookSummary
+import ireader.presentation.ui.book.components.NovelInfoFab
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
-import ireader.presentation.ui.book.viewmodel.BookDetailState
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
 import ireader.presentation.ui.component.reusable_composable.AppTextField
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 
 /**
@@ -122,9 +120,9 @@ fun BookDetailScreen(
         ChapterClickHandlers(onItemClick, onLongItemClick)
     }
     
-    // Derive chapter list efficiently - only recompute when chapters change
-    val reversedChapters by remember(chapters) {
-        derivedStateOf { chapters.value.reversed() }
+    // Use chapters directly - sorting is already handled by BookDetailScreenSpec
+    val displayChapters by remember(chapters) {
+        derivedStateOf { chapters.value }
     }
     
     // Derive chapter count for efficient updates
@@ -350,7 +348,7 @@ fun BookDetailScreen(
                 }
                 
                     items(
-                        items = reversedChapters,
+                        items = displayChapters,
                         key = { chapter -> chapter.id },
                         contentType = { "chapter_item" }
                     ) { chapter ->
@@ -506,8 +504,8 @@ private fun ChapterListPanel(
     val dividerModifier = remember { Modifier.padding(horizontal = 16.dp) }
     val searchFieldModifier = remember { Modifier.padding(horizontal = 16.dp, vertical = 8.dp) }
     
-    // Memoize reversed chapters - only recompute when chapters change
-    val reversedChapters = remember(chapters) { chapters.reversed() }
+    // Use chapters directly - sorting is already handled by BookDetailScreenSpec
+    val displayChapters = remember(chapters) { chapters }
     
     // Memoize click handlers - stable reference
     val chapterClickHandlers = remember(onItemClick, onLongItemClick) {
@@ -598,7 +596,7 @@ private fun ChapterListPanel(
             }
             
             items(
-                items = reversedChapters,
+                items = displayChapters,
                 key = { chapter -> chapter.id },
                 contentType = { "chapter_item" }
             ) { chapter ->

@@ -51,6 +51,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     private val readerPreferences: ReaderPreferences by inject()
     private val appPrefs: AppPreferences by inject()
     private val localizeHelper: LocalizeHelper by inject()
+    private val historyUseCase: ireader.domain.usecases.history.HistoryUseCase by inject()
     
     // Unified TTS Engine - ONLY ONE engine at a time
     private var ttsEngine: TTSEngine? = null
@@ -859,6 +860,29 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
         return chapters.indexOfFirst { it.id == chapter.id }
     }
     
+    /**
+     * Update reading history when chapter changes in TTS
+     * This ensures the novel progress stays in sync with TTS navigation
+     */
+    private suspend fun updateReadingHistory(chapter: Chapter) {
+        try {
+            val currentTime = ireader.domain.utils.extensions.currentTimeToLong()
+            val existingHistory = historyUseCase.findHistory(chapter.id)
+            
+            val history = ireader.domain.models.entities.History(
+                id = existingHistory?.id ?: 0L,
+                chapterId = chapter.id,
+                readAt = currentTime,
+                readDuration = existingHistory?.readDuration ?: 0L,
+                progress = 0f // TTS starts from beginning of chapter
+            )
+            historyUseCase.insertHistory(history)
+            Log.info { "TTS: Updated reading history for chapter ${chapter.name}" }
+        } catch (e: Exception) {
+            Log.error { "TTS: Failed to update reading history: ${e.message}" }
+        }
+    }
+    
     // ========== Notification Management ==========
     
     private fun hookNotification() {
@@ -1134,8 +1158,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     ) {
         try {
             setLoadingState(true)
-            state.setCurrentReadingParagraph(0
-)
+            state.setCurrentReadingParagraph(0)
             
             val chapter = chapterRepo.findChapterById(chapterId) ?: return
             
@@ -1149,6 +1172,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                             scope.launch {
                                 chapterRepo.insertChapter(remoteChapter)
                                 ttsState.setTtsChapter(remoteChapter)
+                                // Update reading history to sync TTS progress with novel progress
+                                updateReadingHistory(remoteChapter)
                                 setLoadingState(false)
                                 onSuccess()
                             }
@@ -1164,6 +1189,8 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 }
             } else {
                 ttsState.setTtsChapter(chapter)
+                // Update reading history to sync TTS progress with novel progress
+                updateReadingHistory(chapter)
                 setLoadingState(false)
                 onSuccess()
             }

@@ -690,7 +690,7 @@
     <string name="eth_wallet_address_api_key">ETH-Wallet-Adresse (API-Schlüssel)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">Beispiel: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">Beispiel-URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Beispiele:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Beispiele:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Kategorien ausschließen</string>
     <string name="excluded"> (ausgeschlossen)</string>
     <string name="exclusive">Exklusiv</string>

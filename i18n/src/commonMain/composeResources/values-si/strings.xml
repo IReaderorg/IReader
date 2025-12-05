@@ -688,7 +688,7 @@
     <string name="eth_wallet_address_api_key">ETH Wallet ලිපිනය (API යතුර)</string>
     <string name="example_httpsrawgithubusercontentcomusernamerepomainindexminjson">උදාහරණය: https://raw.githubusercontent.com/username/repo/main/index.min.json</string>
     <string name="example_url">උදාහරණ URL:</string>
-    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">උදාහරණ:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repo/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
+    <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">උදාහරණ:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">කාණ්ඩ බැහැර කරන්න</string>
     <string name="excluded"> (බැහැර කරන ලදි)</string>
     <string name="exclusive">සුවිශේෂී</string>

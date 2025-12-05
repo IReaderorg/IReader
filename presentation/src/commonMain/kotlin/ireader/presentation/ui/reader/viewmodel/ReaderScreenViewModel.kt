@@ -47,6 +47,7 @@ import ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase
 import ireader.domain.usecases.translate.TranslateParagraphUseCase
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
+import ireader.domain.services.tts_service.CommonTTSService
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.removeIf
 import ireader.i18n.LAST_CHAPTER
@@ -117,6 +118,8 @@ class ReaderScreenViewModel(
     val translationViewModel: ReaderTranslationViewModel,
     val ttsViewModel: ReaderTTSViewModel,
     val statisticsViewModel: ReaderStatisticsViewModel,
+    // Shared TTS service for chapter sync (optional - may be null on some platforms)
+    private val sharedTTSService: CommonTTSService? = null,
 ) : BaseViewModel() {
 
     data class Param(val chapterId: Long?, val bookId: Long?)
@@ -205,6 +208,8 @@ class ReaderScreenViewModel(
         if (bookId != null && chapterId != null) {
             subscribeReaderThemes()
             initializeReader(bookId, chapterId)
+            // Subscribe to TTS chapter changes for sync
+            subscribeTTSChapterChanges()
         } else {
             scope.launch {
                 showSnackBar(UiText.MStringResource(Res.string.something_wrong_with_book))
@@ -217,6 +222,46 @@ class ReaderScreenViewModel(
         // Load custom fonts
         scope.launch {
             customFonts = fontManagementUseCase.getCustomFonts()
+        }
+    }
+    
+    // ==================== TTS Chapter Sync ====================
+    
+    /**
+     * Subscribe to TTS chapter changes to keep reader in sync.
+     * When TTS navigates to a different chapter (e.g., auto-next chapter),
+     * the reader will automatically sync to that chapter.
+     */
+    private fun subscribeTTSChapterChanges() {
+        sharedTTSService?.state?.currentChapter?.onEach { ttsChapter ->
+            if (ttsChapter == null) return@onEach
+            
+            val currentState = _state.value as? ReaderState.Success ?: return@onEach
+            
+            // Only sync if:
+            // 1. TTS chapter is for the same book
+            // 2. TTS chapter is different from current reader chapter
+            if (ttsChapter.bookId == currentState.book.id && 
+                ttsChapter.id != currentState.currentChapter.id) {
+                Log.debug { "TTS chapter changed to ${ttsChapter.name}, syncing reader..." }
+                navigateToChapter(ttsChapter.id, next = true)
+            }
+        }?.launchIn(scope)
+    }
+    
+    /**
+     * Manually sync reader state with TTS state.
+     * Call this when returning to reader screen from TTS screen.
+     */
+    fun syncWithTTSState() {
+        val ttsChapter = sharedTTSService?.state?.currentChapter?.value ?: return
+        val currentState = _state.value as? ReaderState.Success ?: return
+        
+        // Only sync if TTS chapter is for the same book and different from current
+        if (ttsChapter.bookId == currentState.book.id && 
+            ttsChapter.id != currentState.currentChapter.id) {
+            Log.debug { "Syncing reader with TTS chapter: ${ttsChapter.name}" }
+            navigateToChapter(ttsChapter.id, next = true)
         }
     }
 
