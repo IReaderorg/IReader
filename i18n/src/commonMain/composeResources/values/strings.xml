@@ -2211,4 +2211,24 @@
     <string name="notification_restore_complete">Restore Complete</string>
     <string name="notification_network_error">Network Error</string>
     <string name="notification_connection_restored">Connection Restored</string>
+    
+    <!-- TTS Text Merging and Caching -->
+    <string name="tts_text_merging">TTS Text Merging</string>
+    <string name="tts_merge_info">Merge multiple paragraphs into larger chunks for smoother reading. This reduces server requests and provides better audio continuity. Set to 0 to disable merging.</string>
+    <string name="tts_remote_engines">Remote Engines</string>
+    <string name="tts_merge_words_remote">Merge words for Gradio/online TTS engines</string>
+    <string name="tts_native_engines">Native Engines</string>
+    <string name="tts_merge_words_native">Merge words for Android TTS, Piper, Sherpa engines</string>
+    <string name="tts_chapter_caching">Chapter Audio Caching</string>
+    <string name="tts_download_chapter_audio">Download Chapter Audio</string>
+    <string name="tts_download_chapter_audio_desc">Pre-download entire chapter audio for offline playback (remote engines only)</string>
+    <string name="tts_cache_duration">Cache Duration</string>
+    <string name="tts_cache_duration_desc">Auto-delete cached audio after this many days</string>
+    <string name="tts_cache_status">Cache Status</string>
+    <string name="tts_clear_cache">Clear Cache</string>
+    <string name="tts_disabled">Disabled</string>
+    <string name="tts_words">words</string>
+    <string name="tts_days">days</string>
+    <string name="tts_chapters">chapters</string>
+    <string name="download_chapter_audio">Download Chapter Audio</string>
 </resources>

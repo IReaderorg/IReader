@@ -670,6 +670,43 @@ class ReaderPreferences constructor(
     fun ttsSentenceHighlight(): Preference<Boolean> {
         return preferenceStore.getBoolean("tts_sentence_highlight", false)
     }
+    
+    // ========== TTS Text Merging Settings ==========
+    // Merge multiple paragraphs into one request for better reading experience
+    
+    /**
+     * Number of words to merge for remote TTS engines (Gradio, etc.)
+     * Higher values = fewer requests, smoother reading
+     * Range: 50-500 words, 0 = disabled
+     */
+    fun ttsMergeWordsRemote(): Preference<Int> {
+        return preferenceStore.getInt("tts_merge_words_remote", 0)
+    }
+    
+    /**
+     * Number of words to merge for native TTS engines (Android TTS, Piper, etc.)
+     * Range: 50-500 words, 0 = disabled
+     */
+    fun ttsMergeWordsNative(): Preference<Int> {
+        return preferenceStore.getInt("tts_merge_words_native", 0)
+    }
+    
+    // ========== TTS Chapter Audio Caching (Remote Engines Only) ==========
+    
+    /**
+     * Enable downloading and caching whole chapter audio for remote engines
+     */
+    fun ttsChapterCacheEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("tts_chapter_cache_enabled", false)
+    }
+    
+    /**
+     * Number of days to keep cached chapter audio before auto-deletion
+     * Range: 1-30 days
+     */
+    fun ttsChapterCacheDays(): Preference<Int> {
+        return preferenceStore.getInt("tts_chapter_cache_days", 7)
+    }
 }
 
 enum class ReadingMode {

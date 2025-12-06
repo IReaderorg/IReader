@@ -397,6 +397,10 @@ class TTSScreenSpec(
             ttsService.state.previousParagraph.debounce(50)
         }.collectAsState(initial = 0)
         
+        // Collect merged chunk state for text merging feature
+        val mergedChunkParagraphs by ttsService.state.currentMergedChunkParagraphs.collectAsState()
+        val isMergingEnabled by ttsService.state.isMergingEnabled.collectAsState()
+        
         // Sync sleep mode UI with service state
         LaunchedEffect(sleepModeEnabledState, sleepTimeRemaining) {
             sleepModeEnabled = sleepModeEnabledState
@@ -480,7 +484,7 @@ class TTSScreenSpec(
             translatedContent, showTranslation, bilingualMode, chapterName, bookTitle,
             speechSpeed, autoNextChapter, fullScreenMode, cachedParagraphs, loadingParagraphs,
             sleepTimeRemaining, sleepModeEnabledState, paragraphSpeakingStartTime, sentenceHighlightEnabled,
-            calibratedWPM, isCalibrated
+            calibratedWPM, isCalibrated, mergedChunkParagraphs, isMergingEnabled
         ) {
             derivedStateOf {
                 CommonTTSScreenState(
@@ -508,7 +512,9 @@ class TTSScreenSpec(
                     sentenceHighlightEnabled = sentenceHighlightEnabled,
                     calibratedWPM = calibratedWPM,
                     isCalibrated = isCalibrated,
-                    isTTSReady = isTTSReady
+                    isTTSReady = isTTSReady,
+                    mergedChunkParagraphs = mergedChunkParagraphs,
+                    isMergingEnabled = isMergingEnabled
                 )
             }
         }
@@ -716,6 +722,22 @@ class TTSScreenSpec(
                                             MaterialTheme.colorScheme.primary 
                                         else 
                                             LocalContentColor.current
+                                    )
+                                }
+                            }
+                            // Download chapter audio button (only for Gradio engines when caching is enabled)
+                            if (useGradioTTS && readerPreferences.ttsChapterCacheEnabled().get()) {
+                                IconButton(
+                                    onClick = {
+                                        // TODO: Implement chapter audio download
+                                        // This would call TTSChapterCache to download and cache the entire chapter
+                                    },
+                                    enabled = currentChapter != null && !isLoading
+                                ) {
+                                    Icon(
+                                        Icons.Default.Download,
+                                        contentDescription = "Download Chapter Audio",
+                                        tint = LocalContentColor.current
                                     )
                                 }
                             }

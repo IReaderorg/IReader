@@ -234,6 +234,13 @@ class AndroidTTSStateAdapter(
     // TTS engine ready state
     override val isTTSReady: StateFlow<Boolean> = sharedState.isTTSReady
     
+    // Text merging state
+    private val _currentMergedChunkParagraphs = MutableStateFlow<List<Int>>(emptyList())
+    override val currentMergedChunkParagraphs: StateFlow<List<Int>> = _currentMergedChunkParagraphs.asStateFlow()
+    
+    private val _isMergingEnabled = MutableStateFlow(false)
+    override val isMergingEnabled: StateFlow<Boolean> = _isMergingEnabled.asStateFlow()
+    
     init {
         // Observe ttsContent and update currentContent
         scope.launch {

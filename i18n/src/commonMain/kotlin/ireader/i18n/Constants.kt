@@ -20,6 +20,7 @@ object SHORTCUTS {
     const val SHORTCUT_LIBRARY = "ireader.SHORTCUT_LIBRARY"
     const val SHORTCUT_UPDATES = "ireader.SHORTCUT_UPDATES"
     const val SHORTCUT_HISTORY = "ireader.SHORTCUT_HISTORY"
+    const val SHORTCUT_DOWNLOADS = "ireader.SHORTCUT_DOWNLOADS"
 }
 
 

@@ -69,6 +69,12 @@ abstract class BaseTTSService(
     // Timestamp when TTS actually starts speaking current paragraph (for highlighter sync)
     private val _paragraphSpeakingStartTime = MutableStateFlow(0L)
     
+    // Text merging state
+    private val _currentMergedChunkParagraphs = MutableStateFlow<List<Int>>(emptyList())
+    private val _isMergingEnabled = MutableStateFlow(false)
+    private var mergedChunks: List<TTSTextMerger.MergedChunk> = emptyList()
+    private var currentMergedChunkIndex = 0
+    
     // TTS Engine
     protected var ttsEngine: TTSEngine? = null
     protected var ttsNotification: TTSNotification? = null
@@ -98,6 +104,8 @@ abstract class BaseTTSService(
         override val error = _error.asStateFlow()
         override val cachedParagraphs = _cachedParagraphs.asStateFlow()
         override val loadingParagraphs = _loadingParagraphs.asStateFlow()
+        override val currentMergedChunkParagraphs = _currentMergedChunkParagraphs.asStateFlow()
+        override val isMergingEnabled = _isMergingEnabled.asStateFlow()
         override val sleepTimeRemaining = _sleepTimeRemaining.asStateFlow()
         override val sleepModeEnabled = _sleepModeEnabled.asStateFlow()
         override val hasAudioFocus = _hasAudioFocus.asStateFlow()
@@ -428,6 +436,39 @@ abstract class BaseTTSService(
     
     // ========== Protected Helper Methods ==========
     
+    /**
+     * Check if text merging should be enabled based on engine type and preferences
+     */
+    protected fun shouldMergeText(): Boolean {
+        val isRemoteEngine = appPrefs.useGradioTTS().get()
+        val mergeWords = if (isRemoteEngine) {
+            readerPreferences.ttsMergeWordsRemote().get()
+        } else {
+            readerPreferences.ttsMergeWordsNative().get()
+        }
+        return mergeWords > 0
+    }
+    
+    /**
+     * Get the target word count for merging based on engine type
+     */
+    protected fun getMergeWordCount(): Int {
+        val isRemoteEngine = appPrefs.useGradioTTS().get()
+        return if (isRemoteEngine) {
+            readerPreferences.ttsMergeWordsRemote().get()
+        } else {
+            readerPreferences.ttsMergeWordsNative().get()
+        }
+    }
+    
+    /**
+     * Build merged chunks from content
+     */
+    protected fun buildMergedChunks(content: List<String>): List<TTSTextMerger.MergedChunk> {
+        val mergeWords = getMergeWordCount()
+        return TTSTextMerger.mergeParagraphs(content, mergeWords, includeRemainder = true)
+    }
+    
     protected suspend fun readCurrentParagraph() {
         val content = _currentContent.value
         val index = _currentParagraph.value
@@ -437,14 +478,50 @@ abstract class BaseTTSService(
             return
         }
         
-        val text = content[index]
-        val utteranceId = index.toString()
+        // Check if text merging is enabled
+        val shouldMerge = shouldMergeText()
+        _isMergingEnabled.value = shouldMerge
         
-        // Pre-cache next paragraphs (platform-specific)
-        precacheNextParagraphs()
-        
-        // Speak
-        ttsEngine?.speak(text, utteranceId)
+        if (shouldMerge) {
+            // Build merged chunks if not already built or content changed
+            if (mergedChunks.isEmpty() || mergedChunks.flatMap { it.originalParagraphIndices }.size != content.size) {
+                mergedChunks = buildMergedChunks(content)
+                currentMergedChunkIndex = 0
+            }
+            
+            // Find which merged chunk contains the current paragraph
+            val chunkIndex = TTSTextMerger.findChunkForParagraph(mergedChunks, index)
+            currentMergedChunkIndex = chunkIndex
+            
+            if (chunkIndex < mergedChunks.size) {
+                val chunk = mergedChunks[chunkIndex]
+                _currentMergedChunkParagraphs.value = chunk.originalParagraphIndices
+                
+                val text = chunk.mergedText
+                val utteranceId = "merged_${chunkIndex}_${chunk.startParagraph}"
+                
+                Log.debug { "TTS Merging: Reading chunk $chunkIndex with ${chunk.paragraphCount} paragraphs (${chunk.wordCount} words)" }
+                
+                // Pre-cache next chunks (platform-specific)
+                precacheNextParagraphs()
+                
+                // Speak merged text
+                ttsEngine?.speak(text, utteranceId)
+            }
+        } else {
+            // No merging - read single paragraph
+            _currentMergedChunkParagraphs.value = listOf(index)
+            mergedChunks = emptyList()
+            
+            val text = content[index]
+            val utteranceId = index.toString()
+            
+            // Pre-cache next paragraphs (platform-specific)
+            precacheNextParagraphs()
+            
+            // Speak
+            ttsEngine?.speak(text, utteranceId)
+        }
     }
     
     /**
@@ -493,21 +570,53 @@ abstract class BaseTTSService(
         
         val content = _currentContent.value
         val current = _currentParagraph.value
-        val isFinished = current >= content.lastIndex
         
-        if (!isFinished && _isPlaying.value) {
-            // Track previous paragraph for UI highlighting
-            _previousParagraph.value = current
-            _currentParagraph.value = current + 1
-            readCurrentParagraph()
-            updateNotification()
-        } else if (isFinished && _isPlaying.value && _autoNextChapter.value) {
-            // Auto-advance to next chapter
-            _previousParagraph.value = 0
-            nextChapter()
+        // Handle merged chunks differently
+        if (_isMergingEnabled.value && mergedChunks.isNotEmpty()) {
+            val currentChunk = mergedChunks.getOrNull(currentMergedChunkIndex)
+            val isLastChunk = currentMergedChunkIndex >= mergedChunks.lastIndex
+            
+            if (!isLastChunk && _isPlaying.value) {
+                // Move to next merged chunk
+                _previousParagraph.value = currentChunk?.endParagraph ?: current
+                currentMergedChunkIndex++
+                
+                val nextChunk = mergedChunks.getOrNull(currentMergedChunkIndex)
+                if (nextChunk != null) {
+                    _currentParagraph.value = nextChunk.startParagraph
+                    _currentMergedChunkParagraphs.value = nextChunk.originalParagraphIndices
+                }
+                
+                readCurrentParagraph()
+                updateNotification()
+            } else if (isLastChunk && _isPlaying.value && _autoNextChapter.value) {
+                // Auto-advance to next chapter
+                _previousParagraph.value = 0
+                mergedChunks = emptyList()
+                currentMergedChunkIndex = 0
+                nextChapter()
+            } else {
+                _isPlaying.value = false
+                updateNotification()
+            }
         } else {
-            _isPlaying.value = false
-            updateNotification()
+            // Standard paragraph-by-paragraph handling
+            val isFinished = current >= content.lastIndex
+            
+            if (!isFinished && _isPlaying.value) {
+                // Track previous paragraph for UI highlighting
+                _previousParagraph.value = current
+                _currentParagraph.value = current + 1
+                readCurrentParagraph()
+                updateNotification()
+            } else if (isFinished && _isPlaying.value && _autoNextChapter.value) {
+                // Auto-advance to next chapter
+                _previousParagraph.value = 0
+                nextChapter()
+            } else {
+                _isPlaying.value = false
+                updateNotification()
+            }
         }
     }
     

@@ -99,6 +99,7 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
+            
             <intent-filter>
                 <data
                     android:host="www.ireader.org"
@@ -113,14 +114,7 @@
                     android:scheme="ireader" />
             </intent-filter>
             
-            <!-- App Shortcuts deep link intent filter -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data
-                    android:scheme="ireader"
-                    android:host="shortcut" />
-            </intent-filter>
+
 
         </activity>
         <activity

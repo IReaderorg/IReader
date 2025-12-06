@@ -268,6 +268,7 @@ open class MockTTSService : CommonTTSService {
         override val currentChapter: StateFlow<ireader.domain.models.entities.Chapter?> = MutableStateFlow(null)
         override val currentParagraph: StateFlow<Int> = _currentParagraph
         override val previousParagraph: StateFlow<Int> = _previousParagraph
+        override val paragraphSpeakingStartTime: StateFlow<Long> = MutableStateFlow(0L)
         override val totalParagraphs: StateFlow<Int> = _totalParagraphs
         override val currentContent: StateFlow<List<String>> = _currentContent
         override val speechSpeed: StateFlow<Float> = _speechSpeed
@@ -280,6 +281,8 @@ open class MockTTSService : CommonTTSService {
         override val sleepModeEnabled: StateFlow<Boolean> = _sleepModeEnabled
         override val hasAudioFocus: StateFlow<Boolean> = _hasAudioFocus
         override val isTTSReady: StateFlow<Boolean> = MutableStateFlow(true)
+        override val currentMergedChunkParagraphs: StateFlow<List<Int>> = MutableStateFlow(emptyList())
+        override val isMergingEnabled: StateFlow<Boolean> = MutableStateFlow(false)
     }
     
     override fun initialize() {}

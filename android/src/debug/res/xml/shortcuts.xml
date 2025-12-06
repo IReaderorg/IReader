@@ -9,7 +9,7 @@
         android:shortcutLongLabel="@string/shortcut_search_long">
         <intent
             android:action="ireader.SHORTCUT_SEARCH"
-            android:targetPackage="ir.kazemcodes.infinityreader"
+            android:targetPackage="ir.kazemcodes.infinityreader.debug"
             android:targetClass="org.ireader.app.MainActivity" />
     </shortcut>
     
@@ -21,7 +21,7 @@
         android:shortcutLongLabel="@string/shortcut_library_long">
         <intent
             android:action="ireader.SHORTCUT_LIBRARY"
-            android:targetPackage="ir.kazemcodes.infinityreader"
+            android:targetPackage="ir.kazemcodes.infinityreader.debug"
             android:targetClass="org.ireader.app.MainActivity" />
     </shortcut>
     
@@ -33,7 +33,7 @@
         android:shortcutLongLabel="@string/shortcut_updates_long">
         <intent
             android:action="ireader.SHORTCUT_UPDATES"
-            android:targetPackage="ir.kazemcodes.infinityreader"
+            android:targetPackage="ir.kazemcodes.infinityreader.debug"
             android:targetClass="org.ireader.app.MainActivity" />
     </shortcut>
     
@@ -45,7 +45,7 @@
         android:shortcutLongLabel="@string/shortcut_history_long">
         <intent
             android:action="ireader.SHORTCUT_HISTORY"
-            android:targetPackage="ir.kazemcodes.infinityreader"
+            android:targetPackage="ir.kazemcodes.infinityreader.debug"
             android:targetClass="org.ireader.app.MainActivity" />
     </shortcut>
     
@@ -57,7 +57,7 @@
         android:shortcutLongLabel="@string/shortcut_downloads_long">
         <intent
             android:action="ireader.SHORTCUT_DOWNLOADS"
-            android:targetPackage="ir.kazemcodes.infinityreader"
+            android:targetPackage="ir.kazemcodes.infinityreader.debug"
             android:targetClass="org.ireader.app.MainActivity" />
     </shortcut>
     

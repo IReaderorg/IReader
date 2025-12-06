@@ -25,9 +25,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.back
 import ireader.i18n.resources.for_more_powerful_and_natural
@@ -43,8 +48,11 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.GradioConfigEditDialog
 import ireader.presentation.ui.settings.components.GradioTTSSection
+import ireader.presentation.ui.settings.components.TTSMergeAndCacheSection
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +64,20 @@ fun AndroidTTSMManagerSettingsScreen(
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val gradioState = gradioViewModel?.state?.collectAsState()?.value
+    val readerPreferences: ReaderPreferences = koinInject()
+    val scope = rememberCoroutineScope()
+    
+    // TTS Merge settings state
+    var mergeWordsRemote by remember { mutableStateOf(readerPreferences.ttsMergeWordsRemote().get()) }
+    var mergeWordsNative by remember { mutableStateOf(readerPreferences.ttsMergeWordsNative().get()) }
+    
+    // Chapter cache settings state
+    var chapterCacheEnabled by remember { mutableStateOf(readerPreferences.ttsChapterCacheEnabled().get()) }
+    var chapterCacheDays by remember { mutableStateOf(readerPreferences.ttsChapterCacheDays().get()) }
+    
+    // Cache stats (placeholder - would be populated from TTSChapterCache)
+    var cacheEntryCount by remember { mutableStateOf(0) }
+    var cacheSizeMB by remember { mutableStateOf(0f) }
     
     Scaffold(
         topBar = {
@@ -161,6 +183,40 @@ fun AndroidTTSMManagerSettingsScreen(
                 }
             }
             
+            // TTS Text Merging and Chapter Caching Section
+            item {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                TTSMergeAndCacheSection(
+                    mergeWordsRemote = mergeWordsRemote,
+                    onMergeWordsRemoteChange = { value ->
+                        mergeWordsRemote = value
+                        scope.launch { readerPreferences.ttsMergeWordsRemote().set(value) }
+                    },
+                    mergeWordsNative = mergeWordsNative,
+                    onMergeWordsNativeChange = { value ->
+                        mergeWordsNative = value
+                        scope.launch { readerPreferences.ttsMergeWordsNative().set(value) }
+                    },
+                    chapterCacheEnabled = chapterCacheEnabled,
+                    onChapterCacheEnabledChange = { enabled ->
+                        chapterCacheEnabled = enabled
+                        scope.launch { readerPreferences.ttsChapterCacheEnabled().set(enabled) }
+                    },
+                    chapterCacheDays = chapterCacheDays,
+                    onChapterCacheDaysChange = { days ->
+                        chapterCacheDays = days
+                        scope.launch { readerPreferences.ttsChapterCacheDays().set(days) }
+                    },
+                    cacheEntryCount = cacheEntryCount,
+                    cacheSizeMB = cacheSizeMB,
+                    onClearCache = {
+                        // Clear cache - would call TTSChapterCache.clearAll()
+                        cacheEntryCount = 0
+                        cacheSizeMB = 0f
+                    }
+                )
+            }
+            
             // Native TTS Info
             item {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -231,6 +287,3 @@ fun AndroidTTSMManagerSettingsScreen(
         )
     }
 }
-
-
-

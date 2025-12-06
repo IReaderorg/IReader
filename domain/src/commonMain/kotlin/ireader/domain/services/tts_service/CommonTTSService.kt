@@ -149,6 +149,10 @@ interface TTSServiceState {
     
     // TTS engine ready state
     val isTTSReady: StateFlow<Boolean>
+    
+    // Text merging state - tracks which original paragraphs are in current merged chunk
+    val currentMergedChunkParagraphs: StateFlow<List<Int>>  // Original paragraph indices in current chunk
+    val isMergingEnabled: StateFlow<Boolean>  // Whether text merging is active
 }
 
 /**

@@ -194,6 +194,13 @@ class DesktopTTSStateAdapter(
     private val _isTTSReady = MutableStateFlow(true)
     override val isTTSReady: StateFlow<Boolean> = _isTTSReady.asStateFlow()
     
+    // Text merging state
+    private val _currentMergedChunkParagraphs = MutableStateFlow<List<Int>>(emptyList())
+    override val currentMergedChunkParagraphs: StateFlow<List<Int>> = _currentMergedChunkParagraphs.asStateFlow()
+    
+    private val _isMergingEnabled = MutableStateFlow(false)
+    override val isMergingEnabled: StateFlow<Boolean> = _isMergingEnabled.asStateFlow()
+    
     init {
         // Observe ttsContent changes and update derived state
         scope.launch {

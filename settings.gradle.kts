@@ -3,6 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
         google()
+        maven(url = "https://jitpack.io")
         // JetBrains Compose dev repo excluded for F-Droid builds
         // F-Droid uses stable Compose versions from Maven Central
     }

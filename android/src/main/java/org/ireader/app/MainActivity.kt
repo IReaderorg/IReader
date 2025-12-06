@@ -38,8 +38,13 @@ import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.Args
 import ireader.i18n.SHORTCUTS.SHORTCUT_DETAIL
 import ireader.i18n.SHORTCUTS.SHORTCUT_DOWNLOAD
+import ireader.i18n.SHORTCUTS.SHORTCUT_DOWNLOADS
+import ireader.i18n.SHORTCUTS.SHORTCUT_HISTORY
+import ireader.i18n.SHORTCUTS.SHORTCUT_LIBRARY
 import ireader.i18n.SHORTCUTS.SHORTCUT_READER
+import ireader.i18n.SHORTCUTS.SHORTCUT_SEARCH
 import ireader.i18n.SHORTCUTS.SHORTCUT_TTS
+import ireader.i18n.SHORTCUTS.SHORTCUT_UPDATES
 import ireader.presentation.core.CommonNavHost
 import ireader.presentation.core.MainStarterScreen
 import ireader.presentation.core.NavigationRoutes
@@ -159,26 +164,13 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                 GetPermissions(uiPreferences, context = this@MainActivity)
                             }
                             
-                            // Handle initial intent after navigation is set up
+                            // Handle initial intent after navigation is set up (like Mihon)
                             LaunchedEffect(navController) {
                                 // Wait for navigation graph to be ready
-                                delay(800)
-                                val intent = this@MainActivity.intent
-                                val uri = intent.data
-                                println("🔷 LaunchedEffect: Initial intent data: $uri")
-                                println("🔷 LaunchedEffect: NavController current destination: ${navController.currentDestination?.route}")
-                                
-                                // Handle shortcut deep links
-                                if (uri?.scheme == "ireader" && uri.host == "shortcut") {
-                                    println("🔷 LaunchedEffect: Calling handleIntentAction for shortcut deep link")
-                                    try {
-                                        val result = handleIntentAction(intent, navController)
-                                        println("🔷 LaunchedEffect: handleIntentAction result: $result")
-                                    } catch (e: Exception) {
-                                        println("❌ LaunchedEffect: handleIntentAction failed: ${e.message}")
-                                        e.printStackTrace()
-                                    }
-                                }
+                                delay(500)
+                                println("🔷 LaunchedEffect: Handling initial intent")
+                                println("🔷 LaunchedEffect: Action: ${this@MainActivity.intent.action}")
+                                handleIntentAction(this@MainActivity.intent, navController)
                             }
                             
                             FirstLaunchDialogHandler()
@@ -296,24 +288,20 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     private fun handleEarlyShortcutIntent(intent: Intent) {
         println("🔷 handleEarlyShortcutIntent called")
         println("   Action: ${intent.action}")
-        println("   Data: ${intent.data}")
         
-        // Handle deep link shortcuts (ireader://shortcut/xxx)
-        val uri = intent.data
-        if (uri?.scheme == "ireader" && uri.host == "shortcut") {
-            when (uri.lastPathSegment) {
-                "library" -> {
-                    println("🔷 Early handling shortcut/library - setting initial tab to 0")
-                    MainStarterScreen.setInitialTab(0)
-                }
-                "updates" -> {
-                    println("🔷 Early handling shortcut/updates - setting initial tab to 1")
-                    MainStarterScreen.setInitialTab(1)
-                }
-                "history" -> {
-                    println("🔷 Early handling shortcut/history - setting initial tab to 2")
-                    MainStarterScreen.setInitialTab(2)
-                }
+        // Set initial tab based on shortcut action
+        when (intent.action) {
+            SHORTCUT_LIBRARY -> {
+                println("🔷 Early handling SHORTCUT_LIBRARY - setting initial tab to 0")
+                MainStarterScreen.setInitialTab(0)
+            }
+            SHORTCUT_UPDATES -> {
+                println("🔷 Early handling SHORTCUT_UPDATES - setting initial tab to 1")
+                MainStarterScreen.setInitialTab(1)
+            }
+            SHORTCUT_HISTORY -> {
+                println("🔷 Early handling SHORTCUT_HISTORY - setting initial tab to 2")
+                MainStarterScreen.setInitialTab(2)
             }
         }
     }
@@ -322,67 +310,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         // Log all intent details for debugging
         println("🔷 handleIntentAction called (isNewIntent=$isNewIntent)")
         println("   Action: ${intent.action}")
-        println("   Data: ${intent.data}")
-        println("   Scheme: ${intent.data?.scheme}")
-        println("   Host: ${intent.data?.host}")
-        
-        // Handle deep link shortcuts (ireader://shortcut/xxx)
-        val uri = intent.data
-        if (uri?.scheme == "ireader" && uri.host == "shortcut") {
-            println("🔷 Handling shortcut deep link: ${uri.lastPathSegment}")
-            return when (uri.lastPathSegment) {
-                "search" -> {
-                    println("🔷 Navigating to globalSearch")
-                    try {
-                        navController.navigate("globalSearch") {
-                            launchSingleTop = true
-                        }
-                        println("✅ Navigated to globalSearch")
-                    } catch (e: Exception) {
-                        println("❌ Navigation failed: ${e.message}")
-                        e.printStackTrace()
-                    }
-                    true
-                }
-                "library" -> {
-                    println("🔷 Switching to library tab")
-                    if (isNewIntent) {
-                        lifecycleScope.launch { MainStarterScreen.switchToTab(0) }
-                    }
-                    true
-                }
-                "updates" -> {
-                    println("🔷 Switching to updates tab")
-                    if (isNewIntent) {
-                        lifecycleScope.launch { MainStarterScreen.switchToTab(1) }
-                    }
-                    true
-                }
-                "history" -> {
-                    println("🔷 Switching to history tab")
-                    if (isNewIntent) {
-                        lifecycleScope.launch { MainStarterScreen.switchToTab(2) }
-                    }
-                    true
-                }
-                "downloads" -> {
-                    println("🔷 Navigating to downloader")
-                    try {
-                        navController.navigate(NavigationRoutes.downloader) {
-                            launchSingleTop = true
-                        }
-                        println("✅ Navigated to downloader")
-                    } catch (e: Exception) {
-                        println("❌ Navigation failed: ${e.message}")
-                        e.printStackTrace()
-                    }
-                    true
-                }
-                else -> false
-            }
-        }
         
         // Check if this is a wallet callback
+        val uri = intent.data
         if (uri != null) {
             val scheme = uri.scheme
             // MetaMask SDK callback (uses package name as scheme)
@@ -392,9 +322,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                 scheme?.startsWith("ir.kazemcodes") == true ||
                 scheme?.startsWith("org.ireader") == true) {
                 println("✅ MetaMask SDK callback detected: $uri")
-                println("   Full URI: $uri")
-                println("   Query: ${uri.query}")
-                // The MetaMask SDK automatically handles this when the activity's intent is updated
                 return true
             }
             
@@ -405,7 +332,46 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
             }
         }
         
+        // Handle shortcut actions (like Mihon)
         return when (intent.action) {
+            // App Shortcuts Menu actions
+            SHORTCUT_SEARCH -> {
+                println("🔷 Handling SHORTCUT_SEARCH")
+                navController.navigate("globalSearch") {
+                    launchSingleTop = true
+                }
+                true
+            }
+            SHORTCUT_LIBRARY -> {
+                println("🔷 Handling SHORTCUT_LIBRARY")
+                if (isNewIntent) {
+                    lifecycleScope.launch { MainStarterScreen.switchToTab(0) }
+                }
+                // For initial launch, tab is already set by handleEarlyShortcutIntent
+                true
+            }
+            SHORTCUT_UPDATES -> {
+                println("🔷 Handling SHORTCUT_UPDATES")
+                if (isNewIntent) {
+                    lifecycleScope.launch { MainStarterScreen.switchToTab(1) }
+                }
+                true
+            }
+            SHORTCUT_HISTORY -> {
+                println("🔷 Handling SHORTCUT_HISTORY")
+                if (isNewIntent) {
+                    lifecycleScope.launch { MainStarterScreen.switchToTab(2) }
+                }
+                true
+            }
+            SHORTCUT_DOWNLOADS -> {
+                println("🔷 Handling SHORTCUT_DOWNLOADS")
+                navController.navigate(NavigationRoutes.downloader) {
+                    launchSingleTop = true
+                }
+                true
+            }
+            // Legacy shortcuts (for notifications, widgets, etc.)
             SHORTCUT_TTS -> {
                 val bookId = intent.extras?.getLong(Args.ARG_BOOK_ID)
                 val chapterId = intent.extras?.getLong(Args.ARG_CHAPTER_ID)
@@ -441,15 +407,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                 }
                 true
             }
-            // Legacy action-based shortcuts (kept for backward compatibility)
             SHORTCUT_DOWNLOAD -> {
-                println("🔷 Handling legacy SHORTCUT_DOWNLOAD")
-                try {
-                    navController.navigate(NavigationRoutes.downloader) {
-                        launchSingleTop = true
-                    }
-                } catch (e: Exception) {
-                    println("❌ Navigation failed: ${e.message}")
+                navController.navigate(NavigationRoutes.downloader) {
+                    launchSingleTop = true
                 }
                 true
             }

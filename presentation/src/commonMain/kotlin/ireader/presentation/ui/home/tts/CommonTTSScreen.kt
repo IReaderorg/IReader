@@ -409,13 +409,18 @@ data class CommonTTSScreenState(
     // Whether calibration is complete (first paragraph has finished)
     val isCalibrated: Boolean = false,
     // Whether TTS engine is ready to speak
-    val isTTSReady: Boolean = false
+    val isTTSReady: Boolean = false,
+    // Text merging state - tracks which original paragraphs are in current merged chunk
+    val mergedChunkParagraphs: List<Int> = emptyList(),
+    val isMergingEnabled: Boolean = false
 ) {
     // Pre-computed properties to avoid repeated calculations during recomposition
     val contentSize: Int get() = content.size
     val hasContent: Boolean get() = content.isNotEmpty()
     val hasTranslation: Boolean get() = translatedContent != null && translatedContent.isNotEmpty()
     val progressFraction: Float get() = if (contentSize > 0) (currentReadingParagraph + 1).toFloat() / contentSize else 0f
+    // Check if a paragraph is part of the current merged chunk being read
+    fun isParagraphInCurrentMergedChunk(index: Int): Boolean = isMergingEnabled && index in mergedChunkParagraphs
 }
 
 /**
@@ -663,6 +668,10 @@ fun TTSContentDisplay(
                     contentType = { "tts_paragraph" }
                 ) { index ->
                     val isCurrentParagraph = index == state.currentReadingParagraph
+                    // Check if this paragraph is part of the current merged chunk being read
+                    val isInMergedChunk = state.isParagraphInCurrentMergedChunk(index)
+                    // Highlight if it's the current paragraph OR part of the merged chunk being read
+                    val shouldHighlight = isCurrentParagraph || (isInMergedChunk && state.isPlaying)
                     
                     // Extract item-specific state to minimize recomposition scope
                     TTSParagraphItemWithSentenceHighlight(
@@ -670,7 +679,7 @@ fun TTSContentDisplay(
                         text = displayContent[index],
                         originalText = state.content.getOrNull(index) ?: "",
                         translatedText = state.translatedContent?.getOrNull(index),
-                        isCurrentParagraph = isCurrentParagraph,
+                        isCurrentParagraph = shouldHighlight,
                         isPlaying = state.isPlaying,
                         currentSentenceIndex = if (isCurrentParagraph && state.sentenceHighlightEnabled) 
                             currentSentenceIndex.coerceAtLeast(0) else 0,
