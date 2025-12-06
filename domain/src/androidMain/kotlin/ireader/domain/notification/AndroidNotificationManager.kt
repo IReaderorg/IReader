@@ -59,8 +59,9 @@ class AndroidNotificationManager(
             .setAutoCancel(data.autoCancel)
             .setOngoing(data.ongoing)
         
-        // Set small icon if provided
-        data.smallIconRes?.let { builder.setSmallIcon(it) }
+        // Set small icon - use provided or default to ic_downloading
+        val iconRes = data.smallIconRes ?: ireader.i18n.R.drawable.ic_downloading
+        builder.setSmallIcon(iconRes)
         
         // Set progress if provided
         data.progress?.let { progress ->

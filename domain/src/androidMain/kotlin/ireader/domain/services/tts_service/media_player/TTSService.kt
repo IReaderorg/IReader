@@ -455,7 +455,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     /**
-     * Read text using unified player
+     * Read text using unified player with optional text merging
      */
     fun readText(context: Context, mediaSessionCompat: MediaSessionCompat) {
         setBundle()
@@ -485,23 +485,82 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             // Initialize TTS engine if needed
             initializeTTSEngine()
             
-            // Speak current paragraph
-            val text = content[currentParagraph]
-            val utteranceId = currentParagraph.toString()
+            // Check if text merging is enabled
+            val mergeWordCount = if (currentEngineType == TTSEngineType.GRADIO) {
+                readerPreferences.ttsMergeWordsRemote().get()
+            } else {
+                readerPreferences.ttsMergeWordsNative().get()
+            }
             
-            // Pre-cache next 3 paragraphs for Gradio TTS
+            val textToSpeak: String
+            val utteranceId: String
+            
+            if (mergeWordCount > 0) {
+                // Text merging enabled - merge paragraphs into chunks
+                Log.info { "TTS: Text merging enabled with $mergeWordCount words" }
+                state.setMergingEnabled(true)
+                
+                // Build merged chunks if not already done or if chapter changed
+                if (state.mergedChunks.isEmpty() || 
+                    state.mergedChunks.firstOrNull()?.originalParagraphIndices?.firstOrNull()?.let { 
+                        it >= content.size 
+                    } == true) {
+                    state.mergedChunks = TTSTextMerger.mergeParagraphs(content, mergeWordCount)
+                    Log.info { "TTS: Created ${state.mergedChunks.size} merged chunks from ${content.size} paragraphs" }
+                }
+                
+                // Find which chunk contains the current paragraph
+                val chunkIndex = TTSTextMerger.findChunkForParagraph(state.mergedChunks, currentParagraph)
+                state.currentMergedChunkIndex = chunkIndex
+                
+                if (chunkIndex >= 0 && chunkIndex < state.mergedChunks.size) {
+                    val chunk = state.mergedChunks[chunkIndex]
+                    textToSpeak = chunk.mergedText
+                    utteranceId = "chunk_${chunkIndex}_${chunk.startParagraph}"
+                    
+                    // Update state with which paragraphs are in this chunk
+                    state.setCurrentMergedChunkParagraphs(chunk.originalParagraphIndices)
+                    
+                    Log.info { "TTS: Speaking chunk $chunkIndex with paragraphs ${chunk.originalParagraphIndices} (${chunk.wordCount} words)" }
+                } else {
+                    // Fallback to single paragraph
+                    textToSpeak = content[currentParagraph]
+                    utteranceId = currentParagraph.toString()
+                    state.setCurrentMergedChunkParagraphs(listOf(currentParagraph))
+                }
+            } else {
+                // No merging - speak single paragraph
+                state.setMergingEnabled(false)
+                state.setCurrentMergedChunkParagraphs(listOf(currentParagraph))
+                textToSpeak = content[currentParagraph]
+                utteranceId = currentParagraph.toString()
+            }
+            
+            // Pre-cache next paragraphs/chunks for Gradio TTS
             if (currentEngineType == TTSEngineType.GRADIO) {
-                // Get the underlying Gradio player for caching
                 val androidEngine = ttsEngine as? AndroidGradioTTSEngine
                 androidEngine?.let { engine ->
                     val nextParagraphs = mutableListOf<Pair<String, String>>()
                     val loadingSet = mutableSetOf<Int>()
                     
-                    for (i in 1..3) {
-                        val nextIndex = state.currentReadingParagraph.value + i
-                        if (nextIndex < content.size) {
-                            nextParagraphs.add(nextIndex.toString() to content[nextIndex])
-                            loadingSet.add(nextIndex)
+                    if (mergeWordCount > 0 && state.mergedChunks.isNotEmpty()) {
+                        // Pre-cache next chunks
+                        for (i in 1..2) {
+                            val nextChunkIndex = state.currentMergedChunkIndex + i
+                            if (nextChunkIndex < state.mergedChunks.size) {
+                                val nextChunk = state.mergedChunks[nextChunkIndex]
+                                nextParagraphs.add("chunk_$nextChunkIndex" to nextChunk.mergedText)
+                                loadingSet.addAll(nextChunk.originalParagraphIndices)
+                            }
+                        }
+                    } else {
+                        // Pre-cache next paragraphs
+                        for (i in 1..3) {
+                            val nextIndex = currentParagraph + i
+                            if (nextIndex < content.size) {
+                                nextParagraphs.add(nextIndex.toString() to content[nextIndex])
+                                loadingSet.add(nextIndex)
+                            }
                         }
                     }
                     
@@ -511,18 +570,16 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                         
                         // Update cache status after a delay
                         scope.launch {
-                            delay(500) // Give it time to start caching
+                            delay(500)
                             val cached = mutableSetOf<Int>()
                             val loading = mutableSetOf<Int>()
                             
-                            for (i in 1..3) {
-                                val nextIndex = state.currentReadingParagraph.value + i
-                                if (nextIndex < content.size) {
-                                    when (engine.getCacheStatus(nextIndex.toString())) {
-                                        GenericGradioTTSEngine.CacheStatus.CACHED -> cached.add(nextIndex)
-                                        GenericGradioTTSEngine.CacheStatus.LOADING -> loading.add(nextIndex)
-                                        else -> {}
-                                    }
+                            for (idx in loadingSet) {
+                                val cacheKey = if (mergeWordCount > 0) "chunk_${TTSTextMerger.findChunkForParagraph(state.mergedChunks, idx)}" else idx.toString()
+                                when (engine.getCacheStatus(cacheKey)) {
+                                    GenericGradioTTSEngine.CacheStatus.CACHED -> cached.add(idx)
+                                    GenericGradioTTSEngine.CacheStatus.LOADING -> loading.add(idx)
+                                    else -> {}
                                 }
                             }
                             
@@ -533,9 +590,9 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 }
             }
             
-            // Speak the text - NativeTTSPlayer handles queuing if not ready yet
+            // Speak the text
             scope.launch {
-                ttsEngine?.speak(text, utteranceId)
+                ttsEngine?.speak(textToSpeak, utteranceId)
             }
             
         }.onFailure { e ->
@@ -544,7 +601,7 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
     }
     
     /**
-     * Handle paragraph completion and auto-advance
+     * Handle paragraph/chunk completion and auto-advance
      */
     private fun handleParagraphComplete() {
         checkSleepTime()
@@ -559,13 +616,37 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
             return
         }
         
-        val isFinished = currentParagraph >= content.lastIndex
+        // Handle text merging - advance to next chunk or paragraph
+        val isMergingEnabled = state.isMergingEnabled.value
+        val nextParagraph: Int
+        
+        if (isMergingEnabled && state.mergedChunks.isNotEmpty()) {
+            // Text merging mode - advance to next chunk
+            val currentChunkIndex = state.currentMergedChunkIndex
+            val nextChunkIndex = currentChunkIndex + 1
+            
+            if (nextChunkIndex < state.mergedChunks.size) {
+                // Move to first paragraph of next chunk
+                val nextChunk = state.mergedChunks[nextChunkIndex]
+                nextParagraph = nextChunk.startParagraph
+                Log.info { "TTS: Advancing to chunk $nextChunkIndex, paragraph $nextParagraph" }
+            } else {
+                // No more chunks - chapter finished
+                nextParagraph = content.size // Will trigger chapter finished
+                Log.info { "TTS: All chunks complete, chapter finished" }
+            }
+        } else {
+            // Normal mode - advance to next paragraph
+            nextParagraph = currentParagraph + 1
+        }
+        
+        val isFinished = nextParagraph >= content.size
         
         // Keep playing state true for auto-advance
-        if (!isFinished && currentParagraph < content.size && state.isPlaying.value) {
-            // Update previous paragraph before advancing to current
+        if (!isFinished && state.isPlaying.value) {
+            // Update previous paragraph before advancing
             state.setPreviousReadingParagraph(currentParagraph)
-            state.setCurrentReadingParagraph(currentParagraph + 1)
+            state.setCurrentReadingParagraph(nextParagraph)
             scope.launch { updateNotification() }
             readText(this, mediaSession)
             return
@@ -1180,6 +1261,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                             scope.launch {
                                 chapterRepo.insertChapter(remoteChapter)
                                 ttsState.setTtsChapter(remoteChapter)
+                                // Reset merged chunks for new chapter (use state which is TTSStateImpl)
+                                state.mergedChunks = emptyList()
+                                state.currentMergedChunkIndex = 0
+                                state.setCurrentMergedChunkParagraphs(emptyList())
                                 // Update reading history to sync TTS progress with novel progress
                                 updateReadingHistory(remoteChapter)
                                 setLoadingState(false)
@@ -1197,6 +1282,10 @@ class TTSService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeL
                 }
             } else {
                 ttsState.setTtsChapter(chapter)
+                // Reset merged chunks for new chapter (use state which is TTSStateImpl)
+                state.mergedChunks = emptyList()
+                state.currentMergedChunkIndex = 0
+                state.setCurrentMergedChunkParagraphs(emptyList())
                 // Update reading history to sync TTS progress with novel progress
                 updateReadingHistory(chapter)
                 setLoadingState(false)

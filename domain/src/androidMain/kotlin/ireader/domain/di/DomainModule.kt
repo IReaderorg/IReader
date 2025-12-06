@@ -3,6 +3,7 @@ package ireader.domain.di
 import android.app.Service
 import androidx.compose.ui.text.ExperimentalTextApi
 import ireader.core.http.HttpClients
+import okio.Path.Companion.toPath
 import ireader.core.prefs.PreferenceStore
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.core.source.LocalCatalogSource
@@ -275,7 +276,9 @@ actual val DomainModule = module {
     single<ireader.domain.services.tts_service.AndroidTTSServiceAdapter> {
         ireader.domain.services.tts_service.AndroidTTSServiceAdapter(
             context = androidContext(),
-            sharedState = get()
+            sharedState = get(),
+            appPreferences = get(),
+            httpClient = get<ireader.core.http.HttpClients>().default
         ).apply {
             initialize()
         }
@@ -284,6 +287,30 @@ actual val DomainModule = module {
     // Provide CommonTTSService interface using the adapter
     single<ireader.domain.services.tts_service.CommonTTSService> {
         get<ireader.domain.services.tts_service.AndroidTTSServiceAdapter>()
+    }
+    
+    // TTS Download Notification Helper
+    single<ireader.domain.services.tts_service.TTSDownloadNotificationHelper> {
+        ireader.domain.services.tts_service.TTSDownloadNotificationHelper(
+            notificationManager = get()
+        )
+    }
+    
+    // TTS Chapter Download Manager with notification support
+    single<ireader.domain.services.tts_service.TTSChapterDownloadManager> {
+        ireader.domain.services.tts_service.TTSChapterDownloadManager(
+            notificationHelper = get()
+        )
+    }
+    
+    // TTS Chapter Cache for storing downloaded chapter audio
+    single<ireader.domain.services.tts_service.TTSChapterCache> {
+        val cachePath = "${androidContext().cacheDir.absolutePath}/tts_chapter_cache"
+        val cacheDir = cachePath.toPath()
+        ireader.domain.services.tts_service.TTSChapterCache(
+            fileSystem = okio.FileSystem.SYSTEM,
+            cacheDir = cacheDir
+        )
     }
     
     // Gradio TTS Manager for online TTS services

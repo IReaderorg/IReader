@@ -116,4 +116,12 @@ class AndroidGradioTTSEngine(
      * Get the underlying configuration
      */
     fun getConfig() = engine.getConfig()
+    
+    /**
+     * Generate audio bytes for the given text.
+     * Used for chapter download feature.
+     */
+    suspend fun generateAudioBytes(text: String): ByteArray? {
+        return engine.generateAudioBytes(text)
+    }
 }

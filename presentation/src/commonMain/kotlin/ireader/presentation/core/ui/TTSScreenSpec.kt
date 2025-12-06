@@ -29,6 +29,8 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.CommonTTSService
+import ireader.domain.services.tts_service.TTSChapterDownloadManager
+import ireader.domain.services.tts_service.createTTSDownloadIntentProvider
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
 import ireader.domain.services.common.TranslationService
 import ireader.domain.services.common.ServiceResult
@@ -93,8 +95,22 @@ class TTSScreenSpec(
         val getAllTranslationsUseCase: GetAllTranslationsForChapterUseCase = koinInject()
         val translationService: TranslationService = koinInject()
         val translationEnginesManager: TranslationEnginesManager = koinInject()
+        val downloadManager: TTSChapterDownloadManager = koinInject()
+        val chapterCache: ireader.domain.services.tts_service.TTSChapterCache = koinInject()
         val scope = rememberCoroutineScope()
         val isTabletOrDesktop = isTableUi()
+        
+        // TTS Download state
+        val downloadProgress by downloadManager.progress.collectAsState()
+        val downloadState by downloadManager.state.collectAsState()
+        var isDownloadingChapter by remember { mutableStateOf(false) }
+        
+        // Set up platform-specific intents for notification actions
+        LaunchedEffect(Unit) {
+            val intentProvider = createTTSDownloadIntentProvider()
+            downloadManager.pauseIntent = intentProvider.getPauseIntent()
+            downloadManager.cancelIntent = intentProvider.getCancelIntent()
+        }
         
         // Translation in progress state
         var isTranslatingChapter by remember { mutableStateOf(false) }
@@ -166,6 +182,13 @@ class TTSScreenSpec(
         // This is updated when TTS actually starts speaking (in TTSService.onStart callback)
         // Used as a SIGNAL to reset the sentence highlighter timer in CommonTTSScreen
         val paragraphSpeakingStartTime by ttsService.state.paragraphSpeakingStartTime.collectAsState()
+        
+        // Check if current chapter is cached
+        val isChapterCached by remember(currentChapter?.id) {
+            derivedStateOf { 
+                currentChapter?.id?.let { chapterCache.isCached(it) } ?: false 
+            }
+        }
         
         // Memoize colors to prevent unnecessary recompositions
         val backgroundColor by remember(useCustomColors, customBackgroundColor) {
@@ -478,13 +501,28 @@ class TTSScreenSpec(
         val currentEngineName = remember(ttsService) { ttsService.getCurrentEngineName() }
         val availableEngines = remember(ttsService) { ttsService.getAvailableEngines() }
         
+        // Chapter download progress tracking
+        val chapterDownloadCurrentParagraph = downloadProgress?.currentParagraph ?: -1
+        val chapterDownloadTotalParagraphs = downloadProgress?.totalParagraphs ?: 0
+        val isChapterDownloading = downloadState == TTSChapterDownloadManager.DownloadState.DOWNLOADING ||
+            downloadState == TTSChapterDownloadManager.DownloadState.PAUSED
+        // Track which paragraphs have been downloaded (0 to currentParagraph-1)
+        val chapterDownloadedParagraphs = remember(chapterDownloadCurrentParagraph) {
+            if (chapterDownloadCurrentParagraph > 0) {
+                (0 until chapterDownloadCurrentParagraph).toSet()
+            } else {
+                emptySet()
+            }
+        }
+        
         // Create state object for unified components - memoized to reduce object allocations
         val screenState by remember(
             currentParagraph, previousParagraph, isPlaying, isLoading, isTTSReady, content,
             translatedContent, showTranslation, bilingualMode, chapterName, bookTitle,
             speechSpeed, autoNextChapter, fullScreenMode, cachedParagraphs, loadingParagraphs,
             sleepTimeRemaining, sleepModeEnabledState, paragraphSpeakingStartTime, sentenceHighlightEnabled,
-            calibratedWPM, isCalibrated, mergedChunkParagraphs, isMergingEnabled
+            calibratedWPM, isCalibrated, mergedChunkParagraphs, isMergingEnabled,
+            isChapterDownloading, chapterDownloadCurrentParagraph, chapterDownloadTotalParagraphs, chapterDownloadedParagraphs
         ) {
             derivedStateOf {
                 CommonTTSScreenState(
@@ -506,6 +544,11 @@ class TTSScreenSpec(
                     sleepTimeRemaining = sleepTimeRemaining,
                     sleepModeEnabled = sleepModeEnabledState,
                     hasDownloadFeature = false,
+                    isDownloading = isChapterDownloading,
+                    downloadProgress = downloadProgress?.progressFraction ?: 0f,
+                    chapterDownloadCurrentParagraph = chapterDownloadCurrentParagraph,
+                    chapterDownloadTotalParagraphs = chapterDownloadTotalParagraphs,
+                    chapterDownloadedParagraphs = chapterDownloadedParagraphs,
                     currentEngine = currentEngineName,
                     availableEngines = availableEngines,
                     paragraphStartTime = paragraphSpeakingStartTime,
@@ -727,18 +770,100 @@ class TTSScreenSpec(
                             }
                             // Download chapter audio button (only for Gradio engines when caching is enabled)
                             if (useGradioTTS && readerPreferences.ttsChapterCacheEnabled().get()) {
+                                val isDownloading = downloadState == TTSChapterDownloadManager.DownloadState.DOWNLOADING ||
+                                    downloadState == TTSChapterDownloadManager.DownloadState.PAUSED
+                                val cacheDays = readerPreferences.ttsChapterCacheDays().get()
+                                val activeConfigId = appPreferences.activeGradioConfigId().get()
+                                
                                 IconButton(
                                     onClick = {
-                                        // TODO: Implement chapter audio download
-                                        // This would call TTSChapterCache to download and cache the entire chapter
+                                        val chapter = currentChapter ?: return@IconButton
+                                        val book = currentBook ?: return@IconButton
+                                        
+                                        if (isDownloading) {
+                                            // If already downloading, cancel it
+                                            downloadManager.cancel()
+                                        } else if (isChapterCached) {
+                                            // If already cached, remove from cache
+                                            chapterCache.removeEntry(chapter.id)
+                                        } else {
+                                            // Start download
+                                            val paragraphs = if (showTranslation && translatedContent != null) {
+                                                translatedContent!!
+                                            } else {
+                                                content
+                                            }
+                                            
+                                            if (paragraphs.isNotEmpty()) {
+                                                downloadManager.startDownload(
+                                                    chapterId = chapter.id,
+                                                    chapterName = chapter.name,
+                                                    bookTitle = book.title,
+                                                    paragraphs = paragraphs,
+                                                    generateAudio = { text, index ->
+                                                        // Use TTS service to generate audio
+                                                        ttsService.generateAudioForText(text)
+                                                    },
+                                                    onComplete = { audioChunks ->
+                                                        // Combine all audio chunks and save to cache
+                                                        if (audioChunks.isNotEmpty()) {
+                                                            val combinedAudio = audioChunks.fold(ByteArray(0)) { acc, chunk ->
+                                                                acc + chunk
+                                                            }
+                                                            scope.launch {
+                                                                chapterCache.cacheChapterAudio(
+                                                                    chapterId = chapter.id,
+                                                                    bookId = book.id,
+                                                                    audioData = combinedAudio,
+                                                                    engineId = activeConfigId,
+                                                                    cacheDays = cacheDays
+                                                                )
+                                                            }
+                                                        }
+                                                    },
+                                                    onError = { error ->
+                                                        // Handle error - notification already shown by download manager
+                                                    }
+                                                )
+                                            }
+                                        }
                                     },
                                     enabled = currentChapter != null && !isLoading
                                 ) {
-                                    Icon(
-                                        Icons.Default.Download,
-                                        contentDescription = "Download Chapter Audio",
-                                        tint = LocalContentColor.current
-                                    )
+                                    when {
+                                        isDownloading -> {
+                                            // Show progress or pause icon when downloading
+                                            if (downloadState == TTSChapterDownloadManager.DownloadState.PAUSED) {
+                                                Icon(
+                                                    Icons.Default.PlayArrow,
+                                                    contentDescription = "Resume Download",
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            } else {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(24.dp),
+                                                    strokeWidth = 2.dp,
+                                                    progress = { downloadProgress?.progressFraction ?: 0f }
+                                                )
+                                            }
+                                        }
+                                        isChapterCached -> {
+                                            // Show cached icon (checkmark)
+                                            Icon(
+                                                Icons.Default.DownloadDone,
+                                                contentDescription = "Chapter Cached (tap to remove)",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                        else -> {
+                                            // Show download icon
+                                            Icon(
+                                                Icons.Default.Download,
+                                                contentDescription = "Download Chapter Audio",
+                                                tint = LocalContentColor.current
+                                            )
+                                        }
+                                    }
                                 }
                             }
                             // Chapter drawer button

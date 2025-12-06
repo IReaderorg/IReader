@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FastForward
@@ -396,6 +397,11 @@ data class CommonTTSScreenState(
     val hasDownloadFeature: Boolean = false,
     val isDownloading: Boolean = false,
     val downloadProgress: Float = 0f,
+    // Chapter download progress - which paragraph is currently being downloaded
+    val chapterDownloadCurrentParagraph: Int = -1,
+    val chapterDownloadTotalParagraphs: Int = 0,
+    // Set of paragraphs that have been downloaded during chapter download
+    val chapterDownloadedParagraphs: Set<Int> = emptySet(),
     val selectedVoiceModel: String? = null,
     val availableEngines: List<String> = emptyList(),
     val currentEngine: String = "Default",
@@ -673,6 +679,20 @@ fun TTSContentDisplay(
                     // Highlight if it's the current paragraph OR part of the merged chunk being read
                     val shouldHighlight = isCurrentParagraph || (isInMergedChunk && state.isPlaying)
                     
+                    // Determine cache/download status for this paragraph
+                    // Priority: chapter download status > pre-cache status
+                    val isChapterDownloaded = state.chapterDownloadedParagraphs.contains(index)
+                    val isChapterDownloading = state.isDownloading && index == state.chapterDownloadCurrentParagraph
+                    val isPendingChapterDownload = state.isDownloading && index > state.chapterDownloadCurrentParagraph
+                    
+                    // Show status icon if: downloading chapter, or pre-caching upcoming paragraphs
+                    val showStatusIcon = state.isDownloading || 
+                        (index > state.currentReadingParagraph && index <= state.currentReadingParagraph + 3)
+                    
+                    // Determine final cached/loading state
+                    val finalIsCached = isChapterDownloaded || state.cachedParagraphs.contains(index)
+                    val finalIsLoading = isChapterDownloading || state.loadingParagraphs.contains(index)
+                    
                     // Extract item-specific state to minimize recomposition scope
                     TTSParagraphItemWithSentenceHighlight(
                         index = index,
@@ -687,9 +707,9 @@ fun TTSContentDisplay(
                             currentSentences else emptyList(),
                         isBilingualMode = state.bilingualMode,
                         hasTranslation = hasTranslation,
-                        showCacheIndicator = index > state.currentReadingParagraph && index <= state.currentReadingParagraph + 3,
-                        isCached = state.cachedParagraphs.contains(index),
-                        isLoadingCache = state.loadingParagraphs.contains(index),
+                        showCacheIndicator = showStatusIcon,
+                        isCached = finalIsCached,
+                        isLoadingCache = finalIsLoading,
                         textColor = textColor,
                         highlightColor = highlightColor,
                         fontSize = fontSizeSp,
@@ -772,6 +792,15 @@ private fun TTSParagraphItemWithSentenceHighlight(
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.Top
     ) {
+        // Download/Cache status icon at the start of paragraph
+        if (showCacheIndicator || isCached || isLoadingCache) {
+            ParagraphStatusIcon(
+                isCached = isCached,
+                isLoadingCache = isLoadingCache,
+                textColor = textColor
+            )
+        }
+        
         Column(modifier = Modifier.weight(1f)) {
             // Bilingual mode: show both original and translated
             if (isBilingualMode && hasTranslation && translatedText != null) {
@@ -926,7 +955,7 @@ private fun SentenceHighlightedText(
 }
 
 /**
- * Lightweight cache indicator component
+ * Lightweight cache indicator component (small dot on the right)
  */
 @Composable
 private fun CacheIndicator(
@@ -949,6 +978,52 @@ private fun CacheIndicator(
                 .size(6.dp)
                 .background(indicatorColor, shape = CircleShape)
         )
+    }
+}
+
+/**
+ * Paragraph status icon shown at the start of paragraph
+ * Shows download/cache status with icons
+ */
+@Composable
+private fun ParagraphStatusIcon(
+    isCached: Boolean,
+    isLoadingCache: Boolean,
+    textColor: Color
+) {
+    Box(
+        modifier = Modifier
+            .padding(end = 8.dp, top = 2.dp)
+            .size(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            isCached -> {
+                // Checkmark icon for cached paragraphs
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Cached",
+                    modifier = Modifier.size(14.dp),
+                    tint = Color(0xFF4CAF50) // Green
+                )
+            }
+            isLoadingCache -> {
+                // Loading indicator for downloading paragraphs
+                CircularProgressIndicator(
+                    modifier = Modifier.size(12.dp),
+                    strokeWidth = 1.5.dp,
+                    color = Color(0xFFFFC107) // Yellow/Orange
+                )
+            }
+            else -> {
+                // Small dot for paragraphs that will be downloaded
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .background(textColor.copy(alpha = 0.3f), shape = CircleShape)
+                )
+            }
+        }
     }
 }
 

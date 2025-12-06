@@ -212,6 +212,18 @@
                 <action android:name="ireader.action.DOWNLOAD_CANCEL" />
             </intent-filter>
         </receiver>
+        
+        <!-- TTS Download action receiver for pause/cancel -->
+        <receiver
+            android:name="ireader.domain.services.tts_service.TTSDownloadActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ireader.tts.download.PAUSE" />
+                <action android:name="ireader.tts.download.RESUME" />
+                <action android:name="ireader.tts.download.TOGGLE_PAUSE" />
+                <action android:name="ireader.tts.download.CANCEL" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

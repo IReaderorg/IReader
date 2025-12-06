@@ -1,5 +1,6 @@
 package ireader.domain.di
 
+import okio.Path.Companion.toPath
 import ireader.domain.usecases.backup.ScheduleAutomaticBackup
 import ireader.domain.usecases.backup.ScheduleAutomaticBackupImpl
 import ireader.domain.usecases.backup.DropboxProvider
@@ -92,6 +93,36 @@ actual val DomainModule: Module = module {
     
     // TTS
     single { AITTSManager() }
+    
+    // TTS Download Notification Helper
+    single<ireader.domain.services.tts_service.TTSDownloadNotificationHelper> {
+        ireader.domain.services.tts_service.TTSDownloadNotificationHelper(
+            notificationManager = get()
+        )
+    }
+    
+    // TTS Chapter Download Manager with notification support
+    single<ireader.domain.services.tts_service.TTSChapterDownloadManager> {
+        ireader.domain.services.tts_service.TTSChapterDownloadManager(
+            notificationHelper = get()
+        )
+    }
+    
+    // TTS Chapter Cache for storing downloaded chapter audio
+    single<ireader.domain.services.tts_service.TTSChapterCache> {
+        // iOS uses NSCachesDirectory for cache - get via NSSearchPathForDirectoriesInDomains
+        val cachePaths = platform.Foundation.NSSearchPathForDirectoriesInDomains(
+            platform.Foundation.NSCachesDirectory,
+            platform.Foundation.NSUserDomainMask,
+            true
+        )
+        val cachePathStr = (cachePaths.firstOrNull() as? String) ?: "/tmp"
+        val fullPath = "$cachePathStr/tts_chapter_cache"
+        ireader.domain.services.tts_service.TTSChapterCache(
+            fileSystem = okio.FileSystem.SYSTEM,
+            cacheDir = fullPath.toPath()
+        )
+    }
     
     // Extension services (stubs for iOS)
     single { ExtensionWatcherService() }

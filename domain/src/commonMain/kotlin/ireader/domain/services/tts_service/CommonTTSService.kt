@@ -115,6 +115,14 @@ interface CommonTTSService {
      * Toggle auto-next chapter
      */
     fun setAutoNextChapter(enabled: Boolean)
+    
+    /**
+     * Generate audio for a given text using the current TTS engine.
+     * Used for chapter download feature.
+     * @param text The text to convert to audio
+     * @return ByteArray of audio data, or null if generation failed
+     */
+    suspend fun generateAudioForText(text: String): ByteArray?
 }
 
 /**

@@ -67,7 +67,6 @@ object MainStarterScreen {
      * Tab indices: 0=Library, 1=Updates, 2=History, 3=Extensions, 4=More
      */
     suspend fun switchToTab(tabIndex: Int) {
-        println("🔷 MainStarterScreen.switchToTab($tabIndex) called")
         pendingTabIndex = tabIndex
         switchTabEvent.send(tabIndex)
         println("✅ Tab switch event sent")
@@ -78,7 +77,6 @@ object MainStarterScreen {
      * This is useful for app shortcuts that need to open a specific tab.
      */
     fun setInitialTab(tabIndex: Int) {
-        println("🔷 MainStarterScreen.setInitialTab($tabIndex) called")
         pendingTabIndex = tabIndex
     }
     
@@ -119,7 +117,6 @@ object MainStarterScreen {
         LaunchedEffect(Unit) {
             val pending = consumePendingTab()
             if (pending != null) {
-                println("🔷 MainStarterScreen: Found pending tab $pending on launch")
                 currentTabIndex = pending
             }
         }
@@ -149,12 +146,9 @@ object MainStarterScreen {
         
         // Listen for external tab switch requests (e.g., from app shortcuts)
         LaunchedEffect(Unit) {
-            println("🔷 MainStarterScreen: Starting to listen for tab switch events")
             switchTabEvent.receiveAsFlow().collectLatest { tabIndex ->
-                println("🔷 MainStarterScreen: Received tab switch request for index $tabIndex")
                 if (tabIndex in 0..4) {
                     currentTabIndex = tabIndex
-                    println("✅ MainStarterScreen: Tab switched to $tabIndex")
                 }
             }
         }

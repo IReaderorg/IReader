@@ -114,6 +114,12 @@ class DesktopTTSServiceAdapter(
     override fun cleanup() {
         service.shutdown()
     }
+    
+    override suspend fun generateAudioForText(text: String): ByteArray? {
+        // Desktop TTS doesn't support generating audio to ByteArray directly
+        // This feature is primarily for remote TTS engines like Gradio
+        return null
+    }
 }
 
 /**

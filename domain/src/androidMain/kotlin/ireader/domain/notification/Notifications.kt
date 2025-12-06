@@ -30,6 +30,7 @@ import ireader.domain.notification.NotificationsIds.CHANNEL_LIBRARY_ERROR
 import ireader.domain.notification.NotificationsIds.CHANNEL_LIBRARY_PROGRESS
 import ireader.domain.notification.NotificationsIds.CHANNEL_NEW_CHAPTERS
 import ireader.domain.notification.NotificationsIds.CHANNEL_TTS
+import ireader.domain.notification.NotificationsIds.CHANNEL_TTS_DOWNLOAD
 import ireader.domain.notification.NotificationsIds.CHANNEL_TTS_ERROR
 import ireader.domain.notification.NotificationsIds.GROUP_APK_UPDATES
 import ireader.domain.notification.NotificationsIds.GROUP_DOWNLOADER
@@ -121,6 +122,14 @@ object Notifications {
                     IMPORTANCE_LOW
                 ) {
                     setName(localizeHelper.localize(Res.string.channel_errors))
+                    setGroup(GROUP_TTS)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(
+                    CHANNEL_TTS_DOWNLOAD,
+                    IMPORTANCE_LOW
+                ) {
+                    setName("TTS Download")
                     setGroup(GROUP_TTS)
                     setShowBadge(false)
                 },

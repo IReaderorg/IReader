@@ -65,6 +65,7 @@ fun AndroidTTSMManagerSettingsScreen(
     val state by viewModel.state.collectAsState()
     val gradioState = gradioViewModel?.state?.collectAsState()?.value
     val readerPreferences: ReaderPreferences = koinInject()
+    val chapterCache: ireader.domain.services.tts_service.TTSChapterCache = koinInject()
     val scope = rememberCoroutineScope()
     
     // TTS Merge settings state
@@ -75,9 +76,10 @@ fun AndroidTTSMManagerSettingsScreen(
     var chapterCacheEnabled by remember { mutableStateOf(readerPreferences.ttsChapterCacheEnabled().get()) }
     var chapterCacheDays by remember { mutableStateOf(readerPreferences.ttsChapterCacheDays().get()) }
     
-    // Cache stats (placeholder - would be populated from TTSChapterCache)
-    var cacheEntryCount by remember { mutableStateOf(0) }
-    var cacheSizeMB by remember { mutableStateOf(0f) }
+    // Cache stats from TTSChapterCache
+    var cacheStats by remember { mutableStateOf(chapterCache.getCacheStats()) }
+    val cacheEntryCount = cacheStats.entryCount
+    val cacheSizeMB = cacheStats.totalSizeMB
     
     Scaffold(
         topBar = {
@@ -210,9 +212,10 @@ fun AndroidTTSMManagerSettingsScreen(
                     cacheEntryCount = cacheEntryCount,
                     cacheSizeMB = cacheSizeMB,
                     onClearCache = {
-                        // Clear cache - would call TTSChapterCache.clearAll()
-                        cacheEntryCount = 0
-                        cacheSizeMB = 0f
+                        // Clear all cached chapter audio
+                        chapterCache.clearAll()
+                        // Refresh cache stats
+                        cacheStats = chapterCache.getCacheStats()
                     }
                 )
             }

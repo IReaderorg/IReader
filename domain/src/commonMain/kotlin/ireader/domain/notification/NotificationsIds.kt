@@ -21,6 +21,8 @@ object NotificationsIds {
     const val ID_TTS = -601
     const val CHANNEL_TTS_ERROR = "library_text_reader_error_channel"
     const val ID_TTS_ERROR = -602
+    const val CHANNEL_TTS_DOWNLOAD = "tts_download_channel"
+    const val ID_TTS_DOWNLOAD = -603
 
     /**
      * Notification channel and ids used by the installer.

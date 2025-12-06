@@ -138,6 +138,20 @@ class TTSStateImpl() : AndroidTTSState {
     
     fun setParagraphSpeakingStartTime(value: Long) { _paragraphSpeakingStartTime.value = value }
     
+    // Text merging state - tracks which original paragraphs are in current merged chunk
+    private val _currentMergedChunkParagraphs = kotlinx.coroutines.flow.MutableStateFlow<List<Int>>(emptyList())
+    val currentMergedChunkParagraphs: kotlinx.coroutines.flow.StateFlow<List<Int>> = _currentMergedChunkParagraphs
+    
+    private val _isMergingEnabled = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val isMergingEnabled: kotlinx.coroutines.flow.StateFlow<Boolean> = _isMergingEnabled
+    
+    // Merged chunks cache for current chapter
+    var mergedChunks: List<TTSTextMerger.MergedChunk> = emptyList()
+    var currentMergedChunkIndex: Int = 0
+    
+    fun setCurrentMergedChunkParagraphs(value: List<Int>) { _currentMergedChunkParagraphs.value = value }
+    fun setMergingEnabled(value: Boolean) { _isMergingEnabled.value = value }
+    
     // Alias for speechSpeed (for compatibility)
     val speechRate: kotlinx.coroutines.flow.StateFlow<Float> get() = _speechSpeed
     

@@ -2,6 +2,7 @@ package ireader.domain.di
 
 import ireader.core.http.HttpClients
 import ireader.core.prefs.PreferenceStore
+import okio.Path.Companion.toPath
 import ireader.core.prefs.PreferenceStoreFactory
 import ireader.domain.preferences.prefs.DesktopUiPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
@@ -165,6 +166,30 @@ actual val DomainModule: Module = module {
     single<ireader.domain.services.tts_service.CommonTTSService> {
         ireader.domain.services.tts_service.DesktopTTSServiceAdapter(
             service = get()
+        )
+    }
+    
+    // TTS Download Notification Helper
+    single<ireader.domain.services.tts_service.TTSDownloadNotificationHelper> {
+        ireader.domain.services.tts_service.TTSDownloadNotificationHelper(
+            notificationManager = get()
+        )
+    }
+    
+    // TTS Chapter Download Manager with notification support
+    single<ireader.domain.services.tts_service.TTSChapterDownloadManager> {
+        ireader.domain.services.tts_service.TTSChapterDownloadManager(
+            notificationHelper = get()
+        )
+    }
+    
+    // TTS Chapter Cache for storing downloaded chapter audio
+    single<ireader.domain.services.tts_service.TTSChapterCache> {
+        val userHome = System.getProperty("user.home")
+        val cachePath = "$userHome/.ireader/tts_chapter_cache"
+        ireader.domain.services.tts_service.TTSChapterCache(
+            fileSystem = okio.FileSystem.SYSTEM,
+            cacheDir = cachePath.toPath()
         )
     }
     

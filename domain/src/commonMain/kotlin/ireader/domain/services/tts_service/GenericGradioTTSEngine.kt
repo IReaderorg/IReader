@@ -908,6 +908,16 @@ class GenericGradioTTSEngine(
         }
     }
     
+    /**
+     * Generate audio bytes for the given text.
+     * Used for chapter download feature.
+     * @param text The text to convert to audio
+     * @return ByteArray of audio data, or null if generation failed
+     */
+    suspend fun generateAudioBytes(text: String): ByteArray? {
+        return generateSpeech(text)
+    }
+    
     enum class CacheStatus {
         NOT_CACHED,
         LOADING,

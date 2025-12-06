@@ -2,9 +2,11 @@ package ireader.domain.services.tts_service
 
 import android.content.Context
 import android.content.Intent
+import io.ktor.client.*
 import ireader.core.log.Log
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.media_player.TTSService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +15,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.time.ExperimentalTime
 
 /**
@@ -27,8 +31,14 @@ import kotlin.time.ExperimentalTime
  */
 class AndroidTTSServiceAdapter(
     private val context: Context,
-    private val sharedState: TTSStateImpl
+    private val sharedState: TTSStateImpl,
+    private val appPreferences: AppPreferences,
+    private val httpClient: HttpClient
 ) : CommonTTSService {
+    
+    // Lazy-initialized Gradio engine for audio generation
+    private var gradioEngine: AndroidGradioTTSEngine? = null
+    private val gradioEngineMutex = Mutex()
     
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     
@@ -155,9 +165,18 @@ class AndroidTTSServiceAdapter(
     
     override fun cleanup() {
         Log.info { "TTS cleanup" }
+        cleanupGradioEngine()
         scope.launch {
             stop()
         }
+    }
+    
+    /**
+     * Cleanup the Gradio engine resources
+     */
+    private fun cleanupGradioEngine() {
+        gradioEngine?.cleanup()
+        gradioEngine = null
     }
     
     @OptIn(ExperimentalTime::class)
@@ -180,6 +199,48 @@ class AndroidTTSServiceAdapter(
     override fun setAutoNextChapter(enabled: Boolean) {
         Log.info { "TTS set auto next chapter: $enabled" }
         sharedState.setAutoNextChapter(enabled)
+    }
+    
+    override suspend fun generateAudioForText(text: String): ByteArray? {
+        // For Android, we need to use the Gradio TTS engine to generate audio
+        // Native Android TTS doesn't support generating audio to ByteArray directly
+        // This feature is primarily for Gradio TTS
+        Log.info { "generateAudioForText called - text length: ${text.length}" }
+        
+        // Check if Gradio TTS is enabled
+        if (!appPreferences.useGradioTTS().get()) {
+            Log.info { "Gradio TTS not enabled, cannot generate audio bytes" }
+            return null
+        }
+        
+        val configId = appPreferences.activeGradioConfigId().get()
+        if (configId.isEmpty()) {
+            Log.info { "No Gradio config selected, cannot generate audio bytes" }
+            return null
+        }
+        
+        val config = GradioTTSPresets.getPresetById(configId)
+        if (config == null) {
+            Log.info { "Gradio config not found: $configId" }
+            return null
+        }
+        
+        return try {
+            // Get or create the Gradio engine
+            val engine = gradioEngineMutex.withLock {
+                if (gradioEngine == null || gradioEngine?.getConfig()?.id != configId) {
+                    gradioEngine?.cleanup()
+                    gradioEngine = AndroidGradioTTSEngine(context, httpClient, config)
+                }
+                gradioEngine!!
+            }
+            
+            // Generate audio bytes
+            engine.generateAudioBytes(text)
+        } catch (e: Exception) {
+            Log.error { "Failed to generate audio: ${e.message}" }
+            null
+        }
     }
 }
 
@@ -266,11 +327,15 @@ class AndroidTTSStateAdapter(
             }
         }
         
-        // Periodically sync cache status and sleep timer from shared state
+        // Periodically sync cache status, sleep timer, and merged chunk state from shared state
         scope.launch {
             while (true) {
                 _cachedParagraphs.value = sharedState.cachedParagraphs
                 _loadingParagraphs.value = sharedState.loadingParagraphs
+                
+                // Sync merged chunk state
+                _currentMergedChunkParagraphs.value = sharedState.currentMergedChunkParagraphs.value
+                _isMergingEnabled.value = sharedState.isMergingEnabled.value
                 
                 // Calculate sleep timer remaining
                 if (sharedState.sleepMode.value) {

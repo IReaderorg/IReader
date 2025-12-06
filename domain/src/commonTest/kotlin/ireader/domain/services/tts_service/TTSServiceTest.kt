@@ -381,6 +381,11 @@ open class MockTTSService : CommonTTSService {
         _isPlaying.value = false
     }
     
+    override suspend fun generateAudioForText(text: String): ByteArray? {
+        // Mock implementation returns null
+        return null
+    }
+    
     // Test helper to set content directly
     fun setContent(content: List<String>) {
         _currentContent.value = content

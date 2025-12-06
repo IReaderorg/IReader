@@ -84,14 +84,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Log intent on create
-        println("🔷🔷🔷 MainActivity.onCreate() called")
-        println("   Intent: $intent")
-        println("   Action: ${intent.action}")
-        println("   Data: ${intent.data}")
-        println("   Categories: ${intent.categories}")
-        
+
         // Install splash screen
         var isContentReady = false
         installSplashScreen().apply {
@@ -168,8 +161,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             LaunchedEffect(navController) {
                                 // Wait for navigation graph to be ready
                                 delay(500)
-                                println("🔷 LaunchedEffect: Handling initial intent")
-                                println("🔷 LaunchedEffect: Action: ${this@MainActivity.intent.action}")
                                 handleIntentAction(this@MainActivity.intent, navController)
                             }
                             
@@ -217,13 +208,6 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        println("🔷 MainActivity.onNewIntent() OVERRIDE called")
-        println("   Intent: $intent")
-        println("   Data: ${intent.data}")
-        println("   Action: ${intent.action}")
-        println("   Scheme: ${intent.data?.scheme}")
-        println("   Host: ${intent.data?.host}")
-        
         // CRITICAL: Update the activity's intent
         setIntent(intent)
     }
@@ -286,31 +270,21 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
      * This sets the initial tab for tab-switching shortcuts.
      */
     private fun handleEarlyShortcutIntent(intent: Intent) {
-        println("🔷 handleEarlyShortcutIntent called")
-        println("   Action: ${intent.action}")
-        
         // Set initial tab based on shortcut action
         when (intent.action) {
             SHORTCUT_LIBRARY -> {
-                println("🔷 Early handling SHORTCUT_LIBRARY - setting initial tab to 0")
                 MainStarterScreen.setInitialTab(0)
             }
             SHORTCUT_UPDATES -> {
-                println("🔷 Early handling SHORTCUT_UPDATES - setting initial tab to 1")
                 MainStarterScreen.setInitialTab(1)
             }
             SHORTCUT_HISTORY -> {
-                println("🔷 Early handling SHORTCUT_HISTORY - setting initial tab to 2")
                 MainStarterScreen.setInitialTab(2)
             }
         }
     }
     
     private fun handleIntentAction(intent: Intent, navController: NavHostController, isNewIntent: Boolean = false): Boolean {
-        // Log all intent details for debugging
-        println("🔷 handleIntentAction called (isNewIntent=$isNewIntent)")
-        println("   Action: ${intent.action}")
-        
         // Check if this is a wallet callback
         val uri = intent.data
         if (uri != null) {
@@ -336,14 +310,12 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         return when (intent.action) {
             // App Shortcuts Menu actions
             SHORTCUT_SEARCH -> {
-                println("🔷 Handling SHORTCUT_SEARCH")
                 navController.navigate("globalSearch") {
                     launchSingleTop = true
                 }
                 true
             }
             SHORTCUT_LIBRARY -> {
-                println("🔷 Handling SHORTCUT_LIBRARY")
                 if (isNewIntent) {
                     lifecycleScope.launch { MainStarterScreen.switchToTab(0) }
                 }
@@ -351,21 +323,18 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                 true
             }
             SHORTCUT_UPDATES -> {
-                println("🔷 Handling SHORTCUT_UPDATES")
                 if (isNewIntent) {
                     lifecycleScope.launch { MainStarterScreen.switchToTab(1) }
                 }
                 true
             }
             SHORTCUT_HISTORY -> {
-                println("🔷 Handling SHORTCUT_HISTORY")
                 if (isNewIntent) {
                     lifecycleScope.launch { MainStarterScreen.switchToTab(2) }
                 }
                 true
             }
             SHORTCUT_DOWNLOADS -> {
-                println("🔷 Handling SHORTCUT_DOWNLOADS")
                 navController.navigate(NavigationRoutes.downloader) {
                     launchSingleTop = true
                 }
