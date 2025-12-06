@@ -13,7 +13,8 @@ import kotlinx.coroutines.launch
 
 /**
  * TTS Chapter Download Manager
- * Manages downloading entire chapter audio for remote TTS engines.
+ * Manages downloading chapter audio for remote TTS engines.
+ * Supports both paragraph-by-paragraph and chunk-based downloading (text merging).
  * Shows progress notifications with pause/cancel buttons.
  */
 class TTSChapterDownloadManager(
@@ -35,7 +36,10 @@ class TTSChapterDownloadManager(
         val currentParagraph: Int,
         val totalParagraphs: Int,
         val state: DownloadState,
-        val errorMessage: String? = null
+        val errorMessage: String? = null,
+        // For chunk-based download
+        val currentChunk: Int = 0,
+        val totalChunks: Int = 0
     ) {
         val progressPercent: Int get() = 
             if (totalParagraphs > 0) ((currentParagraph.toFloat() / totalParagraphs) * 100).toInt() else 0
@@ -44,6 +48,15 @@ class TTSChapterDownloadManager(
         val isActive: Boolean get() = 
             state == DownloadState.DOWNLOADING || state == DownloadState.PAUSED
     }
+    
+    /**
+     * Chunk info for download
+     */
+    data class ChunkInfo(
+        val index: Int,
+        val text: String,
+        val paragraphIndices: List<Int>
+    )
 
     
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -248,4 +261,173 @@ class TTSChapterDownloadManager(
     }
     
     fun isActive(): Boolean = _state.value == DownloadState.DOWNLOADING || _state.value == DownloadState.PAUSED
+    
+    /**
+     * Start chunk-based download (respects text merging settings)
+     * Each chunk may contain multiple paragraphs merged together.
+     * 
+     * @param chapterId Chapter ID
+     * @param chapterName Chapter name for notifications
+     * @param bookTitle Book title for notifications
+     * @param chunks List of chunks to download (each chunk has text and paragraph indices)
+     * @param generateAudio Function to generate audio for a chunk
+     * @param onChunkComplete Callback when each chunk is downloaded (for incremental caching)
+     * @param onComplete Callback when all chunks are downloaded
+     * @param onError Callback on error
+     */
+    fun startChunkDownload(
+        chapterId: Long,
+        chapterName: String,
+        bookTitle: String,
+        chunks: List<ChunkInfo>,
+        generateAudio: suspend (String, Int) -> ByteArray?,
+        onChunkComplete: suspend (chunkIndex: Int, audioData: ByteArray, paragraphIndices: List<Int>) -> Unit,
+        onComplete: suspend () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (_state.value == DownloadState.DOWNLOADING) {
+            Log.warn { "$TAG: Download already in progress" }
+            return
+        }
+        
+        // Calculate total paragraphs for progress display
+        val totalParagraphs = chunks.flatMap { it.paragraphIndices }.distinct().size
+        
+        Log.info { "$TAG: Starting chunk download - $chapterName (${chunks.size} chunks, $totalParagraphs paragraphs)" }
+        
+        isPaused = false
+        _state.value = DownloadState.DOWNLOADING
+        _progress.value = DownloadProgress(
+            chapterId = chapterId,
+            chapterName = chapterName,
+            bookTitle = bookTitle,
+            currentParagraph = 0,
+            totalParagraphs = totalParagraphs,
+            state = DownloadState.DOWNLOADING,
+            currentChunk = 0,
+            totalChunks = chunks.size
+        )
+        
+        // Show starting notification
+        notificationHelper?.showStarting(chapterName, bookTitle)
+        
+        downloadJob = scope.launch {
+            var processedParagraphs = 0
+            var successfulChunks = 0
+            var failedChunks = 0
+            
+            try {
+                for ((index, chunk) in chunks.withIndex()) {
+                    if (_state.value == DownloadState.CANCELLED) {
+                        Log.info { "$TAG: Cancelled at chunk $index" }
+                        notificationHelper?.showCancelled(chapterName)
+                        return@launch
+                    }
+                    
+                    while (isPaused && _state.value != DownloadState.CANCELLED) {
+                        kotlinx.coroutines.delay(100)
+                    }
+                    
+                    if (_state.value == DownloadState.CANCELLED) {
+                        notificationHelper?.showCancelled(chapterName)
+                        return@launch
+                    }
+                    
+                    Log.debug { "$TAG: Generating audio for chunk ${index + 1}/${chunks.size} (paragraphs: ${chunk.paragraphIndices})" }
+                    
+                    processedParagraphs += chunk.paragraphIndices.size
+                    
+                    val currentProgress = DownloadProgress(
+                        chapterId = chapterId,
+                        chapterName = chapterName,
+                        bookTitle = bookTitle,
+                        currentParagraph = processedParagraphs,
+                        totalParagraphs = totalParagraphs,
+                        state = if (isPaused) DownloadState.PAUSED else DownloadState.DOWNLOADING,
+                        currentChunk = index + 1,
+                        totalChunks = chunks.size
+                    )
+                    _progress.value = currentProgress
+                    
+                    // Update notification with progress
+                    notificationHelper?.updateProgress(
+                        chapterName = chapterName,
+                        bookTitle = bookTitle,
+                        currentParagraph = processedParagraphs,
+                        totalParagraphs = totalParagraphs,
+                        isPaused = isPaused,
+                        pauseIntent = pauseIntent,
+                        cancelIntent = cancelIntent
+                    )
+                    
+                    val audio = generateAudio(chunk.text, chunk.index)
+                    if (audio != null) {
+                        // Notify about completed chunk for incremental caching
+                        onChunkComplete(chunk.index, audio, chunk.paragraphIndices)
+                        successfulChunks++
+                    } else {
+                        failedChunks++
+                        Log.warn { "$TAG: Failed to generate audio for chunk ${index + 1}" }
+                    }
+                }
+                
+                Log.info { "$TAG: Chunk download complete - $successfulChunks/${chunks.size} chunks succeeded, $failedChunks failed" }
+                
+                if (failedChunks > 0 && successfulChunks == 0) {
+                    // All chunks failed
+                    _state.value = DownloadState.FAILED
+                    _progress.value = _progress.value?.copy(
+                        state = DownloadState.FAILED,
+                        errorMessage = "All $failedChunks chunks failed to download"
+                    )
+                    notificationHelper?.showFailed(chapterName, bookTitle, "All chunks failed")
+                    onError("All $failedChunks chunks failed to download")
+                } else if (failedChunks > 0) {
+                    // Some chunks failed - still mark as completed but with warning
+                    _state.value = DownloadState.COMPLETED
+                    _progress.value = _progress.value?.copy(
+                        currentParagraph = totalParagraphs,
+                        state = DownloadState.COMPLETED,
+                        currentChunk = chunks.size,
+                        errorMessage = "$failedChunks chunks failed"
+                    )
+                    notificationHelper?.showComplete(chapterName, bookTitle)
+                    Log.warn { "$TAG: Download completed with $failedChunks failed chunks" }
+                } else {
+                    // All chunks succeeded
+                    _state.value = DownloadState.COMPLETED
+                    _progress.value = _progress.value?.copy(
+                        currentParagraph = totalParagraphs,
+                        state = DownloadState.COMPLETED,
+                        currentChunk = chunks.size
+                    )
+                    notificationHelper?.showComplete(chapterName, bookTitle)
+                }
+                
+                // Only call onComplete if at least some chunks succeeded
+                if (successfulChunks > 0) {
+                    onComplete()
+                }
+                
+            } catch (e: CancellationException) {
+                Log.info { "$TAG: Chunk download cancelled" }
+                _state.value = DownloadState.CANCELLED
+                _progress.value = _progress.value?.copy(state = DownloadState.CANCELLED)
+                notificationHelper?.showCancelled(chapterName)
+            } catch (e: Exception) {
+                val errorMsg = e.message ?: "Unknown error"
+                Log.error { "$TAG: Chunk download failed: $errorMsg" }
+                _state.value = DownloadState.FAILED
+                _progress.value = _progress.value?.copy(
+                    state = DownloadState.FAILED,
+                    errorMessage = errorMsg
+                )
+                
+                // Show failure notification
+                notificationHelper?.showFailed(chapterName, bookTitle, errorMsg)
+                
+                onError(errorMsg)
+            }
+        }
+    }
 }

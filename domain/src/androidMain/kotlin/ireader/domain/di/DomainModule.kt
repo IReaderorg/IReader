@@ -278,6 +278,7 @@ actual val DomainModule = module {
             context = androidContext(),
             sharedState = get(),
             appPreferences = get(),
+            readerPreferences = get(),
             httpClient = get<ireader.core.http.HttpClients>().default
         ).apply {
             initialize()

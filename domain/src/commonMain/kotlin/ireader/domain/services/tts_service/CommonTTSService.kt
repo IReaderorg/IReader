@@ -161,6 +161,19 @@ interface TTSServiceState {
     // Text merging state - tracks which original paragraphs are in current merged chunk
     val currentMergedChunkParagraphs: StateFlow<List<Int>>  // Original paragraph indices in current chunk
     val isMergingEnabled: StateFlow<Boolean>  // Whether text merging is active
+    val currentMergedChunkIndex: StateFlow<Int>  // Current chunk index (0-based)
+    val totalMergedChunks: StateFlow<Int>  // Total number of merged chunks
+    
+    // Chunk generation progress (for showing progress when generating audio in chunk mode)
+    val isGeneratingChunkAudio: StateFlow<Boolean>  // Whether currently generating chunk audio
+    val chunkGenerationCurrentChunk: StateFlow<Int>  // Current chunk being generated (1-based)
+    val chunkGenerationTotalChunks: StateFlow<Int>  // Total chunks to generate
+    val chunkGenerationEstimatedTimeMs: StateFlow<Long>  // Estimated time remaining in ms
+    
+    // Cached audio playback state (for media player UI when playing downloaded audio)
+    val usingCachedAudio: StateFlow<Boolean>  // Whether current chunk is from cache (offline)
+    val audioPlaybackPosition: StateFlow<Long>  // Current playback position in ms
+    val audioPlaybackDuration: StateFlow<Long>  // Total duration of current audio in ms
 }
 
 /**

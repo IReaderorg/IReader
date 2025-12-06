@@ -30,6 +30,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.CommonTTSService
 import ireader.domain.services.tts_service.TTSChapterDownloadManager
+import ireader.domain.services.tts_service.TTSTextMerger
 import ireader.domain.services.tts_service.createTTSDownloadIntentProvider
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
 import ireader.domain.services.common.TranslationService
@@ -183,10 +184,34 @@ class TTSScreenSpec(
         // Used as a SIGNAL to reset the sentence highlighter timer in CommonTTSScreen
         val paragraphSpeakingStartTime by ttsService.state.paragraphSpeakingStartTime.collectAsState()
         
-        // Check if current chapter is cached
-        val isChapterCached by remember(currentChapter?.id) {
+        // Check if current chapter is cached (either whole chapter or any chunks)
+        val isChapterCached by remember(currentChapter?.id, content) {
             derivedStateOf { 
-                currentChapter?.id?.let { chapterCache.isCached(it) } ?: false 
+                val chapterId = currentChapter?.id ?: return@derivedStateOf false
+                // First check legacy whole-chapter cache
+                if (chapterCache.isCached(chapterId)) return@derivedStateOf true
+                // Then check chunk-based cache - show as cached if ANY chunks are cached
+                val cachedChunks = chapterCache.getCachedChunkIndices(chapterId)
+                cachedChunks.isNotEmpty()
+            }
+        }
+        
+        // Check if ALL chunks are cached (for showing full vs partial cache)
+        val isChapterFullyCached by remember(currentChapter?.id, content) {
+            derivedStateOf {
+                val chapterId = currentChapter?.id ?: return@derivedStateOf false
+                if (chapterCache.isCached(chapterId)) return@derivedStateOf true
+                val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
+                val totalChunks = if (mergeWordCount > 0 && content.isNotEmpty()) {
+                    TTSTextMerger.mergeParagraphs(content, mergeWordCount).size
+                } else {
+                    content.size
+                }
+                if (totalChunks > 0) {
+                    chapterCache.areAllChunksCached(chapterId, totalChunks)
+                } else {
+                    false
+                }
             }
         }
         
@@ -395,15 +420,8 @@ class TTSScreenSpec(
             }
         }
         
-        // Cleanup on dispose - stop TTS when leaving screen
-        DisposableEffect(Unit) {
-            onDispose {
-                // Use runBlocking to ensure stop completes before screen is destroyed
-                kotlinx.coroutines.runBlocking {
-                    ttsService.stop()
-                }
-            }
-        }
+        // NOTE: Do NOT stop TTS when leaving screen - it should continue playing in background
+        // The service will be stopped when user explicitly presses stop or closes notification
         
         // Collect cache status and sleep timer - throttled for low-end devices
         val cachedParagraphs by remember(ttsService) {
@@ -423,6 +441,19 @@ class TTSScreenSpec(
         // Collect merged chunk state for text merging feature
         val mergedChunkParagraphs by ttsService.state.currentMergedChunkParagraphs.collectAsState()
         val isMergingEnabled by ttsService.state.isMergingEnabled.collectAsState()
+        val currentMergedChunkIndex by ttsService.state.currentMergedChunkIndex.collectAsState()
+        val totalMergedChunks by ttsService.state.totalMergedChunks.collectAsState()
+        
+        // Collect chunk generation progress state
+        val isGeneratingChunkAudio by ttsService.state.isGeneratingChunkAudio.collectAsState()
+        val chunkGenerationCurrentChunk by ttsService.state.chunkGenerationCurrentChunk.collectAsState()
+        val chunkGenerationTotalChunks by ttsService.state.chunkGenerationTotalChunks.collectAsState()
+        val chunkGenerationEstimatedTimeMs by ttsService.state.chunkGenerationEstimatedTimeMs.collectAsState()
+        
+        // Collect cached audio playback state (for media player UI)
+        val usingCachedAudio by ttsService.state.usingCachedAudio.collectAsState()
+        val audioPlaybackPosition by ttsService.state.audioPlaybackPosition.collectAsState()
+        val audioPlaybackDuration by ttsService.state.audioPlaybackDuration.collectAsState()
         
         // Sync sleep mode UI with service state
         LaunchedEffect(sleepModeEnabledState, sleepTimeRemaining) {
@@ -502,18 +533,14 @@ class TTSScreenSpec(
         val availableEngines = remember(ttsService) { ttsService.getAvailableEngines() }
         
         // Chapter download progress tracking
-        val chapterDownloadCurrentParagraph = downloadProgress?.currentParagraph ?: -1
-        val chapterDownloadTotalParagraphs = downloadProgress?.totalParagraphs ?: 0
+        // Note: When downloading with chunks, currentParagraph is the chunk index, not paragraph index
+        // We don't show per-paragraph loading indicators during download - just overall progress in button
+        val chapterDownloadCurrentChunk = downloadProgress?.currentParagraph ?: -1
+        val chapterDownloadTotalChunks = downloadProgress?.totalParagraphs ?: 0
         val isChapterDownloading = downloadState == TTSChapterDownloadManager.DownloadState.DOWNLOADING ||
             downloadState == TTSChapterDownloadManager.DownloadState.PAUSED
-        // Track which paragraphs have been downloaded (0 to currentParagraph-1)
-        val chapterDownloadedParagraphs = remember(chapterDownloadCurrentParagraph) {
-            if (chapterDownloadCurrentParagraph > 0) {
-                (0 until chapterDownloadCurrentParagraph).toSet()
-            } else {
-                emptySet()
-            }
-        }
+        // Don't track per-paragraph download status - chunks don't map 1:1 to paragraphs
+        val chapterDownloadedParagraphs = emptySet<Int>()
         
         // Create state object for unified components - memoized to reduce object allocations
         val screenState by remember(
@@ -522,7 +549,9 @@ class TTSScreenSpec(
             speechSpeed, autoNextChapter, fullScreenMode, cachedParagraphs, loadingParagraphs,
             sleepTimeRemaining, sleepModeEnabledState, paragraphSpeakingStartTime, sentenceHighlightEnabled,
             calibratedWPM, isCalibrated, mergedChunkParagraphs, isMergingEnabled,
-            isChapterDownloading, chapterDownloadCurrentParagraph, chapterDownloadTotalParagraphs, chapterDownloadedParagraphs
+            currentMergedChunkIndex, totalMergedChunks,
+            isChapterDownloading, chapterDownloadCurrentChunk, chapterDownloadTotalChunks, chapterDownloadedParagraphs,
+            isGeneratingChunkAudio, chunkGenerationCurrentChunk, chunkGenerationTotalChunks, chunkGenerationEstimatedTimeMs
         ) {
             derivedStateOf {
                 CommonTTSScreenState(
@@ -546,8 +575,8 @@ class TTSScreenSpec(
                     hasDownloadFeature = false,
                     isDownloading = isChapterDownloading,
                     downloadProgress = downloadProgress?.progressFraction ?: 0f,
-                    chapterDownloadCurrentParagraph = chapterDownloadCurrentParagraph,
-                    chapterDownloadTotalParagraphs = chapterDownloadTotalParagraphs,
+                    chapterDownloadCurrentParagraph = chapterDownloadCurrentChunk,
+                    chapterDownloadTotalParagraphs = chapterDownloadTotalChunks,
                     chapterDownloadedParagraphs = chapterDownloadedParagraphs,
                     currentEngine = currentEngineName,
                     availableEngines = availableEngines,
@@ -557,7 +586,16 @@ class TTSScreenSpec(
                     isCalibrated = isCalibrated,
                     isTTSReady = isTTSReady,
                     mergedChunkParagraphs = mergedChunkParagraphs,
-                    isMergingEnabled = isMergingEnabled
+                    isMergingEnabled = isMergingEnabled,
+                    currentMergedChunkIndex = currentMergedChunkIndex,
+                    totalMergedChunks = totalMergedChunks,
+                    isGeneratingChunkAudio = isGeneratingChunkAudio,
+                    chunkGenerationCurrentChunk = chunkGenerationCurrentChunk,
+                    chunkGenerationTotalChunks = chunkGenerationTotalChunks,
+                    chunkGenerationEstimatedTimeMs = chunkGenerationEstimatedTimeMs,
+                    usingCachedAudio = usingCachedAudio,
+                    audioPlaybackPosition = audioPlaybackPosition,
+                    audioPlaybackDuration = audioPlaybackDuration
                 )
             }
         }
@@ -583,6 +621,11 @@ class TTSScreenSpec(
                 override fun onSelectVoice() { showVoiceSelection = true }
                 override fun onSelectEngine(engine: String) { 
                     showEngineSettings = true 
+                }
+                override fun onSeekAudio(positionMs: Long) {
+                    // TODO: Implement audio seek when we have the audio player reference
+                    // For now, this is a placeholder - the actual seek will be implemented
+                    // when we integrate the audio player with position tracking
                 }
             }
         }
@@ -784,10 +827,11 @@ class TTSScreenSpec(
                                             // If already downloading, cancel it
                                             downloadManager.cancel()
                                         } else if (isChapterCached) {
-                                            // If already cached, remove from cache
+                                            // If already cached, remove from cache (both legacy and chunk-based)
                                             chapterCache.removeEntry(chapter.id)
+                                            chapterCache.removeAllChunksForChapter(chapter.id)
                                         } else {
-                                            // Start download
+                                            // Start download using chunks to reduce server requests
                                             val paragraphs = if (showTranslation && translatedContent != null) {
                                                 translatedContent!!
                                             } else {
@@ -795,31 +839,54 @@ class TTSScreenSpec(
                                             }
                                             
                                             if (paragraphs.isNotEmpty()) {
-                                                downloadManager.startDownload(
+                                                // Merge paragraphs into chunks for efficient downloading
+                                                val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
+                                                val mergedChunks = if (mergeWordCount > 0) {
+                                                    TTSTextMerger.mergeParagraphs(paragraphs, mergeWordCount)
+                                                } else {
+                                                    // Create single-paragraph chunks if no merging
+                                                    paragraphs.mapIndexed { index, text ->
+                                                        TTSTextMerger.MergedChunk(
+                                                            mergedText = text,
+                                                            originalParagraphIndices = listOf(index),
+                                                            wordCount = text.split("\\s+".toRegex()).size
+                                                        )
+                                                    }
+                                                }
+                                                
+                                                // Convert to ChunkInfo for download manager
+                                                val chunksToDownload = mergedChunks.mapIndexed { index, chunk ->
+                                                    TTSChapterDownloadManager.ChunkInfo(
+                                                        index = index,
+                                                        text = chunk.mergedText,
+                                                        paragraphIndices = chunk.originalParagraphIndices
+                                                    )
+                                                }
+                                                
+                                                // Use chunk-based download to cache each chunk individually
+                                                downloadManager.startChunkDownload(
                                                     chapterId = chapter.id,
                                                     chapterName = chapter.name,
                                                     bookTitle = book.title,
-                                                    paragraphs = paragraphs,
+                                                    chunks = chunksToDownload,
                                                     generateAudio = { text, index ->
                                                         // Use TTS service to generate audio
                                                         ttsService.generateAudioForText(text)
                                                     },
-                                                    onComplete = { audioChunks ->
-                                                        // Combine all audio chunks and save to cache
-                                                        if (audioChunks.isNotEmpty()) {
-                                                            val combinedAudio = audioChunks.fold(ByteArray(0)) { acc, chunk ->
-                                                                acc + chunk
-                                                            }
-                                                            scope.launch {
-                                                                chapterCache.cacheChapterAudio(
-                                                                    chapterId = chapter.id,
-                                                                    bookId = book.id,
-                                                                    audioData = combinedAudio,
-                                                                    engineId = activeConfigId,
-                                                                    cacheDays = cacheDays
-                                                                )
-                                                            }
-                                                        }
+                                                    onChunkComplete = { chunkIndex, audioData, paragraphIndices ->
+                                                        // Cache each chunk individually for offline playback
+                                                        chapterCache.cacheChunkAudio(
+                                                            chapterId = chapter.id,
+                                                            chunkIndex = chunkIndex,
+                                                            audioData = audioData,
+                                                            engineId = activeConfigId,
+                                                            cacheDays = cacheDays,
+                                                            paragraphIndices = paragraphIndices
+                                                        )
+                                                    },
+                                                    onComplete = {
+                                                        // All chunks downloaded and cached
+                                                        ireader.core.log.Log.info { "TTS Download: All ${chunksToDownload.size} chunks cached for chapter ${chapter.id}" }
                                                     },
                                                     onError = { error ->
                                                         // Handle error - notification already shown by download manager
@@ -848,11 +915,17 @@ class TTSScreenSpec(
                                             }
                                         }
                                         isChapterCached -> {
-                                            // Show cached icon (checkmark)
+                                            // Show cached icon - different color for partial vs full cache
                                             Icon(
                                                 Icons.Default.DownloadDone,
-                                                contentDescription = "Chapter Cached (tap to remove)",
-                                                tint = MaterialTheme.colorScheme.primary
+                                                contentDescription = if (isChapterFullyCached) 
+                                                    "Chapter Fully Cached (tap to remove)" 
+                                                else 
+                                                    "Chapter Partially Cached (tap to remove)",
+                                                tint = if (isChapterFullyCached) 
+                                                    MaterialTheme.colorScheme.primary 
+                                                else 
+                                                    MaterialTheme.colorScheme.tertiary // Different color for partial
                                             )
                                         }
                                         else -> {

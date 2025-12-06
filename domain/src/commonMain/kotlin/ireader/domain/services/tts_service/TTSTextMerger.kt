@@ -32,15 +32,18 @@ object TTSTextMerger {
     /**
      * Merge paragraphs into chunks based on target word count
      * 
+     * Each paragraph belongs to exactly ONE chunk to ensure proper navigation.
+     * Chunks may slightly exceed targetWordCount to keep paragraphs intact.
+     * 
      * @param paragraphs List of original paragraphs
      * @param targetWordCount Target number of words per merged chunk (0 = no merging)
-     * @param includeRemainder If true, include remaining words from incomplete paragraphs
+     * @param includeRemainder Deprecated - kept for API compatibility but ignored
      * @return List of merged chunks with tracking info
      */
     fun mergeParagraphs(
         paragraphs: List<String>,
         targetWordCount: Int,
-        includeRemainder: Boolean = true
+        @Suppress("UNUSED_PARAMETER") includeRemainder: Boolean = false
     ): List<MergedChunk> {
         if (targetWordCount <= 0 || paragraphs.isEmpty()) {
             // No merging - return each paragraph as its own chunk
@@ -61,45 +64,20 @@ object TTSTextMerger {
         for ((index, paragraph) in paragraphs.withIndex()) {
             val paragraphWords = countWords(paragraph)
             
-            // If adding this paragraph would exceed target, finalize current chunk
+            // If adding this paragraph would exceed target AND we already have content,
+            // finalize current chunk first (keep paragraphs intact - no splitting)
             if (currentWordCount > 0 && currentWordCount + paragraphWords > targetWordCount) {
-                // Check if we should include remainder from current paragraph
-                if (includeRemainder && currentWordCount < targetWordCount) {
-                    // Calculate how many words we need to reach target
-                    val wordsNeeded = targetWordCount - currentWordCount
-                    val (partialText, remainingText) = splitParagraphByWords(paragraph, wordsNeeded)
-                    
-                    if (partialText.isNotEmpty()) {
-                        if (currentText.isNotEmpty()) currentText.append("\n\n")
-                        currentText.append(partialText)
-                        currentIndices.add(index)
-                        currentWordCount += countWords(partialText)
-                    }
-                    
-                    // Finalize current chunk
-                    result.add(MergedChunk(
-                        mergedText = currentText.toString(),
-                        originalParagraphIndices = currentIndices.toList(),
-                        wordCount = currentWordCount
-                    ))
-                    
-                    // Start new chunk with remaining text
-                    currentText = StringBuilder(remainingText)
-                    currentIndices = if (remainingText.isNotEmpty()) mutableListOf(index) else mutableListOf()
-                    currentWordCount = countWords(remainingText)
-                } else {
-                    // Finalize current chunk without splitting
-                    result.add(MergedChunk(
-                        mergedText = currentText.toString(),
-                        originalParagraphIndices = currentIndices.toList(),
-                        wordCount = currentWordCount
-                    ))
-                    
-                    // Start new chunk with this paragraph
-                    currentText = StringBuilder(paragraph)
-                    currentIndices = mutableListOf(index)
-                    currentWordCount = paragraphWords
-                }
+                // Finalize current chunk
+                result.add(MergedChunk(
+                    mergedText = currentText.toString(),
+                    originalParagraphIndices = currentIndices.toList(),
+                    wordCount = currentWordCount
+                ))
+                
+                // Start new chunk with this paragraph
+                currentText = StringBuilder(paragraph)
+                currentIndices = mutableListOf(index)
+                currentWordCount = paragraphWords
             } else {
                 // Add paragraph to current chunk
                 if (currentText.isNotEmpty()) currentText.append("\n\n")

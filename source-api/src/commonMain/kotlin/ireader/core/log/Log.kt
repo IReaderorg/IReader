@@ -28,7 +28,7 @@ object Log {
      * Minimum severity level for logging.
      * Set to Severity.Warn to suppress Info and Debug logs in production.
      */
-    var minSeverity: Severity = Severity.Warn
+    var minSeverity: Severity = Severity.Info
     
     /**
      * Enable verbose logging (Debug and Info levels).

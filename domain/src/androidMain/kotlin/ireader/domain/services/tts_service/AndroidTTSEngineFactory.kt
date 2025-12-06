@@ -124,4 +124,20 @@ class AndroidGradioTTSEngine(
     suspend fun generateAudioBytes(text: String): ByteArray? {
         return engine.generateAudioBytes(text)
     }
+    
+    /**
+     * Add audio data to the in-memory cache.
+     * Used to pre-populate cache with audio from persistent storage (TTSChapterCache).
+     * This allows offline playback of downloaded chapter audio.
+     */
+    fun addToCache(utteranceId: String, audioData: ByteArray) {
+        engine.addToCache(utteranceId, audioData)
+    }
+    
+    /**
+     * Check if audio is in the in-memory cache
+     */
+    fun isInCache(utteranceId: String): Boolean {
+        return engine.isInCache(utteranceId)
+    }
 }

@@ -56,6 +56,10 @@ class GenericGradioTTSEngine(
     @kotlin.concurrent.Volatile
     private var isGeneratingSpeech = false
     
+    // Rate limiter - track last API request time
+    @kotlin.concurrent.Volatile
+    private var lastApiRequestTime = 0L
+    
     // Audio cache for pre-fetching (thread-safe with synchronized map)
     private val audioCache = ireader.core.util.synchronizedMapOf<String, ByteArray>()
     private val loadingParagraphs = ireader.core.util.synchronizedSetOf<String>()
@@ -84,6 +88,7 @@ class GenericGradioTTSEngine(
         private const val MAX_PREFETCH_CONCURRENT = 1 // Only 1 prefetch at a time to avoid server overload
         private const val DEBOUNCE_DELAY_MS = 300L
         private const val PREFETCH_DELAY_MS = 500L // Delay before starting prefetch
+        private const val MIN_REQUEST_INTERVAL_MS = 1000L // Minimum 1 second between API requests (rate limiting)
         
         // Cache of working API types per space URL - persists across engine instances
         private val workingApiCache = mutableMapOf<String, GradioApiType>()
@@ -112,9 +117,12 @@ class GenericGradioTTSEngine(
      * Start the queue processor that handles speech requests one at a time
      */
     private fun startQueueProcessor() {
+        Log.info { "$TAG: startQueueProcessor() called" }
         queueProcessorJob?.cancel()
         queueProcessorJob = scope.launch {
+            Log.info { "$TAG: Queue processor started, waiting for requests..." }
             for (request in speechQueue) {
+                Log.info { "$TAG: Queue processor received request: utteranceId=${request.utteranceId}" }
                 // Wait if paused
                 while (isPaused) {
                     delay(100)
@@ -123,12 +131,14 @@ class GenericGradioTTSEngine(
                 try {
                     processSpeechRequest(request)
                 } catch (e: CancellationException) {
+                    Log.info { "$TAG: Queue processor cancelled" }
                     break
                 } catch (e: Exception) {
                     Log.error { "$TAG: Error processing speech: ${e.message}" }
                     callback?.onError(request.utteranceId, e.message ?: "Unknown error")
                 }
             }
+            Log.info { "$TAG: Queue processor ended" }
         }
     }
     
@@ -139,7 +149,10 @@ class GenericGradioTTSEngine(
     private suspend fun processSpeechRequest(request: SpeechRequest): Boolean {
         val (text, utteranceId) = request
         
+        Log.info { "$TAG: processSpeechRequest START - utteranceId=$utteranceId, textLength=${text.length}" }
+        
         _isPlaying.value = true
+        Log.info { "$TAG: processSpeechRequest - Calling onStart callback" }
         callback?.onStart(utteranceId)
         
         try {
@@ -149,11 +162,13 @@ class GenericGradioTTSEngine(
             
             // Check cache first (thread-safe)
             val cachedAudio = audioCache[utteranceId]
+            Log.info { "$TAG: processSpeechRequest - Cache check: ${if (cachedAudio != null) "HIT" else "MISS"}" }
             
             val audioData = if (cachedAudio != null) {
                 cachedAudio
             } else {
                 // Generate audio from server - block prefetch during this
+                Log.info { "$TAG: processSpeechRequest - Generating speech from server" }
                 isGeneratingSpeech = true
                 try {
                     generateSpeech(text)
@@ -163,55 +178,85 @@ class GenericGradioTTSEngine(
             }
             
             if (audioData != null) {
+                Log.info { "$TAG: processSpeechRequest - Got audio data: ${audioData.size} bytes" }
                 // Cache the audio if not already cached (thread-safe)
                 if (cachedAudio == null) {
                     cacheAudio(utteranceId, audioData)
                 }
                 
                 // Play the audio and wait for completion
+                Log.info { "$TAG: processSpeechRequest - Starting playback" }
                 val completedNormally = playAudioAndWait(audioData, utteranceId)
+                Log.info { "$TAG: processSpeechRequest - Playback finished: completedNormally=$completedNormally" }
                 return completedNormally
             } else {
+                Log.error { "$TAG: processSpeechRequest - Failed to generate speech" }
                 callback?.onError(utteranceId, "Failed to generate speech")
                 return false
             }
         } catch (e: CancellationException) {
+            Log.info { "$TAG: processSpeechRequest - Cancelled" }
             throw e
         } catch (e: Exception) {
-            Log.error { "$TAG: Error speaking: ${e.message}" }
+            Log.error { "$TAG: processSpeechRequest - Error: ${e.message}" }
             callback?.onError(utteranceId, e.message ?: "Unknown error")
             return false
         } finally {
             _isPlaying.value = false
+            Log.info { "$TAG: processSpeechRequest END - utteranceId=$utteranceId" }
         }
     }
     
     override suspend fun speak(text: String, utteranceId: String) {
+        Log.info { "$TAG: speak() called - utteranceId=$utteranceId, textLength=${text.length}" }
+        
+        // Ensure queue processor is running
+        if (queueProcessorJob?.isActive != true) {
+            Log.info { "$TAG: speak() - Queue processor not active, restarting..." }
+            startQueueProcessor()
+        }
+        
         // Debounce rapid next/prev taps - wait 300ms before processing
         // If user taps again within 300ms, cancel previous and restart timer
         pendingSpeechJob?.cancel()
         pendingSpeechRequest = SpeechRequest(text, utteranceId)
         
         // Stop current playback immediately for responsive feel
+        Log.info { "$TAG: speak() - Stopping current playback" }
         audioPlayer.stop()
         
+        Log.info { "$TAG: speak() - Launching debounce job, scope.isActive=${scope.isActive}" }
         pendingSpeechJob = scope.launch {
+            Log.info { "$TAG: speak() - Debounce job started for utteranceId=$utteranceId" }
             delay(DEBOUNCE_DELAY_MS)
+            Log.info { "$TAG: speak() - Debounce delay complete for utteranceId=$utteranceId" }
             
-            val request = pendingSpeechRequest ?: return@launch
+            val request = pendingSpeechRequest ?: run {
+                Log.info { "$TAG: speak() - Debounce: pendingSpeechRequest is null, aborting" }
+                return@launch
+            }
+            
+            Log.info { "$TAG: speak() - Sending to queue: utteranceId=${request.utteranceId}" }
             
             // Clear any pending items in queue before adding new one
-            while (speechQueue.tryReceive().isSuccess) { }
+            var drained = 0
+            while (speechQueue.tryReceive().isSuccess) { drained++ }
+            if (drained > 0) {
+                Log.info { "$TAG: speak() - Drained $drained items from queue" }
+            }
             
             speechQueue.send(request)
+            Log.info { "$TAG: speak() - Request sent to queue" }
             pendingSpeechRequest = null
         }
+        Log.info { "$TAG: speak() - Debounce job launched" }
     }
     
     /**
      * Clear the speech queue and stop current playback
      */
     fun clearQueue() {
+        Log.info { "$TAG: clearQueue() called" }
         
         // Cancel pending debounced speech
         pendingSpeechJob?.cancel()
@@ -227,6 +272,7 @@ class GenericGradioTTSEngine(
         
         audioPlayer.stop()
         _isPlaying.value = false
+        Log.info { "$TAG: clearQueue() done" }
     }
     
     /**
@@ -310,35 +356,54 @@ class GenericGradioTTSEngine(
      * Returns true if playback completed normally, false if interrupted (pause/stop)
      */
     private suspend fun playAudioAndWait(audioData: ByteArray, utteranceId: String): Boolean {
+        Log.info { "$TAG: playAudioAndWait START - utteranceId=$utteranceId, audioSize=${audioData.size}" }
         val completionDeferred = CompletableDeferred<Boolean>()
         currentPlaybackCompletion = completionDeferred
         
         try {
             audioPlayer.play(audioData) {
                 // Playback completed normally
+                Log.info { "$TAG: playAudioAndWait - audioPlayer.play() onComplete callback fired, completing with true" }
                 completionDeferred.complete(true)
             }
             
             // Wait for playback to complete
+            Log.info { "$TAG: playAudioAndWait - Waiting for completion..." }
             val completedNormally = completionDeferred.await()
+            Log.info { "$TAG: playAudioAndWait - Completion received: completedNormally=$completedNormally" }
             
             if (completedNormally) {
+                Log.info { "$TAG: playAudioAndWait - Calling onDone callback" }
                 callback?.onDone(utteranceId)
+            } else {
+                Log.info { "$TAG: playAudioAndWait - NOT calling onDone (completedNormally=false)" }
             }
             return completedNormally
         } catch (e: CancellationException) {
+            Log.info { "$TAG: playAudioAndWait - Cancelled, stopping audioPlayer" }
             audioPlayer.stop()
             throw e
         } catch (e: Exception) {
-            Log.error { "$TAG: Error playing audio: ${e.message}" }
+            Log.error { "$TAG: playAudioAndWait - Error: ${e.message}" }
             callback?.onError(utteranceId, e.message ?: "Playback error")
             return false
         } finally {
             currentPlaybackCompletion = null
+            Log.info { "$TAG: playAudioAndWait END - utteranceId=$utteranceId" }
         }
     }
     
     private suspend fun generateSpeech(text: String): ByteArray? {
+        // Rate limiting - ensure minimum interval between API requests
+        val now = currentTimeToLong()
+        val timeSinceLastRequest = now - lastApiRequestTime
+        if (timeSinceLastRequest < MIN_REQUEST_INTERVAL_MS) {
+            val delayNeeded = MIN_REQUEST_INTERVAL_MS - timeSinceLastRequest
+            Log.debug { "$TAG: Rate limiting - waiting ${delayNeeded}ms before next request" }
+            delay(delayNeeded)
+        }
+        lastApiRequestTime = currentTimeToLong()
+        
         val truncatedText = if (text.length > MAX_TEXT_LENGTH) {
             text.take(MAX_TEXT_LENGTH)
         } else {
@@ -831,12 +896,17 @@ class GenericGradioTTSEngine(
     // TTSEngine interface implementation
     
     override fun stop() {
+        Log.info { "$TAG: stop() called - hasCompletion=${currentPlaybackCompletion != null}, queueProcessorActive=${queueProcessorJob?.isActive}" }
         // Complete any pending playback to unblock the coroutine
-        currentPlaybackCompletion?.complete(false)
+        currentPlaybackCompletion?.let {
+            Log.info { "$TAG: stop() - Completing playback deferred with false" }
+            it.complete(false)
+        }
         currentPlaybackCompletion = null
         isPaused = false
         clearQueue()
         cancelPrefetch()
+        Log.info { "$TAG: stop() done - queueProcessorActive=${queueProcessorJob?.isActive}" }
     }
     
     override fun pause() {
@@ -906,6 +976,26 @@ class GenericGradioTTSEngine(
             loadingParagraphs.contains(utteranceId) -> CacheStatus.LOADING
             else -> CacheStatus.NOT_CACHED
         }
+    }
+    
+    /**
+     * Add audio data to the in-memory cache.
+     * Used to pre-populate cache with audio from persistent storage (TTSChapterCache).
+     * This allows offline playback of downloaded chapter audio.
+     * 
+     * @param utteranceId The cache key (e.g., "chunk_0_0" for chunk-based or paragraph index)
+     * @param audioData The audio bytes to cache
+     */
+    fun addToCache(utteranceId: String, audioData: ByteArray) {
+        cacheAudio(utteranceId, audioData)
+        Log.info { "$TAG: Added ${audioData.size} bytes to cache for utteranceId=$utteranceId" }
+    }
+    
+    /**
+     * Check if audio is in the in-memory cache
+     */
+    fun isInCache(utteranceId: String): Boolean {
+        return audioCache.containsKey(utteranceId)
     }
     
     /**

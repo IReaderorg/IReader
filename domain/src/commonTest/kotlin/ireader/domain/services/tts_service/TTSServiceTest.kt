@@ -283,6 +283,15 @@ open class MockTTSService : CommonTTSService {
         override val isTTSReady: StateFlow<Boolean> = MutableStateFlow(true)
         override val currentMergedChunkParagraphs: StateFlow<List<Int>> = MutableStateFlow(emptyList())
         override val isMergingEnabled: StateFlow<Boolean> = MutableStateFlow(false)
+        override val currentMergedChunkIndex: StateFlow<Int> = MutableStateFlow(0)
+        override val totalMergedChunks: StateFlow<Int> = MutableStateFlow(0)
+        override val isGeneratingChunkAudio: StateFlow<Boolean> = MutableStateFlow(false)
+        override val chunkGenerationCurrentChunk: StateFlow<Int> = MutableStateFlow(0)
+        override val chunkGenerationTotalChunks: StateFlow<Int> = MutableStateFlow(0)
+        override val chunkGenerationEstimatedTimeMs: StateFlow<Long> = MutableStateFlow(0L)
+        override val usingCachedAudio: StateFlow<Boolean> = MutableStateFlow(false)
+        override val audioPlaybackPosition: StateFlow<Long> = MutableStateFlow(0L)
+        override val audioPlaybackDuration: StateFlow<Long> = MutableStateFlow(0L)
     }
     
     override fun initialize() {}

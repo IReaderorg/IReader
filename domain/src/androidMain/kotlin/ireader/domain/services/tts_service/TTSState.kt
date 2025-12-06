@@ -147,10 +147,109 @@ class TTSStateImpl() : AndroidTTSState {
     
     // Merged chunks cache for current chapter
     var mergedChunks: List<TTSTextMerger.MergedChunk> = emptyList()
-    var currentMergedChunkIndex: Int = 0
+    
+    // Current chunk index as StateFlow for UI observation
+    private val _currentMergedChunkIndex = kotlinx.coroutines.flow.MutableStateFlow(0)
+    val currentMergedChunkIndexFlow: kotlinx.coroutines.flow.StateFlow<Int> = _currentMergedChunkIndex
+    
+    // Convenience property for direct access (backward compatible)
+    var currentMergedChunkIndex: Int
+        get() = _currentMergedChunkIndex.value
+        set(value) { _currentMergedChunkIndex.value = value }
+    
+    // Total chunks count as StateFlow for UI
+    private val _totalMergedChunks = kotlinx.coroutines.flow.MutableStateFlow(0)
+    val totalMergedChunksFlow: kotlinx.coroutines.flow.StateFlow<Int> = _totalMergedChunks
     
     fun setCurrentMergedChunkParagraphs(value: List<Int>) { _currentMergedChunkParagraphs.value = value }
     fun setMergingEnabled(value: Boolean) { _isMergingEnabled.value = value }
+    fun setTotalMergedChunks(value: Int) { _totalMergedChunks.value = value }
+    
+    // Chunk generation progress tracking (for showing progress when generating audio)
+    private val _isGeneratingChunkAudio = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val isGeneratingChunkAudio: kotlinx.coroutines.flow.StateFlow<Boolean> = _isGeneratingChunkAudio
+    
+    private val _chunkGenerationCurrentChunk = kotlinx.coroutines.flow.MutableStateFlow(0)
+    val chunkGenerationCurrentChunk: kotlinx.coroutines.flow.StateFlow<Int> = _chunkGenerationCurrentChunk
+    
+    private val _chunkGenerationTotalChunks = kotlinx.coroutines.flow.MutableStateFlow(0)
+    val chunkGenerationTotalChunks: kotlinx.coroutines.flow.StateFlow<Int> = _chunkGenerationTotalChunks
+    
+    // Estimated time remaining in milliseconds
+    private val _chunkGenerationEstimatedTimeMs = kotlinx.coroutines.flow.MutableStateFlow(0L)
+    val chunkGenerationEstimatedTimeMs: kotlinx.coroutines.flow.StateFlow<Long> = _chunkGenerationEstimatedTimeMs
+    
+    // Track chunk generation times for better estimation (rolling average of last 3)
+    private var chunkGenerationTimes = mutableListOf<Long>()
+    private var lastChunkStartTime = 0L
+    
+    fun setGeneratingChunkAudio(value: Boolean) { 
+        _isGeneratingChunkAudio.value = value
+        if (value) {
+            // Starting generation - record start time
+            lastChunkStartTime = ireader.domain.utils.extensions.currentTimeToLong()
+        } else if (lastChunkStartTime > 0) {
+            // Finished generation - record duration
+            val duration = ireader.domain.utils.extensions.currentTimeToLong() - lastChunkStartTime
+            if (duration > 0 && duration < 60000) { // Sanity check: between 0 and 60 seconds
+                chunkGenerationTimes.add(duration)
+                if (chunkGenerationTimes.size > 3) {
+                    chunkGenerationTimes.removeAt(0)
+                }
+            }
+            lastChunkStartTime = 0L
+        }
+    }
+    
+    fun setChunkGenerationProgress(current: Int, total: Int) {
+        _chunkGenerationCurrentChunk.value = current
+        _chunkGenerationTotalChunks.value = total
+        
+        // Update estimated time based on rolling average
+        val remainingChunks = total - current + 1 // +1 because current chunk is still generating
+        val avgTimePerChunk = if (chunkGenerationTimes.isNotEmpty()) {
+            chunkGenerationTimes.average().toLong()
+        } else {
+            4000L // Default 4 seconds if no data yet
+        }
+        _chunkGenerationEstimatedTimeMs.value = remainingChunks * avgTimePerChunk
+    }
+    
+    fun setChunkGenerationEstimatedTime(timeMs: Long) { _chunkGenerationEstimatedTimeMs.value = timeMs }
+    
+    // Offline playback mode - when all chunks are cached, play as continuous audio
+    private val _offlinePlaybackMode = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val offlinePlaybackMode: kotlinx.coroutines.flow.StateFlow<Boolean> = _offlinePlaybackMode
+    
+    fun setOfflinePlaybackMode(value: Boolean) { _offlinePlaybackMode.value = value }
+    
+    // Track if current chunk is using cached audio (for media player UI)
+    private val _usingCachedAudio = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val usingCachedAudio: kotlinx.coroutines.flow.StateFlow<Boolean> = _usingCachedAudio
+    
+    fun setUsingCachedAudio(value: Boolean) { _usingCachedAudio.value = value }
+    
+    // Audio playback progress for cached audio (media player style)
+    private val _audioPlaybackPosition = kotlinx.coroutines.flow.MutableStateFlow(0L)
+    val audioPlaybackPosition: kotlinx.coroutines.flow.StateFlow<Long> = _audioPlaybackPosition
+    
+    private val _audioPlaybackDuration = kotlinx.coroutines.flow.MutableStateFlow(0L)
+    val audioPlaybackDuration: kotlinx.coroutines.flow.StateFlow<Long> = _audioPlaybackDuration
+    
+    fun setAudioPlaybackPosition(value: Long) { _audioPlaybackPosition.value = value }
+    fun setAudioPlaybackDuration(value: Long) { _audioPlaybackDuration.value = value }
+    
+    fun resetChunkGenerationTracking() {
+        chunkGenerationTimes.clear()
+        lastChunkStartTime = 0L
+        _isGeneratingChunkAudio.value = false
+        _chunkGenerationCurrentChunk.value = 0
+        _chunkGenerationTotalChunks.value = 0
+        _chunkGenerationEstimatedTimeMs.value = 0L
+        // Also reset merged chunk state
+        _currentMergedChunkIndex.value = 0
+        _totalMergedChunks.value = 0
+    }
     
     // Alias for speechSpeed (for compatibility)
     val speechRate: kotlinx.coroutines.flow.StateFlow<Float> get() = _speechSpeed

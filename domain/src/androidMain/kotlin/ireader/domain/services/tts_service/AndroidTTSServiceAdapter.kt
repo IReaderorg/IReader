@@ -7,6 +7,7 @@ import ireader.core.log.Log
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.tts_service.media_player.TTSService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +34,7 @@ class AndroidTTSServiceAdapter(
     private val context: Context,
     private val sharedState: TTSStateImpl,
     private val appPreferences: AppPreferences,
+    private val readerPreferences: ReaderPreferences,
     private val httpClient: HttpClient
 ) : CommonTTSService {
     
@@ -42,8 +44,9 @@ class AndroidTTSServiceAdapter(
     
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     
-    // Adapter state that wraps the shared state
-    override val state: TTSServiceState = AndroidTTSStateAdapter(sharedState)
+    // Adapter state that wraps the shared state - typed as AndroidTTSStateAdapter for internal access
+    private val stateAdapter = AndroidTTSStateAdapter(sharedState)
+    override val state: TTSServiceState = stateAdapter
     
     override fun initialize() {
         Log.info { "AndroidTTSServiceAdapter initialized" }
@@ -109,19 +112,23 @@ class AndroidTTSServiceAdapter(
     }
     
     override suspend fun nextParagraph() {
-        Log.info { "TTS next paragraph" }
+        Log.info { "TTS Adapter: nextParagraph() called - currentParagraph=${sharedState.currentReadingParagraph.value}, isPlaying=${sharedState.isPlaying.value}" }
+        // Let the service handle all state updates to avoid conflicts
         val intent = Intent(context, TTSService::class.java).apply {
             action = TTSService.ACTION_NEXT_PARAGRAPH
         }
         context.startService(intent)
+        Log.info { "TTS Adapter: nextParagraph() - Intent sent" }
     }
     
     override suspend fun previousParagraph() {
-        Log.info { "TTS previous paragraph" }
+        Log.info { "TTS Adapter: previousParagraph() called - currentParagraph=${sharedState.currentReadingParagraph.value}, isPlaying=${sharedState.isPlaying.value}" }
+        // Let the service handle all state updates to avoid conflicts
         val intent = Intent(context, TTSService::class.java).apply {
             action = TTSService.ACTION_PREVIOUS_PARAGRAPH
         }
         context.startService(intent)
+        Log.info { "TTS Adapter: previousParagraph() - Intent sent" }
     }
     
     override fun setSpeed(speed: Float) {
@@ -136,6 +143,7 @@ class AndroidTTSServiceAdapter(
     
     override suspend fun jumpToParagraph(index: Int) {
         Log.info { "TTS jump to paragraph: $index" }
+        // Let the service handle all state updates to avoid conflicts
         val intent = Intent(context, TTSService::class.java).apply {
             action = TTSService.ACTION_JUMP_TO_PARAGRAPH
             putExtra(TTSService.PARAGRAPH_INDEX, index)
@@ -302,6 +310,35 @@ class AndroidTTSStateAdapter(
     private val _isMergingEnabled = MutableStateFlow(false)
     override val isMergingEnabled: StateFlow<Boolean> = _isMergingEnabled.asStateFlow()
     
+    private val _currentMergedChunkIndex = MutableStateFlow(0)
+    override val currentMergedChunkIndex: StateFlow<Int> = _currentMergedChunkIndex.asStateFlow()
+    
+    private val _totalMergedChunks = MutableStateFlow(0)
+    override val totalMergedChunks: StateFlow<Int> = _totalMergedChunks.asStateFlow()
+    
+    // Chunk generation progress state
+    private val _isGeneratingChunkAudio = MutableStateFlow(false)
+    override val isGeneratingChunkAudio: StateFlow<Boolean> = _isGeneratingChunkAudio.asStateFlow()
+    
+    private val _chunkGenerationCurrentChunk = MutableStateFlow(0)
+    override val chunkGenerationCurrentChunk: StateFlow<Int> = _chunkGenerationCurrentChunk.asStateFlow()
+    
+    private val _chunkGenerationTotalChunks = MutableStateFlow(0)
+    override val chunkGenerationTotalChunks: StateFlow<Int> = _chunkGenerationTotalChunks.asStateFlow()
+    
+    private val _chunkGenerationEstimatedTimeMs = MutableStateFlow(0L)
+    override val chunkGenerationEstimatedTimeMs: StateFlow<Long> = _chunkGenerationEstimatedTimeMs.asStateFlow()
+    
+    // Cached audio playback state
+    private val _usingCachedAudio = MutableStateFlow(false)
+    override val usingCachedAudio: StateFlow<Boolean> = _usingCachedAudio.asStateFlow()
+    
+    private val _audioPlaybackPosition = MutableStateFlow(0L)
+    override val audioPlaybackPosition: StateFlow<Long> = _audioPlaybackPosition.asStateFlow()
+    
+    private val _audioPlaybackDuration = MutableStateFlow(0L)
+    override val audioPlaybackDuration: StateFlow<Long> = _audioPlaybackDuration.asStateFlow()
+    
     init {
         // Observe ttsContent and update currentContent
         scope.launch {
@@ -336,6 +373,19 @@ class AndroidTTSStateAdapter(
                 // Sync merged chunk state
                 _currentMergedChunkParagraphs.value = sharedState.currentMergedChunkParagraphs.value
                 _isMergingEnabled.value = sharedState.isMergingEnabled.value
+                _currentMergedChunkIndex.value = sharedState.currentMergedChunkIndexFlow.value
+                _totalMergedChunks.value = sharedState.totalMergedChunksFlow.value
+                
+                // Sync chunk generation progress
+                _isGeneratingChunkAudio.value = sharedState.isGeneratingChunkAudio.value
+                _chunkGenerationCurrentChunk.value = sharedState.chunkGenerationCurrentChunk.value
+                _chunkGenerationTotalChunks.value = sharedState.chunkGenerationTotalChunks.value
+                _chunkGenerationEstimatedTimeMs.value = sharedState.chunkGenerationEstimatedTimeMs.value
+                
+                // Sync cached audio playback state
+                _usingCachedAudio.value = sharedState.usingCachedAudio.value
+                _audioPlaybackPosition.value = sharedState.audioPlaybackPosition.value
+                _audioPlaybackDuration.value = sharedState.audioPlaybackDuration.value
                 
                 // Calculate sleep timer remaining
                 if (sharedState.sleepMode.value) {
@@ -360,5 +410,20 @@ class AndroidTTSStateAdapter(
     fun updateCacheStatus(cached: Set<Int>, loading: Set<Int>) {
         _cachedParagraphs.value = cached
         _loadingParagraphs.value = loading
+    }
+    
+    /**
+     * Update merged chunk state for immediate UI response
+     */
+    fun updateMergedChunkState(
+        paragraphs: List<Int>,
+        enabled: Boolean,
+        chunkIndex: Int,
+        totalChunks: Int
+    ) {
+        _currentMergedChunkParagraphs.value = paragraphs
+        _isMergingEnabled.value = enabled
+        _currentMergedChunkIndex.value = chunkIndex
+        _totalMergedChunks.value = totalChunks
     }
 }

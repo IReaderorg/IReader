@@ -207,6 +207,35 @@ class DesktopTTSStateAdapter(
     private val _isMergingEnabled = MutableStateFlow(false)
     override val isMergingEnabled: StateFlow<Boolean> = _isMergingEnabled.asStateFlow()
     
+    private val _currentMergedChunkIndex = MutableStateFlow(0)
+    override val currentMergedChunkIndex: StateFlow<Int> = _currentMergedChunkIndex.asStateFlow()
+    
+    private val _totalMergedChunks = MutableStateFlow(0)
+    override val totalMergedChunks: StateFlow<Int> = _totalMergedChunks.asStateFlow()
+    
+    // Chunk generation progress state
+    private val _isGeneratingChunkAudio = MutableStateFlow(false)
+    override val isGeneratingChunkAudio: StateFlow<Boolean> = _isGeneratingChunkAudio.asStateFlow()
+    
+    private val _chunkGenerationCurrentChunk = MutableStateFlow(0)
+    override val chunkGenerationCurrentChunk: StateFlow<Int> = _chunkGenerationCurrentChunk.asStateFlow()
+    
+    private val _chunkGenerationTotalChunks = MutableStateFlow(0)
+    override val chunkGenerationTotalChunks: StateFlow<Int> = _chunkGenerationTotalChunks.asStateFlow()
+    
+    private val _chunkGenerationEstimatedTimeMs = MutableStateFlow(0L)
+    override val chunkGenerationEstimatedTimeMs: StateFlow<Long> = _chunkGenerationEstimatedTimeMs.asStateFlow()
+    
+    // Cached audio playback state (not used on desktop yet)
+    private val _usingCachedAudio = MutableStateFlow(false)
+    override val usingCachedAudio: StateFlow<Boolean> = _usingCachedAudio.asStateFlow()
+    
+    private val _audioPlaybackPosition = MutableStateFlow(0L)
+    override val audioPlaybackPosition: StateFlow<Long> = _audioPlaybackPosition.asStateFlow()
+    
+    private val _audioPlaybackDuration = MutableStateFlow(0L)
+    override val audioPlaybackDuration: StateFlow<Long> = _audioPlaybackDuration.asStateFlow()
+    
     init {
         // Observe ttsContent changes and update derived state
         scope.launch {

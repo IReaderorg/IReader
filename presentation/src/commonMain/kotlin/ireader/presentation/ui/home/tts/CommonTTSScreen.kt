@@ -418,7 +418,18 @@ data class CommonTTSScreenState(
     val isTTSReady: Boolean = false,
     // Text merging state - tracks which original paragraphs are in current merged chunk
     val mergedChunkParagraphs: List<Int> = emptyList(),
-    val isMergingEnabled: Boolean = false
+    val isMergingEnabled: Boolean = false,
+    val currentMergedChunkIndex: Int = 0,  // Current chunk index (0-based)
+    val totalMergedChunks: Int = 0,  // Total number of merged chunks
+    // Chunk generation progress (for showing progress when generating audio in chunk mode)
+    val isGeneratingChunkAudio: Boolean = false,
+    val chunkGenerationCurrentChunk: Int = 0,
+    val chunkGenerationTotalChunks: Int = 0,
+    val chunkGenerationEstimatedTimeMs: Long = 0L,
+    // Cached audio playback state (for media player UI when playing downloaded audio)
+    val usingCachedAudio: Boolean = false,
+    val audioPlaybackPosition: Long = 0L,  // Current position in ms
+    val audioPlaybackDuration: Long = 0L   // Total duration in ms
 ) {
     // Pre-computed properties to avoid repeated calculations during recomposition
     val contentSize: Int get() = content.size
@@ -453,6 +464,8 @@ interface CommonTTSActions {
     fun onSelectEngine(engine: String) {}
     fun onSelectVoice() {}
     fun onOpenSettings() {}
+    // Audio seek action for cached audio playback
+    fun onSeekAudio(positionMs: Long) {}
 }
 
 
@@ -676,22 +689,40 @@ fun TTSContentDisplay(
                     val isCurrentParagraph = index == state.currentReadingParagraph
                     // Check if this paragraph is part of the current merged chunk being read
                     val isInMergedChunk = state.isParagraphInCurrentMergedChunk(index)
-                    // Highlight if it's the current paragraph OR part of the merged chunk being read
-                    val shouldHighlight = isCurrentParagraph || (isInMergedChunk && state.isPlaying)
+                    // Highlight if it's the current paragraph OR part of the merged chunk
+                    // When merging is enabled, highlight all paragraphs in the current chunk
+                    val shouldHighlight = if (state.isMergingEnabled) {
+                        isInMergedChunk // Highlight entire chunk
+                    } else {
+                        isCurrentParagraph // Highlight only current paragraph
+                    }
                     
                     // Determine cache/download status for this paragraph
-                    // Priority: chapter download status > pre-cache status
+                    // Note: During chunk-based download, we don't show per-paragraph indicators
+                    // because chunks don't map 1:1 to paragraphs. Progress is shown in download button.
                     val isChapterDownloaded = state.chapterDownloadedParagraphs.contains(index)
-                    val isChapterDownloading = state.isDownloading && index == state.chapterDownloadCurrentParagraph
-                    val isPendingChapterDownload = state.isDownloading && index > state.chapterDownloadCurrentParagraph
+                    val isChapterDownloading = false // Don't show per-paragraph loading during download
                     
-                    // Show status icon if: downloading chapter, or pre-caching upcoming paragraphs
+                    // For merged chunk reading: show loading for all paragraphs in current chunk being generated
+                    // Show cached for paragraphs in chunks that have already been played
+                    val isMergedChunkLoading = state.isMergingEnabled && isInMergedChunk && state.isLoading
+                    val isMergedChunkCached = state.isMergingEnabled && isInMergedChunk && state.isPlaying && !state.isLoading
+                    
+                    // Show status icon when:
+                    // 1. Chapter download is in progress
+                    // 2. Pre-caching upcoming paragraphs (non-merged mode)
+                    // 3. Part of current merged chunk being processed
                     val showStatusIcon = state.isDownloading || 
+                        isInMergedChunk ||
                         (index > state.currentReadingParagraph && index <= state.currentReadingParagraph + 3)
                     
                     // Determine final cached/loading state
-                    val finalIsCached = isChapterDownloaded || state.cachedParagraphs.contains(index)
-                    val finalIsLoading = isChapterDownloading || state.loadingParagraphs.contains(index)
+                    // Priority: merged chunk status > chapter download > pre-cache
+                    val finalIsCached = isMergedChunkCached || isChapterDownloaded || state.cachedParagraphs.contains(index)
+                    val finalIsLoading = isMergedChunkLoading || isChapterDownloading || state.loadingParagraphs.contains(index)
+                    
+                    // Determine if this paragraph is in a playing merged chunk (not the current one, but being read)
+                    val isInPlayingChunk = isInMergedChunk && state.isPlaying && !state.isLoading
                     
                     // Extract item-specific state to minimize recomposition scope
                     TTSParagraphItemWithSentenceHighlight(
@@ -710,6 +741,7 @@ fun TTSContentDisplay(
                         showCacheIndicator = showStatusIcon,
                         isCached = finalIsCached,
                         isLoadingCache = finalIsLoading,
+                        isInPlayingChunk = isInPlayingChunk,
                         textColor = textColor,
                         highlightColor = highlightColor,
                         fontSize = fontSizeSp,
@@ -730,6 +762,9 @@ fun TTSContentDisplay(
             totalParagraphs = displayContent.size,
             showTranslation = state.showTranslation && hasTranslation,
             textColor = textColor,
+            isMergingEnabled = state.isMergingEnabled,
+            currentChunk = state.currentMergedChunkIndex + 1,  // 1-based for display
+            totalChunks = state.totalMergedChunks,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
@@ -762,6 +797,7 @@ private fun TTSParagraphItemWithSentenceHighlight(
     showCacheIndicator: Boolean,
     isCached: Boolean,
     isLoadingCache: Boolean,
+    isInPlayingChunk: Boolean = false,
     textColor: Color,
     highlightColor: Color,
     fontSize: androidx.compose.ui.unit.TextUnit,
@@ -792,11 +828,12 @@ private fun TTSParagraphItemWithSentenceHighlight(
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // Download/Cache status icon at the start of paragraph
-        if (showCacheIndicator || isCached || isLoadingCache) {
+        // Download/Cache status icon at the start of paragraph (only show for loading or cached)
+        if (isCached || isLoadingCache) {
             ParagraphStatusIcon(
                 isCached = isCached,
                 isLoadingCache = isLoadingCache,
+                isInPlayingChunk = isInPlayingChunk,
                 textColor = textColor
             )
         }
@@ -882,14 +919,7 @@ private fun TTSParagraphItemWithSentenceHighlight(
             }
         }
         
-        // Cache indicator (only show for upcoming paragraphs)
-        if (showCacheIndicator) {
-            CacheIndicator(
-                isCached = isCached,
-                isLoadingCache = isLoadingCache,
-                textColor = textColor
-            )
-        }
+        // Cache indicator removed for cleaner UI - status shown via ParagraphStatusIcon at start
     }
 }
 
@@ -984,43 +1014,43 @@ private fun CacheIndicator(
 /**
  * Paragraph status icon shown at the start of paragraph
  * Shows download/cache status with icons
+ * 
+ * Icons:
+ * - Green checkmark: Cached/downloaded
+ * - Yellow spinner: Currently loading/downloading
  */
 @Composable
 private fun ParagraphStatusIcon(
     isCached: Boolean,
     isLoadingCache: Boolean,
+    isInPlayingChunk: Boolean = false,
     textColor: Color
 ) {
+    // Only show icon if loading or cached (removed blue play icon for cleaner UI)
+    if (!isLoadingCache && !isCached) return
+    
     Box(
         modifier = Modifier
-            .padding(end = 8.dp, top = 2.dp)
-            .size(16.dp),
+            .padding(end = 2.dp, top = 2.dp)
+            .size(14.dp),
         contentAlignment = Alignment.Center
     ) {
         when {
+            isLoadingCache -> {
+                // Loading indicator for downloading paragraphs
+                CircularProgressIndicator(
+                    modifier = Modifier.size(10.dp),
+                    strokeWidth = 1.dp,
+                    color = Color(0xFFFFC107) // Yellow/Orange
+                )
+            }
             isCached -> {
                 // Checkmark icon for cached paragraphs
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Cached",
-                    modifier = Modifier.size(14.dp),
-                    tint = Color(0xFF4CAF50) // Green
-                )
-            }
-            isLoadingCache -> {
-                // Loading indicator for downloading paragraphs
-                CircularProgressIndicator(
                     modifier = Modifier.size(12.dp),
-                    strokeWidth = 1.5.dp,
-                    color = Color(0xFFFFC107) // Yellow/Orange
-                )
-            }
-            else -> {
-                // Small dot for paragraphs that will be downloaded
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .background(textColor.copy(alpha = 0.3f), shape = CircleShape)
+                    tint = Color(0xFF4CAF50) // Green
                 )
             }
         }
@@ -1029,6 +1059,7 @@ private fun ParagraphStatusIcon(
 
 /**
  * Lightweight progress indicator component
+ * Shows only paragraph progress (chunk info removed for cleaner UI)
  */
 @Composable
 private fun TTSProgressIndicator(
@@ -1036,6 +1067,9 @@ private fun TTSProgressIndicator(
     totalParagraphs: Int,
     showTranslation: Boolean,
     textColor: Color,
+    isMergingEnabled: Boolean = false,
+    currentChunk: Int = 0,
+    totalChunks: Int = 0,
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -1048,6 +1082,7 @@ private fun TTSProgressIndicator(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Always show paragraph progress only (chunk info removed)
             Text(
                 text = "${currentParagraph + 1}/$totalParagraphs",
                 style = MaterialTheme.typography.labelSmall,
@@ -1112,6 +1147,15 @@ fun TTSMediaControls(
                     sleepModeEnabled = state.sleepModeEnabled,
                     sleepTimeRemaining = state.sleepTimeRemaining,
                     selectedVoiceModel = state.selectedVoiceModel
+                )
+            }
+            
+            // Audio playback progress bar (shown when playing cached audio)
+            if (state.usingCachedAudio && state.audioPlaybackDuration > 0) {
+                AudioPlaybackProgressBar(
+                    currentPosition = state.audioPlaybackPosition,
+                    duration = state.audioPlaybackDuration,
+                    onSeek = actions::onSeekAudio
                 )
             }
             
@@ -1218,6 +1262,73 @@ private fun TTSProgressBar(
             progress = { progressFraction },
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+/**
+ * Audio playback progress bar for cached audio
+ * Shows current position, duration, and allows seeking
+ */
+@Composable
+private fun AudioPlaybackProgressBar(
+    currentPosition: Long,
+    duration: Long,
+    onSeek: (Long) -> Unit
+) {
+    var sliderPosition by remember { mutableStateOf(currentPosition.toFloat()) }
+    var isDragging by remember { mutableStateOf(false) }
+    
+    // Update slider position when not dragging
+    LaunchedEffect(currentPosition) {
+        if (!isDragging) {
+            sliderPosition = currentPosition.toFloat()
+        }
+    }
+    
+    // Format time as mm:ss
+    fun formatTime(ms: Long): String {
+        val totalSeconds = ms / 1000
+        val minutes = totalSeconds / 60
+        val seconds = totalSeconds % 60
+        return "${minutes}:${seconds.toString().padStart(2, '0')}"
+    }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        // Slider
+        Slider(
+            value = sliderPosition,
+            onValueChange = { 
+                isDragging = true
+                sliderPosition = it 
+            },
+            onValueChangeFinished = {
+                isDragging = false
+                onSeek(sliderPosition.toLong())
+            },
+            valueRange = 0f..duration.toFloat().coerceAtLeast(1f),
+            modifier = Modifier.fillMaxWidth()
+        )
+        
+        // Time labels
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = formatTime(if (isDragging) sliderPosition.toLong() else currentPosition),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = formatTime(duration),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
