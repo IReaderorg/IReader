@@ -293,4 +293,12 @@ class DesktopGradioTTSEngineV2(
         engine.clearQueue()
         engine.clearCache()
     }
+    
+    /**
+     * Pre-cache upcoming chunks/paragraphs for smoother playback
+     */
+    override fun precacheNext(items: List<Pair<String, String>>) {
+        Log.warn { "$TAG: precacheNext(${items.size} items)" }
+        engine.precacheParagraphs(items)
+    }
 }

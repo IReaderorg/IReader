@@ -101,9 +101,9 @@ class TTSAudioCache(
             
             try {
                 if (fileSystem.exists(filePath)) {
-                    // Update last accessed time
+                    // Update last accessed time (don't save index on every get - too expensive)
                     cacheIndex[key] = entry.copy(lastAccessedAt = currentTimeToLong())
-                    saveIndex()
+                    // Note: Index will be saved on next put() or clearAll()
                     
                     val data = fileSystem.read(filePath) { readByteArray() }
                     Log.warn { "$TAG: Cache HIT for key=$key (${data.size} bytes)" }
@@ -112,7 +112,7 @@ class TTSAudioCache(
                     // File missing, remove entry
                     cacheIndex.remove(key)
                     totalSizeBytes -= entry.sizeBytes
-                    saveIndex()
+                    // Don't save index here either - will be saved on next put()
                     Log.warn { "$TAG: Cache MISS (file missing) for key=$key" }
                     null
                 }
@@ -290,10 +290,51 @@ class TTSAudioCache(
             // Recalculate total size
             totalSizeBytes = cacheIndex.values.sumOf { it.sizeBytes }
             
+            // If index is too large, trim it to prevent OOM
+            if (cacheIndex.size > 1000) {
+                Log.warn { "$TAG: Index too large (${cacheIndex.size} entries), trimming to 1000" }
+                trimIndex(1000)
+            }
+            
             Log.warn { "$TAG: Loaded ${cacheIndex.size} entries (${totalSizeBytes / BYTES_PER_MB}MB)" }
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to load index: ${e.message}" }
+            // If loading fails, start fresh to prevent OOM on corrupted index
+            cacheIndex.clear()
+            totalSizeBytes = 0
         }
+    }
+    
+    /**
+     * Trim the index to keep only the most recent entries
+     */
+    private fun trimIndex(maxEntries: Int) {
+        if (cacheIndex.size <= maxEntries) return
+        
+        val entriesToKeep = cacheIndex.values
+            .sortedByDescending { it.lastAccessedAt }
+            .take(maxEntries)
+            .map { it.key }
+            .toSet()
+        
+        val entriesToRemove = cacheIndex.keys.filter { it !in entriesToKeep }
+        entriesToRemove.forEach { key ->
+            val entry = cacheIndex.remove(key)
+            if (entry != null) {
+                totalSizeBytes -= entry.sizeBytes
+                // Delete the file too
+                try {
+                    val filePath = cacheDir / entry.filename
+                    if (fileSystem.exists(filePath)) {
+                        fileSystem.delete(filePath)
+                    }
+                } catch (e: Exception) {
+                    // Ignore file deletion errors during trim
+                }
+            }
+        }
+        
+        Log.warn { "$TAG: Trimmed index from ${entriesToRemove.size + maxEntries} to $maxEntries entries" }
     }
     
     private fun saveIndex() {
@@ -350,15 +391,33 @@ class TTSAudioCache(
     }
     
     private fun buildIndexJson(): String {
-        val entries = cacheIndex.values.joinToString(",") { entry ->
-            // Escape special characters in textPreview
-            val escapedPreview = entry.textPreview
+        // Limit entries to prevent OOM - keep only most recent 1000 entries
+        val entriesToSave = if (cacheIndex.size > 1000) {
+            cacheIndex.values
+                .sortedByDescending { it.lastAccessedAt }
+                .take(1000)
+        } else {
+            cacheIndex.values.toList()
+        }
+        
+        // Build JSON incrementally to avoid huge string allocations
+        val sb = StringBuilder(entriesToSave.size * 200) // Estimate ~200 chars per entry
+        sb.append("""{"entries":[""")
+        
+        entriesToSave.forEachIndexed { index, entry ->
+            if (index > 0) sb.append(",")
+            
+            // Escape special characters in textPreview (truncate to 30 chars to save space)
+            val escapedPreview = entry.textPreview.take(30)
                 .replace("\\", "\\\\")
                 .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-            """{"key":"${entry.key}","filename":"${entry.filename}","sizeBytes":${entry.sizeBytes},"lastAccessedAt":${entry.lastAccessedAt},"createdAt":${entry.createdAt},"engineId":"${entry.engineId}","textPreview":"$escapedPreview"}"""
+                .replace("\n", " ")
+                .replace("\r", " ")
+            
+            sb.append("""{"key":"${entry.key}","filename":"${entry.filename}","sizeBytes":${entry.sizeBytes},"lastAccessedAt":${entry.lastAccessedAt},"createdAt":${entry.createdAt},"engineId":"${entry.engineId}","textPreview":"$escapedPreview"}""")
         }
-        return """{"entries":[$entries]}"""
+        
+        sb.append("]}")
+        return sb.toString()
     }
 }

@@ -7,6 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import ireader.core.log.Log
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,6 +57,9 @@ class GenericGradioTTSEngine(
     // Track if we're actively generating speech (making server request)
     @kotlin.concurrent.Volatile
     private var isGeneratingSpeech = false
+    
+    // Current generation job - can be cancelled when user navigates quickly
+    private var currentGenerationJob: Job? = null
     
     // Rate limiter - track last API request time
     @kotlin.concurrent.Volatile
@@ -168,14 +172,40 @@ class GenericGradioTTSEngine(
             val audioData = if (cachedAudio != null) {
                 cachedAudio
             } else {
-                // Generate audio from server - block prefetch during this
+                // Generate audio from server in a cancellable job
                 Log.info { "$TAG: processSpeechRequest - Generating speech from server" }
                 isGeneratingSpeech = true
                 try {
-                    generateSpeech(text)
+                    // Use withContext to make the generation cancellable
+                    val generationDeferred = CompletableDeferred<ByteArray?>()
+                    currentGenerationJob = scope.launch {
+                        try {
+                            val result = generateSpeech(text)
+                            generationDeferred.complete(result)
+                        } catch (e: CancellationException) {
+                            generationDeferred.cancel(e)
+                            throw e
+                        } catch (e: Exception) {
+                            generationDeferred.completeExceptionally(e)
+                        }
+                    }
+                    
+                    try {
+                        generationDeferred.await()
+                    } catch (e: CancellationException) {
+                        Log.info { "$TAG: processSpeechRequest - Generation cancelled by user navigation" }
+                        return false
+                    }
                 } finally {
                     isGeneratingSpeech = false
+                    currentGenerationJob = null
                 }
+            }
+            
+            // Check if we were cancelled during generation
+            if (!coroutineContext.isActive) {
+                Log.info { "$TAG: processSpeechRequest - Cancelled after generation" }
+                return false
             }
             
             if (audioData != null) {
@@ -217,8 +247,12 @@ class GenericGradioTTSEngine(
             startQueueProcessor()
         }
         
-        // Debounce rapid next/prev taps - wait 300ms before processing
-        // If user taps again within 300ms, cancel previous and restart timer
+        // Cancel any ongoing API generation - this is key for responsive navigation
+        currentGenerationJob?.cancel()
+        currentGenerationJob = null
+        
+        // Debounce rapid next/prev taps - wait before processing
+        // If user taps again within the delay, cancel previous and restart timer
         pendingSpeechJob?.cancel()
         pendingSpeechRequest = SpeechRequest(text, utteranceId)
         
@@ -265,6 +299,10 @@ class GenericGradioTTSEngine(
         
         // Cancel current speech
         currentSpeechJob?.cancel()
+        
+        // Cancel any ongoing API generation
+        currentGenerationJob?.cancel()
+        currentGenerationJob = null
         
         // Drain the queue
         while (speechQueue.tryReceive().isSuccess) {

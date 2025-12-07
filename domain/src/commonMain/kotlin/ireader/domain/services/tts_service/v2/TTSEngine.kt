@@ -81,6 +81,15 @@ interface TTSEngine {
     fun clearState() {}
     
     /**
+     * Pre-cache upcoming text for smoother playback.
+     * Only supported by remote TTS engines (Gradio).
+     * Native TTS engines do nothing.
+     * 
+     * @param items List of (utteranceId, text) pairs to pre-cache
+     */
+    fun precacheNext(items: List<Pair<String, String>>) {}
+    
+    /**
      * Engine events flow
      */
     val events: Flow<EngineEvent>

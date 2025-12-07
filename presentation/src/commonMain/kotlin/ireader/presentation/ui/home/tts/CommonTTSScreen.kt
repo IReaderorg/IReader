@@ -833,8 +833,8 @@ private fun TTSParagraphItemWithSentenceHighlight(
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.Top
     ) {
-        // Download/Cache status icon at the start of paragraph (only show for loading or cached)
-        if (isCached || isLoadingCache) {
+        // Download/Cache status icon at the start of paragraph (only show when enabled and loading or cached)
+        if (showCacheIndicator && (isCached || isLoadingCache)) {
             ParagraphStatusIcon(
                 isCached = isCached,
                 isLoadingCache = isLoadingCache,

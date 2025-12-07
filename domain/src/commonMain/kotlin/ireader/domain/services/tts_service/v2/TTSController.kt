@@ -66,6 +66,9 @@ class TTSController(
     // Flag to indicate a play is pending (waiting for engine ready)
     private var pendingPlay: Boolean = false
     
+    // Pending chunk mode configuration (applied after content loads)
+    private var pendingChunkWordCount: Int? = null
+    
     /**
      * Process a command - ALL interactions go through here
      * Commands are processed sequentially using a mutex to prevent race conditions
@@ -527,6 +530,19 @@ class TTSController(
     private suspend fun loadChapter(bookId: Long, chapterId: Long, startParagraph: Int) {
         Log.warn { "$TAG: loadChapter(bookId=$bookId, chapterId=$chapterId, startParagraph=$startParagraph)" }
         
+        // Check if this chapter is already loaded with content - skip reload to preserve chunk mode
+        val currentState = _state.value
+        if (currentState.chapter?.id == chapterId && currentState.paragraphs.isNotEmpty()) {
+            Log.warn { "$TAG: loadChapter - chapter already loaded, skipping reload" }
+            // Just ensure chunk mode is applied if pending
+            val pendingWordCount = pendingChunkWordCount
+            if (pendingWordCount != null && pendingWordCount > 0 && !currentState.chunkModeEnabled) {
+                Log.warn { "$TAG: loadChapter - applying pending chunk mode" }
+                enableChunkMode(pendingWordCount)
+            }
+            return
+        }
+        
         // Stop current playback and clear engine state
         engine?.stop()
         
@@ -573,6 +589,13 @@ class TTSController(
             }
             
             Log.warn { "$TAG: Chapter loaded - ${content.paragraphs.size} paragraphs" }
+            
+            // Apply pending chunk mode if set
+            val pendingWordCount = pendingChunkWordCount
+            if (pendingWordCount != null && pendingWordCount > 0) {
+                Log.warn { "$TAG: Applying pending chunk mode with $pendingWordCount words" }
+                enableChunkMode(pendingWordCount)
+            }
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to load chapter: ${e.message}" }
             handleError(TTSError.ContentLoadFailed(e.message ?: "Failed to load chapter"))
@@ -686,8 +709,12 @@ class TTSController(
     
     private fun enableChunkMode(targetWordCount: Int) {
         val currentState = _state.value
+        
+        // Always store the desired chunk word count - this ensures loadChapter can re-apply it
+        pendingChunkWordCount = targetWordCount
+        
         if (!currentState.hasContent) {
-            Log.warn { "$TAG: enableChunkMode - no content" }
+            Log.warn { "$TAG: enableChunkMode - no content yet, storing pending word count: $targetWordCount" }
             return
         }
         
@@ -733,6 +760,8 @@ class TTSController(
     private fun disableChunkMode() {
         Log.warn { "$TAG: disableChunkMode()" }
         
+        // Clear pending chunk word count so it won't be re-enabled on next loadChapter
+        pendingChunkWordCount = null
         mergeResult = null
         
         _state.update {
@@ -896,6 +925,44 @@ class TTSController(
         Log.warn { "$TAG: playChunk() - chunk $chunkIndex, text length=${textToSpeak.length}, useTranslation=${currentState.showTranslation}" }
         
         engine?.speak(textToSpeak, utteranceId)
+        
+        // Pre-cache next chunk(s) for smoother playback
+        precacheNextChunks(currentState, result)
+    }
+    
+    /**
+     * Pre-cache the next chunk(s) for smoother playback
+     */
+    private fun precacheNextChunks(currentState: TTSState, result: TTSTextMergerV2.MergeResult) {
+        val nextChunkIndex = currentState.currentChunkIndex + 1
+        if (nextChunkIndex >= result.chunks.size) return
+        
+        // Pre-cache up to 2 chunks ahead
+        val itemsToPrecache = mutableListOf<Pair<String, String>>()
+        
+        for (i in nextChunkIndex until minOf(nextChunkIndex + 2, result.chunks.size)) {
+            val chunk = result.chunks[i]
+            val utteranceId = "chunk_$i"
+            
+            // Get the text - use translated if enabled
+            val text = if (currentState.showTranslation && currentState.hasTranslation) {
+                val translatedParagraphs = currentState.translatedParagraphs!!
+                chunk.paragraphIndices
+                    .mapNotNull { translatedParagraphs.getOrNull(it) }
+                    .joinToString("\n\n")
+            } else {
+                chunk.text
+            }
+            
+            if (text.isNotBlank()) {
+                itemsToPrecache.add(utteranceId to text)
+            }
+        }
+        
+        if (itemsToPrecache.isNotEmpty()) {
+            Log.warn { "$TAG: precacheNextChunks() - precaching ${itemsToPrecache.size} chunks" }
+            engine?.precacheNext(itemsToPrecache)
+        }
     }
     
     // ========== Error Handling ==========

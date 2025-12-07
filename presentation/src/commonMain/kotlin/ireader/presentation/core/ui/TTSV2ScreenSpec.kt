@@ -351,6 +351,12 @@ class TTSV2ScreenSpec(
                         Log.warn { "TTSV2ScreenSpec: Translation not available: ${e.message}" }
                     }
                 }
+                
+                // Ensure chunk mode is enabled if Gradio TTS is active and not already enabled
+                if (useGradioTTS && mergeWordsRemote > 0 && !currentState.chunkModeEnabled) {
+                    Log.warn { "TTSV2ScreenSpec: Re-enabling chunk mode with $mergeWordsRemote words (was disabled)" }
+                    viewModel.adapter.enableChunkMode(mergeWordsRemote)
+                }
             } else {
                 // Clear existing translation state
                 viewModel.adapter.setTranslatedContent(null)
