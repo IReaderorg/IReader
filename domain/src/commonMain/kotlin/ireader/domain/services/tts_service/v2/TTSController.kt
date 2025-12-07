@@ -3,6 +3,8 @@ package ireader.domain.services.tts_service.v2
 import ireader.core.log.Log
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
+import ireader.domain.services.chapter.ChapterCommand
+import ireader.domain.services.chapter.ChapterController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -39,7 +41,8 @@ class TTSController(
     private val nativeEngineFactory: () -> TTSEngine,
     private val gradioEngineFactory: ((GradioConfig) -> TTSEngine?)? = null,
     initialGradioConfig: GradioConfig? = null,
-    private val cacheUseCase: TTSCacheUseCase? = null
+    private val cacheUseCase: TTSCacheUseCase? = null,
+    private val chapterController: ChapterController? = null
 ) {
     // Mutable Gradio config that can be updated at runtime
     private var gradioConfig: GradioConfig? = initialGradioConfig
@@ -48,6 +51,63 @@ class TTSController(
     }
     
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    
+    // Track the last chapter ID we synced from ChapterController to avoid loops
+    private var lastSyncedChapterId: Long? = null
+    
+    // Flag to indicate the current loadChapter was triggered by ChapterController sync
+    // When true, we should NOT notify ChapterController back (would cause infinite loop)
+    private var isLoadingFromChapterControllerSync: Boolean = false
+    
+    init {
+        // Subscribe to ChapterController state changes for cross-screen sync
+        subscribeToChapterControllerState()
+    }
+    
+    /**
+     * Subscribe to ChapterController state changes to keep TTS in sync with Reader screen.
+     * When the Reader screen navigates to a different chapter, TTS should update accordingly.
+     */
+    private fun subscribeToChapterControllerState() {
+        chapterController?.let { controller ->
+            scope.launch {
+                controller.state.collect { chapterState ->
+                    val currentChapter = chapterState.currentChapter
+                    val ttsState = _state.value
+                    
+                    // Only sync if:
+                    // 1. ChapterController has a current chapter
+                    // 2. TTS has content loaded (same book)
+                    // 3. The chapter is different from what TTS currently has
+                    // 4. We haven't just synced this chapter (avoid loops)
+                    if (currentChapter != null && 
+                        ttsState.book != null &&
+                        ttsState.book?.id == chapterState.book?.id &&
+                        currentChapter.id != ttsState.chapter?.id &&
+                        currentChapter.id != lastSyncedChapterId) {
+                        
+                        Log.warn { "$TAG: ChapterController changed to chapter ${currentChapter.id}, syncing TTS" }
+                        lastSyncedChapterId = currentChapter.id
+                        
+                        // Stop current playback before switching
+                        val wasPlaying = ttsState.isPlaying
+                        if (wasPlaying) {
+                            engine?.stop()
+                        }
+                        
+                        // Load the new chapter content for TTS
+                        // Mark that this load is from ChapterController sync to prevent notifying back
+                        isLoadingFromChapterControllerSync = true
+                        try {
+                            loadChapter(ttsState.book!!.id, currentChapter.id, chapterState.currentParagraphIndex)
+                        } finally {
+                            isLoadingFromChapterControllerSync = false
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     // Mutex to ensure commands are processed sequentially
     private val commandMutex = Mutex()
@@ -478,9 +538,17 @@ class TTSController(
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
         
         try {
+            // Get next chapter ID using contentLoader (TTS-specific content handling)
             val nextChapterId = contentLoader.getNextChapterId(book.id, chapter.id)
+            
             if (nextChapterId != null) {
                 Log.warn { "$TAG: Loading next chapter: $nextChapterId" }
+                
+                // Notify ChapterController about navigation (Requirements: 9.3, 9.4)
+                // This keeps ChapterController in sync with TTS navigation
+                chapterController?.dispatch(ChapterCommand.LoadChapter(nextChapterId, 0))
+                
+                // Load chapter content for TTS (with paragraph parsing)
                 loadChapter(book.id, nextChapterId, 0)
                 if (wasPlaying) {
                     play()
@@ -508,9 +576,17 @@ class TTSController(
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
         
         try {
+            // Get previous chapter ID using contentLoader (TTS-specific content handling)
             val prevChapterId = contentLoader.getPreviousChapterId(book.id, chapter.id)
+            
             if (prevChapterId != null) {
                 Log.warn { "$TAG: Loading previous chapter: $prevChapterId" }
+                
+                // Notify ChapterController about navigation (Requirements: 9.3, 9.4)
+                // This keeps ChapterController in sync with TTS navigation
+                chapterController?.dispatch(ChapterCommand.LoadChapter(prevChapterId, 0))
+                
+                // Load chapter content for TTS (with paragraph parsing)
                 loadChapter(book.id, prevChapterId, 0)
                 if (wasPlaying) {
                     play()
@@ -589,6 +665,18 @@ class TTSController(
             }
             
             Log.warn { "$TAG: Chapter loaded - ${content.paragraphs.size} paragraphs" }
+            
+            // Update lastSyncedChapterId to prevent sync loops
+            if (content.chapter != null) {
+                lastSyncedChapterId = content.chapter.id
+            }
+            
+            // Notify ChapterController about chapter load (Requirements: 9.3, 9.4)
+            // This keeps ChapterController in sync with TTS chapter state
+            // BUT skip if this load was triggered BY ChapterController (would cause infinite loop)
+            if (content.chapter != null && !isLoadingFromChapterControllerSync) {
+                chapterController?.dispatch(ChapterCommand.LoadChapter(content.chapter.id, startParagraph))
+            }
             
             // Apply pending chunk mode if set
             val pendingWordCount = pendingChunkWordCount

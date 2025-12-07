@@ -5,7 +5,6 @@ import ireader.domain.models.entities.Chapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,6 +20,8 @@ class TTSControllerTest {
         var loadedChapterId: Long? = null
         var shouldFail = false
         var mockParagraphs = listOf("Paragraph 1", "Paragraph 2", "Paragraph 3")
+        var nextChapterId: Long? = null
+        var previousChapterId: Long? = null
         
         override suspend fun loadChapter(bookId: Long, chapterId: Long): TTSContentLoader.ChapterContent {
             loadedBookId = bookId
@@ -36,6 +37,14 @@ class TTSControllerTest {
                 paragraphs = mockParagraphs
             )
         }
+        
+        override suspend fun getNextChapterId(bookId: Long, currentChapterId: Long): Long? {
+            return nextChapterId
+        }
+        
+        override suspend fun getPreviousChapterId(bookId: Long, currentChapterId: Long): Long? {
+            return previousChapterId
+        }
     }
     
     // Mock TTS engine
@@ -50,8 +59,8 @@ class TTSControllerTest {
         var stopCalled = false
         var pauseCalled = false
         var resumeCalled = false
-        var speed = 1.0f
-        var pitch = 1.0f
+        var speedTTS = 1.0f
+        var ttsPitch = 1.0f
         var ready = true
         
         override suspend fun speak(text: String, utteranceId: String) {
@@ -64,8 +73,8 @@ class TTSControllerTest {
         override fun stop() { stopCalled = true }
         override fun pause() { pauseCalled = true }
         override fun resume() { resumeCalled = true }
-        override fun setSpeed(speed: Float) { this.speed = speed }
-        override fun setPitch(pitch: Float) { this.pitch = pitch }
+        override fun setSpeed(speed: Float) { this.speedTTS = speed }
+        override fun setPitch(pitch: Float) { this.ttsPitch = pitch }
         override fun isReady() = ready
         override fun release() {}
         
@@ -83,7 +92,7 @@ class TTSControllerTest {
     fun `initial state is idle`() = runTest {
         val controller = TTSController(
             contentLoader = MockContentLoader(),
-            engineFactory = { MockEngine() }
+            nativeEngineFactory = { MockEngine() }
         )
         
         val state = controller.state.value
@@ -99,7 +108,7 @@ class TTSControllerTest {
         var engineCreated = false
         val controller = TTSController(
             contentLoader = MockContentLoader(),
-            engineFactory = { 
+            nativeEngineFactory = { 
                 engineCreated = true
                 MockEngine()
             }
@@ -120,7 +129,7 @@ class TTSControllerTest {
         val contentLoader = MockContentLoader()
         val controller = TTSController(
             contentLoader = contentLoader,
-            engineFactory = { MockEngine() }
+            nativeEngineFactory = { MockEngine() }
         )
         
         controller.dispatch(TTSCommand.Initialize)
@@ -144,7 +153,7 @@ class TTSControllerTest {
         val engine = MockEngine()
         val controller = TTSController(
             contentLoader = MockContentLoader(),
-            engineFactory = { engine }
+            nativeEngineFactory = { engine }
         )
         
         controller.dispatch(TTSCommand.Initialize)
@@ -154,7 +163,7 @@ class TTSControllerTest {
         kotlinx.coroutines.delay(100)
         
         assertEquals(1.5f, controller.state.value.speed)
-        assertEquals(1.5f, engine.speed)
+        assertEquals(1.5f, engine.speedTTS)
         
         controller.destroy()
     }
@@ -163,7 +172,7 @@ class TTSControllerTest {
     fun `speed is clamped to valid range`() = runTest {
         val controller = TTSController(
             contentLoader = MockContentLoader(),
-            engineFactory = { MockEngine() }
+            nativeEngineFactory = { MockEngine() }
         )
         
         controller.dispatch(TTSCommand.Initialize)
@@ -186,7 +195,7 @@ class TTSControllerTest {
     fun `play without content emits error`() = runTest {
         val controller = TTSController(
             contentLoader = MockContentLoader(),
-            engineFactory = { MockEngine() }
+            nativeEngineFactory = { MockEngine() }
         )
         
         controller.dispatch(TTSCommand.Initialize)
@@ -205,7 +214,7 @@ class TTSControllerTest {
     fun `cleanup resets state`() = runTest {
         val controller = TTSController(
             contentLoader = MockContentLoader(),
-            engineFactory = { MockEngine() }
+            nativeEngineFactory = { MockEngine() }
         )
         
         controller.dispatch(TTSCommand.Initialize)

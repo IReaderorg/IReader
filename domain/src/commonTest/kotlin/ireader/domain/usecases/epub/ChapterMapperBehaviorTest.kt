@@ -7,6 +7,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Tests that document and verify the behavior of chapter mappers.
@@ -305,6 +307,7 @@ class ChapterMapperBehaviorTest {
      * Simulates the output of chapterMapperLight
      * This is what findChaptersByBookId returns
      */
+    @OptIn(ExperimentalTime::class)
     private fun simulateLightMapper(
         id: Long,
         bookId: Long,
@@ -346,6 +349,7 @@ class ChapterMapperBehaviorTest {
      * Simulates the output of chapterMapper
      * This is what findChaptersByBookIdWithContent returns
      */
+    @OptIn(ExperimentalTime::class)
     private fun simulateFullMapper(
         id: Long,
         bookId: Long,

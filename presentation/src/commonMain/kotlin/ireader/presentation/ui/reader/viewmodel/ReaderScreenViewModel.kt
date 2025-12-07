@@ -47,6 +47,9 @@ import ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase
 import ireader.domain.usecases.translate.TranslateParagraphUseCase
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
+import ireader.domain.services.chapter.ChapterCommand
+import ireader.domain.services.chapter.ChapterController
+import ireader.domain.services.chapter.ChapterEvent
 
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.removeIf
@@ -113,6 +116,8 @@ class ReaderScreenViewModel(
     val autoRepairChapterUseCase: AutoRepairChapterUseCase,
     val params: Param,
     private val systemInteractionService: ireader.domain.services.platform.SystemInteractionService,
+    // ChapterController - single source of truth for chapter operations (Requirements: 9.2, 9.4, 9.5)
+    private val chapterController: ChapterController,
     // Sub-ViewModels
     val settingsViewModel: ReaderSettingsViewModel,
     val translationViewModel: ReaderTranslationViewModel,
@@ -192,10 +197,14 @@ class ReaderScreenViewModel(
 
     // ==================== Jobs ====================
 
-    private var getChapterJob: Job? = null
     private var preloadJob: Job? = null
     private var chapterNavigationJob: Job? = null
+    private var chapterControllerEventJob: Job? = null
     private val preloadedChapters = mutableMapOf<Long, Chapter>()
+    
+    // Flag to indicate the current loadChapter was triggered by ChapterController sync
+    // When true, we should NOT notify ChapterController back (would cause infinite loop)
+    private var isLoadingFromChapterControllerSync: Boolean = false
 
     // ==================== Initialization ====================
 
@@ -205,6 +214,8 @@ class ReaderScreenViewModel(
 
         if (bookId != null && chapterId != null) {
             subscribeReaderThemes()
+            // Subscribe to ChapterController events (Requirements: 9.2, 9.4, 9.5)
+            subscribeToChapterControllerEvents()
             initializeReader(bookId, chapterId)
             // Subscribe to TTS chapter changes for sync
             subscribeTTSChapterChanges()
@@ -224,7 +235,91 @@ class ReaderScreenViewModel(
         
         // Set up next chapter provider for auto-translate feature
         translationViewModel.setNextChapterProvider {
-            nextChapter()
+            getNextChapter()
+        }
+    }
+    
+    // ==================== ChapterController Integration ====================
+    // Requirements: 9.2, 9.4, 9.5
+    
+    /**
+     * Subscribe to ChapterController events for chapter loading notifications.
+     * This handles events like ChapterLoaded, Error, etc.
+     */
+    private fun subscribeToChapterControllerEvents() {
+        chapterControllerEventJob?.cancel()
+        chapterControllerEventJob = scope.launch {
+            // Subscribe to events
+            launch {
+                chapterController.events.collect { event ->
+                    when (event) {
+                        is ChapterEvent.ChapterLoaded -> {
+                            Log.debug { "ChapterController: Chapter loaded - ${event.chapter.id}" }
+                            // Chapter loading is handled by the loadChapter method
+                        }
+                        is ChapterEvent.Error -> {
+                            Log.error { "ChapterController: Error - ${event.error}" }
+                            showSnackBar(UiText.DynamicString(event.error.toUserMessage()))
+                        }
+                        is ChapterEvent.ContentFetched -> {
+                            Log.debug { "ChapterController: Content fetched for chapter ${event.chapterId}" }
+                        }
+                        is ChapterEvent.ProgressSaved -> {
+                            Log.debug { "ChapterController: Progress saved for chapter ${event.chapterId}" }
+                        }
+                        is ChapterEvent.ChapterCompleted -> {
+                            Log.debug { "ChapterController: Chapter completed" }
+                        }
+                    }
+                }
+            }
+            
+            // Subscribe to state changes for cross-screen sync (TTS <-> Reader)
+            launch {
+                chapterController.state.collect { chapterState ->
+                    val currentChapter = chapterState.currentChapter
+                    val readerState = _state.value
+                    
+                    // Sync chapters list when it changes (for drawer to show cached status)
+                    if (readerState is ReaderState.Success && 
+                        chapterState.chapters.isNotEmpty() &&
+                        readerState.book.id == chapterState.book?.id) {
+                        // Update chapters list if it has changed
+                        if (chapterState.chapters != readerState.chapters) {
+                            updateSuccessState { it.copy(chapters = chapterState.chapters) }
+                        }
+                    }
+                    
+                    // Only sync chapter navigation if:
+                    // 1. ChapterController has a current chapter
+                    // 2. Reader has a book loaded (same book)
+                    // 3. The chapter is different from what Reader currently has
+                    if (currentChapter != null && 
+                        readerState is ReaderState.Success &&
+                        readerState.book.id == chapterState.book?.id &&
+                        currentChapter.id != readerState.currentChapter.id) {
+                        
+                        Log.debug { "ChapterController state changed to chapter ${currentChapter.id}, syncing Reader" }
+                        
+                        // Load the new chapter in the reader
+                        // Mark that this load is from ChapterController sync to prevent notifying back
+                        // Don't scroll to end - preserve scroll position or scroll to start
+                        isLoadingFromChapterControllerSync = true
+                        try {
+                            loadChapter(
+                                readerState.book,
+                                readerState.catalog,
+                                currentChapter.id,
+                                next = false,
+                                force = false,
+                                scrollToEnd = false  // Don't scroll to end when syncing from ChapterController
+                            )
+                        } finally {
+                            isLoadingFromChapterControllerSync = false
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -276,11 +371,15 @@ class ReaderScreenViewModel(
                 }
 
                 val catalog = getLocalCatalog.get(book.sourceId)
+                
+                // Set catalog on ChapterController for remote content loading
+                chapterController.setCatalog(catalog)
+                
+                // Load book via ChapterController (Requirements: 9.2, 9.4, 9.5)
+                // This subscribes to chapters reactively
+                chapterController.dispatch(ChapterCommand.LoadBook(bookId))
 
-                // Subscribe to chapters
-                subscribeChapters(bookId)
-
-                // Wait for chapters to load
+                // Wait for chapters to load from ChapterController
                 delay(100)
 
                 // Setup initial chapter
@@ -299,20 +398,14 @@ class ReaderScreenViewModel(
             }
         }
     }
-
-    private fun subscribeChapters(bookId: Long) {
-        getChapterJob?.cancel()
-        getChapterJob = scope.launch {
-            val currentState = _state.value
-            val isAsc = if (currentState is ReaderState.Success) currentState.isDrawerAsc else true
-
-            getChapterUseCase.subscribeChaptersByBookId(
-                bookId = bookId,
-                sort = if (isAsc) "default" else "defaultDesc",
-            ).collect { chapters ->
-                updateSuccessState { it.copy(chapters = chapters) }
-            }
-        }
+    
+    /**
+     * Get chapters from ChapterController state.
+     * This replaces the deprecated subscribeChapters method.
+     * Requirements: 9.2, 9.4, 9.5
+     */
+    private fun getChaptersFromController(): List<Chapter> {
+        return chapterController.state.value.chapters
     }
 
     private suspend fun setupChapters(book: Book, catalog: CatalogLocal?, bookId: Long, chapterId: Long) {
@@ -322,7 +415,11 @@ class ReaderScreenViewModel(
             chapterId != LAST_CHAPTER && chapterId != NO_VALUE -> chapterId
             last != null -> last.chapterId
             else -> {
-                val chapters = getChapterUseCase.findChaptersByBookId(bookId)
+                // Get chapters from ChapterController state (Requirements: 9.2, 9.4, 9.5)
+                val chapters = getChaptersFromController().ifEmpty {
+                    // Fallback to direct query if controller hasn't loaded yet
+                    getChapterUseCase.findChaptersByBookId(bookId)
+                }
                 chapters.firstOrNull()?.id
             }
         }
@@ -342,13 +439,16 @@ class ReaderScreenViewModel(
 
     /**
      * Load a chapter by ID
+     * @param scrollToEnd Override scroll behavior. If null, uses `next` parameter logic.
+     *                    If true, scrolls to end. If false, scrolls to start.
      */
     private suspend fun loadChapter(
         book: Book,
         catalog: CatalogLocal?,
         chapterId: Long,
         next: Boolean = true,
-        force: Boolean = false
+        force: Boolean = false,
+        scrollToEnd: Boolean? = null
     ): Chapter? {
         // Track chapter close before loading new chapter
         statisticsViewModel.onChapterClosed()
@@ -404,12 +504,13 @@ class ReaderScreenViewModel(
             showSettingsBottomSheet = previousSuccessState?.showSettingsBottomSheet ?: false,
             isDrawerAsc = previousSuccessState?.isDrawerAsc ?: true,
             // When navigating to previous chapter (next=false), scroll to end
-            scrollToEndOnChapterChange = !next,
+            // Use explicit scrollToEnd parameter if provided, otherwise use !next logic
+            scrollToEndOnChapterChange = scrollToEnd ?: !next,
             // Word count for reading time estimation
             totalWords = totalWords,
         )
         
-        Log.debug { "loadChapter: chapterId=${chapter.id}, next=$next, scrollToEndOnChapterChange=${!next}" }
+        Log.debug { "loadChapter: chapterId=${chapter.id}, next=$next, scrollToEnd=$scrollToEnd, scrollToEndOnChapterChange=${scrollToEnd ?: !next}" }
 
         // Fetch remote content if needed
         val needsRemoteFetch = chapter.isEmpty() && catalog?.source != null
@@ -422,12 +523,19 @@ class ReaderScreenViewModel(
 
         // Update last read time
         getChapterUseCase.updateLastReadTime(chapter)
+        
+        // Notify ChapterController about the chapter load (Requirements: 9.2, 9.4, 9.5)
+        // This keeps ChapterController in sync with the reader's current chapter
+        // BUT skip if this load was triggered BY ChapterController (would cause infinite loop)
+        if (!isLoadingFromChapterControllerSync) {
+            chapterController.dispatch(ChapterCommand.LoadChapter(chapterId))
+        }
 
         // Track chapter open (pass isLast to track book completion when last chapter is finished)
         val isLastChapter = chapterIndex != -1 && chapterIndex == chapters.lastIndex
         statisticsViewModel.onChapterOpened(chapter, isLastChapter)
 
-        // Trigger preload
+        // Trigger preload via ChapterController (Requirements: 9.2, 9.4, 9.5)
         triggerPreloadNextChapter()
 
         // Load translation if available
@@ -484,11 +592,13 @@ class ReaderScreenViewModel(
     }
 
     // ==================== Chapter Navigation ====================
+    // Navigation methods now delegate to ChapterController (Requirements: 9.2, 9.4, 9.5)
 
     /**
-     * Navigate to next chapter
+     * Get the next chapter without navigating.
+     * Used for preloading and auto-translate features.
      */
-    fun nextChapter(): Chapter? {
+    fun getNextChapter(): Chapter? {
         val currentState = _state.value
         if (currentState !is ReaderState.Success) return null
 
@@ -506,9 +616,9 @@ class ReaderScreenViewModel(
     }
 
     /**
-     * Navigate to previous chapter
+     * Get the previous chapter without navigating.
      */
-    fun prevChapter(): Chapter? {
+    fun getPrevChapter(): Chapter? {
         val currentState = _state.value
         if (currentState !is ReaderState.Success) return null
 
@@ -523,6 +633,40 @@ class ReaderScreenViewModel(
             return currentState.chapters[index - 1]
         }
         return null
+    }
+    
+    /**
+     * Navigate to next chapter via ChapterController.
+     * Requirements: 9.2, 9.4, 9.5
+     * @deprecated Use dispatchNextChapter() instead for ChapterController integration
+     */
+    fun nextChapter(): Chapter? {
+        return getNextChapter()
+    }
+
+    /**
+     * Navigate to previous chapter via ChapterController.
+     * Requirements: 9.2, 9.4, 9.5
+     * @deprecated Use dispatchPrevChapter() instead for ChapterController integration
+     */
+    fun prevChapter(): Chapter? {
+        return getPrevChapter()
+    }
+    
+    /**
+     * Dispatch next chapter command to ChapterController.
+     * Requirements: 9.2, 9.4, 9.5
+     */
+    fun dispatchNextChapter() {
+        chapterController.dispatch(ChapterCommand.NextChapter)
+    }
+    
+    /**
+     * Dispatch previous chapter command to ChapterController.
+     * Requirements: 9.2, 9.4, 9.5
+     */
+    fun dispatchPrevChapter() {
+        chapterController.dispatch(ChapterCommand.PreviousChapter)
     }
 
     /**
@@ -552,7 +696,9 @@ class ReaderScreenViewModel(
     }
 
     /**
-     * Load chapter (public API for backward compatibility)
+     * Load chapter (public API for backward compatibility).
+     * Also dispatches to ChapterController for state synchronization.
+     * Requirements: 9.2, 9.4, 9.5
      */
     suspend fun getLocalChapter(
         chapterId: Long?,
@@ -563,6 +709,8 @@ class ReaderScreenViewModel(
 
         val currentState = _state.value
         return if (currentState is ReaderState.Success) {
+            // Dispatch to ChapterController for state sync (Requirements: 9.2, 9.4, 9.5)
+            chapterController.dispatch(ChapterCommand.LoadChapter(chapterId))
             loadChapter(currentState.book, currentState.catalog, chapterId, next, force)
         } else {
             null
@@ -589,7 +737,11 @@ class ReaderScreenViewModel(
         preloadJob?.cancel()
         preloadJob = scope.launch {
             try {
-                val next = nextChapter()
+                // Use ChapterController for preloading (Requirements: 9.2, 9.4, 9.5)
+                chapterController.dispatch(ChapterCommand.PreloadNextChapter)
+                
+                // Also preload locally for faster access
+                val next = getNextChapter()
                 if (next != null && !preloadedChapters.containsKey(next.id)) {
                     preloadChapter(next)
                 }
@@ -1309,10 +1461,14 @@ class ReaderScreenViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        getChapterJob?.cancel()
+        // Cancel all jobs
         preloadJob?.cancel()
         chapterNavigationJob?.cancel()
+        chapterControllerEventJob?.cancel()
         preloadedChapters.clear()
         statisticsViewModel.onChapterClosed()
+        
+        // Cleanup ChapterController state (Requirements: 9.2, 9.4, 9.5)
+        chapterController.dispatch(ChapterCommand.Cleanup)
     }
 }

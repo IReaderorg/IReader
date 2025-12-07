@@ -7,6 +7,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Contract tests for ChapterRepository methods used in EPUB export.
@@ -228,6 +230,7 @@ class ChapterRepositoryContractTest {
     /**
      * Creates a chapter as it would be returned by findChaptersByBookId (light query)
      */
+    @OptIn(ExperimentalTime::class)
     private fun createLightQueryChapter(id: Long, name: String, isDownloaded: Boolean): Chapter {
         return Chapter(
             id = id,
@@ -251,6 +254,7 @@ class ChapterRepositoryContractTest {
     /**
      * Creates a chapter as it would be returned by findChaptersByBookIdWithContent (full query)
      */
+    @OptIn(ExperimentalTime::class)
     private fun createFullQueryChapter(id: Long, name: String, content: String): Chapter {
         return Chapter(
             id = id,

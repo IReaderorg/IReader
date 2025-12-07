@@ -26,6 +26,7 @@ import ireader.domain.usecases.remote.GetRemoteChapters
 import ireader.domain.usecases.remote.GetRemoteReadingContent
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
+import ireader.domain.services.chapter.chapterModule
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
@@ -273,6 +274,10 @@ val DomainServices = module {
     
     // Use Case Module - New clean architecture use cases
     includes(useCaseModule)
+    
+    // Chapter Module - Unified Chapter Controller and use cases
+    // Requirements: 5.5 - ChapterController injectable via DI
+    includes(chapterModule)
     
     // Note: Preferences, UseCases, and Repository UseCases are loaded separately
     // to avoid circular dependencies with UseCasesInject module

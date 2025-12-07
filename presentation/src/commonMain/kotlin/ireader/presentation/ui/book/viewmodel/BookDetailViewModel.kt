@@ -20,6 +20,8 @@ import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.isObsolete
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.services.chapter.ChapterCommand
+import ireader.domain.services.chapter.ChapterController
 import ireader.domain.services.common.DownloadService
 import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.common.TranslationService
@@ -111,6 +113,7 @@ class BookDetailViewModel(
     private val bookPrefetchService: BookPrefetchService? = null,
     private val translationService: TranslationService? = null,
     val insertUseCases: LocalInsertUseCases = localInsertUseCases,
+    private val chapterController: ChapterController,
 ) : BaseViewModel() {
 
     data class Param(val bookId: Long?)
@@ -190,12 +193,33 @@ class BookDetailViewModel(
             // OPTIMIZATION: Show placeholder immediately - no shimmer needed
             _state.value = BookDetailState.Placeholder(bookId = bookId)
             initializeBook(bookId)
+            
+            // Subscribe to ChapterController state for selection sync (Requirements: 9.1, 9.4, 9.5)
+            subscribeToChapterControllerState()
         } else {
             _state.value = BookDetailState.Error("Invalid book ID")
             scope.launch {
                 _events.emit(BookDetailEvent.ShowSnackbar("Something is wrong with this book"))
             }
         }
+    }
+    
+    /**
+     * Subscribe to ChapterController state for selection synchronization.
+     * This keeps the local selection state in sync with ChapterController.
+     * Requirements: 9.1, 9.4, 9.5
+     */
+    private fun subscribeToChapterControllerState() {
+        chapterController.state
+            .onEach { chapterState ->
+                // Sync selection state from ChapterController
+                val controllerSelection = chapterState.selectedChapterIds
+                if (selection.toSet() != controllerSelection) {
+                    selection.clear()
+                    selection.addAll(controllerSelection)
+                }
+            }
+            .launchIn(scope)
     }
 
     // ==================== Initialization ====================
@@ -737,11 +761,16 @@ class BookDetailViewModel(
     }
 
     // ==================== Chapter Selection ====================
+    // Delegated to ChapterController (Requirements: 9.1, 9.4, 9.5)
     
     fun toggleSelection(book: Book) {
         // This is for book selection, but we use chapter selection
     }
     
+    /**
+     * Select chapters between the first and last selected chapter IDs.
+     * Note: This is a UI-specific operation that extends ChapterController's selection.
+     */
     fun selectBetween() {
         val selectedIds = selection.toSet()
         val chapterIds = chapters.map { it.id }
@@ -750,25 +779,44 @@ class BookDetailViewModel(
         if (filteredIds.isNotEmpty()) {
             val min = filteredIds.first()
             val max = filteredIds.last()
-            selection.clear()
-            selection.addAll((min..max).toList())
+            // Clear and add range - this is a UI-specific operation
+            chapterController.dispatch(ChapterCommand.ClearSelection)
+            (min..max).forEach { id ->
+                chapterController.dispatch(ChapterCommand.SelectChapter(id))
+            }
         }
     }
     
+    /**
+     * Select all chapters - delegates to ChapterController.
+     */
     fun selectAllChapters() {
-        selection.clear()
-        selection.addAll(chapters.map { it.id }.distinct())
+        chapterController.dispatch(ChapterCommand.SelectAll)
     }
     
+    /**
+     * Invert selection - delegates to ChapterController.
+     */
     fun invertSelection() {
-        val selectedIds = selection.toSet()
-        val invertedIds = chapters.map { it.id }.filterNot { it in selectedIds }.distinct()
-        selection.clear()
-        selection.addAll(invertedIds)
+        chapterController.dispatch(ChapterCommand.InvertSelection)
     }
     
+    /**
+     * Clear selection - delegates to ChapterController.
+     */
     fun clearSelection() {
-        selection.clear()
+        chapterController.dispatch(ChapterCommand.ClearSelection)
+    }
+    
+    /**
+     * Toggle selection for a single chapter.
+     */
+    fun toggleChapterSelection(chapterId: Long) {
+        if (selection.contains(chapterId)) {
+            chapterController.dispatch(ChapterCommand.DeselectChapter(chapterId))
+        } else {
+            chapterController.dispatch(ChapterCommand.SelectChapter(chapterId))
+        }
     }
 
     // ==================== Chapter Actions ====================
@@ -1290,6 +1338,9 @@ class BookDetailViewModel(
         getBookDetailJob?.cancel()
         getChapterDetailJob?.cancel()
         subscriptionJob?.cancel()
+        
+        // Cleanup ChapterController state for this book (Requirements: 9.4, 9.5)
+        chapterController.dispatch(ChapterCommand.Cleanup)
         
         Log.info { "BookDetailViewModel cleared - all jobs cancelled" }
     }

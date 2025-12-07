@@ -125,7 +125,7 @@ val PresentationModules = module {
     // Updated to Mihon-style StateFlow pattern (no separate state impl needed)
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get(),getOrNull(),get(),) }
+    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get(),getOrNull(),get(),get(),get()) }
     // Changed from single to factory - settings screen is not always needed
     factory  { 
         MainSettingScreenViewModel(
@@ -263,6 +263,8 @@ val PresentationModules = module {
             autoRepairChapterUseCase = get(),
             params = params,
             systemInteractionService = get(),
+            // ChapterController - single source of truth for chapter operations (Requirements: 9.2, 9.4, 9.5)
+            chapterController = get(),
             settingsViewModel = get(),
             translationViewModel = get(),
             ttsViewModel = get(),

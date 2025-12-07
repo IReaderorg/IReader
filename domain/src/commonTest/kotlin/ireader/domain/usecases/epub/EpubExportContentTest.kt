@@ -6,7 +6,6 @@ import ireader.domain.models.entities.Chapter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -396,7 +395,6 @@ class EpubExportContentTest {
             customCover = "",
             favorite = true,
             lastUpdate = 0L,
-            lastInit = 0L,
             dateAdded = 0L,
             viewer = 0,
             flags = 0
@@ -518,6 +516,7 @@ class EpubExportContentTest {
      * Simulates the result of the full query (getChaptersByMangaId)
      * which DOES include actual content
      */
+    @OptIn(ExperimentalTime::class)
     private fun simulateFullQueryResult(id: Long, name: String, content: String): Chapter {
         return Chapter(
             id = id,

@@ -10,8 +10,8 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -97,7 +97,7 @@ class TTSContentLoaderImpl(
                 var resumed = false
                 
                 // The getRemoteReadingContent is already a suspend function that handles its own dispatching
-                CoroutineScope(Dispatchers.IO).launch {
+                CoroutineScope(ioDispatcher).launch {
                     remoteUseCases.getRemoteReadingContent(
                         chapter = chapter,
                         catalog = catalog,

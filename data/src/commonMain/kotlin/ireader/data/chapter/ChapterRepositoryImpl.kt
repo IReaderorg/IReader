@@ -90,6 +90,9 @@ class ChapterRepositoryImpl(
 
 
     override suspend fun insertChapter(chapter: Chapter): Long {
+        // Invalidate cache for the affected book
+        dbOptimizations?.invalidateCache("book_${chapter.bookId}_chapters")
+        
         return handler.awaitOneAsync(inTransaction = true) {
                 chapterQueries.upsert(
                     chapter.id.toDB(),

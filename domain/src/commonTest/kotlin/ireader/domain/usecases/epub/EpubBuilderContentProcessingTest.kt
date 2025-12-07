@@ -11,6 +11,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Tests for EpubBuilder content processing logic.
@@ -472,6 +474,7 @@ class EpubBuilderContentProcessingTest {
         val order: Int
     )
 
+    @OptIn(ExperimentalTime::class)
     private fun createChapter(id: Long, name: String, content: List<Page>): Chapter {
         return Chapter(
             id = id,
