@@ -132,4 +132,8 @@ class TestTTSState : TTSState {
     private val _translatedTTSContent = MutableStateFlow<List<String>?>(null)
     override val translatedTTSContent: StateFlow<List<String>?> = _translatedTTSContent
     override fun setTranslatedTTSContent(value: List<String>?) { _translatedTTSContent.value = value }
+    
+    private val _isTTSReady = MutableStateFlow(false)
+    override val isTTSReady: StateFlow<Boolean> = _isTTSReady
+    override fun setTTSReady(value: Boolean) { _isTTSReady.value = value }
 }

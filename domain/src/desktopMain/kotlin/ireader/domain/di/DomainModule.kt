@@ -47,6 +47,8 @@ actual val DomainModule: Module = module {
     includes(syncModule)
     // Include ServiceModule for platform services (DownloadService, NotificationService, etc.)
     includes(ServiceModule)
+    // Include TTS v2 module for new clean TTS architecture
+    includes(ireader.domain.services.tts_service.v2.ttsV2Module)
     
     // FileSystem implementation for desktop
     single<ireader.core.io.FileSystem> {

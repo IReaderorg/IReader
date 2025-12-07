@@ -150,6 +150,13 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
+        
+        <!-- TTS V2 Service - Clean architecture background service -->
+        <service
+            android:name="ireader.domain.services.tts_service.v2.TTSV2Service"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <!-- WorkManager foreground service for long-running downloads -->
         <service
@@ -222,6 +229,18 @@
                 <action android:name="ireader.tts.download.RESUME" />
                 <action android:name="ireader.tts.download.TOGGLE_PAUSE" />
                 <action android:name="ireader.tts.download.CANCEL" />
+            </intent-filter>
+        </receiver>
+        
+        <!-- TTS V2 action receiver for notification controls -->
+        <receiver
+            android:name="ireader.domain.services.tts_service.v2.TTSV2ActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ireader.tts.v2.PLAY_PAUSE" />
+                <action android:name="ireader.tts.v2.STOP" />
+                <action android:name="ireader.tts.v2.NEXT" />
+                <action android:name="ireader.tts.v2.PREVIOUS" />
             </intent-filter>
         </receiver>
     </application>

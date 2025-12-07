@@ -40,6 +40,7 @@ import ireader.presentation.core.ui.SourceMigrationScreenSpec
 import ireader.presentation.core.ui.StatisticsScreenSpec
 import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
 import ireader.presentation.core.ui.TTSScreenSpec
+import ireader.presentation.core.ui.TTSV2ScreenSpec
 import ireader.presentation.core.ui.TranslationScreenSpec
 import ireader.presentation.core.ui.WebViewScreenSpec
 import ireader.presentation.core.ui.NavigationViewModelStore
@@ -381,6 +382,33 @@ fun CommonNavHost(
             }
             if (bookId != null && chapterId != null && sourceId != null && readingParagraph != null) {
                     TTSScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
+            }
+        }
+        
+        // TTS V2 Screen - New clean architecture
+        composable(
+            route = NavigationRoutes.TTS_V2,
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.StringType },
+                navArgument("chapterId") { type = NavType.StringType },
+                navArgument("sourceId") { type = NavType.StringType },
+                navArgument("readingParagraph") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val bookId = remember(backStackEntry) {
+                backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+            }
+            val chapterId = remember(backStackEntry) {
+                backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
+            }
+            val sourceId = remember(backStackEntry) {
+                backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+            }
+            val readingParagraph = remember(backStackEntry) {
+                backStackEntry.savedStateHandle.get<String>("readingParagraph")?.toIntOrNull() ?: 0
+            }
+            if (bookId != null && chapterId != null && sourceId != null) {
+                TTSV2ScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
             }
         }
         

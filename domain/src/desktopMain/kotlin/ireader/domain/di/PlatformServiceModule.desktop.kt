@@ -2,6 +2,7 @@ package ireader.domain.di
 
 import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.platform.*
+import ireader.domain.services.tts_service.v2.TTSV2ServiceStarter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.dsl.module
@@ -24,6 +25,9 @@ actual val platformServiceModule = module {
     single<DeviceInfoService> {
         DesktopDeviceInfoService()
     }
+    
+    // TTS V2 Service Starter (no-op on desktop)
+    single { TTSV2ServiceStarter() }
     
     single<NetworkService> {
         DesktopNetworkService()

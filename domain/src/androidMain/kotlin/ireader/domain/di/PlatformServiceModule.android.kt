@@ -15,6 +15,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.platform.*
+import ireader.domain.services.tts_service.v2.TTSV2ServiceStarter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.android.ext.koin.androidContext
@@ -28,6 +29,9 @@ actual val platformServiceModule = module {
     single<DeviceInfoService> {
         AndroidDeviceInfoService(androidContext())
     }
+    
+    // TTS V2 Service Starter
+    single { TTSV2ServiceStarter(androidContext()) }
     
     single<NetworkService> {
         AndroidNetworkService(androidContext())

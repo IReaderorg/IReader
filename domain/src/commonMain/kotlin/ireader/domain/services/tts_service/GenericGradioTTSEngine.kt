@@ -394,12 +394,14 @@ class GenericGradioTTSEngine(
     }
     
     private suspend fun generateSpeech(text: String): ByteArray? {
+        Log.warn { "$TAG: generateSpeech - config: spaceUrl=${config.spaceUrl}, apiName=${config.apiName}, apiType=${config.apiType}, enabled=${config.enabled}" }
+        
         // Rate limiting - ensure minimum interval between API requests
         val now = currentTimeToLong()
         val timeSinceLastRequest = now - lastApiRequestTime
         if (timeSinceLastRequest < MIN_REQUEST_INTERVAL_MS) {
             val delayNeeded = MIN_REQUEST_INTERVAL_MS - timeSinceLastRequest
-            Log.debug { "$TAG: Rate limiting - waiting ${delayNeeded}ms before next request" }
+            Log.warn { "$TAG: Rate limiting - waiting ${delayNeeded}ms before next request" }
             delay(delayNeeded)
         }
         lastApiRequestTime = currentTimeToLong()
@@ -412,6 +414,7 @@ class GenericGradioTTSEngine(
         
         // Build request body based on config parameters
         val requestBody = buildRequestBody(truncatedText)
+        Log.warn { "$TAG: generateSpeech - requestBody: $requestBody" }
         
         // Determine which API type to use
         val apiTypeToUse = when {
@@ -421,6 +424,8 @@ class GenericGradioTTSEngine(
             else -> getCachedApiType(config.spaceUrl)
         }
         
+        Log.warn { "$TAG: generateSpeech - apiTypeToUse=$apiTypeToUse" }
+        
         // If we know which API works, use it directly
         if (apiTypeToUse != null && apiTypeToUse != GradioApiType.AUTO) {
             val result = trySpecificApi(apiTypeToUse, requestBody)
@@ -428,6 +433,7 @@ class GenericGradioTTSEngine(
             
             // If the cached API failed, DON'T retry all APIs immediately
             // This prevents retry storms - just return null and let next request try
+            Log.warn { "$TAG: generateSpeech - cached API type $apiTypeToUse failed, returning null" }
             return null
         }
         
@@ -453,6 +459,8 @@ class GenericGradioTTSEngine(
      * Try all API types in order and cache the first one that works
      */
     private suspend fun tryAllApisAndCache(requestBody: String): ByteArray? {
+        Log.warn { "$TAG: tryAllApisAndCache - spaceUrl=${config.spaceUrl}, apiName=${config.apiName}" }
+        
         // Order of APIs to try
         val apiTypes = listOf(
             GradioApiType.GRADIO_API_CALL,
@@ -463,12 +471,15 @@ class GenericGradioTTSEngine(
         )
         
         for (apiType in apiTypes) {
+            Log.warn { "$TAG: Trying API type: $apiType" }
             val result = trySpecificApi(apiType, requestBody)
             if (result != null) {
                 // Cache this working API type
+                Log.warn { "$TAG: SUCCESS with $apiType - got ${result.size} bytes" }
                 cacheWorkingApiType(config.spaceUrl, apiType)
                 return result
             }
+            Log.warn { "$TAG: FAILED with $apiType" }
         }
         
         Log.error { "$TAG: All API types failed" }
@@ -482,6 +493,8 @@ class GenericGradioTTSEngine(
         val baseUrl = config.spaceUrl.trimEnd('/')
         val apiName = config.apiName.trimStart('/')
         val apiUrl = "$baseUrl/gradio_api/call/$apiName"
+        Log.warn { "$TAG: Trying GRADIO_API_CALL: $apiUrl" }
+        Log.warn { "$TAG: Request body: $requestBody" }
         return tryCallEndpoint(apiUrl, requestBody)
     }
     
@@ -492,6 +505,7 @@ class GenericGradioTTSEngine(
         val baseUrl = config.spaceUrl.trimEnd('/')
         val apiName = config.apiName.trimStart('/')
         val apiUrl = "$baseUrl/call/$apiName"
+        Log.warn { "$TAG: Trying CALL: $apiUrl" }
         return tryCallEndpoint(apiUrl, requestBody)
     }
     
@@ -505,18 +519,22 @@ class GenericGradioTTSEngine(
         // Try both /api/predict and /gradio_api/predict
         for (apiUrl in listOf("$baseUrl/api/predict", "$baseUrl/gradio_api/predict")) {
             try {
+                Log.warn { "$TAG: Trying API_PREDICT: $apiUrl" }
                 val response = httpClient.post(apiUrl) {
                     contentType(ContentType.Application.Json)
                     config.apiKey?.let { header("Authorization", "Bearer $it") }
                     setBody(legacyBody)
                 }
                 
+                Log.warn { "$TAG: API_PREDICT response: ${response.status}" }
                 if (response.status.isSuccess()) {
-                    val result = parseGradioResponse(response.bodyAsText())
+                    val responseText = response.bodyAsText()
+                    Log.warn { "$TAG: API_PREDICT body: ${responseText.take(300)}" }
+                    val result = parseGradioResponse(responseText)
                     if (result != null) return result
                 }
             } catch (e: Exception) {
-                // Silently try next endpoint
+                Log.warn { "$TAG: API_PREDICT error: ${e.message}" }
             }
         }
         return null
@@ -531,18 +549,22 @@ class GenericGradioTTSEngine(
         
         for (apiUrl in listOf("$baseUrl/run/$apiName", "$baseUrl/gradio_api/run/$apiName")) {
             try {
+                Log.warn { "$TAG: Trying RUN: $apiUrl" }
                 val response = httpClient.post(apiUrl) {
                     contentType(ContentType.Application.Json)
                     config.apiKey?.let { header("Authorization", "Bearer $it") }
                     setBody(requestBody)
                 }
                 
+                Log.warn { "$TAG: RUN response: ${response.status}" }
                 if (response.status.isSuccess()) {
-                    val result = parseGradioResponse(response.bodyAsText())
+                    val responseText = response.bodyAsText()
+                    Log.warn { "$TAG: RUN body: ${responseText.take(300)}" }
+                    val result = parseGradioResponse(responseText)
                     if (result != null) return result
                 }
             } catch (e: Exception) {
-                // Silently try next endpoint
+                Log.warn { "$TAG: RUN error: ${e.message}" }
             }
         }
         return null
@@ -559,6 +581,7 @@ class GenericGradioTTSEngine(
         for (queuePrefix in listOf("$baseUrl/queue", "$baseUrl/gradio_api/queue")) {
             try {
                 val queueUrl = "$queuePrefix/join"
+                Log.warn { "$TAG: Trying QUEUE: $queueUrl" }
                 
                 val response = httpClient.post(queueUrl) {
                     contentType(ContentType.Application.Json)
@@ -566,22 +589,26 @@ class GenericGradioTTSEngine(
                     setBody(queueBody)
                 }
                 
+                Log.warn { "$TAG: QUEUE join response: ${response.status}" }
                 if (!response.status.isSuccess()) continue
                 
                 // Poll for result
                 val dataUrl = "$queuePrefix/data?session_hash=$sessionHash"
-                repeat(30) {
+                Log.warn { "$TAG: Polling QUEUE data: $dataUrl" }
+                repeat(30) { attempt ->
                     delay(1000)
                     val dataResponse = httpClient.get(dataUrl) {
                         config.apiKey?.let { header("Authorization", "Bearer $it") }
                     }
                     if (dataResponse.status.isSuccess()) {
-                        val result = parseGradioResponse(dataResponse.bodyAsText())
+                        val responseText = dataResponse.bodyAsText()
+                        Log.warn { "$TAG: QUEUE data attempt $attempt: ${responseText.take(200)}" }
+                        val result = parseGradioResponse(responseText)
                         if (result != null) return result
                     }
                 }
             } catch (e: Exception) {
-                // Silently try next endpoint
+                Log.warn { "$TAG: QUEUE error: ${e.message}" }
             }
         }
         return null
@@ -592,15 +619,21 @@ class GenericGradioTTSEngine(
      */
     private suspend fun tryCallEndpoint(apiUrl: String, requestBody: String): ByteArray? {
         return try {
+            Log.warn { "$TAG: POST $apiUrl" }
             val response = httpClient.post(apiUrl) {
                 contentType(ContentType.Application.Json)
                 config.apiKey?.let { header("Authorization", "Bearer $it") }
                 setBody(requestBody)
             }
             
-            if (!response.status.isSuccess()) return null
+            Log.warn { "$TAG: Response status: ${response.status}" }
+            if (!response.status.isSuccess()) {
+                Log.warn { "$TAG: Request failed with status ${response.status}" }
+                return null
+            }
             
             val responseText = response.bodyAsText()
+            Log.warn { "$TAG: Response: ${responseText.take(500)}" }
             
             // Extract event_id for SSE streaming
             val eventIdRegex = """"event_id":\s*"([^"]+)"""".toRegex()
@@ -608,20 +641,29 @@ class GenericGradioTTSEngine(
             
             if (eventId.isNullOrEmpty()) {
                 // Maybe direct response without streaming
+                Log.warn { "$TAG: No event_id, trying direct parse" }
                 return parseGradioResponse(responseText)
             }
             
             // Get result using event_id
             val resultUrl = "$apiUrl/$eventId"
+            Log.warn { "$TAG: GET SSE result: $resultUrl" }
             val resultResponse = httpClient.get(resultUrl) {
                 config.apiKey?.let { header("Authorization", "Bearer $it") }
                 header("Accept", "text/event-stream")
             }
             
-            if (!resultResponse.status.isSuccess()) return null
+            Log.warn { "$TAG: SSE response status: ${resultResponse.status}" }
+            if (!resultResponse.status.isSuccess()) {
+                Log.warn { "$TAG: SSE request failed with status ${resultResponse.status}" }
+                return null
+            }
             
-            parseSSEResponse(resultResponse.bodyAsText())
+            val sseBody = resultResponse.bodyAsText()
+            Log.warn { "$TAG: SSE body: ${sseBody.take(500)}" }
+            parseSSEResponse(sseBody)
         } catch (e: Exception) {
+            Log.warn { "$TAG: tryCallEndpoint error: ${e.message}" }
             null
         }
     }
@@ -672,6 +714,7 @@ class GenericGradioTTSEngine(
      * Parse SSE (Server-Sent Events) response to extract audio
      */
     private suspend fun parseSSEResponse(sseBody: String): ByteArray? {
+        Log.warn { "$TAG: parseSSEResponse - body length=${sseBody.length}" }
         val baseUrl = config.spaceUrl.trimEnd('/')
         var audioPath: String? = null
         var audioUrl: String? = null
@@ -681,6 +724,7 @@ class GenericGradioTTSEngine(
             if (line.startsWith("data:")) {
                 val jsonData = line.substring(5).trim()
                 if (jsonData.isNotEmpty() && jsonData != "[DONE]") {
+                    Log.warn { "$TAG: SSE data line: ${jsonData.take(200)}" }
                     // Try to extract audio path/url from JSON
                     val pathRegex = """"path":\s*"([^"]+)"""".toRegex()
                     val urlRegex = """"url":\s*"([^"]+)"""".toRegex()
@@ -688,12 +732,18 @@ class GenericGradioTTSEngine(
                     pathRegex.find(jsonData)?.let { audioPath = it.groupValues[1] }
                     urlRegex.find(jsonData)?.let { audioUrl = it.groupValues[1] }
                     
-                    if (!audioPath.isNullOrEmpty() || !audioUrl.isNullOrEmpty()) break
+                    if (!audioPath.isNullOrEmpty() || !audioUrl.isNullOrEmpty()) {
+                        Log.warn { "$TAG: Found audio - path=$audioPath, url=$audioUrl" }
+                        break
+                    }
                 }
             }
         }
         
-        if (audioPath.isNullOrEmpty() && audioUrl.isNullOrEmpty()) return null
+        if (audioPath.isNullOrEmpty() && audioUrl.isNullOrEmpty()) {
+            Log.warn { "$TAG: parseSSEResponse - No audio path/url found" }
+            return null
+        }
         
         // Download audio
         val downloadUrl = when {
@@ -702,6 +752,7 @@ class GenericGradioTTSEngine(
             else -> return null
         }
         
+        Log.warn { "$TAG: Downloading audio from: $downloadUrl" }
         return downloadAudio(downloadUrl)
     }
     
@@ -849,11 +900,14 @@ class GenericGradioTTSEngine(
      */
     private suspend fun downloadAudio(url: String): ByteArray? {
         return try {
+            Log.warn { "$TAG: downloadAudio - GET $url" }
             val response = httpClient.get(url) {
                 config.apiKey?.let { header("Authorization", "Bearer $it") }
             }
             if (response.status.isSuccess()) {
-                response.body()
+                val bytes: ByteArray = response.body()
+                Log.warn { "$TAG: downloadAudio - SUCCESS, ${bytes.size} bytes" }
+                bytes
             } else {
                 Log.error { "$TAG: Failed to download audio: ${response.status}" }
                 null

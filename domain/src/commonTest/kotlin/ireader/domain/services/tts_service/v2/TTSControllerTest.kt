@@ -1,0 +1,225 @@
+package ireader.domain.services.tts_service.v2
+
+import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.Chapter
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class TTSControllerTest {
+    
+    // Mock content loader
+    private class MockContentLoader : TTSContentLoader {
+        var loadedBookId: Long? = null
+        var loadedChapterId: Long? = null
+        var shouldFail = false
+        var mockParagraphs = listOf("Paragraph 1", "Paragraph 2", "Paragraph 3")
+        
+        override suspend fun loadChapter(bookId: Long, chapterId: Long): TTSContentLoader.ChapterContent {
+            loadedBookId = bookId
+            loadedChapterId = chapterId
+            
+            if (shouldFail) {
+                throw IllegalStateException("Mock failure")
+            }
+            
+            return TTSContentLoader.ChapterContent(
+                book = Book(id = bookId, title = "Test Book", key = "test", sourceId = 1),
+                chapter = Chapter(id = chapterId, bookId = bookId, key = "ch1", name = "Chapter 1"),
+                paragraphs = mockParagraphs
+            )
+        }
+    }
+    
+    // Mock TTS engine
+    private class MockEngine : TTSEngine {
+        private val _events = MutableSharedFlow<EngineEvent>(extraBufferCapacity = 10)
+        override val events: Flow<EngineEvent> = _events
+        override val name: String = "Mock Engine"
+        
+        var speakCalled = false
+        var lastText: String? = null
+        var lastUtteranceId: String? = null
+        var stopCalled = false
+        var pauseCalled = false
+        var resumeCalled = false
+        var speed = 1.0f
+        var pitch = 1.0f
+        var ready = true
+        
+        override suspend fun speak(text: String, utteranceId: String) {
+            speakCalled = true
+            lastText = text
+            lastUtteranceId = utteranceId
+            _events.emit(EngineEvent.Started(utteranceId))
+        }
+        
+        override fun stop() { stopCalled = true }
+        override fun pause() { pauseCalled = true }
+        override fun resume() { resumeCalled = true }
+        override fun setSpeed(speed: Float) { this.speed = speed }
+        override fun setPitch(pitch: Float) { this.pitch = pitch }
+        override fun isReady() = ready
+        override fun release() {}
+        
+        // Helper to simulate completion
+        suspend fun completeUtterance(utteranceId: String) {
+            _events.emit(EngineEvent.Completed(utteranceId))
+        }
+        
+        suspend fun emitReady() {
+            _events.emit(EngineEvent.Ready)
+        }
+    }
+    
+    @Test
+    fun `initial state is idle`() = runTest {
+        val controller = TTSController(
+            contentLoader = MockContentLoader(),
+            engineFactory = { MockEngine() }
+        )
+        
+        val state = controller.state.value
+        assertEquals(PlaybackState.IDLE, state.playbackState)
+        assertFalse(state.isPlaying)
+        assertFalse(state.hasContent)
+        
+        controller.destroy()
+    }
+    
+    @Test
+    fun `initialize creates engine`() = runTest {
+        var engineCreated = false
+        val controller = TTSController(
+            contentLoader = MockContentLoader(),
+            engineFactory = { 
+                engineCreated = true
+                MockEngine()
+            }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        
+        // Give time for command to process
+        kotlinx.coroutines.delay(100)
+        
+        assertTrue(engineCreated)
+        
+        controller.destroy()
+    }
+    
+    @Test
+    fun `load chapter updates state`() = runTest {
+        val contentLoader = MockContentLoader()
+        val controller = TTSController(
+            contentLoader = contentLoader,
+            engineFactory = { MockEngine() }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(bookId = 1, chapterId = 2, startParagraph = 0))
+        
+        // Give time for command to process
+        kotlinx.coroutines.delay(100)
+        
+        val state = controller.state.value
+        assertEquals(1L, contentLoader.loadedBookId)
+        assertEquals(2L, contentLoader.loadedChapterId)
+        assertEquals(3, state.totalParagraphs)
+        assertEquals(0, state.currentParagraphIndex)
+        assertTrue(state.hasContent)
+        
+        controller.destroy()
+    }
+    
+    @Test
+    fun `set speed updates state and engine`() = runTest {
+        val engine = MockEngine()
+        val controller = TTSController(
+            contentLoader = MockContentLoader(),
+            engineFactory = { engine }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.SetSpeed(1.5f))
+        
+        // Give time for command to process
+        kotlinx.coroutines.delay(100)
+        
+        assertEquals(1.5f, controller.state.value.speed)
+        assertEquals(1.5f, engine.speed)
+        
+        controller.destroy()
+    }
+    
+    @Test
+    fun `speed is clamped to valid range`() = runTest {
+        val controller = TTSController(
+            contentLoader = MockContentLoader(),
+            engineFactory = { MockEngine() }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.SetSpeed(5.0f)) // Too high
+        
+        kotlinx.coroutines.delay(100)
+        
+        assertEquals(2.0f, controller.state.value.speed) // Clamped to max
+        
+        controller.dispatch(TTSCommand.SetSpeed(0.1f)) // Too low
+        
+        kotlinx.coroutines.delay(100)
+        
+        assertEquals(0.5f, controller.state.value.speed) // Clamped to min
+        
+        controller.destroy()
+    }
+    
+    @Test
+    fun `play without content emits error`() = runTest {
+        val controller = TTSController(
+            contentLoader = MockContentLoader(),
+            engineFactory = { MockEngine() }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.Play)
+        
+        kotlinx.coroutines.delay(100)
+        
+        val state = controller.state.value
+        assertEquals(PlaybackState.ERROR, state.playbackState)
+        assertTrue(state.error is TTSError.NoContent)
+        
+        controller.destroy()
+    }
+    
+    @Test
+    fun `cleanup resets state`() = runTest {
+        val controller = TTSController(
+            contentLoader = MockContentLoader(),
+            engineFactory = { MockEngine() }
+        )
+        
+        controller.dispatch(TTSCommand.Initialize)
+        controller.dispatch(TTSCommand.LoadChapter(1, 1, 0))
+        kotlinx.coroutines.delay(100)
+        
+        assertTrue(controller.state.value.hasContent)
+        
+        controller.dispatch(TTSCommand.Cleanup)
+        kotlinx.coroutines.delay(100)
+        
+        assertFalse(controller.state.value.hasContent)
+        assertEquals(PlaybackState.IDLE, controller.state.value.playbackState)
+        
+        controller.destroy()
+    }
+}

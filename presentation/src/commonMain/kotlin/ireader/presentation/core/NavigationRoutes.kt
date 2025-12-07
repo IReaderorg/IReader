@@ -72,6 +72,8 @@ object NavigationRoutes {
     fun explore(sourceId: Long) = "explore/$sourceId"
     fun tts(bookId: Long, chapterId: Long, sourceId: Long, readingParagraph: Int) = 
         "tts/$bookId/$chapterId/$sourceId/$readingParagraph"
+    fun ttsV2(bookId: Long, chapterId: Long, sourceId: Long, readingParagraph: Int = 0) = 
+        "ttsV2/$bookId/$chapterId/$sourceId/$readingParagraph"
     fun sourceDetail(sourceId: Long) = "sourceDetail/$sourceId"
     
     // Route patterns for popUpTo operations
@@ -80,6 +82,7 @@ object NavigationRoutes {
     const val READER = "reader/{bookId}/{chapterId}"
     const val BOOK_DETAIL = "bookDetail/{bookId}"
     const val TTS = "tts/{bookId}/{chapterId}/{sourceId}/{readingParagraph}"
+    const val TTS_V2 = "ttsV2/{bookId}/{chapterId}/{sourceId}/{readingParagraph}"
     const val DOWNLOADER = "downloader"
     const val EXPLORE = "explore/{sourceId}"
     const val SOURCE_DETAIL = "sourceDetail/{sourceId}"

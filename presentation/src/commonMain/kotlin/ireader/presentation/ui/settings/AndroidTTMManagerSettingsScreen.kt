@@ -220,6 +220,17 @@ fun AndroidTTSMManagerSettingsScreen(
                 )
             }
             
+            // TTS V2 Architecture Toggle (Experimental)
+            item {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                TTSV2ToggleSection(
+                    useTTSV2 = readerPreferences.useTTSV2().get(),
+                    onUseTTSV2Change = { enabled ->
+                        scope.launch { readerPreferences.useTTSV2().set(enabled) }
+                    }
+                )
+            }
+            
             // Native TTS Info
             item {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -288,5 +299,78 @@ fun AndroidTTSMManagerSettingsScreen(
             onDismiss = { gradioViewModel.closeEditDialog() },
             onSave = { gradioViewModel.saveEditingConfig(it) }
         )
+    }
+}
+
+
+/**
+ * TTS V2 Architecture Toggle Section
+ * Allows users to switch between v1 and v2 TTS implementations
+ */
+@Composable
+private fun TTSV2ToggleSection(
+    useTTSV2: Boolean,
+    onUseTTSV2Change: (Boolean) -> Unit
+) {
+    var enabled by remember { mutableStateOf(useTTSV2) }
+    
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = if (enabled) 
+                MaterialTheme.colorScheme.tertiaryContainer 
+            else 
+                MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "TTS V2 Architecture",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Experimental",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+                
+                androidx.compose.material3.Switch(
+                    checked = enabled,
+                    onCheckedChange = { 
+                        enabled = it
+                        onUseTTSV2Change(it)
+                    }
+                )
+            }
+            
+            Text(
+                text = "Use the new clean architecture TTS implementation with improved state management, command pattern, and better debugging.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (enabled) 
+                    MaterialTheme.colorScheme.onTertiaryContainer 
+                else 
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            if (enabled) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "✓ Single source of truth state\n✓ Command pattern for all actions\n✓ Better error handling\n✓ Sleep timer & notifications",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                )
+            }
+        }
     }
 }

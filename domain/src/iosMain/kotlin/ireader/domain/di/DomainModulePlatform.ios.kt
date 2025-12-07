@@ -57,6 +57,9 @@ import org.koin.dsl.module
  * - PluginClassLoader: Throws UnsupportedOperationException (use JS plugins)
  */
 actual val DomainModule: Module = module {
+    // Include TTS v2 module for new clean TTS architecture
+    includes(ireader.domain.services.tts_service.v2.ttsV2Module)
+    
     // Backup scheduling
     single<ScheduleAutomaticBackup> { ScheduleAutomaticBackupImpl() }
     

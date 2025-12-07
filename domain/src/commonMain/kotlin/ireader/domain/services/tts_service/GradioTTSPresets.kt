@@ -156,16 +156,149 @@ object GradioTTSPresets {
     )
     
     /**
+     * StyleTTS 2 - High-quality expressive TTS
+     */
+    val STYLE_TTS_2 = GradioTTSConfig(
+        id = "style_tts_2",
+        name = "StyleTTS 2",
+        spaceUrl = "https://styletts2-styletts2.hf.space",
+        apiName = "/predict",
+        parameters = listOf(
+            GradioParam.textParam("text"),
+            GradioParam.floatParam(
+                name = "alpha",
+                defaultValue = 0.3f,
+                min = 0.0f,
+                max = 1.0f
+            ),
+            GradioParam.floatParam(
+                name = "beta",
+                defaultValue = 0.7f,
+                min = 0.0f,
+                max = 1.0f
+            ),
+            GradioParam.floatParam(
+                name = "diffusion_steps",
+                defaultValue = 5f,
+                min = 1f,
+                max = 20f
+            )
+        ),
+        audioOutputIndex = 0,
+        description = "High-quality expressive TTS with style control"
+    )
+    
+    /**
+     * Tortoise TTS - Slow but high quality
+     */
+    val TORTOISE_TTS = GradioTTSConfig(
+        id = "tortoise_tts",
+        name = "Tortoise TTS",
+        spaceUrl = "https://jbetker-tortoise-tts.hf.space",
+        apiName = "/predict",
+        parameters = listOf(
+            GradioParam.textParam("text"),
+            GradioParam.choiceParam(
+                name = "voice",
+                choices = listOf("random", "angie", "deniro", "freeman", "halle", "lj", "myself", "pat", "snakes", "tom", "train_atkins", "train_daws", "train_dotrice", "train_dreams", "train_empire", "train_grace", "train_kennard", "train_lescault", "train_mouse", "weaver", "william"),
+                defaultValue = "random"
+            ),
+            GradioParam.choiceParam(
+                name = "preset",
+                choices = listOf("ultra_fast", "fast", "standard", "high_quality"),
+                defaultValue = "fast"
+            )
+        ),
+        audioOutputIndex = 0,
+        description = "High-quality TTS with many voice options (slower)"
+    )
+    
+    /**
+     * Silero TTS - Fast and lightweight
+     */
+    val SILERO_TTS = GradioTTSConfig(
+        id = "silero_tts",
+        name = "Silero TTS",
+        spaceUrl = "https://silero-silero-tts.hf.space",
+        apiName = "/predict",
+        parameters = listOf(
+            GradioParam.textParam("text"),
+            GradioParam.choiceParam(
+                name = "language",
+                choices = listOf("en", "de", "es", "fr", "ru", "ua", "uz", "xal", "indic"),
+                defaultValue = "en"
+            ),
+            GradioParam.choiceParam(
+                name = "speaker",
+                choices = listOf("en_0", "en_1", "en_2", "en_3", "en_4"),
+                defaultValue = "en_0"
+            )
+        ),
+        audioOutputIndex = 0,
+        description = "Fast and lightweight TTS with multiple languages"
+    )
+    
+    /**
+     * OpenVoice - Voice cloning TTS
+     */
+    val OPEN_VOICE = GradioTTSConfig(
+        id = "open_voice",
+        name = "OpenVoice",
+        spaceUrl = "https://myshell-ai-openvoice.hf.space",
+        apiName = "/predict",
+        parameters = listOf(
+            GradioParam.textParam("text"),
+            GradioParam.choiceParam(
+                name = "style",
+                choices = listOf("default", "whispering", "shouting", "excited", "cheerful", "terrified", "angry", "sad", "friendly"),
+                defaultValue = "default"
+            ),
+            GradioParam.choiceParam(
+                name = "language",
+                choices = listOf("EN", "ES", "FR", "ZH", "JP", "KR"),
+                defaultValue = "EN"
+            )
+        ),
+        audioOutputIndex = 0,
+        description = "Voice cloning TTS with emotion control"
+    )
+    
+    /**
+     * Fish Speech - Fast multilingual TTS
+     */
+    val FISH_SPEECH = GradioTTSConfig(
+        id = "fish_speech",
+        name = "Fish Speech",
+        spaceUrl = "https://fishaudio-fish-speech-1.hf.space",
+        apiName = "/predict",
+        parameters = listOf(
+            GradioParam.textParam("text"),
+            GradioParam.choiceParam(
+                name = "language",
+                choices = listOf("en", "zh", "ja", "ko"),
+                defaultValue = "en"
+            )
+        ),
+        audioOutputIndex = 0,
+        description = "Fast multilingual TTS with natural prosody"
+    )
+    
+    /**
      * Get all available presets
      */
     fun getAllPresets(): List<GradioTTSConfig> = listOf(
         COQUI_IREADER,
-        PERSIAN_PIPER,
         EDGE_TTS,
         XTTS_V2,
+        STYLE_TTS_2,
+        SILERO_TTS,
+        OPEN_VOICE,
+        FISH_SPEECH,
         PARLER_TTS,
         MMS_TTS,
-        BARK_TTS
+        TORTOISE_TTS,
+        BARK_TTS,
+        PERSIAN_PIPER
     )
     
     /**

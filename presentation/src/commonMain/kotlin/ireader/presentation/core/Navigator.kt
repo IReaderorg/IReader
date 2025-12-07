@@ -222,6 +222,16 @@ fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSScreenSpe
     }
 }
 
+// TTSV2ScreenSpec navigation - uses new v2 architecture
+fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSV2ScreenSpec) {
+    val route = NavigationRoutes.ttsV2(spec.bookId, spec.chapterId, spec.sourceId, spec.readingParagraph)
+    if (isCurrentRoute(route)) return
+    navigate(route) {
+        launchSingleTop = true
+        popUpTo(NavigationRoutes.TTS_V2) { inclusive = true }
+    }
+}
+
 /**
  * Navigation convenience functions for common patterns.
  * Uses pre-built NavOptions to minimize allocations.

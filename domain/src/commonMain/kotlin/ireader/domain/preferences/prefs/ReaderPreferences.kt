@@ -707,6 +707,14 @@ class ReaderPreferences constructor(
     fun ttsChapterCacheDays(): Preference<Int> {
         return preferenceStore.getInt("tts_chapter_cache_days", 7)
     }
+    
+    /**
+     * Use TTS v2 architecture (experimental)
+     * When enabled, uses the new clean architecture TTS implementation
+     */
+    fun useTTSV2(): Preference<Boolean> {
+        return preferenceStore.getBoolean("use_tts_v2", false)
+    }
 }
 
 enum class ReadingMode {

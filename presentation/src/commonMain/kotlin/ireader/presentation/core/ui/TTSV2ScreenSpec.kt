@@ -1,0 +1,1225 @@
+package ireader.presentation.core.ui
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import ireader.core.log.Log
+import ireader.core.source.model.Text
+import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.models.entities.Chapter
+import ireader.domain.preferences.prefs.AppPreferences
+import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.services.common.ServiceResult
+import ireader.domain.services.common.TranslationService
+import ireader.domain.services.common.TranslationStatus
+import ireader.domain.services.tts_service.TTSChapterCache
+import ireader.domain.services.tts_service.TTSChapterDownloadManager
+import ireader.domain.services.tts_service.TTSTextMerger
+import ireader.domain.services.tts_service.createTTSDownloadIntentProvider
+import ireader.domain.services.tts_service.v2.*
+import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
+import ireader.i18n.localize
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
+import ireader.presentation.core.IModalDrawer
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.ui.component.IScaffold
+import ireader.presentation.ui.component.components.ChapterRow
+import ireader.presentation.ui.component.isTableUi
+import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
+import ireader.presentation.ui.component.reusable_composable.AppIconButton
+import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
+import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.home.tts.*
+import ireader.presentation.ui.home.tts.v2.TTSV2ViewModel
+import ireader.presentation.ui.home.tts.v2.TTSV2ViewModelFactory
+import ireader.presentation.ui.home.tts.v2.SleepTimerDialog
+import ireader.presentation.ui.home.tts.v2.rememberTTSV2StateAdapter
+import ireader.presentation.ui.home.tts.v2.rememberTTSV2Actions
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+
+/**
+ * TTS V2 Screen Spec - Full-featured TTS screen using v2 architecture
+ * 
+ * Features:
+ * - Clean architecture with single source of truth (TTSState)
+ * - Command pattern for all interactions
+ * - CommonTTSScreen UI components
+ * - Sleep timer, notifications, preferences integration
+ * - Chapter drawer for navigation
+ * - Settings panel with all TTS options
+ * - Translation support with auto-translate next chapter
+ * - Sentence highlighting with WPM calibration
+ * - Download chapter audio (for Gradio TTS)
+ * - Fullscreen mode with floating controls
+ */
+class TTSV2ScreenSpec(
+    val bookId: Long,
+    val chapterId: Long,
+    val sourceId: Long,
+    val readingParagraph: Int = 0
+) {
+    @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+    @Composable
+    fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        val scope = rememberCoroutineScope()
+        val isTabletOrDesktop = isTableUi()
+        
+        // Inject dependencies
+        val controller: TTSController = koinInject()
+        val sleepTimerUseCase: TTSSleepTimerUseCase = koinInject()
+        val notificationUseCase: TTSNotificationUseCase = koinInject()
+        val preferencesUseCase: TTSPreferencesUseCase = koinInject()
+        val readerPreferences: ReaderPreferences = koinInject()
+        val appPreferences: AppPreferences = koinInject()
+        val chapterRepository: ChapterRepository = koinInject()
+        val getAllTranslationsUseCase: GetAllTranslationsForChapterUseCase = koinInject()
+        val translationService: TranslationService = koinInject()
+        val translationEnginesManager: TranslationEnginesManager = koinInject()
+        val downloadManager: TTSChapterDownloadManager = koinInject()
+        val chapterCache: TTSChapterCache = koinInject()
+        val serviceStarter: TTSV2ServiceStarter = koinInject()
+        
+        // Set up platform-specific intents for notification actions
+        LaunchedEffect(Unit) {
+            val intentProvider = createTTSDownloadIntentProvider()
+            downloadManager.pauseIntent = intentProvider.getPauseIntent()
+            downloadManager.cancelIntent = intentProvider.getCancelIntent()
+        }
+        
+        // Download state
+        val downloadProgress by downloadManager.progress.collectAsState()
+        val downloadState by downloadManager.state.collectAsState()
+        
+        // Create ViewModel
+        val viewModel = remember {
+            TTSV2ViewModelFactory(
+                controller = controller,
+                sleepTimerUseCase = sleepTimerUseCase,
+                notificationUseCase = notificationUseCase,
+                preferencesUseCase = preferencesUseCase
+            ).create()
+        }
+        
+        // Collect v2 state
+        val state by viewModel.adapter.state.collectAsState()
+        val isPlaying by viewModel.adapter.isPlaying.collectAsState()
+        val isLoading by viewModel.adapter.isLoading.collectAsState()
+        val currentParagraph by remember(viewModel.adapter) {
+            viewModel.adapter.currentParagraph.debounce(50)
+        }.collectAsState(initial = 0)
+        val previousParagraph by remember(viewModel.adapter) {
+            viewModel.adapter.previousParagraph.debounce(50)
+        }.collectAsState(initial = 0)
+        
+        // Chapter drawer state
+        val drawerState = rememberDrawerState(DrawerValue.Closed)
+        var chapters by remember { mutableStateOf<List<Chapter>>(emptyList()) }
+        var chaptersAscending by remember { mutableStateOf(true) }
+        
+        // Local UI state
+        var fullScreenMode by remember { mutableStateOf(false) }
+        var showSettings by remember { mutableStateOf(false) }
+        var showEngineSettings by remember { mutableStateOf(false) }
+        var showVoiceSelection by remember { mutableStateOf(false) }
+        var showSleepTimerDialog by remember { mutableStateOf(false) }
+        
+        // Translation state
+        var isTranslatingChapter by remember { mutableStateOf(false) }
+        var autoTranslateNextChapter by remember { mutableStateOf(readerPreferences.autoTranslateNextChapter().get()) }
+        var readTranslatedText by remember { mutableStateOf(readerPreferences.useTTSWithTranslatedText().get()) }
+        
+        // Settings state from preferences
+        var useCustomColors by remember { mutableStateOf(readerPreferences.ttsUseCustomColors().get()) }
+        var customBackgroundColor by remember { 
+            mutableStateOf(Color(readerPreferences.ttsBackgroundColor().get().toInt()))
+        }
+        var customTextColor by remember { 
+            mutableStateOf(Color(readerPreferences.ttsTextColor().get().toInt()))
+        }
+        var fontSize by remember { mutableStateOf(readerPreferences.ttsFontSize().get()) }
+        var textAlignment by remember { 
+            val savedAlignment = readerPreferences.ttsTextAlignment().get()
+            mutableStateOf(
+                when (savedAlignment) {
+                    ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left -> TextAlign.Start
+                    ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Center -> TextAlign.Center
+                    ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Right -> TextAlign.End
+                    ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Justify -> TextAlign.Justify
+                    else -> TextAlign.Start
+                }
+            )
+        }
+        var sleepModeEnabled by remember { mutableStateOf(readerPreferences.sleepMode().get()) }
+        var sleepTimeMinutes by remember { mutableStateOf(readerPreferences.sleepTime().get().toInt()) }
+        var sentenceHighlightEnabled by remember { mutableStateOf(readerPreferences.ttsSentenceHighlight().get()) }
+        
+        // Gradio TTS state
+        var useGradioTTS by remember { mutableStateOf(appPreferences.useGradioTTS().get()) }
+        val activeGradioConfigId = remember { appPreferences.activeGradioConfigId().get() }
+        val isGradioConfigured = remember(activeGradioConfigId) { activeGradioConfigId.isNotEmpty() }
+        
+        // Cache state
+        val isChapterCached by remember(state.chapter?.id, state.paragraphs) {
+            derivedStateOf { 
+                val chId = state.chapter?.id ?: return@derivedStateOf false
+                if (chapterCache.isCached(chId)) return@derivedStateOf true
+                val cachedChunks = chapterCache.getCachedChunkIndices(chId)
+                cachedChunks.isNotEmpty()
+            }
+        }
+        
+        val isChapterFullyCached by remember(state.chapter?.id, state.paragraphs) {
+            derivedStateOf {
+                val chId = state.chapter?.id ?: return@derivedStateOf false
+                if (chapterCache.isCached(chId)) return@derivedStateOf true
+                val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
+                val totalChunks = if (mergeWordCount > 0 && state.paragraphs.isNotEmpty()) {
+                    TTSTextMerger.mergeParagraphs(state.paragraphs, mergeWordCount).size
+                } else {
+                    state.paragraphs.size
+                }
+                if (totalChunks > 0) {
+                    chapterCache.areAllChunksCached(chId, totalChunks)
+                } else {
+                    false
+                }
+            }
+        }
+        
+        val isDownloading = downloadState == TTSChapterDownloadManager.DownloadState.DOWNLOADING ||
+            downloadState == TTSChapterDownloadManager.DownloadState.PAUSED
+        
+        // WPM Calibration state (rolling average)
+        var calibratedWPM by remember { mutableStateOf<Float?>(null) }
+        var isCalibrated by remember { mutableStateOf(false) }
+        var lastParagraphStartTime by remember { mutableStateOf(0L) }
+        var lastParagraphWordCount by remember { mutableStateOf(0) }
+        var lastParagraphIndex by remember { mutableStateOf(-1) }
+        var wpmHistory by remember { mutableStateOf(listOf<Float>()) }
+        
+        // Memoize colors
+        val backgroundColor by remember(useCustomColors, customBackgroundColor) {
+            derivedStateOf { if (useCustomColors) customBackgroundColor else Color.Unspecified }
+        }
+        val resolvedBackgroundColor = if (backgroundColor == Color.Unspecified) 
+            MaterialTheme.colorScheme.background else backgroundColor
+        
+        val textColor by remember(useCustomColors, customTextColor) {
+            derivedStateOf { if (useCustomColors) customTextColor else Color.Unspecified }
+        }
+        val resolvedTextColor = if (textColor == Color.Unspecified) 
+            MaterialTheme.colorScheme.onBackground else textColor
+        
+        val lazyListState = rememberLazyListState()
+        
+        // Collect sleep timer state
+        val sleepTimerState by viewModel.sleepTimerState?.collectAsState()
+            ?: remember { mutableStateOf(null) }
+
+        
+        // Initialize TTS and load content
+        LaunchedEffect(bookId, chapterId) {
+            Log.warn { "TTSV2ScreenSpec: Loading chapter bookId=$bookId, chapterId=$chapterId" }
+            
+            // Load chapters list for drawer
+            try {
+                chapters = chapterRepository.findChaptersByBookId(bookId)
+            } catch (e: Exception) {
+                Log.error { "TTSV2ScreenSpec: Failed to load chapters: ${e.message}" }
+            }
+            
+            // Clear existing translation state
+            viewModel.adapter.setTranslatedContent(null)
+            viewModel.adapter.setShowTranslation(false)
+            
+            // Load translation BEFORE starting TTS
+            var translatedStringsToUse: List<String>? = null
+            if (readTranslatedText) {
+                try {
+                    val translations = getAllTranslationsUseCase.execute(chapterId)
+                    if (translations.isNotEmpty()) {
+                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                        latestTranslation?.let { translation ->
+                            val translatedStrings = translation.translatedContent
+                                .filterIsInstance<Text>()
+                                .map { it.text }
+                                .filter { it.isNotBlank() }
+                            if (translatedStrings.isNotEmpty()) {
+                                translatedStringsToUse = translatedStrings
+                                viewModel.adapter.setTranslatedContent(translatedStrings)
+                                viewModel.adapter.setShowTranslation(true)
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.warn { "TTSV2ScreenSpec: Translation not available: ${e.message}" }
+                }
+            }
+            
+            // Load chapter content
+            viewModel.loadChapter(bookId, chapterId, readingParagraph)
+            
+            // Configure Gradio TTS if enabled
+            if (useGradioTTS && activeGradioConfigId.isNotEmpty()) {
+                Log.warn { "TTSV2ScreenSpec: Configuring Gradio TTS with config: $activeGradioConfigId" }
+                val gradioTTSConfig = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(activeGradioConfigId)
+                if (gradioTTSConfig != null) {
+                    // Convert to v2 GradioConfig with original config for full functionality
+                    val v2Config = GradioConfig(
+                        id = gradioTTSConfig.id,
+                        name = gradioTTSConfig.name,
+                        spaceUrl = gradioTTSConfig.spaceUrl,
+                        apiName = gradioTTSConfig.apiName,
+                        enabled = gradioTTSConfig.enabled,
+                        originalConfig = gradioTTSConfig  // Pass full config for parameters, apiType, etc.
+                    )
+                    // Use useGradioTTS which sets config and engine type together
+                    viewModel.adapter.useGradioTTS(v2Config)
+                    
+                    // Enable chunk mode for Gradio TTS (merges paragraphs for better performance)
+                    val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
+                    if (mergeWordCount > 0) {
+                        viewModel.adapter.enableChunkMode(mergeWordCount)
+                        Log.warn { "TTSV2ScreenSpec: Chunk mode enabled with $mergeWordCount words" }
+                    }
+                    
+                    Log.warn { "TTSV2ScreenSpec: Gradio engine configured: ${gradioTTSConfig.name}" }
+                } else {
+                    Log.warn { "TTSV2ScreenSpec: Gradio config not found: $activeGradioConfigId" }
+                }
+            }
+            
+            // Start background service for notification (Android only)
+            serviceStarter.startService(bookId, chapterId, readingParagraph)
+            
+            // Load sentence highlight preference
+            viewModel.adapter.setSentenceHighlight(sentenceHighlightEnabled)
+            
+            // If translation wasn't loaded yet, load it for display
+            if (translatedStringsToUse == null) {
+                try {
+                    val translations = getAllTranslationsUseCase.execute(chapterId)
+                    if (translations.isNotEmpty()) {
+                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                        latestTranslation?.let { translation ->
+                            val translatedStrings = translation.translatedContent
+                                .filterIsInstance<Text>()
+                                .map { it.text }
+                                .filter { it.isNotBlank() }
+                            if (translatedStrings.isNotEmpty()) {
+                                viewModel.adapter.setTranslatedContent(translatedStrings)
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Translation not available
+                }
+            }
+        }
+        
+        // Watch for chapter changes (auto-next chapter)
+        LaunchedEffect(state.chapter?.id) {
+            val chapter = state.chapter ?: return@LaunchedEffect
+            if (chapter.id == chapterId) return@LaunchedEffect // Skip initial chapter
+            
+            Log.warn { "TTSV2ScreenSpec: Chapter changed to ${chapter.id}" }
+            
+            // Clear and reload translation for new chapter
+            viewModel.adapter.setTranslatedContent(null)
+            viewModel.adapter.setShowTranslation(false)
+            
+            try {
+                val translations = getAllTranslationsUseCase.execute(chapter.id)
+                if (translations.isNotEmpty()) {
+                    val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                    latestTranslation?.let { translation ->
+                        val translatedStrings = translation.translatedContent
+                            .filterIsInstance<Text>()
+                            .map { it.text }
+                            .filter { it.isNotBlank() }
+                        if (translatedStrings.isNotEmpty()) {
+                            viewModel.adapter.setTranslatedContent(translatedStrings)
+                            if (readTranslatedText) {
+                                viewModel.adapter.setShowTranslation(true)
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.warn { "TTSV2ScreenSpec: Translation not available for chapter ${chapter.id}" }
+            }
+            
+            // Reset calibration for new chapter
+            calibratedWPM = null
+            isCalibrated = false
+            lastParagraphStartTime = 0L
+            lastParagraphWordCount = 0
+            lastParagraphIndex = -1
+            wpmHistory = emptyList()
+        }
+        
+        // Auto-scroll to current paragraph
+        LaunchedEffect(currentParagraph, isPlaying) {
+            if (isPlaying && state.paragraphs.isNotEmpty() && currentParagraph < state.paragraphs.size) {
+                delay(100)
+                try {
+                    lazyListState.animateScrollToItem(currentParagraph)
+                } catch (e: Exception) {
+                    lazyListState.scrollToItem(currentParagraph)
+                }
+            }
+        }
+        
+        // WPM Calibration - rolling average
+        val paragraphStartTime by viewModel.adapter.paragraphStartTime.collectAsState()
+        LaunchedEffect(paragraphStartTime, currentParagraph, isPlaying) {
+            if (state.paragraphs.isNotEmpty() && isPlaying && paragraphStartTime > 0) {
+                if (lastParagraphIndex >= 0 && lastParagraphIndex != currentParagraph && 
+                    lastParagraphStartTime > 0 && lastParagraphWordCount > 0) {
+                    
+                    val paragraphDuration = paragraphStartTime - lastParagraphStartTime
+                    if (paragraphDuration > 300 && paragraphDuration < 60000) {
+                        val measuredWPM = SentenceHighlighter.calculateCalibratedWPM(
+                            lastParagraphWordCount,
+                            paragraphDuration,
+                            state.speed
+                        )
+                        wpmHistory = (wpmHistory + measuredWPM).takeLast(3)
+                        calibratedWPM = wpmHistory.average().toFloat()
+                        isCalibrated = true
+                        viewModel.adapter.setCalibration(calibratedWPM, true)
+                    }
+                }
+                
+                lastParagraphIndex = currentParagraph
+                lastParagraphStartTime = paragraphStartTime
+                lastParagraphWordCount = if (currentParagraph < state.paragraphs.size) {
+                    SentenceHighlighter.countTotalWords(state.paragraphs[currentParagraph])
+                } else 0
+            }
+        }
+        
+        // Observe translation progress
+        val translationProgress by translationService.translationProgress.collectAsState()
+        LaunchedEffect(translationProgress) {
+            val chapter = state.chapter ?: return@LaunchedEffect
+            val progress = translationProgress[chapter.id] ?: return@LaunchedEffect
+            
+            if (progress.status == TranslationStatus.COMPLETED) {
+                try {
+                    val translations = getAllTranslationsUseCase.execute(chapter.id)
+                    if (translations.isNotEmpty()) {
+                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                        latestTranslation?.let { translation ->
+                            val translatedStrings = translation.translatedContent
+                                .filterIsInstance<Text>()
+                                .map { it.text }
+                                .filter { it.isNotBlank() }
+                            if (translatedStrings.isNotEmpty()) {
+                                viewModel.adapter.setTranslatedContent(translatedStrings)
+                                if (readTranslatedText) {
+                                    viewModel.adapter.setShowTranslation(true)
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Auto-translate next chapter if enabled
+                    if (autoTranslateNextChapter) {
+                        val currentIndex = chapters.indexOfFirst { it.id == chapter.id }
+                        if (currentIndex != -1 && currentIndex < chapters.size - 1) {
+                            val nextChapter = chapters[currentIndex + 1]
+                            val nextTranslations = getAllTranslationsUseCase.execute(nextChapter.id)
+                            if (nextTranslations.isEmpty()) {
+                                val engineId = translationEnginesManager.get().id
+                                val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                                val targetLang = readerPreferences.translatorTargetLanguage().get()
+                                
+                                translationService.queueChapters(
+                                    bookId = bookId,
+                                    chapterIds = listOf(nextChapter.id),
+                                    sourceLanguage = sourceLang,
+                                    targetLanguage = targetLang,
+                                    engineId = engineId,
+                                    bypassWarning = true,
+                                    priority = false
+                                )
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.error { "TTSV2ScreenSpec: Failed to load translation: ${e.message}" }
+                }
+            }
+        }
+        
+        // Sync sleep mode UI with timer state
+        LaunchedEffect(sleepTimerState) {
+            sleepTimerState?.let { timerState ->
+                sleepModeEnabled = timerState.isEnabled
+                if (timerState.remainingTimeMs > 0) {
+                    sleepTimeMinutes = (timerState.remainingTimeMs / 60000).toInt().coerceAtLeast(1)
+                }
+            }
+        }
+        
+        // Cleanup on dispose
+        DisposableEffect(Unit) {
+            onDispose {
+                viewModel.onCleared()
+            }
+        }
+
+        
+        // Create CommonTTSScreenState from v2 state
+        val screenState by remember(
+            state, currentParagraph, previousParagraph, isPlaying, isLoading,
+            sleepTimerState, calibratedWPM, isCalibrated, paragraphStartTime, sentenceHighlightEnabled
+        ) {
+            derivedStateOf {
+                CommonTTSScreenState(
+                    currentReadingParagraph = currentParagraph,
+                    previousReadingParagraph = previousParagraph,
+                    isPlaying = isPlaying,
+                    isLoading = isLoading,
+                    content = state.paragraphs,
+                    translatedContent = state.translatedParagraphs,
+                    showTranslation = state.showTranslation,
+                    bilingualMode = state.bilingualMode,
+                    chapterName = state.chapter?.name ?: "",
+                    bookTitle = state.book?.title ?: "",
+                    speechSpeed = state.speed,
+                    autoNextChapter = state.autoNextChapter,
+                    fullScreenMode = fullScreenMode,
+                    cachedParagraphs = state.cachedParagraphs,
+                    loadingParagraphs = state.loadingParagraphs,
+                    sleepTimeRemaining = sleepTimerState?.remainingTimeMs ?: 0L,
+                    sleepModeEnabled = sleepTimerState?.isEnabled == true,
+                    currentEngine = when (state.engineType) {
+                        EngineType.NATIVE -> "Native TTS"
+                        EngineType.GRADIO -> "Gradio TTS"
+                    },
+                    availableEngines = listOf("Native TTS", "Gradio TTS"),
+                    isTTSReady = state.isEngineReady,
+                    paragraphStartTime = paragraphStartTime,
+                    sentenceHighlightEnabled = sentenceHighlightEnabled,
+                    calibratedWPM = calibratedWPM,
+                    isCalibrated = isCalibrated,
+                    mergedChunkParagraphs = state.currentChunkParagraphs,
+                    isMergingEnabled = state.chunkModeEnabled,
+                    currentMergedChunkIndex = state.currentChunkIndex,
+                    totalMergedChunks = state.totalChunks,
+                    usingCachedAudio = state.isUsingCachedAudio
+                )
+            }
+        }
+        
+        // Create actions
+        val actions = remember(scope, viewModel.adapter) {
+            object : CommonTTSActions {
+                override fun onPlay() { viewModel.adapter.play() }
+                override fun onPause() { viewModel.adapter.pause() }
+                override fun onNextParagraph() {
+                    if (state.chunkModeEnabled) {
+                        viewModel.adapter.nextChunk()
+                    } else {
+                        viewModel.adapter.nextParagraph()
+                    }
+                }
+                override fun onPreviousParagraph() {
+                    if (state.chunkModeEnabled) {
+                        viewModel.adapter.previousChunk()
+                    } else {
+                        viewModel.adapter.previousParagraph()
+                    }
+                }
+                override fun onNextChapter() { viewModel.adapter.nextChapter() }
+                override fun onPreviousChapter() { viewModel.adapter.previousChapter() }
+                override fun onParagraphClick(index: Int) { viewModel.adapter.jumpToParagraph(index) }
+                override fun onToggleTranslation() { viewModel.adapter.toggleTranslation() }
+                override fun onToggleBilingualMode() { viewModel.adapter.toggleBilingualMode() }
+                override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
+                override fun onSpeedChange(speed: Float) { viewModel.adapter.setSpeed(speed) }
+                override fun onAutoNextChange(enabled: Boolean) { viewModel.adapter.setAutoNextChapter(enabled) }
+                override fun onOpenSettings() { showSettings = true }
+                override fun onSelectVoice() { showVoiceSelection = true }
+                override fun onSelectEngine(engine: String) { showEngineSettings = true }
+            }
+        }
+        
+        // Sorted chapters for drawer
+        val sortedChapters by remember(chapters, chaptersAscending) {
+            derivedStateOf { if (chaptersAscending) chapters else chapters.asReversed() }
+        }
+        
+        val drawerScrollState = rememberLazyListState()
+        
+        // Scroll to current chapter when drawer opens
+        LaunchedEffect(drawerState.targetValue) {
+            if (state.chapter != null && drawerState.targetValue == DrawerValue.Open && chapters.isNotEmpty()) {
+                val index = sortedChapters.indexOfFirst { it.id == state.chapter?.id }
+                if (index != -1) {
+                    scope.launch {
+                        drawerScrollState.scrollToItem(
+                            index,
+                            -drawerScrollState.layoutInfo.viewportEndOffset / 2
+                        )
+                    }
+                }
+            }
+        }
+        
+        // Main UI with Chapter Drawer
+        IModalDrawer(
+            state = drawerState,
+            sheetContent = {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = slideInVertically(initialOffsetY = { -it }),
+                    exit = slideOutVertically(targetOffsetY = { -it })
+                ) {
+                    TTSV2ScreenDrawer(
+                        onReverseIcon = { chaptersAscending = !chaptersAscending },
+                        onChapter = { ch ->
+                            val wasPlaying = isPlaying
+                            scope.launch {
+                                drawerState.close()
+                                
+                                // Clear translation state
+                                viewModel.adapter.setTranslatedContent(null)
+                                viewModel.adapter.setShowTranslation(false)
+                                
+                                // Load translation for new chapter
+                                var translatedStringsToUse: List<String>? = null
+                                try {
+                                    val translations = getAllTranslationsUseCase.execute(ch.id)
+                                    if (translations.isNotEmpty()) {
+                                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                                        latestTranslation?.let { translation ->
+                                            val translatedStrings = translation.translatedContent
+                                                .filterIsInstance<Text>()
+                                                .map { it.text }
+                                                .filter { it.isNotBlank() }
+                                            if (translatedStrings.isNotEmpty()) {
+                                                translatedStringsToUse = translatedStrings
+                                                viewModel.adapter.setTranslatedContent(translatedStrings)
+                                                if (readTranslatedText) {
+                                                    viewModel.adapter.setShowTranslation(true)
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    // Translation not available
+                                }
+                                
+                                // Load new chapter
+                                viewModel.loadChapter(bookId, ch.id, 0)
+                                
+                                // Resume playback if was playing
+                                if (wasPlaying) {
+                                    delay(500) // Wait for content to load
+                                    viewModel.adapter.play()
+                                }
+                            }
+                        },
+                        chapter = state.chapter,
+                        chapters = sortedChapters,
+                        drawerScrollState = drawerScrollState,
+                        onMap = { drawer ->
+                            scope.launch {
+                                try {
+                                    val index = sortedChapters.indexOfFirst { it.id == state.chapter?.id }
+                                    if (index != -1) {
+                                        drawer.scrollToItem(
+                                            index,
+                                            -drawer.layoutInfo.viewportEndOffset / 2
+                                        )
+                                    }
+                                } catch (e: Throwable) {
+                                    // Ignore scroll errors
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        ) {
+
+        IScaffold(
+            topBar = {
+                if (!fullScreenMode) {
+                    TopAppBar(
+                        title = {
+                            Column {
+                                Text(
+                                    text = localizeHelper.localize(Res.string.text_to_speech),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                if (state.chapter != null) {
+                                    Text(
+                                        text = state.chapter?.name ?: "",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        },
+                        navigationIcon = {
+                            TopAppBarBackButton(onClick = { navController.popBackStack() })
+                        },
+                        actions = {
+                            // Translate current chapter button
+                            IconButton(
+                                onClick = {
+                                    val chapter = state.chapter ?: return@IconButton
+                                    if (isTranslatingChapter) return@IconButton
+                                    
+                                    scope.launch {
+                                        isTranslatingChapter = true
+                                        try {
+                                            val engineId = translationEnginesManager.get().id
+                                            val sourceLang = readerPreferences.translatorOriginLanguage().get()
+                                            val targetLang = readerPreferences.translatorTargetLanguage().get()
+                                            
+                                            translationService.queueChapters(
+                                                bookId = bookId,
+                                                chapterIds = listOf(chapter.id),
+                                                sourceLanguage = sourceLang,
+                                                targetLanguage = targetLang,
+                                                engineId = engineId,
+                                                bypassWarning = true,
+                                                priority = true
+                                            )
+                                        } finally {
+                                            isTranslatingChapter = false
+                                        }
+                                    }
+                                },
+                                enabled = state.chapter != null && !isTranslatingChapter
+                            ) {
+                                if (isTranslatingChapter) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Icon(
+                                        Icons.Default.Translate,
+                                        contentDescription = "Translate Chapter",
+                                        tint = if (state.hasTranslation) 
+                                            MaterialTheme.colorScheme.primary 
+                                        else 
+                                            LocalContentColor.current
+                                    )
+                                }
+                            }
+                            
+                            // Download chapter audio button (only for Gradio TTS when caching is enabled)
+                            if (useGradioTTS && readerPreferences.ttsChapterCacheEnabled().get()) {
+                                val cacheDays = readerPreferences.ttsChapterCacheDays().get()
+                                
+                                IconButton(
+                                    onClick = {
+                                        val chapter = state.chapter ?: return@IconButton
+                                        val book = state.book ?: return@IconButton
+                                        
+                                        if (isDownloading) {
+                                            // If already downloading, cancel it
+                                            downloadManager.cancel()
+                                        } else if (isChapterCached) {
+                                            // If already cached, remove from cache
+                                            chapterCache.removeEntry(chapter.id)
+                                            chapterCache.removeAllChunksForChapter(chapter.id)
+                                        } else {
+                                            // Start download using chunks
+                                            val paragraphs = if (state.showTranslation && state.translatedParagraphs != null) {
+                                                state.translatedParagraphs!!
+                                            } else {
+                                                state.paragraphs
+                                            }
+                                            
+                                            if (paragraphs.isNotEmpty()) {
+                                                val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
+                                                val mergedChunks = if (mergeWordCount > 0) {
+                                                    TTSTextMerger.mergeParagraphs(paragraphs, mergeWordCount)
+                                                } else {
+                                                    paragraphs.mapIndexed { index, text ->
+                                                        TTSTextMerger.MergedChunk(
+                                                            mergedText = text,
+                                                            originalParagraphIndices = listOf(index),
+                                                            wordCount = text.split("\\s+".toRegex()).size
+                                                        )
+                                                    }
+                                                }
+                                                
+                                                val chunksToDownload = mergedChunks.mapIndexed { index, chunk ->
+                                                    TTSChapterDownloadManager.ChunkInfo(
+                                                        index = index,
+                                                        text = chunk.mergedText,
+                                                        paragraphIndices = chunk.originalParagraphIndices
+                                                    )
+                                                }
+                                                
+                                                // Start chunk download
+                                                downloadManager.startChunkDownload(
+                                                    chapterId = chapter.id,
+                                                    chapterName = chapter.name,
+                                                    bookTitle = book.title,
+                                                    chunks = chunksToDownload,
+                                                    generateAudio = { text, index ->
+                                                        viewModel.adapter.generateAudioForText(text)
+                                                    },
+                                                    onChunkComplete = { chunkIndex, audioData, paragraphIndices ->
+                                                        chapterCache.cacheChunkAudio(
+                                                            chapterId = chapter.id,
+                                                            chunkIndex = chunkIndex,
+                                                            audioData = audioData,
+                                                            engineId = activeGradioConfigId,
+                                                            cacheDays = cacheDays,
+                                                            paragraphIndices = paragraphIndices
+                                                        )
+                                                    },
+                                                    onComplete = {
+                                                        Log.warn { "TTSV2: All ${chunksToDownload.size} chunks cached for chapter ${chapter.id}" }
+                                                    },
+                                                    onError = { error ->
+                                                        Log.error { "TTSV2: Download failed: $error" }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    },
+                                    enabled = state.chapter != null && !isLoading
+                                ) {
+                                    when {
+                                        isDownloading -> {
+                                            if (downloadState == TTSChapterDownloadManager.DownloadState.PAUSED) {
+                                                Icon(
+                                                    Icons.Default.PlayArrow,
+                                                    contentDescription = "Resume Download",
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            } else {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(24.dp),
+                                                    strokeWidth = 2.dp,
+                                                    progress = { downloadProgress?.progressFraction ?: 0f }
+                                                )
+                                            }
+                                        }
+                                        isChapterCached -> {
+                                            Icon(
+                                                Icons.Default.DownloadDone,
+                                                contentDescription = if (isChapterFullyCached) 
+                                                    "Chapter Fully Cached (tap to remove)" 
+                                                else 
+                                                    "Chapter Partially Cached (tap to remove)",
+                                                tint = if (isChapterFullyCached) 
+                                                    MaterialTheme.colorScheme.primary 
+                                                else 
+                                                    MaterialTheme.colorScheme.tertiary
+                                            )
+                                        }
+                                        else -> {
+                                            Icon(
+                                                Icons.Default.Download,
+                                                contentDescription = "Download Chapter Audio",
+                                                tint = LocalContentColor.current
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Sleep timer button
+                            IconButton(onClick = { showSleepTimerDialog = true }) {
+                                BadgedBox(
+                                    badge = {
+                                        if (sleepTimerState?.isEnabled == true) {
+                                            Badge { Text(sleepTimerState?.remainingMinutes?.toString() ?: "") }
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Default.Timer,
+                                        contentDescription = "Sleep Timer",
+                                        tint = if (sleepTimerState?.isEnabled == true)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                            
+                            // Settings button
+                            IconButton(onClick = { showSettings = true }) {
+                                Icon(Icons.Default.Settings, "Settings")
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    )
+                }
+            }
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(if (fullScreenMode) PaddingValues(0.dp) else paddingValues)
+            ) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Content area
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        TTSContentDisplay(
+                            state = screenState,
+                            actions = actions,
+                            lazyListState = lazyListState,
+                            backgroundColor = resolvedBackgroundColor,
+                            textColor = resolvedTextColor,
+                            highlightColor = MaterialTheme.colorScheme.primaryContainer,
+                            fontSize = fontSize,
+                            textAlignment = textAlignment,
+                            isTabletOrDesktop = isTabletOrDesktop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        
+                        // Floating controls for fullscreen mode
+                        if (fullScreenMode) {
+                            TTSV2FloatingFullscreenControls(
+                                state = screenState,
+                                actions = actions,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(16.dp)
+                            )
+                        }
+                    }
+                    
+                    // Media controls at bottom (hidden in fullscreen)
+                    if (!fullScreenMode) {
+                        TTSMediaControls(
+                            state = screenState,
+                            actions = actions,
+                            isTabletOrDesktop = isTabletOrDesktop,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                
+                // Settings Panel (overlay)
+                if (showSettings) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { showSettings = false }
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TTSSettingsPanelCommon(
+                            useCustomColors = useCustomColors,
+                            customBackgroundColor = customBackgroundColor,
+                            customTextColor = customTextColor,
+                            fontSize = fontSize,
+                            textAlignment = textAlignment,
+                            sleepModeEnabled = sleepModeEnabled,
+                            sleepTimeMinutes = sleepTimeMinutes,
+                            speechSpeed = state.speed,
+                            autoNextChapter = state.autoNextChapter,
+                            useGradioTTS = useGradioTTS,
+                            currentEngineName = when (state.engineType) {
+                                EngineType.NATIVE -> "Native TTS"
+                                EngineType.GRADIO -> "Gradio TTS"
+                            },
+                            readTranslatedText = readTranslatedText,
+                            hasTranslation = state.hasTranslation,
+                            onUseCustomColorsChange = { 
+                                useCustomColors = it
+                                scope.launch { readerPreferences.ttsUseCustomColors().set(it) }
+                            },
+                            onBackgroundColorChange = { color ->
+                                customBackgroundColor = color
+                                scope.launch { readerPreferences.ttsBackgroundColor().set(color.toArgb().toLong()) }
+                            },
+                            onTextColorChange = { color ->
+                                customTextColor = color
+                                scope.launch { readerPreferences.ttsTextColor().set(color.toArgb().toLong()) }
+                            },
+                            onFontSizeChange = { 
+                                fontSize = it
+                                scope.launch { readerPreferences.ttsFontSize().set(it) }
+                            },
+                            onTextAlignmentChange = { alignment ->
+                                textAlignment = alignment
+                                val prefAlignment = when (alignment) {
+                                    TextAlign.Start -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left
+                                    TextAlign.Center -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Center
+                                    TextAlign.End -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Right
+                                    TextAlign.Justify -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Justify
+                                    else -> ireader.domain.models.prefs.PreferenceValues.PreferenceTextAlignment.Left
+                                }
+                                scope.launch { readerPreferences.ttsTextAlignment().set(prefAlignment) }
+                            },
+                            onSleepModeChange = { enabled ->
+                                sleepModeEnabled = enabled
+                                scope.launch { readerPreferences.sleepMode().set(enabled) }
+                                if (enabled) {
+                                    viewModel.startSleepTimer(sleepTimeMinutes)
+                                } else {
+                                    viewModel.cancelSleepTimer()
+                                }
+                            },
+                            onSleepTimeChange = { minutes ->
+                                sleepTimeMinutes = minutes
+                                scope.launch { readerPreferences.sleepTime().set(minutes.toLong()) }
+                                if (sleepModeEnabled) {
+                                    viewModel.startSleepTimer(minutes)
+                                }
+                            },
+                            onSpeedChange = { viewModel.adapter.setSpeed(it) },
+                            onAutoNextChange = { enabled -> viewModel.adapter.setAutoNextChapter(enabled) },
+                            onCoquiTTSChange = { enabled ->
+                                if (isGradioConfigured) {
+                                    useGradioTTS = enabled
+                                    scope.launch { appPreferences.useGradioTTS().set(enabled) }
+                                    if (enabled) {
+                                        viewModel.adapter.setEngine(EngineType.GRADIO)
+                                    } else {
+                                        viewModel.adapter.setEngine(EngineType.NATIVE)
+                                    }
+                                }
+                            },
+                            onReadTranslatedTextChange = { enabled ->
+                                readTranslatedText = enabled
+                                viewModel.adapter.setShowTranslation(enabled)
+                                scope.launch { readerPreferences.useTTSWithTranslatedText().set(enabled) }
+                            },
+                            sentenceHighlightEnabled = sentenceHighlightEnabled,
+                            onSentenceHighlightChange = { enabled ->
+                                sentenceHighlightEnabled = enabled
+                                viewModel.adapter.setSentenceHighlight(enabled)
+                                scope.launch { readerPreferences.ttsSentenceHighlight().set(enabled) }
+                            },
+                            onOpenEngineSettings = {
+                                showEngineSettings = true
+                                showSettings = false
+                            },
+                            onDismiss = { showSettings = false },
+                            isTabletOrDesktop = isTabletOrDesktop,
+                            modifier = Modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { /* Prevent click through */ }
+                        )
+                    }
+                }
+                
+                // Engine Settings Screen
+                if (showEngineSettings) {
+                    TTSEngineSettingsScreen(
+                        isDesktop = isTabletOrDesktop,
+                        onDismiss = { showEngineSettings = false },
+                        onNavigateToTTSManager = {
+                            showEngineSettings = false
+                            navController.navigate(NavigationRoutes.ttsEngineManager)
+                        }
+                    )
+                }
+                
+                // Voice Selection Screen
+                if (showVoiceSelection) {
+                    TTSVoiceSelectionScreen(
+                        isDesktop = isTabletOrDesktop,
+                        onDismiss = { showVoiceSelection = false }
+                    )
+                }
+            }
+        }
+        } // Close IModalDrawer
+        
+        // Sleep timer dialog
+        if (showSleepTimerDialog) {
+            SleepTimerDialog(
+                currentState = sleepTimerState,
+                onStart = { minutes -> viewModel.startSleepTimer(minutes) },
+                onCancel = { viewModel.cancelSleepTimer() },
+                onDismiss = { showSleepTimerDialog = false }
+            )
+        }
+    }
+}
+
+
+/**
+ * TTS V2 Screen Drawer - Chapter selection drawer
+ */
+@Composable
+private fun TTSV2ScreenDrawer(
+    modifier: Modifier = Modifier,
+    chapter: Chapter?,
+    onChapter: (chapter: Chapter) -> Unit,
+    chapters: List<Chapter>,
+    onReverseIcon: () -> Unit,
+    drawerScrollState: LazyListState,
+    onMap: (LazyListState) -> Unit,
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    Column(
+        modifier = modifier.fillMaxWidth(0.9f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Spacer(modifier = Modifier.height(5.dp))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            BigSizeTextComposable(
+                text = localize(Res.string.content),
+                modifier = Modifier.align(Alignment.Center)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                AppIconButton(
+                    imageVector = Icons.Filled.Place,
+                    contentDescription = localize(Res.string.find_current_chapter),
+                    onClick = { onMap(drawerScrollState) }
+                )
+                AppIconButton(
+                    imageVector = Icons.Default.Sort,
+                    contentDescription = localize(Res.string.reverse),
+                    onClick = { onReverseIcon() }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
+        HorizontalDivider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp)
+        
+        IVerticalFastScroller(listState = drawerScrollState) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = drawerScrollState
+            ) {
+                items(count = chapters.size) { index ->
+                    ChapterRow(
+                        modifier = Modifier,
+                        chapter = chapters[index],
+                        onItemClick = { onChapter(chapters[index]) },
+                        isLastRead = chapter?.id == chapters[index].id,
+                    )
+                }
+            }
+        }
+        
+        if (chapters.isEmpty()) {
+            Text(
+                text = localizeHelper.localize(Res.string.no_chapters_available),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * Floating controls for fullscreen mode
+ */
+@Composable
+private fun TTSV2FloatingFullscreenControls(
+    state: CommonTTSScreenState,
+    actions: CommonTTSActions,
+    modifier: Modifier = Modifier
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val hasTranslation = state.translatedContent != null && state.translatedContent.isNotEmpty()
+    
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Translation toggle
+        if (hasTranslation) {
+            SmallFloatingActionButton(
+                onClick = { actions.onToggleTranslation() },
+                containerColor = if (state.showTranslation)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Translate,
+                    contentDescription = localizeHelper.localize(Res.string.toggle_translation),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+        
+        // Play/Pause
+        FloatingActionButton(
+            onClick = {
+                if (state.isPlaying) actions.onPause() else actions.onPlay()
+            },
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+            shape = CircleShape
+        ) {
+            Icon(
+                imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                contentDescription = if (state.isPlaying) "Pause" else "Play"
+            )
+        }
+        
+        // Exit fullscreen
+        SmallFloatingActionButton(
+            onClick = { actions.onToggleFullScreen() },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+        ) {
+            Icon(
+                imageVector = Icons.Default.FullscreenExit,
+                contentDescription = localizeHelper.localize(Res.string.exit_fullscreen),
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}

@@ -435,14 +435,27 @@ data class ReaderScreenSpec(
                         onReaderPlay = {
                             successState?.book?.let { book ->
                                 chapter?.let { ch ->
-                                    navController.navigateTo(
-                                        TTSScreenSpec(
-                                            bookId = book.id,
-                                            sourceId = book.sourceId,
-                                            chapterId = ch.id,
-                                            readingParagraph = 0
+                                    // Check if v2 TTS is enabled
+                                    val useTTSV2 = vm.readerPreferences.useTTSV2().get()
+                                    if (useTTSV2) {
+                                        navController.navigateTo(
+                                            TTSV2ScreenSpec(
+                                                bookId = book.id,
+                                                sourceId = book.sourceId,
+                                                chapterId = ch.id,
+                                                readingParagraph = 0
+                                            )
                                         )
-                                    )
+                                    } else {
+                                        navController.navigateTo(
+                                            TTSScreenSpec(
+                                                bookId = book.id,
+                                                sourceId = book.sourceId,
+                                                chapterId = ch.id,
+                                                readingParagraph = 0
+                                            )
+                                        )
+                                    }
                                 }
                             }
                         },
