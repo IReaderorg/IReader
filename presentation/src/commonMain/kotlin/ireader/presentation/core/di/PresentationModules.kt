@@ -100,7 +100,8 @@ val PresentationModules = module {
             clipboardService = get(),
             shareService = get(),
             fileSystemService = get(),
-            localizeHelper = get()
+            localizeHelper = get(),
+            libraryController = get()
         )
     }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
@@ -125,7 +126,7 @@ val PresentationModules = module {
     // Updated to Mihon-style StateFlow pattern (no separate state impl needed)
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get(),getOrNull(),get(),get(),get()) }
+    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get(),getOrNull(),get(),get(),get(),get()) }
     // Changed from single to factory - settings screen is not always needed
     factory  { 
         MainSettingScreenViewModel(
@@ -225,7 +226,8 @@ val PresentationModules = module {
     // NOTE: ReaderTranslationViewModel, ReaderTTSViewModel, ReaderStatisticsViewModel are registered
     // in screenModelModule (included at the end of this module) with proper named parameters.
     // Only ReaderSettingsViewModel is registered here.
-    factory { ireader.presentation.ui.reader.viewmodel.ReaderSettingsViewModel(get(), get(), get(), get(), get(), get()) }
+    // ReaderSettingsViewModel with ReaderPreferencesController for SSOT pattern (Requirements: 4.1, 4.2)
+    factory { ireader.presentation.ui.reader.viewmodel.ReaderSettingsViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     factory<ReaderScreenViewModel> { (params: ReaderScreenViewModel.Param) -> 
         ReaderScreenViewModel(
@@ -265,6 +267,8 @@ val PresentationModules = module {
             systemInteractionService = get(),
             // ChapterController - single source of truth for chapter operations (Requirements: 9.2, 9.4, 9.5)
             chapterController = get(),
+            // ReaderPreferencesController - single source of truth for reader preferences (Requirements: 4.1, 4.2)
+            preferencesController = get(),
             settingsViewModel = get(),
             translationViewModel = get(),
             ttsViewModel = get(),

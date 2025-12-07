@@ -50,6 +50,9 @@ import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
 import ireader.domain.services.chapter.ChapterCommand
 import ireader.domain.services.chapter.ChapterController
 import ireader.domain.services.chapter.ChapterEvent
+import ireader.domain.services.preferences.PreferenceCommand
+import ireader.domain.services.preferences.PreferenceEvent
+import ireader.domain.services.preferences.ReaderPreferencesController
 
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.removeIf
@@ -118,6 +121,8 @@ class ReaderScreenViewModel(
     private val systemInteractionService: ireader.domain.services.platform.SystemInteractionService,
     // ChapterController - single source of truth for chapter operations (Requirements: 9.2, 9.4, 9.5)
     private val chapterController: ChapterController,
+    // ReaderPreferencesController - single source of truth for reader preferences (Requirements: 4.1, 4.2)
+    private val preferencesController: ReaderPreferencesController,
     // Sub-ViewModels
     val settingsViewModel: ReaderSettingsViewModel,
     val translationViewModel: ReaderTranslationViewModel,
@@ -216,6 +221,8 @@ class ReaderScreenViewModel(
             subscribeReaderThemes()
             // Subscribe to ChapterController events (Requirements: 9.2, 9.4, 9.5)
             subscribeToChapterControllerEvents()
+            // Subscribe to ReaderPreferencesController events (Requirements: 4.1, 4.2)
+            subscribeToPreferencesControllerEvents()
             initializeReader(bookId, chapterId)
             // Subscribe to TTS chapter changes for sync
             subscribeTTSChapterChanges()
@@ -322,6 +329,113 @@ class ReaderScreenViewModel(
             }
         }
     }
+    
+    // ==================== ReaderPreferencesController Integration ====================
+    // Requirements: 4.1, 4.2, 4.4, 4.5, 5.4
+    
+    private var preferencesControllerEventJob: Job? = null
+    
+    /**
+     * Subscribe to ReaderPreferencesController events for preference change notifications.
+     * This handles events like PreferenceSaved, Error, etc.
+     * Requirements: 4.1, 4.2
+     */
+    private fun subscribeToPreferencesControllerEvents() {
+        preferencesControllerEventJob?.cancel()
+        preferencesControllerEventJob = scope.launch {
+            // Subscribe to events
+            launch {
+                preferencesController.events.collect { event ->
+                    when (event) {
+                        is PreferenceEvent.PreferenceSaved -> {
+                            Log.debug { "PreferencesController: Preference saved - ${event.key}" }
+                        }
+                        is PreferenceEvent.PreferencesLoaded -> {
+                            Log.debug { "PreferencesController: All preferences loaded" }
+                        }
+                        is PreferenceEvent.Error -> {
+                            Log.error { "PreferencesController: Error - ${event.error.toUserMessage()}" }
+                            showSnackBar(UiText.DynamicString(event.error.toUserMessage()))
+                        }
+                    }
+                }
+            }
+            
+            // Subscribe to state changes for preference sync
+            launch {
+                preferencesController.state.collect { prefState ->
+                    // Preferences are synced through the Controller state
+                    // UI components can observe preferencesController.state directly
+                    Log.debug { "PreferencesController: State updated - fontSize=${prefState.fontSize}, brightness=${prefState.brightness}" }
+                }
+            }
+        }
+    }
+    
+    // ==================== Preference Delegation to Controller ====================
+    // Requirements: 4.2
+    
+    /**
+     * Set font size via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     */
+    fun setFontSize(size: Int) {
+        preferencesController.dispatch(PreferenceCommand.SetFontSize(size))
+    }
+    
+    /**
+     * Set line height via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     */
+    fun setLineHeight(height: Int) {
+        preferencesController.dispatch(PreferenceCommand.SetLineHeight(height))
+    }
+    
+    /**
+     * Set brightness via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     */
+    fun setBrightness(brightness: Float) {
+        preferencesController.dispatch(PreferenceCommand.SetBrightness(brightness))
+    }
+    
+    /**
+     * Set immersive mode via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     */
+    fun setImmersiveMode(enabled: Boolean) {
+        preferencesController.dispatch(PreferenceCommand.SetImmersiveMode(enabled))
+    }
+    
+    /**
+     * Set screen always on via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     */
+    fun setScreenAlwaysOn(enabled: Boolean) {
+        preferencesController.dispatch(PreferenceCommand.SetScreenAlwaysOn(enabled))
+    }
+    
+    /**
+     * Set reading mode via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     */
+    fun setReadingMode(mode: ReadingMode) {
+        preferencesController.dispatch(PreferenceCommand.SetReadingMode(mode))
+    }
+    
+    /**
+     * Set scroll mode via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     */
+    fun setScrollMode(vertical: Boolean) {
+        preferencesController.dispatch(PreferenceCommand.SetScrollMode(vertical))
+    }
+    
+    /**
+     * Get the ReaderPreferencesController for direct state observation.
+     * UI components can use this to observe preference state.
+     */
+    fun getPreferencesController(): ReaderPreferencesController = preferencesController
     
     // ==================== TTS Chapter Sync ====================
     
@@ -1465,6 +1579,7 @@ class ReaderScreenViewModel(
         preloadJob?.cancel()
         chapterNavigationJob?.cancel()
         chapterControllerEventJob?.cancel()
+        preferencesControllerEventJob?.cancel()
         preloadedChapters.clear()
         statisticsViewModel.onChapterClosed()
         

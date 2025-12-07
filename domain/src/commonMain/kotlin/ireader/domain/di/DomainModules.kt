@@ -27,6 +27,9 @@ import ireader.domain.usecases.remote.GetRemoteReadingContent
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
 import ireader.domain.services.chapter.chapterModule
+import ireader.domain.services.preferences.preferencesModule
+import ireader.domain.services.book.bookModule
+import ireader.domain.services.library.libraryModule
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
@@ -278,6 +281,18 @@ val DomainServices = module {
     // Chapter Module - Unified Chapter Controller and use cases
     // Requirements: 5.5 - ChapterController injectable via DI
     includes(chapterModule)
+    
+    // Preferences Module - ReaderPreferencesController as singleton
+    // Requirements: 6.1, 6.2, 6.3, 6.4
+    includes(preferencesModule)
+    
+    // Book Module - BookController as singleton
+    // Requirements: 6.1, 6.2, 6.3, 6.4
+    includes(bookModule)
+    
+    // Library Module - LibraryController as singleton
+    // Requirements: 6.1, 6.2, 6.3, 6.4
+    includes(libraryModule)
     
     // Note: Preferences, UseCases, and Repository UseCases are loaded separately
     // to avoid circular dependencies with UseCasesInject module

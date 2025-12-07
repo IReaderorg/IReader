@@ -12,6 +12,8 @@ import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
+import ireader.domain.services.library.LibraryCommand
+import ireader.domain.services.library.LibraryController
 import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.local.book_usecases.DownloadResult
@@ -77,7 +79,8 @@ class LibraryViewModel(
     private val clipboardService: ireader.domain.services.platform.ClipboardService,
     private val shareService: ireader.domain.services.platform.ShareService,
     private val fileSystemService: ireader.domain.services.platform.FileSystemService,
-    private val localizeHelper: LocalizeHelper
+    private val localizeHelper: LocalizeHelper,
+    private val libraryController: LibraryController
 ) : BaseViewModel() {
 
     // ==================== Mihon-style State ====================
@@ -140,6 +143,32 @@ class LibraryViewModel(
 
     init {
         initializeState()
+        
+        // Subscribe to LibraryController state for SSOT pattern (Requirements: 4.3)
+        subscribeToLibraryControllerState()
+        
+        // Load library via LibraryController
+        libraryController.dispatch(LibraryCommand.LoadLibrary)
+    }
+    
+    /**
+     * Subscribe to LibraryController state for library data synchronization.
+     * This keeps the local state in sync with LibraryController (SSOT pattern).
+     * Requirements: 4.3
+     */
+    private fun subscribeToLibraryControllerState() {
+        libraryController.state
+            .onEach { controllerState ->
+                // Sync selection state from LibraryController
+                val controllerSelection = controllerState.selectedBookIds
+                if (_state.value.selectedBookIds != controllerSelection) {
+                    _state.update { it.copy(selectedBookIds = controllerSelection.toImmutableSet()) }
+                }
+                
+                // Log state updates for debugging
+                ireader.core.log.Log.debug { "LibraryViewModel: LibraryController state updated - books=${controllerState.filteredBooks.size}, selection=${controllerState.selectionCount}" }
+            }
+            .launchIn(scope)
     }
     
     private fun initializeState() {
@@ -208,8 +237,17 @@ class LibraryViewModel(
     }
 
     // ==================== Selection Management ====================
+    // Delegated to LibraryController for SSOT pattern (Requirements: 4.3)
     
     fun toggleSelection(bookId: Long) {
+        // Delegate to LibraryController (SSOT pattern)
+        if (bookId in _state.value.selectedBookIds) {
+            libraryController.dispatch(LibraryCommand.DeselectBook(bookId))
+        } else {
+            libraryController.dispatch(LibraryCommand.SelectBook(bookId))
+        }
+        
+        // Also update local state for immediate UI feedback
         _state.update { current ->
             val newSelection = if (bookId in current.selectedBookIds) {
                 current.selectedBookIds - bookId
@@ -221,10 +259,18 @@ class LibraryViewModel(
     }
     
     fun unselectAll() {
+        // Delegate to LibraryController (SSOT pattern)
+        libraryController.dispatch(LibraryCommand.ClearSelection)
+        
+        // Also update local state for immediate UI feedback
         _state.update { it.copy(selectedBookIds = persistentSetOf()) }
     }
     
     fun selectAllInCurrentCategory() {
+        // Delegate to LibraryController (SSOT pattern)
+        libraryController.dispatch(LibraryCommand.SelectAll)
+        
+        // Also update local state for immediate UI feedback
         val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
         val mangaIds = mangaInCurrentCategory.map { it.id }.toSet()
         _state.update { current ->
@@ -233,6 +279,10 @@ class LibraryViewModel(
     }
     
     fun flipAllInCurrentCategory() {
+        // Delegate to LibraryController (SSOT pattern)
+        libraryController.dispatch(LibraryCommand.InvertSelection)
+        
+        // Also update local state for immediate UI feedback
         val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
         val mangaIds = mangaInCurrentCategory.map { it.id }.toSet()
         _state.update { current ->
@@ -266,6 +316,7 @@ class LibraryViewModel(
     }
 
     // ==================== Filter & Sort ====================
+    // Delegated to LibraryController for SSOT pattern (Requirements: 4.3)
     
     fun toggleFilter(type: LibraryFilter.Type) {
         val newFilters = filters.value.map { filterState ->
@@ -289,6 +340,21 @@ class LibraryViewModel(
             )
         }
         
+        // Delegate to LibraryController (SSOT pattern)
+        // Convert to controller filter format
+        val activeFilters = newFilters.filter { it.value == LibraryFilter.Value.Included }
+        if (activeFilters.isEmpty()) {
+            libraryController.dispatch(LibraryCommand.SetFilter(ireader.domain.services.library.LibraryFilter.None))
+        } else if (activeFilters.size == 1) {
+            val controllerFilter = when (activeFilters.first().type) {
+                LibraryFilter.Type.Downloaded -> ireader.domain.services.library.LibraryFilter.Downloaded
+                LibraryFilter.Type.Unread -> ireader.domain.services.library.LibraryFilter.Unread
+                LibraryFilter.Type.InProgress -> ireader.domain.services.library.LibraryFilter.Started
+                LibraryFilter.Type.Completed -> ireader.domain.services.library.LibraryFilter.Completed
+            }
+            libraryController.dispatch(LibraryCommand.SetFilter(controllerFilter))
+        }
+        
         scope.launch { libraryPreferences.filters(true).set(newFilters) }
     }
     
@@ -309,6 +375,19 @@ class LibraryViewModel(
             activeFilters = newActive.toImmutableSet()
         )}
         
+        // Delegate to LibraryController (SSOT pattern)
+        val controllerFilter = when (type) {
+            LibraryFilter.Type.Downloaded -> ireader.domain.services.library.LibraryFilter.Downloaded
+            LibraryFilter.Type.Unread -> ireader.domain.services.library.LibraryFilter.Unread
+            LibraryFilter.Type.InProgress -> ireader.domain.services.library.LibraryFilter.Started
+            LibraryFilter.Type.Completed -> ireader.domain.services.library.LibraryFilter.Completed
+        }
+        if (type in newActive) {
+            libraryController.dispatch(LibraryCommand.SetFilter(controllerFilter))
+        } else {
+            libraryController.dispatch(LibraryCommand.SetFilter(ireader.domain.services.library.LibraryFilter.None))
+        }
+        
         scope.launch { libraryPreferences.filters(true).set(newFilters) }
     }
     
@@ -322,6 +401,20 @@ class LibraryViewModel(
         sorting.value = newSort
 
         _state.update { it.copy(sort = newSort) }
+        
+        // Delegate to LibraryController (SSOT pattern)
+        val controllerSortType = when (type) {
+            LibrarySort.Type.Title -> ireader.domain.services.library.LibrarySort.Type.Title
+            LibrarySort.Type.DateAdded -> ireader.domain.services.library.LibrarySort.Type.DateAdded
+            LibrarySort.Type.LastRead -> ireader.domain.services.library.LibrarySort.Type.LastRead
+            LibrarySort.Type.TotalChapters -> ireader.domain.services.library.LibrarySort.Type.TotalChapters
+            LibrarySort.Type.Unread -> ireader.domain.services.library.LibrarySort.Type.UnreadCount
+            else -> ireader.domain.services.library.LibrarySort.Type.Title
+        }
+        libraryController.dispatch(LibraryCommand.SetSort(
+            ireader.domain.services.library.LibrarySort(controllerSortType, newSort.isAscending)
+        ))
+        
         scope.launch { libraryPreferences.sorting().set(newSort) }
     }
     
@@ -330,6 +423,20 @@ class LibraryViewModel(
         sorting.value = newSort
 
         _state.update { it.copy(sort = newSort) }
+        
+        // Delegate to LibraryController (SSOT pattern)
+        val controllerSortType = when (newSort.type) {
+            LibrarySort.Type.Title -> ireader.domain.services.library.LibrarySort.Type.Title
+            LibrarySort.Type.DateAdded -> ireader.domain.services.library.LibrarySort.Type.DateAdded
+            LibrarySort.Type.LastRead -> ireader.domain.services.library.LibrarySort.Type.LastRead
+            LibrarySort.Type.TotalChapters -> ireader.domain.services.library.LibrarySort.Type.TotalChapters
+            LibrarySort.Type.Unread -> ireader.domain.services.library.LibrarySort.Type.UnreadCount
+            else -> ireader.domain.services.library.LibrarySort.Type.Title
+        }
+        libraryController.dispatch(LibraryCommand.SetSort(
+            ireader.domain.services.library.LibrarySort(controllerSortType, newSort.isAscending)
+        ))
+        
         scope.launch { libraryPreferences.sorting().set(newSort) }
     }
     
@@ -939,6 +1046,10 @@ class LibraryViewModel(
     
     override fun onDestroy() {
         searchJob?.cancel()
+        
+        // Cleanup LibraryController state (Requirements: 4.3)
+        libraryController.dispatch(LibraryCommand.Cleanup)
+        
         super.onDestroy()
     }
 }

@@ -74,6 +74,7 @@ val screenModelModule = module {
     /**
      * Reader settings ViewModel
      * Handles brightness, fonts, colors, and layout preferences
+     * Now integrates with ReaderPreferencesController for SSOT pattern (Requirements: 4.1, 4.2)
      */
     factory {
         ReaderSettingsViewModel(
@@ -82,7 +83,8 @@ val screenModelModule = module {
             platformUiPreferences = get(),
             readerUseCases = get(),
             systemInteractionService = get(),
-            fontUseCase = get()
+            fontUseCase = get(),
+            preferencesController = get()
         )
     }
     

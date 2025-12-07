@@ -11,12 +11,15 @@ import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.PlatformUiPreferences
 import ireader.domain.services.platform.SystemInteractionService
 import ireader.domain.services.common.ServiceResult
+import ireader.domain.services.preferences.PreferenceCommand
+import ireader.domain.services.preferences.PreferenceEvent
+import ireader.domain.services.preferences.ReaderPreferencesController
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toDomainColor
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * ViewModel responsible for reader settings and preferences
@@ -27,6 +30,9 @@ import kotlinx.coroutines.runBlocking
  * - Color themes
  * - Layout preferences
  * - Screen settings (secure screen, keep awake)
+ * 
+ * Now integrates with ReaderPreferencesController for SSOT pattern.
+ * Requirements: 4.1, 4.2, 4.4, 4.5
  */
 class ReaderSettingsViewModel(
     private val readerPreferences: ReaderPreferences,
@@ -35,7 +41,12 @@ class ReaderSettingsViewModel(
     private val readerUseCases: ReaderPrefUseCases,
     private val systemInteractionService: SystemInteractionService,
     private val fontUseCase: ireader.domain.usecases.fonts.FontUseCase,
+    // ReaderPreferencesController - single source of truth for reader preferences (Requirements: 4.1, 4.2)
+    private val preferencesController: ReaderPreferencesController,
 ) : BaseViewModel() {
+    
+    // Job for subscribing to controller events
+    private var controllerEventJob: Job? = null
     
     // Brightness settings - debounced for smooth slider interaction
     val brightness = readerPreferences.brightness().asStateDebounced()
@@ -62,7 +73,37 @@ class ReaderSettingsViewModel(
     
     init {
         loadFonts()
+        subscribeToControllerEvents()
     }
+    
+    /**
+     * Subscribe to ReaderPreferencesController events for error handling.
+     * Requirements: 5.4
+     */
+    private fun subscribeToControllerEvents() {
+        controllerEventJob?.cancel()
+        controllerEventJob = scope.launch {
+            preferencesController.events.collect { event ->
+                when (event) {
+                    is PreferenceEvent.Error -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString(event.error.toUserMessage()))
+                    }
+                    is PreferenceEvent.PreferenceSaved -> {
+                        // Preference saved successfully
+                    }
+                    is PreferenceEvent.PreferencesLoaded -> {
+                        // All preferences loaded
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Get the ReaderPreferencesController for direct state observation.
+     * UI components can use this to observe preference state.
+     */
+    fun getPreferencesController(): ReaderPreferencesController = preferencesController
     
     private fun loadFonts() {
         scope.launch {
@@ -127,17 +168,19 @@ class ReaderSettingsViewModel(
     // ==================== Brightness Control ====================
     
     /**
-     * Update brightness using platform service
+     * Update brightness using platform service and ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     * Requirements: 4.2
      */
     fun updateBrightness(newBrightness: Float) {
         scope.launch {
             when (val result = systemInteractionService.setBrightness(newBrightness)) {
                 is ServiceResult.Success -> {
-                    readerUseCases.brightnessStateUseCase.saveBrightness(newBrightness)
+                    preferencesController.dispatch(PreferenceCommand.SetBrightness(newBrightness))
                 }
                 is ServiceResult.Error -> {
                     // Still save to preferences even if system update fails
-                    readerUseCases.brightnessStateUseCase.saveBrightness(newBrightness)
+                    preferencesController.dispatch(PreferenceCommand.SetBrightness(newBrightness))
                     showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set brightness: ${result.message ?: "Unknown error"}"))
                 }
                 else -> {}
@@ -162,12 +205,12 @@ class ReaderSettingsViewModel(
     // ==================== Font Settings ====================
     
     /**
-     * Update font size
+     * Update font size via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     * Requirements: 4.2
      */
     fun updateFontSize(size: Int) {
-        scope.launch {
-            readerPreferences.fontSize().set(size)
-        }
+        preferencesController.dispatch(PreferenceCommand.SetFontSize(size))
     }
     
     /**
@@ -248,28 +291,30 @@ class ReaderSettingsViewModel(
     // ==================== Layout Settings ====================
     
     /**
-     * Save text alignment
+     * Save text alignment via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     * Requirements: 4.2
      */
     fun saveTextAlignment(textAlign: PreferenceValues.PreferenceTextAlignment) {
-        readerUseCases.textAlignmentUseCase.save(textAlign)
+        preferencesController.dispatch(PreferenceCommand.SetTextAlignment(textAlign))
     }
     
     /**
-     * Update paragraph indent
+     * Update paragraph indent via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     * Requirements: 4.2
      */
     fun updateParagraphIndent(indent: Int) {
-        scope.launch {
-            readerPreferences.paragraphIndent().set(indent)
-        }
+        preferencesController.dispatch(PreferenceCommand.SetParagraphIndent(indent))
     }
     
     /**
-     * Update paragraph distance
+     * Update paragraph distance via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     * Requirements: 4.2
      */
     fun updateParagraphDistance(distance: Int) {
-        scope.launch {
-            readerPreferences.paragraphDistance().set(distance)
-        }
+        preferencesController.dispatch(PreferenceCommand.SetParagraphSpacing(distance))
     }
     
     // ==================== Screen Settings ====================
@@ -292,13 +337,15 @@ class ReaderSettingsViewModel(
     }
     
     /**
-     * Keep screen on during reading
+     * Keep screen on during reading via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     * Requirements: 4.2
      */
     fun setKeepScreenOn(enabled: Boolean) {
         scope.launch {
             when (val result = systemInteractionService.setKeepScreenOn(enabled)) {
                 is ServiceResult.Success -> {
-                    readerPreferences.screenAlwaysOn().set(enabled)
+                    preferencesController.dispatch(PreferenceCommand.SetScreenAlwaysOn(enabled))
                 }
                 is ServiceResult.Error -> {
                     showSnackBar(ireader.i18n.UiText.DynamicString("Failed to set keep screen on: ${result.message ?: "Unknown error"}"))
@@ -309,12 +356,12 @@ class ReaderSettingsViewModel(
     }
     
     /**
-     * Toggle immersive mode
+     * Toggle immersive mode via ReaderPreferencesController.
+     * Delegates to Controller for SSOT pattern.
+     * Requirements: 4.2
      */
     fun toggleImmersiveMode(enabled: Boolean) {
-        scope.launch {
-            readerPreferences.immersiveMode().set(enabled)
-        }
+        preferencesController.dispatch(PreferenceCommand.SetImmersiveMode(enabled))
     }
     
     // ==================== Auto-scroll Settings ====================

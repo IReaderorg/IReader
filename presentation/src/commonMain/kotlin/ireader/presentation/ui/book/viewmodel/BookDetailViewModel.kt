@@ -20,6 +20,8 @@ import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.isObsolete
 import ireader.domain.preferences.prefs.ReaderPreferences
+import ireader.domain.services.book.BookCommand
+import ireader.domain.services.book.BookController
 import ireader.domain.services.chapter.ChapterCommand
 import ireader.domain.services.chapter.ChapterController
 import ireader.domain.services.common.DownloadService
@@ -114,6 +116,7 @@ class BookDetailViewModel(
     private val translationService: TranslationService? = null,
     val insertUseCases: LocalInsertUseCases = localInsertUseCases,
     private val chapterController: ChapterController,
+    private val bookController: BookController,
 ) : BaseViewModel() {
 
     data class Param(val bookId: Long?)
@@ -196,6 +199,12 @@ class BookDetailViewModel(
             
             // Subscribe to ChapterController state for selection sync (Requirements: 9.1, 9.4, 9.5)
             subscribeToChapterControllerState()
+            
+            // Subscribe to BookController state for book data sync (Requirements: 4.3)
+            subscribeToBookControllerState()
+            
+            // Load book via BookController (SSOT pattern)
+            bookController.dispatch(BookCommand.LoadBook(bookId))
         } else {
             _state.value = BookDetailState.Error("Invalid book ID")
             scope.launch {
@@ -218,6 +227,23 @@ class BookDetailViewModel(
                     selection.clear()
                     selection.addAll(controllerSelection)
                 }
+            }
+            .launchIn(scope)
+    }
+    
+    /**
+     * Subscribe to BookController state for book data synchronization.
+     * This keeps the local state in sync with BookController (SSOT pattern).
+     * Requirements: 4.3
+     */
+    private fun subscribeToBookControllerState() {
+        bookController.state
+            .onEach { bookState ->
+                // Sync book-level data from BookController
+                // This provides additional book state like reading progress, categories, etc.
+                // The main book data is still loaded via the existing subscription mechanism
+                // but BookController provides the SSOT for book operations
+                Log.debug { "BookDetailViewModel: BookController state updated - book=${bookState.book?.title}, progress=${bookState.progressPercentage}" }
             }
             .launchIn(scope)
     }
@@ -649,9 +675,18 @@ class BookDetailViewModel(
 
     // ==================== Library Actions ====================
     
+    /**
+     * Toggle the book's favorite status using BookController (SSOT pattern).
+     * Requirements: 4.3
+     */
     fun toggleInLibrary(book: Book) {
         updateSuccessState { it.copy(isInLibraryLoading = true) }
         
+        // Delegate to BookController for SSOT pattern (Requirements: 4.3)
+        // BookController handles the toggle operation and state updates
+        bookController.dispatch(BookCommand.ToggleFavorite)
+        
+        // Also handle sync if available (for backward compatibility)
         applicationScope.launch {
             try {
                 withIOContext {
@@ -1341,6 +1376,9 @@ class BookDetailViewModel(
         
         // Cleanup ChapterController state for this book (Requirements: 9.4, 9.5)
         chapterController.dispatch(ChapterCommand.Cleanup)
+        
+        // Cleanup BookController state (Requirements: 4.3)
+        bookController.dispatch(BookCommand.Cleanup)
         
         Log.info { "BookDetailViewModel cleared - all jobs cancelled" }
     }

@@ -80,6 +80,14 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 - Translations: [Weblate](https://hosted.weblate.org/projects/ireader/ireader/)
 - Extensions: [IReader Extensions](https://github.com/IReaderorg/IReader-extensions)
 
+### 🍎 iOS Developer Needed
+
+We're looking for a developer to help wire the iOS module to the main app. All the groundwork is done — the iOS module exists and the core components are ready — but the final integration work remains. @kazemcodes is unable to continue this work due to not having access to a Mac.
+
+The app can also leverage IReader's existing sources since they are compiled to Native/JS, making the integration straightforward.
+
+If you have iOS/macOS development experience and want to help bring IReader to iOS, please reach out!
+
 ## 📄 License
 
 Licensed under [Apache 2.0 License](LICENSE)
