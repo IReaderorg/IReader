@@ -267,8 +267,6 @@ val PresentationModules = module {
             translationViewModel = get(),
             ttsViewModel = get(),
             statisticsViewModel = get(),
-            // Inject shared TTS service for chapter sync (optional - may be null on some platforms)
-            sharedTTSService = getOrNull(),
         )
     }
 

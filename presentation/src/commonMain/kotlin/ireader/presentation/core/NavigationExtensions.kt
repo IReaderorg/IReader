@@ -29,7 +29,7 @@ fun NavHostController.navigate(spec: GlobalSearchScreenSpec) {
     navigate("globalSearch$query")
 }
 
-// Helper functions for expect classes (WebViewScreenSpec, TTSScreenSpec)
+// Helper functions for expect classes (WebViewScreenSpec, TTSV2ScreenSpec)
 // These need to be called directly since we can't access expect class properties
 
 fun NavHostController.navigateToWebView(

@@ -14,7 +14,6 @@ import ireader.domain.services.downloaderService.DownloaderService
 import ireader.domain.services.extensions_insstaller_service.ExtensionManagerService
 import ireader.domain.services.library_update_service.LibraryUpdatesService
 import ireader.domain.services.tts_service.TTSStateImpl
-import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.services.update_service.UpdateService
 import ireader.domain.usecases.backup.AutomaticBackup
 import ireader.domain.usecases.epub.EpubCreator
@@ -112,9 +111,6 @@ actual val DomainModule = module {
         )
     }
 
-    factory<Service>() {
-        TTSService()
-    }
     single {
         AutomaticBackup(
                 get(),
@@ -264,32 +260,6 @@ actual val DomainModule = module {
             context = androidContext(),
             appPreferences = get()
         )
-    }
-    
-    // AI TTS Player
-    factory<ireader.domain.services.tts_service.media_player.AITTSPlayer> {
-        ireader.domain.services.tts_service.media_player.AITTSPlayer(
-            context = androidContext(),
-            aiTTSManager = get()
-        )
-    }
-    
-    // Android TTS Service Adapter - bridges CommonTTSService with TTSService
-    single<ireader.domain.services.tts_service.AndroidTTSServiceAdapter> {
-        ireader.domain.services.tts_service.AndroidTTSServiceAdapter(
-            context = androidContext(),
-            sharedState = get(),
-            appPreferences = get(),
-            readerPreferences = get(),
-            httpClient = get<ireader.core.http.HttpClients>().default
-        ).apply {
-            initialize()
-        }
-    }
-    
-    // Provide CommonTTSService interface using the adapter
-    single<ireader.domain.services.tts_service.CommonTTSService> {
-        get<ireader.domain.services.tts_service.AndroidTTSServiceAdapter>()
     }
     
     // TTS Download Notification Helper

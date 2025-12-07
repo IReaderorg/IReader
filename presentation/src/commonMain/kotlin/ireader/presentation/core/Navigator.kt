@@ -143,7 +143,8 @@ fun NavHostController.navigateTo(spec: ReaderScreenSpec) {
     navigate(route) {
         launchSingleTop = true
         // Clear any existing reader screens to prevent deep reader stack
-        popUpTo(NavigationRoutes.READER) { inclusive = true }
+        // Use base route name for popUpTo (parameterized routes don't match)
+        popUpTo(NavigationRoutes.READER_BASE) { inclusive = true }
     }
 }
 
@@ -152,7 +153,7 @@ fun NavHostController.navigateTo(spec: ExploreScreenSpec) {
     if (isCurrentRoute(route)) return
     navigate(route) {
         launchSingleTop = true
-        popUpTo(NavigationRoutes.EXPLORE) { inclusive = true }
+        popUpTo(NavigationRoutes.EXPLORE_BASE) { inclusive = true }
     }
 }
 
@@ -191,7 +192,8 @@ fun NavHostController.navigateTo(spec: ireader.presentation.ui.home.sources.exte
     if (isCurrentRoute(route)) return
     navigate(route) {
         launchSingleTop = true
-        popUpTo(NavigationRoutes.SOURCE_DETAIL) { inclusive = true }
+        // Use base route name for popUpTo (parameterized routes don't match)
+        popUpTo(NavigationRoutes.SOURCE_DETAIL_BASE) { inclusive = true }
     }
 }
 
@@ -200,7 +202,8 @@ fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.SourceMigrat
     if (isCurrentRoute(route)) return
     navigate(route) {
         launchSingleTop = true
-        popUpTo(NavigationRoutes.SOURCE_MIGRATION) { inclusive = true }
+        // Use base route name for popUpTo (parameterized routes don't match)
+        popUpTo(NavigationRoutes.SOURCE_MIGRATION_BASE) { inclusive = true }
     }
 }
 
@@ -212,23 +215,14 @@ fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.BrowseSettin
 // Expect functions for platform-specific screen specs
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.WebViewScreenSpec)
 
-// TTSScreenSpec navigation - clears existing TTS to prevent audio conflicts
-fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSScreenSpec) {
-    val route = NavigationRoutes.tts(spec.bookId, spec.chapterId, spec.sourceId, spec.readingParagraph)
-    if (isCurrentRoute(route)) return
-    navigate(route) {
-        launchSingleTop = true
-        popUpTo(NavigationRoutes.TTS) { inclusive = true }
-    }
-}
-
-// TTSV2ScreenSpec navigation - uses new v2 architecture
+// TTSV2ScreenSpec navigation
 fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.TTSV2ScreenSpec) {
     val route = NavigationRoutes.ttsV2(spec.bookId, spec.chapterId, spec.sourceId, spec.readingParagraph)
     if (isCurrentRoute(route)) return
     navigate(route) {
         launchSingleTop = true
-        popUpTo(NavigationRoutes.TTS_V2) { inclusive = true }
+        // Use base route name for popUpTo (parameterized routes don't match)
+        popUpTo(NavigationRoutes.TTS_V2_BASE) { inclusive = true }
     }
 }
 
@@ -253,7 +247,8 @@ fun NavHostController.navigateToReaderAndClearOthers(bookId: Long, chapterId: Lo
     val route = NavigationRoutes.reader(bookId, chapterId)
     if (isCurrentRoute(route)) return
     navigate(route) {
-        popUpTo(NavigationRoutes.READER) { inclusive = true }
+        // Use base route name for popUpTo (parameterized routes don't match)
+        popUpTo(NavigationRoutes.READER_BASE) { inclusive = true }
         launchSingleTop = true
     }
 }

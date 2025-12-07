@@ -76,7 +76,7 @@ object NavigationRoutes {
         "ttsV2/$bookId/$chapterId/$sourceId/$readingParagraph"
     fun sourceDetail(sourceId: Long) = "sourceDetail/$sourceId"
     
-    // Route patterns for popUpTo operations
+    // Route patterns for composable definitions
     const val MAIN = "main"
     const val main = "main"
     const val READER = "reader/{bookId}/{chapterId}"
@@ -88,4 +88,13 @@ object NavigationRoutes {
     const val SOURCE_DETAIL = "sourceDetail/{sourceId}"
     const val SOURCE_MIGRATION = "sourceMigration/{sourceId}"
     const val GLOBAL_SEARCH = "globalSearch"
+    
+    // Base route names for popUpTo operations (without parameters)
+    const val READER_BASE = "reader"
+    const val BOOK_DETAIL_BASE = "bookDetail"
+    const val TTS_BASE = "tts"
+    const val TTS_V2_BASE = "ttsV2"
+    const val EXPLORE_BASE = "explore"
+    const val SOURCE_DETAIL_BASE = "sourceDetail"
+    const val SOURCE_MIGRATION_BASE = "sourceMigration"
 }

@@ -29,7 +29,9 @@ import ireader.presentation.core.ui.ExploreScreenSpec
 import ireader.presentation.core.ui.FontScreenSpec
 import ireader.presentation.core.ui.GeneralScreenSpec
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
+import ireader.presentation.core.ui.LocalNavigationViewModelStore
 import ireader.presentation.core.ui.NFTBadgeScreenSpec
+import ireader.presentation.core.ui.NavigationViewModelStore
 import ireader.presentation.core.ui.ReaderScreenSpec
 import ireader.presentation.core.ui.ReaderSettingSpec
 import ireader.presentation.core.ui.RepositoryAddScreenSpec
@@ -39,12 +41,9 @@ import ireader.presentation.core.ui.SettingScreenSpec
 import ireader.presentation.core.ui.SourceMigrationScreenSpec
 import ireader.presentation.core.ui.StatisticsScreenSpec
 import ireader.presentation.core.ui.TTSEngineManagerScreenSpec
-import ireader.presentation.core.ui.TTSScreenSpec
 import ireader.presentation.core.ui.TTSV2ScreenSpec
 import ireader.presentation.core.ui.TranslationScreenSpec
 import ireader.presentation.core.ui.WebViewScreenSpec
-import ireader.presentation.core.ui.NavigationViewModelStore
-import ireader.presentation.core.ui.LocalNavigationViewModelStore
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
 import org.koin.compose.koinInject
 
@@ -267,7 +266,7 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val query = remember(backStackEntry) {
-                backStackEntry.arguments?.getString("query")
+                backStackEntry.savedStateHandle.get<String>("query")
             }
             GlobalSearchScreenSpec(query).Content()
         }
@@ -359,33 +358,7 @@ fun CommonNavHost(
             ).Content()
         }
         
-        composable(
-            route = "tts/{bookId}/{chapterId}/{sourceId}/{readingParagraph}",
-            arguments = listOf(
-                navArgument("bookId") { type = NavType.StringType },
-                navArgument("chapterId") { type = NavType.StringType },
-                navArgument("sourceId") { type = NavType.StringType },
-                navArgument("readingParagraph") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val bookId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
-            }
-            val chapterId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
-            }
-            val sourceId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
-            }
-            val readingParagraph = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("readingParagraph")?.toIntOrNull()
-            }
-            if (bookId != null && chapterId != null && sourceId != null && readingParagraph != null) {
-                    TTSScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
-            }
-        }
-        
-        // TTS V2 Screen - New clean architecture
+        // TTS Screen - Clean architecture v2
         composable(
             route = NavigationRoutes.TTS_V2,
             arguments = listOf(

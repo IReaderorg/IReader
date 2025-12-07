@@ -141,17 +141,7 @@
                 tools:node="merge" />
         </provider>
 
-        <service
-            android:name="ireader.domain.services.tts_service.media_player.TTSService"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="mediaPlayback">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-            </intent-filter>
-        </service>
-        
-        <!-- TTS V2 Service - Clean architecture background service -->
+        <!-- TTS Service - Clean architecture background service -->
         <service
             android:name="ireader.domain.services.tts_service.v2.TTSV2Service"
             android:enabled="true"

@@ -143,7 +143,7 @@
 //                    }
 //
 //                    // Settings button
-//                    IconButton(onClick = { /* TODO: Show settings */ }) {
+//                    IconButton(onClick = { /*  Show settings */ }) {
 //                        Icon(Icons.Default.Settings, contentDescription = "Settings")
 //                    }
 //                }

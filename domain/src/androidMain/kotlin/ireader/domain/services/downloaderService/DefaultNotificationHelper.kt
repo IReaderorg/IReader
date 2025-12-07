@@ -12,8 +12,6 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.notification.NotificationsIds
 import ireader.domain.notification.legacyFlags
-import ireader.domain.services.tts_service.Player
-import ireader.domain.services.tts_service.media_player.TTSService
 import ireader.domain.utils.extensions.launchMainActivityIntent
 import ireader.i18n.Args
 import ireader.i18n.LocalizeHelper
@@ -193,84 +191,6 @@ class DefaultNotificationHelper(
         }
     }
 
-    val skipPrev = PendingIntent.getBroadcast(
-        context,
-        Player.SKIP_PREV,
-        Intent(
-            context,
-            TTSService::class.java
-        ).apply {
-            putExtra(Player.KEY, Player.SKIP_PREV)
-        },
-        pendingIntentFlags
-    )
-    val rewind = PendingIntent.getBroadcast(
-        context,
-        Player.PREV_PAR,
-        Intent(
-            context.applicationContext,
-            TTSService::class.java
-        ).apply {
-            putExtra(Player.KEY, Player.PREV_PAR)
-        },
-        pendingIntentFlags
-    )
-    val pause = PendingIntent.getBroadcast(
-        context,
-        Player.PAUSE,
-        Intent(
-            context,
-            TTSService::class.java
-        ).apply {
-            putExtra(Player.KEY, Player.PAUSE)
-        },
-        pendingIntentFlags
-    )
-    val play = PendingIntent.getBroadcast(
-        context,
-        Player.PLAY,
-        Intent(
-            context,
-            TTSService::class.java
-        ).apply {
-            putExtra(Player.KEY, Player.PLAY)
-        },
-        pendingIntentFlags
-    )
-    val next = PendingIntent.getBroadcast(
-        context,
-        Player.NEXT_PAR,
-        Intent(
-            context,
-            TTSService::class.java
-        ).apply {
-            putExtra(Player.KEY, Player.NEXT_PAR)
-        },
-        pendingIntentFlags
-    )
-    val skipNext = PendingIntent.getBroadcast(
-        context,
-        Player.SKIP_NEXT,
-        Intent(
-            context,
-            TTSService::class.java
-        ).apply {
-            putExtra(Player.KEY, Player.SKIP_NEXT)
-        },
-        pendingIntentFlags
-    )
-    val cancelMediaPlater = PendingIntent.getBroadcast(
-        context,
-        Player.CANCEL,
-        Intent(
-            context,
-            TTSService::class.java
-        ).apply {
-            putExtra(Player.KEY, Player.CANCEL)
-        },
-        pendingIntentFlags
-    )
-    
     /**
      * Creates a download notification using standard Android notification style.
      * Includes pause/resume and cancel actions.

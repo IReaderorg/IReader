@@ -7,7 +7,6 @@ import ireader.presentation.core.theme.IUseController
 import ireader.presentation.core.theme.LocaleHelper
 
 import ireader.presentation.imageloader.CoilLoaderFactory
-import ireader.presentation.ui.home.tts.TTSViewModel
 import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
 import ireader.presentation.ui.web.WebViewPageModel
 import ireader.presentation.ui.web.WebViewPageStateImpl
@@ -36,25 +35,6 @@ actual val presentationPlatformModule = module  {
 
     // Register WebscrapingTranslateEngine for Android platform
     factory { WebscrapingTranslateEngine(get(), get()) }
-
-    factory<TTSViewModel> { params -> 
-        TTSViewModel(
-            ttsState = get(),
-            param = params.get(),
-            serviceUseCases = get(),
-            getBookUseCases = get(),
-            getChapterUseCase = get(),
-            remoteUseCases = get(),
-            getLocalCatalog = get(),
-            speechPrefUseCases = get(),
-            readerPreferences = get(),
-            androidUiPreferences = get(),
-            insertUseCases = get(),
-            platformUiPreferences = get(),
-            aiTTSManager = get(),
-            getAllTranslationsForChapterUseCase = get()
-        )
-    }
 
     factory <WebViewPageStateImpl> { WebViewPageStateImpl() }
 

@@ -157,18 +157,11 @@ actual val DomainModule: Module = module {
         DesktopPiperVoiceDownloader(appDataDir)
     }
     
-    // Desktop TTS Service (legacy implementation)
+    // Desktop TTS Service (legacy implementation - used by desktop settings screens)
     single<ireader.domain.services.tts_service.DesktopTTSService> {
         ireader.domain.services.tts_service.DesktopTTSService().apply {
             initialize()
         }
-    }
-    
-    // Provide CommonTTSService interface using adapter
-    single<ireader.domain.services.tts_service.CommonTTSService> {
-        ireader.domain.services.tts_service.DesktopTTSServiceAdapter(
-            service = get()
-        )
     }
     
     // TTS Download Notification Helper

@@ -29,4 +29,4 @@ actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
     }
 }
 
-// TTSScreenSpec navigation is now defined in common Navigator.kt
+// TTS navigation is defined in common Navigator.kt
