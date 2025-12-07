@@ -18,7 +18,8 @@ val ttsV2Module = module {
             bookRepository = get(),
             chapterRepository = get(),
             chapterUseCase = get(),
-            remoteUseCases = get()
+            remoteUseCases = get(),
+            catalogStore = get()
         )
     }
     

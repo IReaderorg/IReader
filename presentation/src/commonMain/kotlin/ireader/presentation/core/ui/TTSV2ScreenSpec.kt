@@ -6,15 +6,58 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DownloadDone
+import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,19 +70,30 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.domain.services.common.ServiceResult
 import ireader.domain.services.common.TranslationService
 import ireader.domain.services.common.TranslationStatus
 import ireader.domain.services.tts_service.TTSChapterCache
 import ireader.domain.services.tts_service.TTSChapterDownloadManager
 import ireader.domain.services.tts_service.TTSTextMerger
 import ireader.domain.services.tts_service.createTTSDownloadIntentProvider
-import ireader.domain.services.tts_service.v2.*
+import ireader.domain.services.tts_service.v2.EngineType
+import ireader.domain.services.tts_service.v2.GradioConfig
+import ireader.domain.services.tts_service.v2.TTSController
+import ireader.domain.services.tts_service.v2.TTSNotificationUseCase
+import ireader.domain.services.tts_service.v2.TTSPreferencesUseCase
+import ireader.domain.services.tts_service.v2.TTSSleepTimerUseCase
+import ireader.domain.services.tts_service.v2.TTSV2ServiceStarter
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.content
+import ireader.i18n.resources.exit_fullscreen
+import ireader.i18n.resources.find_current_chapter
+import ireader.i18n.resources.no_chapters_available
+import ireader.i18n.resources.reverse
+import ireader.i18n.resources.text_to_speech
+import ireader.i18n.resources.toggle_translation
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
@@ -51,12 +105,16 @@ import ireader.presentation.ui.component.reusable_composable.AppIconButton
 import ireader.presentation.ui.component.reusable_composable.BigSizeTextComposable
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.home.tts.*
-import ireader.presentation.ui.home.tts.v2.TTSV2ViewModel
-import ireader.presentation.ui.home.tts.v2.TTSV2ViewModelFactory
+import ireader.presentation.ui.home.tts.CommonTTSActions
+import ireader.presentation.ui.home.tts.CommonTTSScreenState
+import ireader.presentation.ui.home.tts.SentenceHighlighter
+import ireader.presentation.ui.home.tts.TTSContentDisplay
+import ireader.presentation.ui.home.tts.TTSEngineSettingsScreen
+import ireader.presentation.ui.home.tts.TTSMediaControls
+import ireader.presentation.ui.home.tts.TTSSettingsPanelCommon
+import ireader.presentation.ui.home.tts.TTSVoiceSelectionScreen
 import ireader.presentation.ui.home.tts.v2.SleepTimerDialog
-import ireader.presentation.ui.home.tts.v2.rememberTTSV2StateAdapter
-import ireader.presentation.ui.home.tts.v2.rememberTTSV2Actions
+import ireader.presentation.ui.home.tts.v2.TTSV2ViewModelFactory
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
@@ -154,7 +212,9 @@ class TTSV2ScreenSpec(
         // Translation state
         var isTranslatingChapter by remember { mutableStateOf(false) }
         var autoTranslateNextChapter by remember { mutableStateOf(readerPreferences.autoTranslateNextChapter().get()) }
-        var readTranslatedText by remember { mutableStateOf(readerPreferences.useTTSWithTranslatedText().get()) }
+        val readTranslatedText by readerPreferences.useTTSWithTranslatedText().changes().collectAsState(
+            initial = readerPreferences.useTTSWithTranslatedText().get()
+        )
         
         // Settings state from preferences
         var useCustomColors by remember { mutableStateOf(readerPreferences.ttsUseCustomColors().get()) }
@@ -181,9 +241,13 @@ class TTSV2ScreenSpec(
         var sleepTimeMinutes by remember { mutableStateOf(readerPreferences.sleepTime().get().toInt()) }
         var sentenceHighlightEnabled by remember { mutableStateOf(readerPreferences.ttsSentenceHighlight().get()) }
         
-        // Gradio TTS state
-        var useGradioTTS by remember { mutableStateOf(appPreferences.useGradioTTS().get()) }
-        val activeGradioConfigId = remember { appPreferences.activeGradioConfigId().get() }
+        // Gradio TTS state - observe changes to react when user changes config in settings
+        val useGradioTTS by appPreferences.useGradioTTS().changes().collectAsState(
+            initial = appPreferences.useGradioTTS().get()
+        )
+        val activeGradioConfigId by appPreferences.activeGradioConfigId().changes().collectAsState(
+            initial = appPreferences.activeGradioConfigId().get()
+        )
         val isGradioConfigured = remember(activeGradioConfigId) { activeGradioConfigId.isNotEmpty() }
         
         // Cache state
@@ -256,39 +320,68 @@ class TTSV2ScreenSpec(
                 Log.error { "TTSV2ScreenSpec: Failed to load chapters: ${e.message}" }
             }
             
-            // Clear existing translation state
-            viewModel.adapter.setTranslatedContent(null)
-            viewModel.adapter.setShowTranslation(false)
+            // Check if controller already has this chapter loaded (e.g., coming from notification)
+            val currentState = controller.state.value
+            val alreadyLoaded = currentState.chapter?.id == chapterId && currentState.paragraphs.isNotEmpty()
             
-            // Load translation BEFORE starting TTS
-            var translatedStringsToUse: List<String>? = null
-            if (readTranslatedText) {
-                try {
-                    val translations = getAllTranslationsUseCase.execute(chapterId)
-                    if (translations.isNotEmpty()) {
-                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
-                        latestTranslation?.let { translation ->
-                            val translatedStrings = translation.translatedContent
-                                .filterIsInstance<Text>()
-                                .map { it.text }
-                                .filter { it.isNotBlank() }
-                            if (translatedStrings.isNotEmpty()) {
-                                translatedStringsToUse = translatedStrings
-                                viewModel.adapter.setTranslatedContent(translatedStrings)
-                                viewModel.adapter.setShowTranslation(true)
+            if (alreadyLoaded) {
+                Log.warn { "TTSV2ScreenSpec: Chapter already loaded in controller, skipping reload" }
+                // Just load translations if needed
+                if (readTranslatedText && currentState.translatedParagraphs.isNullOrEmpty()) {
+                    try {
+                        val translations = getAllTranslationsUseCase.execute(chapterId)
+                        if (translations.isNotEmpty()) {
+                            val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                            latestTranslation?.let { translation ->
+                                val translatedStrings = translation.translatedContent
+                                    .filterIsInstance<Text>()
+                                    .map { it.text }
+                                    .filter { it.isNotBlank() }
+                                if (translatedStrings.isNotEmpty()) {
+                                    viewModel.adapter.setTranslatedContent(translatedStrings)
+                                    viewModel.adapter.setShowTranslation(true)
+                                }
                             }
                         }
+                    } catch (e: Exception) {
+                        Log.warn { "TTSV2ScreenSpec: Translation not available: ${e.message}" }
                     }
-                } catch (e: Exception) {
-                    Log.warn { "TTSV2ScreenSpec: Translation not available: ${e.message}" }
                 }
+            } else {
+                // Clear existing translation state
+                viewModel.adapter.setTranslatedContent(null)
+                viewModel.adapter.setShowTranslation(false)
+                
+                // Load translation BEFORE starting TTS
+                var translatedStringsToUse: List<String>? = null
+                if (readTranslatedText) {
+                    try {
+                        val translations = getAllTranslationsUseCase.execute(chapterId)
+                        if (translations.isNotEmpty()) {
+                            val latestTranslation = translations.maxByOrNull { it.updatedAt }
+                            latestTranslation?.let { translation ->
+                                val translatedStrings = translation.translatedContent
+                                    .filterIsInstance<Text>()
+                                    .map { it.text }
+                                    .filter { it.isNotBlank() }
+                                if (translatedStrings.isNotEmpty()) {
+                                    translatedStringsToUse = translatedStrings
+                                    viewModel.adapter.setTranslatedContent(translatedStrings)
+                                    viewModel.adapter.setShowTranslation(true)
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.warn { "TTSV2ScreenSpec: Translation not available: ${e.message}" }
+                    }
+                }
+                
+                // Load chapter content
+                viewModel.loadChapter(bookId, chapterId, readingParagraph)
             }
             
-            // Load chapter content
-            viewModel.loadChapter(bookId, chapterId, readingParagraph)
-            
-            // Configure Gradio TTS if enabled
-            if (useGradioTTS && activeGradioConfigId.isNotEmpty()) {
+            // Configure Gradio TTS if enabled (only if not already configured)
+            if (useGradioTTS && activeGradioConfigId.isNotEmpty() && !alreadyLoaded) {
                 Log.warn { "TTSV2ScreenSpec: Configuring Gradio TTS with config: $activeGradioConfigId" }
                 val gradioTTSConfig = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(activeGradioConfigId)
                 if (gradioTTSConfig != null) {
@@ -322,27 +415,6 @@ class TTSV2ScreenSpec(
             
             // Load sentence highlight preference
             viewModel.adapter.setSentenceHighlight(sentenceHighlightEnabled)
-            
-            // If translation wasn't loaded yet, load it for display
-            if (translatedStringsToUse == null) {
-                try {
-                    val translations = getAllTranslationsUseCase.execute(chapterId)
-                    if (translations.isNotEmpty()) {
-                        val latestTranslation = translations.maxByOrNull { it.updatedAt }
-                        latestTranslation?.let { translation ->
-                            val translatedStrings = translation.translatedContent
-                                .filterIsInstance<Text>()
-                                .map { it.text }
-                                .filter { it.isNotBlank() }
-                            if (translatedStrings.isNotEmpty()) {
-                                viewModel.adapter.setTranslatedContent(translatedStrings)
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    // Translation not available
-                }
-            }
         }
         
         // Watch for chapter changes (auto-next chapter)
@@ -384,6 +456,51 @@ class TTSV2ScreenSpec(
             lastParagraphWordCount = 0
             lastParagraphIndex = -1
             wpmHistory = emptyList()
+        }
+        
+        // Watch for Gradio config changes (when user changes config in settings)
+        var previousGradioConfigId by remember { mutableStateOf(activeGradioConfigId) }
+        var previousUseGradioTTS by remember { mutableStateOf(useGradioTTS) }
+        LaunchedEffect(activeGradioConfigId, useGradioTTS) {
+            // Skip initial composition (both values unchanged)
+            val configChanged = previousGradioConfigId != activeGradioConfigId
+            val useGradioChanged = previousUseGradioTTS != useGradioTTS
+            
+            if (!configChanged && !useGradioChanged) return@LaunchedEffect
+            
+            previousGradioConfigId = activeGradioConfigId
+            previousUseGradioTTS = useGradioTTS
+            
+            Log.warn { "TTSV2ScreenSpec: Gradio settings changed - config=$activeGradioConfigId, useGradio=$useGradioTTS" }
+            
+            if (useGradioTTS && activeGradioConfigId.isNotEmpty()) {
+                val gradioTTSConfig = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(activeGradioConfigId)
+                if (gradioTTSConfig != null) {
+                    val v2Config = GradioConfig(
+                        id = gradioTTSConfig.id,
+                        name = gradioTTSConfig.name,
+                        spaceUrl = gradioTTSConfig.spaceUrl,
+                        apiName = gradioTTSConfig.apiName,
+                        enabled = gradioTTSConfig.enabled,
+                        originalConfig = gradioTTSConfig
+                    )
+                    // Use useGradioTTS which sets both config AND engine type
+                    viewModel.adapter.useGradioTTS(v2Config)
+                    
+                    // Re-enable chunk mode if needed
+                    val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
+                    if (mergeWordCount > 0) {
+                        viewModel.adapter.enableChunkMode(mergeWordCount)
+                    }
+                    
+                    Log.warn { "TTSV2ScreenSpec: Gradio engine updated to: ${gradioTTSConfig.name}" }
+                }
+            } else if (!useGradioTTS) {
+                // Switch back to native TTS
+                viewModel.adapter.useNativeTTS()
+                viewModel.adapter.disableChunkMode()
+                Log.warn { "TTSV2ScreenSpec: Switched to native TTS" }
+            }
         }
         
         // Auto-scroll to current paragraph
@@ -491,10 +608,13 @@ class TTSV2ScreenSpec(
             }
         }
         
-        // Cleanup on dispose
+        // Cleanup on dispose - only cleanup ViewModel resources, NOT the controller
+        // The controller state should persist while the service is running
         DisposableEffect(Unit) {
             onDispose {
-                viewModel.onCleared()
+                // Don't call viewModel.onCleared() as it would reset the controller
+                // The controller is managed by the service lifecycle
+                Log.warn { "TTSV2ScreenSpec: Screen disposed, keeping controller state" }
             }
         }
 
@@ -519,8 +639,9 @@ class TTSV2ScreenSpec(
                     speechSpeed = state.speed,
                     autoNextChapter = state.autoNextChapter,
                     fullScreenMode = fullScreenMode,
-                    cachedParagraphs = state.cachedParagraphs,
-                    loadingParagraphs = state.loadingParagraphs,
+                    cachedParagraphs = emptySet(),
+                    loadingParagraphs = emptySet(),
+                    showCacheIndicators = false, // Don't show cache indicators (green checkmarks) in v2
                     sleepTimeRemaining = sleepTimerState?.remainingTimeMs ?: 0L,
                     sleepModeEnabled = sleepTimerState?.isEnabled == true,
                     currentEngine = when (state.engineType) {
@@ -542,37 +663,40 @@ class TTSV2ScreenSpec(
             }
         }
         
-        // Create actions
-        val actions = remember(scope, viewModel.adapter) {
-            object : CommonTTSActions {
-                override fun onPlay() { viewModel.adapter.play() }
-                override fun onPause() { viewModel.adapter.pause() }
-                override fun onNextParagraph() {
-                    if (state.chunkModeEnabled) {
-                        viewModel.adapter.nextChunk()
-                    } else {
-                        viewModel.adapter.nextParagraph()
-                    }
-                }
-                override fun onPreviousParagraph() {
-                    if (state.chunkModeEnabled) {
-                        viewModel.adapter.previousChunk()
-                    } else {
-                        viewModel.adapter.previousParagraph()
-                    }
-                }
-                override fun onNextChapter() { viewModel.adapter.nextChapter() }
-                override fun onPreviousChapter() { viewModel.adapter.previousChapter() }
-                override fun onParagraphClick(index: Int) { viewModel.adapter.jumpToParagraph(index) }
-                override fun onToggleTranslation() { viewModel.adapter.toggleTranslation() }
-                override fun onToggleBilingualMode() { viewModel.adapter.toggleBilingualMode() }
-                override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
-                override fun onSpeedChange(speed: Float) { viewModel.adapter.setSpeed(speed) }
-                override fun onAutoNextChange(enabled: Boolean) { viewModel.adapter.setAutoNextChapter(enabled) }
-                override fun onOpenSettings() { showSettings = true }
-                override fun onSelectVoice() { showVoiceSelection = true }
-                override fun onSelectEngine(engine: String) { showEngineSettings = true }
+        // Create actions - use derivedStateOf for state-dependent actions
+        val actions = object : CommonTTSActions {
+            override fun onPlay() { 
+                // Restart service for notification when playing
+                val chId = state.chapter?.id ?: chapterId
+                serviceStarter.startService(bookId, chId, state.currentParagraphIndex)
+                viewModel.adapter.play() 
             }
+            override fun onPause() { viewModel.adapter.pause() }
+            override fun onNextParagraph() {
+                if (state.chunkModeEnabled) {
+                    viewModel.adapter.nextChunk()
+                } else {
+                    viewModel.adapter.nextParagraph()
+                }
+            }
+            override fun onPreviousParagraph() {
+                if (state.chunkModeEnabled) {
+                    viewModel.adapter.previousChunk()
+                } else {
+                    viewModel.adapter.previousParagraph()
+                }
+            }
+            override fun onNextChapter() { viewModel.adapter.nextChapter() }
+            override fun onPreviousChapter() { viewModel.adapter.previousChapter() }
+            override fun onParagraphClick(index: Int) { viewModel.adapter.jumpToParagraph(index) }
+            override fun onToggleTranslation() { viewModel.adapter.toggleTranslation() }
+            override fun onToggleBilingualMode() { viewModel.adapter.toggleBilingualMode() }
+            override fun onToggleFullScreen() { fullScreenMode = !fullScreenMode }
+            override fun onSpeedChange(speed: Float) { viewModel.adapter.setSpeed(speed) }
+            override fun onAutoNextChange(enabled: Boolean) { viewModel.adapter.setAutoNextChapter(enabled) }
+            override fun onOpenSettings() { showSettings = true }
+            override fun onSelectVoice() { showVoiceSelection = true }
+            override fun onSelectEngine(engine: String) { showEngineSettings = true }
         }
         
         // Sorted chapters for drawer
@@ -1017,17 +1141,35 @@ class TTSV2ScreenSpec(
                             onAutoNextChange = { enabled -> viewModel.adapter.setAutoNextChapter(enabled) },
                             onCoquiTTSChange = { enabled ->
                                 if (isGradioConfigured) {
-                                    useGradioTTS = enabled
+                                    // Save to preferences - the flow will update useGradioTTS automatically
                                     scope.launch { appPreferences.useGradioTTS().set(enabled) }
                                     if (enabled) {
-                                        viewModel.adapter.setEngine(EngineType.GRADIO)
+                                        // Set Gradio config before switching engine
+                                        val gradioTTSConfig = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(activeGradioConfigId)
+                                        if (gradioTTSConfig != null) {
+                                            val v2Config = GradioConfig(
+                                                id = gradioTTSConfig.id,
+                                                name = gradioTTSConfig.name,
+                                                spaceUrl = gradioTTSConfig.spaceUrl,
+                                                apiName = gradioTTSConfig.apiName,
+                                                enabled = gradioTTSConfig.enabled,
+                                                originalConfig = gradioTTSConfig
+                                            )
+                                            viewModel.adapter.useGradioTTS(v2Config)
+                                            
+                                            // Enable chunk mode for Gradio TTS
+                                            val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
+                                            if (mergeWordCount > 0) {
+                                                viewModel.adapter.enableChunkMode(mergeWordCount)
+                                            }
+                                        }
                                     } else {
-                                        viewModel.adapter.setEngine(EngineType.NATIVE)
+                                        viewModel.adapter.useNativeTTS()
                                     }
                                 }
                             },
                             onReadTranslatedTextChange = { enabled ->
-                                readTranslatedText = enabled
+                                // Save to preferences - the flow will update readTranslatedText automatically
                                 viewModel.adapter.setShowTranslation(enabled)
                                 scope.launch { readerPreferences.useTTSWithTranslatedText().set(enabled) }
                             },

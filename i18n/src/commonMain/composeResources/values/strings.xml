@@ -2035,7 +2035,7 @@
     <string name="use_a_strong_pin_6_digits_or_passwordn">• Use a strong PIN (6 digits) or password\n</string>
     <string name="use_a_strong_pin_or">• Use a strong PIN or password\n• Enable biometric authentication for convenience\n• Enable secure screen in public places\n• Use 18+ source lock for additional privacy</string>
     <string name="use_biometric">Use Biometric</string>
-    <string name="use_coqui_tts">Use Coqui TTS</string>
+    <string name="use_coqui_tts">Use Remote TTS</string>
     <string name="use_custom_colors">Use Custom Colors</string>
     <string name="use_custom_supabase">Use Custom Supabase</string>
     <string name="use_fab_in_library">Use FAB in Library</string>

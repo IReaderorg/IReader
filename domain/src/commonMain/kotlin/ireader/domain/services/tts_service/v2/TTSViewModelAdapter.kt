@@ -153,6 +153,15 @@ class TTSViewModelAdapter(
         controller.dispatch(TTSCommand.Stop)
     }
     
+    /**
+     * Stop playback and release engine, but keep content.
+     * User can tap play to reinitialize and resume.
+     */
+    fun stopAndRelease() {
+        Log.warn { "$TAG: stopAndRelease()" }
+        controller.dispatch(TTSCommand.StopAndRelease)
+    }
+    
     fun togglePlayPause() {
         val currentState = state.value
         if (currentState.isPlaying) {

@@ -219,10 +219,18 @@ class TTSPreferencesUseCase(
     }
     
     /**
-     * Set merge words for remote TTS
+     * Set merge words for remote TTS and re-enable chunk mode
      */
     fun setMergeWordsRemote(words: Int) {
         readerPreferences.ttsMergeWordsRemote().set(words)
+        // Re-enable chunk mode with new word count to re-merge paragraphs
+        if (words > 0) {
+            Log.warn { "$TAG: Re-enabling chunk mode with $words words" }
+            controller?.dispatch(TTSCommand.EnableChunkMode(words))
+        } else {
+            Log.warn { "$TAG: Disabling chunk mode" }
+            controller?.dispatch(TTSCommand.DisableChunkMode)
+        }
     }
     
     /**

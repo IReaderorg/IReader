@@ -232,17 +232,7 @@
             </intent-filter>
         </receiver>
         
-        <!-- TTS V2 action receiver for notification controls -->
-        <receiver
-            android:name="ireader.domain.services.tts_service.v2.TTSV2ActionReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="ireader.tts.v2.PLAY_PAUSE" />
-                <action android:name="ireader.tts.v2.STOP" />
-                <action android:name="ireader.tts.v2.NEXT" />
-                <action android:name="ireader.tts.v2.PREVIOUS" />
-            </intent-filter>
-        </receiver>
+        <!-- TTS V2 actions are handled by TTSV2Service's internal receiver -->
     </application>
 
 </manifest>

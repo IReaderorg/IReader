@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.settings.general.TestConnectionState
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
 
 /**
@@ -30,6 +31,8 @@ fun EngineSpecificConfig(
             ollamaModel = viewModel.ollamaModel.value,
             onUrlChange = { viewModel.updateOllamaUrl(it) },
             onModelChange = { viewModel.updateOllamaModel(it) },
+            onTestConnection = { viewModel.testConnection() },
+            testState = viewModel.testConnectionState,
             modifier = modifier
         )
         4L -> LibreTranslateInfo(modifier = modifier)
@@ -52,6 +55,8 @@ private fun OllamaConfig(
     ollamaModel: String,
     onUrlChange: (String) -> Unit,
     onModelChange: (String) -> Unit,
+    onTestConnection: () -> Unit,
+    testState: TestConnectionState,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -88,6 +93,88 @@ private fun OllamaConfig(
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium
             )
+
+            // Test Connection Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Test Button
+                FilledTonalButton(
+                    onClick = onTestConnection,
+                    enabled = ollamaUrl.isNotBlank() && ollamaModel.isNotBlank() && testState !is TestConnectionState.Testing,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    if (testState is TestConnectionState.Testing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Testing...", style = MaterialTheme.typography.labelMedium)
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.NetworkCheck,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Test", style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+
+                // Status indicator
+                when (testState) {
+                    is TestConnectionState.Success -> {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "OK",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    is TestConnectionState.Error -> {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "Failed",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    else -> {}
+                }
+            }
+
+            // Error message
+            if (testState is TestConnectionState.Error) {
+                Text(
+                    text = testState.message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    maxLines = 2
+                )
+            }
 
             // Info
             Text(

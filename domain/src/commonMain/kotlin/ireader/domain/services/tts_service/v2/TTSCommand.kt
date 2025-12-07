@@ -54,6 +54,9 @@ sealed class TTSCommand {
     
     // Lifecycle commands
     object Initialize : TTSCommand()
+    /** Stop playback and release engine, but keep content (book, chapter, paragraphs) */
+    object StopAndRelease : TTSCommand()
+    /** Full cleanup - resets everything including content */
     object Cleanup : TTSCommand()
 }
 

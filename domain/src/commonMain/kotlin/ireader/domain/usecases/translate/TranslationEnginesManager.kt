@@ -11,7 +11,14 @@ import ireader.domain.plugins.TranslationPlugin
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.api_rate_limit_exceeded
+import ireader.i18n.resources.api_response_error
+import ireader.i18n.resources.deepseek_api_key_not_set
+import ireader.i18n.resources.deepseek_payment_required
+import ireader.i18n.resources.no_text_to_translate
+import ireader.i18n.resources.openai_api_key_invalid
+import ireader.i18n.resources.openai_api_key_not_set
+import ireader.i18n.resources.openai_quota_exceeded
 
 /**
  * Sealed class representing translation engine sources
@@ -39,6 +46,7 @@ class TranslationEnginesManager(
         GoogleTranslateML(),
         TranslateDictUseCase(httpClients),
         OpenAITranslateEngine(httpClients, readerPreferences),
+        OllamaTranslateEngine(httpClients, readerPreferences),
         DeepSeekTranslateEngine(httpClients, readerPreferences),
         LibreTranslateEngine(httpClients),
         FreeAITranslateEngine(httpClients),

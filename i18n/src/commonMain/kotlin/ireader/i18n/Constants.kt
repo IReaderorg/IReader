@@ -12,6 +12,7 @@ object Args {
 }
 object SHORTCUTS {
     const val SHORTCUT_TTS = "ireader.SHORTCUT_TTS"
+    const val SHORTCUT_TTS_V2 = "ireader.SHORTCUT_TTS_V2"
     const val SHORTCUT_DOWNLOAD = "ireader.SHORTCUT_DOWNLOAD"
     const val SHORTCUT_READER = "ireader.SHORTCUT_READER"
     const val SHORTCUT_DETAIL = "ireader.SHORTCUT_DETAIL"

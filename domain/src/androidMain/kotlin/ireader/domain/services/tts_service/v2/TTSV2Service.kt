@@ -27,7 +27,10 @@ import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import ireader.core.log.Log
 import ireader.domain.notification.NotificationsIds
+import ireader.domain.utils.extensions.launchMainActivityIntent
+import ireader.i18n.Args
 import ireader.i18n.R
+import ireader.i18n.SHORTCUTS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -113,7 +116,8 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                 }
                 ACTION_STOP -> {
                     Log.warn { "$TAG: ACTION_STOP" }
-                    controller.dispatch(TTSCommand.Stop)
+                    // Stop and release engine but keep content
+                    controller.dispatch(TTSCommand.StopAndRelease)
                     stopSelf()
                 }
                 ACTION_NEXT -> {
@@ -161,15 +165,23 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         // Start as foreground service immediately
         startForeground(NOTIFICATION_ID, createNotification())
         
-        // Load chapter if provided
+        // Load chapter if provided and not already loaded
         intent?.let {
             val bookId = it.getLongExtra(EXTRA_BOOK_ID, -1)
             val chapterId = it.getLongExtra(EXTRA_CHAPTER_ID, -1)
             val startParagraph = it.getIntExtra(EXTRA_START_PARAGRAPH, 0)
             
             if (bookId > 0 && chapterId > 0) {
-                Log.warn { "$TAG: Loading chapter bookId=$bookId, chapterId=$chapterId" }
-                controller.dispatch(TTSCommand.LoadChapter(bookId, chapterId, startParagraph))
+                // Only load if chapter is different from current
+                val currentState = controller.state.value
+                val isAlreadyLoaded = currentState.chapter?.id == chapterId && currentState.paragraphs.isNotEmpty()
+                
+                if (!isAlreadyLoaded) {
+                    Log.warn { "$TAG: Loading chapter bookId=$bookId, chapterId=$chapterId" }
+                    controller.dispatch(TTSCommand.LoadChapter(bookId, chapterId, startParagraph))
+                } else {
+                    Log.warn { "$TAG: Chapter already loaded, skipping LoadChapter" }
+                }
             }
         }
         
@@ -191,7 +203,8 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         abandonAudioFocus()
         
         mediaSession.release()
-        controller.dispatch(TTSCommand.Cleanup)
+        // Stop and release engine but keep content for when user returns to TTS screen
+        controller.dispatch(TTSCommand.StopAndRelease)
         
         super.onDestroy()
     }
@@ -274,7 +287,8 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                 
                 override fun onStop() {
                     Log.warn { "$TAG: MediaSession onStop()" }
-                    ttsController.dispatch(TTSCommand.Stop)
+                    // Stop and release engine but keep content
+                    ttsController.dispatch(TTSCommand.StopAndRelease)
                     stopSelf()
                 }
                 
@@ -329,7 +343,13 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         
         mediaSession.setPlaybackState(stateBuilder.build())
         
-        // Update metadata
+        // Update metadata - show chapter name and paragraph progress
+        val progressText = if (state.totalParagraphs > 0) {
+            "${state.currentParagraphIndex + 1}/${state.totalParagraphs}"
+        } else {
+            ""
+        }
+        
         val metadata = android.support.v4.media.MediaMetadataCompat.Builder()
             .putString(
                 android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE,
@@ -337,14 +357,11 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
             )
             .putString(
                 android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ARTIST,
-                state.book?.title ?: ""
+                progressText
             )
             .putString(
                 android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM,
-                when (state.engineType) {
-                    EngineType.NATIVE -> "Native TTS"
-                    EngineType.GRADIO -> "Gradio TTS"
-                }
+                state.book?.title ?: ""
             )
             .build()
         
@@ -413,20 +430,24 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
             createActionPendingIntent(ACTION_STOP)
         )
         
-        // Content text
-        val chapterTitle = state.chapter?.name ?: "Ready"
-        val progressText = if (state.isLoading) {
-            "Loading..."
-        } else if (state.totalParagraphs > 0) {
-            "Paragraph ${state.currentParagraphIndex + 1} of ${state.totalParagraphs}"
+        val openAction = NotificationCompat.Action(
+            R.drawable.ic_baseline_open_in_new_24,
+            "Open",
+            createContentIntent()
+        )
+        
+        // Content text - chapter name as title, paragraph progress as subtitle
+        val chapterTitle = state.chapter?.name ?: "TTS Playback"
+        val progressText = if (state.totalParagraphs > 0) {
+            "${state.currentParagraphIndex + 1}/${state.totalParagraphs}"
         } else {
-            "Ready"
+            ""
         }
         
         val builder = NotificationCompat.Builder(this, NotificationsIds.CHANNEL_TTS)
             .setSmallIcon(R.drawable.ic_infinity)
-            .setContentTitle(progressText)
-            .setContentText(chapterTitle)
+            .setContentTitle(chapterTitle)
+            .setContentText(progressText)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(state.isPlaying)
             .setOnlyAlertOnce(true)
@@ -434,11 +455,14 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setColorized(true)
             .setAutoCancel(false)
+            // Content intent - opens TTS screen when notification is tapped
+            .setContentIntent(createContentIntent())
             // Add actions in order
             .addAction(prevAction)      // index 0
             .addAction(playPauseAction) // index 1
             .addAction(nextAction)      // index 2
-            .addAction(closeAction)     // index 3
+            .addAction(openAction)      // index 3 - Open TTS screen
+            .addAction(closeAction)     // index 4
             // MediaStyle
             .setStyle(
                 MediaStyle()
@@ -473,6 +497,34 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
         return PendingIntent.getBroadcast(
             this,
             action.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+    
+    /**
+     * Create a pending intent that opens the TTS V2 screen when notification is tapped
+     */
+    private fun createContentIntent(): PendingIntent {
+        val state = controller.state.value
+        val bookId = state.book?.id ?: 0L
+        val chapterId = state.chapter?.id ?: 0L
+        val sourceId = state.book?.sourceId ?: 0L
+        val currentParagraph = state.currentParagraphIndex
+        
+        val intent = launchMainActivityIntent(this)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            .apply {
+                action = SHORTCUTS.SHORTCUT_TTS_V2
+                putExtra(Args.ARG_BOOK_ID, bookId)
+                putExtra(Args.ARG_CHAPTER_ID, chapterId)
+                putExtra(Args.ARG_SOURCE_ID, sourceId)
+                putExtra(Args.ARG_READING_PARAGRAPH, currentParagraph.toLong())
+            }
+        
+        return PendingIntent.getActivity(
+            this,
+            NOTIFICATION_ID,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )

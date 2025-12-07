@@ -261,13 +261,10 @@ class ReaderPreferences constructor(
     }
 
     fun ollamaServerUrl(): Preference<String> {
-        return preferenceStore.getString("ollama_server_url", "http://localhost:11434/api/generate")
+        return preferenceStore.getString("ollama_server_url", "http://localhost:11434/api/chat")
     }
     fun ollamaModel(): Preference<String> {
         return preferenceStore.getString("ollama_model", "llama2")
-    }
-    fun ollamaUrl(): Preference<String> {
-        return preferenceStore.getString("ollamaUrl", "ollamaUrl")
     }
     fun chatGptCookies(): Preference<String> {
         return preferenceStore.getString("chatgpt_cookies", "")

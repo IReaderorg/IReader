@@ -66,6 +66,7 @@ fun AndroidTTSMManagerSettingsScreen(
     val gradioState = gradioViewModel?.state?.collectAsState()?.value
     val readerPreferences: ReaderPreferences = koinInject()
     val chapterCache: ireader.domain.services.tts_service.TTSChapterCache = koinInject()
+    val ttsController: ireader.domain.services.tts_service.v2.TTSController = koinInject()
     val scope = rememberCoroutineScope()
     
     // TTS Merge settings state
@@ -192,7 +193,15 @@ fun AndroidTTSMManagerSettingsScreen(
                     mergeWordsRemote = mergeWordsRemote,
                     onMergeWordsRemoteChange = { value ->
                         mergeWordsRemote = value
-                        scope.launch { readerPreferences.ttsMergeWordsRemote().set(value) }
+                        scope.launch { 
+                            readerPreferences.ttsMergeWordsRemote().set(value)
+                            // Re-enable chunk mode with new word count to re-merge paragraphs
+                            if (value > 0) {
+                                ttsController.dispatch(ireader.domain.services.tts_service.v2.TTSCommand.EnableChunkMode(value))
+                            } else {
+                                ttsController.dispatch(ireader.domain.services.tts_service.v2.TTSCommand.DisableChunkMode)
+                            }
+                        }
                     },
                     mergeWordsNative = mergeWordsNative,
                     onMergeWordsNativeChange = { value ->

@@ -148,14 +148,25 @@ class TTSV2ViewModel(
     }
     
     /**
-     * Clean up resources
+     * Clean up ViewModel resources (NOT the controller)
+     * The controller state should persist while the service is running.
+     * Call destroyController() only when you want to fully stop TTS.
      */
     fun onCleared() {
         preferencesUseCase?.cleanup()
         sleepTimerUseCase?.cleanup()
         notificationUseCase?.cleanup()
-        adapter.cleanup()
+        // Don't call adapter.cleanup() - it would reset the controller state
+        // The controller is managed by the service lifecycle
         scope.cancel()
+    }
+    
+    /**
+     * Fully destroy the controller and release all resources.
+     * Only call this when you want to completely stop TTS playback.
+     */
+    fun destroyController() {
+        adapter.cleanup()
     }
 }
 

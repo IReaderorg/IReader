@@ -1,23 +1,20 @@
 package ireader.domain.usecases.translate
 
 import io.ktor.client.call.body
-import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import ireader.core.http.HttpClients
-import ireader.domain.data.engines.ContentType as TranslationContentType
 import ireader.domain.data.engines.ToneType
 import ireader.domain.data.engines.TranslateEngine
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
-import kotlinx.serialization.SerialName
+import ireader.i18n.resources.no_text_to_translate
 import kotlinx.serialization.Serializable
+import ireader.domain.data.engines.ContentType as TranslationContentType
 
 /**
  * Ollama Translation Engine
@@ -46,11 +43,11 @@ class OllamaTranslateEngine(
     override val isOffline: Boolean = true
     
     // Default Ollama API endpoint (typically local)
-    private val defaultApiUrl = "http://localhost:11434/api/generate"
+    private val defaultApiUrl = "http://localhost:11434"
     
     // Get the configured Ollama URL from preferences or use default
     private fun getOllamaUrl(): String {
-        val configuredUrl = readerPreferences.ollamaUrl().get()
+        val configuredUrl = readerPreferences.ollamaServerUrl().get()
         return if (configuredUrl.isNotBlank()) configuredUrl else defaultApiUrl
     }
     
@@ -141,9 +138,15 @@ class OllamaTranslateEngine(
     )
 
     @Serializable
-    private data class OllamaRequest(
+    private data class OllamaMessage(
+        val role: String,
+        val content: String
+    )
+
+    @Serializable
+    private data class OllamaChatRequest(
         val model: String,
-        val prompt: String,
+        val messages: List<OllamaMessage>,
         val stream: Boolean = false,
         val options: OllamaOptions? = null
     )
@@ -154,9 +157,9 @@ class OllamaTranslateEngine(
     )
     
     @Serializable
-    private data class OllamaResponse(
+    private data class OllamaChatResponse(
         val model: String,
-        val response: String,
+        val message: OllamaMessage,
         val done: Boolean
     )
     
@@ -254,44 +257,52 @@ class OllamaTranslateEngine(
                 val progressEnd = 20 + ((batchIndex + 1) * 70 / batches.size)
                 onProgress(progressStart)
                 
+                val chatUrl = url.trimEnd('/') + "/api/chat"
+                
                 if (batch.size == 1) {
                     // Single text in batch
                     val text = batch[0]
-                    val prompt = buildPrompt(text, sourceLang, targetLang, context)
+                    val (systemPrompt, userPrompt) = buildChatPrompt(text, sourceLang, targetLang, context)
                     
-                    val request = OllamaRequest(
+                    val request = OllamaChatRequest(
                         model = model,
-                        prompt = prompt,
+                        messages = listOf(
+                            OllamaMessage(role = "system", content = systemPrompt),
+                            OllamaMessage(role = "user", content = userPrompt)
+                        ),
                         options = OllamaOptions(temperature = 0.1f)
                     )
                     
                     // Make the API request
-                    val response = client.default.post(url) {
+                    val response = client.default.post(chatUrl) {
                         contentType(ContentType.Application.Json)
                         setBody(request)
-                    }.body<OllamaResponse>()
+                    }.body<OllamaChatResponse>()
                     
                     // Add the response to results
-                    results.add(response.response.trim())
+                    results.add(response.message.content.trim())
                 } else {
                     // Multiple texts in batch
                     val combinedText = batch.joinToString("\n---PARAGRAPH_BREAK---\n")
-                    val prompt = buildPrompt(combinedText, sourceLang, targetLang, context)
+                    val (systemPrompt, userPrompt) = buildChatPrompt(combinedText, sourceLang, targetLang, context)
                     
-                    val request = OllamaRequest(
+                    val request = OllamaChatRequest(
                         model = model,
-                        prompt = prompt,
+                        messages = listOf(
+                            OllamaMessage(role = "system", content = systemPrompt),
+                            OllamaMessage(role = "user", content = userPrompt)
+                        ),
                         options = OllamaOptions(temperature = 0.1f)
                     )
                     
                     // Make the API request
-                    val response = client.default.post(url) {
+                    val response = client.default.post(chatUrl) {
                         contentType(ContentType.Application.Json)
                         setBody(request)
-                    }.body<OllamaResponse>()
+                    }.body<OllamaChatResponse>()
                     
                     // Split the response into paragraphs
-                    val responseText = response.response.trim()
+                    val responseText = response.message.content.trim()
                     val splitTexts = responseText.split("\n---PARAGRAPH_BREAK---\n")
                     
                     // Ensure we have the correct number of paragraphs
@@ -337,14 +348,15 @@ class OllamaTranslateEngine(
     }
     
     /**
-     * Builds a prompt for the LLM based on the translation context
+     * Builds a chat prompt (system + user) for the LLM based on the translation context
+     * Returns Pair(systemPrompt, userPrompt)
      */
-    private fun buildPrompt(
+    private fun buildChatPrompt(
         text: String,
         sourceLang: String,
         targetLang: String,
         context: TranslationContext
-    ): String {
+    ): Pair<String, String> {
         val contentTypeStr = when (context.contentType) {
             TranslationContentType.LITERARY -> "literary text"
             TranslationContentType.TECHNICAL -> "technical document"
@@ -367,14 +379,13 @@ class OllamaTranslateEngine(
         else 
             ""
         
-        return """
-            Translate the following $contentTypeStr from $sourceLang to $targetLang.
+        val systemPrompt = """
+            You are a translation assistant that specializes in translating $contentTypeStr from $sourceLang to $targetLang.
             Use a $toneStr tone.
             $stylePreservation
             Return only the translated text without any additional comments or explanations.
-            
-            Text to translate:
-            $text
         """.trimIndent()
+        
+        return Pair(systemPrompt, text)
     }
 } 

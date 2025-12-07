@@ -62,6 +62,9 @@ class TTSController(
     // Current engine instance
     private var engine: TTSEngine? = null
     
+    // Flag to indicate a play is pending (waiting for engine ready)
+    private var pendingPlay: Boolean = false
+    
     /**
      * Process a command - ALL interactions go through here
      * Commands are processed sequentially using a mutex to prevent race conditions
@@ -84,6 +87,7 @@ class TTSController(
     private suspend fun processCommand(command: TTSCommand) {
         when (command) {
             is TTSCommand.Initialize -> initialize()
+            is TTSCommand.StopAndRelease -> stopAndRelease()
             is TTSCommand.Cleanup -> cleanup()
             
             is TTSCommand.Play -> play()
@@ -156,9 +160,40 @@ class TTSController(
         _state.update { it.copy(isEngineReady = engine?.isReady() == true) }
     }
     
+    /**
+     * Stop playback and release engine, but keep content (book, chapter, paragraphs).
+     * User can tap play to reinitialize and resume.
+     */
+    private suspend fun stopAndRelease() {
+        Log.warn { "$TAG: stopAndRelease()" }
+        
+        pendingPlay = false
+        engine?.stop()
+        engine?.release()
+        engine = null
+        
+        // Keep content but reset playback state
+        _state.update { 
+            it.copy(
+                playbackState = PlaybackState.STOPPED,
+                isEngineReady = false,
+                // Reset chunk mode state but keep the content
+                currentChunkIndex = 0,
+                cachedChunks = emptySet(),
+                isUsingCachedAudio = false
+            ) 
+        }
+        
+        _events.emit(TTSEvent.PlaybackStopped)
+    }
+    
+    /**
+     * Full cleanup - resets everything including content.
+     */
     private fun cleanup() {
         Log.warn { "$TAG: cleanup()" }
         
+        pendingPlay = false
         engine?.stop()
         engine?.release()
         engine = null
@@ -182,6 +217,13 @@ class TTSController(
         when (event) {
             is EngineEvent.Ready -> {
                 _state.update { it.copy(isEngineReady = true) }
+                
+                // If there's a pending play, execute it now
+                if (pendingPlay) {
+                    Log.warn { "$TAG: Engine ready, executing pending play" }
+                    pendingPlay = false
+                    play()
+                }
             }
             is EngineEvent.Started -> {
                 // Track paragraph start time for sentence highlighting
@@ -213,8 +255,17 @@ class TTSController(
             return
         }
         
+        // Auto-initialize engine if it was released
+        if (engine == null) {
+            Log.warn { "$TAG: play() - Engine is null, reinitializing..." }
+            initialize()
+        }
+        
         if (engine?.isReady() != true) {
-            handleError(TTSError.EngineNotReady)
+            // Engine is initializing (async), queue the play for when it's ready
+            Log.warn { "$TAG: play() - Engine not ready, queuing play" }
+            pendingPlay = true
+            _state.update { it.copy(playbackState = PlaybackState.LOADING) }
             return
         }
         
@@ -226,7 +277,8 @@ class TTSController(
         
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
         
-        val text = currentState.paragraphs.getOrNull(currentState.currentParagraphIndex)
+        // Use displayContent which respects showTranslation setting
+        val text = currentState.displayContent.getOrNull(currentState.currentParagraphIndex)
         if (text != null) {
             val utteranceId = "p_${currentState.currentParagraphIndex}"
             engine?.speak(text, utteranceId)
@@ -234,12 +286,14 @@ class TTSController(
     }
     
     private suspend fun pause() {
+        pendingPlay = false
         engine?.pause()
         _state.update { it.copy(playbackState = PlaybackState.PAUSED) }
         _events.emit(TTSEvent.PlaybackPaused)
     }
     
     private suspend fun stop() {
+        pendingPlay = false
         engine?.stop()
         _state.update { it.copy(playbackState = PlaybackState.STOPPED) }
         _events.emit(TTSEvent.PlaybackStopped)
@@ -364,9 +418,37 @@ class TTSController(
         val currentState = _state.value
         if (index < 0 || index >= currentState.paragraphs.size) return
         
+        Log.warn { "$TAG: jumpToParagraph($index) - chunkModeEnabled=${currentState.chunkModeEnabled}" }
+        
         val wasPlaying = currentState.isPlaying
         engine?.stop()
         
+        // If chunk mode is enabled, find the chunk containing this paragraph
+        if (currentState.chunkModeEnabled && mergeResult != null) {
+            val result = mergeResult!!
+            val chunkIndex = result.paragraphToChunkMap[index]
+            
+            if (chunkIndex != null) {
+                val chunk = result.chunks.getOrNull(chunkIndex)
+                Log.warn { "$TAG: jumpToParagraph - found chunk $chunkIndex for paragraph $index" }
+                
+                _state.update {
+                    it.copy(
+                        previousParagraphIndex = it.currentParagraphIndex,
+                        currentParagraphIndex = index,
+                        currentChunkIndex = chunkIndex,
+                        currentChunkParagraphs = chunk?.paragraphIndices ?: emptyList()
+                    )
+                }
+                
+                if (wasPlaying) {
+                    playChunk()
+                }
+                return
+            }
+        }
+        
+        // Regular mode (no chunks)
         _state.update { 
             it.copy(
                 previousParagraphIndex = it.currentParagraphIndex,
@@ -718,10 +800,21 @@ class TTSController(
         
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
         
-        val utteranceId = "chunk_${currentState.currentChunkIndex}"
-        Log.warn { "$TAG: playChunk() - chunk ${currentState.currentChunkIndex}, text length=${chunk.text.length}" }
+        // Get the text to speak - use translated text if showTranslation is enabled
+        val textToSpeak = if (currentState.showTranslation && currentState.hasTranslation) {
+            // Re-merge the translated paragraphs for this chunk
+            val translatedParagraphs = currentState.translatedParagraphs!!
+            chunk.paragraphIndices
+                .mapNotNull { translatedParagraphs.getOrNull(it) }
+                .joinToString("\n\n")
+        } else {
+            chunk.text
+        }
         
-        engine?.speak(chunk.text, utteranceId)
+        val utteranceId = "chunk_${currentState.currentChunkIndex}"
+        Log.warn { "$TAG: playChunk() - chunk ${currentState.currentChunkIndex}, text length=${textToSpeak.length}, useTranslation=${currentState.showTranslation}" }
+        
+        engine?.speak(textToSpeak, utteranceId)
     }
     
     // ========== Error Handling ==========

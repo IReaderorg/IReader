@@ -2,6 +2,7 @@
 
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -645,12 +646,17 @@ class GenericGradioTTSEngine(
                 return parseGradioResponse(responseText)
             }
             
-            // Get result using event_id
+            // Get result using event_id - use longer timeout for TTS generation
             val resultUrl = "$apiUrl/$eventId"
             Log.warn { "$TAG: GET SSE result: $resultUrl" }
             val resultResponse = httpClient.get(resultUrl) {
                 config.apiKey?.let { header("Authorization", "Bearer $it") }
                 header("Accept", "text/event-stream")
+                // TTS generation can take 30-60 seconds, especially on cold start
+                timeout {
+                    requestTimeoutMillis = 240_000 // 2 minutes
+                    socketTimeoutMillis = 240_000
+                }
             }
             
             Log.warn { "$TAG: SSE response status: ${resultResponse.status}" }

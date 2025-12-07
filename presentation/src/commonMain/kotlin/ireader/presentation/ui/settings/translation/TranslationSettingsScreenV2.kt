@@ -93,19 +93,19 @@ fun TranslationSettingsScreenV2(
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             // Current Engine Info
-            item {
+            item(key = "current_engine") {
                 CurrentEngineCard(engineName = currentEngine?.engineName ?: "None")
             }
 
             // Engine Selection Section
-            item {
+            item(key = "engine_header") {
                 SectionHeader(
                     title = "Translation Engine",
                     icon = Icons.Default.Translate
                 )
             }
 
-            item {
+            item(key = "engine_selector") {
                 TranslationEngineSelector(
                     engines = engines,
                     selectedEngineId = viewModel.translatorEngine.value,
@@ -115,14 +115,14 @@ fun TranslationSettingsScreenV2(
 
             // API Key Section - Show for Gemini, OpenAI, DeepSeek
             if (showApiKeySection) {
-                item {
+                item(key = "api_key_header") {
                     SectionHeader(
                         title = "API Key",
                         icon = Icons.Default.Key
                     )
                 }
 
-                item {
+                item(key = "api_key_config") {
                     ApiKeyConfigSection(
                         engineId = viewModel.translatorEngine.value,
                         apiKey = getApiKeyForEngine(viewModel, viewModel.translatorEngine.value),
@@ -135,14 +135,14 @@ fun TranslationSettingsScreenV2(
 
             // Gemini Model Selection (when Gemini is selected)
             if (isGeminiSelected) {
-                item {
+                item(key = "gemini_model_header") {
                     SectionHeader(
                         title = "Gemini Model",
                         icon = Icons.Default.ModelTraining
                     )
                 }
 
-                item {
+                item(key = "gemini_model_selector") {
                     GeminiModelSelector(
                         models = viewModel.geminiModels,
                         selectedModel = viewModel.geminiModel.value,
@@ -156,7 +156,7 @@ fun TranslationSettingsScreenV2(
             }
 
             // Engine-Specific Configuration (Ollama, WebView logins)
-            item {
+            item(key = "engine_specific_config") {
                 EngineSpecificConfig(
                     engineId = viewModel.translatorEngine.value,
                     viewModel = viewModel,
@@ -166,14 +166,14 @@ fun TranslationSettingsScreenV2(
 
             // Advanced Settings Section (only for AI engines)
             if (isAiEngine) {
-                item {
+                item(key = "advanced_header") {
                     SectionHeader(
                         title = "Advanced",
                         icon = Icons.Default.Tune
                     )
                 }
 
-                item {
+                item(key = "advanced_settings") {
                     AdvancedSettingsSection(
                         contentType = viewModel.translatorContentType.value,
                         toneType = viewModel.translatorToneType.value,
@@ -187,7 +187,7 @@ fun TranslationSettingsScreenV2(
             }
 
             // Bottom spacing
-            item {
+            item(key = "bottom_spacing") {
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }

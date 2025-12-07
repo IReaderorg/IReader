@@ -390,6 +390,8 @@ data class CommonTTSScreenState(
     // Cache status for Coqui TTS
     val cachedParagraphs: Set<Int> = emptySet(),
     val loadingParagraphs: Set<Int> = emptySet(),
+    // Whether to show cache indicators (green checkmarks, loading spinners)
+    val showCacheIndicators: Boolean = true,
     // Sleep timer
     val sleepTimeRemaining: Long = 0L,
     val sleepModeEnabled: Boolean = false,
@@ -709,12 +711,15 @@ fun TTSContentDisplay(
                     val isMergedChunkCached = state.isMergingEnabled && isInMergedChunk && state.isPlaying && !state.isLoading
                     
                     // Show status icon when:
-                    // 1. Chapter download is in progress
-                    // 2. Pre-caching upcoming paragraphs (non-merged mode)
-                    // 3. Part of current merged chunk being processed
-                    val showStatusIcon = state.isDownloading || 
+                    // 1. Cache indicators are enabled AND
+                    // 2. Chapter download is in progress OR
+                    // 3. Pre-caching upcoming paragraphs (non-merged mode) OR
+                    // 4. Part of current merged chunk being processed
+                    val showStatusIcon = state.showCacheIndicators && (
+                        state.isDownloading || 
                         isInMergedChunk ||
                         (index > state.currentReadingParagraph && index <= state.currentReadingParagraph + 3)
+                    )
                     
                     // Determine final cached/loading state
                     // Priority: merged chunk status > chapter download > pre-cache

@@ -44,6 +44,7 @@ import ireader.i18n.SHORTCUTS.SHORTCUT_LIBRARY
 import ireader.i18n.SHORTCUTS.SHORTCUT_READER
 import ireader.i18n.SHORTCUTS.SHORTCUT_SEARCH
 import ireader.i18n.SHORTCUTS.SHORTCUT_TTS
+import ireader.i18n.SHORTCUTS.SHORTCUT_TTS_V2
 import ireader.i18n.SHORTCUTS.SHORTCUT_UPDATES
 import ireader.presentation.core.CommonNavHost
 import ireader.presentation.core.MainStarterScreen
@@ -350,6 +351,24 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                     navController.popUntilRoot()
                     navController.navigate(
                         NavigationRoutes.tts(
+                            bookId,
+                            chapterId,
+                            sourceId,
+                            readingParagraph?.toInt() ?: 0
+                        )
+                    )
+                }
+                true
+            }
+            SHORTCUT_TTS_V2 -> {
+                val bookId = intent.extras?.getLong(Args.ARG_BOOK_ID)
+                val chapterId = intent.extras?.getLong(Args.ARG_CHAPTER_ID)
+                val sourceId = intent.extras?.getLong(Args.ARG_SOURCE_ID)
+                val readingParagraph = intent.extras?.getLong(Args.ARG_READING_PARAGRAPH)
+                if (bookId != null && chapterId != null && sourceId != null) {
+                    navController.popUntilRoot()
+                    navController.navigate(
+                        NavigationRoutes.ttsV2(
                             bookId,
                             chapterId,
                             sourceId,
