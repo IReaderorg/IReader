@@ -115,6 +115,9 @@ fun main() {
             )
         }
         
+        // Mark modules as fully initialized (desktop loads all modules synchronously)
+        ireader.domain.di.ModuleInitializationState.markFullyInitialized()
+        
         // Initialize system fonts
         try {
             val systemFontsInitializer = koinApp.koin.get<ireader.domain.usecases.fonts.SystemFontsInitializer>()
