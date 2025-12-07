@@ -61,19 +61,22 @@ class GradioTTSPlayerFactory(
      * @param audioGenerator Custom audio generator
      * @param audioPlayback Custom audio playback
      * @param prefetchCount Number of paragraphs to prefetch (default: 3)
+     * @param dispatcher Custom coroutine dispatcher (useful for testing)
      * @return A new GradioTTSPlayer instance
      */
     fun createWithCustomComponents(
         config: GradioTTSConfig,
         audioGenerator: GradioAudioGenerator,
         audioPlayback: GradioAudioPlayback,
-        prefetchCount: Int = 3
+        prefetchCount: Int = 3,
+        dispatcher: kotlinx.coroutines.CoroutineDispatcher = kotlinx.coroutines.Dispatchers.Default
     ): GradioTTSPlayer {
         return GradioTTSPlayer(
             audioGenerator = audioGenerator,
             audioPlayer = audioPlayback,
             config = config,
-            prefetchCount = prefetchCount
+            prefetchCount = prefetchCount,
+            dispatcher = dispatcher
         )
     }
 }

@@ -57,7 +57,7 @@ object MainStarterScreen {
     private val switchTabEvent = Channel<Int>(Channel.BUFFERED)
     
     // Pending tab index to switch to (set before MainStarterScreen is composed)
-    @Volatile
+    @kotlin.concurrent.Volatile
     private var pendingTabIndex: Int? = null
     
     fun libraryFilterSheetFlow() = libraryFilterSheetEvent.receiveAsFlow()

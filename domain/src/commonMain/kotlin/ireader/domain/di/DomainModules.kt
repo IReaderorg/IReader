@@ -3,11 +3,16 @@ package ireader.domain.di
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
-import ireader.domain.plugins.*
+import ireader.domain.plugins.PluginManager
+import ireader.domain.plugins.PluginPreferences
+import ireader.domain.plugins.PluginRegistry
+import ireader.domain.services.book.bookModule
+import ireader.domain.services.chapter.chapterModule
 import ireader.domain.services.downloaderService.DownloadStateHolder
+import ireader.domain.services.library.libraryModule
+import ireader.domain.services.preferences.preferencesModule
 import ireader.domain.usecases.backup.CloudBackupManager
 import ireader.domain.usecases.backup.CloudProvider
-import ireader.domain.usecases.backup.CloudStorageProvider
 import ireader.domain.usecases.backup.CreateBackup
 import ireader.domain.usecases.backup.DropboxProvider
 import ireader.domain.usecases.backup.GoogleDriveProvider
@@ -26,10 +31,6 @@ import ireader.domain.usecases.remote.GetRemoteChapters
 import ireader.domain.usecases.remote.GetRemoteReadingContent
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
-import ireader.domain.services.chapter.chapterModule
-import ireader.domain.services.preferences.preferencesModule
-import ireader.domain.services.book.bookModule
-import ireader.domain.services.library.libraryModule
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 
@@ -272,8 +273,7 @@ val DomainServices = module {
         )
     }
     
-    // Analytics Module
-    includes(analyticsModule)
+
     
     // Use Case Module - New clean architecture use cases
     includes(useCaseModule)

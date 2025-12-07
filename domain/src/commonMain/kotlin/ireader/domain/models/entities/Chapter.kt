@@ -30,8 +30,23 @@ data class Chapter(
 ) {
 
     val isRecognizedNumber get() = number >= 0
+    
+    /**
+     * Check if the chapter has no actual text content.
+     * This properly handles placeholder content (empty Text objects) from light queries.
+     */
     fun isEmpty(): Boolean {
-        return content.joinToString().isBlank()
+        if (content.isEmpty()) return true
+        
+        // Extract actual text content from Text pages
+        val textContent = content.mapNotNull { page ->
+            when (page) {
+                is ireader.core.source.model.Text -> page.text.takeIf { it.isNotBlank() }
+                else -> null
+            }
+        }
+        
+        return textContent.isEmpty()
     }
 }
 

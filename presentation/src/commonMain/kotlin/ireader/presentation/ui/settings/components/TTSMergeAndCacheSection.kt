@@ -356,7 +356,7 @@ fun TTSMergeAndCacheSection(
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
-                                text = "$cacheEntryCount chapters • ${String.format("%.1f", cacheSizeMB)} MB",
+                                text = "$cacheEntryCount chapters • ${((cacheSizeMB * 10).roundToInt() / 10.0)} MB",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

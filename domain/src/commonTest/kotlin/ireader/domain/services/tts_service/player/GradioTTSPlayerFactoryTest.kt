@@ -65,24 +65,26 @@ class GradioTTSPlayerFactoryTest {
         val config = createTestConfig()
         val customGenerator = MockAudioGenerator()
         val customPlayback = MockAudioPlayback()
+        val testDispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
         
         val player = factory.createWithCustomComponents(
             config = config,
             audioGenerator = customGenerator,
             audioPlayback = customPlayback,
-            prefetchCount = 2
+            prefetchCount = 2,
+            dispatcher = testDispatcher
         )
         
         assertNotNull(player)
         
-        // Verify custom components are used
-        player.setContent(listOf("Test"))
-        advanceUntilIdle()
-        
+        // Verify custom components are used by setting speed
+        // The player should call setSpeed on the generator
         player.setSpeed(1.5f)
+        
+        // Advance the test scheduler to process the command
         advanceUntilIdle()
         
-        assertEquals(1.5f, customGenerator.speedSet)
+        assertEquals(1.5f, customGenerator.speedSet, "Custom generator should receive speed setting")
         
         player.release()
     }
