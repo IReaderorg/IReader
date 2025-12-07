@@ -318,7 +318,10 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
                 }
             })
             
-            isActive = true
+            // Don't set isActive here - it will be set in updateMediaSessionState()
+            // based on actual playback state. This prevents responding to media buttons
+            // when the app is not actively playing.
+            isActive = false
         }
     }
     
@@ -342,6 +345,10 @@ class TTSV2Service : Service(), AudioManager.OnAudioFocusChangeListener {
             )
         
         mediaSession.setPlaybackState(stateBuilder.build())
+        
+        // Only keep MediaSession active when playing or paused
+        // This prevents the app from responding to media buttons when not in use
+        mediaSession.isActive = state.isPlaying || state.isPaused
         
         // Update metadata - show chapter name and paragraph progress
         val progressText = if (state.totalParagraphs > 0) {

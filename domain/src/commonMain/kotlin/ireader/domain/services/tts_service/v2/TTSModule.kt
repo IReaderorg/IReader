@@ -50,7 +50,8 @@ val ttsV2Module = module {
             contentLoader = get(),
             nativeEngineFactory = { TTSEngineFactory.createNativeEngine() },
             gradioEngineFactory = { config -> TTSEngineFactory.createGradioEngine(config) },
-            initialGradioConfig = null // Can be set via SetGradioConfig command
+            initialGradioConfig = null, // Can be set via SetGradioConfig command
+            cacheUseCase = getOrNull() // Optional - for offline playback of cached audio
         )
     }
     

@@ -250,6 +250,11 @@ class TTSV2ScreenSpec(
         )
         val isGradioConfigured = remember(activeGradioConfigId) { activeGradioConfigId.isNotEmpty() }
         
+        // Chunk mode settings - observe changes to re-chunk when user changes word count
+        val mergeWordsRemote by readerPreferences.ttsMergeWordsRemote().changes().collectAsState(
+            initial = readerPreferences.ttsMergeWordsRemote().get()
+        )
+        
         // Cache state
         val isChapterCached by remember(state.chapter?.id, state.paragraphs) {
             derivedStateOf { 
@@ -264,9 +269,8 @@ class TTSV2ScreenSpec(
             derivedStateOf {
                 val chId = state.chapter?.id ?: return@derivedStateOf false
                 if (chapterCache.isCached(chId)) return@derivedStateOf true
-                val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
-                val totalChunks = if (mergeWordCount > 0 && state.paragraphs.isNotEmpty()) {
-                    TTSTextMerger.mergeParagraphs(state.paragraphs, mergeWordCount).size
+                val totalChunks = if (mergeWordsRemote > 0 && state.paragraphs.isNotEmpty()) {
+                    TTSTextMerger.mergeParagraphs(state.paragraphs, mergeWordsRemote).size
                 } else {
                     state.paragraphs.size
                 }
@@ -398,10 +402,9 @@ class TTSV2ScreenSpec(
                     viewModel.adapter.useGradioTTS(v2Config)
                     
                     // Enable chunk mode for Gradio TTS (merges paragraphs for better performance)
-                    val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
-                    if (mergeWordCount > 0) {
-                        viewModel.adapter.enableChunkMode(mergeWordCount)
-                        Log.warn { "TTSV2ScreenSpec: Chunk mode enabled with $mergeWordCount words" }
+                    if (mergeWordsRemote > 0) {
+                        viewModel.adapter.enableChunkMode(mergeWordsRemote)
+                        Log.warn { "TTSV2ScreenSpec: Chunk mode enabled with $mergeWordsRemote words" }
                     }
                     
                     Log.warn { "TTSV2ScreenSpec: Gradio engine configured: ${gradioTTSConfig.name}" }
@@ -488,9 +491,8 @@ class TTSV2ScreenSpec(
                     viewModel.adapter.useGradioTTS(v2Config)
                     
                     // Re-enable chunk mode if needed
-                    val mergeWordCount = readerPreferences.ttsMergeWordsRemote().get()
-                    if (mergeWordCount > 0) {
-                        viewModel.adapter.enableChunkMode(mergeWordCount)
+                    if (mergeWordsRemote > 0) {
+                        viewModel.adapter.enableChunkMode(mergeWordsRemote)
                     }
                     
                     Log.warn { "TTSV2ScreenSpec: Gradio engine updated to: ${gradioTTSConfig.name}" }
@@ -500,6 +502,28 @@ class TTSV2ScreenSpec(
                 viewModel.adapter.useNativeTTS()
                 viewModel.adapter.disableChunkMode()
                 Log.warn { "TTSV2ScreenSpec: Switched to native TTS" }
+            }
+        }
+        
+        // Watch for merge words changes (when user changes chunk word count in settings)
+        var previousMergeWords by remember { mutableStateOf(mergeWordsRemote) }
+        LaunchedEffect(mergeWordsRemote) {
+            // Skip initial composition
+            if (previousMergeWords == mergeWordsRemote) return@LaunchedEffect
+            previousMergeWords = mergeWordsRemote
+            
+            Log.warn { "TTSV2ScreenSpec: Merge words changed to $mergeWordsRemote" }
+            
+            if (useGradioTTS && state.hasContent) {
+                if (mergeWordsRemote > 0) {
+                    // Re-enable chunk mode with new word count
+                    viewModel.adapter.enableChunkMode(mergeWordsRemote)
+                    Log.warn { "TTSV2ScreenSpec: Chunk mode re-enabled with $mergeWordsRemote words" }
+                } else {
+                    // Disable chunk mode
+                    viewModel.adapter.disableChunkMode()
+                    Log.warn { "TTSV2ScreenSpec: Chunk mode disabled" }
+                }
             }
         }
         

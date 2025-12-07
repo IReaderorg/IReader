@@ -65,6 +65,22 @@ interface TTSEngine {
     suspend fun generateAudioForText(text: String): ByteArray? = null
     
     /**
+     * Play cached audio data directly
+     * Used for offline playback of downloaded TTS audio.
+     * 
+     * @param audioData Raw audio bytes (WAV, MP3, etc.)
+     * @param utteranceId Unique ID for this utterance (for tracking)
+     * @return true if playback started successfully, false if not supported
+     */
+    suspend fun playCachedAudio(audioData: ByteArray, utteranceId: String): Boolean = false
+    
+    /**
+     * Clear internal state (queue, cache, etc.)
+     * Called when switching chapters to ensure clean state.
+     */
+    fun clearState() {}
+    
+    /**
      * Engine events flow
      */
     val events: Flow<EngineEvent>

@@ -38,7 +38,8 @@ class TTSController(
     private val contentLoader: TTSContentLoader,
     private val nativeEngineFactory: () -> TTSEngine,
     private val gradioEngineFactory: ((GradioConfig) -> TTSEngine?)? = null,
-    initialGradioConfig: GradioConfig? = null
+    initialGradioConfig: GradioConfig? = null,
+    private val cacheUseCase: TTSCacheUseCase? = null
 ) {
     // Mutable Gradio config that can be updated at runtime
     private var gradioConfig: GradioConfig? = initialGradioConfig
@@ -524,10 +525,29 @@ class TTSController(
     // ========== Content ==========
     
     private suspend fun loadChapter(bookId: Long, chapterId: Long, startParagraph: Int) {
+        Log.warn { "$TAG: loadChapter(bookId=$bookId, chapterId=$chapterId, startParagraph=$startParagraph)" }
+        
+        // Stop current playback and clear engine state
+        engine?.stop()
+        
+        // Clear engine's internal state (queue, cache) - IMPORTANT for Gradio engines
+        engine?.clearState()
+        
+        // Clear chunk mode data - IMPORTANT: must be done before loading new content
+        mergeResult = null
+        
         _state.update { it.copy(playbackState = PlaybackState.LOADING, error = null) }
         
         try {
             val content = contentLoader.loadChapter(bookId, chapterId)
+            
+            // Check if we need to reload cached chunks for the new chapter
+            val newChapterId = content.chapter?.id
+            val cachedChunks = if (newChapterId != null && cacheUseCase != null) {
+                cacheUseCase.getCachedChunkIndices(newChapterId)
+            } else {
+                emptySet()
+            }
             
             _state.update { 
                 it.copy(
@@ -537,10 +557,24 @@ class TTSController(
                     totalParagraphs = content.paragraphs.size,
                     currentParagraphIndex = startParagraph.coerceIn(0, content.paragraphs.lastIndex.coerceAtLeast(0)),
                     playbackState = PlaybackState.IDLE,
-                    error = null
+                    error = null,
+                    // Reset translation state for new chapter
+                    translatedParagraphs = null,
+                    showTranslation = false,
+                    isTranslationAvailable = false,
+                    // Reset chunk mode state - will be re-enabled if needed
+                    chunkModeEnabled = false,
+                    currentChunkIndex = 0,
+                    totalChunks = 0,
+                    currentChunkParagraphs = emptyList(),
+                    cachedChunks = cachedChunks,
+                    isUsingCachedAudio = false
                 )
             }
+            
+            Log.warn { "$TAG: Chapter loaded - ${content.paragraphs.size} paragraphs" }
         } catch (e: Exception) {
+            Log.error { "$TAG: Failed to load chapter: ${e.message}" }
             handleError(TTSError.ContentLoadFailed(e.message ?: "Failed to load chapter"))
         }
     }
@@ -659,6 +693,9 @@ class TTSController(
         
         Log.warn { "$TAG: enableChunkMode(targetWordCount=$targetWordCount)" }
         
+        // Clear engine's internal cache when re-chunking (chunks will be different)
+        engine?.clearState()
+        
         // Create text merger if needed
         if (textMerger == null) {
             textMerger = TTSTextMergerV2()
@@ -672,16 +709,25 @@ class TTSController(
         val currentChunkIndex = result.paragraphToChunkMap[currentState.currentParagraphIndex] ?: 0
         val currentChunk = result.chunks.getOrNull(currentChunkIndex)
         
+        // Load cached chunks from persistent storage
+        val chapterId = currentState.chapter?.id
+        val cachedChunks = if (chapterId != null && cacheUseCase != null) {
+            cacheUseCase.getCachedChunkIndices(chapterId)
+        } else {
+            emptySet()
+        }
+        
         _state.update {
             it.copy(
                 chunkModeEnabled = true,
                 currentChunkIndex = currentChunkIndex,
                 totalChunks = result.chunks.size,
-                currentChunkParagraphs = currentChunk?.paragraphIndices ?: emptyList()
+                currentChunkParagraphs = currentChunk?.paragraphIndices ?: emptyList(),
+                cachedChunks = cachedChunks
             )
         }
         
-        Log.warn { "$TAG: Chunk mode enabled - ${result.chunks.size} chunks, current=$currentChunkIndex" }
+        Log.warn { "$TAG: Chunk mode enabled - ${result.chunks.size} chunks, current=$currentChunkIndex, cached=${cachedChunks.size}" }
     }
     
     private fun disableChunkMode() {
@@ -793,12 +839,48 @@ class TTSController(
             return
         }
         
+        // Auto-initialize engine if it was released
+        if (engine == null) {
+            Log.warn { "$TAG: playChunk() - Engine is null, reinitializing..." }
+            initialize()
+        }
+        
         if (engine?.isReady() != true) {
-            handleError(TTSError.EngineNotReady)
+            // Engine is initializing (async), queue the play for when it's ready
+            Log.warn { "$TAG: playChunk() - Engine not ready, queuing play" }
+            pendingPlay = true
+            _state.update { it.copy(playbackState = PlaybackState.LOADING) }
             return
         }
         
         _state.update { it.copy(playbackState = PlaybackState.LOADING) }
+        
+        val chapterId = currentState.chapter?.id
+        val chunkIndex = currentState.currentChunkIndex
+        val utteranceId = "chunk_$chunkIndex"
+        
+        // Check if this chunk is cached (for offline playback)
+        if (chapterId != null && cacheUseCase != null) {
+            val isCached = cacheUseCase.isChunkCached(chapterId, chunkIndex)
+            Log.warn { "$TAG: playChunk() - chunk $chunkIndex, cached=$isCached" }
+            
+            if (isCached) {
+                val cachedAudio = cacheUseCase.getChunkAudio(chapterId, chunkIndex)
+                if (cachedAudio != null) {
+                    Log.warn { "$TAG: playChunk() - Playing cached audio: ${cachedAudio.size} bytes" }
+                    _state.update { it.copy(isUsingCachedAudio = true) }
+                    
+                    // Play cached audio directly via engine
+                    val played = engine?.playCachedAudio(cachedAudio, utteranceId) ?: false
+                    if (played) {
+                        return
+                    }
+                    Log.warn { "$TAG: playChunk() - Engine doesn't support cached audio playback, falling back to text" }
+                }
+            }
+        }
+        
+        _state.update { it.copy(isUsingCachedAudio = false) }
         
         // Get the text to speak - use translated text if showTranslation is enabled
         val textToSpeak = if (currentState.showTranslation && currentState.hasTranslation) {
@@ -811,8 +893,7 @@ class TTSController(
             chunk.text
         }
         
-        val utteranceId = "chunk_${currentState.currentChunkIndex}"
-        Log.warn { "$TAG: playChunk() - chunk ${currentState.currentChunkIndex}, text length=${textToSpeak.length}, useTranslation=${currentState.showTranslation}" }
+        Log.warn { "$TAG: playChunk() - chunk $chunkIndex, text length=${textToSpeak.length}, useTranslation=${currentState.showTranslation}" }
         
         engine?.speak(textToSpeak, utteranceId)
     }

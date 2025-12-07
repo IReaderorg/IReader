@@ -266,4 +266,31 @@ class DesktopGradioTTSEngineV2(
         
         return audioData
     }
+    
+    /**
+     * Play cached audio data directly (for offline playback)
+     */
+    override suspend fun playCachedAudio(audioData: ByteArray, utteranceId: String): Boolean {
+        Log.warn { "$TAG: playCachedAudio($utteranceId) - ${audioData.size} bytes" }
+        return try {
+            _events.tryEmit(EngineEvent.Started(utteranceId))
+            audioPlayer.play(audioData) {
+                _events.tryEmit(EngineEvent.Completed(utteranceId))
+            }
+            true
+        } catch (e: Exception) {
+            Log.error { "$TAG: playCachedAudio error: ${e.message}" }
+            _events.tryEmit(EngineEvent.Error(utteranceId, e.message ?: "Playback error"))
+            false
+        }
+    }
+    
+    /**
+     * Clear internal state (queue, cache) when switching chapters
+     */
+    override fun clearState() {
+        Log.warn { "$TAG: clearState()" }
+        engine.clearQueue()
+        engine.clearCache()
+    }
 }
