@@ -4,7 +4,6 @@ import ireader.core.log.Log
 import ireader.domain.data.repository.BookRepository
 import ireader.domain.data.repository.CategoryRepository
 import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.models.entities.Book
 import ireader.domain.usecases.history.HistoryUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +20,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Book Controller - The central coordinator for all book-level operations.
@@ -214,6 +215,7 @@ class BookController(
      * Update reading progress for the current book.
      * Requirements: 2.3
      */
+    @OptIn(ExperimentalTime::class)
     private suspend fun updateReadingProgress(chapterId: Long, progress: Float) {
         Log.debug { "$TAG: updateReadingProgress(chapterId=$chapterId, progress=$progress)" }
         
@@ -229,7 +231,7 @@ class BookController(
             val history = ireader.domain.models.entities.History(
                 id = existingHistory?.id ?: 0,
                 chapterId = chapterId,
-                readAt = System.currentTimeMillis(),
+                readAt = Clock.System.now().toEpochMilliseconds(),
                 readDuration = existingHistory?.readDuration ?: 0,
                 progress = progress
             )
