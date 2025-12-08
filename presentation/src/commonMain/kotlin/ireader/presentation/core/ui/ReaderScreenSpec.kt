@@ -313,24 +313,18 @@ data class ReaderScreenSpec(
                         onNext = { rest ->
                             if (currentIndex < chapters.lastIndex) {
                                 try {
-                                    vm.apply {
-                                        val nextChapter = vm.nextChapter()
-                                        scope.launch {
-                                            vm.getLocalChapter(
-                                                nextChapter?.id,
-                                            )
+                                    // Dispatch navigation to ChapterController (Requirements: 10.1, 10.3)
+                                    vm.dispatchNextChapter()
+                                    scope.launch {
+                                        if (rest) {
+                                            vm.clearChapterShell(scrollState)
                                         }
-                                        scope.launch {
-                                            if (rest) {
-                                                vm.clearChapterShell(scrollState)
-                                            }
-                                        }
-                                        when (readingMode.value) {
-                                            ReadingMode.Continues -> {}
-                                            ReadingMode.Page -> {
-                                                scope.launch {
-                                                    scrollState.scrollTo(0)
-                                                }
+                                    }
+                                    when (vm.readingMode.value) {
+                                        ReadingMode.Continues -> {}
+                                        ReadingMode.Page -> {
+                                            scope.launch {
+                                                scrollState.scrollTo(0)
                                             }
                                         }
                                     }
@@ -350,18 +344,13 @@ data class ReaderScreenSpec(
                         onPrev = { reset ->
                             try {
                                 if (currentIndex > 0) {
-                                    val prevChapter = vm.prevChapter()
+                                    // Dispatch navigation to ChapterController (Requirements: 10.2, 10.3)
+                                    vm.dispatchPrevChapter()
 
                                     scope.launch {
                                         if (reset) {
                                             vm.clearChapterShell(scrollState)
                                         }
-
-                                        // Load the previous chapter (next=false triggers scrollToEndOnChapterChange)
-                                        vm.getLocalChapter(
-                                            prevChapter?.id,
-                                            false
-                                        )
 
                                         // For Page mode, also scroll to end
                                         if (vm.readingMode.value == ReadingMode.Page) {

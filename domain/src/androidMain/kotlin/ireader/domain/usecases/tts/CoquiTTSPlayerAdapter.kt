@@ -251,11 +251,6 @@ class CoquiTTSPlayerAdapter(
      */
     fun getGradioService(): CoquiTTSService? = coquiService
     
-    /**
-     * Legacy method - use getGradioService() instead
-     */
-    @Deprecated("Use getGradioService() instead", ReplaceWith("getGradioService()"))
-    fun getCoquiService(): CoquiTTSService? = coquiService
 }
 
 /**

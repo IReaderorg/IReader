@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
 import ireader.core.prefs.Preference
 import ireader.domain.models.common.DomainColor
-import ireader.domain.preferences.models.prefs.asThemeColor
+import ireader.domain.preferences.models.prefs.asThemeDomainColor
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import ireader.presentation.ui.core.ui.asStateIn
@@ -30,17 +30,17 @@ class CustomizableAppColorsPreferenceState(
 
 fun UiPreferences.getLightColors(): CustomizableAppColorsPreference {
     return CustomizableAppColorsPreference(
-        colorPrimaryLight().asThemeColor(),
-        colorSecondaryLight().asThemeColor(),
-        colorBarsLight().asThemeColor()
+        colorPrimaryLight().asThemeDomainColor(),
+        colorSecondaryLight().asThemeDomainColor(),
+        colorBarsLight().asThemeDomainColor()
     )
 }
 
 fun UiPreferences.getDarkColors(): CustomizableAppColorsPreference {
     return CustomizableAppColorsPreference(
-        colorPrimaryDark().asThemeColor(),
-        colorSecondaryDark().asThemeColor(),
-        colorBarsDark().asThemeColor()
+        colorPrimaryDark().asThemeDomainColor(),
+        colorSecondaryDark().asThemeDomainColor(),
+        colorBarsDark().asThemeDomainColor()
     )
 }
 

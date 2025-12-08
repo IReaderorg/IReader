@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
  * 2. Simple spinner is sufficient for short loads
  * 3. Reduces complexity and potential jank
  * 
- * For screens that need skeleton loading, use the specific shimmer
- * components (e.g., BookDetailShimmerLoading).
+ * For screens that need skeleton loading, use the specific placeholder
+ * components (e.g., BookDetailPlaceholder).
  */
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {

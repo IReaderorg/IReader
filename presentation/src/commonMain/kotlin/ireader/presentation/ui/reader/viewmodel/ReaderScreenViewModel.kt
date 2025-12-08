@@ -750,24 +750,6 @@ class ReaderScreenViewModel(
     }
     
     /**
-     * Navigate to next chapter via ChapterController.
-     * Requirements: 9.2, 9.4, 9.5
-     * @deprecated Use dispatchNextChapter() instead for ChapterController integration
-     */
-    fun nextChapter(): Chapter? {
-        return getNextChapter()
-    }
-
-    /**
-     * Navigate to previous chapter via ChapterController.
-     * Requirements: 9.2, 9.4, 9.5
-     * @deprecated Use dispatchPrevChapter() instead for ChapterController integration
-     */
-    fun prevChapter(): Chapter? {
-        return getPrevChapter()
-    }
-    
-    /**
      * Dispatch next chapter command to ChapterController.
      * Requirements: 9.2, 9.4, 9.5
      */

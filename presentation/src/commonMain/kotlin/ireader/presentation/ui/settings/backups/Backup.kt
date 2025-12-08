@@ -9,14 +9,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup
-import ireader.domain.utils.extensions.launchIO
-import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.ChoicePreference
@@ -35,74 +30,10 @@ fun BackUpAndRestoreScreen(
     onNavigateToCloudBackup: () -> Unit = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val scope = rememberCoroutineScope()
-    val onShowRestore = remember { mutableStateOf(false) }
-    val onShowBackup = remember { mutableStateOf(false) }
-    val onShowLNReaderImport = remember { mutableStateOf(false) }
     
     // LNReader import progress
     val lnReaderProgress by vm.lnReaderImportProgress.collectAsState()
     val lnReaderResult by vm.lnReaderImportResult.collectAsState()
-    OnShowRestore(onShowRestore.value, onFileSelected = {
-        it?.let {files ->
-            scope.launchIO {
-                vm.restoreBackup.restoreFrom(it, onError = {
-                    vm.showSnackBar(it)
-                }, onSuccess = {
-                    vm.showSnackBar((UiText.MStringResource(Res.string.restoredSuccessfully)))
-                })
-            }
-        }
-    })
-    OnShowBackup(onShowBackup.value, onFileSelected = {
-        it?.let {files ->
-            scope.launchIO {
-                vm.createBackup.saveTo(it, onError = {
-                    vm.showSnackBar(it)
-                }, onSuccess = {
-                    vm.showSnackBar((UiText.MStringResource(Res.string.backup_created_successfully)))
-                }, currentEvent = {
-                    vm.showSnackBar(UiText.DynamicString(it))
-                })
-            }
-        }
-    })
-
-
-//    val onRestore =
-//        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
-//            if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-//                val uri = resultIntent.data!!.data!!
-//                globalScope.launchIO {
-//                    vm.restoreBackup.restoreFrom(Uri(uri), onError = {
-//                        vm.showSnackBar(it)
-//                    }, onSuccess = {
-//                        vm.showSnackBar((UiText.MStringResource(Res.string.restoredSuccessfully)))
-//                    })
-//                }
-//            }
-//        }
-//    val onBackup =
-//        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultIntent ->
-//            if (resultIntent.resultCode == Activity.RESULT_OK && resultIntent.data != null) {
-//                val uri = resultIntent.data!!.data!!
-//                Uri(uri)
-//                globalScope.launchIO {
-//                    val result = vm.createBackup.saveTo(Uri(uri), onError = {
-//                        vm.showSnackBar(it)
-//                    }, onSuccess = {
-//                        vm.showSnackBar((UiText.MStringResource(Res.string.backup_created_successfully)))
-//                    })
-//                }
-//            }
-//        }
-    // LNReader import file picker
-    OnShowLNReaderImport(onShowLNReaderImport.value, onFileSelected = { uri ->
-        uri?.let {
-            vm.importLNReaderBackupFromUri(it)
-        }
-        onShowLNReaderImport.value = false
-    })
     
     // Get import progress text
     val importProgressText = when (val progress = lnReaderProgress) {
@@ -117,18 +48,18 @@ fun BackUpAndRestoreScreen(
         null -> null
     }
     
-    val items = remember(importProgressText, localizeHelper) {
+    val items = androidx.compose.runtime.remember(importProgressText, localizeHelper) {
         listOf<Components>(
             Components.Row(
                 localizeHelper.localize(Res.string.create_backup), onClick = {
-                    onShowBackup.value = true
-
+                    // Use ViewModel method instead of deprecated composable
+                    vm.pickBackupLocation()
                 }
             ),
             Components.Row(
                 localizeHelper.localize(Res.string.restore), onClick = {
-                    onShowRestore.value = true
-
+                    // Use ViewModel method instead of deprecated composable
+                    vm.pickRestoreFile()
                 }
             ),
             Components.Header(localizeHelper.localize(Res.string.import_from_other_apps)),
@@ -138,7 +69,8 @@ fun BackUpAndRestoreScreen(
                 icon = Icons.Filled.FileDownload,
                 onClick = {
                     if (importProgressText == null) {
-                        onShowLNReaderImport.value = true
+                        // Use ViewModel method instead of deprecated composable
+                        vm.pickLNReaderBackupFile()
                     }
                 }
             ),

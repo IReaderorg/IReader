@@ -159,16 +159,4 @@ class CustomSystemColorState {
     }
 }
 
-// ==================== Deprecated Aliases (for backward compatibility) ====================
 
-@Deprecated(
-    message = "Use TransparentStatusBarState instead",
-    replaceWith = ReplaceWith("TransparentStatusBarState")
-)
-typealias TransparentStatusBar = TransparentStatusBarState
-
-@Deprecated(
-    message = "Use CustomSystemColorState instead", 
-    replaceWith = ReplaceWith("CustomSystemColorState")
-)
-typealias CustomStatusBar = CustomSystemColorState

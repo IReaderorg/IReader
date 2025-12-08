@@ -278,6 +278,10 @@ val DomainServices = module {
     // Use Case Module - New clean architecture use cases
     includes(useCaseModule)
     
+    // Use Case Aggregate Module - Aggregates for ViewModel simplification
+    // Requirements: 4.1, 4.2, 4.3, 4.5
+    includes(useCaseAggregateModule)
+    
     // Chapter Module - Unified Chapter Controller and use cases
     // Requirements: 5.5 - ChapterController injectable via DI
     includes(chapterModule)

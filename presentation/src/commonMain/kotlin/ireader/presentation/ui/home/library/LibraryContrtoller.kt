@@ -45,20 +45,20 @@ fun LibraryController(
         modifier = modifier,
         onMarkAsRead = {
             vm.scope.launch(ioDispatcher) {
-                vm.markAsReadWithUndo()
+                vm.markAsReadWithUndo(state.selectedBookIds.toList())
             }
         },
         onDownload = {
-            vm.downloadChapters()
+            vm.downloadChapters(state.selectedBookIds.toList())
         },
         onDownloadUnread = {
             vm.scope.launch(ioDispatcher) {
-                vm.downloadUnreadChapters()
+                vm.downloadUnreadChapters(state.selectedBookIds.toList())
             }
         },
         onMarkAsNotRead = {
             vm.scope.launch(ioDispatcher) {
-                vm.markAsUnreadWithUndo()
+                vm.markAsUnreadWithUndo(state.selectedBookIds.toList())
             }
         },
         onDelete = {
@@ -91,7 +91,7 @@ fun LibraryController(
         },
         scaffoldPadding = scaffoldPadding,
         requestHideBottomNav = requestHideNavigator,
-        getColumnsForOrientation = { isLandscape ->
+        getColumnsForOrientation = { isLandscape: Boolean ->
             vm.getColumnsForOrientation(isLandscape, this)
         },
         showCategoryDialog = showDialog,

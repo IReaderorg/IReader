@@ -110,9 +110,8 @@ class ChapterTest {
     }
 
     @Test
-    fun `isEmpty returns false for content with whitespace text objects`() {
-        // Note: isEmpty() uses joinToString() which includes the Text wrapper
-        // So Text("   ") becomes "Text(text=   )" which is not blank
+    fun `isEmpty returns true for content with whitespace text objects`() {
+        // isEmpty() checks if text content is blank (whitespace-only counts as empty)
         val chapter = Chapter(
             bookId = 1L, 
             key = "key", 
@@ -120,9 +119,8 @@ class ChapterTest {
             content = listOf(Text("   "), Text("\n\t"))
         )
         
-        // The content list is not empty, so isEmpty returns false
-        // because joinToString includes the data class representation
-        assertFalse(chapter.isEmpty())
+        // Whitespace-only content is considered empty
+        assertTrue(chapter.isEmpty())
     }
 
     @Test

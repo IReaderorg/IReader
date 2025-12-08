@@ -50,10 +50,10 @@ fun EditCategoriesDialog(
                                 .clickable(onClick = dismissDialog),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val defaultValue by remember {
-                                derivedStateOf { vm.getDefaultValue(category.category) }
+                            val defaultValue = remember(category.category, vm.state) {
+                                vm.getDefaultValue(category.category)
                             }
-                            var state: ToggleableState by remember {
+                            var state: ToggleableState by remember(defaultValue) {
                                 mutableStateOf(defaultValue)
                             }
                             TriStateCheckbox(state = state, onClick = {

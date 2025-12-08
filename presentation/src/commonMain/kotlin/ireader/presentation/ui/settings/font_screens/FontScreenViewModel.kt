@@ -15,6 +15,7 @@ class FontScreenViewModel(
     private val fontUseCase: FontUseCase,
     val readerPreferences: ReaderPreferences,
     val androidUiPreferences: PlatformUiPreferences,
+    private val fileSystemService: ireader.domain.services.platform.FileSystemService,
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), FontScreenState by fontScreenState {
 
     val font = androidUiPreferences.font()?.asState()
@@ -71,6 +72,35 @@ class FontScreenViewModel(
             this
         } else {
             filter { it.contains(query, ignoreCase = true) }
+        }
+    }
+    
+    /**
+     * Pick a custom font file from the file system using platform service
+     * Supports TTF and OTF font formats
+     */
+    fun pickFontFile() {
+        scope.launch {
+            when (val result = fileSystemService.pickFile(
+                fileTypes = listOf("ttf", "otf"),
+                title = "Select Font File"
+            )) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    // Store the custom font - create a FontType with the font name
+                    val fontPath = result.data.toString()
+                    val fontName = fontPath.substringAfterLast("/").substringBeforeLast(".")
+                    val fontType = ireader.domain.preferences.models.FontType(
+                        name = fontName,
+                        fontFamily = ireader.domain.models.common.FontFamilyModel.Default
+                    )
+                    androidUiPreferences.font()?.set(fontType)
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Custom font selected: $fontName"))
+                }
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    showSnackBar(ireader.i18n.UiText.DynamicString("Font selection cancelled"))
+                }
+                else -> {}
+            }
         }
     }
 }

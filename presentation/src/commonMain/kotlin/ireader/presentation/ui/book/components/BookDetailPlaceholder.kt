@@ -27,51 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-
-/**
- * Static placeholder for Book Detail screen - NO shimmer animation.
- * Shows the actual UI structure immediately with static placeholder colors.
- * Data fills in progressively as it loads without any animation overhead.
- * 
- * @deprecated Use BookDetailPlaceholder instead for progressive loading
- */
-@Composable
-fun BookDetailShimmerLoading(
-    modifier: Modifier = Modifier,
-    appbarPadding: Dp = 0.dp
-) {
-    // Redirect to the non-shimmer placeholder
-    BookDetailPlaceholder(
-        bookId = 0L,
-        title = "",
-        cover = null,
-        author = null,
-        isLoading = true,
-        onBack = {},
-        modifier = modifier
-    )
-}
-
-/**
- * @deprecated Use BookDetailPlaceholder instead
- */
-@Composable
-fun BookDetailShimmerLoadingTablet(
-    modifier: Modifier = Modifier
-) {
-    BookDetailPlaceholder(
-        bookId = 0L,
-        title = "",
-        cover = null,
-        author = null,
-        isLoading = true,
-        onBack = {},
-        modifier = modifier
-    )
-}
-
 
 /**
  * Placeholder UI for Book Detail screen - shows immediately with minimal info.

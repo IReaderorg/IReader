@@ -57,8 +57,10 @@ internal fun LibraryContent(
         }
     }
 
-    // Trigger data loading for the current category
-    val currentCategoryBooks by vm.getLibraryForCategoryIndex(categoryIndex = selectedCategoryIndex)
+    // Get books for the current category (not a delegate, just a value)
+    val currentCategoryBooks = remember(selectedCategoryIndex, state.books) {
+        vm.getLibraryForCategoryIndex(categoryIndex = selectedCategoryIndex)
+    }
     
     androidx.compose.foundation.layout.Column(
         modifier = Modifier.fillMaxWidth()
@@ -90,7 +92,8 @@ internal fun LibraryContent(
                 pageCount = categories.size,
                 layout = layout,
                 onPageChange = { page ->
-                    vm.getLibraryForCategoryIndex(categoryIndex = page)
+                    // Return books for the page as State<List<BookItem>>
+                    vm.getLibraryForCategoryIndexAsState(categoryIndex = page)
                 },
                 selection = selectedBooks.toList(),
                 currentPage = selectedCategoryIndex,

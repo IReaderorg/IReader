@@ -16,6 +16,48 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 
 /**
+ * Internal UI-specific state for LibraryViewModel.
+ * This state is NOT duplicated from LibraryController - it contains only UI-specific concerns.
+ * 
+ * Requirements: 3.1 - ViewModel does not maintain separate _state for selection
+ * (Selection is managed by LibraryController, this only has UI-specific state)
+ */
+@Immutable
+data class LibraryUiState(
+    // UI-specific state (not in LibraryController)
+    val isUpdatingLibrary: Boolean = false,
+    val categories: ImmutableList<CategoryWithCount> = persistentListOf(),
+    val selectedCategoryIndex: Int = 0,
+    val layout: DisplayMode = DisplayMode.CompactGrid,
+    val searchQuery: String? = null,
+    val inSearchMode: Boolean = false,
+    val sort: LibrarySort = LibrarySort(LibrarySort.Type.LastRead, true),
+    
+    // Scroll positions per category (categoryId -> (index, offset))
+    val categoryScrollPositions: Map<Long, Pair<Int, Int>> = emptyMap(),
+    
+    // Dialog state
+    val showUpdateCategoryDialog: Boolean = false,
+    val showImportEpubDialog: Boolean = false,
+    
+    // Batch operation state
+    val batchOperationInProgress: Boolean = false,
+    val batchOperationMessage: String? = null,
+    val lastUndoState: UndoState? = null,
+    
+    // EPUB import/export state
+    val epubImportState: EpubImportState = EpubImportState(),
+    val epubExportState: EpubExportState = EpubExportState(),
+    
+    // Resume reading
+    val lastReadInfo: ireader.domain.models.entities.LastReadInfo? = null,
+    val isResumeCardVisible: Boolean = true,
+    
+    // Sync
+    val isSyncAvailable: Boolean = false
+)
+
+/**
  * State for undo operations
  */
 @Immutable

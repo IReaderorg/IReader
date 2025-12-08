@@ -41,6 +41,8 @@ class AdvanceSettingViewModel(
     private val appPreferences: AppPreferences,
     private val repairDatabaseUseCase: RepairDatabaseUseCase,
     private val bookRepository: BookRepository,
+    // Platform services - Clean architecture
+    private val fileSystemService: ireader.domain.services.platform.FileSystemService,
     ) : BaseViewModel() {
 
     private val _state = mutableStateOf(SettingState())
@@ -168,5 +170,26 @@ class AdvanceSettingViewModel(
      */
     fun checkStoragePermission(): Boolean {
         return storageManager.hasStoragePermission()
+    }
+    
+    /**
+     * Pick export directory using platform service
+     * Used for exporting data to a user-selected location
+     */
+    fun pickExportDirectory(onDirectorySelected: (ireader.domain.models.common.Uri) -> Unit) {
+        scope.launch {
+            when (val result = fileSystemService.pickDirectory(
+                title = "Select Export Directory"
+            )) {
+                is ireader.domain.services.common.ServiceResult.Success -> {
+                    onDirectorySelected(result.data)
+                    showSnackBar(UiText.DynamicString("Export directory selected"))
+                }
+                is ireader.domain.services.common.ServiceResult.Error -> {
+                    showSnackBar(UiText.DynamicString("Directory selection cancelled"))
+                }
+                else -> {}
+            }
+        }
     }
 }

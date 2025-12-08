@@ -118,19 +118,4 @@ fun Preference<Int>.asThemeDomainColor(): ThemeColorPreference {
     return ThemeColorPreference(this)
 }
 
-// Backwards compatibility - deprecated
-@Deprecated(
-    "Use asDomainColor() instead",
-    ReplaceWith("asDomainColor()", "ireader.domain.preferences.models.prefs.asDomainColor")
-)
-fun Preference<Int>.asColor(): ColorPreference {
-    return ColorPreference(this)
-}
 
-@Deprecated(
-    "Use asThemeDomainColor() instead",
-    ReplaceWith("asThemeDomainColor()", "ireader.domain.preferences.models.prefs.asThemeDomainColor")
-)
-fun Preference<Int>.asThemeColor(): ThemeColorPreference {
-    return ThemeColorPreference(this)
-}

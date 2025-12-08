@@ -5,7 +5,43 @@ import ireader.core.source.model.Text
 import ireader.domain.data.repository.TranslatedChapterRepository
 import ireader.domain.models.entities.Chapter
 import ireader.domain.models.entities.TranslatedChapter
+import ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase
+import ireader.domain.usecases.glossary.ExportGlossaryUseCase
+import ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase
+import ireader.domain.usecases.glossary.ImportGlossaryUseCase
+import ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase
+import ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase
+import ireader.domain.usecases.translate.TranslateParagraphUseCase
 import kotlin.time.ExperimentalTime
+
+/**
+ * Aggregate for translation-related use cases.
+ * Groups glossary and chapter translation operations.
+ * 
+ * Usage:
+ * ```kotlin
+ * class ReaderTranslationViewModel(
+ *     private val translationUseCases: TranslationUseCases,
+ *     // ... other deps
+ * ) {
+ *     fun translateChapter(chapter: Chapter) {
+ *         translationUseCases.translateChapter.execute(...)
+ *     }
+ * }
+ * ```
+ * 
+ * Requirements: 4.3 - TranslationUseCases aggregate groups translation operations
+ */
+data class TranslationUseCases(
+    val translateChapter: TranslateChapterWithStorageUseCase,
+    val translateParagraph: TranslateParagraphUseCase,
+    val getTranslated: GetTranslatedChapterUseCase,
+    val getGlossary: GetGlossaryByBookIdUseCase,
+    val saveGlossary: SaveGlossaryEntryUseCase,
+    val deleteGlossary: DeleteGlossaryEntryUseCase,
+    val exportGlossary: ExportGlossaryUseCase,
+    val importGlossary: ImportGlossaryUseCase
+)
 
 class SaveTranslatedChapterUseCase(
     private val repository: TranslatedChapterRepository

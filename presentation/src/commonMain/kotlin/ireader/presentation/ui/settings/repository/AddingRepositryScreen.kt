@@ -768,30 +768,6 @@ fun EnhancedFormComponent(
     )
 }
 
-@Deprecated("Use EnhancedFormComponent instead")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FormComponent(
-        name: String,
-        icon: ImageVector,
-        state: MutableState<String>,
-        enable: Boolean = true
-) {
-    OutlinedTextField(
-            value = state.value,
-            onValueChange = { state.value = it },
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(imageVector = icon, contentDescription = name)
-            },
-            enabled = enable,
-            label = {
-                SmallTextComposable(text = name)
-            }
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-}
-
 
 @Composable
 private fun AddingRepositoryScreenPrev() {
@@ -799,15 +775,6 @@ private fun AddingRepositoryScreenPrev() {
             scaffoldPadding = PaddingValues(0.dp),
             onSave = {},
     )
-}
-
-
-@Composable
-private fun FormComponentPreview() {
-    val state = remember {
-        mutableStateOf("")
-    }
-    FormComponent("Name", Icons.Default.AccountBalance, state)
 }
 
 enum class RepositoryType {

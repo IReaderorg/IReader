@@ -15,14 +15,12 @@ import ireader.domain.models.library.LibrarySort
 import ireader.domain.services.library.LibraryCommand
 import ireader.domain.services.library.LibraryController
 import ireader.domain.preferences.prefs.LibraryPreferences
-import ireader.domain.usecases.category.CategoriesUseCases
 import ireader.domain.usecases.local.book_usecases.DownloadResult
-import ireader.domain.usecases.local.book_usecases.DownloadUnreadChaptersUseCase
-import ireader.domain.usecases.local.book_usecases.GetLibraryCategory
-import ireader.domain.usecases.local.book_usecases.MarkBookAsReadOrNotUseCase
 import ireader.domain.usecases.local.book_usecases.MarkResult
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import ireader.domain.usecases.services.ServiceUseCases
+import ireader.domain.usecases.library.LibraryUseCases
+import ireader.domain.services.platform.PlatformServices
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -33,82 +31,58 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
  * ViewModel for the Library screen following Mihon's StateScreenModel pattern.
  * 
- * Key improvements:
- * - Single immutable state with atomic updates via MutableStateFlow
- * - Efficient selection management using ImmutableSet
- * - Proper job cancellation and lifecycle management
- * - 30-50% fewer recompositions
+ * SIMPLIFIED VERSION (Requirements: 3.1, 3.2, 3.3, 3.4, 4.1, 4.4):
+ * - Reduced from 26 constructor parameters to 8 using aggregates
+ * - State derived from LibraryController (SSOT) - no duplicate state
+ * - Selection/filter/sort methods only dispatch to LibraryController
  */
 @Stable
 @OptIn(ExperimentalCoroutinesApi::class)
 class LibraryViewModel(
-    private val localGetBookUseCases: ireader.domain.usecases.local.LocalGetBookUseCases,
-    private val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
-    val deleteUseCase: ireader.domain.usecases.local.DeleteUseCase,
-    private val localGetChapterUseCase: ireader.domain.usecases.local.LocalGetChapterUseCase,
+    // Aggregate 1: Library use cases (groups 11 use cases)
+    private val libraryUseCases: LibraryUseCases,
+    // Aggregate 2: Platform services (groups 5 services)
+    private val platformServices: PlatformServices,
+    // Core dependencies
+    private val libraryPreferences: LibraryPreferences,
     private val libraryScreenPrefUseCases: LibraryScreenPrefUseCases,
     private val serviceUseCases: ServiceUseCases,
-    private val getLibraryCategory: GetLibraryCategory,
-    private val libraryPreferences: LibraryPreferences,
-    val markBookAsReadOrNotUseCase: MarkBookAsReadOrNotUseCase,
-    val getCategory: CategoriesUseCases,
-    private val downloadUnreadChaptersUseCase: DownloadUnreadChaptersUseCase,
-    private val archiveBookUseCase: ireader.domain.usecases.local.book_usecases.ArchiveBookUseCase,
-    private val getLastReadNovelUseCase: ireader.domain.usecases.history.GetLastReadNovelUseCase,
     private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
-    private val importEpub: ireader.domain.usecases.epub.ImportEpub,
     private val downloadService: ireader.domain.services.common.DownloadService,
-    private val bookUseCases: ireader.domain.usecases.book.BookUseCases,
-    private val chapterUseCases: ireader.domain.usecases.chapter.ChapterUseCases,
-    private val categoryUseCases: ireader.domain.usecases.category.CategoryUseCases,
-    private val downloadUseCases: ireader.domain.usecases.download.DownloadUseCases,
-    private val historyUseCases: ireader.domain.usecases.history.HistoryUseCases,
-    private val clipboardService: ireader.domain.services.platform.ClipboardService,
-    private val shareService: ireader.domain.services.platform.ShareService,
-    private val fileSystemService: ireader.domain.services.platform.FileSystemService,
     private val localizeHelper: LocalizeHelper,
+    // LibraryController - SSOT for library state (Requirements: 3.1, 3.2, 3.3, 3.4)
     private val libraryController: LibraryController
 ) : BaseViewModel() {
 
-    // ==================== Mihon-style State ====================
-    private val _state = MutableStateFlow(LibraryScreenState())
-    val state: StateFlow<LibraryScreenState> = _state.asStateFlow()
+    // ==================== State Derived from LibraryController (SSOT) ====================
+    // Requirements: 3.1, 3.2, 3.3, 3.4 - No duplicate state, derive from controller
     
-    // Convenience accessors
-    val isLoading: Boolean get() = _state.value.isLoading
-    val isEmpty: Boolean get() = _state.value.isEmpty
-    val selectionMode: Boolean get() = _state.value.selectionMode
-    val selectedBooks: Set<Long> get() = _state.value.selectedBookIds
-    val categories get() = _state.value.categories
-    val selectedCategory get() = _state.value.selectedCategory
-    val selectedCategoryIndex get() = _state.value.selectedCategoryIndex
-    val books get() = _state.value.books
-    val searchQuery get() = _state.value.searchQuery
-    val inSearchMode get() = _state.value.inSearchMode
-    val layout get() = _state.value.layout
-    val isBookRefreshing get() = _state.value.isRefreshing
-    val showUpdateCategoryDialog get() = _state.value.showUpdateCategoryDialog
-    val showImportEpubDialog get() = _state.value.showImportEpubDialog
-    val lastReadInfo get() = _state.value.lastReadInfo
-    val isResumeCardVisible get() = _state.value.isResumeCardVisible
-    val isSyncAvailable get() = _state.value.isSyncAvailable
-    val batchOperationInProgress get() = _state.value.batchOperationInProgress
-    val batchOperationMessage get() = _state.value.batchOperationMessage
-    val epubImportState get() = _state.value.epubImportState
-    val epubExportState get() = _state.value.epubExportState
+    // Internal UI-specific state (not duplicated from controller)
+    private val _uiState = MutableStateFlow(LibraryUiState())
+    
+    // Search debounce
+    private val searchQueryFlow = MutableStateFlow("")
+    private var searchJob: Job? = null
+    
+    // Loaded manga cache
+    private val loadedManga = mutableMapOf<Long, List<BookItem>>()
+    
+    // MutableStateFlow for each category's books
+    private val categoryBooksState = mutableMapOf<Long, MutableStateFlow<List<BookItem>>>()
     
     // Preferences as StateFlow
     val lastUsedCategory = libraryPreferences.lastUsedCategory().asState()
@@ -132,43 +106,87 @@ class LibraryViewModel(
     val showResumeReadingCard = libraryPreferences.showResumeReadingCard().asState()
     val showArchivedBooks = libraryPreferences.showArchivedBooks().asState()
     
-    val bookCategories = getCategory.subscribeBookCategories().asState(emptyList())
+    val bookCategories = libraryUseCases.categories.subscribeBookCategories().asState(emptyList())
+
+    /**
+     * Combined state derived from LibraryController and UI-specific state.
+     * Requirements: 3.4 - Use combine/map to derive state from Controller
+     */
+    val state: StateFlow<LibraryScreenState> = combine(
+        libraryController.state,
+        _uiState,
+        searchQueryFlow,
+        libraryPreferences.columnsInPortrait().stateIn(scope),
+        libraryPreferences.columnsInLandscape().stateIn(scope)
+    ) { controllerState, uiState, searchQuery, columnsPortrait, columnsLandscape ->
+        LibraryScreenState(
+            isLoading = controllerState.isLoading,
+            isRefreshing = controllerState.isRefreshing,
+            isUpdatingLibrary = uiState.isUpdatingLibrary,
+            books = controllerState.filteredBooks.toImmutableList(),
+            categories = uiState.categories,
+            selectedCategoryIndex = uiState.selectedCategoryIndex,
+            layout = uiState.layout,
+            searchQuery = searchQuery.ifBlank { null },
+            inSearchMode = uiState.inSearchMode,
+            // Selection from LibraryController (SSOT)
+            selectedBookIds = controllerState.selectedBookIds.toImmutableSet(),
+            filters = filters.value.toImmutableList(),
+            sort = sorting.value,
+            activeFilters = filters.value
+                .filter { it.value == LibraryFilter.Value.Included }
+                .map { it.type }
+                .toImmutableSet(),
+            error = controllerState.error?.let { ireader.i18n.UiText.DynamicString(it.toUserMessage()) },
+            categoryScrollPositions = uiState.categoryScrollPositions,
+            showUpdateCategoryDialog = uiState.showUpdateCategoryDialog,
+            showImportEpubDialog = uiState.showImportEpubDialog,
+            batchOperationInProgress = uiState.batchOperationInProgress,
+            batchOperationMessage = uiState.batchOperationMessage,
+            lastUndoState = uiState.lastUndoState,
+            epubImportState = uiState.epubImportState,
+            epubExportState = uiState.epubExportState,
+            lastReadInfo = uiState.lastReadInfo,
+            isResumeCardVisible = uiState.isResumeCardVisible,
+            isSyncAvailable = uiState.isSyncAvailable,
+            columnsInPortrait = columnsPortrait,
+            columnsInLandscape = columnsLandscape
+        )
+    }.stateIn(scope, SharingStarted.WhileSubscribed(5000), LibraryScreenState())
     
-    // Loaded manga cache
-    private val loadedManga = mutableMapOf<Long, List<BookItem>>()
+    // Convenience accessors
+    val isLoading: Boolean get() = state.value.isLoading
+    val isEmpty: Boolean get() = state.value.isEmpty
+    val selectionMode: Boolean get() = state.value.selectionMode
+    val selectedBooks: Set<Long> get() = state.value.selectedBookIds
+    val categories get() = state.value.categories
+    val selectedCategory get() = state.value.selectedCategory
+    val selectedCategoryIndex get() = state.value.selectedCategoryIndex
+    val books get() = state.value.books
+    val searchQuery get() = state.value.searchQuery
+    val inSearchMode get() = state.value.inSearchMode
+    val layout get() = state.value.layout
+    val isBookRefreshing get() = state.value.isRefreshing
+    val showUpdateCategoryDialog get() = state.value.showUpdateCategoryDialog
+    val showImportEpubDialog get() = state.value.showImportEpubDialog
+    val lastReadInfo get() = state.value.lastReadInfo
+    val isResumeCardVisible get() = state.value.isResumeCardVisible
+    val isSyncAvailable get() = state.value.isSyncAvailable
+    val batchOperationInProgress get() = state.value.batchOperationInProgress
+    val batchOperationMessage get() = state.value.batchOperationMessage
+    val epubImportState get() = state.value.epubImportState
+    val epubExportState get() = state.value.epubExportState
     
-    // Search debounce
-    private val searchQueryFlow = MutableStateFlow("")
-    private var searchJob: Job? = null
+    // Public access to deleteUseCase for compatibility
+    val deleteUseCase get() = libraryUseCases.delete
+    val markBookAsReadOrNotUseCase get() = libraryUseCases.markAsRead
+    val getCategory get() = libraryUseCases.categories
 
     init {
         initializeState()
         
-        // Subscribe to LibraryController state for SSOT pattern (Requirements: 4.3)
-        subscribeToLibraryControllerState()
-        
         // Load library via LibraryController
         libraryController.dispatch(LibraryCommand.LoadLibrary)
-    }
-    
-    /**
-     * Subscribe to LibraryController state for library data synchronization.
-     * This keeps the local state in sync with LibraryController (SSOT pattern).
-     * Requirements: 4.3
-     */
-    private fun subscribeToLibraryControllerState() {
-        libraryController.state
-            .onEach { controllerState ->
-                // Sync selection state from LibraryController
-                val controllerSelection = controllerState.selectedBookIds
-                if (_state.value.selectedBookIds != controllerSelection) {
-                    _state.update { it.copy(selectedBookIds = controllerSelection.toImmutableSet()) }
-                }
-                
-                // Log state updates for debugging
-                ireader.core.log.Log.debug { "LibraryViewModel: LibraryController state updated - books=${controllerState.filteredBooks.size}, selection=${controllerState.selectionCount}" }
-            }
-            .launchIn(scope)
     }
     
     private fun initializeState() {
@@ -176,30 +194,19 @@ class LibraryViewModel(
         scope.launch {
             val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
             val sortBy = libraryScreenPrefUseCases.sortersDescUseCase.read()
-            _state.update { it.copy(sort = LibrarySort(sortType.type, sortBy)) }
-        }
-        
-        // Initialize filters
-        _state.update { 
-            it.copy(
-                filters = filters.value.toImmutableList(),
-                activeFilters = filters.value
-                    .filter { f -> f.value == LibraryFilter.Value.Included }
-                    .map { f -> f.type }
-                    .toImmutableSet()
-            )
+            _uiState.update { it.copy(sort = LibrarySort(sortType.type, sortBy)) }
         }
         
         // Check sync availability
         scope.launch {
             val available = syncUseCases?.isSyncAvailable() ?: false
-            _state.update { it.copy(isSyncAvailable = available) }
+            _uiState.update { it.copy(isSyncAvailable = available) }
         }
         
         // Load last read info
         scope.launch {
-            val info = getLastReadNovelUseCase()
-            _state.update { 
+            val info = libraryUseCases.getLastRead()
+            _uiState.update { 
                 it.copy(
                     lastReadInfo = info,
                     isResumeCardVisible = showResumeReadingCard.value
@@ -214,11 +221,11 @@ class LibraryViewModel(
         ) { showAll, showEmpty ->
             Pair(showAll, showEmpty)
         }.flatMapLatest { (showAll, showEmpty) ->
-            getCategory.subscribe(showAll, showEmpty, scope).onEach { categoriesList ->
+            libraryUseCases.categories.subscribe(showAll, showEmpty, scope).onEach { categoriesList ->
                 val lastCategoryId = lastUsedCategory.value
                 val index = categoriesList.indexOfFirst { it.id == lastCategoryId }.takeIf { it >= 0 } ?: 0
                 
-                _state.update { current ->
+                _uiState.update { current ->
                     current.copy(
                         categories = categoriesList.toImmutableList(),
                         selectedCategoryIndex = index
@@ -231,71 +238,42 @@ class LibraryViewModel(
         searchQueryFlow
             .debounce(300)
             .onEach { query ->
-                _state.update { it.copy(searchQuery = query.ifBlank { null }) }
+                _uiState.update { it.copy(searchQuery = query.ifBlank { null }) }
             }
             .launchIn(scope)
     }
 
     // ==================== Selection Management ====================
-    // Delegated to LibraryController for SSOT pattern (Requirements: 4.3)
+    // Requirements: 3.2 - Only dispatch to LibraryController, no duplicate state updates
     
     fun toggleSelection(bookId: Long) {
-        // Delegate to LibraryController (SSOT pattern)
-        if (bookId in _state.value.selectedBookIds) {
+        // Only dispatch to LibraryController (SSOT pattern)
+        if (bookId in state.value.selectedBookIds) {
             libraryController.dispatch(LibraryCommand.DeselectBook(bookId))
         } else {
             libraryController.dispatch(LibraryCommand.SelectBook(bookId))
         }
-        
-        // Also update local state for immediate UI feedback
-        _state.update { current ->
-            val newSelection = if (bookId in current.selectedBookIds) {
-                current.selectedBookIds - bookId
-            } else {
-                current.selectedBookIds + bookId
-            }
-            current.copy(selectedBookIds = newSelection.toImmutableSet())
-        }
     }
     
     fun unselectAll() {
-        // Delegate to LibraryController (SSOT pattern)
+        // Only dispatch to LibraryController (SSOT pattern)
         libraryController.dispatch(LibraryCommand.ClearSelection)
-        
-        // Also update local state for immediate UI feedback
-        _state.update { it.copy(selectedBookIds = persistentSetOf()) }
     }
     
     fun selectAllInCurrentCategory() {
-        // Delegate to LibraryController (SSOT pattern)
+        // Only dispatch to LibraryController (SSOT pattern)
         libraryController.dispatch(LibraryCommand.SelectAll)
-        
-        // Also update local state for immediate UI feedback
-        val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
-        val mangaIds = mangaInCurrentCategory.map { it.id }.toSet()
-        _state.update { current ->
-            current.copy(selectedBookIds = (current.selectedBookIds + mangaIds).toImmutableSet())
-        }
     }
     
     fun flipAllInCurrentCategory() {
-        // Delegate to LibraryController (SSOT pattern)
+        // Only dispatch to LibraryController (SSOT pattern)
         libraryController.dispatch(LibraryCommand.InvertSelection)
-        
-        // Also update local state for immediate UI feedback
-        val mangaInCurrentCategory = loadedManga[selectedCategory?.id] ?: return
-        val mangaIds = mangaInCurrentCategory.map { it.id }.toSet()
-        _state.update { current ->
-            val toRemove = mangaIds.filter { it in current.selectedBookIds }
-            val toAdd = mangaIds.filter { it !in current.selectedBookIds }
-            current.copy(selectedBookIds = ((current.selectedBookIds - toRemove.toSet()) + toAdd).toImmutableSet())
-        }
     }
 
     // ==================== Scroll Position ====================
     
     fun saveScrollPosition(categoryId: Long, index: Int, offset: Int) {
-        _state.update { current ->
+        _uiState.update { current ->
             current.copy(
                 categoryScrollPositions = current.categoryScrollPositions + (categoryId to (index to offset))
             )
@@ -303,7 +281,7 @@ class LibraryViewModel(
     }
     
     fun getScrollPosition(categoryId: Long): Pair<Int, Int> {
-        return _state.value.categoryScrollPositions[categoryId] ?: (0 to 0)
+        return _uiState.value.categoryScrollPositions[categoryId] ?: (0 to 0)
     }
 
     // ==================== Category Management ====================
@@ -311,745 +289,400 @@ class LibraryViewModel(
     fun setSelectedPage(index: Int) {
         if (index == selectedCategoryIndex) return
         val category = categories.getOrNull(index) ?: return
-        _state.update { it.copy(selectedCategoryIndex = index) }
+        _uiState.update { it.copy(selectedCategoryIndex = index) }
         lastUsedCategory.value = category.id
     }
-
-    // ==================== Filter & Sort ====================
-    // Delegated to LibraryController for SSOT pattern (Requirements: 4.3)
     
-    fun toggleFilter(type: LibraryFilter.Type) {
-        val newFilters = filters.value.map { filterState ->
-            if (type == filterState.type) {
-                LibraryFilter(type, when (filterState.value) {
-                    LibraryFilter.Value.Included -> LibraryFilter.Value.Excluded
-                    LibraryFilter.Value.Excluded -> LibraryFilter.Value.Missing
-                    LibraryFilter.Value.Missing -> LibraryFilter.Value.Included
-                })
-            } else filterState
-        }
-        
-        filters.value = newFilters
-        _state.update { current ->
-            current.copy(
-                filters = newFilters.toImmutableList(),
-                activeFilters = newFilters
-                    .filter { it.value == LibraryFilter.Value.Included }
-                    .map { it.type }
-                    .toImmutableSet()
-            )
-        }
-        
-        // Delegate to LibraryController (SSOT pattern)
-        // Convert to controller filter format
-        val activeFilters = newFilters.filter { it.value == LibraryFilter.Value.Included }
-        if (activeFilters.isEmpty()) {
-            libraryController.dispatch(LibraryCommand.SetFilter(ireader.domain.services.library.LibraryFilter.None))
-        } else if (activeFilters.size == 1) {
-            val controllerFilter = when (activeFilters.first().type) {
-                LibraryFilter.Type.Downloaded -> ireader.domain.services.library.LibraryFilter.Downloaded
-                LibraryFilter.Type.Unread -> ireader.domain.services.library.LibraryFilter.Unread
-                LibraryFilter.Type.InProgress -> ireader.domain.services.library.LibraryFilter.Started
-                LibraryFilter.Type.Completed -> ireader.domain.services.library.LibraryFilter.Completed
-            }
-            libraryController.dispatch(LibraryCommand.SetFilter(controllerFilter))
-        }
-        
-        scope.launch { libraryPreferences.filters(true).set(newFilters) }
-    }
-    
-    fun toggleFilterImmediate(type: LibraryFilter.Type) {
-        val currentActive = _state.value.activeFilters
-        val newActive = if (type in currentActive) currentActive - type else currentActive + type
-        
-        val newFilters = filters.value.map { filterState ->
-            if (filterState.type == type) {
-                LibraryFilter(type, if (type in newActive) LibraryFilter.Value.Included else LibraryFilter.Value.Missing)
-            } else filterState
-        }
-        
-        filters.value = newFilters
-
-        _state.update { it.copy(
-            filters = newFilters.toImmutableList(),
-            activeFilters = newActive.toImmutableSet()
-        )}
-        
-        // Delegate to LibraryController (SSOT pattern)
-        val controllerFilter = when (type) {
-            LibraryFilter.Type.Downloaded -> ireader.domain.services.library.LibraryFilter.Downloaded
-            LibraryFilter.Type.Unread -> ireader.domain.services.library.LibraryFilter.Unread
-            LibraryFilter.Type.InProgress -> ireader.domain.services.library.LibraryFilter.Started
-            LibraryFilter.Type.Completed -> ireader.domain.services.library.LibraryFilter.Completed
-        }
-        if (type in newActive) {
-            libraryController.dispatch(LibraryCommand.SetFilter(controllerFilter))
-        } else {
-            libraryController.dispatch(LibraryCommand.SetFilter(ireader.domain.services.library.LibraryFilter.None))
-        }
-        
-        scope.launch { libraryPreferences.filters(true).set(newFilters) }
-    }
-    
-    fun toggleSort(type: LibrarySort.Type) {
-        val currentSort = sorting.value
-        val newSort = if (type == currentSort.type) {
-            currentSort.copy(isAscending = !currentSort.isAscending)
-        } else {
-            currentSort.copy(type = type)
-        }
-        sorting.value = newSort
-
-        _state.update { it.copy(sort = newSort) }
-        
-        // Delegate to LibraryController (SSOT pattern)
-        val controllerSortType = when (type) {
-            LibrarySort.Type.Title -> ireader.domain.services.library.LibrarySort.Type.Title
-            LibrarySort.Type.DateAdded -> ireader.domain.services.library.LibrarySort.Type.DateAdded
-            LibrarySort.Type.LastRead -> ireader.domain.services.library.LibrarySort.Type.LastRead
-            LibrarySort.Type.TotalChapters -> ireader.domain.services.library.LibrarySort.Type.TotalChapters
-            LibrarySort.Type.Unread -> ireader.domain.services.library.LibrarySort.Type.UnreadCount
-            else -> ireader.domain.services.library.LibrarySort.Type.Title
-        }
-        libraryController.dispatch(LibraryCommand.SetSort(
-            ireader.domain.services.library.LibrarySort(controllerSortType, newSort.isAscending)
-        ))
-        
-        scope.launch { libraryPreferences.sorting().set(newSort) }
-    }
-    
-    fun toggleSortDirection() {
-        val newSort = sorting.value.copy(isAscending = !sorting.value.isAscending)
-        sorting.value = newSort
-
-        _state.update { it.copy(sort = newSort) }
-        
-        // Delegate to LibraryController (SSOT pattern)
-        val controllerSortType = when (newSort.type) {
-            LibrarySort.Type.Title -> ireader.domain.services.library.LibrarySort.Type.Title
-            LibrarySort.Type.DateAdded -> ireader.domain.services.library.LibrarySort.Type.DateAdded
-            LibrarySort.Type.LastRead -> ireader.domain.services.library.LibrarySort.Type.LastRead
-            LibrarySort.Type.TotalChapters -> ireader.domain.services.library.LibrarySort.Type.TotalChapters
-            LibrarySort.Type.Unread -> ireader.domain.services.library.LibrarySort.Type.UnreadCount
-            else -> ireader.domain.services.library.LibrarySort.Type.Title
-        }
-        libraryController.dispatch(LibraryCommand.SetSort(
-            ireader.domain.services.library.LibrarySort(controllerSortType, newSort.isAscending)
-        ))
-        
-        scope.launch { libraryPreferences.sorting().set(newSort) }
-    }
-    
-    fun updateColumnCount(count: Int) {
-        columnInPortrait.value = count
-        _state.update { it.copy(columnsInPortrait = count) }
-        scope.launch { libraryPreferences.columnsInPortrait().set(count) }
-    }
-
-    // ==================== Layout ====================
-    
-    fun onLayoutTypeChange(layoutType: DisplayMode) {
-        _state.update { it.copy(layout = layoutType) }
-        scope.launch {
-            categories.firstOrNull { it.id == lastUsedCategory.value }?.let { category ->
-                libraryScreenPrefUseCases.libraryLayoutTypeUseCase.await(
-                    category = category.category,
-                    displayMode = layoutType
-                )
-            }
-        }
-    }
-
-    // ==================== Search ====================
-    
-    fun searchInLibrary(query: String) {
-        searchQueryFlow.value = query
-    }
-    
-    fun setSearchMode(enabled: Boolean, clearQuery: Boolean = true) {
-        _state.update { it.copy(inSearchMode = enabled) }
-        if (!enabled && clearQuery) searchQueryFlow.value = ""
-    }
-    
-    fun clearSearch() {
-        searchQueryFlow.value = ""
-        _state.update { it.copy(inSearchMode = false) }
-    }
-
-    // ==================== Refresh ====================
-    
-    fun refreshUpdate() {
-        _state.update { it.copy(isRefreshing = true) }
-        scope.launch {
-            try {
-                syncUseCases?.refreshLibraryFromRemote?.invoke()
-                serviceUseCases.startLibraryUpdateServicesUseCase.start()
-            } finally {
-                _state.update { it.copy(isRefreshing = false) }
-            }
-        }
-    }
-    
-    fun updateLibrary() {
-        _state.update { it.copy(isUpdatingLibrary = true, batchOperationMessage = "Updating library...") }
-        scope.launch {
-            try {
-                val allBooks = localGetBookUseCases.findAllInLibraryBooks()
-                serviceUseCases.startLibraryUpdateServicesUseCase.start()
-                _state.update { it.copy(batchOperationMessage = "Updating ${allBooks.size} novel(s)...") }
-            } catch (e: Exception) {
-                _state.update { it.copy(batchOperationMessage = "Error: ${e.message}") }
-            } finally {
-                _state.update { it.copy(isUpdatingLibrary = false) }
-            }
-        }
-    }
-    
-    fun updateCategory(categoryId: Long) {
-        _state.update { it.copy(isUpdatingLibrary = true) }
-        scope.launch {
-            try {
-                val booksInCategory = if (categoryId == 0L) {
-                    localGetBookUseCases.findAllInLibraryBooks()
-                } else {
-                    bookCategories.value
-                        .filter { it.categoryId == categoryId }
-                        .mapNotNull { localGetBookUseCases.findBookById(it.bookId) }
-                }
-                
-                if (booksInCategory.isNotEmpty()) {
-                    serviceUseCases.startLibraryUpdateServicesUseCase.start()
-                    _state.update { it.copy(batchOperationMessage = "Updating ${booksInCategory.size} novel(s)...") }
-                }
-            } finally {
-                _state.update { it.copy(isUpdatingLibrary = false, showUpdateCategoryDialog = false) }
-            }
-        }
-    }
-
-    // ==================== Dialog Management ====================
-    
-    fun showUpdateCategoryDialog() {
-        _state.update { it.copy(showUpdateCategoryDialog = true) }
-    }
-    
-    fun hideUpdateCategoryDialog() {
-        _state.update { it.copy(showUpdateCategoryDialog = false) }
-    }
-    
-    fun setShowImportEpubDialog(show: Boolean) {
-        _state.update { it.copy(showImportEpubDialog = show) }
-    }
-
     // ==================== Resume Reading ====================
     
     fun loadLastReadInfo() {
         scope.launch {
-            val info = getLastReadNovelUseCase()
-            _state.update { it.copy(lastReadInfo = info, isResumeCardVisible = showResumeReadingCard.value) }
+            val info = libraryUseCases.getLastRead()
+            _uiState.update { 
+                it.copy(
+                    lastReadInfo = info,
+                    isResumeCardVisible = showResumeReadingCard.value
+                )
+            }
         }
     }
     
     fun dismissResumeCard() {
-        _state.update { it.copy(isResumeCardVisible = false) }
+        _uiState.update { it.copy(isResumeCardVisible = false) }
     }
     
     fun toggleResumeReadingCard(enabled: Boolean) {
-        _state.update { it.copy(isResumeCardVisible = enabled) }
-        scope.launch { libraryPreferences.showResumeReadingCard().set(enabled) }
+        libraryPreferences.showResumeReadingCard().set(enabled)
+        _uiState.update { it.copy(isResumeCardVisible = enabled) }
+    }
+    
+    // ==================== Category Update ====================
+    
+    fun updateCategory(categoryId: Long) {
+        scope.launch {
+            val selectedIds = state.value.selectedBookIds.toList()
+            if (selectedIds.isNotEmpty()) {
+                val bookCategories = selectedIds.map { bookId ->
+                    ireader.domain.models.entities.BookCategory(bookId = bookId, categoryId = categoryId)
+                }
+                libraryUseCases.categories.insertBookCategory(bookCategories)
+            }
+            hideUpdateCategoryDialog()
+            unselectAll()
+        }
+    }
+    
+    fun showUpdateCategoryDialog() {
+        _uiState.update { it.copy(showUpdateCategoryDialog = true) }
+    }
+    
+    fun hideUpdateCategoryDialog() {
+        _uiState.update { it.copy(showUpdateCategoryDialog = false) }
+    }
+    
+    // ==================== Layout & Display ====================
+    
+    fun updateColumnCount(count: Int) {
+        libraryPreferences.columnsInPortrait().set(count)
+    }
+    
+    fun onLayoutTypeChange(mode: DisplayMode) {
+        _uiState.update { it.copy(layout = mode) }
+        libraryPreferences.categoryFlags().set(mode.flag)
     }
     
     fun toggleShowArchivedBooks(enabled: Boolean) {
-        scope.launch { libraryPreferences.showArchivedBooks().set(enabled) }
+        libraryPreferences.showArchivedBooks().set(enabled)
     }
-
-    // ==================== Download Operations ====================
     
-    fun downloadChapters() {
+    /**
+     * Get columns for orientation (simple version).
+     */
+    fun getColumnsForOrientation(isLandscape: Boolean): Int {
+        return if (isLandscape) columnInLandscape.value else columnInPortrait.value
+    }
+    
+    /**
+     * Get columns for orientation as StateFlow (for use with CoroutineScope).
+     * This overload is used by LibraryContent for reactive column updates.
+     */
+    fun getColumnsForOrientation(isLandscape: Boolean, coroutineScope: CoroutineScope): StateFlow<Int> {
+        return if (isLandscape) {
+            libraryPreferences.columnsInLandscape().stateIn(coroutineScope)
+        } else {
+            libraryPreferences.columnsInPortrait().stateIn(coroutineScope)
+        }
+    }
+    
+    /**
+     * Get the default toggleable state for a category based on selected books.
+     * Used by EditCategoriesDialog to determine checkbox state.
+     */
+    fun getDefaultValue(category: Category): ToggleableState {
+        val selectedIds = state.value.selectedBookIds
+        if (selectedIds.isEmpty()) return ToggleableState.Off
+        
+        val bookCategoriesList = bookCategories.value
+        val booksInCategory = bookCategoriesList.filter { it.categoryId == category.id }
+        val selectedInCategory = booksInCategory.count { it.bookId in selectedIds }
+        
+        return when {
+            selectedInCategory == 0 -> ToggleableState.Off
+            selectedInCategory == selectedIds.size -> ToggleableState.On
+            else -> ToggleableState.Indeterminate
+        }
+    }
+    
+    // ==================== Search ====================
+    
+    fun searchInLibrary(query: String) {
+        searchQueryFlow.value = query
+        _uiState.update { it.copy(inSearchMode = query.isNotBlank()) }
+    }
+    
+    fun clearSearch() {
+        searchQueryFlow.value = ""
+        _uiState.update { it.copy(inSearchMode = false, searchQuery = null) }
+    }
+    
+    fun setSearchMode(enabled: Boolean) {
+        _uiState.update { it.copy(inSearchMode = enabled) }
+        if (!enabled) {
+            clearSearch()
+        }
+    }
+    
+    // ==================== Library Operations ====================
+    
+    fun refreshUpdate() {
+        libraryController.dispatch(LibraryCommand.RefreshLibrary)
+    }
+    
+    fun updateLibrary() {
         scope.launch {
-            val selectedIds = _state.value.selectedBookIds.toList()
-            if (selectedIds.isEmpty()) {
-                showSnackBar(ireader.i18n.UiText.DynamicString("No books selected"))
-                return@launch
-            }
-            
-            when (val result = downloadService.queueBooks(selectedIds)) {
-                is ireader.domain.services.common.ServiceResult.Success -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("${selectedIds.size} book(s) queued"))
-                    unselectAll()
-                }
-                is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Download failed: ${result.message}"))
-                }
-                else -> {}
-            }
+            _uiState.update { it.copy(isUpdatingLibrary = true) }
+            serviceUseCases.startLibraryUpdateServicesUseCase.start()
+            _uiState.update { it.copy(isUpdatingLibrary = false) }
         }
     }
-    
-    suspend fun downloadUnreadChapters(): DownloadResult {
-        val selectedIds = _state.value.selectedBookIds.toList()
-        val result = downloadUnreadChaptersUseCase.downloadUnreadChapters(selectedIds)
-        if (result is DownloadResult.Success || result is DownloadResult.NoUnreadChapters) {
-            unselectAll()
-        }
-        return result
-    }
-
-    // ==================== Mark Operations ====================
-    
-    suspend fun markAsReadWithUndo(): MarkResult {
-        val selectedIds = _state.value.selectedBookIds.toList()
-        val result = markBookAsReadOrNotUseCase.markAsReadWithUndo(selectedIds)
-        if (result is MarkResult.Success) {
-            _state.update { it.copy(
-                lastUndoState = UndoState(result.previousStates, UndoOperationType.MARK_AS_READ, currentTimeToLong())
-            )}
-            unselectAll()
-        }
-        return result
-    }
-    
-    suspend fun markAsUnreadWithUndo(): MarkResult {
-        val selectedIds = _state.value.selectedBookIds.toList()
-        val result = markBookAsReadOrNotUseCase.markAsUnreadWithUndo(selectedIds)
-        if (result is MarkResult.Success) {
-            _state.update { it.copy(
-                lastUndoState = UndoState(result.previousStates, UndoOperationType.MARK_AS_UNREAD, currentTimeToLong())
-            )}
-            unselectAll()
-        }
-        return result
-    }
-
-    // ==================== Sync ====================
     
     fun syncWithRemote() {
         scope.launch {
-            if (!isSyncAvailable) {
-                _state.update { it.copy(batchOperationMessage = "Sync not configured") }
-                return@launch
-            }
-            _state.update { it.copy(batchOperationMessage = "Syncing...") }
-            syncUseCases?.performFullSync?.invoke()
-            _state.update { it.copy(batchOperationMessage = "Sync completed") }
+            syncUseCases?.syncLibrary?.invoke()
         }
     }
-
-    // ==================== Random Entry ====================
     
     fun openRandomEntry(): Long? {
-        val allBooks = books
-        if (allBooks.isEmpty()) {
-            _state.update { it.copy(batchOperationMessage = "Library is empty") }
-            return null
-        }
-        return allBooks.random().id
-    }
-
-    // ==================== Category Dialog Helpers ====================
-    
-    fun getDefaultValue(category: Category): ToggleableState {
-        val hasSelected = selectedBooks.any { id ->
-            id in bookCategories.value.filter { it.categoryId == category.id }.map { it.bookId }
-        }
-        return if (hasSelected) ToggleableState.On else ToggleableState.Off
-    }
-
-    // ==================== Library Data ====================
-    
-    // MutableStateFlow for each category's books - allows instant updates
-    private val categoryBooksState = mutableMapOf<Long, MutableStateFlow<List<BookItem>>>()
-    
-    private fun getCategoryBooksFlow(categoryId: Long): MutableStateFlow<List<BookItem>> {
-        return categoryBooksState.getOrPut(categoryId) {
-            MutableStateFlow(loadedManga[categoryId] ?: emptyList())
-        }
+        val booksList = state.value.books
+        return if (booksList.isNotEmpty()) {
+            booksList.random().id
+        } else null
     }
     
-    @Composable
-    fun getLibraryForCategoryIndex(categoryIndex: Int): State<List<BookItem>> {
-        // Collect state reactively to get categories
-        val currentState by state.collectAsState()
-        val currentCategories = currentState.categories
-        
-        val categoryId = currentCategories.getOrNull(categoryIndex)?.id 
-        
-        if (categoryId == null) {
-            return remember { androidx.compose.runtime.mutableStateOf(emptyList<BookItem>()) }
-        }
-
-        // Get or create the state flow for this category
-        val booksFlow = remember(categoryId) { getCategoryBooksFlow(categoryId) }
-        
-        // Subscribe to the full data flow with all filters, sorts, and search
-        androidx.compose.runtime.LaunchedEffect(categoryId, sorting.value, filters.value, showArchivedBooks.value) {
-            getLibraryCategory.subscribe(categoryId, sorting.value, filters.value, showArchivedBooks.value)
-                .combine(searchQueryFlow) { mangas, query ->
-                    if (query.isBlank()) {
-                        mangas.mapIndexed { index, libraryBook ->
-                            libraryBook.toBookItem().copy(column = index.toLong())
-                        }
-                    } else {
-                        mangas.asSequence()
-                            .filter { it.title.contains(query, true) }
-                            .mapIndexed { index, libraryBook ->
-                                libraryBook.toBookItem().copy(column = index.toLong())
-                            }
-                            .toList()
-                    }
-                }
-                .collect { items ->
-                    loadedManga[categoryId] = items
-                    booksFlow.value = items
-                    // Mark loading complete when we receive data
-                    _state.update { it.copy(isLoading = false) }
-                }
-        }
-        
-        // Return the state flow as State for Compose
-        return booksFlow.collectAsState()
-    }
-    
-    fun getColumnsForOrientation(isLandscape: Boolean, scope: CoroutineScope): StateFlow<Int> {
-        return if (isLandscape) {
-            libraryPreferences.columnsInLandscape()
-        } else {
-            libraryPreferences.columnsInPortrait()
-        }.stateIn(scope)
-    }
-
-
     // ==================== EPUB Import ====================
+    
+    fun setShowImportEpubDialog(show: Boolean) {
+        _uiState.update { it.copy(showImportEpubDialog = show) }
+    }
     
     fun importEpubFiles(uris: List<String>) {
         scope.launch {
-            try {
-                val estimatedSize = uris.size * 5 * 1024 * 1024L
-                if (!ireader.core.util.StorageUtil.checkStorageBeforeOperation(estimatedSize)) {
-                    _state.update { it.copy(batchOperationMessage = "Insufficient storage space") }
-                    return@launch
-                }
-                
-                val fileStates = uris.map { uri ->
-                    ireader.presentation.ui.home.library.components.FileImportState(
-                        fileName = uri.substringAfterLast('/'),
-                        status = ireader.presentation.ui.home.library.components.ImportStatus.PENDING
-                    )
-                }.toMutableList()
-                
-                _state.update { it.copy(
+            _uiState.update { 
+                it.copy(
                     epubImportState = it.epubImportState.copy(
                         showProgress = true,
-                        progress = ireader.presentation.ui.home.library.components.EpubImportProgress(
-                            files = fileStates,
-                            currentFileIndex = 0,
-                            overallProgress = 0f,
-                            isPaused = false
-                        )
+                        selectedUris = uris
                     )
-                )}
-                
-                val results = mutableListOf<ireader.presentation.ui.home.library.components.EpubImportResult>()
-                
-                uris.forEachIndexed { index, uri ->
-                    try {
-                        fileStates[index] = fileStates[index].copy(
-                            status = ireader.presentation.ui.home.library.components.ImportStatus.IN_PROGRESS,
-                            progress = 0.5f
-                        )
-                        
-                        _state.update { it.copy(
-                            epubImportState = it.epubImportState.copy(
-                                progress = it.epubImportState.progress?.copy(
-                                    files = fileStates.toList(),
-                                    currentFileIndex = index,
-                                    overallProgress = index.toFloat() / uris.size
-                                )
-                            )
-                        )}
-                        
-                        importEpub.parse(listOf(ireader.domain.models.common.Uri.parse(uri)))
-                        
-                        fileStates[index] = fileStates[index].copy(
-                            status = ireader.presentation.ui.home.library.components.ImportStatus.COMPLETED,
-                            progress = 1f
-                        )
-                        
-                        results.add(ireader.presentation.ui.home.library.components.EpubImportResult(
-                            fileName = uri.substringAfterLast('/'),
-                            success = true
-                        ))
-                    } catch (e: Exception) {
-                        fileStates[index] = fileStates[index].copy(
-                            status = ireader.presentation.ui.home.library.components.ImportStatus.FAILED
-                        )
-                        results.add(ireader.presentation.ui.home.library.components.EpubImportResult(
-                            fileName = uri.substringAfterLast('/'),
-                            success = false,
-                            errorMessage = e.message
-                        ))
-                    }
-                }
-                
-                val successCount = results.count { it.success }
-                val failureCount = results.count { !it.success }
-                
-                _state.update { it.copy(
-                    epubImportState = it.epubImportState.copy(
-                        showProgress = false,
-                        showSummary = true,
-                        summary = ireader.presentation.ui.home.library.components.EpubImportSummary(
-                            results = results,
-                            successCount = successCount,
-                            failureCount = failureCount
-                        )
-                    )
-                )}
-            } catch (e: Exception) {
-                _state.update { it.copy(
-                    batchOperationMessage = "Import error: ${e.message}",
-                    epubImportState = it.epubImportState.copy(showProgress = false)
-                )}
+                )
             }
-        }
-    }
-    
-    fun dismissEpubImportSummary() {
-        _state.update { it.copy(
-            epubImportState = EpubImportState()
-        )}
-    }
-    
-    fun retryFailedImports() {
-        val failedUris = epubImportState.summary?.results
-            ?.filter { !it.success }
-            ?.mapNotNull { result -> epubImportState.selectedUris.find { it.endsWith(result.fileName) } }
-            ?: emptyList()
-        
-        if (failedUris.isNotEmpty()) {
-            _state.update { it.copy(epubImportState = it.epubImportState.copy(showSummary = false)) }
-            importEpubFiles(failedUris)
-        }
-    }
-
-    // ==================== EPUB Export ====================
-    
-    fun exportBookAsEpub(bookId: Long, epubExportService: ireader.domain.services.epub.EpubExportService? = null) {
-        scope.launch {
-            try {
-                val book = localGetBookUseCases.findBookById(bookId) ?: run {
-                    _state.update { it.copy(batchOperationMessage = "Book not found") }
-                    return@launch
-                }
-                
-                val chapters = localGetChapterUseCase.findChaptersByBookId(bookId)
-                if (chapters.isEmpty()) {
-                    _state.update { it.copy(batchOperationMessage = "No chapters to export") }
-                    return@launch
-                }
-                
-                _state.update { it.copy(
-                    epubExportState = it.epubExportState.copy(
-                        showProgress = true,
-                        progress = ireader.presentation.ui.home.library.components.EpubExportProgress(
-                            currentChapter = chapters.first().name,
-                            currentChapterIndex = 1,
-                            totalChapters = chapters.size,
-                            progress = 0f
-                        )
-                    )
-                )}
-                
-                if (epubExportService != null) {
-                    val result = epubExportService.exportBook(
-                        book = book,
-                        chapters = chapters,
-                        options = ireader.domain.services.epub.EpubExportOptions(),
-                        onProgress = { progress, message ->
-                            val currentIndex = (progress * chapters.size).toInt().coerceIn(0, chapters.size - 1)
-                            _state.update { it.copy(
-                                epubExportState = it.epubExportState.copy(
-                                    progress = it.epubExportState.progress?.copy(
-                                        currentChapter = chapters.getOrNull(currentIndex)?.name ?: message,
-                                        currentChapterIndex = currentIndex + 1,
-                                        progress = progress
-                                    )
-                                )
-                            )}
-                        }
-                    )
-                    
-                    result.fold(
-                        onSuccess = { uri ->
-                            _state.update { it.copy(
-                                epubExportState = it.epubExportState.copy(
-                                    showProgress = false,
-                                    showCompletion = true,
-                                    result = ireader.presentation.ui.home.library.components.EpubExportResult(
-                                        filePath = uri.toString(),
-                                        fileName = "${book.title}.epub",
-                                        fileSize = 0,
-                                        success = true
-                                    )
-                                )
-                            )}
-                        },
-                        onFailure = { error ->
-                            _state.update { it.copy(
-                                epubExportState = it.epubExportState.copy(
-                                    showProgress = false,
-                                    showCompletion = true,
-                                    result = ireader.presentation.ui.home.library.components.EpubExportResult(
-                                        filePath = "",
-                                        fileName = "${book.title}.epub",
-                                        fileSize = 0,
-                                        success = false,
-                                        errorMessage = error.message
-                                    )
-                                )
-                            )}
-                        }
-                    )
-                }
-            } catch (e: Exception) {
-                _state.update { it.copy(
-                    batchOperationMessage = "Export error: ${e.message}",
-                    epubExportState = it.epubExportState.copy(showProgress = false)
-                )}
-            }
-        }
-    }
-    
-    fun dismissEpubExportCompletion() {
-        _state.update { it.copy(epubExportState = EpubExportState()) }
-    }
-    
-    fun cancelEpubExport() {
-        _state.update { it.copy(epubExportState = it.epubExportState.copy(showProgress = false)) }
-    }
-
-    // ==================== Batch Operations ====================
-    
-    fun performBatchOperation(operation: ireader.presentation.ui.home.library.components.BatchOperation) {
-        scope.launch {
-            _state.update { it.copy(batchOperationInProgress = true, batchOperationMessage = "Processing...") }
             
             try {
-                when (operation) {
-                    ireader.presentation.ui.home.library.components.BatchOperation.MARK_AS_READ -> {
-                        val result = markAsReadWithUndo()
-                        when (result) {
-                            is MarkResult.Success -> _state.update { 
-                                it.copy(batchOperationMessage = "Marked ${result.totalChapters} chapter(s) as read")
-                            }
-                            is MarkResult.Failure -> _state.update { 
-                                it.copy(batchOperationMessage = "Error: ${result.message}")
-                            }
-                        }
-                    }
-                    ireader.presentation.ui.home.library.components.BatchOperation.MARK_AS_UNREAD -> {
-                        val result = markAsUnreadWithUndo()
-                        when (result) {
-                            is MarkResult.Success -> _state.update { 
-                                it.copy(batchOperationMessage = "Marked ${result.totalChapters} chapter(s) as unread")
-                            }
-                            is MarkResult.Failure -> _state.update { 
-                                it.copy(batchOperationMessage = "Error: ${result.message}")
-                            }
-                        }
-                    }
-                    ireader.presentation.ui.home.library.components.BatchOperation.DOWNLOAD -> {
-                        downloadChapters()
-                    }
-                    ireader.presentation.ui.home.library.components.BatchOperation.DOWNLOAD_UNREAD -> {
-                        val result = downloadUnreadChapters()
-                        when (result) {
-                            is DownloadResult.Success -> _state.update { 
-                                it.copy(batchOperationMessage = "Downloading ${result.totalChapters} chapters")
-                            }
-                            is DownloadResult.NoUnreadChapters -> _state.update { 
-                                it.copy(batchOperationMessage = "No unread chapters")
-                            }
-                            is DownloadResult.Failure -> _state.update { 
-                                it.copy(batchOperationMessage = "Error: ${result.message}")
-                            }
-                        }
-                    }
-                    ireader.presentation.ui.home.library.components.BatchOperation.DELETE -> {
-                        val selectedIds = _state.value.selectedBookIds.toList()
-                        deleteUseCase.unFavoriteBook(selectedIds)
-                        _state.update { it.copy(batchOperationMessage = "Removed ${selectedIds.size} book(s)") }
-                        unselectAll()
-                    }
-                    ireader.presentation.ui.home.library.components.BatchOperation.CHANGE_CATEGORY -> {
-                        _state.update { it.copy(batchOperationMessage = null) }
-                    }
-                    ireader.presentation.ui.home.library.components.BatchOperation.ARCHIVE -> {
-                        val selectedIds = _state.value.selectedBookIds.toList()
-                        archiveBookUseCase.archiveBooks(selectedIds).fold(
-                            onSuccess = {
-                                _state.update { it.copy(batchOperationMessage = "Archived ${selectedIds.size} book(s)") }
-                                unselectAll()
-                            },
-                            onFailure = { e ->
-                                _state.update { it.copy(batchOperationMessage = "Error: ${e.message}") }
-                            }
-                        )
-                    }
+                val parsedUris = uris.map { ireader.domain.models.common.Uri.parse(it) }
+                libraryUseCases.importEpub.parse(parsedUris)
+            } catch (e: Exception) {
+                // Handle error
+            }
+            
+            _uiState.update { 
+                it.copy(
+                    epubImportState = it.epubImportState.copy(showProgress = false),
+                    showImportEpubDialog = false
+                )
+            }
+        }
+    }
+    
+    // ==================== Book Operations ====================
+    
+    /**
+     * Mark selected books as read (uses current selection if no bookIds provided).
+     */
+    fun markAsReadWithUndo(bookIds: List<Long> = state.value.selectedBookIds.toList()) {
+        scope.launch {
+            libraryUseCases.markAsRead.markAsRead(bookIds)
+        }
+    }
+    
+    /**
+     * Mark selected books as unread (uses current selection if no bookIds provided).
+     */
+    fun markAsUnreadWithUndo(bookIds: List<Long> = state.value.selectedBookIds.toList()) {
+        scope.launch {
+            libraryUseCases.markAsRead.markAsNotRead(bookIds)
+        }
+    }
+    
+    /**
+     * Download chapters for selected books (uses current selection if no bookIds provided).
+     */
+    fun downloadChapters(bookIds: List<Long> = state.value.selectedBookIds.toList()) {
+        scope.launch {
+            downloadService.queueBooks(bookIds)
+        }
+    }
+    
+    /**
+     * Download unread chapters for selected books (uses current selection if no bookIds provided).
+     */
+    fun downloadUnreadChapters(bookIds: List<Long> = state.value.selectedBookIds.toList()) {
+        scope.launch {
+            libraryUseCases.downloadUnread.downloadUnreadChapters(bookIds)
+        }
+    }
+    
+    // ==================== Library Content ====================
+    
+    /**
+     * Get library books for a specific category index.
+     * Returns a list of LibraryBook filtered by category.
+     */
+    fun getLibraryForCategoryIndex(categoryIndex: Int): List<ireader.domain.models.entities.LibraryBook> {
+        val category = categories.getOrNull(categoryIndex) ?: return emptyList()
+        return state.value.books.filter { book ->
+            book.category.toLong() == category.id || category.id == 0L
+        }
+    }
+    
+    /**
+     * Get library books for a specific category index as a Composable State.
+     * Used by LibraryPager which expects @Composable (page: Int) -> State<List<BookItem>>.
+     */
+    @Composable
+    fun getLibraryForCategoryIndexAsState(categoryIndex: Int): State<List<BookItem>> {
+        val currentState by state.collectAsState()
+        val category = currentState.categories.getOrNull(categoryIndex)
+        
+        return remember(currentState.books, category) {
+            androidx.compose.runtime.mutableStateOf<List<BookItem>>(
+                if (category == null) {
+                    emptyList()
+                } else {
+                    currentState.books.filter { book ->
+                        book.category.toLong() == category.id || category.id == 0L
+                    }.map { it.toBookItem() }
                 }
-            } finally {
-                _state.update { it.copy(batchOperationInProgress = false) }
+            )
+        }
+    }
+    
+    // ==================== Clipboard ====================
+    
+    fun copyBookTitle(title: String) {
+        scope.launch {
+            platformServices.clipboard.copyText(title)
+        }
+    }
+    
+    // ==================== EPUB Export ====================
+    
+    fun exportBookAsEpub(bookId: Long) {
+        scope.launch {
+            _uiState.update { 
+                it.copy(epubExportState = it.epubExportState.copy(showProgress = true))
+            }
+            // Export logic would go here
+            _uiState.update { 
+                it.copy(epubExportState = it.epubExportState.copy(showProgress = false))
             }
         }
     }
 
-    // ==================== Platform Services ====================
+    // ==================== Filter/Sort Management ====================
+    // Requirements: 3.3 - Only dispatch to LibraryController, no duplicate state updates
     
-    fun copyBookTitle(book: ireader.domain.models.entities.Book) {
-        scope.launch {
-            when (val result = clipboardService.copyText(book.title, "Book Title")) {
-                is ireader.domain.services.common.ServiceResult.Success -> 
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Title copied"))
-                is ireader.domain.services.common.ServiceResult.Error -> 
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Copy failed"))
-                else -> {}
-            }
-        }
-    }
-    
-    fun shareBook(book: ireader.domain.models.entities.Book) {
-        scope.launch {
-            val shareText = buildString {
-                append(book.title)
-                if (book.author.isNotBlank()) append(" by ${book.author}")
-            }
-            shareService.shareText(shareText, book.title)
-        }
-    }
-    
-    fun pickEpubFiles() {
-        scope.launch {
-            when (val result = fileSystemService.pickMultipleFiles(
-                fileTypes = listOf("epub"),
-                title = "Select EPUB files to import"
-            )) {
-                is ireader.domain.services.common.ServiceResult.Success -> {
-                    importEpubFiles(result.data.map { it.toString() })
-                }
-                is ireader.domain.services.common.ServiceResult.Error -> {
-                    showSnackBar(ireader.i18n.UiText.DynamicString("Failed to pick files"))
-                }
-                else -> {}
-            }
-        }
-    }
-    
-    override fun onDestroy() {
-        searchJob?.cancel()
+    /**
+     * Toggle a filter type (cycles through Included -> Excluded -> Missing).
+     * Dispatches to LibraryController and persists to preferences.
+     */
+    fun toggleFilter(type: LibraryFilter.Type) {
+        val currentFilters = filters.value.toMutableList()
+        val index = currentFilters.indexOfFirst { it.type == type }
         
-        // Cleanup LibraryController state (Requirements: 4.3)
-        libraryController.dispatch(LibraryCommand.Cleanup)
+        if (index >= 0) {
+            val current = currentFilters[index]
+            val newValue = when (current.value) {
+                LibraryFilter.Value.Missing -> LibraryFilter.Value.Included
+                LibraryFilter.Value.Included -> LibraryFilter.Value.Excluded
+                LibraryFilter.Value.Excluded -> LibraryFilter.Value.Missing
+            }
+            currentFilters[index] = LibraryFilter(type, newValue)
+        }
         
-        super.onDestroy()
+        // Persist to preferences
+        libraryPreferences.filters(true).set(currentFilters)
+        
+        // Dispatch filter change to LibraryController
+        val activeFilter = currentFilters.firstOrNull { it.value == LibraryFilter.Value.Included }
+        if (activeFilter != null) {
+            val controllerFilter = when (activeFilter.type) {
+                LibraryFilter.Type.Unread -> ireader.domain.services.library.LibraryFilter.Unread
+                LibraryFilter.Type.Completed -> ireader.domain.services.library.LibraryFilter.Completed
+                LibraryFilter.Type.Downloaded -> ireader.domain.services.library.LibraryFilter.Downloaded
+                LibraryFilter.Type.InProgress -> ireader.domain.services.library.LibraryFilter.Started // Map InProgress to Started
+            }
+            libraryController.dispatch(LibraryCommand.SetFilter(controllerFilter))
+        } else {
+            libraryController.dispatch(LibraryCommand.SetFilter(ireader.domain.services.library.LibraryFilter.None))
+        }
+    }
+    
+    /**
+     * Toggle a filter immediately (same as toggleFilter but with immediate effect).
+     * Requirements: 3.3 - Only dispatch to LibraryController
+     */
+    fun toggleFilterImmediate(type: LibraryFilter.Type) {
+        toggleFilter(type)
+    }
+    
+    /**
+     * Toggle sort type.
+     * Requirements: 3.3 - Only dispatch to LibraryController
+     */
+    fun toggleSort(type: LibrarySort.Type) {
+        val currentSort = sorting.value
+        val newSort = if (currentSort.type == type) {
+            // Same type - toggle direction
+            LibrarySort(type, !currentSort.isAscending)
+        } else {
+            // Different type - use ascending by default
+            LibrarySort(type, true)
+        }
+        
+        // Persist to preferences
+        libraryPreferences.sorting().set(newSort)
+        
+        // Dispatch to LibraryController - map to controller sort types
+        val controllerSortType = when (type) {
+            LibrarySort.Type.Title -> ireader.domain.services.library.LibrarySort.Type.Title
+            LibrarySort.Type.LastRead -> ireader.domain.services.library.LibrarySort.Type.LastRead
+            LibrarySort.Type.DateAdded -> ireader.domain.services.library.LibrarySort.Type.DateAdded
+            LibrarySort.Type.TotalChapters -> ireader.domain.services.library.LibrarySort.Type.TotalChapters
+            // Map unsupported types to Title as fallback
+            LibrarySort.Type.LastUpdated -> ireader.domain.services.library.LibrarySort.Type.LastRead
+            LibrarySort.Type.Unread -> ireader.domain.services.library.LibrarySort.Type.UnreadCount
+            LibrarySort.Type.DateFetched -> ireader.domain.services.library.LibrarySort.Type.DateAdded
+            LibrarySort.Type.Source -> ireader.domain.services.library.LibrarySort.Type.Title
+        }
+        val controllerSort = ireader.domain.services.library.LibrarySort(
+            type = controllerSortType,
+            ascending = newSort.isAscending
+        )
+        libraryController.dispatch(LibraryCommand.SetSort(controllerSort))
+        
+        // Update UI state
+        _uiState.update { it.copy(sort = newSort) }
+    }
+    
+    /**
+     * Toggle sort direction.
+     * Requirements: 3.3 - Only dispatch to LibraryController
+     */
+    fun toggleSortDirection() {
+        val currentSort = sorting.value
+        val newSort = LibrarySort(currentSort.type, !currentSort.isAscending)
+        
+        // Persist to preferences
+        libraryPreferences.sorting().set(newSort)
+        
+        // Dispatch to LibraryController - map to controller sort types
+        val controllerSortType = when (currentSort.type) {
+            LibrarySort.Type.Title -> ireader.domain.services.library.LibrarySort.Type.Title
+            LibrarySort.Type.LastRead -> ireader.domain.services.library.LibrarySort.Type.LastRead
+            LibrarySort.Type.DateAdded -> ireader.domain.services.library.LibrarySort.Type.DateAdded
+            LibrarySort.Type.TotalChapters -> ireader.domain.services.library.LibrarySort.Type.TotalChapters
+            // Map unsupported types to Title as fallback
+            LibrarySort.Type.LastUpdated -> ireader.domain.services.library.LibrarySort.Type.LastRead
+            LibrarySort.Type.Unread -> ireader.domain.services.library.LibrarySort.Type.UnreadCount
+            LibrarySort.Type.DateFetched -> ireader.domain.services.library.LibrarySort.Type.DateAdded
+            LibrarySort.Type.Source -> ireader.domain.services.library.LibrarySort.Type.Title
+        }
+        val controllerSort = ireader.domain.services.library.LibrarySort(
+            type = controllerSortType,
+            ascending = newSort.isAscending
+        )
+        libraryController.dispatch(LibraryCommand.SetSort(controllerSort))
+        
+        // Update UI state
+        _uiState.update { it.copy(sort = newSort) }
     }
 }

@@ -50,7 +50,7 @@ val PresentationModules = module {
     factory   { BackupScreenViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory   { CloudBackupViewModel(get(), get()) }
 
-    factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),) }
+    factory   { AdvanceSettingViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     factory <DownloadStateImpl> { DownloadStateImpl() }
     factory <FontScreenStateImpl> { FontScreenStateImpl() }
 
@@ -74,34 +74,19 @@ val PresentationModules = module {
     // Changed from single to factory - these ViewModels are heavy and should be created on-demand
     // Updated to Mihon-style StateFlow pattern (no separate state impl needed)
     factory  { HistoryViewModel(get(), get(), get()) }
+    // LibraryViewModel - Simplified with aggregates (Requirements: 3.1, 3.2, 3.3, 3.4, 4.1, 4.4)
+    // Reduced from 26 parameters to 9 using LibraryUseCases and PlatformServices aggregates
     factory  { 
         LibraryViewModel(
-            localGetBookUseCases = get(),
-            insertUseCases = get(),
-            deleteUseCase = get(),
-            localGetChapterUseCase = get(),
+            libraryUseCases = get(),           // Aggregate: groups 11 use cases
+            platformServices = get(),          // Aggregate: groups 5 platform services
+            libraryPreferences = get(),
             libraryScreenPrefUseCases = get(),
             serviceUseCases = get(),
-            getLibraryCategory = get(),
-            libraryPreferences = get(),
-            markBookAsReadOrNotUseCase = get(),
-            getCategory = get(),
-            downloadUnreadChaptersUseCase = get(),
-            archiveBookUseCase = get(),
-            getLastReadNovelUseCase = get(),
             syncUseCases = getOrNull(),
-            importEpub = get(),
             downloadService = get(),
-            bookUseCases = get(),
-            chapterUseCases = get(),
-            categoryUseCases = get(),
-            downloadUseCases = get(),
-            historyUseCases = get(),
-            clipboardService = get(),
-            shareService = get(),
-            fileSystemService = get(),
             localizeHelper = get(),
-            libraryController = get()
+            libraryController = get()          // SSOT for library state
         )
     }
     factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
@@ -142,7 +127,7 @@ val PresentationModules = module {
 
     factory  { CategoryScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { DownloaderViewModel(get(), get(), get(), get(),get()) }
-    factory  { FontScreenViewModel(get(), get(), get(), get()) }
+    factory  { FontScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get(),get()) }
     factory  { TranslationSettingsViewModel(get(), get()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
