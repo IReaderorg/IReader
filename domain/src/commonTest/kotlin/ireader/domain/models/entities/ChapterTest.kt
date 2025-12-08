@@ -147,6 +147,20 @@ class ChapterTest {
         assertFalse(chapter.isEmpty())
     }
 
+    @Test
+    fun `isEmpty returns true for placeholder content from light mapper`() {
+        // The light mapper uses a placeholder to indicate downloaded status
+        // This placeholder should be treated as empty content
+        val chapter = Chapter(
+            bookId = 1L,
+            key = "key",
+            name = "Downloaded",
+            content = listOf(Text("[DOWNLOADED_CONTENT_PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER]"))
+        )
+        
+        assertTrue(chapter.isEmpty())
+    }
+
     // ==================== Conversion Tests ====================
 
     @Test

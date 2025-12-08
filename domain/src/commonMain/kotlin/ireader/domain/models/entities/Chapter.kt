@@ -33,7 +33,8 @@ data class Chapter(
     
     /**
      * Check if the chapter has no actual text content.
-     * This properly handles placeholder content (empty Text objects) from light queries.
+     * This properly handles placeholder content (empty Text objects) from light queries,
+     * as well as the DOWNLOADED_CHAPTER_PLACEHOLDER marker used by chapterMapperLight.
      */
     fun isEmpty(): Boolean {
         if (content.isEmpty()) return true
@@ -41,7 +42,9 @@ data class Chapter(
         // Extract actual text content from Text pages
         val textContent = content.mapNotNull { page ->
             when (page) {
-                is ireader.core.source.model.Text -> page.text.takeIf { it.isNotBlank() }
+                is ireader.core.source.model.Text -> page.text.takeIf { 
+                    it.isNotBlank() && !it.contains("PLACEHOLDER_DO_NOT_DISPLAY_THIS_TEXT_TO_USER")
+                }
                 else -> null
             }
         }
