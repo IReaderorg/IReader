@@ -20,6 +20,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,9 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.core.log.Log
 import ireader.core.util.getBuildNumber
-import ireader.domain.preferences.models.FontType
-import ireader.domain.preferences.models.getDefaultFont
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.this_is_first_chapter
@@ -59,9 +60,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import ireader.domain.utils.extensions.currentTimeToLong
 
 
 @OptIn( ExperimentalMaterial3Api::class)
@@ -113,11 +111,7 @@ data class ReaderScreenSpec(
             }
         }
         
-        // Sync with TTS state when reader screen becomes active
-        // This handles the case where user was in TTS screen and navigated chapters there
-        LaunchedEffect(Unit) {
-            vm.syncWithTTSState()
-        }
+
         
         // Track reading time - records time spent in reader screen
         DisposableEffect(key1 = Unit) {
@@ -154,6 +148,17 @@ data class ReaderScreenSpec(
             while (vm.settingsViewModel.autoScrollInterval.value.toInt() != 0 && autoScrollMode) {
                 scrollState.scrollBy(vm.settingsViewModel.autoScrollOffset.value.toFloat())
                 delay(vm.settingsViewModel.autoScrollInterval.value.toLong())
+            }
+        }
+        
+        // Sync with TTS chapter when screen becomes active
+        // Observe the back stack to detect when we return from TTS screen
+        val backStackEntry by navController.currentBackStackEntryFlow.collectAsState(initial = null)
+        LaunchedEffect(backStackEntry) {
+            // When back stack changes and we're on this screen, sync with TTS
+            val route = backStackEntry?.destination?.route
+            if (route?.contains("reader") == true) {
+                vm.syncWithTTSChapter()
             }
         }
         LaunchedEffect(key1 = vm.autoBrightnessMode.value) {

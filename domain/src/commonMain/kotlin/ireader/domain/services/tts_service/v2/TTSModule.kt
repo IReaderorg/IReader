@@ -45,15 +45,14 @@ val ttsV2Module = module {
     // TTS Controller - main coordinator
     // Note: Engine factory is platform-specific (expect/actual)
     // Using single instead of factory to maintain state across the app
-    // ChapterController integration (Requirements: 9.3, 9.4, 9.5)
+    // No ChapterController - TTS has its own independent state, sync happens via onPop
     single {
         TTSController(
             contentLoader = get(),
             nativeEngineFactory = { TTSEngineFactory.createNativeEngine() },
             gradioEngineFactory = { config -> TTSEngineFactory.createGradioEngine(config) },
             initialGradioConfig = null, // Can be set via SetGradioConfig command
-            cacheUseCase = getOrNull(), // Optional - for offline playback of cached audio
-            chapterController = getOrNull() // Optional - for chapter navigation sync
+            cacheUseCase = getOrNull() // Optional - for offline playback of cached audio
         )
     }
     

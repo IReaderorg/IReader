@@ -70,12 +70,14 @@ val chapterModule = module {
     /**
      * ChapterController - The central coordinator for all chapter operations.
      * 
-     * This is registered as a SINGLETON to ensure all screens share the same
-     * instance and receive consistent state updates.
+     * Registered as FACTORY so each screen (Reader, TTS) gets its own instance.
+     * This prevents cross-screen sync bugs where TTS navigation affects Reader.
+     * 
+     * Sync between screens happens only on explicit events (e.g., TTS onPop).
      * 
      * Dependencies: All use cases above + BookRepository
      */
-    single {
+    factory {
         ChapterController(
             getChaptersUseCase = get(),
             loadChapterContentUseCase = get(),

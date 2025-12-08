@@ -24,6 +24,12 @@ import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.ChapterHealthChecker
+import ireader.domain.services.chapter.ChapterCommand
+import ireader.domain.services.chapter.ChapterController
+import ireader.domain.services.chapter.ChapterEvent
+import ireader.domain.services.preferences.PreferenceCommand
+import ireader.domain.services.preferences.PreferenceEvent
+import ireader.domain.services.preferences.ReaderPreferencesController
 import ireader.domain.usecases.chapter.AutoRepairChapterUseCase
 import ireader.domain.usecases.chapter.ReportBrokenChapterUseCase
 import ireader.domain.usecases.fonts.FontManagementUseCase
@@ -47,13 +53,6 @@ import ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase
 import ireader.domain.usecases.translate.TranslateParagraphUseCase
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
-import ireader.domain.services.chapter.ChapterCommand
-import ireader.domain.services.chapter.ChapterController
-import ireader.domain.services.chapter.ChapterEvent
-import ireader.domain.services.preferences.PreferenceCommand
-import ireader.domain.services.preferences.PreferenceEvent
-import ireader.domain.services.preferences.ReaderPreferencesController
-
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.removeIf
 import ireader.i18n.LAST_CHAPTER
@@ -119,10 +118,12 @@ class ReaderScreenViewModel(
     val autoRepairChapterUseCase: AutoRepairChapterUseCase,
     val params: Param,
     private val systemInteractionService: ireader.domain.services.platform.SystemInteractionService,
-    // ChapterController - single source of truth for chapter operations (Requirements: 9.2, 9.4, 9.5)
+    // ChapterController - Reader's own instance for chapter operations
     private val chapterController: ChapterController,
-    // ReaderPreferencesController - single source of truth for reader preferences (Requirements: 4.1, 4.2)
+    // ReaderPreferencesController - single source of truth for reader preferences
     private val preferencesController: ReaderPreferencesController,
+    // TTSController - for syncing chapter when returning from TTS screen
+    private val ttsController: ireader.domain.services.tts_service.v2.TTSController,
     // Sub-ViewModels
     val settingsViewModel: ReaderSettingsViewModel,
     val translationViewModel: ReaderTranslationViewModel,
@@ -207,9 +208,7 @@ class ReaderScreenViewModel(
     private var chapterControllerEventJob: Job? = null
     private val preloadedChapters = mutableMapOf<Long, Chapter>()
     
-    // Flag to indicate the current loadChapter was triggered by ChapterController sync
-    // When true, we should NOT notify ChapterController back (would cause infinite loop)
-    private var isLoadingFromChapterControllerSync: Boolean = false
+
 
     // ==================== Initialization ====================
 
@@ -247,83 +246,31 @@ class ReaderScreenViewModel(
     }
     
     // ==================== ChapterController Integration ====================
-    // Requirements: 9.2, 9.4, 9.5
-    
     /**
-     * Subscribe to ChapterController events for chapter loading notifications.
-     * This handles events like ChapterLoaded, Error, etc.
+     * Subscribe to ChapterController events for error handling.
+     * Note: Cross-screen sync removed - each screen has its own ChapterController instance.
+     * TTS sync happens only via onTTSScreenPop() when user leaves TTS screen.
      */
     private fun subscribeToChapterControllerEvents() {
         chapterControllerEventJob?.cancel()
         chapterControllerEventJob = scope.launch {
-            // Subscribe to events
-            launch {
-                chapterController.events.collect { event ->
-                    when (event) {
-                        is ChapterEvent.ChapterLoaded -> {
-                            Log.debug { "ChapterController: Chapter loaded - ${event.chapter.id}" }
-                            // Chapter loading is handled by the loadChapter method
-                        }
-                        is ChapterEvent.Error -> {
-                            Log.error { "ChapterController: Error - ${event.error}" }
-                            showSnackBar(UiText.DynamicString(event.error.toUserMessage()))
-                        }
-                        is ChapterEvent.ContentFetched -> {
-                            Log.debug { "ChapterController: Content fetched for chapter ${event.chapterId}" }
-                        }
-                        is ChapterEvent.ProgressSaved -> {
-                            Log.debug { "ChapterController: Progress saved for chapter ${event.chapterId}" }
-                        }
-                        is ChapterEvent.ChapterCompleted -> {
-                            Log.debug { "ChapterController: Chapter completed" }
-                        }
+            chapterController.events.collect { event ->
+                when (event) {
+                    is ChapterEvent.ChapterLoaded -> {
+                        Log.debug { "ChapterController: Chapter loaded - ${event.chapter.id}" }
                     }
-                }
-            }
-            
-            // Subscribe to state changes for cross-screen sync (TTS <-> Reader)
-            launch {
-                chapterController.state.collect { chapterState ->
-                    val currentChapter = chapterState.currentChapter
-                    val readerState = _state.value
-                    
-                    // Sync chapters list when it changes (for drawer to show cached status)
-                    if (readerState is ReaderState.Success && 
-                        chapterState.chapters.isNotEmpty() &&
-                        readerState.book.id == chapterState.book?.id) {
-                        // Update chapters list if it has changed
-                        if (chapterState.chapters != readerState.chapters) {
-                            updateSuccessState { it.copy(chapters = chapterState.chapters) }
-                        }
+                    is ChapterEvent.Error -> {
+                        Log.error { "ChapterController: Error - ${event.error}" }
+                        showSnackBar(UiText.DynamicString(event.error.toUserMessage()))
                     }
-                    
-                    // Only sync chapter navigation if:
-                    // 1. ChapterController has a current chapter
-                    // 2. Reader has a book loaded (same book)
-                    // 3. The chapter is different from what Reader currently has
-                    if (currentChapter != null && 
-                        readerState is ReaderState.Success &&
-                        readerState.book.id == chapterState.book?.id &&
-                        currentChapter.id != readerState.currentChapter.id) {
-                        
-                        Log.debug { "ChapterController state changed to chapter ${currentChapter.id}, syncing Reader" }
-                        
-                        // Load the new chapter in the reader
-                        // Mark that this load is from ChapterController sync to prevent notifying back
-                        // Don't scroll to end - preserve scroll position or scroll to start
-                        isLoadingFromChapterControllerSync = true
-                        try {
-                            loadChapter(
-                                readerState.book,
-                                readerState.catalog,
-                                currentChapter.id,
-                                next = false,
-                                force = false,
-                                scrollToEnd = false  // Don't scroll to end when syncing from ChapterController
-                            )
-                        } finally {
-                            isLoadingFromChapterControllerSync = false
-                        }
+                    is ChapterEvent.ContentFetched -> {
+                        Log.debug { "ChapterController: Content fetched for chapter ${event.chapterId}" }
+                    }
+                    is ChapterEvent.ProgressSaved -> {
+                        Log.debug { "ChapterController: Progress saved for chapter ${event.chapterId}" }
+                    }
+                    is ChapterEvent.ChapterCompleted -> {
+                        Log.debug { "ChapterController: Chapter completed" }
                     }
                 }
             }
@@ -439,23 +386,72 @@ class ReaderScreenViewModel(
     
     // ==================== TTS Chapter Sync ====================
     
+    private var ttsChapterSyncJob: Job? = null
+    
     /**
-     * Subscribe to TTS chapter changes to keep reader in sync.
-     * Note: TTS V2 architecture handles chapter sync through TTSController state.
-     * This method is kept for potential future integration.
+     * Subscribe to TTS state changes to sync when TTS stops playing.
+     * This syncs Reader with TTS chapter when user returns from TTS screen.
+     * Only syncs when TTS is idle/stopped (not while actively playing).
      */
     private fun subscribeTTSChapterChanges() {
-        // TTS V2 uses TTSController which manages its own state
-        // Reader can observe TTSController.state.chapter if sync is needed
+        ttsChapterSyncJob?.cancel()
+        ttsChapterSyncJob = scope.launch {
+            var lastTTSChapterId: Long? = null
+            
+            ttsController.state.collect { ttsState ->
+                val ttsChapter = ttsState.chapter
+                val readerState = _state.value
+                
+                // Track when TTS chapter changes
+                if (ttsChapter != null && ttsChapter.id != lastTTSChapterId) {
+                    lastTTSChapterId = ttsChapter.id
+                    
+                    // Only sync when TTS is NOT playing (user has left TTS or stopped playback)
+                    // This prevents sync while TTS is actively navigating chapters
+                    if (!ttsState.isPlaying && readerState is ReaderState.Success &&
+                        ttsState.book?.id == readerState.book.id &&
+                        ttsChapter.id != readerState.currentChapter.id) {
+                        
+                        Log.debug { "TTS stopped on chapter ${ttsChapter.id}, syncing Reader" }
+                        loadChapter(
+                            readerState.book,
+                            readerState.catalog,
+                            ttsChapter.id,
+                            next = false,
+                            force = false,
+                            scrollToEnd = false
+                        )
+                    }
+                }
+            }
+        }
     }
     
     /**
-     * Manually sync reader state with TTS state.
-     * Note: TTS V2 architecture handles chapter sync through TTSController state.
+     * Sync Reader with TTS's current chapter.
+     * Called explicitly when user returns from TTS screen.
      */
-    fun syncWithTTSState() {
-        // TTS V2 uses TTSController which manages its own state
-        // Reader can observe TTSController.state.chapter if sync is needed
+    suspend fun syncWithTTSChapter() {
+        val ttsState = ttsController.state.value
+        val ttsChapter = ttsState.chapter ?: return
+        val readerState = _state.value
+        
+        if (readerState !is ReaderState.Success) return
+        
+        // Only sync if same book and different chapter
+        if (ttsState.book?.id == readerState.book.id &&
+            ttsChapter.id != readerState.currentChapter.id) {
+            
+            Log.debug { "Syncing Reader with TTS chapter ${ttsChapter.id}" }
+            loadChapter(
+                readerState.book,
+                readerState.catalog,
+                ttsChapter.id,
+                next = false,
+                force = false,
+                scrollToEnd = false
+            )
+        }
     }
 
     private fun subscribeReaderThemes() {
@@ -638,12 +634,8 @@ class ReaderScreenViewModel(
         // Update last read time
         getChapterUseCase.updateLastReadTime(chapter)
         
-        // Notify ChapterController about the chapter load (Requirements: 9.2, 9.4, 9.5)
-        // This keeps ChapterController in sync with the reader's current chapter
-        // BUT skip if this load was triggered BY ChapterController (would cause infinite loop)
-        if (!isLoadingFromChapterControllerSync) {
-            chapterController.dispatch(ChapterCommand.LoadChapter(chapterId))
-        }
+        // Notify ChapterController about the chapter load
+        chapterController.dispatch(ChapterCommand.LoadChapter(chapterId))
 
         // Track chapter open (pass isLast to track book completion when last chapter is finished)
         val isLastChapter = chapterIndex != -1 && chapterIndex == chapters.lastIndex

@@ -250,10 +250,12 @@ val PresentationModules = module {
             autoRepairChapterUseCase = get(),
             params = params,
             systemInteractionService = get(),
-            // ChapterController - single source of truth for chapter operations (Requirements: 9.2, 9.4, 9.5)
+            // ChapterController - Reader's own instance (factory creates new instance)
             chapterController = get(),
-            // ReaderPreferencesController - single source of truth for reader preferences (Requirements: 4.1, 4.2)
+            // ReaderPreferencesController - single source of truth for reader preferences
             preferencesController = get(),
+            // TTSController - singleton for syncing chapter when returning from TTS screen
+            ttsController = get(),
             settingsViewModel = get(),
             translationViewModel = get(),
             ttsViewModel = get(),
