@@ -1,14 +1,18 @@
 package ireader.presentation.ui.home.library
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,13 +26,11 @@ import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.empty_library
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog
-import ireader.presentation.ui.home.library.components.LibraryFilterBottomSheet
 import ireader.presentation.ui.home.library.ui.LibraryContent
 import ireader.presentation.ui.home.library.ui.LibrarySelectionBar
-import ireader.presentation.ui.home.library.viewmodel.LibraryScreenState
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -149,7 +151,7 @@ fun LibraryScreen(
                 EmptyScreen(text = localize(Res.string.empty_library))
             }
 
-            // Selection bar
+            // Selection bar - Always show when in selection mode
             AnimatedVisibility(
                 visible = state.selectionMode,
                 enter = fadeIn(animationSpec = tween(200)) + slideInVertically(
@@ -164,7 +166,7 @@ fun LibraryScreen(
             ) {
                 LibrarySelectionBar(
                     modifier = selectionBarModifier,
-                    visible = true,
+                    visible = state.selectionMode,
                     onClickChangeCategory = onClickChangeCategory,
                     onClickDeleteDownload = onDelete,
                     onClickDownload = onDownload,
@@ -174,25 +176,25 @@ fun LibraryScreen(
                 )
             }
         }
-        
-        // Filter Bottom Sheet
-        if (showFilterSheet) {
-            LibraryFilterBottomSheet(
-                filters = state.filters,
-                sorting = state.sort,
-                columnCount = state.columnsInPortrait,
-                displayMode = state.layout,
-                showResumeReadingCard = vm.showResumeReadingCard.value,
-                showArchivedBooks = vm.showArchivedBooks.value,
-                onFilterToggle = { type -> vm.toggleFilterImmediate(type) },
-                onSortChange = { type -> vm.toggleSort(type) },
-                onSortDirectionToggle = { vm.toggleSortDirection() },
-                onColumnCountChange = { count -> vm.updateColumnCount(count) },
-                onDisplayModeChange = { mode -> vm.onLayoutTypeChange(mode) },
-                onResumeReadingCardToggle = { enabled -> vm.toggleResumeReadingCard(enabled) },
-                onArchivedBooksToggle = { enabled -> vm.toggleShowArchivedBooks(enabled) },
-                onDismiss = onHideFilterSheet
-            )
-        }
+
+//        // Filter Bottom Sheet
+//        if (showFilterSheet) {
+//            LibraryFilterBottomSheet(
+//                filters = state.filters,
+//                sorting = state.sort,
+//                columnCount = state.columnsInPortrait,
+//                displayMode = state.layout,
+//                showResumeReadingCard = vm.showResumeReadingCard.value,
+//                showArchivedBooks = vm.showArchivedBooks.value,
+//                onFilterToggle = { type -> vm.toggleFilterImmediate(type) },
+//                onSortChange = { type -> vm.toggleSort(type) },
+//                onSortDirectionToggle = { vm.toggleSortDirection() },
+//                onColumnCountChange = { count -> vm.updateColumnCount(count) },
+//                onDisplayModeChange = { mode -> vm.onLayoutTypeChange(mode) },
+//                onResumeReadingCardToggle = { enabled -> vm.toggleResumeReadingCard(enabled) },
+//                onArchivedBooksToggle = { enabled -> vm.toggleShowArchivedBooks(enabled) },
+//                onDismiss = onHideFilterSheet
+//            )
+//        }
     }
 }

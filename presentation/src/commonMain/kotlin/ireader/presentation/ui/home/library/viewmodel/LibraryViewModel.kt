@@ -12,19 +12,15 @@ import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
+import ireader.domain.preferences.prefs.LibraryPreferences
 import ireader.domain.services.library.LibraryCommand
 import ireader.domain.services.library.LibraryController
-import ireader.domain.preferences.prefs.LibraryPreferences
-import ireader.domain.usecases.local.book_usecases.DownloadResult
-import ireader.domain.usecases.local.book_usecases.MarkResult
+import ireader.domain.services.platform.PlatformServices
+import ireader.domain.usecases.library.LibraryUseCases
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
 import ireader.domain.usecases.services.ServiceUseCases
-import ireader.domain.usecases.library.LibraryUseCases
-import ireader.domain.services.platform.PlatformServices
-import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.LocalizeHelper
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
-import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.CoroutineScope
@@ -119,11 +115,20 @@ class LibraryViewModel(
         libraryPreferences.columnsInPortrait().stateIn(scope),
         libraryPreferences.columnsInLandscape().stateIn(scope)
     ) { controllerState, uiState, searchQuery, columnsPortrait, columnsLandscape ->
+        // Apply search filter to books if search query is not empty
+        val filteredBooks = if (searchQuery.isNotBlank()) {
+            controllerState.filteredBooks.filter { book ->
+                book.title.contains(searchQuery, ignoreCase = true)
+            }
+        } else {
+            controllerState.filteredBooks
+        }
+        
         LibraryScreenState(
             isLoading = controllerState.isLoading,
             isRefreshing = controllerState.isRefreshing,
             isUpdatingLibrary = uiState.isUpdatingLibrary,
-            books = controllerState.filteredBooks.toImmutableList(),
+            books = filteredBooks.toImmutableList(),
             categories = uiState.categories,
             selectedCategoryIndex = uiState.selectedCategoryIndex,
             layout = uiState.layout,
@@ -195,6 +200,13 @@ class LibraryViewModel(
             val sortType = libraryScreenPrefUseCases.sortersUseCase.read()
             val sortBy = libraryScreenPrefUseCases.sortersDescUseCase.read()
             _uiState.update { it.copy(sort = LibrarySort(sortType.type, sortBy)) }
+        }
+        
+        // Load layout preference
+        scope.launch {
+            val layoutFlags = libraryPreferences.categoryFlags().get()
+            val displayMode = DisplayMode.getFlag(layoutFlags) ?: DisplayMode.CompactGrid
+            _uiState.update { it.copy(layout = displayMode) }
         }
         
         // Check sync availability
@@ -637,8 +649,8 @@ class LibraryViewModel(
             LibrarySort.Type.LastRead -> ireader.domain.services.library.LibrarySort.Type.LastRead
             LibrarySort.Type.DateAdded -> ireader.domain.services.library.LibrarySort.Type.DateAdded
             LibrarySort.Type.TotalChapters -> ireader.domain.services.library.LibrarySort.Type.TotalChapters
-            // Map unsupported types to Title as fallback
-            LibrarySort.Type.LastUpdated -> ireader.domain.services.library.LibrarySort.Type.LastRead
+            // Map LastUpdated to DateAdded (which sorts by lastUpdate field in controller)
+            LibrarySort.Type.LastUpdated -> ireader.domain.services.library.LibrarySort.Type.DateAdded
             LibrarySort.Type.Unread -> ireader.domain.services.library.LibrarySort.Type.UnreadCount
             LibrarySort.Type.DateFetched -> ireader.domain.services.library.LibrarySort.Type.DateAdded
             LibrarySort.Type.Source -> ireader.domain.services.library.LibrarySort.Type.Title
@@ -670,8 +682,8 @@ class LibraryViewModel(
             LibrarySort.Type.LastRead -> ireader.domain.services.library.LibrarySort.Type.LastRead
             LibrarySort.Type.DateAdded -> ireader.domain.services.library.LibrarySort.Type.DateAdded
             LibrarySort.Type.TotalChapters -> ireader.domain.services.library.LibrarySort.Type.TotalChapters
-            // Map unsupported types to Title as fallback
-            LibrarySort.Type.LastUpdated -> ireader.domain.services.library.LibrarySort.Type.LastRead
+            // Map LastUpdated to DateAdded (which sorts by lastUpdate field in controller)
+            LibrarySort.Type.LastUpdated -> ireader.domain.services.library.LibrarySort.Type.DateAdded
             LibrarySort.Type.Unread -> ireader.domain.services.library.LibrarySort.Type.UnreadCount
             LibrarySort.Type.DateFetched -> ireader.domain.services.library.LibrarySort.Type.DateAdded
             LibrarySort.Type.Source -> ireader.domain.services.library.LibrarySort.Type.Title

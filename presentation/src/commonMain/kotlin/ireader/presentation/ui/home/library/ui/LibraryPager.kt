@@ -12,16 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.DisplayMode
-import ireader.domain.models.DisplayMode.Companion.displayMode
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.CategoryWithCount
 import ireader.domain.usecases.prefetch.BookPrefetchService
@@ -61,6 +56,8 @@ internal fun LibraryPager(
     showLocalMangaBadge: Boolean = false,
     showLanguageBadge: Boolean = false,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
+    columnsInPortrait: Int = 3,
+    columnsInLandscape: Int = 5,
     onSaveScrollPosition: (categoryId: Long, index: Int, offset: Int) -> Unit = { _, _, _ -> },
     getScrollPosition: (categoryId: Long) -> Pair<Int, Int> = { 0 to 0 },
 ) {
@@ -149,18 +146,16 @@ internal fun LibraryPager(
                 }
             }
             
-            // Use derivedStateOf for display mode to minimize recompositions
-            val displayMode by remember(page, categories) {
-                derivedStateOf { categories.getOrNull(page)?.category?.displayMode ?: DisplayMode.CompactGrid }
-            }
+            // Use the layout parameter passed from the parent (from ViewModel state)
+            // This ensures the display mode changes when user selects a different layout
+            val displayMode = layout
             
-            val columns by if (displayMode != DisplayMode.List) {
-                val isLandscape = isLandscape()
-                with(rememberCoroutineScope()) {
-                    remember(isLandscape) { getColumnsForOrientation(isLandscape) }.collectAsState()
-                }
+            // Get columns for orientation - use the values passed from state
+            val isLandscape = isLandscape()
+            val columns = if (displayMode != DisplayMode.List) {
+                if (isLandscape) columnsInLandscape else columnsInPortrait
             } else {
-                remember { mutableStateOf(0) }
+                0
             }
             
             ILazyColumnScrollbar(

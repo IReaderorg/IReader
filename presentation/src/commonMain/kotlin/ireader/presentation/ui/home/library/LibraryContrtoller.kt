@@ -46,19 +46,23 @@ fun LibraryController(
         onMarkAsRead = {
             vm.scope.launch(ioDispatcher) {
                 vm.markAsReadWithUndo(state.selectedBookIds.toList())
+                vm.unselectAll()
             }
         },
         onDownload = {
             vm.downloadChapters(state.selectedBookIds.toList())
+            vm.unselectAll()
         },
         onDownloadUnread = {
             vm.scope.launch(ioDispatcher) {
                 vm.downloadUnreadChapters(state.selectedBookIds.toList())
+                vm.unselectAll()
             }
         },
         onMarkAsNotRead = {
             vm.scope.launch(ioDispatcher) {
                 vm.markAsUnreadWithUndo(state.selectedBookIds.toList())
+                vm.unselectAll()
             }
         },
         onDelete = {

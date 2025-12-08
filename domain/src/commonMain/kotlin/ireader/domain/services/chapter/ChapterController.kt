@@ -149,7 +149,21 @@ class ChapterController(
         chaptersSubscriptionJob?.cancel()
         lastReadSubscriptionJob?.cancel()
         
-        _state.update { it.copy(isLoadingBook = true, isLoadingChapters = true, error = null) }
+        // Clear chapter state when switching books
+        _state.update { 
+            it.copy(
+                isLoadingBook = true, 
+                isLoadingChapters = true, 
+                error = null,
+                currentChapter = null,
+                currentChapterIndex = 0,
+                currentParagraphIndex = 0,
+                chapters = emptyList(),
+                filteredChapters = emptyList(),
+                selectedChapterIds = emptySet(),
+                lastReadChapterId = null
+            ) 
+        }
         
         try {
             // Load book

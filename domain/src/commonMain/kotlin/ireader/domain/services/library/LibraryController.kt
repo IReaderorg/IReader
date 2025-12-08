@@ -179,7 +179,9 @@ class LibraryController(
         val currentSelection = _state.value.selectedBookIds
         
         _state.update { state ->
-            val filteredBooks = applyFilterAndSort(state.books, filter, state.sort)
+            // Only apply filter, not sort - repository already sorted the data
+            val predicate = filter.toPredicate()
+            val filteredBooks = state.books.filter(predicate)
             state.copy(
                 filter = filter,
                 filteredBooks = filteredBooks,
@@ -191,7 +193,7 @@ class LibraryController(
     }
     
     /**
-     * Set the current sort and reapply to books.
+     * Set the current sort and re-subscribe to repository with new sort.
      * Requirements: 3.3
      */
     private suspend fun setSort(sort: LibrarySort) {
@@ -200,13 +202,16 @@ class LibraryController(
         // Preserve selection when changing sort
         val currentSelection = _state.value.selectedBookIds
         
-        _state.update { state ->
-            val filteredBooks = applyFilterAndSort(state.books, state.filter, sort)
-            state.copy(
-                sort = sort,
-                filteredBooks = filteredBooks,
-                selectedBookIds = currentSelection // Preserve selection
-            )
+        // Update sort in state first
+        _state.update { it.copy(sort = sort, selectedBookIds = currentSelection) }
+        
+        // Cancel existing subscription and re-subscribe with new sort
+        booksSubscriptionJob?.cancel()
+        booksSubscriptionJob = scope.launch {
+            libraryRepository.subscribe(sort.toDomainSort()).collect { books ->
+                Log.debug { "$TAG: Library updated with new sort - ${books.size} books" }
+                updateBooksAndApplyFilter(books)
+            }
         }
         
         _events.emit(LibraryEvent.SortChanged(sort))
@@ -332,11 +337,14 @@ class LibraryController(
     // ========== Helper Methods ==========
     
     /**
-     * Update books and apply current filter/sort.
+     * Update books and apply current filter (but NOT sort - repository already sorted).
+     * The repository handles sorting with proper database queries for LastRead, DateAdded, etc.
      */
     private fun updateBooksAndApplyFilter(books: List<LibraryBook>) {
         _state.update { state ->
-            val filteredBooks = applyFilterAndSort(books, state.filter, state.sort)
+            // Only apply filter, not sort - repository already sorted the data correctly
+            val predicate = state.filter.toPredicate()
+            val filteredBooks = books.filter(predicate)
             state.copy(
                 books = books,
                 filteredBooks = filteredBooks,
@@ -344,23 +352,6 @@ class LibraryController(
             )
         }
     }
-    
-    /**
-     * Apply filter and sort to a list of books.
-     */
-    private fun applyFilterAndSort(
-        books: List<LibraryBook>,
-        filter: LibraryFilter,
-        sort: LibrarySort
-    ): List<LibraryBook> {
-        val predicate = filter.toPredicate()
-        val comparator = sort.toComparator()
-        
-        return books
-            .filter(predicate)
-            .sortedWith(comparator)
-    }
-    
     // ========== Error Handling ==========
     
     /**

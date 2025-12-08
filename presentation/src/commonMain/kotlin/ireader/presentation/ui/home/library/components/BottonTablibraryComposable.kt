@@ -260,6 +260,10 @@ private fun LazyListScope.DispalyPage(
     }
     items(layouts) { layout ->
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+        // Read layout from layouts preference to ensure recomposition
+        val currentLayout = vm.layouts.value.let { flags ->
+            DisplayMode.getFlag(flags) ?: DisplayMode.CompactGrid
+        }
         Column(
             Modifier
                 .fillMaxSize()
@@ -267,7 +271,7 @@ private fun LazyListScope.DispalyPage(
         ) {
             ClickableRow(onClick = { onLayoutSelected(layout) }) {
                 RadioButton(
-                    selected = vm.layout == layout,
+                    selected = currentLayout == layout,
                     onClick = { onLayoutSelected(layout) },
                     modifier = Modifier.padding(horizontal = 15.dp)
                 )
@@ -298,9 +302,9 @@ private fun LazyListScope.DispalyPage(
         )
     }
     item {
-        Slider(modifier = Modifier.padding(horizontal = 20.dp), value = vm.columnInPortrait.lazyValue.toFloat(), onValueChange = {
-            vm.columnInPortrait.lazyValue = it.toInt()
-        }, valueRange = 0f..10f)
+        Slider(modifier = Modifier.padding(horizontal = 20.dp), value = vm.columnInPortrait.lazyValue.toFloat().coerceIn(1f, 10f), onValueChange = {
+            vm.columnInPortrait.lazyValue = it.toInt().coerceIn(1, 10)
+        }, valueRange = 1f..10f)
     }
     item {
         TextSection(

@@ -178,7 +178,10 @@ object LibraryScreenSpec {
                         sheetState = sheetState,
                         requestHideNavigator = {
                             scope.launch { MainStarterScreen.showBottomNav(!state.selectionMode) }
-                        }
+                        },
+                        showFilterSheet = sheetState.isVisible,
+                        onShowFilterSheet = { scope.launch { sheetState.partialExpand() } },
+                        onHideFilterSheet = { scope.launch { sheetState.hide() } }
                     )
                 }
             }
