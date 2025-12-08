@@ -57,16 +57,14 @@ val PresentationModules = module {
     factory  { ScreenContentViewModel(get()) }
     single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
 
+    // ExploreViewModel - Simplified with ExploreUseCases aggregate (Requirements: 4.2, 4.4)
+    // Reduced from 10 parameters to 6 using ExploreUseCases aggregate
     factory<ExploreViewModel> { (params: ExploreViewModel.Param) -> 
         ExploreViewModel(
-            remoteUseCases = get(),
+            exploreUseCases = get(),           // Aggregate: groups 5 use cases (remote, insert, findDuplicate, openLocalFolder, browseScreenPref)
             catalogStore = get(),
-            browseScreenPrefUseCase = get(),
-            insertUseCases = get(),
             param = params,
-            findDuplicateBook = get(),
             libraryPreferences = get(),
-            openLocalFolder = get(),
             syncUseCases = getOrNull(),
             filterStateManager = getOrNull()
         )

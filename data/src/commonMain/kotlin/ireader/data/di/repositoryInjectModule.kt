@@ -1,67 +1,29 @@
 package ireader.data.di
 
 import ireader.data.util.AppDataDirectory
-import ireader.data.book.BookRepositoryImpl
-import ireader.data.core.DatabaseOptimizations
-import ireader.data.catalog.CatalogRemoteRepositoryImpl
-import ireader.data.category.BookCategoryRepositoryImpl
-import ireader.data.category.CategoryRepositoryImpl
-import ireader.data.chapter.ChapterRepositoryImpl
-import ireader.data.chapterhealth.ChapterHealthRepositoryImpl
-import ireader.data.chapterreport.ChapterReportRepositoryImpl
 import ireader.data.database.RepairDatabaseUseCaseImpl
-import ireader.data.downloads.DownloadRepositoryImpl
-import ireader.data.font.FontRepositoryImpl
-import ireader.data.history.HistoryRepositoryImpl
 import ireader.data.plugin.PluginDatabaseImpl
 import ireader.data.plugin.PluginRepositoryImpl
 import ireader.data.repository.FundingGoalRepositoryImpl
-import ireader.data.repository.LibraryRepositoryImpl
-import ireader.data.repository.ReaderThemeRepositoryImpl
-import ireader.data.repository.SourceCredentialsRepositoryImpl
-import ireader.data.repository.ThemeRepositoryImpl
-import ireader.data.repository.UpdatesRepositoryImpl
-import ireader.data.security.SecurityRepositoryImpl
-import ireader.data.services.SourceHealthCheckerImpl
-import ireader.data.sourcecomparison.SourceComparisonRepositoryImpl
-import ireader.data.sourcereport.SourceReportRepositoryImpl
-import ireader.data.statistics.ReadingStatisticsRepositoryImpl
-import ireader.data.translation.GlossaryRepositoryImpl
-import ireader.data.translation.TranslatedChapterRepositoryImpl
 import ireader.data.tts.VoiceModelRepositoryImpl
 import ireader.data.repository.PiperVoiceRepositoryImpl
-import ireader.domain.catalogs.service.CatalogRemoteRepository
 import ireader.domain.data.repository.PiperVoiceRepository
-import ireader.domain.data.repository.BookCategoryRepository
-import ireader.domain.data.repository.BookRepository
-import ireader.domain.data.repository.CategoryRepository
-import ireader.domain.data.repository.ChapterHealthRepository
-import ireader.domain.data.repository.ChapterReportRepository
-import ireader.domain.data.repository.ChapterRepository
-import ireader.domain.data.repository.DownloadRepository
-import ireader.domain.data.repository.FontRepository
-import ireader.domain.data.repository.GlossaryRepository
-import ireader.domain.data.repository.HistoryRepository
-import ireader.domain.data.repository.LibraryRepository
 import ireader.domain.data.repository.PluginRepository
-import ireader.domain.data.repository.ReaderThemeRepository
-import ireader.domain.data.repository.ReadingStatisticsRepository
-import ireader.domain.data.repository.SecurityRepository
-import ireader.domain.data.repository.SourceComparisonRepository
-import ireader.domain.data.repository.SourceCredentialsRepository
-import ireader.domain.data.repository.SourceReportRepository
-import ireader.domain.data.repository.ThemeRepository
-import ireader.domain.data.repository.TranslatedChapterRepository
-import ireader.domain.data.repository.UpdatesRepository
 import ireader.domain.data.repository.VoiceModelRepository
 import ireader.domain.plugins.PluginDatabase
-import ireader.domain.services.SourceHealthChecker
 import ireader.domain.usecases.database.RepairDatabaseUseCase
 import org.koin.dsl.module
-import okio.Path.Companion.toPath
 
 
 val repositoryInjectModule = module {
+    // Include feature-specific repository modules
+    includes(bookRepositoryModule)
+    includes(chapterRepositoryModule)
+    includes(libraryRepositoryModule)
+    includes(catalogRepositoryModule)
+    includes(userDataRepositoryModule)
+    includes(translationRepositoryModule)
+    
     // Include remote module for 7-project Supabase setup
     // Supports both default config (from local.properties) and user override
     includes(remoteModule)
@@ -71,36 +33,6 @@ val repositoryInjectModule = module {
     includes(backupModule)
     // Include platform-specific module for platform implementations
     includes(dataPlatformModule)
-    
-    single<DownloadRepository> { DownloadRepositoryImpl(get()) }
-    single<UpdatesRepository> { UpdatesRepositoryImpl(get()) }
-    single<LibraryRepository> { LibraryRepositoryImpl(get()) }
-    single<CategoryRepository> { CategoryRepositoryImpl(get()) }
-    single<CatalogRemoteRepository> { CatalogRemoteRepositoryImpl(get()) }
-    single<ChapterRepository> { ChapterRepositoryImpl(get(), getOrNull()) }
-    single<ChapterHealthRepository> { ChapterHealthRepositoryImpl(get()) }
-    single<SourceComparisonRepository> { SourceComparisonRepositoryImpl(get()) }
-    single<BookCategoryRepository> { BookCategoryRepositoryImpl(get()) }
-    single<BookRepository> { BookRepositoryImpl(get(), get<BookCategoryRepository>(), getOrNull()) }
-    single<ireader.domain.data.repository.consolidated.BookRepository> { 
-        ireader.data.repository.ConsolidatedBookRepositoryImpl(get<BookRepository>(), get<BookCategoryRepository>()) 
-    }
-    single<HistoryRepository> { HistoryRepositoryImpl(get(), getOrNull()) }
-    single<ThemeRepository> { ThemeRepositoryImpl(get()) }
-    single<ReaderThemeRepository> { ReaderThemeRepositoryImpl(get()) }
-    
-    // Translation repositories
-    single<TranslatedChapterRepository> { TranslatedChapterRepositoryImpl(get()) }
-    single<GlossaryRepository> { GlossaryRepositoryImpl(get()) }
-    
-    // Source health checker
-    single<SourceHealthChecker> { SourceHealthCheckerImpl(get()) }
-    
-    // Source credentials repository
-    single<SourceCredentialsRepository> { SourceCredentialsRepositoryImpl(get()) }
-    
-    // Reading statistics repository
-    single<ReadingStatisticsRepository> { ReadingStatisticsRepositoryImpl(get()) }
     
     // Library insights repository
     single<ireader.domain.data.repository.LibraryInsightsRepository> { 
@@ -117,24 +49,12 @@ val repositoryInjectModule = module {
         ireader.data.repository.AdvancedFilterRepositoryImpl(get(), get(), get()) 
     }
     
-    // Security repository
-    single<SecurityRepository> { SecurityRepositoryImpl(get(), get()) }
-    
-    // Chapter report repository
-    single<ChapterReportRepository> { ChapterReportRepositoryImpl(get()) }
-    
-    // Source report repository
-    single<SourceReportRepository> { SourceReportRepositoryImpl(get()) }
-    
     // Migration repository
     single<ireader.domain.data.repository.MigrationRepository> { 
         ireader.data.repository.MigrationRepositoryImpl(get(), get()) 
     }
     
     // Notification repository is provided by platform-specific modules
-    
-    // Font repository
-    single<FontRepository> { FontRepositoryImpl(get(), get()) }
 
     single<ireader.domain.data.repository.FundingGoalRepository> {
         FundingGoalRepositoryImpl()

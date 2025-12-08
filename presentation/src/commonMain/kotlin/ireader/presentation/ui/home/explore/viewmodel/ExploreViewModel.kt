@@ -1,7 +1,6 @@
 package ireader.presentation.ui.home.explore.viewmodel
 
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.viewModelScope
 import ireader.core.log.Log
 import ireader.core.source.model.Filter
 import ireader.core.source.model.Listing
@@ -12,12 +11,9 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBook
 import ireader.domain.preferences.prefs.LibraryPreferences
-import ireader.domain.usecases.local.book_usecases.FindDuplicateBook
-import ireader.domain.usecases.preferences.reader_preferences.BrowseScreenPrefUseCase
-import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.usecases.explore.ExploreUseCases
 import ireader.domain.utils.exceptionHandler
 import ireader.domain.utils.extensions.ioDispatcher
-import ireader.i18n.SourceNotFoundException
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.the_source_is_not_found
@@ -45,20 +41,20 @@ import kotlin.math.min
  * - Efficient deduplication using HashSet
  * - Proper job cancellation and lifecycle management
  * - Optimized for low-end devices with minimal allocations
+ * - Simplified constructor using ExploreUseCases aggregate (Requirements: 4.2, 4.4)
  */
 @Stable
 class ExploreViewModel(
-    private val remoteUseCases: RemoteUseCases,
+    private val exploreUseCases: ExploreUseCases,
     private val catalogStore: GetLocalCatalogs,
-    private val browseScreenPrefUseCase: BrowseScreenPrefUseCase,
-    val insertUseCases: ireader.domain.usecases.local.LocalInsertUseCases,
     private val param: Param,
-    private val findDuplicateBook: FindDuplicateBook,
     private val libraryPreferences: LibraryPreferences,
-    private val openLocalFolder: ireader.domain.usecases.local.OpenLocalFolder,
     private val syncUseCases: ireader.domain.usecases.sync.SyncUseCases? = null,
     private val filterStateManager: ireader.domain.filters.FilterStateManager? = null
 ) : BaseViewModel() {
+    
+    // Expose insertUseCases for backward compatibility with UI code
+    val insertUseCases get() = exploreUseCases.insert
     
     data class Param(val sourceId: Long?, val query: String?)
     
@@ -226,7 +222,7 @@ class ExploreViewModel(
         try {
             var result = MangasPageInfo(emptyList(), false)
             
-            remoteUseCases.getRemoteBooks(
+            exploreUseCases.remote.getRemoteBooks(
                 query = query,
                 listing = listing,
                 filters = filters,
@@ -372,12 +368,12 @@ class ExploreViewModel(
     fun saveLayoutType(layoutType: DisplayMode) {
         _state.update { it.copy(layout = layoutType) }
         scope.launch {
-            browseScreenPrefUseCase.browseLayoutTypeUseCase.save(layoutType)
+            exploreUseCases.browseScreenPref.browseLayoutTypeUseCase.save(layoutType)
         }
     }
     
     private suspend fun readLayoutType() {
-        val layout = browseScreenPrefUseCase.browseLayoutTypeUseCase.read()
+        val layout = exploreUseCases.browseScreenPref.browseLayoutTypeUseCase.read()
         _state.update { it.copy(layout = layout) }
     }
     
@@ -426,14 +422,14 @@ class ExploreViewModel(
      */
     fun openLocalFolderAction(): Boolean {
         return try {
-            openLocalFolder.open()
+            exploreUseCases.openLocalFolder.open()
         } catch (e: Exception) {
             Log.error { "Failed to open local folder" }
             false
         }
     }
     
-    fun getLocalFolderPath(): String = openLocalFolder.getPath()
+    fun getLocalFolderPath(): String = exploreUseCases.openLocalFolder.getPath()
     
     /**
      * Save JS plugin filter state
