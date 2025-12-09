@@ -87,7 +87,17 @@ val PresentationModules = module {
             libraryController = get()          // SSOT for library state
         )
     }
-    factory  { ExtensionViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), getOrNull(), getOrNull(), getOrNull(), get()) }
+    // ExtensionViewModel - Simplified with ExtensionUseCases aggregate (Requirements: 1.3, 1.4, 1.5)
+    // Reduced from 17 parameters to 5 using ExtensionUseCases aggregate
+    factory { 
+        ExtensionViewModel(
+            extensionUseCases = get(),         // Aggregate: groups 13 use cases
+            uiPreferences = get(),
+            startExtensionManagerService = get(),
+            catalogStore = get(),
+            browsePreferences = get()
+        )
+    }
     factory { (param: GlobalSearchViewModel.Param) ->
         GlobalSearchViewModel(
             catalogStore = get(),
@@ -109,7 +119,32 @@ val PresentationModules = module {
     // Updated to Mihon-style StateFlow pattern (no separate state impl needed)
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
-    factory<BookDetailViewModel>  { (params: BookDetailViewModel.Param) -> BookDetailViewModel(get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),params,get(),get(),get(),getOrNull(),get(),get(),get(),get(),get(),get(),getOrNull(),get(),get(),get(),get()) }
+    // BookDetailViewModel - Simplified with BookDetailUseCases aggregate (Requirements: 1.1, 1.4, 1.5)
+    // Reduced from 28 parameters to 20 using BookDetailUseCases aggregate
+    factory<BookDetailViewModel> { (params: BookDetailViewModel.Param) -> 
+        BookDetailViewModel(
+            bookDetailUseCases = get(),        // Aggregate: groups 12 use cases
+            getLocalCatalog = get(),
+            applicationScope = get(),
+            createEpub = get(),
+            readerPreferences = get(),
+            param = params,
+            checkSourceAvailabilityUseCase = get(),
+            migrateToSourceUseCase = get(),
+            catalogStore = get(),
+            syncUseCases = getOrNull(),
+            downloadService = get(),
+            bookUseCases = get(),
+            chapterUseCases = get(),
+            clipboardService = get(),
+            shareService = get(),
+            platformHelper = get(),
+            bookPrefetchService = getOrNull(),
+            translationService = getOrNull(),
+            chapterController = get(),
+            bookController = get()
+        )
+    }
     // Changed from single to factory - settings screen is not always needed
     factory  { 
         MainSettingScreenViewModel(
@@ -212,15 +247,13 @@ val PresentationModules = module {
     // ReaderSettingsViewModel with ReaderPreferencesController for SSOT pattern (Requirements: 4.1, 4.2)
     factory { ireader.presentation.ui.reader.viewmodel.ReaderSettingsViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
+    // ReaderScreenViewModel - Simplified with ReaderUseCasesAggregate (Requirements: 1.2, 1.4, 1.5)
+    // Reduced from 40+ parameters to 25 using ReaderUseCasesAggregate
     factory<ReaderScreenViewModel> { (params: ReaderScreenViewModel.Param) -> 
         ReaderScreenViewModel(
-            getBookUseCases = get(),
-            getChapterUseCase = get(),
-            remoteUseCases = get(),
-            historyUseCase = get(),
+            readerUseCasesAggregate = get(),   // Aggregate: groups 18 use cases
             getLocalCatalog = get(),
             readerUseCases = get(),
-            insertUseCases = get(),
             readerPreferences = get(),
             androidUiPreferences = get(),
             platformUiPreferences = get(),
@@ -228,19 +261,7 @@ val PresentationModules = module {
             screenAlwaysOnUseCase = get(),
             webViewManger = get(),
             readerThemeRepository = get(),
-            bookMarkChapterUseCase = get(),
             translationEnginesManager = get(),
-            preloadChapterUseCase = get(),
-            translateChapterWithStorageUseCase = get(),
-            translateParagraphUseCase = get(),
-            getTranslatedChapterUseCase = get(),
-            getGlossaryByBookIdUseCase = get(),
-            saveGlossaryEntryUseCase = get(),
-            deleteGlossaryEntryUseCase = get(),
-            exportGlossaryUseCase = get(),
-            importGlossaryUseCase = get(),
-            trackReadingProgressUseCase = get(),
-            reportBrokenChapterUseCase = get(),
             fontManagementUseCase = get(),
             fontUseCase = get(),
             chapterHealthChecker = get(),

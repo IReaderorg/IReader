@@ -13,11 +13,12 @@ import ireader.domain.usecases.review.SubmitChapterReviewUseCase
 import org.koin.dsl.module
 
 val reviewModule = module {
-    // Repositories - conditionally provide NoOp implementations
+    // Repositories - conditionally provide NoOp singleton implementations
     single<ReviewRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            ireader.data.repository.NoOpReviewRepository()
+            // Use NoOp singleton when Supabase is not configured
+            ireader.data.repository.NoOpReviewRepository
         } else {
             // Use bookReviewsClient which has Auth installed
             val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).bookReviewsClient
@@ -32,7 +33,8 @@ val reviewModule = module {
     single<BadgeRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            ireader.data.repository.NoOpBadgeRepository()
+            // Use NoOp singleton when Supabase is not configured
+            ireader.data.repository.NoOpBadgeRepository
         } else {
             val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).badgesClient
             BadgeRepositoryImpl(
@@ -46,7 +48,8 @@ val reviewModule = module {
      single<ireader.domain.data.repository.NFTRepository> {
          val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
          if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-             ireader.data.repository.NoOpNFTRepository()
+             // Use NoOp singleton when Supabase is not configured
+             ireader.data.repository.NoOpNFTRepository
          } else {
              val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).badgesClient
              ireader.data.nft.NFTRepositoryImpl(

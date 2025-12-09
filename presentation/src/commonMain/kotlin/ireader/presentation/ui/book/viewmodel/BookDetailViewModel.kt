@@ -33,18 +33,11 @@ import ireader.domain.services.common.TranslationStatus
 import ireader.domain.services.common.ServiceState
 import ireader.domain.services.platform.ClipboardService
 import ireader.domain.services.platform.ShareService
+import ireader.domain.usecases.book.BookDetailUseCases
 import ireader.domain.usecases.book.BookUseCases
 import ireader.domain.usecases.chapter.ChapterUseCases
 import ireader.domain.usecases.epub.EpubCreator
-import ireader.domain.usecases.epub.ExportBookAsEpubUseCase
-import ireader.domain.usecases.epub.ExportNovelAsEpubUseCase
-import ireader.domain.usecases.history.HistoryUseCase
-import ireader.domain.usecases.local.DeleteUseCase
-import ireader.domain.usecases.local.LocalGetBookUseCases
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
 import ireader.domain.usecases.prefetch.BookPrefetchService
-import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.source.CheckSourceAvailabilityUseCase
 import ireader.domain.usecases.source.MigrateToSourceUseCase
 import ireader.domain.usecases.sync.SyncUseCases
@@ -81,6 +74,9 @@ import kotlinx.coroutines.launch
 /**
  * BookDetailViewModel using sealed state pattern (Mihon architecture).
  * 
+ * Refactored to use BookDetailUseCases aggregate to reduce constructor parameters.
+ * Target: ≤12 constructor parameters (Requirements: 1.1, 1.4, 1.5)
+ * 
  * Key optimizations:
  * - Single StateFlow for all UI state
  * - Immutable collections for Compose optimization
@@ -89,17 +85,11 @@ import kotlinx.coroutines.launch
  */
 @Stable
 class BookDetailViewModel(
-    private val localInsertUseCases: LocalInsertUseCases,
-    private val getChapterUseCase: LocalGetChapterUseCase,
-    private val getBookUseCases: LocalGetBookUseCases,
-    private val remoteUseCases: RemoteUseCases,
+    // Use case aggregate - groups 12 related use cases (Requirements: 1.1, 1.4, 1.5)
+    private val bookDetailUseCases: BookDetailUseCases,
     private val getLocalCatalog: GetLocalCatalog,
-    private val deleteUseCase: DeleteUseCase,
     private val applicationScope: CoroutineScope,
     val createEpub: EpubCreator,
-    val exportNovelAsEpub: ExportNovelAsEpubUseCase,
-    private val exportBookAsEpubUseCase: ExportBookAsEpubUseCase,
-    val historyUseCase: HistoryUseCase,
     val readerPreferences: ReaderPreferences,
     private val param: Param,
     private val checkSourceAvailabilityUseCase: CheckSourceAvailabilityUseCase,
@@ -114,10 +104,20 @@ class BookDetailViewModel(
     private val platformHelper: PlatformHelper,
     private val bookPrefetchService: BookPrefetchService? = null,
     private val translationService: TranslationService? = null,
-    val insertUseCases: LocalInsertUseCases = localInsertUseCases,
     private val chapterController: ChapterController,
     private val bookController: BookController,
 ) : BaseViewModel() {
+    
+    // Convenience accessors for aggregate use cases (backward compatibility)
+    private val localInsertUseCases get() = bookDetailUseCases.insertUseCases
+    private val getChapterUseCase get() = bookDetailUseCases.getChapterUseCase
+    private val getBookUseCases get() = bookDetailUseCases.getBookUseCases
+    private val remoteUseCases get() = bookDetailUseCases.remoteUseCases
+    private val deleteUseCase get() = bookDetailUseCases.deleteUseCase
+    val historyUseCase get() = bookDetailUseCases.historyUseCase
+    val exportNovelAsEpub get() = bookDetailUseCases.exportNovelAsEpub
+    private val exportBookAsEpubUseCase get() = bookDetailUseCases.exportBookAsEpub
+    val insertUseCases get() = bookDetailUseCases.insertUseCases
 
     data class Param(val bookId: Long?)
 

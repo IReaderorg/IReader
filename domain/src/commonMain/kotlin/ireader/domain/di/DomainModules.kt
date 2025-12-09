@@ -9,6 +9,7 @@ import ireader.domain.plugins.PluginRegistry
 import ireader.domain.services.book.bookModule
 import ireader.domain.services.chapter.chapterModule
 import ireader.domain.services.downloaderService.DownloadStateHolder
+import ireader.domain.services.extension.extensionModule
 import ireader.domain.services.library.libraryModule
 import ireader.domain.services.preferences.preferencesModule
 import ireader.domain.usecases.backup.CloudBackupManager
@@ -297,6 +298,10 @@ val DomainServices = module {
     // Library Module - LibraryController as singleton
     // Requirements: 6.1, 6.2, 6.3, 6.4
     includes(libraryModule)
+    
+    // Extension Module - ExtensionController as singleton
+    // Requirements: 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1
+    includes(extensionModule)
     
     // Note: Preferences, UseCases, and Repository UseCases are loaded separately
     // to avoid circular dependencies with UseCasesInject module

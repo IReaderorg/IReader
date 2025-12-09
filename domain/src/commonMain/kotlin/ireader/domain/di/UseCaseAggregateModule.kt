@@ -1,8 +1,11 @@
 package ireader.domain.di
 
 import ireader.domain.services.platform.PlatformServices
+import ireader.domain.usecases.book.BookDetailUseCases
 import ireader.domain.usecases.explore.ExploreUseCases
+import ireader.domain.usecases.extension.ExtensionUseCases
 import ireader.domain.usecases.library.LibraryUseCases
+import ireader.domain.usecases.reader.ReaderUseCasesAggregate
 import ireader.domain.usecases.translation.TranslationUseCases
 import org.koin.dsl.module
 
@@ -72,6 +75,72 @@ val useCaseAggregateModule = module {
             fileSystem = get(),
             haptic = get(),
             network = get()
+        )
+    }
+    
+    // BookDetail aggregate - used by BookDetailViewModel
+    // Reduces constructor params from 28+ to ~12
+    // Requirements: 1.1, 1.4, 1.5
+    factory {
+        BookDetailUseCases(
+            getBookUseCases = get(),
+            getChapterUseCase = get(),
+            insertUseCases = get(),
+            deleteUseCase = get(),
+            remoteUseCases = get(),
+            historyUseCase = get(),
+            getLastReadChapter = get(),
+            markChapterAsRead = get(),
+            downloadChapters = get(),
+            exportNovelAsEpub = get(),
+            exportBookAsEpub = get(),
+            getBookReviews = get()
+        )
+    }
+    
+    // Reader aggregate - used by ReaderScreenViewModel
+    // Reduces constructor params from 40+ to ~15
+    // Requirements: 1.2, 1.4, 1.5
+    factory {
+        ReaderUseCasesAggregate(
+            getBookUseCases = get(),
+            getChapterUseCase = get(),
+            insertUseCases = get(),
+            remoteUseCases = get(),
+            historyUseCase = get(),
+            preloadChapter = get(),
+            bookmarkChapter = get(),
+            reportBrokenChapter = get(),
+            trackReadingProgress = get(),
+            translateChapterWithStorage = get(),
+            translateParagraph = get(),
+            getTranslatedChapter = get(),
+            getGlossaryByBookId = get(),
+            saveGlossaryEntry = get(),
+            deleteGlossaryEntry = get(),
+            exportGlossary = get(),
+            importGlossary = get()
+        )
+    }
+    
+    // Extension aggregate - used by ExtensionViewModel
+    // Reduces constructor params from 17 to ~10
+    // Requirements: 1.3, 1.4, 1.5
+    factory {
+        ExtensionUseCases(
+            getCatalogsByType = get(),
+            updateCatalog = get(),
+            installCatalog = get(),
+            uninstallCatalog = get(),
+            togglePinnedCatalog = get(),
+            syncRemoteCatalogs = get(),
+            sourceHealthChecker = get(),
+            sourceCredentialsRepository = get(),
+            extensionWatcherService = get(),
+            catalogSourceRepository = get(),
+            extensionManager = getOrNull(),
+            extensionSecurityManager = getOrNull(),
+            extensionRepositoryManager = getOrNull()
         )
     }
 }

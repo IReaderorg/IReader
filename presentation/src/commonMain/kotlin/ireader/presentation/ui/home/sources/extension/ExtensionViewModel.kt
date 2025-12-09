@@ -8,15 +8,18 @@ import androidx.compose.runtime.snapshotFlow
 import ireader.core.log.Log
 import ireader.core.os.InstallStep
 import ireader.domain.catalogs.CatalogStore
-import ireader.domain.catalogs.interactor.*
-import ireader.domain.data.repository.CatalogSourceRepository
-import ireader.domain.data.repository.SourceCredentialsRepository
+import ireader.domain.catalogs.interactor.ExtensionManager
+import ireader.domain.catalogs.interactor.ExtensionRepositoryManager
+import ireader.domain.catalogs.interactor.ExtensionSecurityManager
+import ireader.domain.catalogs.interactor.GetCatalogsByType
 import ireader.domain.models.entities.*
 import ireader.domain.preferences.prefs.BrowsePreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.ExtensionChangeEvent
-import ireader.domain.services.ExtensionWatcherService
-import ireader.domain.services.SourceHealthChecker
+import ireader.domain.services.extension.ExtensionCommand
+import ireader.domain.services.extension.ExtensionController
+import ireader.domain.services.extension.ExtensionEvent as ControllerEvent
+import ireader.domain.usecases.extension.ExtensionUseCases
 import ireader.domain.usecases.services.StartExtensionManagerService
 import ireader.domain.utils.exceptionHandler
 import ireader.i18n.UiText
@@ -32,32 +35,44 @@ import kotlinx.coroutines.IO
 /**
  * ViewModel for the Extension screen using sealed state pattern.
  * 
+ * Refactored to use ExtensionUseCases aggregate to reduce constructor parameters.
+ * Target: ≤10 constructor parameters (Requirements: 1.3, 1.4, 1.5)
+ * 
+ * Now integrates with ExtensionController for SSOT state management.
+ * Requirements: 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1
+ * 
  * Uses a single immutable StateFlow<ExtensionScreenState> instead of multiple mutable states.
  * This provides:
- * - Single source of truth for UI state
+ * - Single source of truth for UI state (via ExtensionController)
  * - Atomic state updates
  * - Better Compose performance with @Immutable state
  * - Clear Loading/Success/Error states
  */
 class ExtensionViewModel(
-    private val getCatalogsByType: GetCatalogsByType,
-    private val updateCatalog: UpdateCatalog,
-    private val installCatalog: InstallCatalog,
-    private val uninstallCatalog: UninstallCatalogs,
-    private val togglePinnedCatalog: TogglePinnedCatalog,
-    private val syncRemoteCatalogs: SyncRemoteCatalogs,
+    // Use case aggregate - groups 13 related use cases (Requirements: 1.3, 1.4, 1.5)
+    private val extensionUseCases: ExtensionUseCases,
     val uiPreferences: UiPreferences,
     val startExtensionManagerService: StartExtensionManagerService,
-    private val sourceHealthChecker: SourceHealthChecker,
-    private val sourceCredentialsRepository: SourceCredentialsRepository,
-    private val extensionWatcherService: ExtensionWatcherService,
-    private val catalogSourceRepository: CatalogSourceRepository,
     private val catalogStore: CatalogStore,
-    private val extensionManager: ExtensionManager? = null,
-    private val extensionSecurityManager: ExtensionSecurityManager? = null,
-    private val extensionRepositoryManager: ExtensionRepositoryManager? = null,
     private val browsePreferences: BrowsePreferences,
+    // ExtensionController for SSOT state management (Requirements: 3.2, 3.3, 3.4, 3.5)
+    private val extensionController: ExtensionController? = null,
 ) : BaseViewModel() {
+    
+    // Convenience accessors for aggregate use cases (backward compatibility)
+    private val getCatalogsByType get() = extensionUseCases.getCatalogsByType
+    private val updateCatalog get() = extensionUseCases.updateCatalog
+    private val installCatalog get() = extensionUseCases.installCatalog
+    private val uninstallCatalog get() = extensionUseCases.uninstallCatalog
+    private val togglePinnedCatalog get() = extensionUseCases.togglePinnedCatalog
+    private val syncRemoteCatalogs get() = extensionUseCases.syncRemoteCatalogs
+    private val sourceHealthChecker get() = extensionUseCases.sourceHealthChecker
+    private val sourceCredentialsRepository get() = extensionUseCases.sourceCredentialsRepository
+    private val extensionWatcherService get() = extensionUseCases.extensionWatcherService
+    private val catalogSourceRepository get() = extensionUseCases.catalogSourceRepository
+    private val extensionManager: ExtensionManager? get() = extensionUseCases.extensionManager
+    private val extensionSecurityManager: ExtensionSecurityManager? get() = extensionUseCases.extensionSecurityManager
+    private val extensionRepositoryManager: ExtensionRepositoryManager? get() = extensionUseCases.extensionRepositoryManager
 
     // ==================== State Management ====================
     
@@ -139,6 +154,58 @@ class ExtensionViewModel(
         subscribeToCatalogs()
         startExtensionWatcher()
         observeLoadingSources()
+        observeControllerEvents()
+        
+        // Initialize controller if available
+        extensionController?.dispatch(ExtensionCommand.LoadExtensions)
+    }
+    
+    /**
+     * Observe events from the ExtensionController for UI feedback.
+     * Requirements: 3.4, 4.2, 4.3
+     */
+    private fun observeControllerEvents() {
+        extensionController?.let { controller ->
+            scope.launch {
+                controller.events.collect { event ->
+                    when (event) {
+                        is ControllerEvent.Error -> {
+                            showSnackBar(UiText.DynamicString(event.error.toUserMessage()))
+                        }
+                        is ControllerEvent.ExtensionsLoaded -> {
+                            Log.debug { "Extensions loaded: ${event.installedCount} installed, ${event.availableCount} available" }
+                        }
+                        is ControllerEvent.InstallComplete -> {
+                            showSnackBar(UiText.DynamicString("Installed ${event.catalog.name}"))
+                        }
+                        is ControllerEvent.UninstallComplete -> {
+                            showSnackBar(UiText.DynamicString("Uninstalled ${event.pkgName}"))
+                        }
+                        is ControllerEvent.UpdateComplete -> {
+                            showSnackBar(UiText.DynamicString("Updated ${event.catalog.name}"))
+                        }
+                        is ControllerEvent.UpdatesAvailable -> {
+                            showSnackBar(UiText.DynamicString("${event.count} updates available"))
+                        }
+                        is ControllerEvent.AllUpToDate -> {
+                            showSnackBar(UiText.DynamicString("All extensions up to date"))
+                        }
+                        is ControllerEvent.RefreshComplete -> {
+                            Log.debug { "Extensions refreshed" }
+                        }
+                        is ControllerEvent.BatchUpdateComplete -> {
+                            showSnackBar(UiText.DynamicString("Updated ${event.successCount} of ${event.totalCount} extensions"))
+                        }
+                        is ControllerEvent.InstallProgress -> {
+                            // Progress is handled via state
+                        }
+                        is ControllerEvent.ShowSnackbar -> {
+                            showSnackBar(UiText.DynamicString(event.message))
+                        }
+                    }
+                }
+            }
+        }
     }
     
     private fun initializeLanguagePreferences() {
@@ -296,9 +363,22 @@ class ExtensionViewModel(
     }
     
     /**
-     * Install or update a catalog
+     * Install or update a catalog.
+     * Delegates to ExtensionController when available.
+     * Requirements: 3.2, 3.3
      */
     fun installCatalog(catalog: Catalog) {
+        // Use controller if available
+        if (extensionController != null) {
+            when (catalog) {
+                is CatalogRemote -> extensionController.dispatch(ExtensionCommand.InstallExtension(catalog))
+                is CatalogInstalled -> extensionController.dispatch(ExtensionCommand.UpdateExtension(catalog))
+                else -> { /* Unsupported catalog type */ }
+            }
+            return
+        }
+        
+        // Fallback to direct implementation
         if (!installerJobs.containsKey(catalog.sourceId)) {
             installerJobs[catalog.sourceId] = Job()
         }
@@ -341,9 +421,18 @@ class ExtensionViewModel(
     }
     
     /**
-     * Uninstall a catalog
+     * Uninstall a catalog.
+     * Delegates to ExtensionController when available.
+     * Requirements: 3.2, 3.3
      */
     fun uninstallCatalog(catalog: Catalog) {
+        // Use controller if available
+        if (extensionController != null && catalog is CatalogInstalled) {
+            extensionController.dispatch(ExtensionCommand.UninstallExtension(catalog))
+            return
+        }
+        
+        // Fallback to direct implementation
         scope.launch {
             if (catalog is CatalogInstalled) {
                 uninstallCatalog.await(catalog)
@@ -372,9 +461,21 @@ class ExtensionViewModel(
     }
     
     /**
-     * Refresh catalogs from remote
+     * Refresh catalogs from remote.
+     * Delegates to ExtensionController when available.
+     * Requirements: 3.2, 3.3
      */
     fun refreshCatalogs() {
+        // Use controller if available
+        if (extensionController != null) {
+            extensionController.dispatch(ExtensionCommand.RefreshExtensions)
+            if (autoInstaller.value) {
+                startExtensionManagerService.start()
+            }
+            return
+        }
+        
+        // Fallback to direct implementation
         scope.launch(ioDispatcher) {
             updateState { it.copy(isRefreshing = true) }
             
@@ -628,7 +729,19 @@ class ExtensionViewModel(
         }
     }
     
+    /**
+     * Batch update all extensions.
+     * Delegates to ExtensionController when available.
+     * Requirements: 3.2, 3.3
+     */
     fun batchUpdateExtensions() {
+        // Use controller if available
+        if (extensionController != null) {
+            extensionController.dispatch(ExtensionCommand.BatchUpdateExtensions)
+            return
+        }
+        
+        // Fallback to direct implementation
         scope.launch(ioDispatcher) {
             try {
                 val currentState = _state.value
@@ -644,7 +757,19 @@ class ExtensionViewModel(
         }
     }
     
+    /**
+     * Check for extension updates.
+     * Delegates to ExtensionController when available.
+     * Requirements: 3.2, 3.3
+     */
     fun checkForExtensionUpdates() {
+        // Use controller if available
+        if (extensionController != null) {
+            extensionController.dispatch(ExtensionCommand.CheckUpdates)
+            return
+        }
+        
+        // Fallback to direct implementation
         scope.launch(ioDispatcher) {
             try {
                 val updates = extensionManager?.checkForUpdates()

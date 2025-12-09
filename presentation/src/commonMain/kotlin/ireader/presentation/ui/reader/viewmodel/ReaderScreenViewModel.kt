@@ -31,28 +31,12 @@ import ireader.domain.services.preferences.PreferenceCommand
 import ireader.domain.services.preferences.PreferenceEvent
 import ireader.domain.services.preferences.ReaderPreferencesController
 import ireader.domain.usecases.chapter.AutoRepairChapterUseCase
-import ireader.domain.usecases.chapter.ReportBrokenChapterUseCase
 import ireader.domain.usecases.fonts.FontManagementUseCase
 import ireader.domain.usecases.fonts.FontUseCase
-import ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase
-import ireader.domain.usecases.glossary.ExportGlossaryUseCase
-import ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase
-import ireader.domain.usecases.glossary.ImportGlossaryUseCase
-import ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase
-import ireader.domain.usecases.history.HistoryUseCase
-import ireader.domain.usecases.local.LocalGetBookUseCases
-import ireader.domain.usecases.local.LocalGetChapterUseCase
-import ireader.domain.usecases.local.LocalInsertUseCases
-import ireader.domain.usecases.local.book_usecases.BookMarkChapterUseCase
 import ireader.domain.usecases.preferences.reader_preferences.ReaderPrefUseCases
-import ireader.domain.usecases.reader.PreloadChapterUseCase
+import ireader.domain.usecases.reader.ReaderUseCasesAggregate
 import ireader.domain.usecases.reader.ScreenAlwaysOn
-import ireader.domain.usecases.remote.RemoteUseCases
-import ireader.domain.usecases.statistics.TrackReadingProgressUseCase
-import ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase
-import ireader.domain.usecases.translate.TranslateParagraphUseCase
 import ireader.domain.usecases.translate.TranslationEnginesManager
-import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.removeIf
 import ireader.i18n.LAST_CHAPTER
@@ -76,6 +60,9 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for the Reader screen using sealed state pattern.
  *
+ * Refactored to use ReaderUseCasesAggregate to reduce constructor parameters.
+ * Target: ≤15 constructor parameters (Requirements: 1.2, 1.4, 1.5)
+ *
  * Uses a single immutable StateFlow<ReaderState> instead of multiple mutable states.
  * This provides:
  * - Single source of truth for reader state
@@ -84,13 +71,10 @@ import kotlinx.coroutines.launch
  * - Clear Loading/Success/Error states
  */
 class ReaderScreenViewModel(
-    val getBookUseCases: LocalGetBookUseCases,
-    val getChapterUseCase: LocalGetChapterUseCase,
-    val remoteUseCases: RemoteUseCases,
-    val historyUseCase: HistoryUseCase,
+    // Use case aggregate - groups 18 related use cases (Requirements: 1.2, 1.4, 1.5)
+    private val readerUseCasesAggregate: ReaderUseCasesAggregate,
     val getLocalCatalog: GetLocalCatalog,
     val readerUseCases: ReaderPrefUseCases,
-    val insertUseCases: LocalInsertUseCases,
     val readerPreferences: ReaderPreferences,
     val androidUiPreferences: AppPreferences,
     val platformUiPreferences: PlatformUiPreferences,
@@ -98,19 +82,7 @@ class ReaderScreenViewModel(
     val screenAlwaysOnUseCase: ScreenAlwaysOn,
     val webViewManger: WebViewManger,
     val readerThemeRepository: ReaderThemeRepository,
-    val bookMarkChapterUseCase: BookMarkChapterUseCase,
     val translationEnginesManager: TranslationEnginesManager,
-    val preloadChapterUseCase: PreloadChapterUseCase,
-    val translateChapterWithStorageUseCase: TranslateChapterWithStorageUseCase,
-    val translateParagraphUseCase: TranslateParagraphUseCase,
-    val getTranslatedChapterUseCase: GetTranslatedChapterUseCase,
-    val getGlossaryByBookIdUseCase: GetGlossaryByBookIdUseCase,
-    val saveGlossaryEntryUseCase: SaveGlossaryEntryUseCase,
-    val deleteGlossaryEntryUseCase: DeleteGlossaryEntryUseCase,
-    val exportGlossaryUseCase: ExportGlossaryUseCase,
-    val importGlossaryUseCase: ImportGlossaryUseCase,
-    val trackReadingProgressUseCase: TrackReadingProgressUseCase,
-    val reportBrokenChapterUseCase: ReportBrokenChapterUseCase,
     val fontManagementUseCase: FontManagementUseCase,
     val fontUseCase: FontUseCase,
     val chapterHealthChecker: ChapterHealthChecker,
@@ -130,6 +102,25 @@ class ReaderScreenViewModel(
     val ttsViewModel: ReaderTTSViewModel,
     val statisticsViewModel: ReaderStatisticsViewModel,
 ) : BaseViewModel() {
+    
+    // Convenience accessors for aggregate use cases (backward compatibility)
+    val getBookUseCases get() = readerUseCasesAggregate.getBookUseCases
+    val getChapterUseCase get() = readerUseCasesAggregate.getChapterUseCase
+    val insertUseCases get() = readerUseCasesAggregate.insertUseCases
+    val remoteUseCases get() = readerUseCasesAggregate.remoteUseCases
+    val historyUseCase get() = readerUseCasesAggregate.historyUseCase
+    val preloadChapterUseCase get() = readerUseCasesAggregate.preloadChapter
+    val bookMarkChapterUseCase get() = readerUseCasesAggregate.bookmarkChapter
+    val reportBrokenChapterUseCase get() = readerUseCasesAggregate.reportBrokenChapter
+    val trackReadingProgressUseCase get() = readerUseCasesAggregate.trackReadingProgress
+    val translateChapterWithStorageUseCase get() = readerUseCasesAggregate.translateChapterWithStorage
+    val translateParagraphUseCase get() = readerUseCasesAggregate.translateParagraph
+    val getTranslatedChapterUseCase get() = readerUseCasesAggregate.getTranslatedChapter
+    val getGlossaryByBookIdUseCase get() = readerUseCasesAggregate.getGlossaryByBookId
+    val saveGlossaryEntryUseCase get() = readerUseCasesAggregate.saveGlossaryEntry
+    val deleteGlossaryEntryUseCase get() = readerUseCasesAggregate.deleteGlossaryEntry
+    val exportGlossaryUseCase get() = readerUseCasesAggregate.exportGlossary
+    val importGlossaryUseCase get() = readerUseCasesAggregate.importGlossary
 
     data class Param(val chapterId: Long?, val bookId: Long?)
 

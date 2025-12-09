@@ -102,8 +102,8 @@ val repositoryInjectModule = module {
     single<ireader.domain.data.repository.LeaderboardRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            // No Supabase configured, use NoOp
-            ireader.data.repository.NoOpLeaderboardRepository()
+            // No Supabase configured, use NoOp singleton
+            ireader.data.repository.NoOpLeaderboardRepository
         } else {
             try {
                 // Get analytics client from multi-project provider
@@ -113,8 +113,8 @@ val repositoryInjectModule = module {
                     backendService = get()
                 )
             } catch (e: Exception) {
-                // Fallback to NoOp if something goes wrong
-                ireader.data.repository.NoOpLeaderboardRepository()
+                // Fallback to NoOp singleton if something goes wrong
+                ireader.data.repository.NoOpLeaderboardRepository
             }
         }
     }
@@ -123,8 +123,8 @@ val repositoryInjectModule = module {
     single<ireader.domain.data.repository.PopularBooksRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            // No Supabase configured, use NoOp
-            ireader.data.repository.NoOpPopularBooksRepository()
+            // No Supabase configured, use NoOp singleton
+            ireader.data.repository.NoOpPopularBooksRepository
         } else {
             try {
                 val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).libraryClient
@@ -133,7 +133,8 @@ val repositoryInjectModule = module {
                     backendService = get()
                 )
             } catch (e: Exception) {
-                ireader.data.repository.NoOpPopularBooksRepository()
+                // Fallback to NoOp singleton if something goes wrong
+                ireader.data.repository.NoOpPopularBooksRepository
             }
         }
     }
@@ -142,8 +143,8 @@ val repositoryInjectModule = module {
     single<ireader.domain.data.repository.AllReviewsRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            // No Supabase configured, use NoOp
-            ireader.data.repository.NoOpAllReviewsRepository()
+            // No Supabase configured, use NoOp singleton
+            ireader.data.repository.NoOpAllReviewsRepository
         } else {
             try {
                 val supabaseClient = (provider as ireader.data.remote.MultiSupabaseClientProvider).bookReviewsClient
@@ -152,7 +153,8 @@ val repositoryInjectModule = module {
                     backendService = get()
                 )
             } catch (e: Exception) {
-                ireader.data.repository.NoOpAllReviewsRepository()
+                // Fallback to NoOp singleton if something goes wrong
+                ireader.data.repository.NoOpAllReviewsRepository
             }
         }
     }
@@ -161,8 +163,8 @@ val repositoryInjectModule = module {
     single<ireader.domain.data.repository.DonationLeaderboardRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
         if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
-            // No Supabase configured, use NoOp
-            ireader.data.repository.NoOpDonationLeaderboardRepository()
+            // No Supabase configured, use NoOp singleton
+            ireader.data.repository.NoOpDonationLeaderboardRepository
         } else {
             try {
                 // Get analytics client from multi-project provider
@@ -172,8 +174,8 @@ val repositoryInjectModule = module {
                     backendService = get()
                 )
             } catch (e: Exception) {
-                // Fallback to NoOp if something goes wrong
-                ireader.data.repository.NoOpDonationLeaderboardRepository()
+                // Fallback to NoOp singleton if something goes wrong
+                ireader.data.repository.NoOpDonationLeaderboardRepository
             }
         }
     }

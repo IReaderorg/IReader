@@ -1,106 +1,86 @@
 package ireader.data.repository
 
+import ireader.data.repository.base.NoOpRepositoryBase
 import ireader.domain.data.repository.ReviewRepository
 import ireader.domain.models.remote.BookReview
 import ireader.domain.models.remote.ChapterReview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 /**
  * No-op implementation of ReviewRepository used when Supabase is not configured.
  * Returns empty results and failures with descriptive messages.
+ * 
+ * Implemented as a singleton object since it is stateless.
+ * @see Requirements 2.1, 2.2, 2.3, 2.4
  */
-class NoOpReviewRepository : ReviewRepository {
+object NoOpReviewRepository : NoOpRepositoryBase(), ReviewRepository {
     
-    private val unavailableMessage = "Reviews require Supabase configuration. " +
-            "Please configure Supabase credentials in Settings → Supabase Configuration."
+    private const val FEATURE_NAME = "Reviews"
     
     // Book Reviews
-    override suspend fun getBookReview(bookTitle: String): Result<BookReview?> {
-        return Result.success(null)
-    }
+    override suspend fun getBookReview(bookTitle: String): Result<BookReview?> =
+        emptyResult()
     
-    override suspend fun getBookReviews(bookTitle: String): Result<List<BookReview>> {
-        return Result.success(emptyList())
-    }
+    override suspend fun getBookReviews(bookTitle: String): Result<List<BookReview>> =
+        emptyListResult()
     
     override suspend fun submitBookReview(
         bookTitle: String,
         rating: Int,
         reviewText: String
-    ): Result<BookReview> {
-        return Result.failure(UnsupportedOperationException(unavailableMessage))
-    }
+    ): Result<BookReview> = unavailableResult(FEATURE_NAME)
     
     override suspend fun updateBookReview(
         bookTitle: String,
         rating: Int,
         reviewText: String
-    ): Result<BookReview> {
-        return Result.failure(UnsupportedOperationException(unavailableMessage))
-    }
+    ): Result<BookReview> = unavailableResult(FEATURE_NAME)
     
-    override suspend fun deleteBookReview(bookTitle: String): Result<Unit> {
-        return Result.failure(UnsupportedOperationException(unavailableMessage))
-    }
+    override suspend fun deleteBookReview(bookTitle: String): Result<Unit> =
+        unavailableResult(FEATURE_NAME)
     
-    override fun observeBookReview(bookTitle: String): Flow<BookReview?> {
-        return flowOf(null)
-    }
+    override fun observeBookReview(bookTitle: String): Flow<BookReview?> =
+        emptyFlow()
     
     // Chapter Reviews
     override suspend fun getChapterReview(
         bookTitle: String,
         chapterName: String
-    ): Result<ChapterReview?> {
-        return Result.success(null)
-    }
+    ): Result<ChapterReview?> = emptyResult()
     
-    override suspend fun getChapterReviews(bookTitle: String): Result<List<ChapterReview>> {
-        return Result.success(emptyList())
-    }
+    override suspend fun getChapterReviews(bookTitle: String): Result<List<ChapterReview>> =
+        emptyListResult()
     
     override suspend fun submitChapterReview(
         bookTitle: String,
         chapterName: String,
         rating: Int,
         reviewText: String
-    ): Result<ChapterReview> {
-        return Result.failure(UnsupportedOperationException(unavailableMessage))
-    }
+    ): Result<ChapterReview> = unavailableResult(FEATURE_NAME)
     
     override suspend fun updateChapterReview(
         bookTitle: String,
         chapterName: String,
         rating: Int,
         reviewText: String
-    ): Result<ChapterReview> {
-        return Result.failure(UnsupportedOperationException(unavailableMessage))
-    }
+    ): Result<ChapterReview> = unavailableResult(FEATURE_NAME)
     
     override suspend fun deleteChapterReview(
         bookTitle: String,
         chapterName: String
-    ): Result<Unit> {
-        return Result.failure(UnsupportedOperationException(unavailableMessage))
-    }
+    ): Result<Unit> = unavailableResult(FEATURE_NAME)
     
     override fun observeChapterReview(
         bookTitle: String,
         chapterName: String
-    ): Flow<ChapterReview?> {
-        return flowOf(null)
-    }
+    ): Flow<ChapterReview?> = emptyFlow()
     
     // Aggregate stats
-    override suspend fun getBookAverageRating(bookTitle: String): Result<Float> {
-        return Result.success(0f)
-    }
+    override suspend fun getBookAverageRating(bookTitle: String): Result<Float> =
+        defaultResult(0f)
     
     override suspend fun getChapterAverageRating(
         bookTitle: String,
         chapterName: String
-    ): Result<Float> {
-        return Result.success(0f)
-    }
+    ): Result<Float> = defaultResult(0f)
 }
