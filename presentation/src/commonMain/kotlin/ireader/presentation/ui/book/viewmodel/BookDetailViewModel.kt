@@ -22,6 +22,9 @@ import ireader.domain.models.entities.isObsolete
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.book.BookCommand
 import ireader.domain.services.book.BookController
+import ireader.domain.services.bookdetail.BookDetailController
+import ireader.domain.services.bookdetail.BookDetailCommand
+import ireader.domain.services.bookdetail.BookDetailEvent as ControllerEvent
 import ireader.domain.services.chapter.ChapterCommand
 import ireader.domain.services.chapter.ChapterController
 import ireader.domain.services.common.DownloadService
@@ -106,6 +109,7 @@ class BookDetailViewModel(
     private val translationService: TranslationService? = null,
     private val chapterController: ChapterController,
     private val bookController: BookController,
+    private val bookDetailController: BookDetailController,
 ) : BaseViewModel() {
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -203,8 +207,15 @@ class BookDetailViewModel(
             // Subscribe to BookController state for book data sync (Requirements: 4.3)
             subscribeToBookControllerState()
             
+            // Subscribe to BookDetailController state and events (Requirements: 3.1, 3.3, 3.4, 3.5)
+            subscribeToBookDetailControllerState()
+            subscribeToBookDetailControllerEvents()
+            
             // Load book via BookController (SSOT pattern)
             bookController.dispatch(BookCommand.LoadBook(bookId))
+            
+            // Also load via BookDetailController for SSOT pattern (Requirements: 3.1)
+            bookDetailController.dispatch(BookDetailCommand.LoadBook(bookId))
         } else {
             _state.value = BookDetailState.Error("Invalid book ID")
             scope.launch {
@@ -244,6 +255,73 @@ class BookDetailViewModel(
                 // The main book data is still loaded via the existing subscription mechanism
                 // but BookController provides the SSOT for book operations
                 Log.debug { "BookDetailViewModel: BookController state updated - book=${bookState.book?.title}, progress=${bookState.progressPercentage}" }
+            }
+            .launchIn(scope)
+    }
+    
+    /**
+     * Subscribe to BookDetailController state for book detail-specific state.
+     * This provides SSOT for chapter selection, filtering, and sorting.
+     * Requirements: 3.1, 3.3, 3.4, 3.5
+     */
+    private fun subscribeToBookDetailControllerState() {
+        bookDetailController.state
+            .onEach { controllerState ->
+                // Sync filter and sort state from BookDetailController
+                Log.debug { 
+                    "BookDetailViewModel: BookDetailController state updated - " +
+                    "book=${controllerState.book?.title}, " +
+                    "chapters=${controllerState.chapters.size}, " +
+                    "selection=${controllerState.selectedChapterIds.size}"
+                }
+                
+                // The BookDetailController provides additional state management
+                // for chapter filtering, sorting, and selection that complements
+                // the existing ChapterController
+            }
+            .launchIn(scope)
+    }
+    
+    /**
+     * Subscribe to BookDetailController events for one-time occurrences.
+     * Requirements: 3.4, 4.2, 4.3
+     */
+    private fun subscribeToBookDetailControllerEvents() {
+        bookDetailController.events
+            .onEach { event ->
+                when (event) {
+                    is ControllerEvent.Error -> {
+                        Log.error { "BookDetailController error: ${event.error.toUserMessage()}" }
+                        emitEvent(BookDetailEvent.ShowSnackbar(event.error.toUserMessage()))
+                    }
+                    is ControllerEvent.BookLoaded -> {
+                        Log.debug { "BookDetailController: Book loaded - ${event.book.title}" }
+                    }
+                    is ControllerEvent.ChaptersLoaded -> {
+                        Log.debug { "BookDetailController: ${event.count} chapters loaded" }
+                    }
+                    is ControllerEvent.NavigateToReader -> {
+                        emitEvent(BookDetailEvent.NavigateToReader(event.bookId, event.chapterId))
+                    }
+                    is ControllerEvent.NavigateToWebView -> {
+                        // Handle web view navigation if needed
+                    }
+                    is ControllerEvent.NavigateBack -> {
+                        emitEvent(BookDetailEvent.NavigateBack)
+                    }
+                    is ControllerEvent.BookRefreshed -> {
+                        Log.debug { "BookDetailController: Book refreshed" }
+                    }
+                    is ControllerEvent.ChaptersRefreshed -> {
+                        Log.debug { "BookDetailController: Chapters refreshed - ${event.newCount} new, ${event.totalCount} total" }
+                    }
+                    is ControllerEvent.SelectionChanged -> {
+                        Log.debug { "BookDetailController: Selection changed - ${event.selectedCount} selected" }
+                    }
+                    is ControllerEvent.ShowSnackbar -> {
+                        emitEvent(BookDetailEvent.ShowSnackbar(event.message))
+                    }
+                }
             }
             .launchIn(scope)
     }
@@ -1379,6 +1457,12 @@ class BookDetailViewModel(
         
         // Cleanup BookController state (Requirements: 4.3)
         bookController.dispatch(BookCommand.Cleanup)
+        
+        // Cleanup BookDetailController state (Requirements: 3.1, 3.3, 3.4, 3.5)
+        bookDetailController.dispatch(BookDetailCommand.Cleanup)
+        
+        // Release BookDetailController resources
+        bookDetailController.release()
         
         Log.info { "BookDetailViewModel cleared - all jobs cancelled" }
     }

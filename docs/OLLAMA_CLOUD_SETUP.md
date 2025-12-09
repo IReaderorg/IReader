@@ -28,7 +28,16 @@ Hugging Face Spaces offers free GPU access for running Ollama.
 Create a file named `Dockerfile` in your Space with this content:
 
 ```dockerfile
-FROM ollama/ollama:latest
+FROM ubuntu:22.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Ollama
+RUN curl -fsSL https://ollama.com/install.sh | sh
 
 # Expose the Ollama port
 EXPOSE 7860
@@ -40,11 +49,11 @@ ENV OLLAMA_MODELS=/data/models
 # Create models directory
 RUN mkdir -p /data/models
 
-# Start script that pulls model and runs server
+# Copy and set up start script
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-CMD ["/start.sh"]
+ENTRYPOINT ["/bin/bash", "/start.sh"]
 ```
 
 ### Step 4: Add the Start Script
@@ -58,18 +67,18 @@ Create a file named `start.sh`:
 ollama serve &
 
 # Wait for server to start
-sleep 5
+sleep 10
 
 # Pull the translation model (use smaller models for free tier)
 ollama pull qwen2.5:1.5b
 
-# Keep container running
+# Keep container running by waiting for the background process
 wait
 ```
 
 ### Step 5: Configure Your Space
 
-Create a `README.md` file:
+Create a `README.md` file with the required Hugging Face Space configuration:
 
 ```markdown
 ---
@@ -79,10 +88,19 @@ colorFrom: blue
 colorTo: purple
 sdk: docker
 app_port: 7860
+pinned: false
+license: apache-2.0
 ---
 
 Ollama server for IReader translation.
 ```
+
+**Required fields:**
+- `title`: Display name for your Space
+- `sdk`: Must be `docker` for this setup
+- `app_port`: Must match the port in your Dockerfile (7860)
+
+**Note:** Do not use `app_file` for Docker SDK - it's only for Gradio/Streamlit SDKs.
 
 ### Step 6: Get Your Space URL
 

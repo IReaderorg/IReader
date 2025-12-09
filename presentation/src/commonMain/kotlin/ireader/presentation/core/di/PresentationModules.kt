@@ -120,7 +120,8 @@ val PresentationModules = module {
     factory  { UpdatesViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     // BookDetailViewModel - Simplified with BookDetailUseCases aggregate (Requirements: 1.1, 1.4, 1.5)
-    // Reduced from 28 parameters to 20 using BookDetailUseCases aggregate
+    // Reduced from 28 parameters to 21 using BookDetailUseCases aggregate
+    // Now includes BookDetailController for SSOT pattern (Requirements: 3.1, 3.3, 3.4, 3.5)
     factory<BookDetailViewModel> { (params: BookDetailViewModel.Param) -> 
         BookDetailViewModel(
             bookDetailUseCases = get(),        // Aggregate: groups 12 use cases
@@ -142,7 +143,8 @@ val PresentationModules = module {
             bookPrefetchService = getOrNull(),
             translationService = getOrNull(),
             chapterController = get(),
-            bookController = get()
+            bookController = get(),
+            bookDetailController = get()       // BookDetailController for SSOT pattern
         )
     }
     // Changed from single to factory - settings screen is not always needed

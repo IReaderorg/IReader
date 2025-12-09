@@ -13,7 +13,10 @@ import ireader.i18n.UiText
  * Sealed interface representing the overall reader screen state.
  * 
  * This provides clear Loading/Success/Error states for the reader screen.
+ * 
+ * Requirements: 5.1 - @Stable annotation for Compose optimization
  */
+@Stable
 sealed interface ReaderState {
     
     @Immutable

@@ -7,6 +7,7 @@ import ireader.domain.plugins.PluginManager
 import ireader.domain.plugins.PluginPreferences
 import ireader.domain.plugins.PluginRegistry
 import ireader.domain.services.book.bookModule
+import ireader.domain.services.bookdetail.bookDetailModule
 import ireader.domain.services.chapter.chapterModule
 import ireader.domain.services.downloaderService.DownloadStateHolder
 import ireader.domain.services.extension.extensionModule
@@ -302,6 +303,10 @@ val DomainServices = module {
     // Extension Module - ExtensionController as singleton
     // Requirements: 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1
     includes(extensionModule)
+    
+    // BookDetail Module - BookDetailController as factory (each screen gets its own instance)
+    // Requirements: 3.1, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1
+    includes(bookDetailModule)
     
     // Note: Preferences, UseCases, and Repository UseCases are loaded separately
     // to avoid circular dependencies with UseCasesInject module

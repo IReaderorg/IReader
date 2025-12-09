@@ -4,6 +4,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import ireader.core.http.HttpClients
@@ -15,11 +16,13 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.no_text_to_translate
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import ireader.domain.data.engines.ContentType as TranslationContentType
 
 /**
  * Ollama Translation Engine
  * Uses the Ollama API for locally-hosted LLM translation
+ * Optimized to match Gemini's chunking and prompt patterns
  * https://github.com/ollama/ollama
  */
 class OllamaTranslateEngine(
@@ -27,29 +30,34 @@ class OllamaTranslateEngine(
     private val readerPreferences: ReaderPreferences,
 ) : TranslateEngine() {
 
-    override val id: Long = 5 // Unique ID for this engine
+    override val id: Long = 5
     override val engineName: String = "Ollama (Local LLM)"
     override val supportsAI: Boolean = true
     override val supportsContextAwareTranslation: Boolean = true
     override val supportsStylePreservation: Boolean = true
-    override val requiresApiKey: Boolean = false // Doesn't require an API key, but requires URL
+    override val requiresApiKey: Boolean = false
     
-    // Ollama is local, so we can handle larger chunks
+    // Ollama is local, can handle larger chunks
     override val maxCharsPerRequest: Int = 10000
     
-    // Local engine, no rate limiting needed
-    override val rateLimitDelayMs: Long = 0L
+    // Local engine, minimal rate limiting
+    override val rateLimitDelayMs: Long = 100L
     
     // Ollama runs locally
     override val isOffline: Boolean = true
     
-    // Default Ollama API endpoint (typically local)
+    // Default Ollama API endpoint
     private val defaultApiUrl = "http://localhost:11434"
+    
+    // JSON parser with lenient settings
+    private val json = Json { 
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
     
     // Get the configured Ollama URL from preferences or use default
     private fun getOllamaUrl(): String {
         val configuredUrl = readerPreferences.ollamaServerUrl().get()
-        // Handle legacy URLs that include /api/chat path
         val cleanUrl = configuredUrl.trimEnd('/')
             .removeSuffix("/api/chat")
             .removeSuffix("/api/generate")
@@ -63,11 +71,17 @@ class OllamaTranslateEngine(
     }
     
     companion object {
-        /** Maximum paragraphs per chunk to avoid context window limits (same as Gemini) */
+        /** Maximum paragraphs per chunk (same as Gemini) */
         const val MAX_CHUNK_SIZE = 20
         
         /** Request timeout in milliseconds (local LLM can be slow) */
-        const val REQUEST_TIMEOUT_MS = 120000L
+        const val REQUEST_TIMEOUT_MS = 180000L
+        
+        /** Max retries for network issues */
+        const val MAX_RETRIES = 3
+        
+        /** Paragraph separator marker */
+        const val MARKER = "---PARAGRAPH_BREAK---"
     }
     
     // Ollama supports a wide range of languages through its LLM capabilities
@@ -166,14 +180,16 @@ class OllamaTranslateEngine(
     
     @Serializable
     private data class OllamaOptions(
-        val temperature: Float = 0.1f
+        val temperature: Float = 0.1f,
+        val num_predict: Int = 8192
     )
     
     @Serializable
     private data class OllamaChatResponse(
-        val model: String,
-        val message: OllamaMessage,
-        val done: Boolean
+        val model: String? = null,
+        val message: OllamaMessage? = null,
+        val done: Boolean = false,
+        val error: String? = null
     )
     
     override suspend fun translate(
@@ -184,13 +200,11 @@ class OllamaTranslateEngine(
         onSuccess: (List<String>) -> Unit,
         onError: (UiText) -> Unit
     ) {
-        // Create a basic context and delegate to the enhanced method
         val context = TranslationContext(
             contentType = TranslationContentType.GENERAL,
             toneType = ToneType.NEUTRAL,
-            preserveStyle = false
+            preserveStyle = true
         )
-        
         translateWithContext(texts, source, target, context, onProgress, onSuccess, onError)
     }
     
@@ -209,36 +223,32 @@ class OllamaTranslateEngine(
         }
         
         try {
-            onProgress(0)
+            onProgress(10)
             
-            // Get configuration from preferences
             val url = getOllamaUrl()
             val model = getOllamaModel()
             
-            // Get language names for better prompting
+            // Get language names for prompting
             val sourceLang = supportedLanguages.find { it.first == source }?.second ?: source
             val targetLang = supportedLanguages.find { it.first == target }?.second ?: target
             
-            // Chunk texts by paragraph count (similar to DeepSeek approach)
+            // Chunk texts like Gemini does
             val chunks = texts.chunked(MAX_CHUNK_SIZE)
             val allResults = mutableListOf<String>()
-            
-            println("Ollama: Created ${chunks.size} chunks from ${texts.size} texts (max $MAX_CHUNK_SIZE per chunk)")
+            val totalChunks = chunks.size
             
             chunks.forEachIndexed { chunkIndex, chunk ->
-                val chunkProgress = 10 + (chunkIndex * 80 / chunks.size)
+                // Calculate progress: 10% start, 90% for chunks
+                val chunkProgress = 10 + ((chunkIndex + 1) * 80 / totalChunks)
                 onProgress(chunkProgress)
                 
-                try {
-                    val translatedChunk = translateChunk(chunk, sourceLang, targetLang, context, url, model)
-                    allResults.addAll(translatedChunk)
-                } catch (e: Exception) {
-                    println("Ollama chunk $chunkIndex failed: ${e.message}")
-                    throw e
-                }
+                val translatedChunk = translateChunkWithRetry(
+                    chunk, sourceLang, targetLang, context, url, model
+                )
+                allResults.addAll(translatedChunk)
             }
             
-            // Ensure we have the right number of results
+            // Ensure correct paragraph count
             val finalResults = if (allResults.size == texts.size) {
                 allResults
             } else {
@@ -250,10 +260,46 @@ class OllamaTranslateEngine(
             
         } catch (e: Exception) {
             onProgress(0)
-            println("Ollama translation error: ${e.message}")
-            e.printStackTrace()
             onError(UiText.ExceptionString(e))
         }
+    }
+    
+    /**
+     * Translate a chunk with retry logic (like Gemini)
+     */
+    private suspend fun translateChunkWithRetry(
+        chunk: List<String>,
+        sourceLang: String,
+        targetLang: String,
+        context: TranslationContext,
+        url: String,
+        model: String
+    ): List<String> {
+        var lastException: Exception? = null
+        
+        for (attempt in 1..MAX_RETRIES) {
+            try {
+                return translateChunk(chunk, sourceLang, targetLang, context, url, model)
+            } catch (e: Exception) {
+                lastException = e
+                
+                // Check if retryable
+                val isRetryable = e.message?.let { msg ->
+                    msg.contains("timeout", ignoreCase = true) ||
+                    msg.contains("connection", ignoreCase = true) ||
+                    msg.contains("reset", ignoreCase = true)
+                } ?: false
+                
+                if (!isRetryable || attempt == MAX_RETRIES) {
+                    throw e
+                }
+                
+                // Exponential backoff
+                kotlinx.coroutines.delay((1000L * attempt))
+            }
+        }
+        
+        throw lastException ?: Exception("Translation failed after $MAX_RETRIES attempts")
     }
     
     /**
@@ -269,9 +315,26 @@ class OllamaTranslateEngine(
     ): List<String> {
         val chatUrl = url.trimEnd('/') + "/api/chat"
         
-        // Combine texts with paragraph markers
-        val combinedText = chunk.joinToString("\n---PARAGRAPH_BREAK---\n")
-        val (systemPrompt, userPrompt) = buildChatPrompt(combinedText, sourceLang, targetLang, context)
+        // Join paragraphs with marker
+        val combinedText = chunk.joinToString("\n$MARKER\n")
+        
+        // Use system message with native speaker persona for novel translation
+        val systemPrompt = """You are an expert literary translator and native $targetLang speaker specializing in novel and fiction translation. You have years of experience translating web novels, light novels, and fiction from $sourceLang to $targetLang.
+
+Your expertise includes:
+- Preserving narrative tone, character voice, and writing style
+- Adapting idioms and cultural references naturally
+- Maintaining story flow and emotional impact
+
+TASK: Translate the following novel text paragraphs.
+
+OUTPUT FORMAT:
+- Translate each paragraph naturally for $targetLang readers
+- Separate paragraphs with $MARKER exactly as shown
+- Output ONLY the translations
+- NO explanations or comments"""
+
+        val userPrompt = "Novel text to translate:\n\n$combinedText"
         
         val request = OllamaChatRequest(
             model = model,
@@ -279,139 +342,97 @@ class OllamaTranslateEngine(
                 OllamaMessage(role = "system", content = systemPrompt),
                 OllamaMessage(role = "user", content = userPrompt)
             ),
-            options = OllamaOptions(temperature = 0.1f)
+            options = OllamaOptions(temperature = 0.1f, num_predict = 8192)
         )
         
-        // Make the API request with timeout
         val response = client.default.post(chatUrl) {
             contentType(ContentType.Application.Json)
             setBody(request)
             timeout {
                 requestTimeoutMillis = REQUEST_TIMEOUT_MS
-                connectTimeoutMillis = 15000
+                connectTimeoutMillis = 30000
                 socketTimeoutMillis = REQUEST_TIMEOUT_MS
             }
-        }.body<OllamaChatResponse>()
+        }
         
-        // Split the response back into paragraphs
-        return splitResponse(response.message.content.trim(), chunk.size)
+        // Handle response status
+        if (response.status.value !in 200..299) {
+            val errorBody = response.bodyAsText()
+            throw Exception("Ollama API error (${response.status.value}): $errorBody")
+        }
+        
+        val responseText = response.bodyAsText()
+        val ollamaResponse = try {
+            json.decodeFromString<OllamaChatResponse>(responseText)
+        } catch (e: Exception) {
+            throw Exception("Failed to parse Ollama response: ${e.message}")
+        }
+        
+        // Check for errors
+        if (ollamaResponse.error != null) {
+            throw Exception("Ollama error: ${ollamaResponse.error}")
+        }
+        
+        val content = ollamaResponse.message?.content?.trim()
+        if (content.isNullOrEmpty()) {
+            throw Exception("Empty response from Ollama")
+        }
+        
+        return splitResponse(content, chunk.size)
     }
     
+
+    
     /**
-     * Split response back into paragraphs
+     * Split response back into paragraphs using PARAGRAPH_BREAK marker
      */
     private fun splitResponse(response: String, expectedCount: Int): List<String> {
-        // Try to split by paragraph marker first
-        if (response.contains("---PARAGRAPH_BREAK---")) {
+        // Split by marker and clean up
+        if (response.contains(MARKER)) {
             val parts = response
-                .split("---PARAGRAPH_BREAK---")
+                .split(MARKER)
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
             
             if (parts.size == expectedCount) {
                 return parts
             }
-        }
-        
-        // Also try with newline variations
-        val variations = listOf(
-            "\n---PARAGRAPH_BREAK---\n",
-            "---PARAGRAPH_BREAK---",
-            "\n\n---\n\n"
-        )
-        
-        for (separator in variations) {
-            if (response.contains(separator)) {
-                val parts = response.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
-                if (parts.size == expectedCount) {
-                    return parts
-                }
+            
+            // If count doesn't match but we have parts, adjust
+            if (parts.isNotEmpty()) {
+                return adjustParagraphCount(parts, List(expectedCount) { "" })
             }
         }
         
-        // If marker not found and we expect multiple paragraphs, try double newlines
+        // Fallback: try double newlines
         if (expectedCount > 1) {
-            val lines = response.split("\n\n")
+            val parts = response.split("\n\n")
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
             
-            if (lines.size >= expectedCount) {
-                // Distribute lines evenly across expected paragraphs
-                val result = mutableListOf<String>()
-                val linesPerParagraph = lines.size / expectedCount
-                
-                for (i in 0 until expectedCount) {
-                    val start = i * linesPerParagraph
-                    val end = if (i == expectedCount - 1) lines.size else (i + 1) * linesPerParagraph
-                    if (start < lines.size) {
-                        result.add(lines.subList(start, end.coerceAtMost(lines.size)).joinToString("\n\n"))
-                    }
-                }
-                return result
+            if (parts.size >= expectedCount) {
+                return parts.take(expectedCount)
             }
         }
         
-        // Fallback: return as single result
+        // Single paragraph fallback
         return listOf(response.trim())
     }
     
-    // Helper function to adjust paragraph count to match input
+    /**
+     * Adjust paragraph count to match input
+     */
     private fun adjustParagraphCount(translatedParagraphs: List<String>, originalTexts: List<String>): List<String> {
         val result = translatedParagraphs.toMutableList()
         
-        // If we have too few paragraphs, add original ones
         while (result.size < originalTexts.size) {
             result.add(originalTexts[result.size])
         }
         
-        // If we have too many paragraphs, remove extras
         if (result.size > originalTexts.size) {
             result.subList(originalTexts.size, result.size).clear()
         }
         
         return result
-    }
-    
-    /**
-     * Builds a chat prompt (system + user) for the LLM based on the translation context
-     * Returns Pair(systemPrompt, userPrompt)
-     */
-    private fun buildChatPrompt(
-        text: String,
-        sourceLang: String,
-        targetLang: String,
-        context: TranslationContext
-    ): Pair<String, String> {
-        val contentTypeStr = when (context.contentType) {
-            TranslationContentType.LITERARY -> "literary text"
-            TranslationContentType.TECHNICAL -> "technical document"
-            TranslationContentType.CONVERSATION -> "conversation"
-            TranslationContentType.POETRY -> "poetry"
-            TranslationContentType.ACADEMIC -> "academic text"
-            else -> "general text"
-        }
-        
-        val toneStr = when (context.toneType) {
-            ToneType.FORMAL -> "formal"
-            ToneType.CASUAL -> "casual"
-            ToneType.PROFESSIONAL -> "professional"
-            ToneType.HUMOROUS -> "humorous"
-            else -> "neutral"
-        }
-        
-        val stylePreservation = if (context.preserveStyle) 
-            "Preserve the original writing style, formatting, and tone." 
-        else 
-            ""
-        
-        // Optimized prompt: minimal tokens while maintaining quality
-        val systemPrompt = """
-            Translator for $contentTypeStr. $sourceLang to $targetLang. $toneStr tone.
-            $stylePreservation
-            Keep ---PARAGRAPH_BREAK--- markers exactly as they appear.
-            Output only the translation, no explanations.
-        """.trimIndent()
-        
-        return Pair(systemPrompt, text)
     }
 } 
