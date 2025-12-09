@@ -7,6 +7,20 @@ import ireader.i18n.resources.*
 
 actual class GoogleTranslateML : TranslateEngine() {
 
+    actual override val requiresInitialization: Boolean
+        get() = false // Not available on desktop
+    
+    actual override suspend fun initialize(
+        sourceLanguage: String,
+        targetLanguage: String,
+        onProgress: (Int) -> Unit,
+        onSuccess: (String) -> Unit,
+        onError: (UiText) -> Unit
+    ) {
+        // Google ML Kit is not available on desktop
+        onError(UiText.DynamicString("Google ML Kit translation is only available on Android"))
+    }
+
     actual override suspend fun translate(
         texts: List<String>,
         source: String,

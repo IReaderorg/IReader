@@ -32,7 +32,7 @@ fun LanguageChip(choice: LanguageChoice, isSelected: Boolean, onClick: () -> Uni
             tonalElevation = if (isSelected) 3.dp else 0.dp
     ) {
         val text = when (choice) {
-            is LanguageChoice.All -> "🌐 All"
+            LanguageChoice.All -> "🌐 All"
             is LanguageChoice.One -> {
                 val emoji = choice.language.toEmoji() ?: ""
                 val name = ireader.presentation.ui.home.sources.extension.LocaleHelper.getDisplayName(choice.language.code)

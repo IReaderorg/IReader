@@ -9,8 +9,14 @@ import kotlinx.coroutines.flow.Flow
  * Chapters represent individual sections or episodes of a book.
  * This repository provides methods for managing chapters including
  * CRUD operations, queries by book, and reactive subscriptions.
+ * 
+ * This interface extends both [ChapterReadRepository] and [ChapterWriteRepository]
+ * for backward compatibility. New code should prefer depending on the
+ * focused sub-interfaces when only read or write operations are needed.
+ * 
+ * Requirements: 9.1, 9.2, 9.3
  */
-interface ChapterRepository {
+interface ChapterRepository : ChapterReadRepository, ChapterWriteRepository {
 
     /**
      * Subscribes to chapter changes by ID.
@@ -18,7 +24,7 @@ interface ChapterRepository {
      * @param chapterId The unique identifier of the chapter
      * @return Flow emitting the chapter when it changes, or null if not found
      */
-    fun subscribeChapterById(
+    override fun subscribeChapterById(
         chapterId: Long,
     ): Flow<Chapter?>
 
@@ -28,7 +34,7 @@ interface ChapterRepository {
      * @param chapterId The unique identifier of the chapter
      * @return The chapter if found, null otherwise
      */
-    suspend fun findChapterById(
+    override suspend fun findChapterById(
         chapterId: Long,
     ): Chapter?
 
@@ -37,14 +43,14 @@ interface ChapterRepository {
      * 
      * @return List of all chapters
      */
-    suspend fun findAllChapters(): List<Chapter>
+    override suspend fun findAllChapters(): List<Chapter>
 
     /**
      * Retrieves all chapters for books in the user's library.
      * 
      * @return List of chapters from library books
      */
-    suspend fun findAllInLibraryChapter(): List<Chapter>
+    override suspend fun findAllInLibraryChapter(): List<Chapter>
 
     /**
      * Retrieves all chapters for a specific book.
@@ -52,7 +58,7 @@ interface ChapterRepository {
      * @param bookId The unique identifier of the book
      * @return List of chapters belonging to the book
      */
-    suspend fun findChaptersByBookId(
+    override suspend fun findChaptersByBookId(
         bookId: Long,
     ): List<Chapter>
 
@@ -62,7 +68,7 @@ interface ChapterRepository {
      * @param bookId The unique identifier of the book
      * @return The last read chapter if found, null otherwise
      */
-    suspend fun findLastReadChapter(bookId: Long): Chapter?
+    override suspend fun findLastReadChapter(bookId: Long): Chapter?
     
     /**
      * Subscribes to the last read chapter for a specific book.
@@ -70,7 +76,7 @@ interface ChapterRepository {
      * @param bookId The unique identifier of the book
      * @return Flow emitting the last read chapter when it changes
      */
-    suspend fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
+    override suspend fun subscribeLastReadChapter(bookId: Long): Flow<Chapter?>
 
     /**
      * Inserts a new chapter into the database.
@@ -78,7 +84,7 @@ interface ChapterRepository {
      * @param chapter The chapter to insert
      * @return The ID of the inserted chapter
      */
-    suspend fun insertChapter(chapter: Chapter): Long
+    override suspend fun insertChapter(chapter: Chapter): Long
 
     /**
      * Inserts multiple chapters in a batch operation.
@@ -86,7 +92,7 @@ interface ChapterRepository {
      * @param chapters List of chapters to insert
      * @return List of IDs for the inserted chapters
      */
-    suspend fun insertChapters(
+    override suspend fun insertChapters(
             chapters: List<Chapter>,
     ): List<Long>
 
@@ -95,7 +101,7 @@ interface ChapterRepository {
      * 
      * @param bookId The unique identifier of the book
      */
-    suspend fun deleteChaptersByBookId(
+    override suspend fun deleteChaptersByBookId(
         bookId: Long,
     )
 
@@ -104,14 +110,14 @@ interface ChapterRepository {
      * 
      * @param chapters List of chapters to delete
      */
-    suspend fun deleteChapters(chapters: List<Chapter>)
+    override suspend fun deleteChapters(chapters: List<Chapter>)
 
     /**
      * Deletes a single chapter from the database.
      * 
      * @param chapter The chapter to delete
      */
-    suspend fun deleteChapter(
+    override suspend fun deleteChapter(
             chapter: Chapter,
     )
 
@@ -119,7 +125,7 @@ interface ChapterRepository {
      * Deletes all chapters from the database.
      * WARNING: This operation cannot be undone.
      */
-    suspend fun deleteAllChapters()
+    override suspend fun deleteAllChapters()
     
     /**
      * Subscribes to chapter changes for a specific book.
@@ -127,7 +133,7 @@ interface ChapterRepository {
      * @param bookId The unique identifier of the book
      * @return Flow emitting list of chapters when they change
      */
-    fun subscribeChaptersByBookId(bookId: Long): Flow<List<Chapter>>
+    override fun subscribeChaptersByBookId(bookId: Long): Flow<List<Chapter>>
     
     /**
      * Retrieves all chapters for a specific book WITH their full content.
@@ -140,5 +146,5 @@ interface ChapterRepository {
      * @param bookId The unique identifier of the book
      * @return List of chapters with their full content
      */
-    suspend fun findChaptersByBookIdWithContent(bookId: Long): List<Chapter>
+    override suspend fun findChaptersByBookIdWithContent(bookId: Long): List<Chapter>
 }

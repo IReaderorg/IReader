@@ -9,6 +9,93 @@ actual class GoogleTranslateML : TranslateEngine() {
     override val id: Long
         get() = 0
     
+    actual override val requiresInitialization: Boolean
+        get() = true
+    
+    /**
+     * Initialize the Google ML Kit translation engine by downloading language models
+     */
+    actual override suspend fun initialize(
+        sourceLanguage: String,
+        targetLanguage: String,
+        onProgress: (Int) -> Unit,
+        onSuccess: (String) -> Unit,
+        onError: (UiText) -> Unit
+    ) {
+        try {
+            // Use reflection to check if ML Kit is available at runtime
+            val translatorOptionsClass = Class.forName("com.google.mlkit.nl.translate.TranslatorOptions")
+            val translationClass = Class.forName("com.google.mlkit.nl.translate.Translation")
+            
+            onProgress(0)
+            
+            // Build options using reflection
+            val builderClass = Class.forName("com.google.mlkit.nl.translate.TranslatorOptions\$Builder")
+            val builder = builderClass.getDeclaredConstructor().newInstance()
+            
+            val setSourceMethod = builderClass.getMethod("setSourceLanguage", String::class.java)
+            val setTargetMethod = builderClass.getMethod("setTargetLanguage", String::class.java)
+            val buildMethod = builderClass.getMethod("build")
+            
+            setSourceMethod.invoke(builder, sourceLanguage)
+            setTargetMethod.invoke(builder, targetLanguage)
+            val options = buildMethod.invoke(builder)
+            
+            // Get client
+            val getClientMethod = translationClass.getMethod("getClient", translatorOptionsClass)
+            val client = getClientMethod.invoke(null, options)
+            
+            onProgress(10)
+            
+            // Download model
+            val downloadMethod = client.javaClass.getMethod("downloadModelIfNeeded")
+            val downloadTask = downloadMethod.invoke(client)
+            
+            // Add success listener
+            val addOnSuccessListenerMethod = downloadTask.javaClass.getMethod("addOnSuccessListener",
+                Class.forName("com.google.android.gms.tasks.OnSuccessListener"))
+            
+            val successListener = java.lang.reflect.Proxy.newProxyInstance(
+                javaClass.classLoader,
+                arrayOf(Class.forName("com.google.android.gms.tasks.OnSuccessListener"))
+            ) { _, _, _ ->
+                onProgress(100)
+                onSuccess("Language model downloaded successfully for $sourceLanguage → $targetLanguage")
+                null
+            }
+            
+            addOnSuccessListenerMethod.invoke(downloadTask, successListener)
+            
+            // Add failure listener
+            val addOnFailureListenerMethod = downloadTask.javaClass.getMethod("addOnFailureListener",
+                Class.forName("com.google.android.gms.tasks.OnFailureListener"))
+            
+            val failureListener = java.lang.reflect.Proxy.newProxyInstance(
+                javaClass.classLoader,
+                arrayOf(Class.forName("com.google.android.gms.tasks.OnFailureListener"))
+            ) { _, _, args ->
+                onProgress(0)
+                val exception = args?.get(0) as? Exception
+                println("Google ML Kit initialization error: ${exception?.message}")
+                exception?.printStackTrace()
+                onError(UiText.ExceptionString(exception ?: Exception("Failed to download language model")))
+                null
+            }
+            
+            addOnFailureListenerMethod.invoke(downloadTask, failureListener)
+            
+        } catch (e: ClassNotFoundException) {
+            // ML Kit not available (F-Droid build)
+            onProgress(0)
+            onError(UiText.DynamicString("Google ML Kit is not available in this build. Please use the Play Store version."))
+        } catch (e: Exception) {
+            onProgress(0)
+            println("Google ML Kit initialization error: ${e.message}")
+            e.printStackTrace()
+            onError(UiText.ExceptionString(e))
+        }
+    }
+    
     actual override suspend fun translate(
         texts: List<String>,
         source: String,

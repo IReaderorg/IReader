@@ -99,6 +99,11 @@ abstract class TranslateEngine {
      * Whether this engine is offline/local (no rate limiting needed)
      */
     open val isOffline: Boolean = false
+    
+    /**
+     * Whether this engine requires initialization (e.g., downloading language models)
+     */
+    open val requiresInitialization: Boolean = false
 
     abstract suspend fun translate(
         texts: List<String>,
@@ -108,6 +113,25 @@ abstract class TranslateEngine {
         onSuccess: (List<String>) -> Unit,
         onError:(UiText) -> Unit
     )
+    
+    /**
+     * Initialize the translation engine (e.g., download language models)
+     * @param sourceLanguage Source language code
+     * @param targetLanguage Target language code
+     * @param onProgress Progress callback (0-100)
+     * @param onSuccess Success callback with message
+     * @param onError Error callback
+     */
+    open suspend fun initialize(
+        sourceLanguage: String,
+        targetLanguage: String,
+        onProgress: (Int) -> Unit = {},
+        onSuccess: (String) -> Unit = {},
+        onError: (UiText) -> Unit = {}
+    ) {
+        // Default implementation does nothing - override in engines that need initialization
+        onSuccess("Engine ready")
+    }
     
     /**
      * Enhanced version of translate for AI-powered engines that can preserve style, tone, and context

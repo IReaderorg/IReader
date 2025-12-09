@@ -228,10 +228,19 @@ class ExtensionViewModel(
                     selectedLanguages.size == 1 -> LanguageChoice.One(Language(selectedLanguages.first()))
                     else -> LanguageChoice.Others(selectedLanguages.map { Language(it) })
                 }
-                updateState { it.copy(
-                    selectedUserSourceLanguage = choice,
-                    selectedLanguage = choice
-                )}
+                // Update both the selected language and re-filter the catalogs
+                updateState { state ->
+                    state.copy(
+                        selectedUserSourceLanguage = choice,
+                        selectedLanguage = choice,
+                        pinnedCatalogs = state.allPinnedCatalogs.filteredByQuery(state.searchQuery)
+                            .filteredByLanguageChoice(choice),
+                        unpinnedCatalogs = state.allUnpinnedCatalogs.filteredByQuery(state.searchQuery)
+                            .filteredByLanguageChoice(choice),
+                        remoteCatalogs = state.allRemoteCatalogs.filteredByQuery(state.searchQuery)
+                            .filteredByChoice(choice)
+                    )
+                }
             }
         }
     }

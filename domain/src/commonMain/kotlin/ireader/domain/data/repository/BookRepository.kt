@@ -14,15 +14,21 @@ import kotlinx.coroutines.flow.Flow
  * 
  * All suspend functions should be called from a coroutine context.
  * Flow-based functions provide reactive updates when data changes.
+ * 
+ * This interface extends both [BookReadRepository] and [BookWriteRepository]
+ * for backward compatibility. New code should prefer depending on the
+ * focused sub-interfaces when only read or write operations are needed.
+ * 
+ * Requirements: 9.1, 9.2, 9.3
  */
-interface BookRepository {
+interface BookRepository : BookReadRepository, BookWriteRepository {
 
     /**
      * Retrieves all books from the database.
      * 
      * @return List of all books
      */
-    suspend fun findAllBooks(): List<Book>
+    override suspend fun findAllBooks(): List<Book>
 
     /**
      * Subscribes to book changes by ID.
@@ -30,7 +36,7 @@ interface BookRepository {
      * @param id The unique identifier of the book
      * @return Flow emitting the book when it changes, or null if not found
      */
-    fun subscribeBookById(id: Long): Flow<Book?>
+    override fun subscribeBookById(id: Long): Flow<Book?>
 
     /**
      * Finds a book by its unique identifier.
@@ -38,7 +44,7 @@ interface BookRepository {
      * @param id The unique identifier of the book
      * @return The book if found, null otherwise
      */
-    suspend fun findBookById(id: Long): Book?
+    override suspend fun findBookById(id: Long): Book?
 
     /**
      * Finds a book by its key and source ID.
@@ -47,7 +53,7 @@ interface BookRepository {
      * @param sourceId The source identifier
      * @return The book if found, null otherwise
      */
-    suspend fun find(key: String, sourceId: Long): Book?
+    override suspend fun find(key: String, sourceId: Long): Book?
 
     /**
      * Retrieves all books in the library with sorting and filtering.
@@ -57,10 +63,10 @@ interface BookRepository {
      * @param unreadFilter Whether to filter for unread books only
      * @return List of library books matching the criteria
      */
-    suspend fun findAllInLibraryBooks(
+    override suspend fun findAllInLibraryBooks(
         sortType: LibrarySort,
-        isAsc: Boolean = false,
-        unreadFilter: Boolean = false,
+        isAsc: Boolean,
+        unreadFilter: Boolean,
     ): List<Book>
 
     /**
@@ -69,7 +75,7 @@ interface BookRepository {
      * @param key The book's unique key
      * @return The book if found, null otherwise
      */
-    suspend fun findBookByKey(key: String): Book?
+    override suspend fun findBookByKey(key: String): Book?
 
     /**
      * Finds all books matching a specific key.
@@ -77,7 +83,7 @@ interface BookRepository {
      * @param key The book's key to search for
      * @return List of books with matching keys
      */
-    suspend fun findBooksByKey(key: String): List<Book>
+    override suspend fun findBooksByKey(key: String): List<Book>
 
     /**
      * Subscribes to books matching a key and title.
@@ -86,14 +92,14 @@ interface BookRepository {
      * @param title The book's title
      * @return Flow emitting list of matching books when they change
      */
-    suspend fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>>
+    override suspend fun subscribeBooksByKey(key: String, title: String): Flow<List<Book>>
 
     /**
      * Deletes multiple books from the database.
      * 
      * @param book List of books to delete
      */
-    suspend fun deleteBooks(book: List<Book>)
+    override suspend fun deleteBooks(book: List<Book>)
 
     /**
      * Inserts books and their chapters in a single transaction.
@@ -101,14 +107,14 @@ interface BookRepository {
      * @param books List of books to insert
      * @param chapters List of chapters to insert
      */
-    suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>)
+    override suspend fun insertBooksAndChapters(books: List<Book>, chapters: List<Chapter>)
 
     /**
      * Deletes a book by its unique identifier.
      * 
      * @param id The unique identifier of the book to delete
      */
-    suspend fun deleteBookById(id: Long)
+    override suspend fun deleteBookById(id: Long)
     
     /**
      * Finds a duplicate book by title and source ID.
@@ -117,18 +123,18 @@ interface BookRepository {
      * @param sourceId The source identifier
      * @return The duplicate book if found, null otherwise
      */
-    suspend fun findDuplicateBook(title: String, sourceId: Long): Book?
+    override suspend fun findDuplicateBook(title: String, sourceId: Long): Book?
 
     /**
      * Deletes all books from the database.
      * WARNING: This operation cannot be undone.
      */
-    suspend fun deleteAllBooks()
+    override suspend fun deleteAllBooks()
     
     /**
      * Deletes all books that are not in the user's library.
      */
-    suspend fun deleteNotInLibraryBooks()
+    override suspend fun deleteNotInLibraryBooks()
 
 
 
@@ -137,7 +143,7 @@ interface BookRepository {
      * 
      * @param book The book with updated information
      */
-    suspend fun updateBook(book: Book)
+    override suspend fun updateBook(book: Book)
     
     /**
      * Updates a library book's favorite status.
@@ -145,14 +151,14 @@ interface BookRepository {
      * @param book The library book to update
      * @param favorite Whether the book is marked as favorite
      */
-    suspend fun updateBook(book: LibraryBook, favorite: Boolean)
+    override suspend fun updateBook(book: LibraryBook, favorite: Boolean)
     
     /**
      * Updates multiple books in a batch operation.
      * 
      * @param book List of books to update
      */
-    suspend fun updateBook(book: List<Book>)
+    override suspend fun updateBook(book: List<Book>)
     
     /**
      * Inserts a new book or updates if it already exists.
@@ -160,7 +166,7 @@ interface BookRepository {
      * @param book The book to upsert
      * @return The ID of the inserted or updated book
      */
-    suspend fun upsert(book: Book): Long
+    override suspend fun upsert(book: Book): Long
     
     /**
      * Updates only the changed fields of a book.
@@ -168,7 +174,7 @@ interface BookRepository {
      * @param book The book with partial updates
      * @return The ID of the updated book
      */
-    suspend fun updatePartial(book: Book): Long
+    override suspend fun updatePartial(book: Book): Long
     
     /**
      * Inserts multiple books in a batch operation.
@@ -176,44 +182,44 @@ interface BookRepository {
      * @param book List of books to insert
      * @return List of IDs for the inserted books
      */
-    suspend fun insertBooks(book: List<Book>): List<Long>
+    override suspend fun insertBooks(book: List<Book>): List<Long>
     
     /**
      * Deletes a book by its key.
      * 
      * @param key The book's unique key
      */
-    suspend fun delete(key: String)
+    override suspend fun delete(key: String)
 
     /**
      * Retrieves source IDs for all books marked as favorites.
      * 
      * @return List of source IDs that have favorite books
      */
-    suspend fun findFavoriteSourceIds(): List<Long>
+    override suspend fun findFavoriteSourceIds(): List<Long>
     
     /**
      * Ensures all books have the default category assigned
      */
-    suspend fun repairCategoryAssignments()
+    override suspend fun repairCategoryAssignments()
     
     /**
      * Update pin status for a book
      */
-    suspend fun updatePinStatus(bookId: Long, isPinned: Boolean, pinnedOrder: Int)
+    override suspend fun updatePinStatus(bookId: Long, isPinned: Boolean, pinnedOrder: Int)
     
     /**
      * Update pinned order for a book
      */
-    suspend fun updatePinnedOrder(bookId: Long, pinnedOrder: Int)
+    override suspend fun updatePinnedOrder(bookId: Long, pinnedOrder: Int)
     
     /**
      * Get the maximum pinned order value
      */
-    suspend fun getMaxPinnedOrder(): Int
+    override suspend fun getMaxPinnedOrder(): Int
     
     /**
      * Update archive status for a book
      */
-    suspend fun updateArchiveStatus(bookId: Long, isArchived: Boolean)
+    override suspend fun updateArchiveStatus(bookId: Long, isArchived: Boolean)
 }

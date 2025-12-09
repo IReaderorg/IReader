@@ -318,23 +318,24 @@ class OllamaTranslateEngine(
         // Join paragraphs with marker
         val combinedText = chunk.joinToString("\n$MARKER\n")
         
-        // Use system message with native speaker persona for novel translation
-        val systemPrompt = """You are an expert literary translator and native $targetLang speaker specializing in novel and fiction translation. You have years of experience translating web novels, light novels, and fiction from $sourceLang to $targetLang.
+        // Use system message with explicit translation instruction
+        val systemPrompt = """You are an expert literary translator. Your ONLY task is to translate text from $sourceLang to $targetLang.
 
-Your expertise includes:
-- Preserving narrative tone, character voice, and writing style
-- Adapting idioms and cultural references naturally
-- Maintaining story flow and emotional impact
+CRITICAL RULES:
+1. You MUST output ONLY in $targetLang language
+2. Do NOT output any $sourceLang text
+3. Do NOT explain or comment - just translate
+4. Preserve paragraph structure using $MARKER as separator
+5. Maintain narrative tone and style
 
-TASK: Translate the following novel text paragraphs.
+You are translating a novel/fiction text."""
 
-OUTPUT FORMAT:
-- Translate each paragraph naturally for $targetLang readers
-- Separate paragraphs with $MARKER exactly as shown
-- Output ONLY the translations
-- NO explanations or comments"""
+        val userPrompt = """Translate the following $sourceLang text to $targetLang.
+OUTPUT MUST BE IN $targetLang ONLY.
 
-        val userPrompt = "Novel text to translate:\n\n$combinedText"
+Text to translate:
+
+$combinedText"""
         
         val request = OllamaChatRequest(
             model = model,

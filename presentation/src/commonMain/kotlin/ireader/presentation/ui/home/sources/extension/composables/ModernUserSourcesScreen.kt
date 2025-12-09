@@ -85,6 +85,19 @@ fun ModernUserSourcesScreen(
         state = scrollState,
         verticalArrangement = Arrangement.Top,
     ) {
+        // Language filter - Requirements: 5.1
+        item(key = "language_filter") {
+            LanguageChipGroup(
+                choices = state.languageChoices,
+                selected = state.selectedUserSourceLanguage,
+                onClick = { vm.setUserSourceLanguage(it) },
+                isVisible = vm.showLanguageFilter.value,
+                onToggleVisibility = { visible ->
+                    vm.uiPreferences.showLanguageFilter().set(visible)
+                }
+            )
+        }
+        
         items(
             items = usersSources,
             contentType = {

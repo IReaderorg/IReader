@@ -72,13 +72,13 @@ fun LanguageChipGroup(
         val quickAccessChoices = remember(choices, quickAccessCodes) {
             choices.filter { choice ->
                 when (choice) {
-                    is LanguageChoice.All -> true
+                    LanguageChoice.All -> true
                     is LanguageChoice.One -> choice.language.code in quickAccessCodes
                     is LanguageChoice.Others -> false
                 }
             }.distinctBy { choice ->
                 when (choice) {
-                    is LanguageChoice.All -> "all"
+                    LanguageChoice.All -> "all"
                     is LanguageChoice.One -> choice.language.code
                     is LanguageChoice.Others -> "others"
                 }
@@ -98,7 +98,7 @@ fun LanguageChipGroup(
                     items = quickAccessChoices,
                     key = { choice ->
                         when (choice) {
-                            is LanguageChoice.All -> "All"
+                            LanguageChoice.All -> "All"
                             is LanguageChoice.One -> choice.language.code
                             is LanguageChoice.Others -> "others"
                         }
@@ -209,7 +209,7 @@ private fun LanguageSelectionDialog(
         } else {
             choices.filter { choice ->
                 when (choice) {
-                    is LanguageChoice.All -> "all".contains(searchQuery, ignoreCase = true)
+                    LanguageChoice.All -> "all".contains(searchQuery, ignoreCase = true)
                     is LanguageChoice.One -> {
                         val name = LocaleHelper.getDisplayName(choice.language.code)
                         name.contains(searchQuery, ignoreCase = true) || 
@@ -282,7 +282,7 @@ private fun LanguageSelectionDialog(
                         items = filteredChoices,
                         key = { choice ->
                             when (choice) {
-                                is LanguageChoice.All -> "All"
+                                LanguageChoice.All -> "All"
                                 is LanguageChoice.One -> choice.language.code
                                 is LanguageChoice.Others -> "others"
                             }
@@ -308,7 +308,7 @@ private fun LanguageListItem(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val text = when (choice) {
-        is LanguageChoice.All -> "🌐 All Languages"
+        LanguageChoice.All -> "🌐 All Languages"
         is LanguageChoice.One -> {
             val emoji = choice.language.toEmoji() ?: ""
             val name = LocaleHelper.getDisplayName(choice.language.code)

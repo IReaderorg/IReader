@@ -104,6 +104,19 @@ fun ModernRemoteSourcesScreen(
         state = scrollState,
         verticalArrangement = Arrangement.Top,
     ) {
+        // Language filter for remote sources
+        item(key = "language_filter") {
+            LanguageChipGroup(
+                choices = state.languageChoices,
+                selected = state.selectedLanguage,
+                onClick = { vm.setSelectedLanguage(it) },
+                isVisible = vm.showLanguageFilter.value,
+                onToggleVisibility = { visible ->
+                    vm.uiPreferences.showLanguageFilter().set(visible)
+                }
+            )
+        }
+        
         items(
             items = remoteSources,
             contentType = { pair ->

@@ -34,6 +34,20 @@ actual class GoogleTranslateML actual constructor() : TranslateEngine() {
     override val id: Long = TranslateEngine.GOOGLE
     override val engineName: String = "Google Translate (iOS)"
     
+    actual override val requiresInitialization: Boolean = false // iOS uses web API, no model download needed
+    
+    actual override suspend fun initialize(
+        sourceLanguage: String,
+        targetLanguage: String,
+        onProgress: (Int) -> Unit,
+        onSuccess: (String) -> Unit,
+        onError: (UiText) -> Unit
+    ) {
+        // iOS uses web API, no initialization needed
+        onProgress(100)
+        onSuccess("Google Translate (iOS) is ready - no model download required")
+    }
+    
     private val httpClient = HttpClient()
     private val json = Json { ignoreUnknownKeys = true }
     

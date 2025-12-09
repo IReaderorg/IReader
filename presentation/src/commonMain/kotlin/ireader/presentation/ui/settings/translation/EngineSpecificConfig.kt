@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import ireader.presentation.ui.settings.general.MlKitInitState
 import ireader.presentation.ui.settings.general.TestConnectionState
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
 
@@ -26,6 +29,13 @@ fun EngineSpecificConfig(
     modifier: Modifier = Modifier
 ) {
     when (engineId) {
+        0L -> GoogleMlKitConfig(
+            initState = viewModel.mlKitInitState,
+            initProgress = viewModel.mlKitInitProgress,
+            onInitialize = { source, target -> viewModel.initializeGoogleMlKit(source, target) },
+            onResetState = { viewModel.resetMlKitInitState() },
+            modifier = modifier
+        )
         5L -> OllamaConfig(
             ollamaUrl = viewModel.ollamaUrl.value,
             ollamaModel = viewModel.ollamaModel.value,
@@ -268,6 +278,254 @@ private fun WebViewLoginConfig(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Sign in", style = MaterialTheme.typography.labelMedium)
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun GoogleMlKitConfig(
+    initState: MlKitInitState,
+    initProgress: Int,
+    onInitialize: (String, String) -> Unit,
+    onResetState: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var sourceLanguage by remember { mutableStateOf("en") }
+    var targetLanguage by remember { mutableStateOf("es") }
+    var expanded by remember { mutableStateOf(false) }
+    
+    // Common language pairs for ML Kit
+    val languages = listOf(
+        "en" to "English",
+        "es" to "Spanish",
+        "fr" to "French",
+        "de" to "German",
+        "it" to "Italian",
+        "pt" to "Portuguese",
+        "ru" to "Russian",
+        "ja" to "Japanese",
+        "ko" to "Korean",
+        "zh" to "Chinese",
+        "ar" to "Arabic",
+        "hi" to "Hindi"
+    )
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "Download Language Models",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // Info text
+            Text(
+                text = "Google ML Kit requires downloading language models for offline translation. Select your language pair and initialize.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            // Language selection row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Source language dropdown
+                LanguageDropdown(
+                    label = "From",
+                    selectedCode = sourceLanguage,
+                    languages = languages,
+                    onLanguageSelected = { sourceLanguage = it },
+                    modifier = Modifier.weight(1f)
+                )
+                
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
+                )
+                
+                // Target language dropdown
+                LanguageDropdown(
+                    label = "To",
+                    selectedCode = targetLanguage,
+                    languages = languages,
+                    onLanguageSelected = { targetLanguage = it },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            
+            // Initialize button and status
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilledTonalButton(
+                    onClick = { onInitialize(sourceLanguage, targetLanguage) },
+                    enabled = initState !is MlKitInitState.Initializing && sourceLanguage != targetLanguage,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    if (initState is MlKitInitState.Initializing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Downloading...", style = MaterialTheme.typography.labelMedium)
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Initialize", style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+                
+                // Status indicator
+                when (initState) {
+                    is MlKitInitState.Success -> {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "Ready",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    is MlKitInitState.Error -> {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "Failed",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    else -> {}
+                }
+            }
+            
+            // Progress bar during initialization
+            if (initState is MlKitInitState.Initializing && initProgress > 0) {
+                LinearProgressIndicator(
+                    progress = { initProgress / 100f },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            
+            // Success/Error message
+            when (initState) {
+                is MlKitInitState.Success -> {
+                    Text(
+                        text = initState.message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 2
+                    )
+                }
+                is MlKitInitState.Error -> {
+                    Text(
+                        text = initState.message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        maxLines = 3
+                    )
+                }
+                else -> {}
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LanguageDropdown(
+    label: String,
+    selectedCode: String,
+    languages: List<Pair<String, String>>,
+    onLanguageSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedName = languages.find { it.first == selectedCode }?.second ?: selectedCode
+    
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = selectedName,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label, maxLines = 1) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodySmall
+        )
+        
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            languages.forEach { (code, name) ->
+                DropdownMenuItem(
+                    text = { Text(name, style = MaterialTheme.typography.bodySmall) },
+                    onClick = {
+                        onLanguageSelected(code)
+                        expanded = false
+                    }
+                )
             }
         }
     }

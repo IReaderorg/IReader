@@ -1,6 +1,5 @@
 package ireader.presentation.ui.settings.general
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,6 +17,13 @@ sealed class TestConnectionState {
     object Testing : TestConnectionState()
     data class Success(val message: String) : TestConnectionState()
     data class Error(val message: String) : TestConnectionState()
+}
+
+sealed class MlKitInitState {
+    object Idle : MlKitInitState()
+    object Initializing : MlKitInitState()
+    data class Success(val message: String) : MlKitInitState()
+    data class Error(val message: String) : MlKitInitState()
 }
 
 class TranslationSettingsViewModel(
@@ -48,6 +54,13 @@ class TranslationSettingsViewModel(
     }
     
     var testConnectionState by mutableStateOf<TestConnectionState>(TestConnectionState.Idle)
+        private set
+    
+    // Google ML Kit initialization state
+    var mlKitInitState by mutableStateOf<MlKitInitState>(MlKitInitState.Idle)
+        private set
+    
+    var mlKitInitProgress by mutableStateOf(0)
         private set
     
     // Gemini model refresh state
@@ -203,6 +216,72 @@ class TranslationSettingsViewModel(
     
     fun resetTestConnectionState() {
         testConnectionState = TestConnectionState.Idle
+    }
+    
+    /**
+     * Initialize Google ML Kit translation engine by downloading language models
+     * @param sourceLanguage Source language code (e.g., "en")
+     * @param targetLanguage Target language code (e.g., "es")
+     */
+    fun initializeGoogleMlKit(sourceLanguage: String, targetLanguage: String) {
+        scope.launch {
+            mlKitInitState = MlKitInitState.Initializing
+            mlKitInitProgress = 0
+            
+            try {
+                // Get the Google ML Kit engine (id = 0)
+                val engines = translationEnginesManager.getAvailableEngines()
+                val mlKitEngineSource = engines.find { source ->
+                    when (source) {
+                        is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                            source.engine.id == 0L // Google ML Kit engine ID
+                        else -> false
+                    }
+                }
+                
+                if (mlKitEngineSource == null) {
+                    mlKitInitState = MlKitInitState.Error("Google ML Kit engine not found")
+                    return@launch
+                }
+                
+                val mlKitEngine = when (mlKitEngineSource) {
+                    is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
+                        mlKitEngineSource.engine
+                    else -> null
+                }
+                
+                if (mlKitEngine == null) {
+                    mlKitInitState = MlKitInitState.Error("Unable to access Google ML Kit engine")
+                    return@launch
+                }
+                
+                mlKitEngine.initialize(
+                    sourceLanguage = sourceLanguage,
+                    targetLanguage = targetLanguage,
+                    onProgress = { progress ->
+                        mlKitInitProgress = progress
+                    },
+                    onSuccess = { message ->
+                        mlKitInitState = MlKitInitState.Success(message)
+                    },
+                    onError = { error ->
+                        val message = when (error) {
+                            is ireader.i18n.UiText.ExceptionString -> error.e.message ?: "Unknown error"
+                            is ireader.i18n.UiText.DynamicString -> error.text
+                            else -> error.toString()
+                        }
+                        mlKitInitState = MlKitInitState.Error(message)
+                    }
+                )
+            } catch (e: Exception) {
+                mlKitInitState = MlKitInitState.Error("Initialization failed: ${e.message ?: "Unknown error"}")
+            }
+        }
+    }
+    
+    fun resetMlKitInitState() {
+        mlKitInitState = MlKitInitState.Idle
+        mlKitInitProgress = 0
     }
     
     /**
