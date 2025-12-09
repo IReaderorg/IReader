@@ -1,255 +1,255 @@
-package ireader.presentation.ui.home.sources.extension
-
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.PagerDefaults
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import ireader.domain.models.entities.Catalog
-import ireader.i18n.UiEvent
-import ireader.i18n.asString
-import ireader.i18n.resources.Res
-import ireader.i18n.resources.extensions
-import ireader.i18n.resources.sources
-import ireader.presentation.core.toComposeColor
-import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
-import ireader.presentation.ui.core.theme.AppColors
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.core.utils.horizontalPadding
-import ireader.presentation.ui.home.sources.extension.composables.RemoteSourcesScreen
-import ireader.presentation.ui.home.sources.extension.composables.UserSourcesScreen
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ExtensionScreen(
-    modifier: Modifier = Modifier,
-    vm: ExtensionViewModel,
-    onClickCatalog: (Catalog) -> Unit,
-    onClickInstall: (Catalog) -> Unit,
-    onClickUninstall: (Catalog) -> Unit,
-    onClickTogglePinned: (Catalog) -> Unit,
-    onCancelInstaller: ((Catalog) -> Unit)? = null,
-    snackBarHostState: androidx.compose.material3.SnackbarHostState,
-    onShowDetails: ((Catalog) -> Unit)? = null,
-    onMigrateFromSource: ((Long) -> Unit)? = null,
-    onNavigateToBrowseSettings: (() -> Unit)? = null,
-    scaffoldPadding: PaddingValues
-) {
-    val localizeHelper =
-        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    LaunchedEffect(Unit) {
-        vm.eventFlow.collectLatest { event ->
-            when (event) {
-                is UiEvent.ShowSnackbar -> {
-                    snackBarHostState.showSnackbar(
-                        event.uiText.asString(localizeHelper)
-                    )
-                }
-
-                else -> {}
-            }
-        }
-    }
-    val pages = remember {
-        listOf<String>(
-            localizeHelper.localize(Res.string.sources),
-            localizeHelper.localize(Res.string.extensions),
-        )
-    }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(scaffoldPadding)
-    ) {
-        ExtensionContent(
-            vm = vm,
-            onClickCatalog = onClickCatalog,
-            onClickInstall = onClickInstall,
-            onClickTogglePinned = onClickTogglePinned,
-            onClickUninstall = onClickUninstall,
-            pages = pages,
-            onCancelInstaller = onCancelInstaller,
-            onShowDetails = onShowDetails,
-            onMigrateFromSource = onMigrateFromSource,
-        )
-
-    }
-}
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun SourceHeader(
-    modifier: Modifier = Modifier,
-    language: String,
-) {
-    val localizeHelper =
-        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Text(
-            text = LocaleHelper.getSourceDisplayName(language, localizeHelper),
-            modifier = modifier
-                .padding(horizontal = horizontalPadding, vertical = 8.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary,
-        )
-    }
-}
-
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ExtensionContent(
-    pages: List<String>,
-    modifier: Modifier = Modifier,
-    onClickCatalog: (Catalog) -> Unit,
-    onClickTogglePinned: (Catalog) -> Unit,
-    vm: ExtensionViewModel,
-    onClickInstall: (Catalog) -> Unit,
-    onClickUninstall: (Catalog) -> Unit,
-    onCancelInstaller: ((Catalog) -> Unit)? = null,
-    onShowDetails: ((Catalog) -> Unit)? = null,
-    onMigrateFromSource: ((Long) -> Unit)? = null,
-
-    ) {
-    val pagerState = rememberPagerState(
-        initialPage = 0,
-        initialPageOffsetFraction = 0f
-    ) {
-        pages.size
-    }
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect {
-            vm.setCurrentPagerPage(pagerState.currentPage)
-        }
-    }
-    ExtensionTabs(pagerState = pagerState, pages = pages)
-    ExtensionPager(
-        pagerState = pagerState,
-        vm = vm,
-        onClickCatalog = onClickCatalog,
-        onClickInstall = onClickInstall,
-        onClickTogglePinned = onClickTogglePinned,
-        onClickUninstall = onClickUninstall,
-        pages = pages,
-        onCancelInstaller = onCancelInstaller,
-        onShowDetails = onShowDetails,
-        onMigrateFromSource = onMigrateFromSource,
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ExtensionPager(
-    pagerState: androidx.compose.foundation.pager.PagerState,
-    pages: List<String>,
-    modifier: Modifier = Modifier,
-    onClickCatalog: (Catalog) -> Unit,
-    onClickTogglePinned: (Catalog) -> Unit,
-    vm: ExtensionViewModel,
-    onClickInstall: (Catalog) -> Unit,
-    onClickUninstall: (Catalog) -> Unit,
-    onCancelInstaller: ((Catalog) -> Unit)? = null,
-    onShowDetails: ((Catalog) -> Unit)? = null,
-    onMigrateFromSource: ((Long) -> Unit)? = null,
-) {
-    HorizontalPager(
-        modifier = Modifier.fillMaxSize(),
-        state = pagerState,
-        pageSpacing = 0.dp,
-        userScrollEnabled = true,
-        reverseLayout = false,
-        contentPadding = PaddingValues(0.dp),
-        pageSize = PageSize.Fill,
-        key = null,
-        pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-            state = pagerState,
-            Orientation.Horizontal
-        ),
-        pageContent = { page ->
-            when (page) {
-                0 -> {
-                    UserSourcesScreen(
-                        onClickCatalog = onClickCatalog,
-                        onClickTogglePinned = onClickTogglePinned,
-                        vm = vm,
-                        onShowDetails = onShowDetails,
-                        onMigrateFromSource = onMigrateFromSource,
-                    )
-                }
-
-                1 -> {
-                    RemoteSourcesScreen(
-                        vm = vm,
-                        onClickInstall = onClickInstall,
-                        onClickUninstall = onClickUninstall,
-                        onCancelInstaller = onCancelInstaller,
-                    )
-                }
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun ExtensionTabs(
-    modifier: Modifier = Modifier,
-    pagerState: androidx.compose.foundation.pager.PagerState,
-    pages: List<String>,
-
-    ) {
-    val scope = rememberCoroutineScope()
-    TabRow(
-        selectedTabIndex = pagerState.currentPage,
-        containerColor = AppColors.current.bars.toComposeColor(),
-        contentColor = AppColors.current.onBars.toComposeColor(),
-    ) {
-        pages.forEachIndexed { index, title ->
-            Tab(
-                text = {
-                    MidSizeTextComposable(
-                        text = title,
-                        color = androidx.compose.ui.graphics.Color.Unspecified
-                    )
-                },
-                selected = pagerState.currentPage == index,
-                onClick = {
-                    scope.launch { pagerState.animateScrollToPage(index) }
-                },
-                selectedContentColor = MaterialTheme.colorScheme.primary,
-                unselectedContentColor = MaterialTheme.colorScheme.onBackground,
-            )
-        }
-    }
-}
-
+//package ireader.presentation.ui.home.sources.extension
+//
+//import androidx.compose.foundation.ExperimentalFoundationApi
+//import androidx.compose.foundation.gestures.Orientation
+//import androidx.compose.foundation.layout.Box
+//import androidx.compose.foundation.layout.Column
+//import androidx.compose.foundation.layout.PaddingValues
+//import androidx.compose.foundation.layout.fillMaxSize
+//import androidx.compose.foundation.layout.fillMaxWidth
+//import androidx.compose.foundation.layout.padding
+//import androidx.compose.foundation.pager.HorizontalPager
+//import androidx.compose.foundation.pager.PageSize
+//import androidx.compose.foundation.pager.PagerDefaults
+//import androidx.compose.foundation.pager.rememberPagerState
+//import androidx.compose.material3.ExperimentalMaterial3Api
+//import androidx.compose.material3.MaterialTheme
+//import androidx.compose.material3.Tab
+//import androidx.compose.material3.TabRow
+//import androidx.compose.material3.Text
+//import androidx.compose.material3.TopAppBarDefaults
+//import androidx.compose.runtime.Composable
+//import androidx.compose.runtime.LaunchedEffect
+//import androidx.compose.runtime.remember
+//import androidx.compose.runtime.rememberCoroutineScope
+//import androidx.compose.runtime.snapshotFlow
+//import androidx.compose.ui.Alignment
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.unit.dp
+//import ireader.domain.models.entities.Catalog
+//import ireader.i18n.UiEvent
+//import ireader.i18n.asString
+//import ireader.i18n.resources.Res
+//import ireader.i18n.resources.extensions
+//import ireader.i18n.resources.sources
+//import ireader.presentation.core.toComposeColor
+//import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
+//import ireader.presentation.ui.core.theme.AppColors
+//import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+//import ireader.presentation.ui.core.utils.horizontalPadding
+//import ireader.presentation.ui.home.sources.extension.composables.RemoteSourcesScreen
+//import ireader.presentation.ui.home.sources.extension.composables.UserSourcesScreen
+//import kotlinx.coroutines.flow.collectLatest
+//import kotlinx.coroutines.launch
+//
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun ExtensionScreen(
+//    modifier: Modifier = Modifier,
+//    vm: ExtensionViewModel,
+//    onClickCatalog: (Catalog) -> Unit,
+//    onClickInstall: (Catalog) -> Unit,
+//    onClickUninstall: (Catalog) -> Unit,
+//    onClickTogglePinned: (Catalog) -> Unit,
+//    onCancelInstaller: ((Catalog) -> Unit)? = null,
+//    snackBarHostState: androidx.compose.material3.SnackbarHostState,
+//    onShowDetails: ((Catalog) -> Unit)? = null,
+//    onMigrateFromSource: ((Long) -> Unit)? = null,
+//    onNavigateToBrowseSettings: (() -> Unit)? = null,
+//    scaffoldPadding: PaddingValues
+//) {
+//    val localizeHelper =
+//        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+//    LaunchedEffect(Unit) {
+//        vm.eventFlow.collectLatest { event ->
+//            when (event) {
+//                is UiEvent.ShowSnackbar -> {
+//                    snackBarHostState.showSnackbar(
+//                        event.uiText.asString(localizeHelper)
+//                    )
+//                }
+//
+//                else -> {}
+//            }
+//        }
+//    }
+//    val pages = remember {
+//        listOf<String>(
+//            localizeHelper.localize(Res.string.sources),
+//            localizeHelper.localize(Res.string.extensions),
+//        )
+//    }
+//    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+//
+//
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(scaffoldPadding)
+//    ) {
+//        ExtensionContent(
+//            vm = vm,
+//            onClickCatalog = onClickCatalog,
+//            onClickInstall = onClickInstall,
+//            onClickTogglePinned = onClickTogglePinned,
+//            onClickUninstall = onClickUninstall,
+//            pages = pages,
+//            onCancelInstaller = onCancelInstaller,
+//            onShowDetails = onShowDetails,
+//            onMigrateFromSource = onMigrateFromSource,
+//        )
+//
+//    }
+//}
+//
+//
+//@OptIn(ExperimentalFoundationApi::class)
+//@Composable
+//fun SourceHeader(
+//    modifier: Modifier = Modifier,
+//    language: String,
+//) {
+//    val localizeHelper =
+//        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+//    Box(
+//        modifier = Modifier.fillMaxWidth(),
+//        contentAlignment = Alignment.CenterStart
+//    ) {
+//        Text(
+//            text = LocaleHelper.getSourceDisplayName(language, localizeHelper),
+//            modifier = modifier
+//                .padding(horizontal = horizontalPadding, vertical = 8.dp),
+//            style = MaterialTheme.typography.labelSmall,
+//            color = MaterialTheme.colorScheme.primary,
+//        )
+//    }
+//}
+//
+//
+//@OptIn(ExperimentalFoundationApi::class)
+//@Composable
+//private fun ExtensionContent(
+//    pages: List<String>,
+//    modifier: Modifier = Modifier,
+//    onClickCatalog: (Catalog) -> Unit,
+//    onClickTogglePinned: (Catalog) -> Unit,
+//    vm: ExtensionViewModel,
+//    onClickInstall: (Catalog) -> Unit,
+//    onClickUninstall: (Catalog) -> Unit,
+//    onCancelInstaller: ((Catalog) -> Unit)? = null,
+//    onShowDetails: ((Catalog) -> Unit)? = null,
+//    onMigrateFromSource: ((Long) -> Unit)? = null,
+//
+//    ) {
+//    val pagerState = rememberPagerState(
+//        initialPage = 0,
+//        initialPageOffsetFraction = 0f
+//    ) {
+//        pages.size
+//    }
+//    LaunchedEffect(pagerState) {
+//        snapshotFlow { pagerState.currentPage }.collect {
+//            vm.setCurrentPagerPage(pagerState.currentPage)
+//        }
+//    }
+//    ExtensionTabs(pagerState = pagerState, pages = pages)
+//    ExtensionPager(
+//        pagerState = pagerState,
+//        vm = vm,
+//        onClickCatalog = onClickCatalog,
+//        onClickInstall = onClickInstall,
+//        onClickTogglePinned = onClickTogglePinned,
+//        onClickUninstall = onClickUninstall,
+//        pages = pages,
+//        onCancelInstaller = onCancelInstaller,
+//        onShowDetails = onShowDetails,
+//        onMigrateFromSource = onMigrateFromSource,
+//    )
+//}
+//
+//@OptIn(ExperimentalFoundationApi::class)
+//@Composable
+//private fun ExtensionPager(
+//    pagerState: androidx.compose.foundation.pager.PagerState,
+//    pages: List<String>,
+//    modifier: Modifier = Modifier,
+//    onClickCatalog: (Catalog) -> Unit,
+//    onClickTogglePinned: (Catalog) -> Unit,
+//    vm: ExtensionViewModel,
+//    onClickInstall: (Catalog) -> Unit,
+//    onClickUninstall: (Catalog) -> Unit,
+//    onCancelInstaller: ((Catalog) -> Unit)? = null,
+//    onShowDetails: ((Catalog) -> Unit)? = null,
+//    onMigrateFromSource: ((Long) -> Unit)? = null,
+//) {
+//    HorizontalPager(
+//        modifier = Modifier.fillMaxSize(),
+//        state = pagerState,
+//        pageSpacing = 0.dp,
+//        userScrollEnabled = true,
+//        reverseLayout = false,
+//        contentPadding = PaddingValues(0.dp),
+//        pageSize = PageSize.Fill,
+//        key = null,
+//        pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
+//            state = pagerState,
+//            Orientation.Horizontal
+//        ),
+//        pageContent = { page ->
+//            when (page) {
+//                0 -> {
+//                    UserSourcesScreen(
+//                        onClickCatalog = onClickCatalog,
+//                        onClickTogglePinned = onClickTogglePinned,
+//                        vm = vm,
+//                        onShowDetails = onShowDetails,
+//                        onMigrateFromSource = onMigrateFromSource,
+//                    )
+//                }
+//
+//                1 -> {
+//                    RemoteSourcesScreen(
+//                        vm = vm,
+//                        onClickInstall = onClickInstall,
+//                        onClickUninstall = onClickUninstall,
+//                        onCancelInstaller = onCancelInstaller,
+//                    )
+//                }
+//            }
+//        }
+//    )
+//}
+//
+//@OptIn(ExperimentalFoundationApi::class)
+//@Composable
+//private fun ExtensionTabs(
+//    modifier: Modifier = Modifier,
+//    pagerState: androidx.compose.foundation.pager.PagerState,
+//    pages: List<String>,
+//
+//    ) {
+//    val scope = rememberCoroutineScope()
+//    TabRow(
+//        selectedTabIndex = pagerState.currentPage,
+//        containerColor = AppColors.current.bars.toComposeColor(),
+//        contentColor = AppColors.current.onBars.toComposeColor(),
+//    ) {
+//        pages.forEachIndexed { index, title ->
+//            Tab(
+//                text = {
+//                    MidSizeTextComposable(
+//                        text = title,
+//                        color = androidx.compose.ui.graphics.Color.Unspecified
+//                    )
+//                },
+//                selected = pagerState.currentPage == index,
+//                onClick = {
+//                    scope.launch { pagerState.animateScrollToPage(index) }
+//                },
+//                selectedContentColor = MaterialTheme.colorScheme.primary,
+//                unselectedContentColor = MaterialTheme.colorScheme.onBackground,
+//            )
+//        }
+//    }
+//}
+//
