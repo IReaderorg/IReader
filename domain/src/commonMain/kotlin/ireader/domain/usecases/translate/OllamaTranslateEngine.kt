@@ -1,6 +1,5 @@
 package ireader.domain.usecases.translate
 
-import io.ktor.client.call.body
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -75,7 +74,7 @@ class OllamaTranslateEngine(
         const val MAX_CHUNK_SIZE = 20
         
         /** Request timeout in milliseconds (local LLM can be slow) */
-        const val REQUEST_TIMEOUT_MS = 180000L
+        const val REQUEST_TIMEOUT_MS = 800000L
         
         /** Max retries for network issues */
         const val MAX_RETRIES = 3

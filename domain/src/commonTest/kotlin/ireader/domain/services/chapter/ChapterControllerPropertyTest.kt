@@ -648,7 +648,7 @@ class ChapterControllerPropertyTest {
      * **Validates: Requirements 7.1, 7.2**
      */
     @Test
-    fun `Property 8 - Selection Toggle - Select adds ID, Deselect removes ID, idempotent`() = runTest(testDispatcher) {
+    fun `Property 8 - Selection Toggle - Select adds ID and Deselect removes ID idempotent`() = runTest(testDispatcher) {
         repeat(PROPERTY_TEST_ITERATIONS) {
             val getChaptersUseCase = MockGetChaptersUseCase()
             val bookRepository = MockBookRepository()
