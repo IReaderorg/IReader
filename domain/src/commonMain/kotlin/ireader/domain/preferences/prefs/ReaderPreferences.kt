@@ -261,7 +261,7 @@ class ReaderPreferences constructor(
     }
 
     fun ollamaServerUrl(): Preference<String> {
-        return preferenceStore.getString("ollama_server_url", "http://localhost:11434/api/chat")
+        return preferenceStore.getString("ollama_server_url", "http://localhost:11434")
     }
     fun ollamaModel(): Preference<String> {
         return preferenceStore.getString("ollama_model", "llama2")

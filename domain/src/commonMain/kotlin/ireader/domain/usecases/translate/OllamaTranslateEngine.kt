@@ -1,6 +1,7 @@
 package ireader.domain.usecases.translate
 
 import io.ktor.client.call.body
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -48,13 +49,25 @@ class OllamaTranslateEngine(
     // Get the configured Ollama URL from preferences or use default
     private fun getOllamaUrl(): String {
         val configuredUrl = readerPreferences.ollamaServerUrl().get()
-        return if (configuredUrl.isNotBlank()) configuredUrl else defaultApiUrl
+        // Handle legacy URLs that include /api/chat path
+        val cleanUrl = configuredUrl.trimEnd('/')
+            .removeSuffix("/api/chat")
+            .removeSuffix("/api/generate")
+        return if (cleanUrl.isNotBlank()) cleanUrl else defaultApiUrl
     }
     
     // Get the configured Ollama model from preferences or use default
     private fun getOllamaModel(): String {
         val configuredModel = readerPreferences.ollamaModel().get()
         return if (configuredModel.isNotBlank()) configuredModel else "mistral"
+    }
+    
+    companion object {
+        /** Maximum paragraphs per chunk to avoid context window limits (same as Gemini) */
+        const val MAX_CHUNK_SIZE = 20
+        
+        /** Request timeout in milliseconds (local LLM can be slow) */
+        const val REQUEST_TIMEOUT_MS = 120000L
     }
     
     // Ollama supports a wide range of languages through its LLM capabilities
@@ -196,7 +209,7 @@ class OllamaTranslateEngine(
         }
         
         try {
-            onProgress(10)
+            onProgress(0)
             
             // Get configuration from preferences
             val url = getOllamaUrl()
@@ -206,121 +219,34 @@ class OllamaTranslateEngine(
             val sourceLang = supportedLanguages.find { it.first == source }?.second ?: source
             val targetLang = supportedLanguages.find { it.first == target }?.second ?: target
             
-            onProgress(20)
+            // Chunk texts by paragraph count (similar to DeepSeek approach)
+            val chunks = texts.chunked(MAX_CHUNK_SIZE)
+            val allResults = mutableListOf<String>()
             
-            // Batch texts together instead of processing individually
-            // For Ollama, we need to be careful with context window limits
-            // Let's set a reasonable batch size based on token count
-            val results = mutableListOf<String>()
-            val MAX_TOKENS_PER_BATCH = 2000 // Estimate for context window safety
-            val TOKENS_PER_CHAR_ESTIMATE = 0.25 // Rough estimate of tokens per character
+            println("Ollama: Created ${chunks.size} chunks from ${texts.size} texts (max $MAX_CHUNK_SIZE per chunk)")
             
-            // Create batches based on estimated token count
-            val batches = mutableListOf<List<String>>()
-            val currentBatch = mutableListOf<String>()
-            var currentBatchTokens = 0
-            
-            for (text in texts) {
-                val estimatedTokens = (text.length * TOKENS_PER_CHAR_ESTIMATE).toInt()
+            chunks.forEachIndexed { chunkIndex, chunk ->
+                val chunkProgress = 10 + (chunkIndex * 80 / chunks.size)
+                onProgress(chunkProgress)
                 
-                if (estimatedTokens > MAX_TOKENS_PER_BATCH) {
-                    // Text is too long for a batch, process individually
-                    if (currentBatch.isNotEmpty()) {
-                        batches.add(currentBatch.toList())
-                        currentBatch.clear()
-                        currentBatchTokens = 0
-                    }
-                    batches.add(listOf(text))
-                } else if (currentBatchTokens + estimatedTokens > MAX_TOKENS_PER_BATCH) {
-                    // Current batch would exceed token limit, start new batch
-                    batches.add(currentBatch.toList())
-                    currentBatch.clear()
-                    currentBatch.add(text)
-                    currentBatchTokens = estimatedTokens
-                } else {
-                    // Add to current batch
-                    currentBatch.add(text)
-                    currentBatchTokens += estimatedTokens
+                try {
+                    val translatedChunk = translateChunk(chunk, sourceLang, targetLang, context, url, model)
+                    allResults.addAll(translatedChunk)
+                } catch (e: Exception) {
+                    println("Ollama chunk $chunkIndex failed: ${e.message}")
+                    throw e
                 }
             }
             
-            // Add any remaining texts
-            if (currentBatch.isNotEmpty()) {
-                batches.add(currentBatch.toList())
-            }
-            
-            println("Ollama: Created ${batches.size} batches from ${texts.size} texts")
-            
-            // Process each batch
-            for ((batchIndex, batch) in batches.withIndex()) {
-                val progressStart = 20 + (batchIndex * 70 / batches.size)
-                val progressEnd = 20 + ((batchIndex + 1) * 70 / batches.size)
-                onProgress(progressStart)
-                
-                val chatUrl = url.trimEnd('/') + "/api/chat"
-                
-                if (batch.size == 1) {
-                    // Single text in batch
-                    val text = batch[0]
-                    val (systemPrompt, userPrompt) = buildChatPrompt(text, sourceLang, targetLang, context)
-                    
-                    val request = OllamaChatRequest(
-                        model = model,
-                        messages = listOf(
-                            OllamaMessage(role = "system", content = systemPrompt),
-                            OllamaMessage(role = "user", content = userPrompt)
-                        ),
-                        options = OllamaOptions(temperature = 0.1f)
-                    )
-                    
-                    // Make the API request
-                    val response = client.default.post(chatUrl) {
-                        contentType(ContentType.Application.Json)
-                        setBody(request)
-                    }.body<OllamaChatResponse>()
-                    
-                    // Add the response to results
-                    results.add(response.message.content.trim())
-                } else {
-                    // Multiple texts in batch
-                    val combinedText = batch.joinToString("\n---PARAGRAPH_BREAK---\n")
-                    val (systemPrompt, userPrompt) = buildChatPrompt(combinedText, sourceLang, targetLang, context)
-                    
-                    val request = OllamaChatRequest(
-                        model = model,
-                        messages = listOf(
-                            OllamaMessage(role = "system", content = systemPrompt),
-                            OllamaMessage(role = "user", content = userPrompt)
-                        ),
-                        options = OllamaOptions(temperature = 0.1f)
-                    )
-                    
-                    // Make the API request
-                    val response = client.default.post(chatUrl) {
-                        contentType(ContentType.Application.Json)
-                        setBody(request)
-                    }.body<OllamaChatResponse>()
-                    
-                    // Split the response into paragraphs
-                    val responseText = response.message.content.trim()
-                    val splitTexts = responseText.split("\n---PARAGRAPH_BREAK---\n")
-                    
-                    // Ensure we have the correct number of paragraphs
-                    val finalTexts = if (splitTexts.size == batch.size) {
-                        splitTexts
-                    } else {
-                        // If we didn't get the right number back, adjust
-                        adjustParagraphCount(splitTexts, batch)
-                    }
-                    
-                    results.addAll(finalTexts)
-                }
-                
-                onProgress(progressEnd)
+            // Ensure we have the right number of results
+            val finalResults = if (allResults.size == texts.size) {
+                allResults
+            } else {
+                adjustParagraphCount(allResults, texts)
             }
             
             onProgress(100)
-            onSuccess(results)
+            onSuccess(finalResults)
             
         } catch (e: Exception) {
             onProgress(0)
@@ -328,6 +254,105 @@ class OllamaTranslateEngine(
             e.printStackTrace()
             onError(UiText.ExceptionString(e))
         }
+    }
+    
+    /**
+     * Translate a single chunk of texts
+     */
+    private suspend fun translateChunk(
+        chunk: List<String>,
+        sourceLang: String,
+        targetLang: String,
+        context: TranslationContext,
+        url: String,
+        model: String
+    ): List<String> {
+        val chatUrl = url.trimEnd('/') + "/api/chat"
+        
+        // Combine texts with paragraph markers
+        val combinedText = chunk.joinToString("\n---PARAGRAPH_BREAK---\n")
+        val (systemPrompt, userPrompt) = buildChatPrompt(combinedText, sourceLang, targetLang, context)
+        
+        val request = OllamaChatRequest(
+            model = model,
+            messages = listOf(
+                OllamaMessage(role = "system", content = systemPrompt),
+                OllamaMessage(role = "user", content = userPrompt)
+            ),
+            options = OllamaOptions(temperature = 0.1f)
+        )
+        
+        // Make the API request with timeout
+        val response = client.default.post(chatUrl) {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+            timeout {
+                requestTimeoutMillis = REQUEST_TIMEOUT_MS
+                connectTimeoutMillis = 15000
+                socketTimeoutMillis = REQUEST_TIMEOUT_MS
+            }
+        }.body<OllamaChatResponse>()
+        
+        // Split the response back into paragraphs
+        return splitResponse(response.message.content.trim(), chunk.size)
+    }
+    
+    /**
+     * Split response back into paragraphs
+     */
+    private fun splitResponse(response: String, expectedCount: Int): List<String> {
+        // Try to split by paragraph marker first
+        if (response.contains("---PARAGRAPH_BREAK---")) {
+            val parts = response
+                .split("---PARAGRAPH_BREAK---")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+            
+            if (parts.size == expectedCount) {
+                return parts
+            }
+        }
+        
+        // Also try with newline variations
+        val variations = listOf(
+            "\n---PARAGRAPH_BREAK---\n",
+            "---PARAGRAPH_BREAK---",
+            "\n\n---\n\n"
+        )
+        
+        for (separator in variations) {
+            if (response.contains(separator)) {
+                val parts = response.split(separator).map { it.trim() }.filter { it.isNotEmpty() }
+                if (parts.size == expectedCount) {
+                    return parts
+                }
+            }
+        }
+        
+        // If marker not found and we expect multiple paragraphs, try double newlines
+        if (expectedCount > 1) {
+            val lines = response.split("\n\n")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+            
+            if (lines.size >= expectedCount) {
+                // Distribute lines evenly across expected paragraphs
+                val result = mutableListOf<String>()
+                val linesPerParagraph = lines.size / expectedCount
+                
+                for (i in 0 until expectedCount) {
+                    val start = i * linesPerParagraph
+                    val end = if (i == expectedCount - 1) lines.size else (i + 1) * linesPerParagraph
+                    if (start < lines.size) {
+                        result.add(lines.subList(start, end.coerceAtMost(lines.size)).joinToString("\n\n"))
+                    }
+                }
+                return result
+            }
+        }
+        
+        // Fallback: return as single result
+        return listOf(response.trim())
     }
     
     // Helper function to adjust paragraph count to match input
@@ -379,11 +404,12 @@ class OllamaTranslateEngine(
         else 
             ""
         
+        // Optimized prompt: minimal tokens while maintaining quality
         val systemPrompt = """
-            You are a translation assistant that specializes in translating $contentTypeStr from $sourceLang to $targetLang.
-            Use a $toneStr tone.
+            Translator for $contentTypeStr. $sourceLang to $targetLang. $toneStr tone.
             $stylePreservation
-            Return only the translated text without any additional comments or explanations.
+            Keep ---PARAGRAPH_BREAK--- markers exactly as they appear.
+            Output only the translation, no explanations.
         """.trimIndent()
         
         return Pair(systemPrompt, text)
