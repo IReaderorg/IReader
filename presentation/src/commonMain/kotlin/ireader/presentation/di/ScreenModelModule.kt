@@ -68,6 +68,19 @@ val screenModelModule = module {
         )
     }
     
+    // Glossary ViewModel - Community feature for managing book glossaries
+    factory {
+        ireader.presentation.ui.community.GlossaryViewModel(
+            getGlossaryByBookIdUseCase = get(),
+            saveGlossaryEntryUseCase = get(),
+            deleteGlossaryEntryUseCase = get(),
+            exportGlossaryUseCase = get(),
+            importGlossaryUseCase = get(),
+            searchGlossaryUseCase = get(),
+            localGetBookUseCases = get()
+        )
+    }
+    
     // ==================== NEW: Reader Sub-ViewModels ====================
     
 

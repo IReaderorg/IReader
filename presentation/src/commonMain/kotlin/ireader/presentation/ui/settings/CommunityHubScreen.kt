@@ -36,6 +36,7 @@ fun CommunityHubScreen(
     onAllReviews: () -> Unit,
     onCharacterArtGallery: () -> Unit,
     onReadingBuddy: () -> Unit = {},
+    onGlossary: () -> Unit = {},
     onBadgeStore: () -> Unit,
     onNFTBadge: () -> Unit,
     onBadgeManagement: () -> Unit,
@@ -155,6 +156,23 @@ fun CommunityHubScreen(
                     description = "Your reading companion with daily quotes",
                     icon = Icons.Filled.Pets,
                     onClick = onReadingBuddy
+                )
+            }
+            
+            // Tools Section
+            item {
+                SettingsSectionHeader(
+                    title = "Tools",
+                    icon = Icons.Filled.Build
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = localize(Res.string.glossary),
+                    description = "Manage translation glossaries for your books",
+                    icon = Icons.Filled.Translate,
+                    onClick = onGlossary
                 )
             }
             

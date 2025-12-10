@@ -148,6 +148,11 @@ fun CommonNavHost(
             ireader.presentation.core.ui.AdminCharacterArtVerificationScreenSpec().Content()
         }
         
+        // Glossary Screen - Community feature for managing book glossaries
+        composable(NavigationRoutes.glossary) {
+            ireader.presentation.core.ui.GlossaryScreenSpec().Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }
