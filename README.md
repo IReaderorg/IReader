@@ -26,15 +26,40 @@ A cross-platform novel reader with support for multiple sources through extensio
 
 ## 📲 Installation
 
-### Android
-Download the latest APK from [GitHub Releases](https://github.com/IReaderorg/IReader/releases)
-
 **Requirements:** Android 7.0 or higher
 
 ### Desktop
 Download the latest release from [GitHub Releases](https://github.com/IReaderorg/IReader/releases)
 
 **Supported:** Windows, macOS, Linux
+
+### Android
+Download the latest APK from 
+
+[<img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/main/get-it-on-github.png" alt='Get it on GitHub' height="80">](https://github.com/IReaderorg/IReader/releases)
+
+[<img src="https://raw.githubusercontent.com/zapstore/zapstore/0b2eb07b700c477cf49b4d90cd521e1217d6a126/assets/images/badge.png" alt="Get it on Zapstore" height="60">](https://zapstore.dev/apps/naddr1qvzqqqr7pvpzq7xwd748yfjrsu5yuerm56fcn9tntmyv04w95etn0e23xrczvvraqqwxju3wddsh5etdvdhkgetn9e5kuenfde5hg7tjv4skgetjjjktdl)
+
+[<img src="https://raw.githubusercontent.com/solkin/appteka-android/b46cf2280599f93732bb1ee76a9c12364f313444/art/badge.png" alt="Get it on Appteka" height="60">](https://appteka.store/app/936r194079)
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://github.com/IReaderorg/IReader/releases)
+
+[<img src="https://www.openapk.net/images/openapk-badge.png" alt="Get it on OpenAPK" height="80">](https://github.com/IReaderorg/IReader/releases)
+
+[<img src="https://www.androidfreeware.net/images/androidfreeware-badge.png" alt="Get it on AndroidFreeware" height="80">](https://github.com/IReaderorg/IReader/releases)
+
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="80">](https://github.com/IReaderorg/IReader/releases)
+</div>
+
+[<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/refs/heads/main/assets/graphics/badge_obtainium.png" alt='Get it on Obtainium' height="60">](https://github.com/IReaderorg/IReader/releases)
+
+[<img src="https://static.apkpure.com/www/static/imgs/logo_new@2x.png" alt="Get it on Apkpure" height="40">](https://github.com/IReaderorg/IReader/releases)
+
+[<img src="https://gitlab.com/-/project/6922885/uploads/dc268935d9bb381bdf17fc7d92fc19e0/badge.png" alt="Get it on Aurora Store" height="70">](https://github.com/IReaderorg/IReader/releases)
+
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://github.com/IReaderorg/IReader/releases)
+
+[<img src="https://accrescent.app/badges/get-it-on.png" alt="Get it on Accrescent" height="80">](https://github.com/IReaderorg/IReader/releases)
 
 ## 🚀 Quick Start
 
