@@ -148,9 +148,25 @@ fun CommonNavHost(
             ireader.presentation.core.ui.AdminCharacterArtVerificationScreenSpec().Content()
         }
         
+        // Character Art Detail - with artId parameter
+        composable(
+            route = "${NavigationRoutes.characterArtDetail}/{artId}",
+            arguments = listOf(
+                navArgument("artId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val artId =  backStackEntry.savedStateHandle.get<String>("artId") ?: return@composable
+            ireader.presentation.core.ui.CharacterArtDetailScreenSpec(artId).Content()
+        }
+        
         // Glossary Screen - Community feature for managing book glossaries
         composable(NavigationRoutes.glossary) {
             ireader.presentation.core.ui.GlossaryScreenSpec().Content()
+        }
+        
+        // Admin User Panel - Admin feature for managing users, badges, and passwords
+        composable(NavigationRoutes.adminUserPanel) {
+            ireader.presentation.core.ui.AdminUserPanelScreenSpec().Content()
         }
         
         composable(NavigationRoutes.translationSettings) {

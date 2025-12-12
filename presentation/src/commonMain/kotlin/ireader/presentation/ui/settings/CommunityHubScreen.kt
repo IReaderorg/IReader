@@ -44,6 +44,7 @@ fun CommunityHubScreen(
     onAdminBadgeVerification: () -> Unit = {},
     onAdminQuoteVerification: () -> Unit = {},
     onAdminCharacterArtVerification: () -> Unit = {},
+    onAdminUserPanel: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -244,6 +245,15 @@ fun CommunityHubScreen(
                         description = "Review and approve character art submissions",
                         icon = Icons.Outlined.Image,
                         onClick = onAdminCharacterArtVerification
+                    )
+                }
+                
+                item {
+                    SettingsItem(
+                        title = "User Management",
+                        description = "Manage users, assign badges, and reset passwords",
+                        icon = Icons.Outlined.People,
+                        onClick = onAdminUserPanel
                     )
                 }
             }

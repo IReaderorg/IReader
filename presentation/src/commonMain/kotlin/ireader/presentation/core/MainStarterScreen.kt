@@ -121,22 +121,25 @@ object MainStarterScreen {
             }
         }
         
-        // Track visited tabs - once visited, tab stays in memory
-        var visitedTabs by rememberSaveable { mutableStateOf(setOf(0)) }
+        // Track visited tabs - start EMPTY to defer all tab initialization
+        // This improves startup time by not loading Library data until after first frame
+        var visitedTabs by rememberSaveable { mutableStateOf(emptySet<Int>()) }
         
-        // Mark current tab as visited
-        if (currentTabIndex !in visitedTabs) {
-            visitedTabs = visitedTabs + currentTabIndex
-        }
+        // Mark current tab as visited (but only after initial delay)
+        // This is handled by the LaunchedEffect below
         
-        // Pre-initialize all tabs in background after first frame
-        // This makes subsequent tab switches instant
+        // Defer tab initialization until after first frame renders
+        // This significantly improves app startup time by:
+        // 1. Showing shimmer loading immediately
+        // 2. Loading actual content after UI is responsive
         LaunchedEffect(Unit) {
-            // Wait for first frame to render
+            // Wait for first frame to render (show shimmer)
+            delay(50)
+            // Initialize the current tab first (usually Library)
+            visitedTabs = visitedTabs + currentTabIndex
+            // Then pre-initialize remaining tabs with small delays
             delay(100)
-            // Pre-initialize remaining tabs one by one with small delays
-            // to avoid blocking the main thread
-            listOf(3, 4, 1, 2).forEach { tabIndex ->
+            listOf(0, 3, 4, 1, 2).forEach { tabIndex ->
                 if (tabIndex !in visitedTabs) {
                     delay(50) // Small delay between each tab
                     visitedTabs = visitedTabs + tabIndex

@@ -231,6 +231,52 @@ val DomainServices = module {
         )
     }
     
+    // Glossary Use Cases - for local book glossaries
+    factory { ireader.domain.usecases.glossary.GetGlossaryByBookIdUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.GetGlossaryByTypeUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.SearchGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.SaveGlossaryEntryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.UpdateGlossaryEntryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.DeleteGlossaryEntryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.ExportGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.ImportGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.ImportGlossaryFromUrlUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.GetGlossaryAsMapUseCase(get()) }
+    
+    // Global Glossary Use Cases - for glossaries independent of library
+    factory { ireader.domain.usecases.glossary.GetGlobalGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.SaveGlobalGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.DeleteGlobalGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.SearchGlobalGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.GetGlossaryBooksUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.ExportGlobalGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.ImportGlobalGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.SyncGlossaryUseCase(get()) }
+    factory { ireader.domain.usecases.glossary.GetGlossaryMapUseCase(get()) }
+    
+    // Global Glossary Use Cases Aggregate
+    factory {
+        ireader.domain.usecases.glossary.GlobalGlossaryUseCases(
+            getGlossary = get(),
+            saveGlossary = get(),
+            deleteGlossary = get(),
+            searchGlossary = get<ireader.domain.usecases.glossary.SearchGlobalGlossaryUseCase>(),
+            getBooks = get(),
+            exportGlossary = get<ireader.domain.usecases.glossary.ExportGlobalGlossaryUseCase>(),
+            importGlossary = get<ireader.domain.usecases.glossary.ImportGlobalGlossaryUseCase>(),
+            syncGlossary = get(),
+            getGlossaryMap = get()
+        )
+    }
+    
+    // Apply Glossary to Translation Use Case - integrates glossary with translation engine
+    factory { 
+        ireader.domain.usecases.glossary.ApplyGlossaryToTranslationUseCase(
+            glossaryRepository = get(),
+            globalGlossaryRepository = getOrNull()
+        )
+    }
+    
     // Sync Manager - lazy loaded when sync is used
     factory { 
         ireader.domain.services.SyncManager(
@@ -238,6 +284,28 @@ val DomainServices = module {
             supabasePreferences = get(),
             syncBooksUseCase = get(),
             getSyncedDataUseCase = get()
+        )
+    }
+    
+    // Admin User Use Cases
+    factory { ireader.domain.usecases.admin.GetAllUsersUseCase(get()) }
+    factory { ireader.domain.usecases.admin.AssignBadgeToUserUseCase(get()) }
+    factory { ireader.domain.usecases.admin.RemoveBadgeFromUserUseCase(get()) }
+    factory { ireader.domain.usecases.admin.SendPasswordResetUseCase(get()) }
+    factory { ireader.domain.usecases.admin.GetAvailableBadgesForAssignmentUseCase(get()) }
+    factory { ireader.domain.usecases.admin.GetUserBadgesForAdminUseCase(get()) }
+    factory { ireader.domain.usecases.admin.IsCurrentUserAdminUseCase(get()) }
+    
+    // Admin User Use Cases Aggregate
+    factory {
+        ireader.domain.usecases.admin.AdminUserUseCases(
+            getAllUsers = get(),
+            assignBadgeToUser = get(),
+            removeBadgeFromUser = get(),
+            sendPasswordReset = get(),
+            getAvailableBadges = get(),
+            getUserBadges = get(),
+            isCurrentUserAdmin = get()
         )
     }
 

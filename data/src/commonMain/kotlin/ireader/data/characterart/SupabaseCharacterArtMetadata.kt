@@ -103,16 +103,33 @@ class SupabaseCharacterArtMetadata(
     ): Result<List<CharacterArt>> = RemoteErrorMapper.withErrorMapping {
         val userId = getCurrentUserId()
         
-        val queryResult = backendService.query(
+        // First, try to get approved art
+        val approvedResult = backendService.query(
             table = tableName,
             filters = mapOf("status" to CharacterArtStatus.APPROVED.name),
             orderBy = getSortColumn(sort),
             ascending = sort == CharacterArtSort.OLDEST,
             limit = limit,
             offset = offset
-        ).getOrThrow()
+        ).getOrNull() ?: emptyList()
         
-        var artList = queryResult.map { jsonElement ->
+        // Also get user's own pending submissions so they can see their uploads
+        val userPendingResult = if (userId != null) {
+            backendService.query(
+                table = tableName,
+                filters = mapOf("submitter_id" to userId),
+                orderBy = getSortColumn(sort),
+                ascending = sort == CharacterArtSort.OLDEST
+            ).getOrNull() ?: emptyList()
+        } else {
+            emptyList()
+        }
+        
+        // Combine results, removing duplicates (approved art that user also submitted)
+        val approvedIds = approvedResult.map { it.getId() }.toSet()
+        val combinedResults = approvedResult + userPendingResult.filter { it.getId() !in approvedIds }
+        
+        var artList = combinedResults.map { jsonElement ->
             val isLiked = userId?.let { checkIfLiked(jsonElement.getId(), it) } ?: false
             jsonElement.toDomain(isLiked)
         }
@@ -131,7 +148,17 @@ class SupabaseCharacterArtMetadata(
             }
         }
         
-        artList
+        // Sort combined results
+        artList = when (sort) {
+            CharacterArtSort.NEWEST -> artList.sortedByDescending { it.submittedAt }
+            CharacterArtSort.OLDEST -> artList.sortedBy { it.submittedAt }
+            CharacterArtSort.MOST_LIKED -> artList.sortedByDescending { it.likesCount }
+            CharacterArtSort.BOOK_TITLE -> artList.sortedBy { it.bookTitle.lowercase() }
+            CharacterArtSort.CHARACTER_NAME -> artList.sortedBy { it.characterName.lowercase() }
+        }
+        
+        // Apply pagination
+        artList.drop(offset).take(limit)
     }
     
     override suspend fun getArtByBook(bookTitle: String): Result<List<CharacterArt>> = 
@@ -210,14 +237,45 @@ class SupabaseCharacterArtMetadata(
     
     override suspend fun getPendingArt(): Result<List<CharacterArt>> = 
         RemoteErrorMapper.withErrorMapping {
+            // Note: This requires admin RLS policy to be set up in Supabase
+            // The policy should allow admins to view pending art
+            // 
+            // If you're seeing empty results, make sure you've run:
+            // supabase/migrations/character_art_admin_policies.sql
+            
+            // First try to get pending art directly
             val queryResult = backendService.query(
                 table = tableName,
                 filters = mapOf("status" to CharacterArtStatus.PENDING.name),
                 orderBy = "submitted_at",
                 ascending = true
-            ).getOrThrow()
+            )
             
-            queryResult.map { it.toDomain(false) }
+            val results = queryResult.getOrElse { error ->
+                println("CharacterArt: getPendingArt direct query failed - ${error.message}")
+                
+                // Fallback: Try to get all art and filter in memory
+                // This works if the user has access to view all art (e.g., via service role key)
+                val allArtResult = backendService.query(
+                    table = tableName,
+                    orderBy = "submitted_at",
+                    ascending = true
+                )
+                
+                allArtResult.getOrElse { fallbackError ->
+                    println("CharacterArt: getPendingArt fallback also failed - ${fallbackError.message}")
+                    println("CharacterArt: Make sure admin RLS policies are set up in Supabase")
+                    emptyList()
+                }
+            }
+            
+            // Filter for pending status in case we got all art
+            results
+                .filter { 
+                    val status = it.jsonObject["status"]?.jsonPrimitive?.contentOrNull
+                    status == CharacterArtStatus.PENDING.name
+                }
+                .map { it.toDomain(false) }
         }
     
     override suspend fun getArtById(id: String): Result<CharacterArt> = 

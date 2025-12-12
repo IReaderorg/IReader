@@ -72,6 +72,8 @@ class ReaderSettingsViewModel(
         private set
     
     init {
+        // Ensure preferences are loaded (lazy initialization for startup performance)
+        preferencesController.ensurePreferencesLoaded()
         loadFonts()
         subscribeToControllerEvents()
     }

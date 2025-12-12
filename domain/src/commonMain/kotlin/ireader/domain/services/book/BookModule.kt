@@ -20,9 +20,12 @@ val bookModule = module {
      * This is registered as a SINGLETON to ensure all screens share the same
      * instance and receive consistent state updates.
      * 
+     * LAZY LOADING: createdAtStart=false ensures this is not created during app startup.
+     * The controller is created on-demand when first accessed.
+     * 
      * Dependencies: BookRepository, CategoryRepository, ChapterRepository, HistoryUseCase
      */
-    single {
+    single(createdAtStart = false) {
         BookController(
             bookRepository = get(),
             categoryRepository = get(),

@@ -27,6 +27,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import ireader.domain.models.characterart.CharacterArt
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.ui.component.isTableUi
@@ -208,7 +210,10 @@ fun CharacterArtDetailScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    ImagePlaceholder(
+                    ArtImage(
+                        imageUrl = art.imageUrl,
+                        characterName = art.characterName,
+                        bookTitle = art.bookTitle,
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer {
@@ -259,7 +264,12 @@ fun CharacterArtDetailScreen(
                         .background(Color.Black),
                     contentAlignment = Alignment.Center
                 ) {
-                    ImagePlaceholder(modifier = Modifier.fillMaxSize())
+                    ArtImage(
+                        imageUrl = art.imageUrl,
+                        characterName = art.characterName,
+                        bookTitle = art.bookTitle,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
                 
                 // Info
@@ -275,7 +285,12 @@ fun CharacterArtDetailScreen(
 }
 
 @Composable
-private fun ImagePlaceholder(modifier: Modifier = Modifier) {
+private fun ArtImage(
+    imageUrl: String,
+    characterName: String,
+    bookTitle: String,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier
             .background(
@@ -288,14 +303,22 @@ private fun ImagePlaceholder(modifier: Modifier = Modifier) {
             ),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            Icons.Outlined.Image,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = Color.White.copy(alpha = 0.3f)
-        )
-        // TODO: Replace with actual image loading
-        // AsyncImage(model = art.imageUrl, ...)
+        if (imageUrl.isNotBlank()) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = "$characterName from $bookTitle",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
+        } else {
+            // Placeholder when no image URL
+            Icon(
+                Icons.Outlined.Image,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = Color.White.copy(alpha = 0.3f)
+            )
+        }
     }
 }
 

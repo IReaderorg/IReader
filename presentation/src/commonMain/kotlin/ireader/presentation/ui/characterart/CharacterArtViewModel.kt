@@ -84,11 +84,15 @@ class CharacterArtViewModel(
             _state.update { it.copy(isLoading = true) }
             
             // Check admin status
-            val isAdmin = try {
-                getCurrentUser()?.isAdmin == true
+            val user = try {
+                getCurrentUser()
             } catch (e: Exception) {
-                false
+                println("CharacterArt: Failed to get current user - ${e.message}")
+                null
             }
+            
+            val isAdmin = user?.isAdmin == true
+            println("CharacterArt: User=${user?.email}, isAdmin=$isAdmin")
             
             _state.update { it.copy(isAdmin = isAdmin) }
             
@@ -98,6 +102,8 @@ class CharacterArtViewModel(
             
             if (isAdmin) {
                 loadPendingArt()
+            } else {
+                println("CharacterArt: Not loading pending art - user is not admin")
             }
         }
     }
@@ -155,9 +161,17 @@ class CharacterArtViewModel(
     
     private fun loadPendingArt() {
         scope.launch {
+            println("CharacterArt: Loading pending art for admin verification...")
             repository.getPendingArt()
                 .onSuccess { pending ->
+                    println("CharacterArt: Loaded ${pending.size} pending art items")
                     _state.update { it.copy(pendingArt = pending) }
+                }
+                .onFailure { error ->
+                    println("CharacterArt: Failed to load pending art - ${error.message}")
+                    _state.update { 
+                        it.copy(error = "Failed to load pending art: ${error.message}")
+                    }
                 }
         }
     }
@@ -198,6 +212,29 @@ class CharacterArtViewModel(
     
     fun selectArt(art: CharacterArt?) {
         _state.update { it.copy(selectedArt = art) }
+    }
+    
+    /**
+     * Load art by ID for detail screen
+     */
+    fun loadArtById(artId: String) {
+        scope.launch {
+            // First check if it's already in the list
+            val existingArt = _state.value.artList.find { it.id == artId }
+            if (existingArt != null) {
+                _state.update { it.copy(selectedArt = existingArt) }
+                return@launch
+            }
+            
+            // Otherwise fetch from repository
+            repository.getArtById(artId)
+                .onSuccess { art ->
+                    _state.update { it.copy(selectedArt = art) }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(error = "Failed to load art: ${error.message}") }
+                }
+        }
     }
     
     fun toggleLike(artId: String) {
@@ -331,6 +368,28 @@ class CharacterArtViewModel(
         loadFeaturedArt()
         if (_state.value.isAdmin) {
             loadPendingArt()
+        }
+    }
+    
+    /**
+     * Force load pending art for admin verification screen.
+     * This bypasses the isAdmin check since the verification screen
+     * is only accessible to admins anyway.
+     */
+    fun loadPendingArtForVerification() {
+        scope.launch {
+            println("CharacterArt: Force loading pending art for verification screen...")
+            repository.getPendingArt()
+                .onSuccess { pending ->
+                    println("CharacterArt: Loaded ${pending.size} pending art items for verification")
+                    _state.update { it.copy(pendingArt = pending) }
+                }
+                .onFailure { error ->
+                    println("CharacterArt: Failed to load pending art for verification - ${error.message}")
+                    _state.update { 
+                        it.copy(error = "Failed to load pending art: ${error.message}")
+                    }
+                }
         }
     }
     

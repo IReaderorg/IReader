@@ -21,7 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Glossary
+import ireader.domain.models.entities.GlobalGlossary
 import ireader.domain.models.entities.GlossaryTermType
+import ireader.domain.models.entities.GlossarySyncStatus
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
@@ -33,7 +35,7 @@ import ireader.presentation.ui.reader.components.GlossaryEntryItem
 
 /**
  * Community Glossary Screen - A standalone screen for managing glossaries
- * across all books in the library.
+ * across all books in the library and global glossaries.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,26 +43,63 @@ fun GlossaryScreen(
     state: GlossaryState,
     onBack: () -> Unit,
     onSelectBook: (Long, String) -> Unit,
+    onSelectGlobalBook: (String, String) -> Unit,
     onClearSelectedBook: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onFilterTypeChange: (GlossaryTermType?) -> Unit,
     onShowAddDialog: () -> Unit,
     onHideAddDialog: () -> Unit,
+    onShowAddBookDialog: () -> Unit,
+    onHideAddBookDialog: () -> Unit,
     onSetEditingEntry: (Glossary?) -> Unit,
+    onSetEditingGlobalEntry: (GlobalGlossary?) -> Unit,
     onAddEntry: (String, String, GlossaryTermType, String?) -> Unit,
+    onAddGlobalEntry: (String, String, GlossaryTermType, String?) -> Unit,
     onEditEntry: (Glossary) -> Unit,
+    onEditGlobalEntry: (GlobalGlossary) -> Unit,
     onDeleteEntry: (Long) -> Unit,
+    onDeleteGlobalEntry: (Long) -> Unit,
     onExport: ((String) -> Unit) -> Unit,
+    onExportGlobal: ((String) -> Unit) -> Unit,
     onImport: (String) -> Unit,
+    onImportGlobal: (String) -> Unit,
+    onViewModeChange: (GlossaryViewMode) -> Unit,
+    onSyncToRemote: () -> Unit,
+    onSyncFromRemote: () -> Unit,
+    onSyncAll: () -> Unit,
+    onAddGlobalBook: (String, String, String, String) -> Unit,
+    onClearError: () -> Unit,
+    onClearSuccessMessage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showFilterMenu by remember { mutableStateOf(false) }
+    var showMoreMenu by remember { mutableStateOf(false) }
+    var showImportDialog by remember { mutableStateOf(false) }
+    var importText by remember { mutableStateOf("") }
+
+    // Show snackbar for messages
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    LaunchedEffect(state.error) {
+        state.error?.let {
+            snackbarHostState.showSnackbar(it)
+            onClearError()
+        }
+    }
+    
+    LaunchedEffect(state.successMessage) {
+        state.successMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            onClearSuccessMessage()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
-                    if (state.selectedBookId != null) {
+                    if (state.selectedBookId != null || state.selectedBookKey != null) {
                         Column {
                             MidSizeTextComposable(text = localize(Res.string.glossary))
                             state.selectedBookTitle?.let {
@@ -79,7 +118,7 @@ fun GlossaryScreen(
                 },
                 navigationIcon = {
                     TopAppBarBackButton(onClick = {
-                        if (state.selectedBookId != null) {
+                        if (state.selectedBookId != null || state.selectedBookKey != null) {
                             onClearSelectedBook()
                         } else {
                             onBack()
@@ -87,7 +126,24 @@ fun GlossaryScreen(
                     })
                 },
                 actions = {
-                    if (state.selectedBookId != null) {
+                    if (state.selectedBookId != null || state.selectedBookKey != null) {
+                        // Sync button for global glossary
+                        if (state.viewMode == GlossaryViewMode.GLOBAL) {
+                            if (state.isSyncing) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp).padding(4.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                IconButton(onClick = onSyncFromRemote) {
+                                    Icon(
+                                        imageVector = Icons.Default.CloudDownload,
+                                        contentDescription = "Sync from cloud"
+                                    )
+                                }
+                            }
+                        }
+                        
                         // Filter button
                         Box {
                             IconButton(onClick = { showFilterMenu = true }) {
@@ -97,37 +153,78 @@ fun GlossaryScreen(
                                     contentDescription = "Filter"
                                 )
                             }
-                            DropdownMenu(
+                            FilterDropdownMenu(
                                 expanded = showFilterMenu,
-                                onDismissRequest = { showFilterMenu = false }
+                                onDismiss = { showFilterMenu = false },
+                                currentFilter = state.filterType,
+                                onFilterChange = {
+                                    onFilterTypeChange(it)
+                                    showFilterMenu = false
+                                }
+                            )
+                        }
+                        
+                        // More menu
+                        Box {
+                            IconButton(onClick = { showMoreMenu = true }) {
+                                Icon(Icons.Default.MoreVert, "More options")
+                            }
+                            DropdownMenu(
+                                expanded = showMoreMenu,
+                                onDismissRequest = { showMoreMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("All Types") },
+                                    text = { Text("Export") },
                                     onClick = {
-                                        onFilterTypeChange(null)
-                                        showFilterMenu = false
+                                        showMoreMenu = false
+                                        if (state.viewMode == GlossaryViewMode.LOCAL) {
+                                            onExport { }
+                                        } else {
+                                            onExportGlobal { }
+                                        }
                                     },
-                                    leadingIcon = {
-                                        if (state.filterType == null) {
-                                            Icon(Icons.Default.Check, null)
-                                        }
-                                    }
+                                    leadingIcon = { Icon(Icons.Default.Upload, null) }
                                 )
-                                HorizontalDivider()
-                                GlossaryTermType.entries.forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text("Import") },
+                                    onClick = {
+                                        showMoreMenu = false
+                                        showImportDialog = true
+                                    },
+                                    leadingIcon = { Icon(Icons.Default.Download, null) }
+                                )
+                                if (state.viewMode == GlossaryViewMode.GLOBAL) {
+                                    HorizontalDivider()
                                     DropdownMenuItem(
-                                        text = { Text(type.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                        text = { Text("Upload to Cloud") },
                                         onClick = {
-                                            onFilterTypeChange(type)
-                                            showFilterMenu = false
+                                            showMoreMenu = false
+                                            onSyncToRemote()
                                         },
-                                        leadingIcon = {
-                                            if (state.filterType == type) {
-                                                Icon(Icons.Default.Check, null)
-                                            }
-                                        }
+                                        leadingIcon = { Icon(Icons.Default.CloudUpload, null) }
                                     )
                                 }
+                            }
+                        }
+                    } else {
+                        // View mode toggle
+                        IconButton(onClick = {
+                            onViewModeChange(
+                                if (state.viewMode == GlossaryViewMode.LOCAL) 
+                                    GlossaryViewMode.GLOBAL else GlossaryViewMode.LOCAL
+                            )
+                        }) {
+                            Icon(
+                                imageVector = if (state.viewMode == GlossaryViewMode.LOCAL)
+                                    Icons.Default.Public else Icons.Default.LibraryBooks,
+                                contentDescription = "Toggle view mode"
+                            )
+                        }
+                        
+                        // Sync all button for global mode
+                        if (state.viewMode == GlossaryViewMode.GLOBAL) {
+                            IconButton(onClick = onSyncAll) {
+                                Icon(Icons.Default.Sync, "Sync all")
                             }
                         }
                     }
@@ -138,12 +235,19 @@ fun GlossaryScreen(
             )
         },
         floatingActionButton = {
-            if (state.selectedBookId != null) {
+            if (state.selectedBookId != null || state.selectedBookKey != null) {
                 FloatingActionButton(
                     onClick = onShowAddDialog,
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Entry")
+                }
+            } else if (state.viewMode == GlossaryViewMode.GLOBAL) {
+                FloatingActionButton(
+                    onClick = onShowAddBookDialog,
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Book")
                 }
             }
         }
@@ -153,49 +257,135 @@ fun GlossaryScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            if (state.selectedBookId == null) {
+            if (state.selectedBookId == null && state.selectedBookKey == null) {
                 // Book selection view
-                BookSelectionContent(
-                    books = state.availableBooks,
-                    isLoading = state.isLoading,
-                    onSelectBook = onSelectBook
-                )
+                if (state.viewMode == GlossaryViewMode.LOCAL) {
+                    BookSelectionContent(
+                        books = state.availableBooks,
+                        isLoading = state.isLoading,
+                        onSelectBook = onSelectBook
+                    )
+                } else {
+                    GlobalBookSelectionContent(
+                        books = state.globalBooks,
+                        isLoading = state.isLoading,
+                        onSelectBook = onSelectGlobalBook
+                    )
+                }
             } else {
                 // Glossary entries view
-                GlossaryEntriesContent(
-                    state = state,
-                    onSearchQueryChange = onSearchQueryChange,
-                    onSetEditingEntry = onSetEditingEntry,
-                    onDeleteEntry = onDeleteEntry,
-                    onExport = onExport,
-                    onImport = onImport
-                )
+                if (state.viewMode == GlossaryViewMode.LOCAL) {
+                    GlossaryEntriesContent(
+                        entries = state.glossaryEntries,
+                        searchQuery = state.searchQuery,
+                        filterType = state.filterType,
+                        isLoading = state.isLoading,
+                        onSearchQueryChange = onSearchQueryChange,
+                        onSetEditingEntry = onSetEditingEntry,
+                        onDeleteEntry = onDeleteEntry
+                    )
+                } else {
+                    GlobalGlossaryEntriesContent(
+                        entries = state.globalGlossaryEntries,
+                        searchQuery = state.searchQuery,
+                        filterType = state.filterType,
+                        isLoading = state.isLoading,
+                        syncStatus = state.syncStatus,
+                        onSearchQueryChange = onSearchQueryChange,
+                        onSetEditingEntry = onSetEditingGlobalEntry,
+                        onDeleteEntry = onDeleteGlobalEntry
+                    )
+                }
             }
         }
     }
 
-    // Add dialog
+    // Dialogs
     if (state.showAddDialog) {
         AddGlossaryEntryDialog(
             onDismiss = onHideAddDialog,
             onConfirm = { source, target, type, notes ->
-                onAddEntry(source, target, type, notes)
+                if (state.viewMode == GlossaryViewMode.LOCAL) {
+                    onAddEntry(source, target, type, notes)
+                } else {
+                    onAddGlobalEntry(source, target, type, notes)
+                }
             }
         )
     }
 
-    // Edit dialog
     state.editingEntry?.let { entry ->
         EditGlossaryEntryDialog(
             entry = entry,
             onDismiss = { onSetEditingEntry(null) },
-            onConfirm = { updatedEntry ->
-                onEditEntry(updatedEntry)
+            onConfirm = { updatedEntry -> onEditEntry(updatedEntry) }
+        )
+    }
+
+    state.editingGlobalEntry?.let { entry ->
+        EditGlobalGlossaryEntryDialog(
+            entry = entry,
+            onDismiss = { onSetEditingGlobalEntry(null) },
+            onConfirm = { updatedEntry -> onEditGlobalEntry(updatedEntry) }
+        )
+    }
+
+    if (state.showAddBookDialog) {
+        AddGlobalBookDialog(
+            onDismiss = onHideAddBookDialog,
+            onConfirm = onAddGlobalBook
+        )
+    }
+
+    if (showImportDialog) {
+        ImportGlossaryDialog(
+            importText = importText,
+            onImportTextChange = { importText = it },
+            onDismiss = { 
+                showImportDialog = false
+                importText = ""
+            },
+            onConfirm = {
+                if (state.viewMode == GlossaryViewMode.LOCAL) {
+                    onImport(importText)
+                } else {
+                    onImportGlobal(importText)
+                }
+                showImportDialog = false
+                importText = ""
             }
         )
     }
 }
 
+
+@Composable
+private fun FilterDropdownMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    currentFilter: GlossaryTermType?,
+    onFilterChange: (GlossaryTermType?) -> Unit
+) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        DropdownMenuItem(
+            text = { Text("All Types") },
+            onClick = { onFilterChange(null) },
+            leadingIcon = {
+                if (currentFilter == null) Icon(Icons.Default.Check, null)
+            }
+        )
+        HorizontalDivider()
+        GlossaryTermType.entries.forEach { type ->
+            DropdownMenuItem(
+                text = { Text(type.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                onClick = { onFilterChange(type) },
+                leadingIcon = {
+                    if (currentFilter == type) Icon(Icons.Default.Check, null)
+                }
+            )
+        }
+    }
+}
 
 @Composable
 private fun BookSelectionContent(
@@ -204,85 +394,28 @@ private fun BookSelectionContent(
     onSelectBook: (Long, String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
-                .padding(20.dp)
-        ) {
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.MenuBook,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = localize(Res.string.glossary),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Manage translation glossaries for your books. Select a book to view and edit its glossary entries.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        HeaderCard(
+            title = localize(Res.string.glossary),
+            subtitle = "Manage translation glossaries for your books. Select a book to view and edit its glossary entries.",
+            icon = Icons.Filled.MenuBook
+        )
 
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (books.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Book,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "No books with glossaries",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Add glossary entries while reading to see them here",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
+        when {
+            isLoading -> LoadingContent()
+            books.isEmpty() -> EmptyContent(
+                icon = Icons.Outlined.Book,
+                title = "No books in library",
+                subtitle = "Add books to your library first to create glossaries"
+            )
+            else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(books, key = { it.id }) { book ->
                     BookGlossaryCard(
-                        book = book,
+                        title = book.title,
+                        count = book.glossaryCount,
                         onClick = { onSelectBook(book.id, book.title) }
                     )
                 }
@@ -292,26 +425,185 @@ private fun BookSelectionContent(
 }
 
 @Composable
+private fun GlobalBookSelectionContent(
+    books: List<GlobalBookInfo>,
+    isLoading: Boolean,
+    onSelectBook: (String, String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        HeaderCard(
+            title = "Global Glossaries",
+            subtitle = "Manage glossaries for any book, even those not in your library. These can be synced across devices.",
+            icon = Icons.Filled.Public
+        )
+
+        when {
+            isLoading -> LoadingContent()
+            books.isEmpty() -> EmptyContent(
+                icon = Icons.Outlined.Public,
+                title = "No global glossaries",
+                subtitle = "Tap + to add a new book glossary"
+            )
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(books, key = { it.bookKey }) { book ->
+                    GlobalBookGlossaryCard(
+                        book = book,
+                        onClick = { onSelectBook(book.bookKey, book.title) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeaderCard(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+            .padding(20.dp)
+    ) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingContent() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun EmptyContent(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String
+) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
 private fun BookGlossaryCard(
-    book: BookInfo,
+    title: String,
+    count: Int,
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Outlined.MenuBook,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "$count entries",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun GlobalBookGlossaryCard(
+    book: GlobalBookInfo,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Public,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(40.dp)
@@ -326,10 +618,24 @@ private fun BookGlossaryCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                Row {
+                    Text(
+                        text = "${book.glossaryCount} entries",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (book.lastSynced != null) {
+                        Text(
+                            text = " • Synced",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
                 Text(
-                    text = "${book.glossaryCount} entries",
+                    text = "${book.sourceLanguage} → ${book.targetLanguage}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
             }
             Icon(
@@ -344,98 +650,31 @@ private fun BookGlossaryCard(
 
 @Composable
 private fun GlossaryEntriesContent(
-    state: GlossaryState,
+    entries: List<Glossary>,
+    searchQuery: String,
+    filterType: GlossaryTermType?,
+    isLoading: Boolean,
     onSearchQueryChange: (String) -> Unit,
     onSetEditingEntry: (Glossary?) -> Unit,
-    onDeleteEntry: (Long) -> Unit,
-    onExport: ((String) -> Unit) -> Unit,
-    onImport: (String) -> Unit
+    onDeleteEntry: (Long) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // Search bar
-        OutlinedTextField(
-            value = state.searchQuery,
-            onValueChange = onSearchQueryChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            placeholder = { Text(localize(Res.string.search_glossary)) },
-            leadingIcon = { Icon(Icons.Default.Search, null) },
-            trailingIcon = {
-                if (state.searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { onSearchQueryChange("") }) {
-                        Icon(Icons.Default.Clear, "Clear")
-                    }
-                }
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(12.dp)
-        )
+        SearchBar(searchQuery = searchQuery, onSearchQueryChange = onSearchQueryChange)
+        StatsRow(count = entries.size, filterType = filterType)
 
-        // Stats row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${state.glossaryEntries.size} entries" +
-                    if (state.filterType != null) " (${state.filterType.name.lowercase()})" else "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        when {
+            isLoading -> LoadingContent()
+            entries.isEmpty() -> EmptyContent(
+                icon = Icons.Outlined.Translate,
+                title = if (searchQuery.isNotEmpty()) "No matching entries" else "No glossary entries",
+                subtitle = if (searchQuery.isNotEmpty()) "Try a different search term" else "Tap + to add your first entry"
             )
-            
-            // Export/Import buttons could be added here
-        }
-
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (state.glossaryEntries.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Translate,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = if (state.searchQuery.isNotEmpty()) 
-                            "No matching entries" else "No glossary entries",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = if (state.searchQuery.isNotEmpty())
-                            "Try a different search term"
-                        else "Tap + to add your first entry",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                }
-            }
-        } else {
-            LazyColumn(
+            else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(state.glossaryEntries, key = { it.id }) { entry ->
+                items(entries, key = { it.id }) { entry ->
                     GlossaryEntryItem(
                         entry = entry,
                         onEdit = { onSetEditingEntry(entry) },
@@ -445,4 +684,444 @@ private fun GlossaryEntriesContent(
             }
         }
     }
+}
+
+@Composable
+private fun GlobalGlossaryEntriesContent(
+    entries: List<GlobalGlossary>,
+    searchQuery: String,
+    filterType: GlossaryTermType?,
+    isLoading: Boolean,
+    syncStatus: GlossarySyncStatus,
+    onSearchQueryChange: (String) -> Unit,
+    onSetEditingEntry: (GlobalGlossary?) -> Unit,
+    onDeleteEntry: (Long) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        SearchBar(searchQuery = searchQuery, onSearchQueryChange = onSearchQueryChange)
+        
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${entries.size} entries" +
+                    if (filterType != null) " (${filterType.name.lowercase()})" else "",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            SyncStatusChip(syncStatus)
+        }
+
+        when {
+            isLoading -> LoadingContent()
+            entries.isEmpty() -> EmptyContent(
+                icon = Icons.Outlined.Translate,
+                title = if (searchQuery.isNotEmpty()) "No matching entries" else "No glossary entries",
+                subtitle = if (searchQuery.isNotEmpty()) "Try a different search term" else "Tap + to add your first entry"
+            )
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(entries, key = { it.id }) { entry ->
+                    GlobalGlossaryEntryItem(
+                        entry = entry,
+                        onEdit = { onSetEditingEntry(entry) },
+                        onDelete = { onDeleteEntry(entry.id) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchBar(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = searchQuery,
+        onValueChange = onSearchQueryChange,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        placeholder = { Text(localize(Res.string.search_glossary)) },
+        leadingIcon = { Icon(Icons.Default.Search, null) },
+        trailingIcon = {
+            if (searchQuery.isNotEmpty()) {
+                IconButton(onClick = { onSearchQueryChange("") }) {
+                    Icon(Icons.Default.Clear, "Clear")
+                }
+            }
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
+@Composable
+private fun StatsRow(count: Int, filterType: GlossaryTermType?) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "$count entries" +
+                if (filterType != null) " (${filterType.name.lowercase()})" else "",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun SyncStatusChip(status: GlossarySyncStatus) {
+    val (color, text) = when (status) {
+        GlossarySyncStatus.NOT_SYNCED -> MaterialTheme.colorScheme.outline to "Not synced"
+        GlossarySyncStatus.SYNCING -> MaterialTheme.colorScheme.primary to "Syncing..."
+        GlossarySyncStatus.SYNCED -> MaterialTheme.colorScheme.primary to "Synced"
+        GlossarySyncStatus.SYNC_ERROR -> MaterialTheme.colorScheme.error to "Sync error"
+    }
+    
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = color.copy(alpha = 0.1f)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = color
+        )
+    }
+}
+
+@Composable
+private fun GlobalGlossaryEntryItem(
+    entry: GlobalGlossary,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = entry.sourceTerm,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = entry.targetTerm,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                
+                Row {
+                    IconButton(onClick = onEdit) {
+                        Icon(Icons.Default.Edit, "Edit", modifier = Modifier.size(20.dp))
+                    }
+                    IconButton(onClick = { showDeleteConfirm = true }) {
+                        Icon(
+                            Icons.Default.Delete, "Delete",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                ) {
+                    Text(
+                        text = entry.termType.name.lowercase(),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+                
+                if (entry.syncedAt != null) {
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Text(
+                            text = "synced",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+            
+            entry.notes?.let { notes ->
+                if (notes.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = notes,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+    
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete Entry") },
+            text = { Text("Are you sure you want to delete this glossary entry?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDelete()
+                    showDeleteConfirm = false
+                }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+
+@Composable
+private fun AddGlobalBookDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (bookKey: String, bookTitle: String, sourceLanguage: String, targetLanguage: String) -> Unit
+) {
+    var bookKey by remember { mutableStateOf("") }
+    var bookTitle by remember { mutableStateOf("") }
+    var sourceLanguage by remember { mutableStateOf("auto") }
+    var targetLanguage by remember { mutableStateOf("en") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add New Book Glossary") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = bookTitle,
+                    onValueChange = { bookTitle = it },
+                    label = { Text("Book Title") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = bookKey,
+                    onValueChange = { bookKey = it },
+                    label = { Text("Book Key (unique identifier)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    supportingText = { Text("e.g., novel_name_source") }
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = sourceLanguage,
+                        onValueChange = { sourceLanguage = it },
+                        label = { Text("Source") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = targetLanguage,
+                        onValueChange = { targetLanguage = it },
+                        label = { Text("Target") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(bookKey.ifBlank { bookTitle.lowercase().replace(" ", "_") }, bookTitle, sourceLanguage, targetLanguage) },
+                enabled = bookTitle.isNotBlank()
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun EditGlobalGlossaryEntryDialog(
+    entry: GlobalGlossary,
+    onDismiss: () -> Unit,
+    onConfirm: (GlobalGlossary) -> Unit
+) {
+    var sourceTerm by remember { mutableStateOf(entry.sourceTerm) }
+    var targetTerm by remember { mutableStateOf(entry.targetTerm) }
+    var termType by remember { mutableStateOf(entry.termType) }
+    var notes by remember { mutableStateOf(entry.notes ?: "") }
+    var showTypeMenu by remember { mutableStateOf(false) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Glossary Entry") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = sourceTerm,
+                    onValueChange = { sourceTerm = it },
+                    label = { Text("Source Term") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = targetTerm,
+                    onValueChange = { targetTerm = it },
+                    label = { Text("Target Term") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Box {
+                    OutlinedTextField(
+                        value = termType.name.lowercase().replaceFirstChar { it.uppercase() },
+                        onValueChange = { },
+                        label = { Text("Type") },
+                        modifier = Modifier.fillMaxWidth(),
+                        readOnly = true,
+                        trailingIcon = {
+                            IconButton(onClick = { showTypeMenu = true }) {
+                                Icon(Icons.Default.ArrowDropDown, null)
+                            }
+                        }
+                    )
+                    DropdownMenu(
+                        expanded = showTypeMenu,
+                        onDismissRequest = { showTypeMenu = false }
+                    ) {
+                        GlossaryTermType.entries.forEach { type ->
+                            DropdownMenuItem(
+                                text = { Text(type.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                onClick = {
+                                    termType = type
+                                    showTypeMenu = false
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = { Text("Notes (optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    maxLines = 4
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(entry.copy(
+                        sourceTerm = sourceTerm,
+                        targetTerm = targetTerm,
+                        termType = termType,
+                        notes = notes.ifBlank { null }
+                    ))
+                },
+                enabled = sourceTerm.isNotBlank() && targetTerm.isNotBlank()
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun ImportGlossaryDialog(
+    importText: String,
+    onImportTextChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Import Glossary") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "Paste the JSON glossary data below:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                OutlinedTextField(
+                    value = importText,
+                    onValueChange = onImportTextChange,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp),
+                    minLines = 6,
+                    maxLines = 10,
+                    placeholder = { Text("Paste JSON here...") }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = importText.isNotBlank()
+            ) {
+                Text("Import")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

@@ -6,6 +6,7 @@ import data.Catalog
 import data.Chapter
 import data.ChapterHealth
 import data.Download
+import data.Global_glossary
 import data.Glossary
 import data.NftWallets
 import data.Plugin
@@ -98,7 +99,7 @@ fun createDatabase(driver: SqlDriver): Database {
         ),
         nftWalletsAdapter = NftWallets.Adapter(
             longConverter,
-            ),
+        ),
         pluginAdapter = Plugin.Adapter(
             install_dateAdapter = longConverter
         ),
@@ -111,9 +112,13 @@ fun createDatabase(driver: SqlDriver): Database {
         plugin_trialAdapter = Plugin_trial.Adapter(
             start_dateAdapter = longConverter,
             expiration_dateAdapter = longConverter
-        )
+        ),
+        global_glossaryAdapter = Global_glossary.Adapter(
+            created_atAdapter = longConverter,
+            updated_atAdapter = longConverter
+        ),
     )
-    
+
     return database
 }
 

@@ -180,6 +180,44 @@ val repositoryInjectModule = module {
         }
     }
     
+    // Glossary repository - for local book glossaries
+    single<ireader.domain.data.repository.GlossaryRepository> {
+        ireader.data.glossary.GlossaryRepositoryImpl(get())
+    }
+    
+    // Global Glossary repository - for glossaries independent of library with Supabase sync
+    single<ireader.domain.data.repository.GlobalGlossaryRepository> {
+        val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+        
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            // No Supabase configured, use local-only implementation
+            ireader.data.glossary.GlobalGlossaryRepositoryImpl(
+                handler = get(),
+                backendService = null,
+                getCurrentUserId = { null }
+            )
+        } else {
+            try {
+                // Get backend service for Supabase operations
+                val backendService: ireader.data.backend.BackendService = get()
+                
+                ireader.data.glossary.GlobalGlossaryRepositoryImpl(
+                    handler = get(),
+                    backendService = backendService,
+                    getCurrentUserId = { getCurrentUserUseCase().getOrNull()?.id }
+                )
+            } catch (e: Exception) {
+                // Fallback to local-only if something goes wrong
+                ireader.data.glossary.GlobalGlossaryRepositoryImpl(
+                    handler = get(),
+                    backendService = null,
+                    getCurrentUserId = { null }
+                )
+            }
+        }
+    }
+    
     // Character Art Gallery repository
     single<ireader.domain.data.repository.CharacterArtRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()

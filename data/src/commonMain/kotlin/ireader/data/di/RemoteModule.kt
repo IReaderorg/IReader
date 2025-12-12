@@ -210,4 +210,18 @@ val remoteModule = module {
             )
         }
     }
+    
+    // Admin User repository for admin user management
+    single<ireader.domain.data.repository.AdminUserRepository> {
+        val provider = get<SupabaseClientProvider>()
+        if (provider is ireader.data.remote.NoOpSupabaseClientProvider) {
+            ireader.data.admin.NoOpAdminUserRepository()
+        } else {
+            val supabaseClient = (provider as MultiSupabaseClientProvider).authClient
+            ireader.data.admin.AdminUserRepositoryImpl(
+                supabaseClient = supabaseClient,
+                backendService = get()
+            )
+        }
+    }
 }

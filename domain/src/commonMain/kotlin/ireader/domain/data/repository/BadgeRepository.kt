@@ -29,3 +29,5 @@ interface BadgeRepository {
         adminUserId: String
     ): Result<Unit>
 }
+
+// PaymentProofStatus enum is defined in PaymentProof.kt

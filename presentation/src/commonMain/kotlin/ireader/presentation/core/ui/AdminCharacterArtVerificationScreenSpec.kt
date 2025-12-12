@@ -37,9 +37,11 @@ class AdminCharacterArtVerificationScreenSpec {
         var showRejectDialog by remember { mutableStateOf(false) }
         var rejectReason by remember { mutableStateOf("") }
         
-        // Refresh pending art when screen is shown
+        // Load pending art when screen is shown
+        // Use loadPendingArtForVerification to bypass admin check since
+        // this screen is only accessible to admins anyway
         LaunchedEffect(Unit) {
-            vm.refresh()
+            vm.loadPendingArtForVerification()
         }
         
         // Reject dialog
@@ -79,6 +81,15 @@ class AdminCharacterArtVerificationScreenSpec {
             )
         }
         
+        // Show error snackbar
+        val snackbarHostState = remember { SnackbarHostState() }
+        LaunchedEffect(state.error) {
+            state.error?.let {
+                snackbarHostState.showSnackbar(it)
+                vm.clearError()
+            }
+        }
+        
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -87,58 +98,82 @@ class AdminCharacterArtVerificationScreenSpec {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
+                    },
+                    actions = {
+                        // Refresh button
+                        IconButton(onClick = { vm.loadPendingArtForVerification() }) {
+                            Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                        }
                     }
                 )
-            }
+            },
+            snackbarHost = { SnackbarHost(snackbarHostState) }
         ) { padding ->
-            if (state.pendingArt.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("✅", style = MaterialTheme.typography.displayLarge)
-                        Spacer(Modifier.height(16.dp))
-                        Text(
-                            "No pending submissions",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            "All caught up!",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+            when {
+                state.isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        Text(
-                            "${state.pendingArt.size} pending submissions",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    
-                    items(state.pendingArt, key = { it.id }) { art ->
-                        PendingArtCard(
-                            art = art,
-                            onApprove = { featured ->
-                                vm.approveArt(art.id, featured)
-                            },
-                            onReject = {
-                                selectedArt = art
-                                showRejectDialog = true
+                state.pendingArt.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("✅", style = MaterialTheme.typography.displayLarge)
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                "No pending submissions",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                "All caught up!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            TextButton(onClick = { vm.loadPendingArtForVerification() }) {
+                                Text("Refresh")
                             }
-                        )
+                        }
+                    }
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        item {
+                            Text(
+                                "${state.pendingArt.size} pending submissions",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        
+                        items(state.pendingArt, key = { it.id }) { art ->
+                            PendingArtCard(
+                                art = art,
+                                onApprove = { featured ->
+                                    vm.approveArt(art.id, featured)
+                                },
+                                onReject = {
+                                    selectedArt = art
+                                    showRejectDialog = true
+                                }
+                            )
+                        }
                     }
                 }
             }

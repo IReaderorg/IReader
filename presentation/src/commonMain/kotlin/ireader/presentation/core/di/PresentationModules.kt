@@ -207,6 +207,13 @@ val PresentationModules = module {
         )
     }
     
+    // Admin User Panel ViewModel
+    factory {
+        ireader.presentation.ui.settings.admin.AdminUserPanelViewModel(
+            adminUserUseCases = get()
+        )
+    }
+    
     // Character Art Gallery ViewModel
     factory {
         ireader.presentation.ui.characterart.CharacterArtViewModel(

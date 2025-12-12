@@ -69,6 +69,7 @@ val screenModelModule = module {
     }
     
     // Glossary ViewModel - Community feature for managing book glossaries
+    // Supports both local book glossaries and global glossaries with cloud sync
     factory {
         ireader.presentation.ui.community.GlossaryViewModel(
             getGlossaryByBookIdUseCase = get(),
@@ -77,7 +78,8 @@ val screenModelModule = module {
             exportGlossaryUseCase = get(),
             importGlossaryUseCase = get(),
             searchGlossaryUseCase = get(),
-            localGetBookUseCases = get()
+            localGetBookUseCases = get(),
+            globalGlossaryUseCases = getOrNull() // Optional - may not be available if repository not configured
         )
     }
     

@@ -279,6 +279,9 @@ class ReaderScreenViewModel(
      * Requirements: 4.1, 4.2
      */
     private fun subscribeToPreferencesControllerEvents() {
+        // Ensure preferences are loaded (lazy initialization for startup performance)
+        preferencesController.ensurePreferencesLoaded()
+        
         preferencesControllerEventJob?.cancel()
         preferencesControllerEventJob = scope.launch {
             // Subscribe to events

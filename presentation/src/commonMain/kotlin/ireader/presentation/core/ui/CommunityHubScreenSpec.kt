@@ -65,6 +65,9 @@ class CommunityHubScreenSpec {
             },
             onAdminCharacterArtVerification = {
                 navController.navigate(NavigationRoutes.adminCharacterArtVerification)
+            },
+            onAdminUserPanel = {
+                navController.navigate(NavigationRoutes.adminUserPanel)
             }
         )
     }

@@ -61,18 +61,31 @@ class ReaderPreferencesController(
     // Font registry for looking up fonts by ID
     private var fontRegistry: Map<String, FontType> = emptyMap()
     
-    init {
-        // Load initial preferences
-        scope.launch {
-            loadAllPreferences()
-        }
-    }
+    // Track if preferences have been loaded (lazy initialization)
+    private var preferencesLoaded = false
+    
+    // NOTE: Removed init block that loaded preferences at startup
+    // Preferences are now loaded lazily when first accessed via ensurePreferencesLoaded()
+    // This improves app startup time significantly
     
     /**
      * Register available fonts for lookup by ID.
      */
     fun registerFonts(fonts: List<FontType>) {
         fontRegistry = fonts.associateBy { it.name }
+    }
+    
+    /**
+     * Ensure preferences are loaded. Call this before accessing state.
+     * This enables lazy loading of preferences to improve startup time.
+     */
+    fun ensurePreferencesLoaded() {
+        if (!preferencesLoaded) {
+            preferencesLoaded = true
+            scope.launch {
+                loadAllPreferences()
+            }
+        }
     }
 
     

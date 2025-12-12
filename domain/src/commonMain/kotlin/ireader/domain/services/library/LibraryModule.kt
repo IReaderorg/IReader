@@ -11,8 +11,11 @@ val libraryModule = module {
     /**
      * LibraryController as singleton - ensures single source of truth
      * across all screens that need library state.
+     * 
+     * LAZY LOADING: createdAtStart=false ensures this is not created during app startup.
+     * The controller is created on-demand when first accessed (e.g., when user opens Library).
      */
-    single { 
+    single(createdAtStart = false) { 
         LibraryController(
             libraryRepository = get(),
             categoryRepository = get()

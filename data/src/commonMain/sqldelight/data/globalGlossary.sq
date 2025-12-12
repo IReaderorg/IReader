@@ -1,0 +1,108 @@
+import kotlin.Long;
+import kotlin.String;
+
+CREATE TABLE IF NOT EXISTS global_glossary(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_key TEXT NOT NULL,
+    book_title TEXT NOT NULL,
+    source_term TEXT NOT NULL,
+    target_term TEXT NOT NULL,
+    term_type TEXT NOT NULL,
+    notes TEXT,
+    source_language TEXT NOT NULL DEFAULT 'auto',
+    target_language TEXT NOT NULL DEFAULT 'en',
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    synced_at INTEGER AS Long,
+    remote_id TEXT,
+    UNIQUE(book_key, source_term)
+);
+
+CREATE INDEX IF NOT EXISTS global_glossary_book_key_index ON global_glossary(book_key);
+CREATE INDEX IF NOT EXISTS global_glossary_source_term_index ON global_glossary(source_term);
+CREATE INDEX IF NOT EXISTS global_glossary_remote_id_index ON global_glossary(remote_id);
+
+getById:
+SELECT * FROM global_glossary WHERE _id = :id;
+
+getByBookKey:
+SELECT * FROM global_glossary WHERE book_key = :bookKey ORDER BY source_term ASC;
+
+getByBookKeyAndType:
+SELECT * FROM global_glossary 
+WHERE book_key = :bookKey AND term_type = :termType 
+ORDER BY source_term ASC;
+
+search:
+SELECT * FROM global_glossary 
+WHERE book_key = :bookKey 
+AND (source_term LIKE '%' || :query || '%' OR target_term LIKE '%' || :query || '%')
+ORDER BY source_term ASC;
+
+searchAll:
+SELECT * FROM global_glossary 
+WHERE source_term LIKE '%' || :query || '%' OR target_term LIKE '%' || :query || '%'
+ORDER BY book_title ASC, source_term ASC;
+
+getAllBookKeys:
+SELECT DISTINCT book_key, book_title FROM global_glossary ORDER BY book_title ASC;
+
+getAll:
+SELECT * FROM global_glossary ORDER BY book_title ASC, source_term ASC;
+
+getUnsyncedEntries:
+SELECT * FROM global_glossary WHERE synced_at IS NULL OR synced_at < updated_at;
+
+delete:
+DELETE FROM global_glossary WHERE _id = :id;
+
+deleteByBookKey:
+DELETE FROM global_glossary WHERE book_key = :bookKey;
+
+insert:
+INSERT INTO global_glossary(
+    book_key, book_title, source_term, target_term, term_type, notes,
+    source_language, target_language, created_at, updated_at, synced_at, remote_id
+)
+VALUES (
+    :bookKey, :bookTitle, :sourceTerm, :targetTerm, :termType, :notes,
+    :sourceLanguage, :targetLanguage, :createdAt, :updatedAt, :syncedAt, :remoteId
+);
+
+update:
+UPDATE global_glossary
+SET target_term = :targetTerm,
+    term_type = :termType,
+    notes = :notes,
+    updated_at = :updatedAt
+WHERE _id = :id;
+
+updateSyncStatus:
+UPDATE global_glossary
+SET synced_at = :syncedAt,
+    remote_id = :remoteId
+WHERE _id = :id;
+
+upsert:
+INSERT INTO global_glossary(
+    book_key, book_title, source_term, target_term, term_type, notes,
+    source_language, target_language, created_at, updated_at, synced_at, remote_id
+)
+VALUES (
+    :bookKey, :bookTitle, :sourceTerm, :targetTerm, :termType, :notes,
+    :sourceLanguage, :targetLanguage, :createdAt, :updatedAt, :syncedAt, :remoteId
+)
+ON CONFLICT(book_key, source_term)
+DO UPDATE SET
+    target_term = :targetTerm,
+    term_type = :termType,
+    notes = :notes,
+    updated_at = :updatedAt,
+    synced_at = :syncedAt,
+    remote_id = :remoteId;
+
+selectLastInsertedRowId:
+SELECT LAST_INSERT_ROWID() AS Long;
+
+countByBookKey:
+SELECT COUNT(*) FROM global_glossary WHERE book_key = :bookKey;

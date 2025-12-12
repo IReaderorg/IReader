@@ -1,0 +1,24 @@
+-- Migration 22: Add global_glossary table for glossaries independent of library books
+-- This allows users to maintain glossaries for books they haven't added yet,
+-- or share glossaries across the community with cloud sync support.
+
+CREATE TABLE IF NOT EXISTS global_glossary(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_key TEXT NOT NULL,
+    book_title TEXT NOT NULL,
+    source_term TEXT NOT NULL,
+    target_term TEXT NOT NULL,
+    term_type TEXT NOT NULL,
+    notes TEXT,
+    source_language TEXT NOT NULL DEFAULT 'auto',
+    target_language TEXT NOT NULL DEFAULT 'en',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced_at INTEGER,
+    remote_id TEXT,
+    UNIQUE(book_key, source_term)
+);
+
+CREATE INDEX IF NOT EXISTS global_glossary_book_key_index ON global_glossary(book_key);
+CREATE INDEX IF NOT EXISTS global_glossary_source_term_index ON global_glossary(source_term);
+CREATE INDEX IF NOT EXISTS global_glossary_remote_id_index ON global_glossary(remote_id);

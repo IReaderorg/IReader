@@ -20,9 +20,12 @@ val preferencesModule = module {
      * This is registered as a SINGLETON to ensure all screens share the same
      * instance and receive consistent state updates.
      * 
+     * LAZY LOADING: createdAtStart=false ensures this is not created during app startup.
+     * Preferences are loaded lazily when first accessed via ensurePreferencesLoaded().
+     * 
      * Dependencies: ReaderPreferences
      */
-    single {
+    single(createdAtStart = false) {
         ReaderPreferencesController(
             readerPreferences = get()
         )
