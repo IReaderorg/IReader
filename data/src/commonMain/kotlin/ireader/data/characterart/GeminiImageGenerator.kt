@@ -32,23 +32,21 @@ class GeminiImageGenerator(
         val DEFAULT_IMAGE_MODELS = listOf(
             ImageModel("imagen-4.0-generate-001", "Imagen 4", "Latest high quality image generation"),
             ImageModel("imagen-3.0-generate-002", "Imagen 3", "High quality image generation"),
+            ImageModel("imagen-3.0-generate-001", "Imagen 3 (v1)", "High quality image generation"),
             ImageModel("imagen-3.0-fast-generate-001", "Imagen 3 Fast", "Faster generation, slightly lower quality"),
-            ImageModel("gemini-2.0-flash-preview-image-generation", "Gemini 2.0 Flash", "Multimodal image generation")
+            ImageModel("gemini-2.0-flash-preview-image-generation", "Gemini 2.0 Flash", "Multimodal image generation"),
+            ImageModel("gemini-2.0-flash-exp-image-generation", "Gemini 2.0 Flash Exp", "Experimental image generation"),
+            ImageModel("gemini-exp-1206", "Gemini Exp 1206", "Experimental model with image capabilities")
         )
         
-        // Known image generation model prefixes for filtering
-        private val IMAGE_MODEL_PREFIXES = listOf(
-            "imagen-",
-            "gemini-2.0-flash-preview-image",
-            "gemini-2.5-flash-preview-image"
-        )
     }
     
     /**
-     * Fetch available image generation models from Gemini API
+     * Fetch available models from Gemini API
+     * Shows all models but prioritizes image-related ones at the top
      * 
      * @param apiKey User's Gemini API key
-     * @return List of available models that support image generation (only image models, not text models)
+     * @return List of available models, sorted with image models first
      */
     suspend fun fetchAvailableModels(apiKey: String): Result<List<ImageModel>> {
         return try {
@@ -60,41 +58,52 @@ class GeminiImageGenerator(
                 val responseBody = response.bodyAsText()
                 val modelsResponse = json.decodeFromString<ModelsListResponse>(responseBody)
                 
-                // Filter to ONLY image generation models (not text/chat models)
-                val imageModels = modelsResponse.models
-                    .filter { model ->
-                        val modelId = model.name.removePrefix("models/")
-                        // Only include models that are specifically for image generation
-                        IMAGE_MODEL_PREFIXES.any { prefix -> 
-                            modelId.startsWith(prefix, ignoreCase = true) 
-                        }
-                    }
+                // Show ALL models, but sort with image-related ones first
+                val allModels = modelsResponse.models
                     .map { model ->
+                        val modelId = model.name.removePrefix("models/")
+                        val description = model.description.ifBlank { 
+                            getDefaultDescription(modelId) 
+                        }
                         ImageModel(
-                            id = model.name.removePrefix("models/"),
+                            id = modelId,
                             displayName = model.displayName.ifBlank { 
-                                formatModelName(model.name.removePrefix("models/"))
+                                formatModelName(modelId)
                             },
-                            description = model.description.ifBlank {
-                                getDefaultDescription(model.name.removePrefix("models/"))
-                            }
+                            description = description
                         )
                     }
                     .sortedBy { model ->
-                        // Sort: Imagen 4 first, then Imagen 3, then Gemini
+                        // Priority sorting: banana first, then image/imagen models
+                        val modelLower = model.id.lowercase()
+                        val descLower = model.description.lowercase()
+                        val displayLower = model.displayName.lowercase()
                         when {
-                            model.id.contains("imagen-4") -> 0
-                            model.id.contains("imagen-3") && !model.id.contains("fast") -> 1
-                            model.id.contains("imagen-3") && model.id.contains("fast") -> 2
-                            else -> 3
+                            // Top priority: banana models
+                            modelLower.contains("banana") || displayLower.contains("banana") -> -1
+                            // Highest priority: imagen models
+                            modelLower.contains("imagen-4") -> 0
+                            modelLower.contains("imagen-3") && !modelLower.contains("fast") -> 1
+                            modelLower.contains("imagen-3") && modelLower.contains("fast") -> 2
+                            modelLower.contains("imagen") -> 3
+                            // High priority: models with "image" in name or description
+                            modelLower.contains("image") -> 4
+                            descLower.contains("image") -> 5
+                            // Medium priority: gemini flash models (often support images)
+                            modelLower.contains("gemini-2") && modelLower.contains("flash") -> 6
+                            modelLower.contains("gemini-2") -> 7
+                            // Lower priority: other gemini models
+                            modelLower.contains("gemini") -> 8
+                            // Lowest: everything else
+                            else -> 9
                         }
                     }
                 
-                if (imageModels.isEmpty()) {
+                if (allModels.isEmpty()) {
                     // Return default models if none found
                     Result.success(DEFAULT_IMAGE_MODELS)
                 } else {
-                    Result.success(imageModels)
+                    Result.success(allModels)
                 }
             } else {
                 val errorBody = response.bodyAsText()

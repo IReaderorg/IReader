@@ -20,7 +20,8 @@ import kotlinx.serialization.json.*
 class SupabaseCharacterArtMetadata(
     @Suppress("unused") private val supabaseClient: SupabaseClient,
     private val backendService: BackendService,
-    private val getCurrentUserId: suspend () -> String?
+    private val getCurrentUserId: suspend () -> String?,
+    private val getCurrentUsername: suspend () -> String? = { null }
 ) : MetadataStorageProvider {
     
     private val tableName = "character_art"
@@ -299,6 +300,7 @@ class SupabaseCharacterArtMetadata(
         thumbnailUrl: String?
     ): Result<CharacterArt> = RemoteErrorMapper.withErrorMapping {
         val userId = getCurrentUserId() ?: throw Exception("Not logged in")
+        val username = getCurrentUsername() ?: "User_${userId.take(8)}"
         
         // Convert tags list to JSON array for PostgreSQL
         val tagsArray = buildJsonArray {
@@ -313,6 +315,7 @@ class SupabaseCharacterArtMetadata(
             put("image_url", imageUrl)
             put("thumbnail_url", thumbnailUrl ?: "")
             put("submitter_id", userId)
+            put("submitter_username", username)
             put("ai_model", request.aiModel)
             put("prompt", request.prompt)
             put("tags", tagsArray)

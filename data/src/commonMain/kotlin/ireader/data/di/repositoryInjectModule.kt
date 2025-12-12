@@ -232,10 +232,15 @@ val repositoryInjectModule = module {
                 val backendService: ireader.data.backend.BackendService = get()
                 
                 // Create Supabase metadata storage using BackendService (pure HTTP, no reflection)
+                val multiProvider = provider as ireader.data.remote.MultiSupabaseClientProvider
                 val metadataStorage = ireader.data.characterart.SupabaseCharacterArtMetadata(
                     supabaseClient = supabaseClient,
                     backendService = backendService,
-                    getCurrentUserId = { getCurrentUserUseCase().getOrNull()?.id }
+                    getCurrentUserId = { getCurrentUserUseCase().getOrNull()?.id },
+                    getCurrentUsername = { 
+                        getCurrentUserUseCase().getOrNull()?.username 
+                            ?: multiProvider.getCurrentUsername()
+                    }
                 )
                 
                 // Create image storage using Cloudflare R2

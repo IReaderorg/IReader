@@ -1,31 +1,79 @@
 package ireader.presentation.ui.characterart
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -127,249 +175,251 @@ fun UploadCharacterArtScreen(
             }
         )
     }
-    
-    Scaffold(
-        modifier = modifier.padding(paddingValues),
-        topBar = {
-            UploadTopBar(onBack = onBack)
-        }
-    ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = if (isWideScreen) 48.dp else 16.dp)
-                    .padding(bottom = 100.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                Spacer(Modifier.height(8.dp))
-                
-                // Image source toggle
-                ImageSourceToggle(
-                    selectedMode = imageSourceMode,
-                    onModeChange = { imageSourceMode = it }
-                )
-                
-                Spacer(Modifier.height(12.dp))
-                
-                // Image section based on mode
-                when (imageSourceMode) {
-                    ImageSourceMode.PICK_FILE -> {
-                        ImagePickerSection(
-                            selectedImagePath = selectedImagePath,
-                            onPickImage = onPickImage,
-                            isWideScreen = isWideScreen
-                        )
-                    }
-                    ImageSourceMode.GENERATE_AI -> {
-                        GeminiGeneratorSection(
-                            apiKey = geminiApiKey,
-                            prompt = generationPrompt,
-                            characterName = characterName,
-                            bookTitle = bookTitle,
-                            selectedStyle = selectedStyle,
-                            selectedModel = selectedModel,
-                            availableModels = availableModels,
-                            isLoadingModels = isLoadingModels,
-                            generatedPreview = generatedImagePreview,
-                            isGenerating = isGenerating,
-                            error = generationError,
-                            onApiKeyClick = { showApiKeyDialog = true },
-                            onPromptChange = { generationPrompt = it },
-                            onStyleChange = { selectedStyle = it },
-                            onModelSelect = onModelSelect,
-                            onFetchModels = { onFetchModels(geminiApiKey) },
-                            onGenerate = {
-                                if (geminiApiKey.isNotBlank() && generationPrompt.isNotBlank()) {
-                                    onGenerateImage(
-                                        geminiApiKey,
-                                        generationPrompt,
-                                        characterName,
-                                        bookTitle,
-                                        selectedStyle
-                                    )
-                                    // Auto-fill AI model with selected model name
-                                    aiModel = selectedModel?.displayName ?: "Gemini Imagen 3"
-                                    prompt = generationPrompt
-                                }
-                            },
-                            isWideScreen = isWideScreen
-                        )
-                    }
-                }
-                
-                // Character info section
-                SectionCard(title = "Character Info", icon = "👤") {
-                    OutlinedTextField(
-                        value = characterName,
-                        onValueChange = { characterName = it },
-                        label = { Text("Character Name *") },
-                        placeholder = { Text("e.g., Harry Potter") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    
-                    Spacer(Modifier.height(12.dp))
-                    
-                    OutlinedTextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = { Text("Description") },
-                        placeholder = { Text("Brief description of the character...") },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 2,
-                        maxLines = 4,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-                
-                // Book info section
-                SectionCard(title = "Book Info", icon = "📚") {
-                    OutlinedTextField(
-                        value = bookTitle,
-                        onValueChange = { bookTitle = it },
-                        label = { Text("Book Title *") },
-                        placeholder = { Text("e.g., Harry Potter and the Sorcerer's Stone") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    
-                    Spacer(Modifier.height(12.dp))
-                    
-                    OutlinedTextField(
-                        value = bookAuthor,
-                        onValueChange = { bookAuthor = it },
-                        label = { Text("Author") },
-                        placeholder = { Text("e.g., J.K. Rowling") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-                
-                // AI info section
-                SectionCard(title = "AI Generation Info", icon = "🤖") {
-                    OutlinedTextField(
-                        value = aiModel,
-                        onValueChange = { aiModel = it },
-                        label = { Text("AI Model Used") },
-                        placeholder = { Text("e.g., Midjourney, DALL-E, Stable Diffusion") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    
-                    Spacer(Modifier.height(12.dp))
-                    
-                    OutlinedTextField(
-                        value = prompt,
-                        onValueChange = { prompt = it },
-                        label = { Text("Prompt Used") },
-                        placeholder = { Text("Share the prompt you used (optional)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 2,
-                        maxLines = 4,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-                
-                // Style tags section
-                SectionCard(title = "Art Style", icon = "🎨") {
-                    Text(
-                        text = "Select applicable styles:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
+    Scaffold { paddingValues ->
+        Scaffold(
+            modifier = modifier.padding(paddingValues),
+            topBar = {
+                UploadTopBar(onBack = onBack)
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .verticalScroll(scrollState)
+                        .padding(horizontal = if (isWideScreen) 48.dp else 16.dp)
+                        .padding(bottom = 100.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
                     Spacer(Modifier.height(8.dp))
-                    
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(ArtStyleFilter.entries.filter { it != ArtStyleFilter.ALL }) { style ->
-                            val isSelected = style in selectedTags
-                            FilterChip(
-                                selected = isSelected,
-                                onClick = {
-                                    selectedTags = if (isSelected) {
-                                        selectedTags - style
-                                    } else {
-                                        selectedTags + style
+
+                    // Image source toggle
+                    ImageSourceToggle(
+                        selectedMode = imageSourceMode,
+                        onModeChange = { imageSourceMode = it }
+                    )
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // Image section based on mode
+                    when (imageSourceMode) {
+                        ImageSourceMode.PICK_FILE -> {
+                            ImagePickerSection(
+                                selectedImagePath = selectedImagePath,
+                                onPickImage = onPickImage,
+                                isWideScreen = isWideScreen
+                            )
+                        }
+
+                        ImageSourceMode.GENERATE_AI -> {
+                            GeminiGeneratorSection(
+                                apiKey = geminiApiKey,
+                                prompt = generationPrompt,
+                                characterName = characterName,
+                                bookTitle = bookTitle,
+                                selectedStyle = selectedStyle,
+                                selectedModel = selectedModel,
+                                availableModels = availableModels,
+                                isLoadingModels = isLoadingModels,
+                                generatedPreview = generatedImagePreview,
+                                isGenerating = isGenerating,
+                                error = generationError,
+                                onApiKeyClick = { showApiKeyDialog = true },
+                                onPromptChange = { generationPrompt = it },
+                                onStyleChange = { selectedStyle = it },
+                                onModelSelect = onModelSelect,
+                                onFetchModels = { onFetchModels(geminiApiKey) },
+                                onGenerate = {
+                                    if (geminiApiKey.isNotBlank() && generationPrompt.isNotBlank()) {
+                                        onGenerateImage(
+                                            geminiApiKey,
+                                            generationPrompt,
+                                            characterName,
+                                            bookTitle,
+                                            selectedStyle
+                                        )
+                                        // Auto-fill AI model with selected model name
+                                        aiModel = selectedModel?.displayName ?: "Gemini Imagen 3"
+                                        prompt = generationPrompt
                                     }
                                 },
-                                label = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text(style.icon, fontSize = 14.sp)
-                                        Text(style.displayName)
-                                    }
-                                }
+                                isWideScreen = isWideScreen
                             )
                         }
                     }
-                }
-                
-                // Guidelines
-                GuidelinesCard()
-            }
-            
-            // Bottom submit button
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
-                shadowElevation = 8.dp,
-                color = MaterialTheme.colorScheme.surface
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    if (isUploading) {
-                        LinearProgressIndicator(
-                            progress = { uploadProgress },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(4.dp)
-                                .clip(RoundedCornerShape(2.dp))
+
+                    // Character info section
+                    SectionCard(title = "Character Info", icon = "👤") {
+                        OutlinedTextField(
+                            value = characterName,
+                            onValueChange = { characterName = it },
+                            label = { Text("Character Name *") },
+                            placeholder = { Text("e.g., Harry Potter") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp)
                         )
+
                         Spacer(Modifier.height(12.dp))
-                        Text(
-                            text = "Uploading... ${(uploadProgress * 100).toInt()}%",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+
+                        OutlinedTextField(
+                            value = description,
+                            onValueChange = { description = it },
+                            label = { Text("Description") },
+                            placeholder = { Text("Brief description of the character...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 2,
+                            maxLines = 4,
+                            shape = RoundedCornerShape(12.dp)
                         )
-                    } else {
-                        Button(
-                            onClick = {
-                                onSubmit(
-                                    characterName,
-                                    bookTitle,
-                                    bookAuthor,
-                                    description,
-                                    aiModel,
-                                    prompt,
-                                    selectedTags.map { it.name }
-                                )
-                            },
-                            enabled = isFormValid,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
-                            shape = RoundedCornerShape(16.dp)
+                    }
+
+                    // Book info section
+                    SectionCard(title = "Book Info", icon = "📚") {
+                        OutlinedTextField(
+                            value = bookTitle,
+                            onValueChange = { bookTitle = it },
+                            label = { Text("Book Title *") },
+                            placeholder = { Text("e.g., Harry Potter and the Sorcerer's Stone") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+
+                        Spacer(Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = bookAuthor,
+                            onValueChange = { bookAuthor = it },
+                            label = { Text("Author") },
+                            placeholder = { Text("e.g., J.K. Rowling") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+
+                    // AI info section
+                    SectionCard(title = "AI Generation Info", icon = "🤖") {
+                        OutlinedTextField(
+                            value = aiModel,
+                            onValueChange = { aiModel = it },
+                            label = { Text("AI Model Used") },
+                            placeholder = { Text("e.g., Midjourney, DALL-E, Stable Diffusion") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+
+                        Spacer(Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = prompt,
+                            onValueChange = { prompt = it },
+                            label = { Text("Prompt Used") },
+                            placeholder = { Text("Share the prompt you used (optional)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 2,
+                            maxLines = 4,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+
+                    // Style tags section
+                    SectionCard(title = "Art Style", icon = "🎨") {
+                        Text(
+                            text = "Select applicable styles:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Spacer(Modifier.height(8.dp))
+
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(Icons.Default.CloudUpload, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                "Submit for Review",
-                                style = MaterialTheme.typography.titleMedium
+                            items(ArtStyleFilter.entries.filter { it != ArtStyleFilter.ALL }) { style ->
+                                val isSelected = style in selectedTags
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = {
+                                        selectedTags = if (isSelected) {
+                                            selectedTags - style
+                                        } else {
+                                            selectedTags + style
+                                        }
+                                    },
+                                    label = {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Text(style.icon, fontSize = 14.sp)
+                                            Text(style.displayName)
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Guidelines
+                    GuidelinesCard()
+                }
+
+                // Bottom submit button
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                    shadowElevation = 8.dp,
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        if (isUploading) {
+                            LinearProgressIndicator(
+                                progress = { uploadProgress },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp))
                             )
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                text = "Uploading... ${(uploadProgress * 100).toInt()}%",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                        } else {
+                            Button(
+                                onClick = {
+                                    onSubmit(
+                                        characterName,
+                                        bookTitle,
+                                        bookAuthor,
+                                        description,
+                                        aiModel,
+                                        prompt,
+                                        selectedTags.map { it.name }
+                                    )
+                                },
+                                enabled = isFormValid,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Icon(Icons.Default.CloudUpload, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    "Submit for Review",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
                         }
                     }
                 }
