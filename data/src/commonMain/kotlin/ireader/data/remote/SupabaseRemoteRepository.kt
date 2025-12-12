@@ -225,6 +225,25 @@ class SupabaseRemoteRepository(
             Unit
         }
     
+    override suspend fun updatePassword(newPassword: String): Result<Unit> = 
+        RemoteErrorMapper.withErrorMapping {
+            try {
+                supabaseClient.auth.updateUser {
+                    password = newPassword
+                }
+                Unit
+            } catch (e: Exception) {
+                val message = when {
+                    e.message?.contains("weak", ignoreCase = true) == true ->
+                        "Password is too weak. Please use a stronger password."
+                    e.message?.contains("same", ignoreCase = true) == true ->
+                        "New password must be different from the current password."
+                    else -> e.message ?: "Failed to update password. Please try again."
+                }
+                throw Exception(message)
+            }
+        }
+    
     override suspend fun getUserById(userId: String): Result<User?> = 
         RemoteErrorMapper.withErrorMapping {
             try {

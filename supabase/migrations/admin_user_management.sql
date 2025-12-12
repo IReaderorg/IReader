@@ -203,8 +203,5 @@ END $$;
 
 -- Create index for faster admin queries
 CREATE INDEX IF NOT EXISTS idx_users_is_admin ON users(is_admin) WHERE is_admin = TRUE;
-CREATE INDEX IF NOT EXISTS idx_users_email_search ON users USING gin(email gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS idx_users_username_search ON users USING gin(username gin_trgm_ops);
-
--- Enable pg_trgm extension for fuzzy search (if not already enabled)
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS idx_users_email_btree ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_username_btree ON users(username);

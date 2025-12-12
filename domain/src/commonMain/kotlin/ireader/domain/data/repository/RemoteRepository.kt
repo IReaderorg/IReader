@@ -60,6 +60,13 @@ interface RemoteRepository {
     suspend fun updateEthWalletAddress(userId: String, ethWalletAddress: String): Result<Unit>
     
     /**
+     * Update the password for the currently authenticated user
+     * @param newPassword The new password
+     * @return Result indicating success or failure
+     */
+    suspend fun updatePassword(newPassword: String): Result<Unit>
+    
+    /**
      * Get a user by their ID
      * @param userId The user ID to look up
      * @return Result containing the User or null if not found

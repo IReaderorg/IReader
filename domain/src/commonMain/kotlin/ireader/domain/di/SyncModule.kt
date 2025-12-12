@@ -17,6 +17,7 @@ val syncModule = module {
     single { ireader.domain.usecases.remote.SignOutUseCase(get()) }
     single { ireader.domain.usecases.remote.UpdateUsernameUseCase(get()) }
     single { ireader.domain.usecases.remote.UpdateEthWalletAddressUseCase(get()) }
+    single { ireader.domain.usecases.remote.UpdatePasswordUseCase(get()) }
     single { ireader.domain.usecases.remote.SyncReadingProgressUseCase(get(),get()) }
     single { ireader.domain.usecases.remote.GetReadingProgressUseCase(get()) }
     single { ireader.domain.usecases.remote.ObserveReadingProgressUseCase(get()) }
@@ -35,6 +36,7 @@ val syncModule = module {
             signOut = get(),
             updateUsername = get(),
             updateEthWalletAddress = get(),
+            updatePassword = get(),
             syncReadingProgress = get(),
             getReadingProgress = get(),
             observeReadingProgress = get(),

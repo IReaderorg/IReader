@@ -32,6 +32,9 @@ class NoOpRemoteRepository : RemoteRepository {
     override suspend fun updateEthWalletAddress(userId: String, ethWalletAddress: String): Result<Unit> = 
         Result.failure(UnsupportedOperationException("Supabase is not configured"))
     
+    override suspend fun updatePassword(newPassword: String): Result<Unit> = 
+        Result.failure(UnsupportedOperationException("Supabase is not configured"))
+    
     override suspend fun getUserById(userId: String): Result<User?> = Result.success(null)
     
     // Reading Progress

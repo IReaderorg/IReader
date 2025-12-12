@@ -2232,4 +2232,12 @@
     <string name="tts_chapters">chapters</string>
     <string name="download_chapter_audio">Download Chapter Audio</string>
 
+    <!-- Password Update -->
+    <string name="change">Change</string>
+    <string name="change_password">Change Password</string>
+    <string name="enter_new_password">Enter your new password. Make sure it\'s at least 6 characters long.</string>
+    <string name="new_password">New Password</string>
+    <string name="password_updated">Password Updated</string>
+    <string name="password_updated_successfully">Your password has been updated successfully.</string>
+
 </resources>

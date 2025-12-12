@@ -10,6 +10,7 @@ data class RemoteBackendUseCases(
     val signOut: SignOutUseCase,
     val updateUsername: UpdateUsernameUseCase,
     val updateEthWalletAddress: UpdateEthWalletAddressUseCase,
+    val updatePassword: UpdatePasswordUseCase,
     val syncReadingProgress: SyncReadingProgressUseCase,
     val getReadingProgress: GetReadingProgressUseCase,
     val observeReadingProgress: ObserveReadingProgressUseCase,

@@ -115,7 +115,8 @@ class ProfileScreen  {
                                 user = state.currentUser!!,
                                 onSignOut = { viewModel.signOut() },
                                 onUpdateUsername = { viewModel.showUsernameDialog() },
-                                onUpdateWallet = { viewModel.showWalletDialog() }
+                                onUpdateWallet = { viewModel.showWalletDialog() },
+                                onUpdatePassword = { viewModel.showPasswordDialog() }
                             )
                         }
                         
@@ -186,6 +187,41 @@ class ProfileScreen  {
             )
         }
         
+        if (state.showPasswordDialog) {
+            PasswordDialog(
+                onDismiss = { viewModel.hidePasswordDialog() },
+                onConfirm = { password -> viewModel.updatePassword(password) }
+            )
+        }
+        
+        if (state.passwordUpdateSuccess) {
+            AlertDialog(
+                onDismissRequest = { viewModel.clearPasswordUpdateSuccess() },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.clearPasswordUpdateSuccess() }) {
+                        Text(localizeHelper.localize(Res.string.ok))
+                    }
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Security,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(48.dp)
+                    )
+                },
+                title = {
+                    Text(
+                        text = localizeHelper.localize(Res.string.password_updated),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(text = localizeHelper.localize(Res.string.password_updated_successfully))
+                }
+            )
+        }
+        
         // Show beautiful error dialog for user errors
         if (state.error != null) {
             val userError = ireader.presentation.ui.component.components.UserError.fromMessage(state.error)
@@ -253,7 +289,8 @@ private fun UserProfileCard(
     user: ireader.domain.models.remote.User,
     onSignOut: () -> Unit,
     onUpdateUsername: () -> Unit,
-    onUpdateWallet: () -> Unit
+    onUpdateWallet: () -> Unit,
+    onUpdatePassword: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
@@ -366,6 +403,39 @@ private fun UserProfileCard(
                     )
                 ) {
                     Text(localizeHelper.localize(Res.string.edit))
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = localizeHelper.localize(Res.string.password),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "••••••••",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                
+                TextButton(
+                    onClick = onUpdatePassword,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(localizeHelper.localize(Res.string.change))
                 }
             }
             
@@ -690,6 +760,101 @@ private fun WalletDialog(
                         error = "Wallet address must be 42 characters"
                     } else {
                         onConfirm(wallet)
+                    }
+                }
+            ) {
+                Text(localizeHelper.localize(Res.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(localizeHelper.localize(Res.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun PasswordDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var passwordVisible by remember { mutableStateOf(false) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(localizeHelper.localize(Res.string.change_password)) },
+        text = {
+            Column {
+                Text(
+                    text = localizeHelper.localize(Res.string.enter_new_password),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = {
+                        newPassword = it
+                        error = null
+                    },
+                    label = { Text(localizeHelper.localize(Res.string.new_password)) },
+                    singleLine = true,
+                    isError = error != null,
+                    visualTransformation = if (passwordVisible) 
+                        androidx.compose.ui.text.input.VisualTransformation.None 
+                    else 
+                        androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) 
+                                    Icons.Default.Security 
+                                else 
+                                    Icons.Default.Security,
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    }
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = {
+                        confirmPassword = it
+                        error = null
+                    },
+                    label = { Text(localizeHelper.localize(Res.string.confirm_password)) },
+                    singleLine = true,
+                    isError = error != null,
+                    visualTransformation = if (passwordVisible) 
+                        androidx.compose.ui.text.input.VisualTransformation.None 
+                    else 
+                        androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    supportingText = error?.let { { Text(it) } }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    when {
+                        newPassword.length < 6 -> {
+                            error = "Password must be at least 6 characters"
+                        }
+                        newPassword != confirmPassword -> {
+                            error = "Passwords do not match"
+                        }
+                        else -> {
+                            onConfirm(newPassword)
+                        }
                     }
                 }
             ) {

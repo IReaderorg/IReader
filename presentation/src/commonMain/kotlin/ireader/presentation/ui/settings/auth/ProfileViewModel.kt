@@ -75,6 +75,14 @@ class ProfileViewModel(
         updateState { it.copy(showWalletDialog = false) }
     }
     
+    fun showPasswordDialog() {
+        updateState { it.copy(showPasswordDialog = true) }
+    }
+    
+    fun hidePasswordDialog() {
+        updateState { it.copy(showPasswordDialog = false) }
+    }
+    
     fun updateUsername(username: String) {
         scope.launch {
             updateState { it.copy(isLoading = true, showUsernameDialog = false) }
@@ -141,6 +149,50 @@ class ProfileViewModel(
                 }
             )
         }
+    }
+    
+    fun updatePassword(newPassword: String) {
+        scope.launch {
+            updateState { it.copy(isLoading = true, showPasswordDialog = false) }
+            
+            if (currentState.currentUser == null) {
+                updateState { 
+                    it.copy(
+                        isLoading = false, 
+                        error = "user not found",
+                        requiresSignIn = true
+                    ) 
+                }
+                return@launch
+            }
+            
+            remoteUseCases?.updatePassword?.invoke(newPassword)?.fold(
+                onSuccess = {
+                    updateState { 
+                        it.copy(
+                            isLoading = false,
+                            error = null,
+                            passwordUpdateSuccess = true
+                        ) 
+                    }
+                },
+                onFailure = { error ->
+                    updateState { 
+                        it.copy(
+                            error = error.message ?: "Failed to update password", 
+                            isLoading = false,
+                            requiresSignIn = error.message?.contains("not found", ignoreCase = true) == true ||
+                                           error.message?.contains("unauthorized", ignoreCase = true) == true ||
+                                           error.message?.contains("session", ignoreCase = true) == true
+                        ) 
+                    }
+                }
+            )
+        }
+    }
+    
+    fun clearPasswordUpdateSuccess() {
+        updateState { it.copy(passwordUpdateSuccess = false) }
     }
     
     fun clearError() {
@@ -239,6 +291,8 @@ data class ProfileState(
     val lastSyncTime: Long? = null,
     val showUsernameDialog: Boolean = false,
     val showWalletDialog: Boolean = false,
+    val showPasswordDialog: Boolean = false,
+    val passwordUpdateSuccess: Boolean = false,
     val featuredBadges: List<Badge> = emptyList(),
     val achievementBadges: List<Badge> = emptyList(),
     val isBadgesLoading: Boolean = false,
