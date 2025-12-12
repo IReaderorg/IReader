@@ -151,11 +151,9 @@ class AdminUserRepositoryImpl(
                 throw Exception("Unauthorized: Admin access required")
             }
             
-            // Use Supabase Auth admin API to send password reset
-            backendService.rpc(
-                function = "admin_send_password_reset",
-                parameters = mapOf("p_email" to email)
-            ).getOrThrow()
+            // Use Supabase Auth's built-in password reset
+            // This sends an email through Supabase's email service (no server needed!)
+            supabaseClient.auth.resetPasswordForEmail(email)
         }
     
     override suspend fun getAvailableBadgesForAssignment(): Result<List<Badge>> = 
