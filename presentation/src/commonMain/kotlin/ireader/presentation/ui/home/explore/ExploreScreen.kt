@@ -1,9 +1,15 @@
 package ireader.presentation.ui.home.explore
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Public
@@ -62,7 +68,8 @@ fun ExploreScreen(
     onLongClick: (Book) -> Unit = {},
     headers: ((url: String) -> Map<String, String>?)? = null,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
-    prevPaddingValues: PaddingValues
+    prevPaddingValues: PaddingValues,
+    onListingSelected: ((Listing) -> Unit)? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
@@ -211,56 +218,229 @@ fun ExploreScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) }
     ) { paddingValue ->
-        Box(
+        // Get listings from source
+        val listings = remember(source) { source.getListings() }
+        
+        // Get sort filter options from source filters
+        val sortFilter = remember(source) {
+            source.getFilters().filterIsInstance<Filter.Sort>().firstOrNull()
+        }
+        
+        // Build unified filter options - merge listings with sort filter options
+        val filterOptions = remember(listings, sortFilter) {
+            buildList {
+                // Add listings first
+                listings.forEach { listing ->
+                    add(FilterOption.FromListing(listing))
+                }
+                // Add sort filter options (avoid duplicates by name)
+                val listingNames = listings.map { it.name.lowercase() }.toSet()
+                sortFilter?.options?.forEachIndexed { index, option ->
+                    if (option.lowercase() !in listingNames) {
+                        add(FilterOption.FromSort(index, option, sortFilter))
+                    }
+                }
+            }
+        }
+        
+        // Track selected filter option
+        var selectedOption by remember(state.currentListing) {
+            mutableStateOf<FilterOption?>(
+                state.currentListing?.let { FilterOption.FromListing(it) }
+                    ?: filterOptions.firstOrNull()
+            )
+        }
+        
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(prevPaddingValues)
         ) {
-            when {
-                // Initial loading state
-                state.isInitialLoading -> {
-                    BookShimmerLoading(columns = columns)
-                }
-                // Error with no content
-                state.isErrorWithNoContent -> {
-                    ExploreScreenError(
-                        error = state.error?.asString(localizeHelper) ?: localize(Res.string.no_results_found),
-                        source = source,
-                        onRefresh = { getBooks(null, null, emptyList()) },
-                        onWebView = { src -> 
-                            (src as? HttpSource)?.let { onAppbarWebView(it.baseUrl) }
+            // Show unified filter chips row if there are multiple options and not in search mode
+            if (filterOptions.size > 1 && !state.isSearchModeEnabled) {
+                UnifiedFilterChips(
+                    options = filterOptions,
+                    selectedOption = selectedOption,
+                    onOptionSelected = { option ->
+                        selectedOption = option
+                        when (option) {
+                            is FilterOption.FromListing -> {
+                                onListingSelected?.invoke(option.listing)
+                                getBooks(null, option.listing, emptyList())
+                            }
+                            is FilterOption.FromSort -> {
+                                val updatedSortFilter = Filter.Sort(
+                                    option.sortFilter.name,
+                                    option.sortFilter.options,
+                                    Filter.Sort.Selection(option.index, false)
+                                )
+                                getBooks(null, null, listOf(updatedSortFilter))
+                            }
                         }
-                    )
-                }
-                // Empty state (no books, not loading, no error)
-                !state.hasContent && !state.isLoading -> {
-                    ExploreScreenError(
-                        error = localize(Res.string.no_results_found),
-                        source = source,
-                        onRefresh = { getBooks(null, null, emptyList()) },
-                        onWebView = { src -> 
-                            (src as? HttpSource)?.let { onAppbarWebView(it.baseUrl) }
-                        }
-                    )
-                }
-                // Content state
-                else -> {
-                    ModernLayoutComposable(
-                        books = booksWithKeys,
-                        layout = state.layout,
-                        scrollState = scrollState,
-                        gridState = gridState,
-                        onClick = stableOnBook,
-                        isLoading = state.isLoading,
-                        showInLibraryBadge = true,
-                        onLongClick = { book -> stableOnLongClick(book.toBook()) },
-                        headers = headers,
-                        keys = stableKeyFunction,
-                        columns = columns
-                    )
+                    }
+                )
+            }
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                when {
+                    // Initial loading state
+                    state.isInitialLoading -> {
+                        BookShimmerLoading(columns = columns)
+                    }
+                    // Error with no content
+                    state.isErrorWithNoContent -> {
+                        ExploreScreenError(
+                            error = state.error?.asString(localizeHelper) ?: localize(Res.string.no_results_found),
+                            source = source,
+                            onRefresh = { getBooks(null, null, emptyList()) },
+                            onWebView = { src -> 
+                                (src as? HttpSource)?.let { onAppbarWebView(it.baseUrl) }
+                            }
+                        )
+                    }
+                    // Empty state (no books, not loading, no error)
+                    !state.hasContent && !state.isLoading -> {
+                        ExploreScreenError(
+                            error = localize(Res.string.no_results_found),
+                            source = source,
+                            onRefresh = { getBooks(null, null, emptyList()) },
+                            onWebView = { src -> 
+                                (src as? HttpSource)?.let { onAppbarWebView(it.baseUrl) }
+                            }
+                        )
+                    }
+                    // Content state
+                    else -> {
+                        ModernLayoutComposable(
+                            books = booksWithKeys,
+                            layout = state.layout,
+                            scrollState = scrollState,
+                            gridState = gridState,
+                            onClick = stableOnBook,
+                            isLoading = state.isLoading,
+                            showInLibraryBadge = true,
+                            onLongClick = { book -> stableOnLongClick(book.toBook()) },
+                            headers = headers,
+                            keys = stableKeyFunction,
+                            columns = columns
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+/**
+ * Sealed class representing unified filter options from both Listing and Filter.Sort
+ */
+sealed class FilterOption {
+    abstract val displayName: String
+    
+    data class FromListing(val listing: Listing) : FilterOption() {
+        override val displayName: String = listing.name
+    }
+    
+    data class FromSort(
+        val index: Int,
+        val optionName: String,
+        val sortFilter: Filter.Sort
+    ) : FilterOption() {
+        override val displayName: String = optionName
+    }
+}
+
+/**
+ * Unified horizontal scrollable row of filter chips that combines Listing and Filter.Sort options
+ */
+@Composable
+fun UnifiedFilterChips(
+    options: List<FilterOption>,
+    selectedOption: FilterOption?,
+    onOptionSelected: (FilterOption) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scrollState = rememberScrollState()
+    
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(scrollState)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        options.forEach { option ->
+            val isSelected = when {
+                selectedOption == null -> false
+                option is FilterOption.FromListing && selectedOption is FilterOption.FromListing ->
+                    option.listing.name == selectedOption.listing.name
+                option is FilterOption.FromSort && selectedOption is FilterOption.FromSort ->
+                    option.index == selectedOption.index && option.optionName == selectedOption.optionName
+                else -> false
+            }
+            
+            FilterChipItem(
+                text = option.displayName,
+                isSelected = isSelected,
+                onClick = { onOptionSelected(option) }
+            )
+        }
+    }
+}
+
+/**
+ * Reusable filter chip item with animated colors
+ */
+@Composable
+private fun FilterChipItem(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val containerColor by animateColorAsState(
+        targetValue = if (isSelected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "ChipContainerColor"
+    )
+    
+    val contentColor by animateColorAsState(
+        targetValue = if (isSelected) {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "ChipContentColor"
+    )
+    
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = containerColor,
+        contentColor = contentColor,
+        tonalElevation = if (isSelected) 2.dp else 0.dp
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.labelLarge
+        )
     }
 }
 

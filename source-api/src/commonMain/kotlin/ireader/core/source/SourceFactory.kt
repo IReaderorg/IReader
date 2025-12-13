@@ -94,6 +94,11 @@ abstract class SourceFactory(
     open val exploreFetchers: List<BaseExploreFetcher> = listOf()
 
     class LatestListing() : Listing(name = "Latest")
+    
+    /**
+     * Dynamic listing class that wraps a fetcher key
+     */
+    class FetcherListing(val key: String, name: String) : Listing(name)
 
     /**
      * the custom baseUrl
@@ -101,13 +106,21 @@ abstract class SourceFactory(
     open fun getCustomBaseUrl(): String = baseUrl
 
     /**
-     * the default listing, it must have a default value
-     * if not the [getMangaList] return nothing
+     * Returns listings based on exploreFetchers.
+     * Each non-search fetcher becomes a listing option (Popular, Latest, etc.)
      */
     override fun getListings(): List<Listing> {
-        return listOf(
-            LatestListing()
-        )
+        val nonSearchFetchers = exploreFetchers.filter { it.type != Type.Search }
+        return if (nonSearchFetchers.isNotEmpty()) {
+            nonSearchFetchers.map { fetcher ->
+                FetcherListing(
+                    key = fetcher.key,
+                    name = fetcher.key.replaceFirstChar { it.uppercase() }
+                )
+            }
+        } else {
+            listOf(LatestListing())
+        }
     }
 
     /**
@@ -300,8 +313,14 @@ abstract class SourceFactory(
      * @return MangasPageInfo containing the manga list and pagination info
      */
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        val fetcher = exploreFetchers.firstOrNull { it.type != Type.Search }
-            ?: return emptyMangaPage()
+        val nonSearchFetchers = exploreFetchers.filter { it.type != Type.Search }
+        
+        // Find the fetcher matching the listing
+        val fetcher = when (sort) {
+            is FetcherListing -> nonSearchFetchers.find { it.key == sort.key }
+            else -> nonSearchFetchers.firstOrNull()
+        } ?: return emptyMangaPage()
+        
         return getLists(fetcher, page, "", emptyList())
     }
 

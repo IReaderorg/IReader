@@ -113,10 +113,41 @@ abstract class HttpSource(private val dependencies: ireader.core.source.Dependen
     }
 }
 
+/**
+ * Describes the capabilities of a source.
+ * Sources can declare which features they support for better UI/UX.
+ */
 data class SourceCapabilities(
+    // Basic capabilities
     val supportsLatest: Boolean = true,
     val supportsSearch: Boolean = true,
     val supportsFilters: Boolean = true,
     val supportsDeepLinks: Boolean = false,
-    val supportsCommands: Boolean = false
+    val supportsCommands: Boolean = false,
+    
+    // Command category support
+    val supportsChapterCommands: Boolean = false,
+    val supportsContentCommands: Boolean = false,
+    val supportsAICommands: Boolean = false,
+    val supportsAuthCommands: Boolean = false,
+    val supportsBatchCommands: Boolean = false,
+    val supportsTransformCommands: Boolean = false,
+    val supportsCacheCommands: Boolean = false,
+    val supportsSocialCommands: Boolean = false,
+    val supportsMigrationCommands: Boolean = false,
+    val supportsExploreCommands: Boolean = false,
+    
+    // Content type support
+    val supportsImages: Boolean = false,
+    val supportsVideo: Boolean = false,
+    val supportsAudio: Boolean = false,
+    
+    // Premium/Auth features
+    val requiresLogin: Boolean = false,
+    val hasPremiumContent: Boolean = false,
+    
+    // Quality options
+    val hasMultipleServers: Boolean = false,
+    val hasQualityOptions: Boolean = false,
+    val hasLanguageVariants: Boolean = false
 )

@@ -7,7 +7,9 @@ import ireader.core.source.model.MangasPageInfo
 import ireader.domain.models.entities.CatalogLocal
 import ireader.i18n.EmptyQuery
 import ireader.i18n.SourceNotFoundException
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 
@@ -25,6 +27,9 @@ class GetRemoteBooksUseCase() {
         if (source !is ireader.core.source.CatalogSource) throw SourceNotFoundException()
         withContext(ioDispatcher) {
             try {
+                // Check for cancellation before starting
+                currentCoroutineContext().ensureActive()
+                
                 var item: MangasPageInfo = MangasPageInfo(emptyList(), false)
                 if (query != null) {
                     if (query != null && query.isNotBlank()) {
@@ -43,7 +48,14 @@ class GetRemoteBooksUseCase() {
                 } else {
                     item = source.getMangaList(sort = listing, page)
                 }
+                
+                // Check for cancellation after fetch
+                currentCoroutineContext().ensureActive()
+                
                 onSuccess(item.copy(mangas = item.mangas.filter { it.title.isNotBlank() }))
+            } catch (e: CancellationException) {
+                // Re-throw cancellation exceptions - don't treat them as errors
+                throw e
             } catch (e: Error) {
                 onError(e)
             } catch (e: Throwable) {

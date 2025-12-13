@@ -82,3 +82,72 @@ fun TextField(
         }
     }
 }
+
+/**
+ * Generic TextField for any Command<String>
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextField(
+    command: ireader.core.source.model.Command<String>,
+    onUpdate: (String) -> Unit,
+    hint: String = "",
+) {
+    var state by remember {
+        mutableStateOf(command.value)
+    }
+    if (command.value.isBlank()) {
+        state = ""
+    }
+    Box(
+        modifier = Modifier,
+        contentAlignment = Alignment.CenterStart
+    ) {
+        OutlinedTextField(
+            value = state, 
+            onValueChange = {
+                onUpdate(it)
+                state = it
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = { MidSizeTextComposable(text = command.name) },
+            placeholder = if (hint.isNotBlank()) {
+                { MidSizeTextComposable(text = hint, color = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f)) }
+            } else null
+        )
+    }
+}
+
+/**
+ * TextField for Command.Text base class
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextField(
+    command: ireader.core.source.model.Command.Text,
+    onUpdate: (String) -> Unit,
+) {
+    var state by remember {
+        mutableStateOf(command.value)
+    }
+    if (command.value.isBlank()) {
+        state = ""
+    }
+    Box(
+        modifier = Modifier,
+        contentAlignment = Alignment.CenterStart
+    ) {
+        OutlinedTextField(
+            value = state, 
+            onValueChange = {
+                onUpdate(it)
+                state = it
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = { MidSizeTextComposable(text = command.name) },
+            placeholder = if (command.hint.isNotBlank()) {
+                { MidSizeTextComposable(text = command.hint, color = MaterialTheme.colorScheme.onBackground.copy(alpha = .4f)) }
+            } else null
+        )
+    }
+}

@@ -170,9 +170,9 @@ data class ExploreScreenSpec(
                         source = source,
                         getBooks = { searchQuery, listing, filters ->
                             vm.searchQuery = searchQuery
-                            vm.stateListing = listing
+                            vm.stateListing = listing ?: vm.stateListing
                             vm.stateFilters = filters
-                            vm.loadItems()
+                            vm.loadItems(reset = true)
                         },
                         loadItems = { reset -> vm.loadItems(reset) },
                         onBook = { book ->
@@ -216,6 +216,9 @@ data class ExploreScreenSpec(
                         },
                         getColumnsForOrientation = { isLandscape ->
                             vm.getColumnsForOrientation(isLandscape, this)
+                        },
+                        onListingSelected = { listing ->
+                            vm.stateListing = listing
                         }
                     )
                 } else {

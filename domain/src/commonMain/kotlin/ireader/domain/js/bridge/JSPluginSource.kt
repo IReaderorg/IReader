@@ -8,6 +8,9 @@ import ireader.core.source.model.*
 import ireader.domain.js.models.PluginMetadata
 import ireader.domain.js.util.JSFilterConverter
 import ireader.domain.utils.extensions.currentTimeToLong
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 /**
  * Wrapper that adapts a Zipline LNReaderPlugin to IReader's HttpSource interface.
@@ -98,6 +101,9 @@ class JSPluginSource(
         Log.info("JSPluginSource: [$name] getMangaList(sort) called - sort=$sort, page=$page")
         
         return try {
+            // Check for cancellation before starting
+            currentCoroutineContext().ensureActive()
+            
             // Map IReader's Listing to LNReader plugin methods
             val novels = when (sort) {
                 is PopularListing -> {
@@ -115,6 +121,9 @@ class JSPluginSource(
                 }
             }
             
+            // Check for cancellation after fetch
+            currentCoroutineContext().ensureActive()
+            
             Log.info("JSPluginSource: Got ${novels.size} novels from plugin")
             if (novels.isEmpty()) {
                 Log.warn("JSPluginSource: Plugin returned empty list!")
@@ -126,6 +135,9 @@ class JSPluginSource(
                 mangas = novels.map { it.toMangaInfo() },
                 hasNextPage = novels.isNotEmpty()
             )
+        } catch (e: CancellationException) {
+            // Re-throw cancellation exceptions - don't treat them as errors
+            throw e
         } catch (e: Exception) {
             Log.error("JSPluginSource: Error in getMangaList(sort): ${e.message}", e)
             e.printStackTrace()
@@ -135,6 +147,9 @@ class JSPluginSource(
     
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
         return try {
+            // Check for cancellation before starting
+            currentCoroutineContext().ensureActive()
+            
             // Check if there's a search query in filters
             val query = filters.filterIsInstance<Filter.Title>().firstOrNull()?.value ?: ""
             
@@ -149,6 +164,9 @@ class JSPluginSource(
                 plugin.popularNovels(page)
             }
             
+            // Check for cancellation after fetch
+            currentCoroutineContext().ensureActive()
+            
             Log.info("JSPluginSource: Got ${novels.size} novels from plugin")
             if (novels.isEmpty()) {
                 Log.warn("JSPluginSource: Plugin returned empty list!")
@@ -160,6 +178,9 @@ class JSPluginSource(
                 mangas = novels.map { it.toMangaInfo() },
                 hasNextPage = novels.isNotEmpty()
             )
+        } catch (e: CancellationException) {
+            // Re-throw cancellation exceptions - don't treat them as errors
+            throw e
         } catch (e: Exception) {
             Log.error("JSPluginSource: Error in getMangaList(filters): ${e.message}", e)
             e.printStackTrace()

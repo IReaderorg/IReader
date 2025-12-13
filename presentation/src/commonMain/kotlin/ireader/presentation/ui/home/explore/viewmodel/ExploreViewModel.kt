@@ -18,10 +18,14 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.the_source_is_not_found
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -193,6 +197,9 @@ class ExploreViewModel(
                     page = currentState.page
                 )
                 
+                // Check if job was cancelled during fetch
+                if (!isActive) return@launch
+                
                 result.fold(
                     onSuccess = { pageInfo ->
                         processSuccessResult(pageInfo)
@@ -201,10 +208,16 @@ class ExploreViewModel(
                         processErrorResult(error)
                     }
                 )
+            } catch (e: CancellationException) {
+                // Silently ignore cancellation - this is expected when switching listings
+                return@launch
             } catch (e: Exception) {
                 processErrorResult(e)
             } finally {
-                _state.update { it.copy(isLoading = false) }
+                // Only update loading state if job wasn't cancelled
+                if (isActive) {
+                    _state.update { it.copy(isLoading = false) }
+                }
             }
         }
     }
@@ -220,6 +233,9 @@ class ExploreViewModel(
         page: Int
     ): Result<MangasPageInfo> = withContext(ioDispatcher) {
         try {
+            // Check for cancellation before starting
+            currentCoroutineContext().ensureActive()
+            
             var result = MangasPageInfo(emptyList(), false)
             
             exploreUseCases.remote.getRemoteBooks(
@@ -228,11 +244,23 @@ class ExploreViewModel(
                 filters = filters,
                 catalog = catalog,
                 page = page,
-                onError = { throw it },
+                onError = { error ->
+                    // Don't throw cancellation exceptions as errors
+                    if (error is CancellationException) {
+                        throw error
+                    }
+                    throw error
+                },
                 onSuccess = { res -> result = res }
             )
             
+            // Check for cancellation after fetch
+            currentCoroutineContext().ensureActive()
+            
             Result.success(result)
+        } catch (e: CancellationException) {
+            // Re-throw cancellation to be handled by the caller
+            throw e
         } catch (e: Throwable) {
             Result.failure(e)
         }
@@ -279,7 +307,7 @@ class ExploreViewModel(
      */
     private fun processErrorResult(error: Throwable) {
         // Silently ignore cancellation exceptions - these are expected during navigation
-        if (error is kotlinx.coroutines.CancellationException) {
+        if (error is CancellationException) {
             return
         }
         

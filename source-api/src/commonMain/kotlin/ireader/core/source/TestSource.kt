@@ -79,7 +79,8 @@ class TestSource : ireader.core.source.CatalogSource {
 
     override fun getCommands(): CommandList {
         return listOf(
-            Command.Chapter.Note("NOTE:Only the first value would be used"),
+            // Chapter commands
+            Command.Chapter.Note("NOTE: Only the first value would be used"),
             Command.Chapter.Text("Title"),
             Command.Chapter.Select(
                 "Options",
@@ -88,6 +89,33 @@ class TestSource : ireader.core.source.CatalogSource {
                     "Last 10 Chapter"
                 )
             ),
+            Command.Chapter.ReverseOrder("Reverse Order"),
+            Command.Chapter.ChapterType(),
+            Command.Chapter.DateRange(),
+            
+            // Content commands
+            Command.Content.ImageQuality(),
+            Command.Content.TextFormat(),
+            Command.Content.LanguageVariant(),
+            
+            // AI commands
+            Command.AI.ChapterSummary(),
+            Command.AI.TrackCharacters(),
+            Command.AI.ReadingTimeEstimate(),
+            Command.AI.ContentWarnings(),
+            
+            // Transform commands
+            Command.Transform.TTSOptimize(),
+            Command.Transform.ContentFilter(),
+            Command.Transform.ReadingMode(),
+            
+            // Cache commands
+            Command.Cache.PrefetchDepth(),
+            Command.Cache.CacheImages(),
+            
+            // Social commands
+            Command.Social.ShowAnnotations(),
+            Command.Social.ChapterRating(),
         )
     }
     private class GenreList(genres: List<Filter.Genre>) : Filter.Group("Genres", genres)
