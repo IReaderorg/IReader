@@ -40,6 +40,8 @@ class StatisticsViewModel(
     init {
         refreshStatistics()
         loadUserBadges()
+        // Auto-sync with remote on screen open to ensure data consistency
+        syncWithRemote()
     }
 
     private fun refreshStatistics() {

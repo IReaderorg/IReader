@@ -279,13 +279,53 @@ class TTSController(
             return
         }
         
-        _state.update { it.copy(playbackState = PlaybackState.LOADING) }
+        val paragraphIndex = currentState.currentParagraphIndex
+        
+        // Mark this paragraph as loading
+        _state.update { 
+            it.copy(
+                playbackState = PlaybackState.LOADING,
+                loadingParagraphs = it.loadingParagraphs + paragraphIndex
+            ) 
+        }
         
         // Use displayContent which respects showTranslation setting
-        val text = currentState.displayContent.getOrNull(currentState.currentParagraphIndex)
+        val text = currentState.displayContent.getOrNull(paragraphIndex)
         if (text != null) {
-            val utteranceId = "p_${currentState.currentParagraphIndex}"
+            val utteranceId = "p_${paragraphIndex}"
+            
+            // Pre-cache next paragraphs in background
+            precacheUpcomingParagraphs(paragraphIndex)
+            
             engine?.speak(text, utteranceId)
+        }
+    }
+    
+    /**
+     * Pre-cache upcoming paragraphs for smoother playback
+     */
+    private fun precacheUpcomingParagraphs(currentIndex: Int) {
+        val currentState = _state.value
+        val content = currentState.displayContent
+        val prefetchCount = 3
+        
+        val itemsToPrecache = mutableListOf<Pair<String, String>>()
+        for (i in 1..prefetchCount) {
+            val nextIndex = currentIndex + i
+            if (nextIndex >= content.size) break
+            
+            // Skip if already cached
+            if (currentState.cachedParagraphs.contains(nextIndex)) continue
+            
+            val text = content.getOrNull(nextIndex) ?: continue
+            if (text.isBlank()) continue
+            
+            itemsToPrecache.add("p_$nextIndex" to text)
+        }
+        
+        if (itemsToPrecache.isNotEmpty()) {
+            Log.warn { "$TAG: Precaching ${itemsToPrecache.size} upcoming paragraphs" }
+            engine?.precacheNext(itemsToPrecache)
         }
     }
     
@@ -318,6 +358,16 @@ class TTSController(
         _events.emit(TTSEvent.ParagraphCompleted)
         
         val currentState = _state.value
+        val completedIndex = currentState.currentParagraphIndex
+        
+        // Mark paragraph as cached (it was just played, so it's now in cache)
+        // and remove from loading set
+        _state.update { 
+            it.copy(
+                cachedParagraphs = it.cachedParagraphs + completedIndex,
+                loadingParagraphs = it.loadingParagraphs - completedIndex
+            )
+        }
         
         // Handle chunk mode completion
         if (currentState.chunkModeEnabled && mergeResult != null) {
@@ -538,10 +588,15 @@ class TTSController(
     private suspend fun loadChapter(bookId: Long, chapterId: Long, startParagraph: Int) {
         Log.warn { "$TAG: loadChapter(bookId=$bookId, chapterId=$chapterId, startParagraph=$startParagraph)" }
         
-        // Check if this chapter is already loaded with content - skip reload to preserve chunk mode
+        // Check if this EXACT chapter is already loaded with content - skip reload to preserve chunk mode
+        // IMPORTANT: Must check BOTH bookId AND chapterId to avoid showing stale data from different book
         val currentState = _state.value
-        if (currentState.chapter?.id == chapterId && currentState.paragraphs.isNotEmpty()) {
-            Log.warn { "$TAG: loadChapter - chapter already loaded, skipping reload" }
+        val sameBook = currentState.book?.id == bookId
+        val sameChapter = currentState.chapter?.id == chapterId
+        val hasContent = currentState.paragraphs.isNotEmpty()
+        
+        if (sameBook && sameChapter && hasContent) {
+            Log.warn { "$TAG: loadChapter - same book/chapter already loaded, skipping reload" }
             // Just ensure chunk mode is applied if pending
             val pendingWordCount = pendingChunkWordCount
             if (pendingWordCount != null && pendingWordCount > 0 && !currentState.chunkModeEnabled) {
@@ -549,6 +604,11 @@ class TTSController(
                 enableChunkMode(pendingWordCount)
             }
             return
+        }
+        
+        // Different book or chapter - must reload
+        if (!sameBook || !sameChapter) {
+            Log.warn { "$TAG: loadChapter - different book/chapter, clearing old state (old: book=${currentState.book?.id}, chapter=${currentState.chapter?.id})" }
         }
         
         // Stop current playback and clear engine state
@@ -604,10 +664,22 @@ class TTSController(
                 Log.warn { "$TAG: Applying pending chunk mode with $pendingWordCount words" }
                 enableChunkMode(pendingWordCount)
             }
+            
+            // Update cached paragraphs state for UI
+            updateCachedParagraphsState(content.paragraphs)
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to load chapter: ${e.message}" }
             handleError(TTSError.ContentLoadFailed(e.message ?: "Failed to load chapter"))
         }
+    }
+    
+    /**
+     * Update the cached paragraphs state by checking which paragraphs are in the cache
+     */
+    private suspend fun updateCachedParagraphsState(paragraphs: List<String>) {
+        val cachedIndices = engine?.getCachedIndices(paragraphs) ?: emptySet()
+        Log.warn { "$TAG: updateCachedParagraphsState - ${cachedIndices.size} paragraphs cached" }
+        _state.update { it.copy(cachedParagraphs = cachedIndices) }
     }
     
     private fun setContent(paragraphs: List<String>) {

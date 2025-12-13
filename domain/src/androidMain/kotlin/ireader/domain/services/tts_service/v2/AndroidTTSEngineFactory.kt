@@ -1,11 +1,17 @@
 package ireader.domain.services.tts_service.v2
 
 import android.content.Context
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 import ireader.core.log.Log
-import ireader.domain.services.tts_service.*
+import ireader.domain.services.tts_service.AndroidGradioAudioPlayer
+import ireader.domain.services.tts_service.GenericGradioTTSEngine
+import ireader.domain.services.tts_service.GradioTTSConfig
+import ireader.domain.services.tts_service.NativeTTSPlayer
+import ireader.domain.services.tts_service.TTSCallback
+import ireader.domain.services.tts_service.TTSEngineCallback
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.koin.core.component.KoinComponent
@@ -343,9 +349,54 @@ class AndroidGradioTTSEngineV2(
     
     /**
      * Pre-cache upcoming chunks/paragraphs for smoother playback
+     * Uses disk cache for persistence across sessions
      */
     override fun precacheNext(items: List<Pair<String, String>>) {
         Log.warn { "$TAG: precacheNext(${items.size} items)" }
-        engine.precacheParagraphs(items)
+        
+        // If we have disk cache, use it for prefetching
+        if (audioCache != null) {
+            kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                for ((utteranceId, text) in items) {
+                    // Skip if already cached
+                    if (audioCache.isCached(text, config.id)) {
+                        Log.warn { "$TAG: precacheNext - $utteranceId already cached" }
+                        continue
+                    }
+                    
+                    try {
+                        Log.warn { "$TAG: precacheNext - fetching $utteranceId" }
+                        val audioData = engine.generateAudioBytes(text)
+                        if (audioData != null) {
+                            audioCache.put(text, config.id, audioData)
+                            Log.warn { "$TAG: precacheNext - cached $utteranceId (${audioData.size} bytes)" }
+                        }
+                    } catch (e: Exception) {
+                        Log.warn { "$TAG: precacheNext - failed $utteranceId: ${e.message}" }
+                    }
+                }
+            }
+        } else {
+            // Fallback to in-memory cache
+            engine.precacheParagraphs(items)
+        }
+    }
+    
+    /**
+     * Check if audio for the given text is cached
+     */
+    override suspend fun isTextCached(text: String): Boolean {
+        return audioCache?.isCached(text, config.id) ?: false
+    }
+    
+    /**
+     * Get the set of indices from a list of texts that are cached
+     */
+    override suspend fun getCachedIndices(texts: List<String>): Set<Int> {
+        if (audioCache == null) return emptySet()
+        
+        return texts.mapIndexedNotNull { index, text ->
+            if (audioCache.isCached(text, config.id)) index else null
+        }.toSet()
     }
 }

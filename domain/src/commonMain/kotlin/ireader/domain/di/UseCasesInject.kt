@@ -364,7 +364,7 @@ val UseCasesInject = module {
     factory { ireader.domain.usecases.nft.GetNFTVerificationStatusUseCase(get()) }
     factory { ireader.domain.usecases.nft.GetNFTMarketplaceUrlUseCase() }
     
-    // Reading Buddy use cases
+    // Reading Buddy use cases - now uses unified database statistics (no preferences)
     factory { ireader.domain.usecases.quote.ReadingBuddyUseCases(get()) }
     factory { ireader.domain.usecases.quote.QuoteUseCases(get()) }
 }

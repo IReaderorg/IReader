@@ -324,12 +324,16 @@ class TTSV2ScreenSpec(
                 Log.error { "TTSV2ScreenSpec: Failed to load chapters: ${e.message}" }
             }
             
-            // Check if controller already has this chapter loaded (e.g., coming from notification)
+            // Check if controller already has this EXACT book/chapter loaded (e.g., coming from notification)
+            // IMPORTANT: Must check BOTH bookId AND chapterId to avoid showing stale data from different book
             val currentState = controller.state.value
-            val alreadyLoaded = currentState.chapter?.id == chapterId && currentState.paragraphs.isNotEmpty()
+            val sameBook = currentState.book?.id == bookId
+            val sameChapter = currentState.chapter?.id == chapterId
+            val hasContent = currentState.paragraphs.isNotEmpty()
+            val alreadyLoaded = sameBook && sameChapter && hasContent
             
             if (alreadyLoaded) {
-                Log.warn { "TTSV2ScreenSpec: Chapter already loaded in controller, skipping reload" }
+                Log.warn { "TTSV2ScreenSpec: Same book/chapter already loaded in controller, skipping reload" }
                 // Just load translations if needed
                 if (readTranslatedText && currentState.translatedParagraphs.isNullOrEmpty()) {
                     try {

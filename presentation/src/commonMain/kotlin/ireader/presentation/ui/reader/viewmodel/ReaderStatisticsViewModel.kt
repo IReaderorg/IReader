@@ -8,6 +8,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.ReadingTimerManager
 import ireader.domain.usecases.statistics.TrackReadingProgressUseCase
+import ireader.domain.usecases.quote.ReadingBuddyUseCases
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.launch
@@ -22,10 +23,12 @@ import ireader.domain.utils.extensions.currentTimeToLong
  * - Reading break reminders
  * - Statistics collection
  * - Reading speed calculation
+ * - Reading Buddy sync (chapters/books completed)
  */
 class ReaderStatisticsViewModel(
     private val trackReadingProgressUseCase: TrackReadingProgressUseCase,
     private val readerPreferences: ReaderPreferences,
+    private val readingBuddyUseCases: ReadingBuddyUseCases? = null,
 ) : BaseViewModel() {
     
     // Reading session tracking
@@ -104,6 +107,11 @@ class ReaderStatisticsViewModel(
             sessionStartTime = currentTimeToLong()
         }
         
+        // Sync with Reading Buddy - notify reading started
+        scope.launch {
+            readingBuddyUseCases?.onReadingStarted()
+        }
+        
         Log.debug("Chapter opened: ${chapter.name}, isLastChapter: $isLast")
     }
     
@@ -147,12 +155,18 @@ class ReaderStatisticsViewModel(
                     trackReadingProgressUseCase.onChapterProgressUpdate(currentProgress, wordsRead)
                     Log.debug("Chapter progress tracked: ${(currentProgress * 100).toInt()}%, $wordsRead words")
                     
+                    // Sync with Reading Buddy - track chapter completion
+                    readingBuddyUseCases?.onChapterCompleted()
+                    
                     // Track book completion if this is the last chapter and user read 80%+
                     val bookId = currentBookId
                     if (isLastChapter && bookId != null && !completedBooks.contains(bookId)) {
                         trackReadingProgressUseCase.trackBookCompletion()
                         completedBooks.add(bookId)
                         Log.debug("Book completion tracked for bookId: $bookId")
+                        
+                        // Sync with Reading Buddy - track book completion
+                        readingBuddyUseCases?.onBookCompleted()
                     }
                 }
             } catch (e: Exception) {

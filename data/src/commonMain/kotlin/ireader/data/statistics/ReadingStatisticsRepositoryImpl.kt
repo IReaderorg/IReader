@@ -45,7 +45,13 @@ class ReadingStatisticsRepositoryImpl(
                 favoriteGenres = getFavoriteGenres(),
                 readingStreak = dbStats.reading_streak.toInt(),
                 booksCompleted = dbStats.books_completed.toInt(),
-                currentlyReading = getCurrentlyReading()
+                currentlyReading = getCurrentlyReading(),
+                longestStreak = dbStats.longest_streak.toInt(),
+                buddyLevel = dbStats.buddy_level.toInt(),
+                buddyExperience = dbStats.buddy_experience.toInt(),
+                unlockedAchievements = dbStats.unlocked_achievements,
+                lastInteractionTime = dbStats.last_interaction_time,
+                lastReadDate = dbStats.last_read_date ?: 0L
             )
         }
     }
@@ -64,7 +70,13 @@ class ReadingStatisticsRepositoryImpl(
             favoriteGenres = getFavoriteGenres(),
             readingStreak = dbStats.reading_streak.toInt(),
             booksCompleted = dbStats.books_completed.toInt(),
-            currentlyReading = getCurrentlyReading()
+            currentlyReading = getCurrentlyReading(),
+            longestStreak = dbStats.longest_streak.toInt(),
+            buddyLevel = dbStats.buddy_level.toInt(),
+            buddyExperience = dbStats.buddy_experience.toInt(),
+            unlockedAchievements = dbStats.unlocked_achievements,
+            lastInteractionTime = dbStats.last_interaction_time,
+            lastReadDate = dbStats.last_read_date ?: 0L
         )
     }
 
@@ -84,6 +96,15 @@ class ReadingStatisticsRepositoryImpl(
             readingStatisticsQueries.getStatistics() 
         }
         return dbStats.reading_streak.toInt()
+    }
+
+    override suspend fun getLongestStreak(): Int {
+        ensureInitialized()
+        
+        val dbStats = handler.awaitOne { 
+            readingStatisticsQueries.getStatistics() 
+        }
+        return dbStats.longest_streak.toInt()
     }
 
     override suspend fun incrementChaptersRead() {
@@ -109,6 +130,17 @@ class ReadingStatisticsRepositoryImpl(
                 lastReadDate = lastReadDate
             )
         }
+    }
+
+    override suspend fun updateStreakWithLongest(streak: Int, lastReadDate: Long) {
+        handler.await {
+            readingStatisticsQueries.updateStreakWithLongest(
+                streak = streak.toLong(),
+                lastReadDate = lastReadDate
+            )
+        }
+        // Trigger sync in background
+        triggerSync()
     }
 
     override suspend fun addWordsRead(words: Int) {
@@ -225,5 +257,54 @@ class ReadingStatisticsRepositoryImpl(
      */
     suspend fun getUserBadges(): Result<List<UserBadge>> {
         return syncService?.syncUserBadges() ?: Result.failure(Exception("Sync service not available"))
+    }
+
+    // Reading Buddy methods - unified with statistics
+    
+    override suspend fun getBuddyLevel(): Int {
+        ensureInitialized()
+        val dbStats = handler.awaitOne { readingStatisticsQueries.getStatistics() }
+        return dbStats.buddy_level.toInt()
+    }
+
+    override suspend fun getBuddyExperience(): Int {
+        ensureInitialized()
+        val dbStats = handler.awaitOne { readingStatisticsQueries.getStatistics() }
+        return dbStats.buddy_experience.toInt()
+    }
+
+    override suspend fun updateBuddyProgress(level: Int, experience: Int) {
+        handler.await {
+            readingStatisticsQueries.updateBuddyProgress(
+                level = level.toLong(),
+                experience = experience.toLong()
+            )
+        }
+        triggerSync()
+    }
+
+    override suspend fun getUnlockedAchievements(): String {
+        ensureInitialized()
+        val dbStats = handler.awaitOne { readingStatisticsQueries.getStatistics() }
+        return dbStats.unlocked_achievements
+    }
+
+    override suspend fun updateUnlockedAchievements(achievements: String) {
+        handler.await {
+            readingStatisticsQueries.updateUnlockedAchievements(achievements)
+        }
+        triggerSync()
+    }
+
+    override suspend fun getLastInteractionTime(): Long {
+        ensureInitialized()
+        val dbStats = handler.awaitOne { readingStatisticsQueries.getStatistics() }
+        return dbStats.last_interaction_time
+    }
+
+    override suspend fun updateLastInteractionTime(time: Long) {
+        handler.await {
+            readingStatisticsQueries.updateLastInteractionTime(time)
+        }
     }
 }

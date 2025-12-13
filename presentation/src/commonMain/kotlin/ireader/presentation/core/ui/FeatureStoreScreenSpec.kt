@@ -5,7 +5,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.presentation.core.LocalNavigator
-import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.featurestore.FeatureStoreScreen
 import ireader.presentation.ui.featurestore.FeatureStoreViewModel
@@ -18,7 +17,7 @@ class FeatureStoreScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
-        val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
+        val navController = LocalNavigator.current
         val viewModel: FeatureStoreViewModel = getIViewModel()
         
         IScaffold { padding ->
@@ -26,11 +25,11 @@ class FeatureStoreScreenSpec {
                 viewModel = viewModel,
                 modifier = Modifier.padding(padding),
                 onNavigateBack = {
-                    navController.popBackStack()
+                    navController?.popBackStack()
                 },
                 onPluginClick = { pluginId ->
-                    // Navigate to plugin details screen
-                    navController.navigate("pluginDetails/$pluginId")
+                    // TODO: Navigate to plugin details screen when implemented
+                    // For now, plugin details are shown inline or via a dialog
                 }
             )
         }

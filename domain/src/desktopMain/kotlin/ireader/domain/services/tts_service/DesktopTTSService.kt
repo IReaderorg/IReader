@@ -988,12 +988,8 @@ class DesktopTTSService : KoinComponent {
         // This is used to detect manual navigation (user tapping next/prev)
         speechJobStartParagraph = currentParagraph
         
-        // Pre-generate upcoming paragraphs for Gradio (speeds up playback)
-        if (currentEngine == TTSEngine.GRADIO) {
-            serviceScope.launch {
-                prefetchGradioAudio(currentParagraph, content)
-            }
-        }
+        // Note: Gradio prefetching is now handled inside readTextWithGradio()
+        // to ensure it starts before audio generation
         
         // Pre-generate upcoming paragraphs for Kokoro (speeds up playback)
         if (currentEngine == TTSEngine.KOKORO && currentParagraph % 3 == 0) {
@@ -1237,13 +1233,16 @@ class DesktopTTSService : KoinComponent {
     }
     
     /**
-     * Read text using the new GradioTTSPlayer system
-     * Supports any Gradio-based TTS space with caching and prefetching
+     * Read text using Gradio TTS with simplified flow:
+     * 1. Start prefetching next paragraphs immediately
+     * 2. Get cached audio or generate new for current
+     * 3. Play and wait for ACTUAL completion (not pause)
+     * 4. Ensure next paragraph is cached before advancing
+     * 5. Advance to next paragraph
      */
     private suspend fun readTextWithGradio(text: String) {
         val adapter = gradioAdapter
         if (adapter == null) {
-            // Try to configure from preferences
             configureGradioFromPreferences()
             if (gradioAdapter == null) {
                 readTextSimulation(text)
@@ -1253,6 +1252,14 @@ class DesktopTTSService : KoinComponent {
         
         val activeAdapter = gradioAdapter ?: return
         val currentParagraph = state.currentReadingParagraph.value
+        
+        // Get content early for prefetching
+        val translatedContent = state.translatedTTSContent.value
+        val content = if (translatedContent != null && translatedContent.isNotEmpty()) {
+            translatedContent
+        } else {
+            state.ttsContent.value
+        } ?: return
         
         try {
             // Check if cancelled or not playing before starting
@@ -1264,53 +1271,143 @@ class DesktopTTSService : KoinComponent {
             val speed = appPrefs.gradioTTSSpeed().get()
             activeAdapter.setSpeed(speed)
             
+            // IMPORTANT: Start prefetching BEFORE we do anything else
+            // This gives the prefetch jobs a head start
+            startPrefetchingNextParagraphs(currentParagraph, content)
+            
             // Try to get cached audio first
             var audioData = getCachedGradioAudio(currentParagraph)
             
             if (audioData != null) {
-                // Remove from cache after use
+                Log.info { "CACHE HIT: Using cached audio for paragraph $currentParagraph" }
                 gradioAudioCache.remove(currentParagraph)
             } else {
-                // Generate audio (the adapter handles API calls)
+                Log.info { "CACHE MISS: Generating audio for paragraph $currentParagraph" }
                 audioData = activeAdapter.generateAudio(text)
             }
             
-            // Check if cancelled or paused after generation
-            if (!kotlinx.coroutines.currentCoroutineContext().isActive || !state.isPlaying.value) return
+            // Check if cancelled after generation
+            if (!kotlinx.coroutines.currentCoroutineContext().isActive) return
             
             if (audioData == null) {
                 Log.error { "Failed to generate audio for paragraph $currentParagraph" }
-                // Only advance if still playing and not cancelled
                 if (state.isPlaying.value && kotlinx.coroutines.currentCoroutineContext().isActive) {
                     advanceToNextParagraph()
                 }
                 return
             }
             
-            // Play and wait for completion
+            // Play and wait for ACTUAL completion
+            Log.info { "Playing paragraph $currentParagraph (${audioData.size} bytes)" }
             val success = activeAdapter.playAndWait(audioData)
             
-            // Check if cancelled, paused, or playback was interrupted after playback
-            // success=false means playback was interrupted (pause/stop)
-            if (!kotlinx.coroutines.currentCoroutineContext().isActive || !state.isPlaying.value || !success) return
+            // If playback was stopped (not paused), don't advance
+            if (!success) {
+                Log.debug { "Playback stopped for paragraph $currentParagraph" }
+                return
+            }
+            
+            // Check if we should continue (not cancelled, still playing)
+            if (!kotlinx.coroutines.currentCoroutineContext().isActive || !state.isPlaying.value) return
             
             // Check sleep time
             checkSleepTime()
             
-            // Move to next paragraph ONLY if still playing and not cancelled
+            // Ensure next paragraph is cached before advancing
+            val nextParagraph = currentParagraph + 1
+            if (nextParagraph < content.size) {
+                val cached = ensureNextParagraphCached(nextParagraph, content)
+                Log.info { "Next paragraph $nextParagraph cached: $cached" }
+            }
+            
+            // Move to next paragraph
             if (state.isPlaying.value && kotlinx.coroutines.currentCoroutineContext().isActive) {
                 advanceToNextParagraph()
             }
         } catch (e: kotlinx.coroutines.CancellationException) {
-            // Coroutine was cancelled, don't advance
             throw e
         } catch (e: Exception) {
             Log.error { "Gradio TTS error: ${e.message}" }
-            // Only advance on error if still playing
             if (state.isPlaying.value && kotlinx.coroutines.currentCoroutineContext().isActive) {
                 advanceToNextParagraph()
             }
         }
+    }
+    
+    /**
+     * Start prefetching next paragraphs in background
+     * This is called at the START of readTextWithGradio to give prefetch a head start
+     */
+    private fun startPrefetchingNextParagraphs(currentParagraph: Int, content: List<String>) {
+        val adapter = gradioAdapter ?: return
+        val prefetchCount = 3
+        
+        Log.info { "Starting prefetch from paragraph ${currentParagraph + 1}, cache size: ${gradioAudioCache.size}, cache bytes: ${getGradioCacheSizeBytes() / 1024}KB" }
+        
+        // Update state with current cache info
+        updateCacheState()
+        
+        for (i in 1..prefetchCount) {
+            val nextParagraph = currentParagraph + i
+            if (nextParagraph >= content.size) continue
+            
+            // Skip if already cached
+            if (gradioAudioCache.containsKey(nextParagraph)) {
+                Log.debug { "Paragraph $nextParagraph already cached, skipping" }
+                continue
+            }
+            
+            // Skip if already being prefetched
+            if (!prefetchingParagraphs.add(nextParagraph)) {
+                Log.debug { "Paragraph $nextParagraph already being prefetched, skipping" }
+                continue
+            }
+            
+            // Update loading state
+            updateCacheState()
+            
+            val text = content.getOrNull(nextParagraph)
+            if (text.isNullOrBlank()) {
+                prefetchingParagraphs.remove(nextParagraph)
+                updateCacheState()
+                continue
+            }
+            
+            // Launch prefetch in background
+            serviceScope.launch {
+                try {
+                    if (!state.isPlaying.value) {
+                        prefetchingParagraphs.remove(nextParagraph)
+                        updateCacheState()
+                        return@launch
+                    }
+                    
+                    Log.info { "PREFETCH START: paragraph $nextParagraph" }
+                    val audioData = adapter.generateAudio(text)
+                    
+                    if (audioData != null) {
+                        addToGradioCache(nextParagraph, audioData)
+                        Log.info { "PREFETCH DONE: paragraph $nextParagraph (${audioData.size} bytes)" }
+                    } else {
+                        Log.warn { "PREFETCH FAILED: paragraph $nextParagraph returned null" }
+                    }
+                } catch (e: Exception) {
+                    Log.warn { "PREFETCH ERROR: paragraph $nextParagraph - ${e.message}" }
+                } finally {
+                    prefetchingParagraphs.remove(nextParagraph)
+                    updateCacheState()
+                }
+            }
+        }
+    }
+    
+    /**
+     * Update the cache state in the TTS state for UI observation
+     */
+    private fun updateCacheState() {
+        state.setCachedParagraphs(gradioAudioCache.keys().toList().toSet())
+        state.setLoadingParagraphs(prefetchingParagraphs.toSet())
+        state.setCacheSizeBytes(getGradioCacheSizeBytes())
     }
     
     private suspend fun advanceToNextParagraph() {
@@ -1357,54 +1454,85 @@ class DesktopTTSService : KoinComponent {
     }
     
     // Cache for pre-generated Gradio audio (thread-safe)
+    // Key: paragraph index, Value: audio data
     private val gradioAudioCache = java.util.concurrent.ConcurrentHashMap<Int, ByteArray>()
     // Track paragraphs currently being prefetched to avoid duplicate requests
     private val prefetchingParagraphs = java.util.concurrent.ConcurrentHashMap.newKeySet<Int>()
+    // Max cache size in bytes (50MB default)
+    private val maxGradioCacheSizeBytes = 50 * 1024 * 1024L
     
     /**
-     * Prefetch audio for the next paragraphs to reduce latency
-     * This runs in the background while the current paragraph is playing
+     * Get current cache size in bytes
      */
-    private suspend fun prefetchGradioAudio(currentParagraph: Int, content: List<String>) {
-        val adapter = gradioAdapter ?: return
-        val prefetchCount = 3 // Prefetch next 3 paragraphs
+    private fun getGradioCacheSizeBytes(): Long {
+        return gradioAudioCache.values.sumOf { it.size.toLong() }
+    }
+    
+    /**
+     * Add audio to cache, evicting newest entries (highest paragraph numbers) if max size exceeded
+     * This keeps older paragraphs cached so user can go back without re-generating
+     */
+    private fun addToGradioCache(paragraph: Int, audioData: ByteArray) {
+        gradioAudioCache[paragraph] = audioData
         
-        for (i in 1..prefetchCount) {
-            val nextParagraph = currentParagraph + i
-            if (nextParagraph >= content.size) break
-            
-            // Skip if already cached or currently being prefetched
-            if (gradioAudioCache.containsKey(nextParagraph)) continue
-            if (!prefetchingParagraphs.add(nextParagraph)) continue // Already being prefetched
-            
-            val text = content[nextParagraph]
-            if (text.isBlank()) {
-                prefetchingParagraphs.remove(nextParagraph)
-                continue
-            }
-            
-            try {
-                // Check if still playing and not cancelled
-                if (!state.isPlaying.value || !kotlinx.coroutines.currentCoroutineContext().isActive) {
-                    prefetchingParagraphs.remove(nextParagraph)
-                    break
+        // Check if we need to evict entries
+        var currentSize = getGradioCacheSizeBytes()
+        if (currentSize > maxGradioCacheSizeBytes) {
+            // Evict newest entries first (highest paragraph numbers) - keep old ones for going back
+            val sortedKeys = gradioAudioCache.keys().toList().sortedDescending()
+            for (key in sortedKeys) {
+                if (key == paragraph) continue // Don't evict the one we just added
+                if (currentSize <= maxGradioCacheSizeBytes * 0.8) break // Keep 80% of max
+                val removed = gradioAudioCache.remove(key)
+                if (removed != null) {
+                    currentSize -= removed.size
+                    Log.debug { "Evicted paragraph $key from cache (${removed.size} bytes)" }
                 }
-                
-                val audioData = adapter.generateAudio(text)
-                
-                if (audioData != null) {
-                    gradioAudioCache[nextParagraph] = audioData
-                }
-            } catch (e: Exception) {
-                // Prefetch failed, ignore
-            } finally {
-                prefetchingParagraphs.remove(nextParagraph)
             }
         }
         
-        // Clean up old cache entries (keep only nearby paragraphs)
-        val keysToRemove = gradioAudioCache.keys().toList().filter { it < currentParagraph - 1 || it > currentParagraph + prefetchCount + 1 }
-        keysToRemove.forEach { gradioAudioCache.remove(it) }
+        // Update state for UI
+        updateCacheState()
+    }
+    
+    /**
+     * Ensure the next paragraph is cached before advancing
+     * Waits for prefetch to complete if necessary
+     */
+    private suspend fun ensureNextParagraphCached(nextParagraph: Int, content: List<String>): Boolean {
+        if (nextParagraph >= content.size) return true
+        
+        val text = content.getOrNull(nextParagraph) ?: return true
+        if (text.isBlank()) return true
+        
+        // Already cached
+        if (gradioAudioCache.containsKey(nextParagraph)) return true
+        
+        // Wait for prefetch to complete (with timeout)
+        var attempts = 0
+        while (attempts < 50) { // 5 seconds max
+            if (gradioAudioCache.containsKey(nextParagraph)) return true
+            if (!prefetchingParagraphs.contains(nextParagraph)) break
+            delay(100)
+            attempts++
+        }
+        
+        // Still not cached - fetch it now
+        if (!gradioAudioCache.containsKey(nextParagraph)) {
+            val adapter = gradioAdapter ?: return false
+            try {
+                Log.info { "Urgently fetching paragraph $nextParagraph" }
+                val audioData = adapter.generateAudio(text)
+                if (audioData != null) {
+                    gradioAudioCache[nextParagraph] = audioData
+                    return true
+                }
+            } catch (e: Exception) {
+                Log.error { "Failed to fetch paragraph $nextParagraph: ${e.message}" }
+            }
+        }
+        
+        return gradioAudioCache.containsKey(nextParagraph)
     }
     
     /**
@@ -1420,6 +1548,48 @@ class DesktopTTSService : KoinComponent {
     fun clearGradioAudioCache() {
         gradioAudioCache.clear()
         prefetchingParagraphs.clear()
+    }
+    
+    /**
+     * Get the number of cached paragraphs
+     */
+    fun getCachedParagraphCount(): Int {
+        return gradioAudioCache.size
+    }
+    
+    /**
+     * Get the set of cached paragraph indices
+     */
+    fun getCachedParagraphIndices(): Set<Int> {
+        return gradioAudioCache.keys().toList().toSet()
+    }
+    
+    /**
+     * Get the set of paragraphs currently being prefetched
+     */
+    fun getPrefetchingParagraphIndices(): Set<Int> {
+        return prefetchingParagraphs.toSet()
+    }
+    
+    /**
+     * Get cache size in bytes
+     */
+    fun getGradioCacheSize(): Long {
+        return getGradioCacheSizeBytes()
+    }
+    
+    /**
+     * Check if a paragraph is cached
+     */
+    fun isParagraphCached(paragraph: Int): Boolean {
+        return gradioAudioCache.containsKey(paragraph)
+    }
+    
+    /**
+     * Check if a paragraph is currently being prefetched
+     */
+    fun isParagraphPrefetching(paragraph: Int): Boolean {
+        return prefetchingParagraphs.contains(paragraph)
     }
 
     private suspend fun loadChapter(chapterId: Long) {

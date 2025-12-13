@@ -30,6 +30,7 @@ class TrackReadingProgressUseCase(
     /**
      * Update reading streak based on last read date
      * Checks if user read on consecutive days and updates streak accordingly
+     * Also automatically tracks the longest streak in the database
      */
     suspend fun updateReadingStreak(currentDateMillis: Long) {
         val lastReadDate = statisticsRepository.getLastReadDate()
@@ -37,7 +38,7 @@ class TrackReadingProgressUseCase(
         
         // If this is the first time reading, set streak to 1
         if (lastReadDate == null || lastReadDate == 0L) {
-            statisticsRepository.updateStreak(1, currentDateMillis)
+            statisticsRepository.updateStreakWithLongest(1, currentDateMillis)
             return
         }
         
@@ -49,7 +50,8 @@ class TrackReadingProgressUseCase(
             else -> 1 // Streak broken (more than 1 day gap), reset to 1
         }
         
-        statisticsRepository.updateStreak(newStreak, currentDateMillis)
+        // Use updateStreakWithLongest to automatically track longest streak
+        statisticsRepository.updateStreakWithLongest(newStreak, currentDateMillis)
     }
 
     /**

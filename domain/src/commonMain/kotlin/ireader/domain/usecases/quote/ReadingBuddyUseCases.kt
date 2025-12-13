@@ -1,59 +1,90 @@
 ﻿package ireader.domain.usecases.quote
 
+import ireader.domain.data.repository.ReadingStatisticsRepository
+import ireader.domain.models.entities.ReadingStatisticsType1
 import ireader.domain.models.quote.*
-import ireader.domain.preferences.prefs.ReadingBuddyPreferences
-import kotlin.math.sqrt
 import ireader.domain.utils.extensions.currentTimeToLong
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /**
- * Use cases for the Reading Buddy feature
+ * Use cases for the Reading Buddy feature.
+ * Now uses the unified ReadingStatisticsRepository (database) as the single source of truth
+ * instead of preferences, ensuring sync across Leaderboard, Statistics, and Reading Buddy screens.
  */
 class ReadingBuddyUseCases(
-    private val preferences: ReadingBuddyPreferences
+    private val statisticsRepository: ReadingStatisticsRepository
 ) {
+    // Cache the current message to prevent flickering when Flow emits
+    private var cachedMood: BuddyMood? = null
+    private var cachedMessage: String? = null
     
     /**
-     * Get current buddy state based on reading activity
+     * Get buddy state as a Flow for reactive updates.
+     * Uses distinctUntilChanged to prevent unnecessary recompositions.
      */
-    fun getBuddyState(): ReadingBuddyState {
-        val lastInteraction = preferences.lastInteractionTime().get()
-        val lastReadDate = preferences.lastReadDate().get()
-        val currentStreak = preferences.currentStreak().get()
-        val level = preferences.buddyLevel().get()
-        val experience = preferences.buddyExperience().get()
-        
+    fun getBuddyStateFlow(): Flow<ReadingBuddyState> {
+        return statisticsRepository.getStatisticsFlow()
+            .map { stats -> createBuddyState(stats) }
+            .distinctUntilChanged()
+    }
+    
+    /**
+     * Get current buddy state based on reading activity from database
+     */
+    suspend fun getBuddyState(): ReadingBuddyState {
+        val stats = statisticsRepository.getStatistics()
+        return createBuddyState(stats)
+    }
+    
+    private fun createBuddyState(stats: ReadingStatisticsType1): ReadingBuddyState {
         val now = currentTimeToLong()
-        val hoursSinceLastRead = (now - lastReadDate) / (1000 * 60 * 60)
+        val hoursSinceLastRead = if (stats.lastReadDate > 0) {
+            (now - stats.lastReadDate) / (1000 * 60 * 60)
+        } else {
+            Long.MAX_VALUE
+        }
         
         val mood = when {
             hoursSinceLastRead > 168 -> BuddyMood.SLEEPING // > 1 week
             hoursSinceLastRead > 72 -> BuddyMood.SLEEPY // > 3 days
             hoursSinceLastRead > 48 -> BuddyMood.SAD // > 2 days
             hoursSinceLastRead > 24 -> BuddyMood.NEUTRAL // > 1 day
-            currentStreak >= 7 -> BuddyMood.PROUD
-            currentStreak >= 3 -> BuddyMood.EXCITED
+            stats.readingStreak >= 7 -> BuddyMood.PROUD
+            stats.readingStreak >= 3 -> BuddyMood.EXCITED
             else -> BuddyMood.HAPPY
+        }
+        
+        // Only generate a new message if mood changed to prevent flickering
+        val message = if (mood == cachedMood && cachedMessage != null) {
+            cachedMessage!!
+        } else {
+            val newMessage = getMessageForMood(mood, stats.readingStreak)
+            cachedMood = mood
+            cachedMessage = newMessage
+            newMessage
         }
         
         return ReadingBuddyState(
             mood = mood,
-            message = getMessageForMood(mood, currentStreak),
+            message = message,
             animation = getAnimationForMood(mood),
-            level = level,
-            experience = experience,
-            totalBooksRead = preferences.totalBooksRead().get(),
-            totalChaptersRead = preferences.totalChaptersRead().get(),
-            currentStreak = currentStreak,
-            longestStreak = preferences.longestStreak().get(),
-            lastInteractionTime = lastInteraction
+            level = stats.buddyLevel,
+            experience = stats.buddyExperience,
+            totalBooksRead = stats.booksCompleted,
+            totalChaptersRead = stats.totalChaptersRead,
+            currentStreak = stats.readingStreak,
+            longestStreak = stats.longestStreak,
+            lastInteractionTime = stats.lastInteractionTime
         )
     }
-    
+
     /**
      * Record that user started reading
      */
     suspend fun onReadingStarted() {
-        preferences.lastInteractionTime().set(currentTimeToLong())
+        statisticsRepository.updateLastInteractionTime(currentTimeToLong())
         updateStreak()
     }
     
@@ -61,8 +92,10 @@ class ReadingBuddyUseCases(
      * Record chapter completion and award XP
      */
     suspend fun onChapterCompleted(): BuddyAchievement? {
-        val chaptersRead = preferences.totalChaptersRead().get() + 1
-        preferences.totalChaptersRead().set(chaptersRead)
+        // Chapter count is already incremented by TrackReadingProgressUseCase
+        // We just need to handle XP and achievements
+        val stats = statisticsRepository.getStatistics()
+        val chaptersRead = stats.totalChaptersRead
         
         // Award XP for chapter
         addExperience(5)
@@ -85,8 +118,10 @@ class ReadingBuddyUseCases(
      * Record book completion and award XP
      */
     suspend fun onBookCompleted(): BuddyAchievement? {
-        val booksRead = preferences.totalBooksRead().get() + 1
-        preferences.totalBooksRead().set(booksRead)
+        // Book count is already incremented by TrackReadingProgressUseCase
+        // We just need to handle XP and achievements
+        val stats = statisticsRepository.getStatistics()
+        val booksRead = stats.booksCompleted
         
         // Award XP for book
         addExperience(25)
@@ -118,14 +153,18 @@ class ReadingBuddyUseCases(
     }
     
     /**
-     * Update reading streak
+     * Update reading streak using the unified database
      */
     private suspend fun updateStreak() {
         val now = currentTimeToLong()
-        val lastRead = preferences.lastReadDate().get()
-        val currentStreak = preferences.currentStreak().get()
+        val lastRead = statisticsRepository.getLastReadDate() ?: 0L
+        val currentStreak = statisticsRepository.getCurrentStreak()
         
-        val daysSinceLastRead = (now - lastRead) / (1000 * 60 * 60 * 24)
+        val daysSinceLastRead = if (lastRead > 0) {
+            (now - lastRead) / (1000 * 60 * 60 * 24)
+        } else {
+            Long.MAX_VALUE
+        }
         
         val newStreak = when {
             daysSinceLastRead <= 1 -> currentStreak + 1
@@ -133,14 +172,8 @@ class ReadingBuddyUseCases(
             else -> 1 // Streak broken, start fresh
         }
         
-        preferences.currentStreak().set(newStreak)
-        preferences.lastReadDate().set(now)
-        
-        // Update longest streak
-        val longestStreak = preferences.longestStreak().get()
-        if (newStreak > longestStreak) {
-            preferences.longestStreak().set(newStreak)
-        }
+        // Use updateStreakWithLongest to automatically track longest streak
+        statisticsRepository.updateStreakWithLongest(newStreak, now)
         
         // Check streak achievements
         checkStreakAchievements(newStreak)
@@ -158,28 +191,31 @@ class ReadingBuddyUseCases(
      * Add experience points and handle level up
      */
     private suspend fun addExperience(xp: Int) {
-        val currentXp = preferences.buddyExperience().get() + xp
-        val currentLevel = preferences.buddyLevel().get()
+        val stats = statisticsRepository.getStatistics()
+        var currentXp = stats.buddyExperience + xp
+        var currentLevel = stats.buddyLevel
         
         // XP needed for next level: level * 100
-        val xpForNextLevel = currentLevel * 100
+        var xpForNextLevel = currentLevel * 100
         
-        if (currentXp >= xpForNextLevel) {
-            preferences.buddyLevel().set(currentLevel + 1)
-            preferences.buddyExperience().set(currentXp - xpForNextLevel)
-        } else {
-            preferences.buddyExperience().set(currentXp)
+        // Handle multiple level ups
+        while (currentXp >= xpForNextLevel) {
+            currentXp -= xpForNextLevel
+            currentLevel++
+            xpForNextLevel = currentLevel * 100
         }
+        
+        statisticsRepository.updateBuddyProgress(currentLevel, currentXp)
     }
     
     /**
      * Unlock an achievement
      */
     private suspend fun unlockAchievement(achievement: BuddyAchievement) {
-        val unlocked = preferences.unlockedAchievements().get()
+        val unlocked = statisticsRepository.getUnlockedAchievements()
         if (!unlocked.contains(achievement.name)) {
             val newUnlocked = if (unlocked.isEmpty()) achievement.name else "$unlocked,${achievement.name}"
-            preferences.unlockedAchievements().set(newUnlocked)
+            statisticsRepository.updateUnlockedAchievements(newUnlocked)
             addExperience(achievement.xpReward)
         }
     }
@@ -187,8 +223,8 @@ class ReadingBuddyUseCases(
     /**
      * Get unlocked achievements
      */
-    fun getUnlockedAchievements(): List<BuddyAchievement> {
-        val unlocked = preferences.unlockedAchievements().get()
+    suspend fun getUnlockedAchievements(): List<BuddyAchievement> {
+        val unlocked = statisticsRepository.getUnlockedAchievements()
         if (unlocked.isEmpty()) return emptyList()
         
         return unlocked.split(",").mapNotNull { name ->
@@ -203,11 +239,10 @@ class ReadingBuddyUseCases(
     /**
      * Get XP progress to next level (0.0 to 1.0)
      */
-    fun getLevelProgress(): Float {
-        val currentXp = preferences.buddyExperience().get()
-        val currentLevel = preferences.buddyLevel().get()
-        val xpForNextLevel = currentLevel * 100
-        return (currentXp.toFloat() / xpForNextLevel).coerceIn(0f, 1f)
+    suspend fun getLevelProgress(): Float {
+        val stats = statisticsRepository.getStatistics()
+        val xpForNextLevel = stats.buddyLevel * 100
+        return (stats.buddyExperience.toFloat() / xpForNextLevel).coerceIn(0f, 1f)
     }
     
     private fun getMessageForMood(mood: BuddyMood, streak: Int): String {

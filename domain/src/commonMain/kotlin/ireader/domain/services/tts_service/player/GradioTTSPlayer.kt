@@ -268,6 +268,37 @@ class GradioTTSPlayer(
         _error.value = null
         
         emitEvent(GradioTTSPlayerEvent.ContentLoaded(content.size))
+        
+        // Pre-cache the first few paragraphs immediately so playback starts faster
+        if (content.isNotEmpty()) {
+            startPrefetchFrom(validIndex)
+        }
+    }
+    
+    /**
+     * Start prefetching from a specific index (used when content is set)
+     */
+    private fun startPrefetchFrom(fromIndex: Int) {
+        prefetchJob?.cancel()
+        
+        prefetchJob = scope.launch {
+            val endIndex = (fromIndex + prefetchCount).coerceAtMost(_totalParagraphs.value - 1)
+            
+            if (fromIndex > endIndex) return@launch
+            
+            // Launch all prefetch jobs in parallel
+            val jobs = (fromIndex..endIndex).mapNotNull { i ->
+                val shouldFetch = cacheMutex.withLock {
+                    !audioCache.containsKey(i) && !loadingSet.contains(i)
+                }
+                
+                if (shouldFetch) {
+                    launch { prefetchParagraph(i) }
+                } else null
+            }
+            
+            jobs.forEach { it.join() }
+        }
     }
     
     private suspend fun handlePlay() {
@@ -524,14 +555,25 @@ class GradioTTSPlayer(
                 if (!isActive || !_isPlaying.value) break
                 
                 try {
+                    // Start prefetching next paragraphs in parallel while playing current
+                    startPrefetch()
+                    
                     val success = playCurrentParagraph()
                     
                     if (!success) {
+                        // Check if we were paused/stopped - that's not an error
+                        if (_isPaused.value || !_isPlaying.value) {
+                            Log.debug { "$TAG: Playback interrupted (paused or stopped)" }
+                            continue
+                        }
                         Log.error { "$TAG: Failed to play paragraph ${_currentParagraph.value}" }
                         _error.value = "Failed to play paragraph"
                         emitEvent(GradioTTSPlayerEvent.Error("Failed to play paragraph ${_currentParagraph.value}"))
                         break
                     }
+                    
+                    // Ensure next paragraph is cached before moving on
+                    ensureNextParagraphCached()
                     
                     // Move to next paragraph
                     val nextIndex = _currentParagraph.value + 1
@@ -541,9 +583,6 @@ class GradioTTSPlayer(
                         
                         val text = paragraphs.getOrNull(nextIndex) ?: ""
                         emitEvent(GradioTTSPlayerEvent.ParagraphChanged(nextIndex, text))
-                        
-                        // Trigger prefetch for upcoming paragraphs
-                        startPrefetch()
                     } else {
                         // Finished all paragraphs
                         break
@@ -622,22 +661,64 @@ class GradioTTSPlayer(
         prefetchJob?.cancel()
         
         prefetchJob = scope.launch {
-            val startIndex = _currentParagraph.value + 1
+            val currentIdx = _currentParagraph.value
+            val startIndex = currentIdx + 1
             val endIndex = (startIndex + prefetchCount - 1).coerceAtMost(_totalParagraphs.value - 1)
             
-            for (i in startIndex..endIndex) {
-                if (!isActive) break
-                
+            if (startIndex > endIndex) return@launch
+            
+            // Launch all prefetch jobs in parallel for faster caching
+            val jobs = (startIndex..endIndex).mapNotNull { i ->
                 // Check if already cached or loading
                 val shouldFetch = cacheMutex.withLock {
                     !audioCache.containsKey(i) && !loadingSet.contains(i)
                 }
                 
                 if (shouldFetch) {
-                    prefetchParagraph(i)
-                }
+                    launch { prefetchParagraph(i) }
+                } else null
             }
+            
+            // Wait for all to complete (or be cancelled)
+            jobs.forEach { it.join() }
         }
+    }
+    
+    /**
+     * Ensure the next paragraph is cached before we need it.
+     * Called during playback to guarantee smooth transitions.
+     */
+    private suspend fun ensureNextParagraphCached(): Boolean {
+        val nextIndex = _currentParagraph.value + 1
+        if (nextIndex >= _totalParagraphs.value) return true // No next paragraph
+        
+        val text = paragraphs.getOrNull(nextIndex) ?: return true
+        if (text.isBlank()) return true // Skip blank paragraphs
+        
+        // Check if already cached
+        val isCached = cacheMutex.withLock { audioCache.containsKey(nextIndex) }
+        if (isCached) return true
+        
+        // Check if already loading
+        val isLoading = cacheMutex.withLock { loadingSet.contains(nextIndex) }
+        if (isLoading) {
+            // Wait for it to finish loading (with timeout)
+            var attempts = 0
+            while (attempts < 100) { // 10 seconds max
+                delay(100)
+                val nowCached = cacheMutex.withLock { audioCache.containsKey(nextIndex) }
+                if (nowCached) return true
+                val stillLoading = cacheMutex.withLock { loadingSet.contains(nextIndex) }
+                if (!stillLoading) break
+                attempts++
+            }
+            return cacheMutex.withLock { audioCache.containsKey(nextIndex) }
+        }
+        
+        // Not cached and not loading - fetch it now
+        Log.info { "$TAG: Urgently fetching next paragraph $nextIndex" }
+        prefetchParagraph(nextIndex)
+        return cacheMutex.withLock { audioCache.containsKey(nextIndex) }
     }
     
     private suspend fun prefetchParagraph(index: Int) {
@@ -646,9 +727,17 @@ class GradioTTSPlayer(
         if (text.isBlank()) return
         
         // Mark as loading
-        cacheMutex.withLock {
-            loadingSet.add(index)
+        val alreadyLoading = cacheMutex.withLock {
+            if (loadingSet.contains(index) || audioCache.containsKey(index)) {
+                true
+            } else {
+                loadingSet.add(index)
+                false
+            }
         }
+        
+        if (alreadyLoading) return
+        
         updateLoadingState()
         
         try {
@@ -658,7 +747,7 @@ class GradioTTSPlayer(
             if (audioData != null) {
                 cacheAudio(index, audioData)
                 emitEvent(GradioTTSPlayerEvent.ParagraphCached(index))
-                Log.debug { "$TAG: Prefetched paragraph $index" }
+                Log.debug { "$TAG: Prefetched paragraph $index (${audioData.size} bytes)" }
             }
         } catch (e: CancellationException) {
             Log.debug { "$TAG: Prefetch cancelled for paragraph $index" }

@@ -138,11 +138,13 @@ val screenModelModule = module {
     /**
      * Reader statistics ViewModel
      * Handles reading time tracking and statistics
+     * Also syncs with Reading Buddy for unified progress tracking
      */
     factory {
         ReaderStatisticsViewModel(
             trackReadingProgressUseCase = get(),
-            readerPreferences = get()
+            readerPreferences = get(),
+            readingBuddyUseCases = get()
         )
     }
     // Gradio TTS Settings ViewModel
@@ -212,7 +214,9 @@ val screenModelModule = module {
     // Feature Store ViewModel - Plugin monetization marketplace
     factory {
         ireader.presentation.ui.featurestore.FeatureStoreViewModel(
-            pluginManager = get()
+            pluginManager = get(),
+            repositoryRepository = get(),
+            indexFetcher = get()
         )
     }
     

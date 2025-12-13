@@ -90,6 +90,25 @@ interface TTSEngine {
     fun precacheNext(items: List<Pair<String, String>>) {}
     
     /**
+     * Check if audio for the given text is cached.
+     * Only supported by remote TTS engines (Gradio).
+     * Native TTS engines return false.
+     * 
+     * @param text Text to check
+     * @return true if audio is cached, false otherwise
+     */
+    suspend fun isTextCached(text: String): Boolean = false
+    
+    /**
+     * Get the set of indices from a list of texts that are cached.
+     * Useful for updating UI to show which paragraphs are cached.
+     * 
+     * @param texts List of texts to check
+     * @return Set of indices that are cached
+     */
+    suspend fun getCachedIndices(texts: List<String>): Set<Int> = emptySet()
+    
+    /**
      * Engine events flow
      */
     val events: Flow<EngineEvent>

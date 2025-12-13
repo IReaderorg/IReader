@@ -34,13 +34,15 @@ data class ReadingBuddyScreenState(
 )
 
 /**
- * ViewModel for Reading Buddy and Daily Quotes feature
+ * ViewModel for Reading Buddy and Daily Quotes feature.
+ * Now uses unified database statistics via ReadingBuddyUseCases for consistent
+ * data across Leaderboard, Statistics, and Reading Buddy screens.
  */
 @Stable
 class ReadingBuddyViewModel(
     private val quoteRepository: QuoteRepository,
     private val readingBuddyUseCases: ReadingBuddyUseCases,
-    private val preferences: ReadingBuddyPreferences,
+    private val preferences: ReadingBuddyPreferences, // Only for card style preference
     private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?
 ) : BaseViewModel() {
     
@@ -49,13 +51,33 @@ class ReadingBuddyViewModel(
     
     init {
         loadInitialData()
+        observeBuddyState()
+    }
+    
+    /**
+     * Observe buddy state changes reactively from the database
+     */
+    private fun observeBuddyState() {
+        scope.launch {
+            readingBuddyUseCases.getBuddyStateFlow().collect { buddyState ->
+                val achievements = readingBuddyUseCases.getUnlockedAchievements()
+                val levelProgress = readingBuddyUseCases.getLevelProgress()
+                _state.update { current ->
+                    current.copy(
+                        buddyState = buddyState,
+                        unlockedAchievements = achievements,
+                        levelProgress = levelProgress
+                    )
+                }
+            }
+        }
     }
     
     private fun loadInitialData() {
         scope.launch {
             _state.update { it.copy(isLoading = true) }
             
-            // Load buddy state
+            // Load buddy state from database
             val buddyState = readingBuddyUseCases.getBuddyState()
             val achievements = readingBuddyUseCases.getUnlockedAchievements()
             val levelProgress = readingBuddyUseCases.getLevelProgress()
@@ -83,7 +105,7 @@ class ReadingBuddyViewModel(
             _state.update { it.copy(isLoading = false) }
         }
     }
-    
+
     fun loadDailyQuote() {
         scope.launch {
             quoteRepository.getDailyQuote()
@@ -172,7 +194,7 @@ class ReadingBuddyViewModel(
     fun onReadingStarted() {
         scope.launch {
             readingBuddyUseCases.onReadingStarted()
-            refreshBuddyState()
+            // State will be updated via Flow observation
         }
     }
     
@@ -187,7 +209,7 @@ class ReadingBuddyViewModel(
                     )
                 }
             }
-            refreshBuddyState()
+            // State will be updated via Flow observation
         }
     }
     
@@ -202,7 +224,7 @@ class ReadingBuddyViewModel(
                     )
                 }
             }
-            refreshBuddyState()
+            // State will be updated via Flow observation
         }
     }
     
@@ -224,19 +246,5 @@ class ReadingBuddyViewModel(
     
     fun showError(error: String) {
         _state.update { it.copy(error = error) }
-    }
-    
-    private fun refreshBuddyState() {
-        val buddyState = readingBuddyUseCases.getBuddyState()
-        val achievements = readingBuddyUseCases.getUnlockedAchievements()
-        val levelProgress = readingBuddyUseCases.getLevelProgress()
-        
-        _state.update { current ->
-            current.copy(
-                buddyState = buddyState,
-                unlockedAchievements = achievements,
-                levelProgress = levelProgress
-            )
-        }
     }
 }

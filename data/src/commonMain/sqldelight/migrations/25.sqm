@@ -1,0 +1,9 @@
+-- Migration 25: Add Reading Buddy fields to reading_statistics table
+-- This unifies reading progress tracking by storing buddy-related data in the database
+-- instead of preferences, ensuring sync across Leaderboard, Statistics, and Reading Buddy screens
+
+ALTER TABLE reading_statistics ADD COLUMN longest_streak INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE reading_statistics ADD COLUMN buddy_level INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE reading_statistics ADD COLUMN buddy_experience INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE reading_statistics ADD COLUMN unlocked_achievements TEXT NOT NULL DEFAULT '';
+ALTER TABLE reading_statistics ADD COLUMN last_interaction_time INTEGER NOT NULL DEFAULT 0;

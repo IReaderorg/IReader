@@ -43,15 +43,50 @@ class CoquiTTSService(
     private var audioTrack: AudioTrack? = null
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     
-    // Preloading cache for next 3 paragraphs
-    private val preloadCache = mutableMapOf<Int, AudioData>()
+    // Preloading cache - persists until max size reached
+    // Key: paragraph index, Value: audio data
+    private val preloadCache = java.util.concurrent.ConcurrentHashMap<Int, AudioData>()
     private var preloadJob: Job? = null
+    
+    // Max cache size in bytes (50MB default)
+    private val maxCacheSizeBytes = 50 * 1024 * 1024L
     
     // Playback state
     private var currentParagraphIndex = 0
     private var isPlaying = false
     private var onParagraphComplete: ((Int) -> Unit)? = null
     private var onChapterComplete: (() -> Unit)? = null
+    
+    /**
+     * Get current cache size in bytes
+     */
+    private fun getCacheSizeBytes(): Long {
+        return preloadCache.values.sumOf { it.samples.size.toLong() }
+    }
+    
+    /**
+     * Add audio to cache, evicting newest entries (highest paragraph numbers) if max size exceeded
+     * This keeps older paragraphs cached so user can go back without re-generating
+     */
+    private fun addToCache(paragraph: Int, audioData: AudioData) {
+        preloadCache[paragraph] = audioData
+        
+        // Check if we need to evict entries
+        var currentSize = getCacheSizeBytes()
+        if (currentSize > maxCacheSizeBytes) {
+            // Evict newest entries first (highest paragraph numbers) - keep old ones for going back
+            val sortedKeys = preloadCache.keys().toList().sortedDescending()
+            for (key in sortedKeys) {
+                if (key == paragraph) continue // Don't evict the one we just added
+                if (currentSize <= maxCacheSizeBytes * 0.8) break // Keep 80% of max
+                val removed = preloadCache.remove(key)
+                if (removed != null) {
+                    currentSize -= removed.samples.size
+                    Log.debug { "Evicted paragraph $key from cache (${removed.samples.size} bytes)" }
+                }
+            }
+        }
+    }
 
     private val coquiVoices = listOf(
         VoiceModel(
@@ -108,25 +143,44 @@ class CoquiTTSService(
     }
     
     /**
-     * Preload next 3 paragraphs in background
+     * Preload next 3 paragraphs in background (parallel)
      */
     private fun startPreloading(paragraphs: List<String>, startIndex: Int, speed: Float) {
         preloadJob?.cancel()
         preloadJob = serviceScope.launch {
-            for (i in 1..3) {
+            Log.info { "Starting prefetch from paragraph ${startIndex + 1}, cache size: ${preloadCache.size}, cache bytes: ${getCacheSizeBytes() / 1024}KB" }
+            
+            // Launch all prefetch jobs in parallel
+            val jobs = (1..3).mapNotNull { i ->
                 val nextIndex = startIndex + i
-                if (nextIndex < paragraphs.size && isPlaying) {
+                if (nextIndex >= paragraphs.size) return@mapNotNull null
+                
+                // Skip if already cached
+                if (preloadCache.containsKey(nextIndex)) {
+                    Log.debug { "Paragraph $nextIndex already cached, skipping" }
+                    return@mapNotNull null
+                }
+                
+                launch {
+                    if (!isPlaying) return@launch
+                    
                     try {
+                        Log.info { "PREFETCH START: paragraph $nextIndex" }
                         val result = synthesize(paragraphs[nextIndex], "default", speed, 1.0f)
                         result.onSuccess { audioData ->
-                            preloadCache[nextIndex] = audioData
-                            Log.info { "Preloaded paragraph $nextIndex (${paragraphs[nextIndex].take(50)}...)" }
+                            addToCache(nextIndex, audioData)
+                            Log.info { "PREFETCH DONE: paragraph $nextIndex (${audioData.samples.size} bytes)" }
+                        }.onFailure { error ->
+                            Log.warn { "PREFETCH FAILED: paragraph $nextIndex - ${error.message}" }
                         }
                     } catch (e: Exception) {
-                        Log.error { "Failed to preload paragraph $nextIndex: ${e.message}" }
+                        Log.warn { "PREFETCH ERROR: paragraph $nextIndex - ${e.message}" }
                     }
                 }
             }
+            
+            // Wait for all to complete
+            jobs.forEach { it.join() }
         }
     }
     
@@ -182,12 +236,12 @@ class CoquiTTSService(
     }
     
     /**
-     * Stop reading and clear cache
+     * Stop reading (cache is preserved for going back)
      */
     override fun stopReading() {
         isPlaying = false
         preloadJob?.cancel()
-        preloadCache.clear()
+        // Don't clear cache - keep it for going back to previous paragraphs
         stopAudio()
     }
     
@@ -210,12 +264,12 @@ class CoquiTTSService(
     }
     
     /**
-     * Skip to specific paragraph
+     * Skip to specific paragraph (cache is preserved)
      */
     override fun seekToParagraph(paragraphs: List<String>, index: Int, speed: Float, autoNext: Boolean) {
         stopAudio()
         currentParagraphIndex = index
-        preloadCache.clear()
+        // Don't clear cache - keep it for going back to previous paragraphs
         
         if (isPlaying) {
             serviceScope.launch {
@@ -694,7 +748,16 @@ class CoquiTTSService(
 
     override fun cleanup() {
         stopReading()
+        clearCache()
         serviceScope.cancel()
+    }
+    
+    /**
+     * Clear the audio cache (call when changing chapters)
+     */
+    fun clearCache() {
+        preloadCache.clear()
+        Log.info { "Audio cache cleared" }
     }
     
     /**

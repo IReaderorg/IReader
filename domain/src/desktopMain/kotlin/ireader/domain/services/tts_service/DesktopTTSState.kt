@@ -110,6 +110,20 @@ class DesktopTTSState : TTSState {
     private val _isDrawerAsc = MutableStateFlow(false)
     override val isDrawerAsc: StateFlow<Boolean> = _isDrawerAsc.asStateFlow()
     
+    // Cache state for Gradio TTS
+    private val _cachedParagraphs = MutableStateFlow<Set<Int>>(emptySet())
+    val cachedParagraphs: StateFlow<Set<Int>> = _cachedParagraphs.asStateFlow()
+    
+    private val _loadingParagraphs = MutableStateFlow<Set<Int>>(emptySet())
+    val loadingParagraphs: StateFlow<Set<Int>> = _loadingParagraphs.asStateFlow()
+    
+    private val _cacheSizeBytes = MutableStateFlow(0L)
+    val cacheSizeBytes: StateFlow<Long> = _cacheSizeBytes.asStateFlow()
+    
+    fun setCachedParagraphs(value: Set<Int>) { _cachedParagraphs.value = value }
+    fun setLoadingParagraphs(value: Set<Int>) { _loadingParagraphs.value = value }
+    fun setCacheSizeBytes(value: Long) { _cacheSizeBytes.value = value }
+    
     // Piper-specific properties
     /** Current word boundary for text highlighting during TTS playback */
     var currentWordBoundary by mutableStateOf<WordBoundary?>(null)

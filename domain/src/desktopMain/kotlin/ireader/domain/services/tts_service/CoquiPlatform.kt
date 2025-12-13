@@ -130,10 +130,18 @@ class DesktopGradioAudioPlayer : GradioAudioPlayer {
             clip = AudioSystem.getClip().apply {
                 open(decodedStream)
                 addLineListener { event ->
-                    if (event.type == LineEvent.Type.STOP && !isPaused) {
-                        isPlaying = false
-                        onComplete()
-                        cleanup()
+                    when (event.type) {
+                        LineEvent.Type.STOP -> {
+                            // Only call onComplete if audio finished naturally (reached end)
+                            // Check if we're at the end of the clip
+                            val clipRef = clip
+                            if (clipRef != null && !isPaused && clipRef.framePosition >= clipRef.frameLength - 1) {
+                                isPlaying = false
+                                onComplete()
+                                cleanup()
+                            }
+                        }
+                        else -> { /* ignore other events */ }
                     }
                 }
                 start()
@@ -199,10 +207,17 @@ class DesktopGradioAudioPlayer : GradioAudioPlayer {
                 clip = AudioSystem.getClip().apply {
                     open(audioInputStream)
                     addLineListener { event ->
-                        if (event.type == LineEvent.Type.STOP && !isPaused) {
-                            isPlaying = false
-                            onComplete()
-                            cleanup()
+                        when (event.type) {
+                            LineEvent.Type.STOP -> {
+                                // Only call onComplete if audio finished naturally
+                                val clipRef = clip
+                                if (clipRef != null && !isPaused && clipRef.framePosition >= clipRef.frameLength - 1) {
+                                    isPlaying = false
+                                    onComplete()
+                                    cleanup()
+                                }
+                            }
+                            else -> { /* ignore other events */ }
                         }
                     }
                     start()

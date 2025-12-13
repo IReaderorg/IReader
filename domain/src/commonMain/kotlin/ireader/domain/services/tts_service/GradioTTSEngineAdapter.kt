@@ -74,14 +74,38 @@ class GradioTTSEngineAdapter(
     @kotlin.concurrent.Volatile
     private var currentCompletion: CompletableDeferred<Boolean>? = null
     
+    @kotlin.concurrent.Volatile
+    private var isPaused = false
+    
+    @kotlin.concurrent.Volatile
+    private var isStopped = false
+    
     override suspend fun playAndWait(audioData: ByteArray): Boolean {
         val completion = CompletableDeferred<Boolean>()
         currentCompletion = completion
+        isStopped = false
         
         try {
             audioPlayer.play(audioData) {
-                completion.complete(true)
+                // Only complete with true if not stopped/paused
+                if (!isStopped && !isPaused) {
+                    completion.complete(true)
+                }
             }
+            
+            // Wait for completion, but handle pause differently
+            while (!completion.isCompleted) {
+                if (isStopped) {
+                    return false
+                }
+                if (isPaused) {
+                    // Wait while paused, don't return false
+                    delay(100)
+                    continue
+                }
+                delay(50)
+            }
+            
             return completion.await()
         } catch (e: CancellationException) {
             audioPlayer.stop()
@@ -95,24 +119,19 @@ class GradioTTSEngineAdapter(
     }
     
     override fun stop() {
+        isStopped = true
+        isPaused = false
         currentPlaybackJob?.cancel()
         audioPlayer.stop()
-        // Reset pause state
-        isPaused = false
         // Complete any pending playback wait to unblock the coroutine
         currentCompletion?.complete(false)
         currentCompletion = null
     }
     
-    @kotlin.concurrent.Volatile
-    private var isPaused = false
-    
     override fun pause() {
         isPaused = true
         audioPlayer.pause()
-        // Complete the playAndWait coroutine so it doesn't block
-        // This allows the UI to respond to pause immediately
-        currentCompletion?.complete(false)
+        // Don't complete the deferred - let playAndWait handle pause state
     }
     
     override fun resume() {

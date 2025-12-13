@@ -9,12 +9,17 @@ CREATE TABLE IF NOT EXISTS reading_statistics(
     reading_streak INTEGER NOT NULL DEFAULT 0,
     last_read_date INTEGER,
     total_words_read INTEGER NOT NULL DEFAULT 0,
-    books_completed INTEGER NOT NULL DEFAULT 0
+    books_completed INTEGER NOT NULL DEFAULT 0,
+    longest_streak INTEGER NOT NULL DEFAULT 0,
+    buddy_level INTEGER NOT NULL DEFAULT 1,
+    buddy_experience INTEGER NOT NULL DEFAULT 0,
+    unlocked_achievements TEXT NOT NULL DEFAULT '',
+    last_interaction_time INTEGER NOT NULL DEFAULT 0
 );
 
 -- Initialize with a single row if not exists
-INSERT OR IGNORE INTO reading_statistics(_id, total_chapters_read, total_reading_time_minutes, reading_streak, last_read_date, total_words_read)
-VALUES (1, 0, 0, 0, 0, 0);
+INSERT OR IGNORE INTO reading_statistics(_id, total_chapters_read, total_reading_time_minutes, reading_streak, last_read_date, total_words_read, books_completed, longest_streak, buddy_level, buddy_experience, unlocked_achievements, last_interaction_time)
+VALUES (1, 0, 0, 0, 0, 0, 0, 0, 1, 0, '', 0);
 
 getStatistics:
 SELECT * FROM reading_statistics WHERE _id = 1;
@@ -44,6 +49,13 @@ UPDATE reading_statistics SET
     last_read_date = :lastReadDate
 WHERE _id = 1;
 
+updateStreakWithLongest:
+UPDATE reading_statistics SET
+    reading_streak = :streak,
+    last_read_date = :lastReadDate,
+    longest_streak = MAX(longest_streak, :streak)
+WHERE _id = 1;
+
 addWordsRead:
 UPDATE reading_statistics SET
     total_words_read = total_words_read + :words
@@ -54,6 +66,22 @@ UPDATE reading_statistics SET
     books_completed = books_completed + 1
 WHERE _id = 1;
 
+updateBuddyProgress:
+UPDATE reading_statistics SET
+    buddy_level = :level,
+    buddy_experience = :experience
+WHERE _id = 1;
+
+updateUnlockedAchievements:
+UPDATE reading_statistics SET
+    unlocked_achievements = :achievements
+WHERE _id = 1;
+
+updateLastInteractionTime:
+UPDATE reading_statistics SET
+    last_interaction_time = :time
+WHERE _id = 1;
+
 initializeIfNeeded:
-INSERT OR IGNORE INTO reading_statistics(_id, total_chapters_read, total_reading_time_minutes, reading_streak, last_read_date, total_words_read, books_completed)
-VALUES (1, 0, 0, 0, 0, 0, 0);
+INSERT OR IGNORE INTO reading_statistics(_id, total_chapters_read, total_reading_time_minutes, reading_streak, last_read_date, total_words_read, books_completed, longest_streak, buddy_level, buddy_experience, unlocked_achievements, last_interaction_time)
+VALUES (1, 0, 0, 0, 0, 0, 0, 0, 1, 0, '', 0);
