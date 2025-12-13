@@ -4,7 +4,7 @@ This directory contains split schema files to distribute your database across mu
 
 ## Architecture Overview
 
-The schema is split into 7 separate projects for maximum storage:
+The schema is split into 11 separate projects for maximum storage:
 
 1. **Project 1 (Auth)**: User authentication and profiles only
 2. **Project 2 (Reading)**: Reading progress tracking
@@ -13,73 +13,44 @@ The schema is split into 7 separate projects for maximum storage:
 5. **Project 5 (Chapter Reviews)**: Chapter reviews only
 6. **Project 6 (Badges)**: Badge system and NFT integration
 7. **Project 7 (Analytics)**: Leaderboard and statistics
+8. **Project 8 (Quotes)**: Community quotes system
+9. **Project 9 (Community Source)**: Community books and translations
+10. **Project 10 (Glossary)**: Glossary sync system
+11. **Project 11 (Character Art)**: Character art gallery
 
-**Total Storage: 3.5GB (7 × 500MB)**
+**Total Storage: 5.5GB (11 × 500MB)**
+
+## Schema Files
+
+| File | Project | Tables |
+|------|---------|--------|
+| `schema_1_auth.sql` | Auth | users |
+| `schema_2_reading.sql` | Reading | reading_progress |
+| `schema_3_library.sql` | Library | synced_books |
+| `schema_4_book_reviews.sql` | Book Reviews | book_reviews |
+| `schema_5_chapter_reviews.sql` | Chapter Reviews | chapter_reviews |
+| `schema_6_badges.sql` | Badges | badges, user_badges, payment_proofs, nft_wallets |
+| `schema_7_analytics.sql` | Analytics | leaderboard |
+| `schema_8_quotes.sql` | Quotes | community_quotes, quote_likes, daily_quote_history |
+| `schema_9_community_source.sql` | Community Source | community_books, community_chapters, chapter_reports, chapter_ratings |
+| `schema_10_glossary.sql` | Glossary | glossary_entries, community_glossaries |
+| `schema_11_character_art.sql` | Character Art | character_art, character_art_likes, character_art_reports |
 
 ## Setup Instructions
 
-### Project 1 - Auth (Primary Database)
-```sql
--- File: schema_1_auth.sql
-```
-- users table (authentication and profiles)
-
-### Project 2 - Reading
-```sql
--- File: schema_2_reading.sql
-```
-- reading_progress table (current reading positions)
-
-### Project 3 - Library
-```sql
--- File: schema_3_library.sql
-```
-- synced_books table (favorite books)
-
-### Project 4 - Book Reviews
-```sql
--- File: schema_4_book_reviews.sql
-```
-- book_reviews table (dedicated 500MB)
-
-### Project 5 - Chapter Reviews
-```sql
--- File: schema_5_chapter_reviews.sql
-```
-- chapter_reviews table (dedicated 500MB)
-
-### Project 6 - Badges
-```sql
--- File: schema_6_badges.sql
-```
-- badges table
-- user_badges table
-- payment_proofs table
-- nft_wallets table
-
-### Project 7 - Analytics
-```sql
--- File: schema_7_analytics.sql
-```
-- leaderboard table
-- Statistics views and functions
+1. Create 11 Supabase projects (free tier)
+2. Run each schema file in its respective project's SQL Editor
+3. Note down each project's URL and anon key
+4. Configure your app with all 11 project credentials
 
 ## Important Notes
 
 ### Cross-Project References
-Since tables are in different databases, you'll need to:
+Since tables are in different databases:
 
-1. **Store user_id as TEXT** in Projects 2 and 3 (instead of UUID foreign key)
+1. **Store user_id as TEXT** in all projects (instead of UUID foreign key)
 2. **Use API calls** to sync data between projects
 3. **Implement application-level joins** instead of database joins
-
-### Application Changes Required
-
-Your app will need to:
-- Connect to multiple Supabase projects
-- Sync user_id across all projects when a user signs up
-- Fetch data from multiple sources and combine in the app
-- Handle eventual consistency between projects
 
 ### Environment Variables
 
@@ -111,65 +82,88 @@ SUPABASE_BADGES_KEY=xxx6
 # Project 7 - Analytics
 SUPABASE_ANALYTICS_URL=https://xxx7.supabase.co
 SUPABASE_ANALYTICS_KEY=xxx7
+
+# Project 8 - Quotes
+SUPABASE_QUOTES_URL=https://xxx8.supabase.co
+SUPABASE_QUOTES_KEY=xxx8
+
+# Project 9 - Community Source
+SUPABASE_COMMUNITY_URL=https://xxx9.supabase.co
+SUPABASE_COMMUNITY_KEY=xxx9
+
+# Project 10 - Glossary
+SUPABASE_GLOSSARY_URL=https://xxx10.supabase.co
+SUPABASE_GLOSSARY_KEY=xxx10
+
+# Project 11 - Character Art
+SUPABASE_CHARACTER_ART_URL=https://xxx11.supabase.co
+SUPABASE_CHARACTER_ART_KEY=xxx11
 ```
 
-## Data Distribution Strategy
+## Estimated Capacity
 
-### High-Volume Tables (Prioritize splitting these)
-- **reading_progress**: ~1KB per book per user → Project 1
-- **synced_books**: ~500 bytes per book per user → Project 1
-- **book_reviews**: ~2KB per review → Project 2
-- **chapter_reviews**: ~1KB per review → Project 2
-- **leaderboard**: ~200 bytes per user → Project 3
-
-### Estimated Capacity
 With 500MB per project:
 - Project 1 (Auth): ~5M user profiles
 - Project 2 (Reading): ~2.5M reading progress entries
 - Project 3 (Library): ~5M synced books
-- Project 4 (Book Reviews): ~250K book reviews (dedicated)
-- Project 5 (Chapter Reviews): ~500K chapter reviews (dedicated)
-- Project 6 (Badges): ~10M badge assignments + NFT data
+- Project 4 (Book Reviews): ~250K book reviews
+- Project 5 (Chapter Reviews): ~500K chapter reviews
+- Project 6 (Badges): ~10M badge assignments
 - Project 7 (Analytics): ~2.5M leaderboard entries
+- Project 8 (Quotes): ~500K quotes
+- Project 9 (Community Source): ~100K books with chapters
+- Project 10 (Glossary): ~1M glossary entries
+- Project 11 (Character Art): ~500K art submissions
 
-**Total: 3.5GB storage, supporting millions of records**
-
-## Migration Path
-
-If you're already using the single schema:
-
-1. Create 7 new Supabase projects
-2. Run each split schema file in its respective project
-3. Export data from your current project
-4. Import data into the appropriate new projects
-5. Update your app to use the MultiSupabaseClient (7 projects version)
-6. Test thoroughly before switching production traffic
+**Total: 5.5GB storage, supporting millions of records**
 
 ## Pros and Cons
 
 ### Pros
-✓ 3.5GB total storage (7 × 500MB) - 7x single project!
+✓ 5.5GB total storage (11 × 500MB)
 ✓ Maximum isolation of concerns
 ✓ Can scale individual components independently
-✓ Free tier benefits × 7
-✓ Each major table gets dedicated 500MB
-✓ Better performance per table (smaller indexes)
-✓ Reviews can scale independently (book vs chapter)
+✓ Free tier benefits × 11
+✓ Each feature gets dedicated storage
+✓ Better performance per table
 
 ### Cons
 ✗ No database-level foreign keys between projects
 ✗ No cross-project transactions
 ✗ More complex application code
-✗ Need to manage 7 separate projects
-✗ Potential data consistency issues
+✗ Need to manage 11 separate projects
 ✗ More API calls = higher latency
-✗ More environment variables to manage
 
-## Alternative: Single Project Optimization
+## Combining Schemas
 
-Before splitting, consider:
-1. Enable Row Level Security to reduce overhead
-2. Use JSONB columns for flexible data
-3. Archive old data periodically
-4. Compress large text fields
-5. Use Supabase Storage for images/files instead of database
+You can combine multiple schemas into a single Supabase project if you don't need maximum storage. Some logical groupings:
+
+### Option A: 3 Projects (1.5GB)
+| Project | Schemas | Tables |
+|---------|---------|--------|
+| Main | 1, 2, 3, 7 | users, reading_progress, synced_books, leaderboard |
+| Social | 4, 5, 8 | book_reviews, chapter_reviews, quotes |
+| Community | 6, 9, 10, 11 | badges, community_source, glossary, character_art |
+
+### Option B: 5 Projects (2.5GB)
+| Project | Schemas | Tables |
+|---------|---------|--------|
+| Auth | 1 | users |
+| Core | 2, 3, 7 | reading_progress, synced_books, leaderboard |
+| Reviews | 4, 5 | book_reviews, chapter_reviews |
+| Badges | 6 | badges, user_badges, payment_proofs, nft_wallets |
+| Community | 8, 9, 10, 11 | quotes, community_source, glossary, character_art |
+
+### How to Combine
+Simply run multiple schema files in the same Supabase SQL Editor:
+```sql
+-- Run schema_1_auth.sql first
+-- Then run schema_2_reading.sql in the same project
+-- Continue with other schemas you want to combine
+```
+
+Note: When combining schemas, you can change `user_id TEXT` back to `user_id UUID REFERENCES public.users(id)` for proper foreign key relationships within the same project.
+
+## Alternative: Single Project
+
+If you prefer simplicity, use the main `schema.sql` file in the parent directory which contains all tables in a single database.

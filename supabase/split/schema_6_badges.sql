@@ -206,53 +206,54 @@ CREATE TRIGGER update_nft_wallets_updated_at
 -- INITIAL BADGE DATA
 -- ============================================================================
 
-INSERT INTO public.badges (id, name, description, icon, category, rarity, type, is_available) VALUES
--- Donor Badges
-('donor_bronze', 'Bronze Supporter', 'Donated $5 or more', '🥉', 'donor', 'common', 'ACHIEVEMENT', TRUE),
-('donor_silver', 'Silver Supporter', 'Donated $10 or more', '🥈', 'donor', 'rare', 'ACHIEVEMENT', TRUE),
-('donor_gold', 'Gold Supporter', 'Donated $25 or more', '🥇', 'donor', 'epic', 'ACHIEVEMENT', TRUE),
-('donor_platinum', 'Platinum Supporter', 'Donated $50 or more', '💎', 'donor', 'legendary', 'ACHIEVEMENT', TRUE),
+-- Donor badges (PURCHASABLE)
+INSERT INTO public.badges (id, name, description, icon, category, rarity, type, image_url, is_available, price) VALUES
+    ('donor_bronze', 'Bronze Supporter', 'Donated $5 or more', '🥉', 'donor', 'common', 'PURCHASABLE', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/bronze-supporter.png', TRUE, 5.00),
+    ('donor_silver', 'Silver Supporter', 'Donated $10 or more', '🥈', 'donor', 'rare', 'PURCHASABLE', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/silver-min.png', TRUE, 10.00),
+    ('donor_gold', 'Gold Supporter', 'Donated $25 or more', '🥇', 'donor', 'epic', 'PURCHASABLE', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/gold-min.png', TRUE, 25.00),
+    ('donor_platinum', 'Platinum Supporter', 'Donated $50 or more', '💎', 'donor', 'legendary', 'PURCHASABLE', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/platinum-min.png', TRUE, 50.00),
+    ('donor_coffee', 'Coffee Supporter', 'Bought us a coffee', '☕', 'donor', 'common', 'PURCHASABLE', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/coffee-supporter.png', TRUE, 3.00),
+    ('donor_lifetime', 'Lifetime Supporter', 'Made a lifetime contribution', '♾️', 'donor', 'legendary', 'PURCHASABLE', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/lifetime-supporter.png', TRUE, 100.00)
+ON CONFLICT (id) DO NOTHING;
 
--- Contributor Badges
-('contributor_translator', 'Translator', 'Contributed translations', '🌐', 'contributor', 'rare', 'ACHIEVEMENT', TRUE),
-('contributor_developer', 'Developer', 'Contributed code', '💻', 'contributor', 'epic', 'ACHIEVEMENT', TRUE),
-('contributor_designer', 'Designer', 'Contributed designs', '🎨', 'contributor', 'rare', 'ACHIEVEMENT', TRUE),
+-- Contributor badges
+INSERT INTO public.badges (id, name, description, icon, category, rarity, type, image_url, is_available) VALUES
+    ('contributor_translator', 'Translator', 'Contributed translations', '🌐', 'contributor', 'rare', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/translator-min.png', TRUE),
+    ('contributor_developer', 'Developer', 'Contributed code', '💻', 'contributor', 'epic', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/developer-min.png', TRUE),
+    ('contributor_designer', 'Designer', 'Contributed designs', '🎨', 'contributor', 'rare', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/designer-min.png', TRUE)
+ON CONFLICT (id) DO NOTHING;
 
--- Achievement Badges - Reading Progress
-('novice_reader', 'Novice Reader', 'Read your first 10 chapters', '📖', 'reader', 'common', 'ACHIEVEMENT', TRUE),
-('avid_reader', 'Avid Reader', 'Read 100 chapters', '📚', 'reader', 'rare', 'ACHIEVEMENT', TRUE),
-('bookworm', 'Bookworm', 'Read 500 chapters', '🐛', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
-('master_reader', 'Master Reader', 'Read 1000 chapters', '🎓', 'reader', 'legendary', 'ACHIEVEMENT', TRUE),
+-- Reader badges
+INSERT INTO public.badges (id, name, description, icon, category, rarity, type, image_url, is_available) VALUES
+    ('novice_reader', 'Novice Reader', 'Read your first 10 chapters', '📖', 'reader', 'common', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/novice-reader-min.png', TRUE),
+    ('avid_reader', 'Avid Reader', 'Read 100 chapters', '📚', 'reader', 'rare', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/avid-reader-min.png', TRUE),
+    ('bookworm', 'Bookworm', 'Read 500 chapters', '🐛', 'reader', 'epic', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/bookworm-min.png', TRUE),
+    ('master_reader', 'Master Reader', 'Read 1000 chapters', '🎓', 'reader', 'legendary', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/master-reader-min.png', TRUE),
+    ('week_warrior', 'Week Warrior', 'Read for 7 consecutive days', '🔥', 'reader', 'rare', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/week-warrior-min.png', TRUE),
+    ('month_master', 'Month Master', 'Read for 30 consecutive days', '⚡', 'reader', 'epic', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/month-master-min.png', TRUE),
+    ('year_legend', 'Year Legend', 'Read for 365 consecutive days', '🌟', 'reader', 'legendary', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/year-legend-min.png', TRUE),
+    ('speed_reader', 'Speed Reader', 'Read 50 chapters in a single day', '⚡', 'reader', 'epic', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/speed-reader-min.png', TRUE),
+    ('first_finish', 'First Finish', 'Finished your first book', '🏁', 'reader', 'common', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/first-finish.png', TRUE),
+    ('marathon_reader', 'Marathon Reader', 'Read for 12 hours in a single day', '🏃', 'reader', 'legendary', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/marathond-reader.png', TRUE)
+ON CONFLICT (id) DO NOTHING;
 
--- Achievement Badges - Book Completion
-('first_finish', 'First Finish', 'Complete your first book', '🏁', 'reader', 'common', 'ACHIEVEMENT', TRUE),
-('book_collector', 'Book Collector', 'Complete 10 books', '📕', 'reader', 'rare', 'ACHIEVEMENT', TRUE),
-('library_master', 'Library Master', 'Complete 50 books', '📚', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
-('legendary_collector', 'Legendary Collector', 'Complete 100 books', '👑', 'reader', 'legendary', 'ACHIEVEMENT', TRUE),
+-- Reviewer badges
+INSERT INTO public.badges (id, name, description, icon, category, rarity, type, image_url, is_available) VALUES
+    ('first_critic', 'First Critic', 'Write your first review', '✍️', 'reviewer', 'common', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/first-critic-min.png', TRUE),
+    ('thoughtful_critic', 'Thoughtful Critic', 'Write 10 reviews', '🤔', 'reviewer', 'rare', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/thoughtful-critic-min.png', TRUE),
+    ('master_critic', 'Master Critic', 'Write 50 reviews', '🎭', 'reviewer', 'epic', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/master-critic-min.png', TRUE),
+    ('legendary_critic', 'Legendary Critic', 'Write 100 reviews', '🌟', 'reviewer', 'legendary', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/legendary-critic.png', TRUE)
+ON CONFLICT (id) DO NOTHING;
 
--- Achievement Badges - Reviews
-('first_critic', 'First Critic', 'Write your first review', '✍️', 'reviewer', 'common', 'ACHIEVEMENT', TRUE),
-('thoughtful_critic', 'Thoughtful Critic', 'Write 10 reviews', '💭', 'reviewer', 'rare', 'ACHIEVEMENT', TRUE),
-('master_critic', 'Master Critic', 'Write 50 reviews', '🎭', 'reviewer', 'epic', 'ACHIEVEMENT', TRUE),
-('legendary_critic', 'Legendary Critic', 'Write 100 reviews', '🏆', 'reviewer', 'legendary', 'ACHIEVEMENT', TRUE),
-
--- Achievement Badges - Reading Streaks
-('week_warrior', 'Week Warrior', 'Read for 7 consecutive days', '🔥', 'reader', 'rare', 'ACHIEVEMENT', TRUE),
-('month_master', 'Month Master', 'Read for 30 consecutive days', '⚡', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
-('year_legend', 'Year Legend', 'Read for 365 consecutive days', '🌟', 'reader', 'legendary', 'ACHIEVEMENT', TRUE),
-
--- Achievement Badges - Time-based
-('night_owl', 'Night Owl', 'Read 100 chapters between 10 PM and 6 AM', '🦉', 'special', 'rare', 'ACHIEVEMENT', TRUE),
-('early_bird', 'Early Bird', 'Read 100 chapters between 5 AM and 9 AM', '🐦', 'special', 'rare', 'ACHIEVEMENT', TRUE),
-
--- Achievement Badges - Speed Reading
-('speed_reader', 'Speed Reader', 'Read 50 chapters in a single day', '⚡', 'reader', 'epic', 'ACHIEVEMENT', TRUE),
-('marathon_reader', 'Marathon Reader', 'Read for 12 hours in a single day', '🏃', 'reader', 'legendary', 'ACHIEVEMENT', TRUE),
-
--- Special Badges
-('special_early_adopter', 'Early Adopter', 'Joined during beta', '🚀', 'special', 'legendary', 'ACHIEVEMENT', TRUE),
-('special_bug_hunter', 'Bug Hunter', 'Reported critical bugs', '🐛', 'special', 'epic', 'ACHIEVEMENT', TRUE),
-('special_community_hero', 'Community Hero', 'Outstanding community contribution', '🦸', 'special', 'legendary', 'ACHIEVEMENT', TRUE)
+-- Special badges
+INSERT INTO public.badges (id, name, description, icon, category, rarity, type, image_url, is_available) VALUES
+    ('night_owl', 'Night Owl', 'Read 100 chapters between 10 PM and 6 AM', '🦉', 'special', 'rare', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/night-owl-min.png', TRUE),
+    ('early_bird', 'Early Bird', 'Read 100 chapters between 5 AM and 9 AM', '🐦', 'special', 'rare', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/early-bird-min.png', TRUE),
+    ('special_early_adopter', 'Early Adopter', 'Joined during beta', '🚀', 'special', 'legendary', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/early-adopter-min.png', TRUE),
+    ('special_bug_hunter', 'Bug Hunter', 'Reported critical bugs', '🐛', 'special', 'epic', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/bug-hunter-min.png', TRUE),
+    ('book_collector', 'Book Collector', 'Added many books to your library', '📚', 'special', 'rare', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/book-collector.png', TRUE),
+    ('legendary_collector', 'Legendary Collector', 'Amassed an extraordinary book collection', '📖', 'special', 'legendary', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/legendary-collector.png', TRUE),
+    ('library_master', 'Library Master', 'Mastered the art of library organization', '🏛️', 'special', 'epic', 'ACHIEVEMENT', 'https://raw.githubusercontent.com/IReaderorg/badge-repo/main/library-master.png', TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================================
