@@ -19,6 +19,8 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetTranslatedChapterUseCase
 import ireader.domain.usecases.translation.SaveTranslatedChapterUseCase
+import ireader.i18n.LocalizeHelper
+import ireader.i18n.asString
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +49,8 @@ class TranslationServiceImpl(
     private val getLocalCatalog: GetLocalCatalog,
     private val stateHolder: TranslationStateHolder = TranslationStateHolder(),
     private val submitTranslationUseCase: ireader.domain.community.SubmitTranslationUseCase? = null,
-    private val communityPreferences: ireader.domain.community.CommunityPreferences? = null
+    private val communityPreferences: ireader.domain.community.CommunityPreferences? = null,
+    private val localizeHelper: LocalizeHelper
 ) : TranslationService {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -497,7 +500,7 @@ class TranslationServiceImpl(
                     chunkResult = translations
                 },
                 onError = { uiText ->
-                    chunkError = uiText.toString()
+                    chunkError = uiText.asString(localizeHelper)
                 }
             )
             
@@ -543,7 +546,7 @@ class TranslationServiceImpl(
                 target = currentTargetLang,
                 onProgress = { },
                 onSuccess = { translations -> chunkResult = translations },
-                onError = { uiText -> chunkError = uiText.toString() }
+                onError = { uiText -> chunkError = uiText.asString(localizeHelper) }
             )
             
             if (chunkError != null) {

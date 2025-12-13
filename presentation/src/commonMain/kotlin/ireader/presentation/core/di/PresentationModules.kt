@@ -164,7 +164,7 @@ val PresentationModules = module {
     factory  { DownloaderViewModel(get(), get(), get(), get(),get()) }
     factory  { FontScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get(),get()) }
-    factory  { TranslationSettingsViewModel(get(), get()) }
+    factory  { TranslationSettingsViewModel(get(), get(), getOrNull(), get()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
     factory  { SourceRepositoryViewModel(get(), get()) }
     factory  { SecuritySettingsViewModel(get(), get()) }

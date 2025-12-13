@@ -79,7 +79,8 @@ val ServiceModule = module {
             getLocalCatalog = get(),
             stateHolder = get(),
             submitTranslationUseCase = getOrNull(),
-            communityPreferences = getOrNull()
+            communityPreferences = getOrNull(),
+            localizeHelper = get()
         )
     }
     

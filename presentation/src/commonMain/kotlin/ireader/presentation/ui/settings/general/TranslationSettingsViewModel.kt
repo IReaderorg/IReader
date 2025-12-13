@@ -8,7 +8,9 @@ import ireader.domain.data.engines.ToneType
 import ireader.domain.data.engines.TranslationContext
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
+import ireader.i18n.asString
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.launch
 
@@ -29,7 +31,8 @@ sealed class MlKitInitState {
 class TranslationSettingsViewModel(
     private val readerPreferences: ReaderPreferences,
     val translationEnginesManager: TranslationEnginesManager,
-    private val communityPreferences: ireader.domain.community.CommunityPreferences? = null
+    private val communityPreferences: ireader.domain.community.CommunityPreferences? = null,
+    private val localizeHelper: LocalizeHelper
 ) : BaseViewModel() {
 
     val translatorEngine = readerPreferences.translatorEngine().asState()
@@ -188,11 +191,7 @@ class TranslationSettingsViewModel(
                         }
                     },
                     onError = { error ->
-                        val message = when (error) {
-                            is UiText.ExceptionString -> error.e.message ?: "Unknown error"
-                            is UiText.MStringResource -> error.toString()
-                            else -> error.toString()
-                        }
+                        val message = error.asString(localizeHelper)
                         testConnectionState = TestConnectionState.Error(
                             "Connection test failed: $message"
                         )
@@ -265,11 +264,7 @@ class TranslationSettingsViewModel(
                         mlKitInitState = MlKitInitState.Success(message)
                     },
                     onError = { error ->
-                        val message = when (error) {
-                            is ireader.i18n.UiText.ExceptionString -> error.e.message ?: "Unknown error"
-                            is ireader.i18n.UiText.DynamicString -> error.text
-                            else -> error.toString()
-                        }
+                        val message = error.asString(localizeHelper)
                         mlKitInitState = MlKitInitState.Error(message)
                     }
                 )

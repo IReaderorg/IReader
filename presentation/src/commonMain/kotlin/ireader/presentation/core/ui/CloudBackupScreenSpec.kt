@@ -9,6 +9,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import ireader.i18n.asString
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.backups.CloudBackupScreen
 import ireader.presentation.ui.settings.backups.CloudBackupViewModel
 import kotlinx.coroutines.launch
@@ -21,6 +23,7 @@ class CloudBackupScreenSpec {
     fun Content() {
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val viewModel: CloudBackupViewModel = getIViewModel()
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
 
         val backupCreator = koinInject<ireader.domain.usecases.backup.CreateBackup>()
         
@@ -84,7 +87,7 @@ class CloudBackupScreenSpec {
                         backupCreator.saveTo(
                             uri = uri,
                             onError = { error ->
-                                errorMsg = error.toString()
+                                errorMsg = error.asString(localizeHelper)
                             },
                             onSuccess = {
                                 backupSuccess = true
