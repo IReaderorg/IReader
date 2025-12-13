@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
+import ireader.data.characterart.ImageProvider
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.ui.characterart.AIProviderOption
 import ireader.presentation.ui.characterart.CharacterArtViewModel
 import ireader.presentation.ui.characterart.GeminiModelInfo
 import ireader.presentation.ui.characterart.UploadCharacterArtScreen
@@ -50,6 +52,16 @@ class CharacterArtUploadScreenSpec {
             }
         }
         
+        // Convert ImageProvider to AIProviderOption for UI
+        val selectedProvider = remember(state.selectedProvider) {
+            when (state.selectedProvider) {
+                ImageProvider.GEMINI -> AIProviderOption.GEMINI
+                ImageProvider.HUGGING_FACE -> AIProviderOption.HUGGING_FACE
+                ImageProvider.POLLINATIONS -> AIProviderOption.POLLINATIONS
+                ImageProvider.STABILITY_AI -> AIProviderOption.STABILITY_AI
+            }
+        }
+        
         UploadCharacterArtScreen(
             onBack = {
                 navController.popBackStack()
@@ -66,7 +78,7 @@ class CharacterArtUploadScreenSpec {
                     )
                 }
             },
-            onGenerateImage = { apiKey, prompt, characterName, bookTitle, style ->
+            onGenerateImage = { provider, apiKey, prompt, characterName, bookTitle, style, modelId ->
                 vm.generateImage(prompt, characterName, bookTitle, style)
             },
             onSubmit = { characterName, bookTitle, bookAuthor, description, aiModel, prompt, tags ->
@@ -93,6 +105,18 @@ class CharacterArtUploadScreenSpec {
             isGenerating = state.isGenerating,
             uploadProgress = state.uploadProgress,
             generationError = state.generationError,
+            // Provider selection
+            selectedProvider = selectedProvider,
+            onProviderSelect = { uiProvider ->
+                val domainProvider = when (uiProvider) {
+                    AIProviderOption.GEMINI -> ImageProvider.GEMINI
+                    AIProviderOption.HUGGING_FACE -> ImageProvider.HUGGING_FACE
+                    AIProviderOption.POLLINATIONS -> ImageProvider.POLLINATIONS
+                    AIProviderOption.STABILITY_AI -> ImageProvider.STABILITY_AI
+                }
+                vm.setProvider(domainProvider)
+            },
+            // Model selection
             availableModels = availableModels,
             selectedModel = selectedModel,
             isLoadingModels = state.isLoadingModels,
@@ -102,13 +126,24 @@ class CharacterArtUploadScreenSpec {
                     vm.selectModel(model)
                 }
             },
-            onFetchModels = { apiKey ->
-                vm.fetchAvailableModels(apiKey)
+            onFetchModels = { provider, apiKey ->
+                val domainProvider = when (provider) {
+                    AIProviderOption.GEMINI -> ImageProvider.GEMINI
+                    AIProviderOption.HUGGING_FACE -> ImageProvider.HUGGING_FACE
+                    AIProviderOption.POLLINATIONS -> ImageProvider.POLLINATIONS
+                    AIProviderOption.STABILITY_AI -> ImageProvider.STABILITY_AI
+                }
+                vm.setProvider(domainProvider)
             },
-            onApiKeyChanged = { apiKey ->
+            // API keys
+            onGeminiApiKeyChanged = { apiKey ->
                 vm.setGeminiApiKey(apiKey)
             },
-            initialApiKey = state.geminiApiKey,
+            onHuggingFaceApiKeyChanged = { apiKey ->
+                vm.setHuggingFaceApiKey(apiKey)
+            },
+            initialGeminiApiKey = state.geminiApiKey,
+            initialHuggingFaceApiKey = state.huggingFaceApiKey,
             paddingValues = PaddingValues(0.dp)
         )
     }

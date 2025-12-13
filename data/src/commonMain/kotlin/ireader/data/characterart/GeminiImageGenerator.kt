@@ -353,27 +353,7 @@ class GeminiImageGenerator(
     }
 }
 
-/**
- * Result of image generation
- */
-data class GeneratedImage(
-    val bytes: ByteArray,
-    val mimeType: String,
-    val prompt: String
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-        other as GeneratedImage
-        return bytes.contentEquals(other.bytes) && prompt == other.prompt
-    }
-    
-    override fun hashCode(): Int {
-        var result = bytes.contentHashCode()
-        result = 31 * result + prompt.hashCode()
-        return result
-    }
-}
+// GeneratedImage is defined in ImageGeneratorProvider.kt
 
 // Request/Response DTOs for Imagen 3
 
@@ -493,11 +473,4 @@ data class GeminiModelInfo(
     val outputTokenLimit: Int = 0
 )
 
-/**
- * Simplified image model info for UI
- */
-data class ImageModel(
-    val id: String,
-    val displayName: String,
-    val description: String = ""
-)
+// ImageModel is defined in ImageGeneratorProvider.kt

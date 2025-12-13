@@ -214,6 +214,13 @@ val PresentationModules = module {
         )
     }
     
+    // Unified Image Generator
+    single {
+        ireader.data.characterart.UnifiedImageGenerator(
+            httpClient = get<ireader.core.http.HttpClients>().default
+        )
+    }
+    
     // Character Art Gallery ViewModel
     factory {
         ireader.presentation.ui.characterart.CharacterArtViewModel(
@@ -221,7 +228,10 @@ val PresentationModules = module {
             getCurrentUser = {
                 val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
                 getCurrentUserUseCase().getOrNull()
-            }
+            },
+            geminiImageGenerator = getOrNull(),
+            unifiedImageGenerator = get(),
+            readerPreferences = get()
         )
     }
     

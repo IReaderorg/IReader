@@ -259,6 +259,14 @@ class ReaderPreferences constructor(
     fun geminiApiKey(): Preference<String> {
         return preferenceStore.getString("gemini_api_key", "")
     }
+    
+    fun huggingFaceApiKey(): Preference<String> {
+        return preferenceStore.getString("huggingface_api_key", "")
+    }
+    
+    fun stabilityAiApiKey(): Preference<String> {
+        return preferenceStore.getString("stability_ai_api_key", "")
+    }
 
     fun ollamaServerUrl(): Preference<String> {
         return preferenceStore.getString("ollama_server_url", "http://localhost:11434")

@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.data.characterart.GeminiImageGenerator
 import ireader.data.characterart.ImageModel
+import ireader.data.characterart.ImageProvider
+import ireader.data.characterart.UnifiedImageGenerator
 
 /**
  * State for Character Art Gallery screen
@@ -36,14 +38,18 @@ data class CharacterArtScreenState(
     val isAdmin: Boolean = false,
     val hasMorePages: Boolean = true,
     val currentPage: Int = 0,
-    // Gemini AI generation state
-    val availableModels: List<ImageModel> = GeminiImageGenerator.DEFAULT_IMAGE_MODELS,
+    // AI generation state - supports multiple providers
+    val selectedProvider: ImageProvider = ImageProvider.POLLINATIONS, // Default to free provider
+    val availableProviders: List<ImageProvider> = ImageProvider.entries,
+    val availableModels: List<ImageModel> = emptyList(),
     val selectedModel: ImageModel? = null,
     val isLoadingModels: Boolean = false,
     val isGenerating: Boolean = false,
     val generatedImageBytes: ByteArray? = null,
     val generationError: String? = null,
-    val geminiApiKey: String = ""
+    // API keys for different providers
+    val geminiApiKey: String = "",
+    val huggingFaceApiKey: String = ""
 )
 
 /**
@@ -54,6 +60,7 @@ class CharacterArtViewModel(
     private val repository: CharacterArtRepository,
     private val getCurrentUser: suspend () -> ireader.domain.models.remote.User?,
     private val geminiImageGenerator: GeminiImageGenerator? = null,
+    private val unifiedImageGenerator: UnifiedImageGenerator? = null,
     private val readerPreferences: ReaderPreferences? = null
 ) : BaseViewModel() {
     
@@ -64,18 +71,21 @@ class CharacterArtViewModel(
     
     init {
         loadInitialData()
-        loadSavedApiKey()
+        loadSavedApiKeys()
+        loadModelsForCurrentProvider()
     }
     
     /**
-     * Load saved Gemini API key from preferences
+     * Load saved API keys from preferences
      */
-    private fun loadSavedApiKey() {
-        val savedKey = readerPreferences?.geminiApiKey()?.get() ?: ""
-        if (savedKey.isNotBlank()) {
-            _state.update { it.copy(geminiApiKey = savedKey) }
-            // Fetch models with saved key
-            fetchAvailableModels(savedKey)
+    private fun loadSavedApiKeys() {
+        val savedGeminiKey = readerPreferences?.geminiApiKey()?.get() ?: ""
+        val savedHuggingFaceKey = readerPreferences?.huggingFaceApiKey()?.get() ?: ""
+        _state.update { 
+            it.copy(
+                geminiApiKey = savedGeminiKey,
+                huggingFaceApiKey = savedHuggingFaceKey
+            ) 
         }
     }
     
@@ -402,8 +412,20 @@ class CharacterArtViewModel(
         _state.update { it.copy(geminiApiKey = apiKey) }
         // Save to preferences for persistence
         readerPreferences?.geminiApiKey()?.set(apiKey)
-        if (apiKey.isNotBlank()) {
-            fetchAvailableModels(apiKey)
+        if (apiKey.isNotBlank() && _state.value.selectedProvider == ImageProvider.GEMINI) {
+            loadModelsForCurrentProvider()
+        }
+    }
+    
+    /**
+     * Set the Hugging Face API key, save to preferences
+     */
+    fun setHuggingFaceApiKey(apiKey: String) {
+        _state.update { it.copy(huggingFaceApiKey = apiKey) }
+        // Save to preferences for persistence
+        readerPreferences?.huggingFaceApiKey()?.set(apiKey)
+        if (apiKey.isNotBlank() && _state.value.selectedProvider == ImageProvider.HUGGING_FACE) {
+            loadModelsForCurrentProvider()
         }
     }
     
@@ -445,7 +467,52 @@ class CharacterArtViewModel(
     }
     
     /**
-     * Generate an image using Gemini AI
+     * Switch to a different image generation provider
+     */
+    fun setProvider(provider: ImageProvider) {
+        _state.update { it.copy(selectedProvider = provider, selectedModel = null) }
+        loadModelsForCurrentProvider()
+    }
+    
+    /**
+     * Load models for the currently selected provider
+     */
+    private fun loadModelsForCurrentProvider() {
+        val generator = unifiedImageGenerator ?: return
+        val currentState = _state.value
+        
+        scope.launch {
+            _state.update { it.copy(isLoadingModels = true) }
+            
+            val apiKey = when (currentState.selectedProvider) {
+                ImageProvider.GEMINI -> currentState.geminiApiKey
+                ImageProvider.HUGGING_FACE -> currentState.huggingFaceApiKey
+                else -> ""
+            }
+            
+            generator.getModelsForProvider(currentState.selectedProvider, apiKey)
+                .onSuccess { models ->
+                    _state.update { state ->
+                        state.copy(
+                            availableModels = models,
+                            selectedModel = models.firstOrNull(),
+                            isLoadingModels = false
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _state.update { 
+                        it.copy(
+                            isLoadingModels = false,
+                            generationError = "Failed to load models: ${error.message}"
+                        )
+                    }
+                }
+        }
+    }
+    
+    /**
+     * Generate an image using the selected provider
      */
     fun generateImage(
         prompt: String,
@@ -453,19 +520,32 @@ class CharacterArtViewModel(
         bookTitle: String,
         style: String
     ) {
-        val generator = geminiImageGenerator ?: run {
+        val generator = unifiedImageGenerator ?: geminiImageGenerator?.let { 
+            // Fallback to old Gemini generator if unified not available
+            generateImageWithGemini(prompt, characterName, bookTitle, style)
+            return
+        } ?: run {
             _state.update { it.copy(generationError = "Image generator not available") }
             return
         }
         
-        val apiKey = _state.value.geminiApiKey
-        if (apiKey.isBlank()) {
-            _state.update { it.copy(generationError = "Please set your Gemini API key first") }
+        val currentState = _state.value
+        val provider = currentState.selectedProvider
+        
+        // Check if API key is required and provided
+        val apiKey = when (provider) {
+            ImageProvider.GEMINI -> currentState.geminiApiKey
+            ImageProvider.HUGGING_FACE -> currentState.huggingFaceApiKey
+            ImageProvider.POLLINATIONS -> "" // No key needed
+            ImageProvider.STABILITY_AI -> readerPreferences?.stabilityAiApiKey()?.get() ?: ""
+        }
+        
+        if (provider != ImageProvider.POLLINATIONS && apiKey.isBlank()) {
+            _state.update { it.copy(generationError = "Please set your ${provider.displayName} API key first") }
             return
         }
         
-        val selectedModel = _state.value.selectedModel
-        val modelId = selectedModel?.id ?: "imagen-4.0-generate-001"
+        val modelId = currentState.selectedModel?.id
         
         scope.launch {
             _state.update { 
@@ -476,21 +556,13 @@ class CharacterArtViewModel(
                 ) 
             }
             
-            // Use appropriate generation method based on selected model
-            // Gemini models use generateContent endpoint, Imagen models use predict endpoint
-            val result = if (modelId.startsWith("gemini-")) {
-                generator.generateWithGemini2Flash(apiKey, prompt, characterName, bookTitle, modelId)
-            } else {
-                generator.generateImage(apiKey, prompt, characterName, bookTitle, style, modelId)
-            }
-            
-            result
+            generator.generateWithFallback(provider, apiKey, prompt, characterName, bookTitle, style, modelId)
                 .onSuccess { generatedImage ->
                     _state.update { 
                         it.copy(
                             isGenerating = false,
                             generatedImageBytes = generatedImage.bytes,
-                            successMessage = "Image generated successfully! ??"
+                            successMessage = "Image generated successfully! 🎨"
                         )
                     }
                 }
@@ -501,6 +573,40 @@ class CharacterArtViewModel(
                             generationError = error.message ?: "Image generation failed"
                         )
                     }
+                }
+        }
+    }
+    
+    /**
+     * Legacy method for Gemini-only generation
+     */
+    private fun generateImageWithGemini(
+        prompt: String,
+        characterName: String,
+        bookTitle: String,
+        style: String
+    ) {
+        val generator = geminiImageGenerator ?: return
+        val apiKey = _state.value.geminiApiKey
+        
+        if (apiKey.isBlank()) {
+            _state.update { it.copy(generationError = "Please set your Gemini API key first") }
+            return
+        }
+        
+        val modelId = _state.value.selectedModel?.id ?: "gemini-2.5-flash-image"
+        
+        scope.launch {
+            _state.update { it.copy(isGenerating = true, generationError = null, generatedImageBytes = null) }
+            
+            generator.generateImage(apiKey, prompt, characterName, bookTitle, style, modelId)
+                .onSuccess { generatedImage ->
+                    _state.update { 
+                        it.copy(isGenerating = false, generatedImageBytes = generatedImage.bytes, successMessage = "Image generated! 🎨")
+                    }
+                }
+                .onFailure { error ->
+                    _state.update { it.copy(isGenerating = false, generationError = error.message ?: "Generation failed") }
                 }
         }
     }

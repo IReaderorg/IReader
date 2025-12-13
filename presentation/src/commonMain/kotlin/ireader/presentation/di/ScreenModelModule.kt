@@ -186,6 +186,13 @@ val screenModelModule = module {
         )
     }
     
+    // Unified Image Generator - supports multiple providers
+    single {
+        ireader.data.characterart.UnifiedImageGenerator(
+            httpClient = get<ireader.core.http.HttpClients>().default
+        )
+    }
+    
     // Character Art ViewModel
     factory {
         CharacterArtViewModel(
@@ -195,6 +202,7 @@ val screenModelModule = module {
                 getCurrentUserUseCase().getOrNull()
             },
             geminiImageGenerator = get(),
+            unifiedImageGenerator = get(),
             readerPreferences = get()
         )
     }

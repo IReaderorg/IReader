@@ -79,6 +79,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import androidx.compose.ui.layout.ContentScale
 import ireader.domain.models.characterart.ArtStyleFilter
 import ireader.presentation.ui.component.isTableUi
 
@@ -101,14 +105,14 @@ private val defaultModels = listOf(
 )
 
 /**
- * Screen for uploading new character art with Gemini AI generation support
+ * Screen for uploading new character art with multi-provider AI generation support
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UploadCharacterArtScreen(
     onBack: () -> Unit,
     onPickImage: () -> Unit,
-    onGenerateImage: (apiKey: String, prompt: String, characterName: String, bookTitle: String, style: String) -> Unit,
+    onGenerateImage: (provider: AIProviderOption, apiKey: String, prompt: String, characterName: String, bookTitle: String, style: String, modelId: String?) -> Unit,
     onSubmit: (
         characterName: String,
         bookTitle: String,
@@ -124,15 +128,20 @@ fun UploadCharacterArtScreen(
     isGenerating: Boolean,
     uploadProgress: Float,
     generationError: String?,
+    // Provider selection
+    selectedProvider: AIProviderOption = AIProviderOption.POLLINATIONS,
+    onProviderSelect: (AIProviderOption) -> Unit = {},
     // Model selection parameters
     availableModels: List<GeminiModelInfo> = defaultModels,
     selectedModel: GeminiModelInfo? = defaultModels.firstOrNull(),
     isLoadingModels: Boolean = false,
     onModelSelect: (GeminiModelInfo) -> Unit = {},
-    onFetchModels: (String) -> Unit = {},
-    onApiKeyChanged: (String) -> Unit = {},
-    // Initial API key from preferences
-    initialApiKey: String = "",
+    onFetchModels: (AIProviderOption, String) -> Unit = { _, _ -> },
+    // API keys for different providers
+    onGeminiApiKeyChanged: (String) -> Unit = {},
+    onHuggingFaceApiKeyChanged: (String) -> Unit = {},
+    initialGeminiApiKey: String = "",
+    initialHuggingFaceApiKey: String = "",
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues()
 ) {
@@ -147,29 +156,53 @@ fun UploadCharacterArtScreen(
     var prompt by remember { mutableStateOf("") }
     var selectedTags by remember { mutableStateOf<List<ArtStyleFilter>>(emptyList()) }
     
-    // Gemini AI generation state
+    // AI generation state - supports multiple providers
     var imageSourceMode by remember { mutableStateOf(ImageSourceMode.PICK_FILE) }
-    var geminiApiKey by remember(initialApiKey) { mutableStateOf(initialApiKey) }
+    var currentProvider by remember(selectedProvider) { mutableStateOf(selectedProvider) }
+    var geminiApiKey by remember(initialGeminiApiKey) { mutableStateOf(initialGeminiApiKey) }
+    var huggingFaceApiKey by remember(initialHuggingFaceApiKey) { mutableStateOf(initialHuggingFaceApiKey) }
     var generationPrompt by remember { mutableStateOf("") }
     var selectedStyle by remember { mutableStateOf("digital art") }
     var showApiKeyDialog by remember { mutableStateOf(false) }
+    var showProviderSelector by remember { mutableStateOf(false) }
     
     val hasImage = selectedImagePath != null || generatedImagePreview != null
     val isFormValid = characterName.isNotBlank() && 
                       bookTitle.isNotBlank() && 
                       hasImage
     
-    // API Key dialog
+    // Get current API key based on provider
+    val currentApiKey = when (currentProvider) {
+        AIProviderOption.GEMINI -> geminiApiKey
+        AIProviderOption.HUGGING_FACE -> huggingFaceApiKey
+        AIProviderOption.STABILITY_AI -> "" // TODO: Add stabilityAiApiKey state
+        AIProviderOption.POLLINATIONS -> "" // No key needed
+    }
+    
+    // API Key dialog - supports multiple providers
     if (showApiKeyDialog) {
-        GeminiApiKeyDialog(
-            currentKey = geminiApiKey,
+        MultiProviderApiKeyDialog(
+            provider = currentProvider,
+            currentKey = currentApiKey,
             onDismiss = { showApiKeyDialog = false },
             onSave = { key ->
-                geminiApiKey = key
-                onApiKeyChanged(key)
+                when (currentProvider) {
+                    AIProviderOption.GEMINI -> {
+                        geminiApiKey = key
+                        onGeminiApiKeyChanged(key)
+                    }
+                    AIProviderOption.HUGGING_FACE -> {
+                        huggingFaceApiKey = key
+                        onHuggingFaceApiKeyChanged(key)
+                    }
+                    AIProviderOption.STABILITY_AI -> {
+                        // TODO: Add stabilityAiApiKey state and callback
+                    }
+                    AIProviderOption.POLLINATIONS -> { /* No key needed */ }
+                }
                 // Fetch models when API key is set
-                if (key.isNotBlank()) {
-                    onFetchModels(key)
+                if (key.isNotBlank() || !currentProvider.requiresApiKey) {
+                    onFetchModels(currentProvider, key)
                 }
                 showApiKeyDialog = false
             }
@@ -213,8 +246,9 @@ fun UploadCharacterArtScreen(
                         }
 
                         ImageSourceMode.GENERATE_AI -> {
-                            GeminiGeneratorSection(
-                                apiKey = geminiApiKey,
+                            AIGeneratorSection(
+                                provider = currentProvider,
+                                apiKey = currentApiKey,
                                 prompt = generationPrompt,
                                 characterName = characterName,
                                 bookTitle = bookTitle,
@@ -225,27 +259,50 @@ fun UploadCharacterArtScreen(
                                 generatedPreview = generatedImagePreview,
                                 isGenerating = isGenerating,
                                 error = generationError,
+                                onProviderClick = { showProviderSelector = true },
                                 onApiKeyClick = { showApiKeyDialog = true },
                                 onPromptChange = { generationPrompt = it },
                                 onStyleChange = { selectedStyle = it },
                                 onModelSelect = onModelSelect,
-                                onFetchModels = { onFetchModels(geminiApiKey) },
+                                onFetchModels = { onFetchModels(currentProvider, currentApiKey) },
                                 onGenerate = {
-                                    if (geminiApiKey.isNotBlank() && generationPrompt.isNotBlank()) {
+                                    val canGenerate = !currentProvider.requiresApiKey || currentApiKey.isNotBlank()
+                                    if (canGenerate && generationPrompt.isNotBlank()) {
                                         onGenerateImage(
-                                            geminiApiKey,
+                                            currentProvider,
+                                            currentApiKey,
                                             generationPrompt,
                                             characterName,
                                             bookTitle,
-                                            selectedStyle
+                                            selectedStyle,
+                                            selectedModel?.id
                                         )
-                                        // Auto-fill AI model with selected model name
-                                        aiModel = selectedModel?.displayName ?: "Gemini Imagen 3"
+                                        // Auto-fill AI model with provider and model name
+                                        aiModel = "${currentProvider.displayName} - ${selectedModel?.displayName ?: "Default"}"
                                         prompt = generationPrompt
                                     }
                                 },
                                 isWideScreen = isWideScreen
                             )
+                            
+                            // Provider selector dropdown
+                            if (showProviderSelector) {
+                                ProviderSelectorDialog(
+                                    currentProvider = currentProvider,
+                                    onProviderSelect = { provider ->
+                                        currentProvider = provider
+                                        onProviderSelect(provider)
+                                        onFetchModels(provider, when (provider) {
+                                            AIProviderOption.GEMINI -> geminiApiKey
+                                            AIProviderOption.HUGGING_FACE -> huggingFaceApiKey
+                                            AIProviderOption.STABILITY_AI -> ""
+                                            AIProviderOption.POLLINATIONS -> ""
+                                        })
+                                        showProviderSelector = false
+                                    },
+                                    onDismiss = { showProviderSelector = false }
+                                )
+                            }
                         }
                     }
 
@@ -747,10 +804,51 @@ data class GeminiModelInfo(
 )
 
 /**
- * Gemini AI image generation section
+ * Available AI providers for image generation
+ */
+enum class AIProviderOption(
+    val displayName: String,
+    val emoji: String,
+    val requiresApiKey: Boolean,
+    val description: String,
+    val apiKeyUrl: String
+) {
+    POLLINATIONS(
+        displayName = "Pollinations.ai",
+        emoji = "🌸",
+        requiresApiKey = false,
+        description = "FREE - No API key needed!",
+        apiKeyUrl = ""
+    ),
+    GEMINI(
+        displayName = "Google Gemini",
+        emoji = "✨",
+        requiresApiKey = true,
+        description = "High quality image generation",
+        apiKeyUrl = "aistudio.google.com/apikey"
+    ),
+    HUGGING_FACE(
+        displayName = "Hugging Face",
+        emoji = "🤗",
+        requiresApiKey = true,
+        description = "Many models, free tier",
+        apiKeyUrl = "huggingface.co/settings/tokens"
+    ),
+    STABILITY_AI(
+        displayName = "Stability AI",
+        emoji = "🎨",
+        requiresApiKey = true,
+        description = "Stable Diffusion, pay-per-use",
+        apiKeyUrl = "platform.stability.ai/account/keys"
+    )
+}
+
+/**
+ * Multi-provider AI image generation section
  */
 @Composable
-private fun GeminiGeneratorSection(
+private fun AIGeneratorSection(
+    provider: AIProviderOption,
     apiKey: String,
     prompt: String,
     characterName: String,
@@ -762,6 +860,7 @@ private fun GeminiGeneratorSection(
     generatedPreview: ByteArray?,
     isGenerating: Boolean,
     error: String?,
+    onProviderClick: () -> Unit,
     onApiKeyClick: () -> Unit,
     onPromptChange: (String) -> Unit,
     onStyleChange: (String) -> Unit,
@@ -771,7 +870,7 @@ private fun GeminiGeneratorSection(
     isWideScreen: Boolean
 ) {
     val height = if (isWideScreen) 400.dp else 320.dp
-    val hasApiKey = apiKey.isNotBlank()
+    val hasApiKey = apiKey.isNotBlank() || !provider.requiresApiKey
     var showModelDropdown by remember { mutableStateOf(false) }
     
     Card(
@@ -789,48 +888,84 @@ private fun GeminiGeneratorSection(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Header
+            // Header with provider selector
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("✨", fontSize = 24.sp)
-                Spacer(Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Gemini AI Generator",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Create character art with AI",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                
-                // API Key status
+                // Provider selector button
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = if (hasApiKey)
-                        MaterialTheme.colorScheme.primaryContainer
-                    else
-                        MaterialTheme.colorScheme.errorContainer,
-                    onClick = onApiKeyClick
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    onClick = onProviderClick
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            if (hasApiKey) Icons.Default.Key else Icons.Default.Warning,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Text(provider.emoji, fontSize = 20.sp)
+                        Spacer(Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                text = provider.displayName,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = provider.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                                maxLines = 1
+                            )
+                        }
                         Spacer(Modifier.width(4.dp))
+                        Icon(
+                            Icons.Default.ArrowDropDown,
+                            contentDescription = "Change provider",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                
+                Spacer(Modifier.weight(1f))
+                
+                // API Key status (only show if provider requires key)
+                if (provider.requiresApiKey) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (apiKey.isNotBlank())
+                            MaterialTheme.colorScheme.primaryContainer
+                        else
+                            MaterialTheme.colorScheme.errorContainer,
+                        onClick = onApiKeyClick
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                if (apiKey.isNotBlank()) Icons.Default.Key else Icons.Default.Warning,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = if (apiKey.isNotBlank()) "Key Set" else "Add Key",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+                } else {
+                    // Show "FREE" badge for providers that don't need API key
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.tertiaryContainer
+                    ) {
                         Text(
-                            text = if (hasApiKey) "API Key Set" else "Add Key",
-                            style = MaterialTheme.typography.labelSmall
+                            text = "✓ FREE",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                         )
                     }
                 }
@@ -1038,61 +1173,21 @@ private fun GeminiGeneratorSection(
             
             // Generated preview or generate button
             if (generatedPreview != null) {
-                // Show preview
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primaryContainer,
-                                        MaterialTheme.colorScheme.surface
-                                    )
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                modifier = Modifier.size(48.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                "Image Generated!",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                "${generatedPreview.size / 1024} KB",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            TextButton(onClick = onGenerate) {
-                                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("Regenerate")
-                            }
-                        }
-                        // TODO: Show actual image preview with AsyncImage
-                    }
-                }
+                // Show actual generated image preview
+                GeneratedImagePreview(
+                    imageBytes = generatedPreview,
+                    onRegenerate = onGenerate,
+                    isWideScreen = isWideScreen
+                )
             } else {
                 // Generate button
+                val canGenerate = hasApiKey && prompt.isNotBlank() && 
+                                  characterName.isNotBlank() && bookTitle.isNotBlank() && 
+                                  !isGenerating
+                
                 Button(
                     onClick = onGenerate,
-                    enabled = hasApiKey && prompt.isNotBlank() && 
-                              characterName.isNotBlank() && bookTitle.isNotBlank() && 
-                              !isGenerating,
+                    enabled = canGenerate,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -1103,11 +1198,11 @@ private fun GeminiGeneratorSection(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("Generating...")
+                        Text("Generating with ${provider.displayName}...")
                     } else {
-                        Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                        Text(provider.emoji, fontSize = 16.sp)
                         Spacer(Modifier.width(8.dp))
-                        Text("Generate Image")
+                        Text("Generate with ${provider.displayName}")
                     }
                 }
             }
@@ -1116,10 +1211,189 @@ private fun GeminiGeneratorSection(
 }
 
 /**
- * Dialog for entering Gemini API key
+ * Preview component for generated image with actual image display
  */
 @Composable
-private fun GeminiApiKeyDialog(
+private fun GeneratedImagePreview(
+    imageBytes: ByteArray,
+    onRegenerate: () -> Unit,
+    isWideScreen: Boolean
+) {
+    val height = if (isWideScreen) 350.dp else 280.dp
+    var isFullScreen by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            // Display the actual generated image
+            val context = LocalPlatformContext.current
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(imageBytes)
+                    .build(),
+                contentDescription = "Generated character art",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { isFullScreen = true },
+                contentScale = ContentScale.Fit
+            )
+            
+            // Overlay with success indicator and actions
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+            )
+            
+            // Bottom action bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Success indicator
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.Green
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            "Image Generated!",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                        Text(
+                            "${imageBytes.size / 1024} KB",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+                
+                // Regenerate button
+                Surface(
+                    onClick = onRegenerate,
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "Regenerate",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                }
+            }
+            
+            // Tap to view hint
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = Color.Black.copy(alpha = 0.5f)
+            ) {
+                Text(
+                    "Tap to enlarge",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
+    }
+    
+    // Full screen image dialog
+    if (isFullScreen) {
+        FullScreenImageDialog(
+            imageBytes = imageBytes,
+            onDismiss = { isFullScreen = false }
+        )
+    }
+}
+
+/**
+ * Full screen dialog to view the generated image
+ */
+@Composable
+private fun FullScreenImageDialog(
+    imageBytes: ByteArray,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxSize(0.95f),
+        title = null,
+        text = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                val context = LocalPlatformContext.current
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(imageBytes)
+                        .build(),
+                    contentDescription = "Generated character art full view",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Fit
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
+/**
+ * Dialog for entering API key for any provider
+ */
+@Composable
+private fun MultiProviderApiKeyDialog(
+    provider: AIProviderOption,
     currentKey: String,
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
@@ -1131,35 +1405,44 @@ private fun GeminiApiKeyDialog(
         onDismissRequest = onDismiss,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🔑", fontSize = 24.sp)
+                Text(provider.emoji, fontSize = 24.sp)
                 Spacer(Modifier.width(8.dp))
-                Text("Gemini API Key")
+                Text("${provider.displayName} API Key")
             }
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "Enter your Gemini API key to generate images. Get one free at:",
+                    text = "Enter your ${provider.displayName} API key to generate images. Get one free at:",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                ) {
-                    Text(
-                        text = "aistudio.google.com/apikey",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                if (provider.apiKeyUrl.isNotBlank()) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    ) {
+                        Text(
+                            text = provider.apiKeyUrl,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
                 }
                 
                 OutlinedTextField(
                     value = apiKey,
                     onValueChange = { apiKey = it },
                     label = { Text("API Key") },
-                    placeholder = { Text("AIza...") },
+                    placeholder = { 
+                        Text(when (provider) {
+                            AIProviderOption.GEMINI -> "AIza..."
+                            AIProviderOption.HUGGING_FACE -> "hf_..."
+                            AIProviderOption.STABILITY_AI -> "sk-..."
+                            AIProviderOption.POLLINATIONS -> ""
+                        })
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     visualTransformation = if (showKey) 
@@ -1178,7 +1461,7 @@ private fun GeminiApiKeyDialog(
                 )
                 
                 Text(
-                    text = "⚠️ Your API key is stored locally and never shared.",
+                    text = "🔒 Your API key is stored locally and never shared.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1201,7 +1484,96 @@ private fun GeminiApiKeyDialog(
 }
 
 /**
- * Overload for backward compatibility (without Gemini features)
+ * Dialog for selecting AI provider
+ */
+@Composable
+private fun ProviderSelectorDialog(
+    currentProvider: AIProviderOption,
+    onProviderSelect: (AIProviderOption) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("🤖", fontSize = 24.sp)
+                Spacer(Modifier.width(8.dp))
+                Text("Choose AI Provider")
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                AIProviderOption.entries.forEach { provider ->
+                    val isSelected = provider == currentProvider
+                    
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.primaryContainer
+                        else
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        onClick = { onProviderSelect(provider) }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(provider.emoji, fontSize = 24.sp)
+                            Spacer(Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = provider.displayName,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                )
+                                Text(
+                                    text = provider.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (isSelected)
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            if (!provider.requiresApiKey) {
+                                Spacer(Modifier.width(8.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = MaterialTheme.colorScheme.tertiaryContainer
+                                ) {
+                                    Text(
+                                        text = "FREE",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
+/**
+ * Overload for backward compatibility (without AI generation features)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1226,7 +1598,7 @@ fun UploadCharacterArtScreen(
     UploadCharacterArtScreen(
         onBack = onBack,
         onPickImage = onPickImage,
-        onGenerateImage = { _, _, _, _, _ -> },
+        onGenerateImage = { _, _, _, _, _, _, _ -> },
         onSubmit = onSubmit,
         selectedImagePath = selectedImagePath,
         generatedImagePreview = null,
@@ -1234,13 +1606,17 @@ fun UploadCharacterArtScreen(
         isGenerating = false,
         uploadProgress = uploadProgress,
         generationError = null,
+        selectedProvider = AIProviderOption.POLLINATIONS,
+        onProviderSelect = {},
         availableModels = defaultModels,
         selectedModel = defaultModels.firstOrNull(),
         isLoadingModels = false,
         onModelSelect = {},
-        onFetchModels = {},
-        onApiKeyChanged = {},
-        initialApiKey = "",
+        onFetchModels = { _, _ -> },
+        onGeminiApiKeyChanged = {},
+        onHuggingFaceApiKeyChanged = {},
+        initialGeminiApiKey = "",
+        initialHuggingFaceApiKey = "",
         modifier = modifier,
         paddingValues = paddingValues
     )
