@@ -8,4 +8,5 @@ object Modules {
     const val presentation = ":presentation"
     const val presentationCore = ":presentation-core"
     const val sourceApi = ":source-api"
+    const val pluginApi = ":plugin-api"
 }

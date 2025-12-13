@@ -1,40 +1,65 @@
-package ireader.domain.plugins
+package ireader.plugin.api
 
 import kotlinx.serialization.Serializable
 
 /**
- * Plugin interface for custom themes
- * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5
+ * Plugin interface for custom themes.
+ * Theme plugins provide custom color schemes, typography, and backgrounds.
+ * 
+ * Example:
+ * ```kotlin
+ * class OceanThemePlugin : ThemePlugin {
+ *     override val manifest = PluginManifest(
+ *         id = "com.example.ocean-theme",
+ *         name = "Ocean Theme",
+ *         type = PluginType.THEME,
+ *         // ... other manifest fields
+ *     )
+ *     
+ *     override fun getColorScheme(isDark: Boolean): ThemeColorScheme {
+ *         return if (isDark) darkOceanColors else lightOceanColors
+ *     }
+ *     
+ *     // ... other implementations
+ * }
+ * ```
  */
 interface ThemePlugin : Plugin {
     /**
-     * Get the color scheme for the theme
+     * Get the color scheme for the theme.
+     * 
      * @param isDark Whether to return dark or light theme colors
+     * @return Color scheme for the theme
      */
     fun getColorScheme(isDark: Boolean): ThemeColorScheme
     
     /**
-     * Get extra colors not included in standard color scheme
+     * Get extra colors not included in standard color scheme.
+     * 
      * @param isDark Whether to return dark or light theme colors
+     * @return Extra colors for the theme
      */
     fun getExtraColors(isDark: Boolean): ThemeExtraColors
     
     /**
-     * Get custom typography settings (optional)
+     * Get custom typography settings (optional).
+     * 
      * @return Typography settings or null to use default
      */
-    fun getTypography(): ThemeTypography?
+    fun getTypography(): ThemeTypography? = null
     
     /**
-     * Get background assets for the theme (optional)
+     * Get background assets for the theme (optional).
+     * 
      * @return Background assets or null for no custom backgrounds
      */
-    fun getBackgroundAssets(): ThemeBackgrounds?
+    fun getBackgroundAssets(): ThemeBackgrounds? = null
 }
 
 /**
- * Color scheme for theme plugins
- * Simplified representation of Material3 ColorScheme
+ * Color scheme for theme plugins.
+ * Based on Material Design 3 color system.
+ * Colors are represented as ARGB Long values (e.g., 0xFF6200EE).
  */
 @Serializable
 data class ThemeColorScheme(
@@ -69,17 +94,22 @@ data class ThemeColorScheme(
 )
 
 /**
- * Extra colors for theme plugins
+ * Extra colors for theme plugins.
+ * Used for app bars and other custom UI elements.
  */
 @Serializable
 data class ThemeExtraColors(
+    /** Color for app bars */
     val bars: Long,
+    /** Color for content on app bars */
     val onBars: Long,
+    /** Whether the bar uses light content (for status bar icons) */
     val isBarLight: Boolean
 )
 
 /**
- * Typography settings for theme plugins
+ * Typography settings for theme plugins.
+ * All values are optional - null values use system defaults.
  */
 @Serializable
 data class ThemeTypography(
@@ -102,10 +132,13 @@ data class ThemeTypography(
 )
 
 /**
- * Background assets for theme plugins
+ * Background assets for theme plugins.
+ * URLs to background images for reader and app.
  */
 @Serializable
 data class ThemeBackgrounds(
+    /** URL to reader background image */
     val readerBackground: String? = null,
+    /** URL to app background image */
     val appBackground: String? = null
 )

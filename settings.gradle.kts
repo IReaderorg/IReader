@@ -21,6 +21,7 @@ include(":core")
 include(":i18n")
 include(":desktop")
 include(":source-api")
+include(":plugin-api")
 include(":source-runtime-js")
 include(":ios-build-check")
 

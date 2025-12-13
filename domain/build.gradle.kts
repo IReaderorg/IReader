@@ -119,6 +119,7 @@ kotlin {
                 implementation(project(Modules.commonResources))
                 implementation(project(Modules.coreApi))
                 implementation(project(Modules.sourceApi))
+                api(project(Modules.pluginApi))
                 // Compose dependencies removed - domain layer is now UI-framework agnostic ✅
                 // Only keeping resources for i18n support
                 api(compose.components.resources)
