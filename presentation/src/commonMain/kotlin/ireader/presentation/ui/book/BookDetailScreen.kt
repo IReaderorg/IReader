@@ -50,7 +50,11 @@ import ireader.presentation.ui.book.components.ModernBookHeader
 import ireader.presentation.ui.book.components.ModernBookSummary
 import ireader.presentation.ui.book.components.NovelInfoFab
 import ireader.presentation.ui.book.components.TranslationWarningDialog
+import ireader.presentation.ui.book.components.CharacterArtSection
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
@@ -301,6 +305,13 @@ fun BookDetailScreen(
                         BookReviewsIntegration(
                             bookTitle = book.title,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                        )
+                    }
+                    // Character Art Section (if enabled)
+                    item {
+                        CharacterArtSectionWrapper(
+                            bookTitle = book.title,
+                            uiPreferences = uiPreferences
                         )
                     }
                     item {
@@ -643,5 +654,55 @@ private fun ChapterListPanel(
             }
         }
     }
+}
+
+/**
+ * Wrapper composable for Character Art Section that handles preference checking
+ * and data loading. Only shows when the preference is enabled.
+ */
+@Composable
+private fun CharacterArtSectionWrapper(
+    bookTitle: String,
+    uiPreferences: UiPreferences
+) {
+    val showCharacterArt by uiPreferences.showCharacterArtInDetails().changes().collectAsState(initial = false)
+    
+    if (!showCharacterArt) {
+        return
+    }
+    
+    // State for character art
+    var characterArtList by remember { mutableStateOf<List<ireader.domain.models.characterart.CharacterArt>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    
+    // Get the repository from Koin - will be null if not available
+    val repository: ireader.domain.data.repository.CharacterArtRepository? = org.koin.compose.getKoin().getOrNull()
+    
+    // Load character art for this book
+    LaunchedEffect(bookTitle, repository) {
+        if (repository != null) {
+            isLoading = true
+            repository.getApprovedArt(
+                searchQuery = bookTitle,
+                limit = 10,
+                offset = 0
+            ).onSuccess { art ->
+                characterArtList = art
+                isLoading = false
+            }.onFailure {
+                isLoading = false
+            }
+        } else {
+            isLoading = false
+        }
+    }
+    
+    CharacterArtSection(
+        bookTitle = bookTitle,
+        characterArtList = characterArtList,
+        isLoading = isLoading,
+        onViewAll = { /* Navigate to character art gallery with filter */ },
+        onArtClick = { /* Navigate to character art detail */ }
+    )
 }
 

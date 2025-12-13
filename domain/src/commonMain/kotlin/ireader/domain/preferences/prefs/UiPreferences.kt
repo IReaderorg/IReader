@@ -425,4 +425,18 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun hasCompletedFirstLaunch(): Preference<Boolean> {
         return preferenceStore.getBoolean("has_completed_first_launch", false)
     }
+    
+    // ============================================================================
+    // Character Art Settings
+    // ============================================================================
+    
+    /**
+     * Whether to show character art gallery in book detail screens.
+     * When enabled, displays AI-generated character art related to the novel
+     * in a horizontal carousel on the book detail page.
+     * Default: false (disabled)
+     */
+    fun showCharacterArtInDetails(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_character_art_in_details", false)
+    }
 }

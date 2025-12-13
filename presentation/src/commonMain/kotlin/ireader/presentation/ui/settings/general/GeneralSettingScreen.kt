@@ -213,6 +213,12 @@ fun GeneralSettingScreen(
                         subtitle = localizeHelper.localize(Res.string.default_sorting_method_for_chapter_lists)
                     )
                 },
+                Components.Switch(
+                        preference = vm.showCharacterArtInDetails,
+                        title = "Show Character Art",
+                        subtitle = "Display AI-generated character art gallery in book details",
+                        icon = Icons.Filled.Settings
+                ),
                 
                 Components.Space,
                 
@@ -600,6 +606,9 @@ class GeneralSettingScreenViewModel(
     
     // Leaderboard preferences
     val leaderboardRealtimeEnabled = uiPreferences.leaderboardRealtimeEnabled().asStateIn(scope)
+    
+    // Character Art preferences
+    val showCharacterArtInDetails = uiPreferences.showCharacterArtInDetails().asStateIn(scope)
 
     /**
      * Returns language choices filtered to only include languages that have
