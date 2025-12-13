@@ -212,6 +212,15 @@ fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.BrowseSettin
     navigate(NavigationRoutes.browseSettings, NavOptions.singleTop)
 }
 
+fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.PluginDetailsScreenSpec) {
+    val route = NavigationRoutes.pluginDetails(spec.pluginId)
+    if (isCurrentRoute(route)) return
+    navigate(route) {
+        launchSingleTop = true
+        popUpTo(NavigationRoutes.PLUGIN_DETAILS_BASE) { inclusive = true }
+    }
+}
+
 // Expect functions for platform-specific screen specs
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.WebViewScreenSpec)
 

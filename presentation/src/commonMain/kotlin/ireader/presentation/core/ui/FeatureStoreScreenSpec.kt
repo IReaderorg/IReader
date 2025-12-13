@@ -5,6 +5,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.featurestore.FeatureStoreScreen
 import ireader.presentation.ui.featurestore.FeatureStoreViewModel
@@ -28,8 +29,7 @@ class FeatureStoreScreenSpec {
                     navController?.popBackStack()
                 },
                 onPluginClick = { pluginId ->
-                    // TODO: Navigate to plugin details screen when implemented
-                    // For now, plugin details are shown inline or via a dialog
+                    navController?.navigateTo(PluginDetailsScreenSpec(pluginId))
                 }
             )
         }

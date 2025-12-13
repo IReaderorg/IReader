@@ -72,6 +72,10 @@ object NavigationRoutes {
     const val featureStore = "featureStore"
     const val pluginRepository = "pluginRepository"
     const val developerPortal = "developerPortal"
+    const val PLUGIN_DETAILS = "pluginDetails/{pluginId}"
+    const val PLUGIN_DETAILS_BASE = "pluginDetails"
+    
+    fun pluginDetails(pluginId: String) = "pluginDetails/$pluginId"
     
     // Routes with parameters
     fun bookDetail(bookId: Long) = "bookDetail/$bookId"

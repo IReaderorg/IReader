@@ -55,7 +55,7 @@ jobs:
       run:
         shell: ${{ matrix.shell }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -73,7 +73,6 @@ jobs:
 
       - name: Build rpm Package
         if: ${{ matrix.runtime == 'linux-fedora-x64' }}
-        uses: Syer10/Fedora-Java21-Action@v1
         env:
           # 7-Project Supabase Configuration
           SUPABASE_AUTH_URL: ${{ secrets.SUPABASE_AUTH_URL }}
@@ -96,8 +95,33 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
-        with:
-          command: ./gradlew ${{ matrix.build }} --stacktrace
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace \
+            -e SUPABASE_AUTH_URL="${{ secrets.SUPABASE_AUTH_URL }}" \
+            -e SUPABASE_AUTH_KEY="${{ secrets.SUPABASE_AUTH_KEY }}" \
+            -e SUPABASE_READING_URL="${{ secrets.SUPABASE_READING_URL }}" \
+            -e SUPABASE_READING_KEY="${{ secrets.SUPABASE_READING_KEY }}" \
+            -e SUPABASE_LIBRARY_URL="${{ secrets.SUPABASE_LIBRARY_URL }}" \
+            -e SUPABASE_LIBRARY_KEY="${{ secrets.SUPABASE_LIBRARY_KEY }}" \
+            -e SUPABASE_BOOK_REVIEWS_URL="${{ secrets.SUPABASE_BOOK_REVIEWS_URL }}" \
+            -e SUPABASE_BOOK_REVIEWS_KEY="${{ secrets.SUPABASE_BOOK_REVIEWS_KEY }}" \
+            -e SUPABASE_CHAPTER_REVIEWS_URL="${{ secrets.SUPABASE_CHAPTER_REVIEWS_URL }}" \
+            -e SUPABASE_CHAPTER_REVIEWS_KEY="${{ secrets.SUPABASE_CHAPTER_REVIEWS_KEY }}" \
+            -e SUPABASE_BADGES_URL="${{ secrets.SUPABASE_BADGES_URL }}" \
+            -e SUPABASE_BADGES_KEY="${{ secrets.SUPABASE_BADGES_KEY }}" \
+            -e SUPABASE_ANALYTICS_URL="${{ secrets.SUPABASE_ANALYTICS_URL }}" \
+            -e SUPABASE_ANALYTICS_KEY="${{ secrets.SUPABASE_ANALYTICS_KEY }}" \
+            -e R2_ACCOUNT_ID="${{ secrets.R2_ACCOUNT_ID }}" \
+            -e R2_ACCESS_KEY_ID="${{ secrets.R2_ACCESS_KEY_ID }}" \
+            -e R2_SECRET_ACCESS_KEY="${{ secrets.R2_SECRET_ACCESS_KEY }}" \
+            -e R2_BUCKET_NAME="${{ secrets.R2_BUCKET_NAME }}" \
+            -e R2_PUBLIC_URL="${{ secrets.R2_PUBLIC_URL }}" \
+            fedora:latest bash -c "
+            dnf install -y java-21-openjdk-devel java-21-openjdk-jmods rpm-build findutils git &&
+            export JAVA_HOME=/usr/lib/jvm/java-21-openjdk &&
+            export PATH=\$JAVA_HOME/bin:\$PATH &&
+            ./gradlew ${{ matrix.build }} --stacktrace
+          "
 
       - name: Build
         if: ${{ matrix.runtime != 'linux-fedora-x64' }}

@@ -212,6 +212,17 @@ fun CommonNavHost(
             ireader.presentation.core.ui.DeveloperPortalScreenSpec().Content()
         }
         
+        // Plugin Details - Show detailed plugin information
+        composable(
+            route = NavigationRoutes.PLUGIN_DETAILS,
+            arguments = listOf(
+                navArgument("pluginId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val pluginId = backStackEntry.arguments?.getString("pluginId") ?: return@composable
+            ireader.presentation.core.ui.PluginDetailsScreenSpec(pluginId).Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }
