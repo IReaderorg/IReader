@@ -2,9 +2,11 @@ package ireader.domain.usecases.epub
 
 import ireader.core.log.Log
 import ireader.domain.data.repository.ChapterRepository
+import ireader.domain.data.repository.TranslatedChapterRepository
 import ireader.domain.epub.EpubBuilder
 import ireader.domain.models.common.Uri
 import ireader.domain.models.entities.Book
+import ireader.domain.models.entities.TranslatedChapter
 import ireader.domain.models.epub.ExportOptions
 import ireader.domain.usecases.local.book_usecases.FindBookById
 
@@ -14,6 +16,7 @@ import ireader.domain.usecases.local.book_usecases.FindBookById
  * This use case:
  * - Fetches book details and chapters
  * - Applies export options (selected chapters, formatting, etc.)
+ * - Optionally uses translated content instead of original content
  * - Creates a valid EPUB 3.0 file
  * 
  * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5
@@ -21,6 +24,7 @@ import ireader.domain.usecases.local.book_usecases.FindBookById
 class ExportBookAsEpubUseCase(
     private val findBookById: FindBookById,
     private val chapterRepository: ChapterRepository,
+    private val translatedChapterRepository: TranslatedChapterRepository,
     private val epubBuilder: EpubBuilder
 ) {
     /**
@@ -66,6 +70,21 @@ class ExportBookAsEpubUseCase(
                 return Result.failure(Exception("No chapters selected for export"))
             }
             
+            // Fetch translated chapters if requested
+            val translationsMap: Map<Long, TranslatedChapter> = if (options.useTranslatedContent) {
+                onProgress("Loading translated content...")
+                translatedChapterRepository.getTranslatedChaptersByBookId(bookId)
+                    .filter { it.targetLanguage == options.translationTargetLanguage }
+                    .associateBy { it.chapterId }
+            } else {
+                emptyMap()
+            }
+            
+            if (options.useTranslatedContent && translationsMap.isEmpty()) {
+                Log.warn { "No translations found for target language: ${options.translationTargetLanguage}" }
+                onProgress("Warning: No translations found, using original content")
+            }
+            
             onProgress("Creating EPUB file...")
             
             // For content URIs (Android), we need to create a temp file first
@@ -83,7 +102,8 @@ class ExportBookAsEpubUseCase(
                 book = book,
                 chapters = selectedChapters,
                 options = options,
-                outputUri = tempFilePath
+                outputUri = tempFilePath,
+                translationsMap = translationsMap
             )
             
             // If we used a temp file for content URI, we need to copy it

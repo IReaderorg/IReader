@@ -121,6 +121,7 @@ class BookDetailViewModel(
     val historyUseCase get() = bookDetailUseCases.historyUseCase
     val exportNovelAsEpub get() = bookDetailUseCases.exportNovelAsEpub
     private val exportBookAsEpubUseCase get() = bookDetailUseCases.exportBookAsEpub
+    private val getTranslatedChaptersByBookIdUseCase get() = bookDetailUseCases.getTranslatedChaptersByBookId
     val insertUseCases get() = bookDetailUseCases.insertUseCases
 
     data class Param(val bookId: Long?)
@@ -167,6 +168,12 @@ class BookDetailViewModel(
     var showMigrationDialog by mutableStateOf(false)
     var showEpubExportDialog by mutableStateOf(false)
     var availableMigrationSources by mutableStateOf<List<CatalogLocal>>(emptyList())
+    
+    // Translation export state
+    var hasTranslationsForExport by mutableStateOf(false)
+        private set
+    var translationExportTargetLanguage by mutableStateOf("en")
+        private set
     
     // Source switching state
     val sourceSwitchingState = SourceSwitchingState()
@@ -1326,6 +1333,27 @@ class BookDetailViewModel(
 
     // ==================== EPUB Export ====================
     
+    /**
+     * Check if the book has any translated chapters available for export.
+     * Should be called before showing the export dialog.
+     */
+    fun checkTranslationsForExport() {
+        val currentBook = book ?: return
+        scope.launch {
+            try {
+                val translations = getTranslatedChaptersByBookIdUseCase(currentBook.id)
+                hasTranslationsForExport = translations.isNotEmpty()
+                // Get the target language from the first translation if available
+                translations.firstOrNull()?.let {
+                    translationExportTargetLanguage = it.targetLanguage
+                }
+            } catch (e: Exception) {
+                Log.error("Failed to check translations for export", e)
+                hasTranslationsForExport = false
+            }
+        }
+    }
+    
     fun exportAsEpub(options: ExportOptions) {
         val currentBook = book ?: return
         
@@ -1356,7 +1384,9 @@ class BookDetailViewModel(
                         ireader.presentation.ui.book.components.Typography.SANS_SERIF -> "sans-serif"
                         else -> "serif"
                     },
-                    fontSize = 16
+                    fontSize = 16,
+                    useTranslatedContent = options.useTranslatedContent,
+                    translationTargetLanguage = options.translationTargetLanguage
                 )
                 
                 val result = exportBookAsEpubUseCase(
@@ -1368,7 +1398,8 @@ class BookDetailViewModel(
                 }
                 
                 result.onSuccess { filePath ->
-                    emitEvent(BookDetailEvent.ShowSnackbar("EPUB exported successfully"))
+                    val exportType = if (options.useTranslatedContent) "translated " else ""
+                    emitEvent(BookDetailEvent.ShowSnackbar("${exportType}EPUB exported successfully"))
                     Log.info { "EPUB export successful: $filePath" }
                 }.onFailure { error ->
                     emitEvent(BookDetailEvent.ShowSnackbar("Export failed: ${error.message}"))

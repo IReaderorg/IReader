@@ -377,7 +377,10 @@ data class BookDetailScreenSpec constructor(
                                 onUnarchive = { vm.unarchiveBook(state.book) },
                                 isArchived = state.isArchived,
                                 onShareBook = { vm.shareBook() },
-                                onExportEpub = { vm.showEpubExportDialog = true }
+                                onExportEpub = { 
+                                    vm.checkTranslationsForExport()
+                                    vm.showEpubExportDialog = true 
+                                }
                             )
                         },
                         floatingActionButton = {
@@ -593,6 +596,8 @@ data class BookDetailScreenSpec constructor(
             ireader.presentation.ui.book.components.EpubExportDialog(
                 book = state.book,
                 chapters = state.chapters,
+                hasTranslations = vm.hasTranslationsForExport,
+                translationTargetLanguage = vm.translationExportTargetLanguage,
                 onExport = { options ->
                     vm.showEpubExportDialog = false
                     vm.exportAsEpub(options)

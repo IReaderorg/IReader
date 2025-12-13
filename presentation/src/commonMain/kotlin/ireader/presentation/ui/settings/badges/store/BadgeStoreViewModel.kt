@@ -49,9 +49,14 @@ class BadgeStoreViewModel(
             
             result
                 .onSuccess { badges ->
+                    // Sort badges by price from low to high
+                    // Badges with null price (NFT badges) go to the end
+                    val sortedBadges = badges.sortedWith(
+                        compareBy(nullsLast()) { it.price }
+                    )
                     _state.update { 
                         it.copy(
-                            badges = badges,
+                            badges = sortedBadges,
                             isLoading = false,
                             error = null
                         )

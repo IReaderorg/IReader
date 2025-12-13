@@ -13,6 +13,7 @@ import ireader.domain.usecases.local.DeleteUseCase
 import ireader.domain.usecases.local.LocalGetChapterUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.usecases.review.GetBookReviewsUseCase
+import ireader.domain.usecases.translation.GetTranslatedChaptersByBookIdUseCase
 
 /**
  * Aggregate class for BookDetailViewModel use cases.
@@ -60,5 +61,8 @@ data class BookDetailUseCases(
     val exportBookAsEpub: ExportBookAsEpubUseCase,
     
     /** Use case for getting book reviews */
-    val getBookReviews: GetBookReviewsUseCase
+    val getBookReviews: GetBookReviewsUseCase,
+    
+    /** Use case for getting translated chapters by book ID */
+    val getTranslatedChaptersByBookId: GetTranslatedChaptersByBookIdUseCase
 )

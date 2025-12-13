@@ -10,7 +10,11 @@ data class ExportOptions(
     val chapterHeadingSize: Float = 1.5f,
     val fontFamily: String = "serif",
     val fontSize: Int = 16,
-    val includeImages: Boolean = true
+    val includeImages: Boolean = true,
+    /** When true, export translated content instead of original content */
+    val useTranslatedContent: Boolean = false,
+    /** Target language for translated content (e.g., "en", "es") */
+    val translationTargetLanguage: String = "en"
 )
 
 /**

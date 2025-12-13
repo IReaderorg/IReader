@@ -44,6 +44,7 @@ class EpubBuilder(
      * @param options Export configuration options
      * @param outputUri The destination file path
      * @param tempDirPath Optional custom temp directory path (for Android compatibility)
+     * @param translationsMap Optional map of chapter ID to translated chapter for translated export
      * @return Result containing the file path or an error
      */
     suspend fun createEpub(
@@ -51,7 +52,8 @@ class EpubBuilder(
         chapters: List<Chapter>,
         options: ExportOptions,
         outputUri: String,
-        tempDirPath: String? = null
+        tempDirPath: String? = null,
+        translationsMap: Map<Long, ireader.domain.models.entities.TranslatedChapter> = emptyMap()
     ): Result<String> = withContext(ioDispatcher) {
         try {
             // Create temporary directory for EPUB structure
@@ -62,8 +64,8 @@ class EpubBuilder(
             createMimetypeFile(tempDir)
             createContainerXml(tempDir)
             
-            // Process chapters
-            val epubChapters = processChapters(chapters, options)
+            // Process chapters (with optional translated content)
+            val epubChapters = processChapters(chapters, options, translationsMap)
             
             // Generate metadata
             val metadata = createMetadata(book)
@@ -134,7 +136,11 @@ class EpubBuilder(
         )
     }
     
-    private fun processChapters(chapters: List<Chapter>, options: ExportOptions): List<EpubChapter> {
+    private fun processChapters(
+        chapters: List<Chapter>, 
+        options: ExportOptions,
+        translationsMap: Map<Long, ireader.domain.models.entities.TranslatedChapter> = emptyMap()
+    ): List<EpubChapter> {
         val selectedChapters = if (options.selectedChapters.isEmpty()) {
             chapters
         } else {
@@ -142,7 +148,14 @@ class EpubBuilder(
         }
         
         return selectedChapters.mapIndexed { index, chapter ->
-            val content = chapter.content.mapNotNull {
+            // Use translated content if available and requested
+            val contentPages = if (options.useTranslatedContent && translationsMap.containsKey(chapter.id)) {
+                translationsMap[chapter.id]?.translatedContent ?: chapter.content
+            } else {
+                chapter.content
+            }
+            
+            val content = contentPages.mapNotNull {
                 when (it) {
                     is Text -> it.text
                     else -> null

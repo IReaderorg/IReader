@@ -26,7 +26,11 @@ import ireader.i18n.resources.*
 data class ExportOptions(
     val includeCover: Boolean,
     val selectedChapters: List<Long>,
-    val formatOptions: FormatOptions
+    val formatOptions: FormatOptions,
+    /** When true, export translated content instead of original content */
+    val useTranslatedContent: Boolean = false,
+    /** Target language for translated content */
+    val translationTargetLanguage: String = "en"
 )
 
 /**
@@ -50,16 +54,26 @@ enum class Typography {
 /**
  * Dialog for configuring EPUB export options.
  * Allows users to select chapters, formatting, and other export settings.
+ * 
+ * @param book The book to export
+ * @param chapters The chapters available for export
+ * @param hasTranslations Whether the book has any translated chapters available
+ * @param translationTargetLanguage The target language for translations (e.g., "en", "es")
+ * @param onExport Callback when export is confirmed with options
+ * @param onDismiss Callback when dialog is dismissed
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EpubExportDialog(
     book: Book,
     chapters: List<Chapter>,
+    hasTranslations: Boolean = false,
+    translationTargetLanguage: String = "en",
     onExport: (ExportOptions) -> Unit,
     onDismiss: () -> Unit
 ) {
     var includeCover by remember { mutableStateOf(true) }
+    var useTranslatedContent by remember { mutableStateOf(false) }
     var selectAllChapters by remember { mutableStateOf(true) }
     var selectedChapterIds by remember { mutableStateOf(chapters.map { it.id }.toSet()) }
     var paragraphSpacing by remember { mutableStateOf(1.0f) }
@@ -134,6 +148,34 @@ fun EpubExportDialog(
                                 checked = includeCover,
                                 onCheckedChange = { includeCover = it }
                             )
+                        }
+                    }
+                    
+                    // Use translated content option (only shown if translations are available)
+                    if (hasTranslations) {
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = localize(Res.string.export_translated_content),
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        text = localize(Res.string.export_translated_content_description),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Switch(
+                                    checked = useTranslatedContent,
+                                    onCheckedChange = { useTranslatedContent = it }
+                                )
+                            }
                         }
                     }
                     
@@ -318,7 +360,9 @@ fun EpubExportDialog(
                                     paragraphSpacing = paragraphSpacing,
                                     chapterHeadingSize = chapterHeadingSize,
                                     typography = typography
-                                )
+                                ),
+                                useTranslatedContent = useTranslatedContent,
+                                translationTargetLanguage = translationTargetLanguage
                             )
                             onExport(options)
                         },

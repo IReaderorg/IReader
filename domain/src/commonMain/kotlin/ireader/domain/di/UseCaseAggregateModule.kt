@@ -94,7 +94,8 @@ val useCaseAggregateModule = module {
             downloadChapters = get(),
             exportNovelAsEpub = get(),
             exportBookAsEpub = get(),
-            getBookReviews = get()
+            getBookReviews = get(),
+            getTranslatedChaptersByBookId = get()
         )
     }
     

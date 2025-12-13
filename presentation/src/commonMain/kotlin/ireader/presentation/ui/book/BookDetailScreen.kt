@@ -194,6 +194,8 @@ fun BookDetailScreen(
         EpubExportDialog(
             book = book,
             chapters = chapters.value,
+            hasTranslations = vm.hasTranslationsForExport,
+            translationTargetLanguage = vm.translationExportTargetLanguage,
             onExport = { options ->
                 vm.showEpubExportDialog = false
                 vm.exportAsEpub(options)

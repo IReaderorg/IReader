@@ -317,8 +317,8 @@ fun ExploreScreen(
                             }
                         )
                     }
-                    // Empty state (no books, not loading, no error)
-                    !state.hasContent && !state.isLoading -> {
+                    // Empty state in search mode (no results for search query - this is normal)
+                    !state.hasContent && !state.isLoading && state.isSearchModeEnabled -> {
                         ExploreScreenError(
                             error = localize(Res.string.no_results_found),
                             source = source,

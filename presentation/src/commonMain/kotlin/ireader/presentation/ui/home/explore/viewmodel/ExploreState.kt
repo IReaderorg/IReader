@@ -62,23 +62,47 @@ data class ExploreScreenState(
         get() = books.isNotEmpty()
     
     /**
-     * Check if we're in error state with no content
+     * Check if we're in error state with no content (network error, not broken source)
      */
     @Stable
     val isErrorWithNoContent: Boolean
-        get() = error != null && books.isEmpty() && !isLoading && !isSourceBroken
+        get() = error != null && books.isEmpty() && !isLoading && !isSourceBroken && !isLikelyBrokenSource
+    
+    /**
+     * Check if the source is likely broken.
+     * This is true when:
+     * - No books were loaded on first page
+     * - Not in search mode (browsing default listing)
+     * - Not currently loading
+     * - Either explicitly marked as broken OR got empty results without search
+     * 
+     * When browsing (not searching), a source should always return books.
+     * Empty results without search mode indicates the source parsing is broken.
+     */
+    @Stable
+    val isLikelyBrokenSource: Boolean
+        get() {
+            // If explicitly marked as broken
+            if (isSourceBroken) return true
+            
+            // If we're loading or have content, not broken
+            if (isLoading || books.isNotEmpty()) return false
+            
+            // If in search mode, empty results are normal (user might search for something that doesn't exist)
+            if (isSearchModeEnabled && !searchQuery.isNullOrBlank()) return false
+            
+            // If we're on page 1, not loading, not in search mode, and have no books = likely broken
+            // A working source should always return books when browsing default listing
+            return page >= 1 && !isLoading && books.isEmpty() && !isSearchModeEnabled
+        }
     
     /**
      * Check if the source is broken (parsing error, not network error).
-     * This is true when:
-     * - There's an error
-     * - No books were loaded
-     * - Not currently loading
-     * - The error indicates a parsing/broken source issue
+     * Uses isLikelyBrokenSource for detection.
      */
     @Stable
     val isBrokenSourceError: Boolean
-        get() = isSourceBroken && books.isEmpty() && !isLoading
+        get() = isLikelyBrokenSource && !isLoading
 }
 
 /**

@@ -214,6 +214,7 @@ val UseCasesInject = module {
     factory { ireader.domain.usecases.translation.GetTranslatedChapterUseCase(get()) }
     factory { ireader.domain.usecases.translation.DeleteTranslatedChapterUseCase(get()) }
     factory { ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase(get()) }
+    factory { ireader.domain.usecases.translation.GetTranslatedChaptersByBookIdUseCase(get()) }
     factory { ireader.domain.usecases.translation.ApplyGlossaryToTextUseCase() }
     factory { 
         ireader.domain.usecases.translate.TranslateChapterWithStorageUseCase(
@@ -347,6 +348,7 @@ val UseCasesInject = module {
     factory { ireader.domain.usecases.epub.ExportBookAsEpubUseCase(
         findBookById = get<ireader.domain.usecases.local.LocalGetBookUseCases>().findBookById,
         chapterRepository = get(),
+        translatedChapterRepository = get(),
         epubBuilder = get()
     ) }
     
