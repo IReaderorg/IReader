@@ -40,15 +40,25 @@ class GradioTTSManager(
     
     /**
      * Load saved configurations from storage
+     * Merges current presets with saved custom configs to ensure new presets are always available
      */
     private fun loadSavedConfigs() {
         try {
             val savedJson = loadConfigs()
             if (savedJson != null) {
                 val saved = json.decodeFromString<GradioTTSManagerState>(savedJson)
-                _configs.value = saved.configs
+                
+                // Get all current presets (includes any newly added ones)
+                val currentPresets = GradioTTSPresets.getAllPresets()
+                
+                // Extract only custom configs from saved state
+                val customConfigs = saved.configs.filter { it.isCustom }
+                
+                // Merge: current presets + saved custom configs
+                _configs.value = currentPresets + customConfigs
                 _activeConfigId.value = saved.activeConfigId
-                Log.info { "$TAG: Loaded ${saved.configs.size} configs" }
+                
+                Log.info { "$TAG: Merged ${currentPresets.size} presets + ${customConfigs.size} custom configs" }
             } else {
                 // Initialize with presets
                 _configs.value = GradioTTSPresets.getAllPresets()

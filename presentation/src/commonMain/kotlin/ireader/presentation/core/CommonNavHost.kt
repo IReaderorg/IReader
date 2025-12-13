@@ -197,6 +197,11 @@ fun CommonNavHost(
             ireader.presentation.core.ui.AdminUserPanelScreenSpec().Content()
         }
         
+        // Feature Store - Plugin monetization marketplace
+        composable(NavigationRoutes.featureStore) {
+            ireader.presentation.core.ui.FeatureStoreScreenSpec().Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }

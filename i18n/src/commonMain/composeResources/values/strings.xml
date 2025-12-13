@@ -1103,6 +1103,7 @@
     <string name="search_glossary">Search glossary...</string>
     <string name="search_languages">Search languages...</string>
     <string name="search_plugins">Search plugins...</string>
+    <string name="search_features">Search features...</string>
     <string name="search_voices">Search voices...</string>
     <string name="search_voices_by_name_language">Search voices by name, language...</string>
     <string name="secondary_button">Secondary Button</string>
@@ -1479,6 +1480,8 @@
     <string name="featured_badges">Featured Badges</string>
     <string name="featured_badges_for_profile">Featured Badges (for Profile)</string>
     <string name="featured_plugins">Featured Plugins</string>
+    <string name="feature_store">Feature Store</string>
+    <string name="feature_store_description">Discover and purchase premium plugins and features</string>
     <string name="features">Features</string>
     <string name="fetch_all_chapters">Fetch All Chapters</string>
     <string name="fetch_book_details">Fetch Book Details</string>
@@ -1597,6 +1600,7 @@
     <string name="loading_novels">Loading novels...</string>
     <string name="loading_plugin_details">Loading plugin details...</string>
     <string name="loading_plugins">Loading plugins...</string>
+    <string name="loading_features">Loading features...</string>
     <string name="loading_popular_books">Loading popular books...</string>
     <string name="loading_reviews">Loading reviews...</string>
     <string name="loading_sources">Loading sources</string>
@@ -1660,6 +1664,7 @@
     <string name="no_featured_badges_selected">No featured badges selected</string>
     <string name="no_icon_just_text">No icon, just text</string>
     <string name="no_languages_found">No languages found</string>
+    <string name="no_plugins_available">No plugins available</string>
     <string name="no_matches_found">No matches found</string>
     <string name="no_models_available">No models available</string>
     <string name="no_nft_found">No NFT Found</string>

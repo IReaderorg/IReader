@@ -14,12 +14,16 @@ This module provides support for any Gradio-based TTS engine, not just Coqui TTS
 2. **GradioTTSPresets** (`GradioTTSPresets.kt`)
    - Predefined configurations for popular TTS spaces:
      - Coqui TTS (IReader)
-     - Persian TTS (Piper)
      - Edge TTS
      - XTTS v2
      - Parler TTS
      - MMS TTS (Meta)
      - Bark TTS
+   - Persian TTS options (ordered by quality):
+     - Persian Edge TTS (Premium - Microsoft neural voices)
+     - Persian Chatterbox (Natural - neural model)
+     - Persian XTTS (Voice cloning capable)
+     - Persian Piper (Basic - legacy)
 
 3. **GenericGradioTTSEngine** (`GenericGradioTTSEngine.kt`)
    - Universal engine that works with any Gradio TTS configuration

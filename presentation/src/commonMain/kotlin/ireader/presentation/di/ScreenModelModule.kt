@@ -206,4 +206,13 @@ val screenModelModule = module {
             readerPreferences = get()
         )
     }
+    
+    // ==================== Feature Store ====================
+    
+    // Feature Store ViewModel - Plugin monetization marketplace
+    factory {
+        ireader.presentation.ui.featurestore.FeatureStoreViewModel(
+            pluginManager = get()
+        )
+    }
 }

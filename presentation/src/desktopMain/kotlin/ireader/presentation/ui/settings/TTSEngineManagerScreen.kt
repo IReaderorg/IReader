@@ -1351,15 +1351,29 @@ private fun GradioTTSSectionDesktop(
         activeConfigId = appPrefs.activeGradioConfigId().get().ifEmpty { null }
         globalSpeed = appPrefs.gradioTTSSpeed().get()
         
-        // Load saved configs
+        // Load saved configs and merge with current presets
         val savedConfigsJson = appPrefs.gradioTTSConfigs().get()
         if (savedConfigsJson.isNotEmpty()) {
             try {
                 val state = kotlinx.serialization.json.Json.decodeFromString<ireader.domain.services.tts_service.GradioTTSManagerState>(savedConfigsJson)
-                configs = state.configs
+                val savedConfigs = state.configs
+                
+                // Get all current presets
+                val currentPresets = GradioTTSPresets.getAllPresets()
+                
+                // Merge: keep custom configs from saved, update presets from current
+                val customConfigs = savedConfigs.filter { it.isCustom }
+                
+                // Use current presets (which include any new ones) + saved custom configs
+                configs = currentPresets + customConfigs
+                
+                Log.info { "Merged ${currentPresets.size} presets + ${customConfigs.size} custom configs" }
             } catch (e: Exception) {
                 Log.error { "Failed to load Gradio configs: ${e.message}" }
+                configs = GradioTTSPresets.getAllPresets()
             }
+        } else {
+            configs = GradioTTSPresets.getAllPresets()
         }
         
         // Configure Gradio if enabled

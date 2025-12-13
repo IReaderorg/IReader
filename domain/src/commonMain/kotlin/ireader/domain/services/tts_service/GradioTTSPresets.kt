@@ -29,19 +29,85 @@ object GradioTTSPresets {
     )
     
     /**
-     * Persian TTS using Piper
+     * Persian TTS using Piper (Legacy - basic quality)
      * Example: gyroing/persian-tts-piper
+     * API: /gradio_api/call/synthesize_speech (Gradio 4.x with SSE)
      */
     val PERSIAN_PIPER = GradioTTSConfig(
         id = "persian_piper",
-        name = "Persian TTS (Piper)",
+        name = "Persian TTS (Piper - Basic)",
         spaceUrl = "https://gyroing-persian-tts-piper.hf.space",
         apiName = "/synthesize_speech",
         parameters = listOf(
             GradioParam.textParam("text")
         ),
         audioOutputIndex = 0,
-        description = "Persian language TTS using Piper voices"
+        description = "Persian language TTS using Piper voices (basic quality)",
+        apiType = GradioApiType.GRADIO_API_CALL  // Use /gradio_api/call/ endpoint
+    )
+    
+    /**
+     * Persian Chatterbox TTS - High quality neural TTS for Persian
+     * Uses Chatterbox model for natural-sounding Persian speech
+     * API: /gradio_api/call/generate_audio (Gradio 4.x with SSE)
+     */
+    val PERSIAN_CHATTERBOX = GradioTTSConfig(
+        id = "persian_chatterbox",
+        name = "Persian TTS (Chatterbox - Natural)",
+        spaceUrl = "https://gyroing-chatterbox-tts-persian-farsi.hf.space",
+        apiName = "/generate_audio",
+        parameters = listOf(
+            GradioParam.textParam("text")
+        ),
+        audioOutputIndex = 0,
+        description = "High-quality Persian TTS using Chatterbox neural model - natural and expressive",
+        apiType = GradioApiType.GRADIO_API_CALL  // Use /gradio_api/call/ endpoint
+    )
+    
+    /**
+     * Persian Edge TTS - Microsoft's neural TTS with Persian voices
+     * Very natural sounding with multiple voice options
+     */
+    val PERSIAN_EDGE_TTS = GradioTTSConfig(
+        id = "persian_edge_tts",
+        name = "Persian TTS (Edge - Premium)",
+        spaceUrl = "https://innoai-edge-tts-text-to-speech.hf.space",
+        apiName = "/predict",
+        parameters = listOf(
+            GradioParam.textParam("text"),
+            GradioParam.choiceParam(
+                name = "voice",
+                choices = listOf(
+                    "fa-IR-DilaraNeural",   // Female - natural, warm
+                    "fa-IR-FaridNeural"     // Male - clear, professional
+                ),
+                defaultValue = "fa-IR-DilaraNeural"
+            ),
+            GradioParam.speedParam("rate", 1.0f, 0.5f, 2.0f)
+        ),
+        audioOutputIndex = 0,
+        description = "Premium Persian TTS using Microsoft Edge neural voices - most natural and realistic"
+    )
+    
+    /**
+     * Persian Coqui XTTS - Voice cloning capable TTS with Persian support
+     * Can clone voices and supports Persian language
+     */
+    val PERSIAN_XTTS = GradioTTSConfig(
+        id = "persian_xtts",
+        name = "Persian TTS (XTTS v2 - Voice Clone)",
+        spaceUrl = "https://coqui-xtts.hf.space",
+        apiName = "/predict",
+        parameters = listOf(
+            GradioParam.textParam("text"),
+            GradioParam.choiceParam(
+                name = "language",
+                choices = listOf("fa"),
+                defaultValue = "fa"
+            )
+        ),
+        audioOutputIndex = 0,
+        description = "Persian TTS with XTTS v2 - supports voice cloning for personalized voices"
     )
     
     /**
@@ -51,7 +117,7 @@ object GradioTTSPresets {
     val EDGE_TTS = GradioTTSConfig(
         id = "edge_tts",
         name = "Edge TTS",
-        spaceUrl = "https://innoai-edge-tts.hf.space",
+        spaceUrl = "https://innoai-edge-tts-text-to-speech.hf.space",
         apiName = "/predict",
         parameters = listOf(
             GradioParam.textParam("text"),
@@ -133,26 +199,6 @@ object GradioTTSPresets {
         ),
         audioOutputIndex = 0,
         description = "Describe the voice style you want"
-    )
-    
-    /**
-     * MMS TTS - Meta's Massively Multilingual Speech
-     */
-    val MMS_TTS = GradioTTSConfig(
-        id = "mms_tts",
-        name = "MMS TTS (Meta)",
-        spaceUrl = "https://facebook-mms-tts.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "language",
-                choices = listOf("eng", "fra", "deu", "spa", "ita", "por", "rus", "ara", "hin", "jpn", "kor", "cmn"),
-                defaultValue = "eng"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "Meta's multilingual TTS supporting 1000+ languages"
     )
     
     /**
@@ -295,11 +341,29 @@ object GradioTTSPresets {
         OPEN_VOICE,
         FISH_SPEECH,
         PARLER_TTS,
-        MMS_TTS,
         TORTOISE_TTS,
         BARK_TTS,
+        // Persian TTS options - ordered by quality (best first)
+        PERSIAN_EDGE_TTS,       // Premium - Microsoft neural voices
+        PERSIAN_CHATTERBOX,     // Natural - Chatterbox neural model
+        PERSIAN_XTTS,           // Voice cloning capable
+        PERSIAN_PIPER           // Basic - Piper (legacy)
+    )
+    
+    /**
+     * Get all Persian TTS presets
+     */
+    fun getPersianPresets(): List<GradioTTSConfig> = listOf(
+        PERSIAN_EDGE_TTS,
+        PERSIAN_CHATTERBOX,
+        PERSIAN_XTTS,
         PERSIAN_PIPER
     )
+    
+    /**
+     * Get recommended Persian TTS preset (best quality)
+     */
+    fun getRecommendedPersianPreset(): GradioTTSConfig = PERSIAN_EDGE_TTS
     
     /**
      * Get preset by ID

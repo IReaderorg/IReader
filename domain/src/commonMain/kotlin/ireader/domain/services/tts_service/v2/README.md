@@ -325,7 +325,10 @@ The following Gradio TTS presets are available in `GradioTTSPresets`:
 | MMS TTS (Meta) | 1000+ languages support | 1000+ |
 | Tortoise TTS | High quality, slower | English |
 | Bark TTS | Generative TTS by Suno | English |
-| Persian Piper | Persian language TTS | Persian |
+| Persian Edge TTS | Microsoft neural voices (Premium) | Persian |
+| Persian Chatterbox | Natural neural TTS | Persian |
+| Persian XTTS | Voice cloning capable | Persian |
+| Persian Piper | Basic Piper voices | Persian |
 
 Usage:
 ```kotlin

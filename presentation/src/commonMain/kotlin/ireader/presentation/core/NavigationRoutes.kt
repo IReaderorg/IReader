@@ -69,6 +69,7 @@ object NavigationRoutes {
     }
     const val glossary = "glossary"
     const val adminUserPanel = "adminUserPanel"
+    const val featureStore = "featureStore"
     
     // Routes with parameters
     fun bookDetail(bookId: Long) = "bookDetail/$bookId"

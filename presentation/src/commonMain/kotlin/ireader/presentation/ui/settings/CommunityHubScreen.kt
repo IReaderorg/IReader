@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -37,6 +38,7 @@ fun CommunityHubScreen(
     onCharacterArtGallery: () -> Unit,
     onReadingBuddy: () -> Unit = {},
     onGlossary: () -> Unit = {},
+    onFeatureStore: () -> Unit = {},
     onBadgeStore: () -> Unit,
     onNFTBadge: () -> Unit,
     onBadgeManagement: () -> Unit,
@@ -173,6 +175,23 @@ fun CommunityHubScreen(
                     description = "Manage translation glossaries for your books",
                     icon = Icons.Filled.Translate,
                     onClick = onGlossary
+                )
+            }
+            
+            // Feature Store Section
+            item {
+                SettingsSectionHeader(
+                    title = localize(Res.string.feature_store),
+                    icon = Icons.Filled.ShoppingCart
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = localize(Res.string.feature_store),
+                    description = localize(Res.string.feature_store_description),
+                    icon = Icons.Filled.ShoppingCart,
+                    onClick = onFeatureStore
                 )
             }
             
