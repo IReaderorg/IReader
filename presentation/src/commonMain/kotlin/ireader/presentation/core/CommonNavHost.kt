@@ -202,6 +202,16 @@ fun CommonNavHost(
             ireader.presentation.core.ui.FeatureStoreScreenSpec().Content()
         }
         
+        // Plugin Repository - Manage plugin sources
+        composable(NavigationRoutes.pluginRepository) {
+            ireader.presentation.core.ui.PluginRepositoryScreenSpec().Content()
+        }
+        
+        // Developer Portal - For plugin developers with dev badge
+        composable(NavigationRoutes.developerPortal) {
+            ireader.presentation.core.ui.DeveloperPortalScreenSpec().Content()
+        }
+        
         composable(NavigationRoutes.translationSettings) {
             TranslationScreenSpec().Content()
         }

@@ -48,6 +48,48 @@ actual fun instantiatePlugin(pluginClass: Any): Plugin {
 }
 
 /**
+ * iOS implementation of file download
+ * Uses NSURLSession for downloading plugin files
+ */
+@OptIn(ExperimentalForeignApi::class)
+actual suspend fun downloadFile(url: String, destination: okio.Path) {
+    val nsUrl = NSURL.URLWithString(url) 
+        ?: throw Exception("Invalid URL: $url")
+    
+    val request = NSMutableURLRequest.requestWithURL(nsUrl)
+    request.setHTTPMethod("GET")
+    request.setTimeoutInterval(30.0)
+    
+    val session = NSURLSession.sharedSession
+    
+    // Use synchronous download for simplicity
+    var downloadError: NSError? = null
+    var responseData: NSData? = null
+    
+    val semaphore = platform.darwin.dispatch_semaphore_create(0)
+    
+    session.dataTaskWithRequest(request) { data, response, error ->
+        responseData = data
+        downloadError = error
+        platform.darwin.dispatch_semaphore_signal(semaphore)
+    }.resume()
+    
+    platform.darwin.dispatch_semaphore_wait(semaphore, platform.darwin.DISPATCH_TIME_FOREVER)
+    
+    downloadError?.let { throw Exception("Download failed: ${it.localizedDescription}") }
+    
+    val data = responseData ?: throw Exception("No data received")
+    
+    // Write to file
+    val destUrl = NSURL.fileURLWithPath(destination.toString())
+    val success = data.writeToURL(destUrl, true)
+    
+    if (!success) {
+        throw Exception("Failed to write file to $destination")
+    }
+}
+
+/**
  * Data class for ZIP entry information
  */
 private data class ZipEntry(

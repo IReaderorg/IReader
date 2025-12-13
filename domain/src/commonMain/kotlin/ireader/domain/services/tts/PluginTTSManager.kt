@@ -2,11 +2,15 @@ package ireader.domain.services.tts
 
 import ireader.domain.catalogs.VoiceCatalog
 import ireader.domain.models.tts.VoiceModel
+import ireader.domain.models.tts.VoiceGender
+import ireader.domain.models.tts.VoiceQuality
 import ireader.domain.plugins.AudioStream
 import ireader.domain.plugins.PluginManager
 import ireader.domain.plugins.PluginType
 import ireader.domain.plugins.TTSPlugin
 import ireader.domain.plugins.VoiceConfig
+import ireader.plugin.api.VoiceModel as PluginVoiceModel
+import ireader.plugin.api.VoiceGender as PluginVoiceGender
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -42,9 +46,9 @@ class PluginTTSManager(
             .filterIsInstance<TTSPlugin>()
         
         return ttsPlugins.flatMap { plugin ->
-            plugin.getAvailableVoices().map { voice ->
+            plugin.getAvailableVoices().map { pluginVoice ->
                 VoiceWithSource(
-                    voice = voice,
+                    voice = pluginVoice.toDomainVoiceModel(),
                     source = VoiceSource.Plugin(
                         pluginId = plugin.manifest.id,
                         pluginName = plugin.manifest.name
@@ -52,6 +56,32 @@ class PluginTTSManager(
                 )
             }
         }
+    }
+    
+    /**
+     * Convert plugin VoiceModel to domain VoiceModel
+     */
+    private fun PluginVoiceModel.toDomainVoiceModel(): VoiceModel {
+        return VoiceModel(
+            id = this.id,
+            name = this.name,
+            language = this.language.substringBefore("-"),
+            locale = this.language,
+            gender = when (this.gender) {
+                PluginVoiceGender.MALE -> VoiceGender.MALE
+                PluginVoiceGender.FEMALE -> VoiceGender.FEMALE
+                PluginVoiceGender.NEUTRAL -> VoiceGender.NEUTRAL
+            },
+            quality = VoiceQuality.MEDIUM,
+            sampleRate = 22050,
+            modelSize = this.downloadSize ?: 0L,
+            downloadUrl = "",
+            configUrl = "",
+            checksum = "",
+            license = "Plugin",
+            description = "Voice from plugin",
+            tags = emptyList()
+        )
     }
     
     /**

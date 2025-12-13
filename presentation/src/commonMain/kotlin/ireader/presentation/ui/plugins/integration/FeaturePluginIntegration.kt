@@ -11,13 +11,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import ireader.domain.plugins.FeaturePlugin
-import ireader.domain.plugins.PluginAction
 import ireader.domain.plugins.PluginManager
 import ireader.domain.plugins.PluginMenuItem
 import ireader.domain.plugins.PluginScreen
 import ireader.domain.plugins.PluginStatus
 import ireader.domain.plugins.PluginType
 import ireader.domain.plugins.ReaderContext
+import ireader.plugin.api.PluginAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

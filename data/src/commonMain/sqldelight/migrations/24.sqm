@@ -1,0 +1,13 @@
+-- Migration 24: Add plugin_permission table for storing granted permissions
+
+CREATE TABLE IF NOT EXISTS plugin_permission (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    plugin_id TEXT NOT NULL,
+    permission TEXT NOT NULL,
+    granted_at INTEGER NOT NULL,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    UNIQUE(plugin_id, permission)
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_permission_plugin ON plugin_permission(plugin_id);
+CREATE INDEX IF NOT EXISTS idx_plugin_permission_active ON plugin_permission(is_active);

@@ -176,6 +176,8 @@ class MultiSupabaseClientProvider(
         }
     }
     
+    override fun getSupabaseUrl(): String = authUrl
+    
     /**
      * Get the current authenticated user ID as a string
      * This is used to sync user_id across all projects

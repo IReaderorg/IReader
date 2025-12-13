@@ -194,6 +194,55 @@ Plugins support three monetization models:
 2. **Premium** - One-time purchase with optional trial
 3. **Freemium** - Free base with purchasable features
 
+## Utilities
+
+### HTTP Client
+
+```kotlin
+import ireader.plugin.api.http.PluginHttpClient
+import ireader.plugin.api.http.getText
+import ireader.plugin.api.http.postText
+
+// Create and use HTTP client
+val client = PluginHttpClient.create()
+try {
+    val response = client.getText("https://api.example.com/data")
+    val postResponse = client.postText(
+        url = "https://api.example.com/translate",
+        body = """{"text": "Hello"}"""
+    )
+} finally {
+    client.close()
+}
+```
+
+### JSON Helper
+
+```kotlin
+import ireader.plugin.api.util.JsonHelper
+
+// Serialize
+val json = JsonHelper.encode(myObject)
+
+// Deserialize
+val obj = JsonHelper.decode<MyClass>(jsonString)
+
+// Safe deserialize (returns null on error)
+val objOrNull = JsonHelper.decodeOrNull<MyClass>(jsonString)
+```
+
+### String Extensions
+
+```kotlin
+import ireader.plugin.api.util.*
+
+val encoded = "hello world".urlEncode()  // "hello%20world"
+val decoded = "hello%20world".urlDecode() // "hello world"
+val clean = "<p>Hello</p>".stripHtml()    // "Hello"
+val short = "Long text...".truncate(10)   // "Long te..."
+val isUrl = "https://example.com".isValidUrl() // true
+```
+
 ## License
 
 Mozilla Public License 2.0

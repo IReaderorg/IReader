@@ -129,4 +129,21 @@ actual object PlatformConfig {
             ?: System.getenv("R2_PUBLIC_URL")
             ?: ConfigLoader.get("r2.publicUrl", "")
     }
+    
+    // Device identification for license binding
+    actual fun getDeviceId(): String {
+        // Desktop: Use combination of hostname and MAC address hash
+        return try {
+            val hostname = java.net.InetAddress.getLocalHost().hostName
+            val networkInterfaces = java.net.NetworkInterface.getNetworkInterfaces()
+            val macAddress = networkInterfaces?.asSequence()
+                ?.mapNotNull { it.hardwareAddress }
+                ?.firstOrNull()
+                ?.joinToString(":") { "%02x".format(it) }
+                ?: "unknown"
+            "$hostname:$macAddress".hashCode().toString(16)
+        } catch (e: Exception) {
+            java.util.UUID.randomUUID().toString()
+        }
+    }
 }

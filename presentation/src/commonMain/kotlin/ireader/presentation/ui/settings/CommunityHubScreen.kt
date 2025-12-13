@@ -39,6 +39,8 @@ fun CommunityHubScreen(
     onReadingBuddy: () -> Unit = {},
     onGlossary: () -> Unit = {},
     onFeatureStore: () -> Unit = {},
+    onPluginRepository: () -> Unit = {},
+    onDeveloperPortal: () -> Unit = {},
     onBadgeStore: () -> Unit,
     onNFTBadge: () -> Unit,
     onBadgeManagement: () -> Unit,
@@ -192,6 +194,24 @@ fun CommunityHubScreen(
                     description = localize(Res.string.feature_store_description),
                     icon = Icons.Filled.ShoppingCart,
                     onClick = onFeatureStore
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "Plugin Repositories",
+                    description = "Manage plugin sources and add custom repositories",
+                    icon = Icons.Filled.Storage,
+                    onClick = onPluginRepository
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "Developer Portal",
+                    description = "Manage your plugins and grant access to users",
+                    icon = Icons.Filled.Code,
+                    onClick = onDeveloperPortal
                 )
             }
             

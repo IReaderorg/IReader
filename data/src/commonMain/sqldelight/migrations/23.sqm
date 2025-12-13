@@ -1,0 +1,17 @@
+-- Migration 23: Add plugin_repository table for managing plugin sources
+-- Users can add custom repositories to discover and install plugins
+
+CREATE TABLE IF NOT EXISTS plugin_repository (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    is_enabled INTEGER NOT NULL DEFAULT 1,
+    is_official INTEGER NOT NULL DEFAULT 0,
+    plugin_count INTEGER NOT NULL DEFAULT 0,
+    last_updated INTEGER NOT NULL DEFAULT 0,
+    last_error TEXT,
+    created_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_repository_enabled ON plugin_repository(is_enabled);
+CREATE INDEX IF NOT EXISTS idx_plugin_repository_official ON plugin_repository(is_official);

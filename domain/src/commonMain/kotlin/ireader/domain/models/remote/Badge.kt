@@ -22,7 +22,8 @@ data class Badge(
 enum class BadgeType {
     PURCHASABLE,
     NFT_EXCLUSIVE,
-    ACHIEVEMENT
+    ACHIEVEMENT,
+    DEVELOPER  // Developer badge - grants access to Developer Portal
 }
 
 @Serializable

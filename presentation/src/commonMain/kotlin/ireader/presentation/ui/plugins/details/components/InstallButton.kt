@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.PluginInfo
-import ireader.domain.plugins.PluginMonetization
 import ireader.domain.plugins.PluginStatus
+import ireader.plugin.api.PluginMonetization
 import ireader.presentation.ui.plugins.details.InstallationState
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*

@@ -80,20 +80,34 @@ kotlin {
                 api(kotlinx.datetime)
                 api(kotlinx.serialization.json)
                 api(libs.kermit)
+                // Ktor for HTTP - exposed as API for plugin developers
+                api(libs.ktor.core)
+                api(libs.ktor.contentNegotiation)
+                api(libs.ktor.contentNegotiation.kotlinx)
             }
         }
         
         androidMain {
             dependencies {
                 implementation(androidx.core)
+                // Platform-specific Ktor engine
+                implementation(libs.ktor.okhttp)
             }
         }
         
         val desktopMain by getting {
             kotlin.srcDir("./src/jvmMain/kotlin")
+            dependencies {
+                // Platform-specific Ktor engine
+                implementation(libs.ktor.okhttp)
+            }
         }
         
-        val jsMain by getting
+        val jsMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
+        }
         
         val iosX64Main by getting
         val iosArm64Main by getting
@@ -103,6 +117,9 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                implementation(libs.ktor.client.darwin.v333)
+            }
         }
         
         commonTest {

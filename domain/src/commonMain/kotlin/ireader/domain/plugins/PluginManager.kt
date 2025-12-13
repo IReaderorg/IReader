@@ -3,10 +3,12 @@ package ireader.domain.plugins
 import ireader.core.io.FileSystem
 import ireader.core.io.VirtualFile
 import ireader.core.util.createICoroutineScope
+import ireader.plugin.api.PluginMonetization as ApiPluginMonetization
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okio.Path.Companion.toPath
 
 /**
  * Central service for managing plugin lifecycle
@@ -84,7 +86,8 @@ class PluginManager(
                 ?: return Result.failure(Exception("Failed to load plugin from package"))
             
             // Check if plugin requires purchase
-            if (plugin.manifest.monetization is PluginMonetization.Premium) {
+            val monetizationModel = plugin.manifest.monetization
+            if (monetizationModel is ApiPluginMonetization.Premium) {
                 val isPurchased = monetization.isPurchased(plugin.manifest.id)
                 if (!isPurchased) {
                     return Result.failure(Exception("Plugin requires purchase"))
@@ -349,6 +352,53 @@ class PluginManager(
         // This would be implemented to use the actual preferences system
         // For now, return a simple in-memory implementation
         return InMemoryPluginPreferencesStore()
+    }
+    
+    /**
+     * Get the plugins directory path
+     */
+    suspend fun getPluginsDirectory(): okio.Path {
+        val dataDir = fileSystem.getDataDirectory()
+        val pluginsDir = dataDir.resolve("plugins")
+        if (!pluginsDir.exists()) {
+            pluginsDir.mkdirs()
+        }
+        return pluginsDir.path.toPath()
+    }
+    
+    /**
+     * Download a plugin from URL to destination path
+     */
+    suspend fun downloadPlugin(url: String, destination: okio.Path): Result<Unit> {
+        return try {
+            // Use the loader's HTTP client to download
+            loader.downloadToFile(url, destination)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Validate a plugin package structure
+     */
+    suspend fun validatePluginPackage(packagePath: okio.Path): Result<Unit> {
+        return try {
+            // Extract and validate manifest
+            val file = fileSystem.getDataDirectory().resolve(packagePath.toString())
+            loader.extractManifest(file)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(Exception("Invalid plugin package: ${e.message}"))
+        }
+    }
+    
+    /**
+     * Install plugin from Okio Path
+     */
+    suspend fun installPlugin(packagePath: okio.Path): Result<PluginInfo> {
+        val file = fileSystem.getDataDirectory().resolve(packagePath.toString())
+        return installPlugin(file)
     }
 }
 

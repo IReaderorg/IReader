@@ -16,4 +16,6 @@ class NoOpSupabaseClientProvider : SupabaseClientProvider {
     }
     
     override fun isEndpointAvailable(endpoint: SupabaseEndpoint): Boolean = false
+    
+    override fun getSupabaseUrl(): String = ""
 }

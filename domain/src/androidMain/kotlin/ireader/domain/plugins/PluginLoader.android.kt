@@ -38,3 +38,33 @@ actual fun instantiatePlugin(pluginClass: Any): Plugin {
     val clazz = pluginClass as Class<out Plugin>
     return clazz.getDeclaredConstructor().newInstance()
 }
+
+/**
+ * Android implementation of file download
+ * Uses HttpURLConnection for downloading plugin files
+ */
+actual suspend fun downloadFile(url: String, destination: okio.Path) {
+    val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+    connection.requestMethod = "GET"
+    connection.connectTimeout = 30000
+    connection.readTimeout = 30000
+    
+    try {
+        connection.connect()
+        
+        if (connection.responseCode != java.net.HttpURLConnection.HTTP_OK) {
+            throw Exception("HTTP error: ${connection.responseCode}")
+        }
+        
+        val file = destination.toFile()
+        file.parentFile?.mkdirs()
+        
+        connection.inputStream.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+    } finally {
+        connection.disconnect()
+    }
+}

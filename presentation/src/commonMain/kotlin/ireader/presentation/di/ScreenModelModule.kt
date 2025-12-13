@@ -215,4 +215,24 @@ val screenModelModule = module {
             pluginManager = get()
         )
     }
+    
+    // ==================== Plugin Repository ====================
+    
+    // Plugin Repository ViewModel - Manage plugin sources
+    factory {
+        ireader.presentation.ui.pluginrepository.PluginRepositoryViewModel(
+            repository = get(),
+            indexFetcher = get()
+        )
+    }
+    
+    // ==================== Developer Portal ====================
+    
+    // Developer Portal ViewModel - For plugin developers
+    factory {
+        ireader.presentation.ui.developerportal.DeveloperPortalViewModel(
+            repository = get(),
+            getCurrentUser = get()
+        )
+    }
 }

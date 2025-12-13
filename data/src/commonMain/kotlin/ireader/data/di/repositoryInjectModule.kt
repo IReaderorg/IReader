@@ -70,7 +70,41 @@ val repositoryInjectModule = module {
     
     // Plugin repository and database
     single<PluginRepository> { PluginRepositoryImpl(get()) }
-    single<PluginDatabase> { PluginDatabaseImpl(get(), get()) }
+    single<PluginDatabase> { PluginDatabaseImpl(get()) }
+    
+    // Plugin Repository Repository - for managing plugin sources
+    single<ireader.domain.plugins.PluginRepositoryRepository> {
+        ireader.data.plugins.PluginRepositoryRepositoryImpl()
+    }
+    
+    // Plugin Repository Index Fetcher - for fetching repository index.json
+    single<ireader.domain.plugins.PluginRepositoryIndexFetcher> {
+        ireader.data.plugins.PluginRepositoryIndexFetcherImpl(
+            httpClient = get<ireader.core.http.HttpClients>().default
+        )
+    }
+    
+    // Plugin Security Validator - ensures paid plugins only work on official app
+    single<ireader.domain.plugins.PluginSecurityValidator> {
+        val supabaseProvider = get<ireader.domain.data.repository.SupabaseClientProvider>()
+        
+        ireader.data.plugins.PluginSecurityValidatorImpl(
+            supabaseUrl = supabaseProvider.getSupabaseUrl(),
+            getCurrentUserId = { null }, // Will be set lazily when needed
+            getDeviceId = { 
+                // Get unique device ID - platform specific
+                ireader.domain.config.PlatformConfig.getDeviceId()
+            }
+        )
+    }
+    
+    // Developer Portal Repository - for plugin developers
+    single<ireader.domain.plugins.DeveloperPortalRepository> {
+        ireader.data.plugins.DeveloperPortalRepositoryImpl(
+            checkDeveloperBadge = { false }, // Simplified - no backend check
+            getCurrentUserId = { null } // Will be set lazily when needed
+        )
+    }
     
     // Plugin monetization repositories
     single<ireader.domain.plugins.PurchaseRepository> { 
@@ -79,10 +113,7 @@ val repositoryInjectModule = module {
     single<ireader.domain.plugins.TrialRepository> { 
         ireader.data.plugin.TrialRepositoryImpl(
             handler = get(),
-            getCurrentUserId = { 
-                // TODO: Get actual user ID from authentication service
-                "default_user"
-            }
+            getCurrentUserId = { "anonymous" } // Simplified
         ) 
     }
     

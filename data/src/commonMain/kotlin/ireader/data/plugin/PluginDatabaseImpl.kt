@@ -1,6 +1,5 @@
 ﻿package ireader.data.plugin
 
-import ireader.data.core.DatabaseHandler
 import ireader.domain.data.repository.PluginRepository
 import ireader.domain.plugins.PluginDatabase
 import ireader.domain.plugins.PluginInfo
@@ -15,9 +14,11 @@ import ireader.domain.utils.extensions.currentTimeToLong
  * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5
  */
 class PluginDatabaseImpl(
-    private val repository: PluginRepository,
-    private val handler: DatabaseHandler
+    private val repository: PluginRepository
 ) : PluginDatabase {
+
+    // In-memory permission storage
+    private val grantedPermissions = mutableMapOf<String, MutableSet<PluginPermission>>()
 
     override suspend fun getPluginInfo(pluginId: String): PluginInfo? {
         return repository.getPlugin(pluginId)
@@ -53,6 +54,8 @@ class PluginDatabaseImpl(
     }
 
     override suspend fun delete(pluginId: String) {
+        // Also revoke all permissions when deleting plugin
+        revokeAllGrantedPermissions(pluginId)
         repository.deletePlugin(pluginId)
     }
 
@@ -69,32 +72,26 @@ class PluginDatabaseImpl(
         repository.updatePlugin(updated)
     }
 
-    // Permission management methods
-    // Note: These would ideally be stored in a separate table, but for now we'll use a simple approach
-    // In a full implementation, you'd want to create a plugin_permissions table
+    // Permission management methods using in-memory storage
     
     override suspend fun saveGrantedPermission(pluginId: String, permission: PluginPermission) {
-        // TODO: Implement with dedicated permissions table if needed
-        // For now, permissions are managed in-memory by PluginPermissionManager
+        val permissions = grantedPermissions.getOrPut(pluginId) { mutableSetOf() }
+        permissions.add(permission)
     }
 
     override suspend fun revokeGrantedPermission(pluginId: String, permission: PluginPermission) {
-        // TODO: Implement with dedicated permissions table if needed
+        grantedPermissions[pluginId]?.remove(permission)
     }
 
     override suspend fun revokeAllGrantedPermissions(pluginId: String) {
-        // TODO: Implement with dedicated permissions table if needed
+        grantedPermissions.remove(pluginId)
     }
 
     override suspend fun getAllGrantedPermissions(): Map<String, List<PluginPermission>> {
-        // TODO: Implement with dedicated permissions table if needed
-        return emptyMap()
+        return grantedPermissions.mapValues { it.value.toList() }
     }
 
     override suspend fun getGrantedPermissions(pluginId: String): List<PluginPermission> {
-        // TODO: Implement with dedicated permissions table if needed
-        // For now, return permissions from manifest
-        val plugin = repository.getPlugin(pluginId)
-        return plugin?.manifest?.permissions ?: emptyList()
+        return grantedPermissions[pluginId]?.toList() ?: emptyList()
     }
 }

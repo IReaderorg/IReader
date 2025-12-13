@@ -10,7 +10,9 @@ import data.Global_glossary
 import data.Glossary
 import data.NftWallets
 import data.Plugin
+import data.Plugin_permission
 import data.Plugin_purchase
+import data.Plugin_repository
 import data.Plugin_review
 import data.Plugin_trial
 import data.Reader_theme
@@ -116,6 +118,13 @@ fun createDatabase(driver: SqlDriver): Database {
         global_glossaryAdapter = Global_glossary.Adapter(
             created_atAdapter = longConverter,
             updated_atAdapter = longConverter
+        ),
+        plugin_permissionAdapter = Plugin_permission.Adapter(
+            granted_atAdapter = longConverter
+        ),
+        plugin_repositoryAdapter = Plugin_repository.Adapter(
+            last_updatedAdapter = longConverter,
+            created_atAdapter = longConverter
         ),
     )
 

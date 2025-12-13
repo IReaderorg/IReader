@@ -1,0 +1,69 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Plugin Repository table for storing plugin sources
+-- Users can add custom repositories to discover and install plugins
+CREATE TABLE IF NOT EXISTS plugin_repository (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    is_enabled INTEGER AS Boolean NOT NULL DEFAULT 1,
+    is_official INTEGER AS Boolean NOT NULL DEFAULT 0,
+    plugin_count INTEGER NOT NULL DEFAULT 0,
+    last_updated INTEGER AS Long NOT NULL DEFAULT 0,
+    last_error TEXT,
+    created_at INTEGER AS Long NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_repository_enabled ON plugin_repository(is_enabled);
+CREATE INDEX IF NOT EXISTS idx_plugin_repository_official ON plugin_repository(is_official);
+
+-- Queries
+selectAll:
+SELECT * FROM plugin_repository ORDER BY is_official DESC, name ASC;
+
+selectEnabled:
+SELECT * FROM plugin_repository WHERE is_enabled = 1 ORDER BY is_official DESC, name ASC;
+
+selectByUrl:
+SELECT * FROM plugin_repository WHERE url = ? LIMIT 1;
+
+selectById:
+SELECT * FROM plugin_repository WHERE id = ? LIMIT 1;
+
+insert:
+INSERT INTO plugin_repository(url, name, is_enabled, is_official, plugin_count, last_updated, last_error, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE plugin_repository SET
+    name = ?,
+    is_enabled = ?,
+    plugin_count = ?,
+    last_updated = ?,
+    last_error = ?
+WHERE id = ?;
+
+updateEnabled:
+UPDATE plugin_repository SET is_enabled = ? WHERE id = ?;
+
+updatePluginCount:
+UPDATE plugin_repository SET plugin_count = ?, last_updated = ?, last_error = NULL WHERE id = ?;
+
+updateError:
+UPDATE plugin_repository SET last_error = ?, last_updated = ? WHERE id = ?;
+
+delete:
+DELETE FROM plugin_repository WHERE id = ? AND is_official = 0;
+
+deleteByUrl:
+DELETE FROM plugin_repository WHERE url = ? AND is_official = 0;
+
+deleteAll:
+DELETE FROM plugin_repository WHERE is_official = 0;
+
+count:
+SELECT COUNT(*) FROM plugin_repository;
+
+countEnabled:
+SELECT COUNT(*) FROM plugin_repository WHERE is_enabled = 1;

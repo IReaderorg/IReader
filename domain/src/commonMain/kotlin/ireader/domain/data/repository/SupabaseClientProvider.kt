@@ -29,4 +29,10 @@ interface SupabaseClientProvider {
     fun getDefaultClient(): Any {
         return getClient(SupabaseEndpoint.USERS)
     }
+    
+    /**
+     * Get the Supabase URL for security validation
+     * Used to verify app is using official backend
+     */
+    fun getSupabaseUrl(): String
 }

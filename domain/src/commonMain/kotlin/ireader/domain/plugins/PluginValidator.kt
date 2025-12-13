@@ -1,5 +1,7 @@
 package ireader.domain.plugins
 
+import ireader.plugin.api.PluginMonetization as ApiPluginMonetization
+
 /**
  * Validates plugin manifests and ensures compatibility
  * Requirements: 1.1, 1.2, 1.3, 1.4, 17.1, 17.2, 17.3, 17.4, 17.5
@@ -100,23 +102,29 @@ class PluginValidator(
      */
     fun validateMonetization(monetization: PluginMonetization): Result<Unit> {
         return when (monetization) {
-            is PluginMonetization.Premium -> {
-                if (monetization.price < 0) {
-                    Result.failure(IllegalArgumentException("Premium price cannot be negative"))
-                } else if (monetization.currency.isBlank()) {
-                    Result.failure(IllegalArgumentException("Premium currency cannot be empty"))
-                } else if (monetization.trialDays != null && monetization.trialDays < 0) {
-                    Result.failure(IllegalArgumentException("Trial days cannot be negative"))
-                } else {
-                    Result.success(Unit)
+            is ApiPluginMonetization.Premium -> {
+                val trialDays = monetization.trialDays
+                when {
+                    monetization.price < 0 -> {
+                        Result.failure(IllegalArgumentException("Premium price cannot be negative"))
+                    }
+                    monetization.currency.isBlank() -> {
+                        Result.failure(IllegalArgumentException("Premium currency cannot be empty"))
+                    }
+                    trialDays != null && trialDays < 0 -> {
+                        Result.failure(IllegalArgumentException("Trial days cannot be negative"))
+                    }
+                    else -> {
+                        Result.success(Unit)
+                    }
                 }
             }
-            is PluginMonetization.Freemium -> {
+            is ApiPluginMonetization.Freemium -> {
                 if (monetization.features.isEmpty()) {
                     Result.failure(IllegalArgumentException("Freemium plugin must have at least one premium feature"))
                 } else {
                     // Validate each premium feature
-                    monetization.features.forEach { feature ->
+                    for (feature in monetization.features) {
                         if (feature.price < 0) {
                             return Result.failure(
                                 IllegalArgumentException("Feature '${feature.name}' price cannot be negative")
@@ -136,7 +144,7 @@ class PluginValidator(
                     Result.success(Unit)
                 }
             }
-            is PluginMonetization.Free -> Result.success(Unit)
+            ApiPluginMonetization.Free -> Result.success(Unit)
         }
     }
     

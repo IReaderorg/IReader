@@ -5,6 +5,7 @@ import ireader.core.io.VirtualFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlin.collections.emptyList
 
 /**
  * Plugin loader - loads and validates plugins from packages
@@ -110,6 +111,21 @@ class PluginLoader(
         // For Desktop: use java.util.zip.ZipFile
         throw NotImplementedError("ZIP extraction must be implemented platform-specifically")
     }
+    
+    /**
+     * Download a plugin file from URL to destination
+     */
+    suspend fun downloadToFile(url: String, destination: okio.Path): Result<Unit> {
+        return withContext(Dispatchers.Default) {
+            try {
+                // Platform-specific download implementation
+                downloadFile(url, destination)
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 }
 
 /**
@@ -121,3 +137,8 @@ expect suspend fun extractZipEntry(file: VirtualFile, entryName: String): String
  * Platform-specific plugin instantiation
  */
 expect fun instantiatePlugin(pluginClass: Any): Plugin
+
+/**
+ * Platform-specific file download
+ */
+expect suspend fun downloadFile(url: String, destination: okio.Path)

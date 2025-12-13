@@ -4,8 +4,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginManager
-import ireader.domain.plugins.PluginMonetization
 import ireader.domain.plugins.PluginType
+import ireader.plugin.api.PluginMonetization
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import ireader.presentation.ui.plugins.marketplace.PriceFilter
 import ireader.presentation.ui.plugins.marketplace.SortOrder

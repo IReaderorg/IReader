@@ -50,6 +50,12 @@ class CommunityHubScreenSpec {
             onFeatureStore = {
                 navController.navigate(NavigationRoutes.featureStore)
             },
+            onPluginRepository = {
+                navController.navigate(NavigationRoutes.pluginRepository)
+            },
+            onDeveloperPortal = {
+                navController.navigate(NavigationRoutes.developerPortal)
+            },
             onBadgeStore = {
                 navController.navigate(NavigationRoutes.badgeStore)
             },

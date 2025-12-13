@@ -42,4 +42,39 @@ actual object PlatformConfig {
     actual fun getR2SecretAccessKey(): String = BuildConfig.R2_SECRET_ACCESS_KEY
     actual fun getR2BucketName(): String = BuildConfig.R2_BUCKET_NAME
     actual fun getR2PublicUrl(): String = BuildConfig.R2_PUBLIC_URL
+    
+    // Device identification for license binding
+    // Note: This requires context, so we use a fallback approach
+    private var cachedDeviceId: String? = null
+    
+    actual fun getDeviceId(): String {
+        cachedDeviceId?.let { return it }
+        
+        // Generate a stable device ID based on available system properties
+        val deviceId = try {
+            val serial = android.os.Build.SERIAL.takeIf { it != android.os.Build.UNKNOWN } ?: ""
+            val board = android.os.Build.BOARD
+            val brand = android.os.Build.BRAND
+            val device = android.os.Build.DEVICE
+            val model = android.os.Build.MODEL
+            val product = android.os.Build.PRODUCT
+            
+            "$serial:$board:$brand:$device:$model:$product".hashCode().toString(16)
+        } catch (e: Exception) {
+            java.util.UUID.randomUUID().toString()
+        }
+        
+        cachedDeviceId = deviceId
+        return deviceId
+    }
+    
+    /**
+     * Set device ID from context (call from Application.onCreate)
+     */
+    fun setDeviceIdFromContext(context: android.content.Context) {
+        cachedDeviceId = android.provider.Settings.Secure.getString(
+            context.contentResolver,
+            android.provider.Settings.Secure.ANDROID_ID
+        ) ?: cachedDeviceId
+    }
 }

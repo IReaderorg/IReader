@@ -43,4 +43,7 @@ expect object PlatformConfig {
     fun getR2SecretAccessKey(): String
     fun getR2BucketName(): String
     fun getR2PublicUrl(): String
+    
+    // Device identification for license binding
+    fun getDeviceId(): String
 }

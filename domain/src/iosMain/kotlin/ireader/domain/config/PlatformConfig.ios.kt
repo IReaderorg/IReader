@@ -27,4 +27,11 @@ actual object PlatformConfig {
     actual fun getR2SecretAccessKey(): String = ""
     actual fun getR2BucketName(): String = "ireader-character-art"
     actual fun getR2PublicUrl(): String = ""
+    
+    // Device identification for license binding
+    actual fun getDeviceId(): String {
+        // iOS: Use identifierForVendor or generate UUID
+        return platform.UIKit.UIDevice.currentDevice.identifierForVendor?.UUIDString 
+            ?: platform.Foundation.NSUUID().UUIDString
+    }
 }
