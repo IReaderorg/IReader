@@ -140,8 +140,10 @@ fun UploadCharacterArtScreen(
     // API keys for different providers
     onGeminiApiKeyChanged: (String) -> Unit = {},
     onHuggingFaceApiKeyChanged: (String) -> Unit = {},
+    onStabilityAiApiKeyChanged: (String) -> Unit = {},
     initialGeminiApiKey: String = "",
     initialHuggingFaceApiKey: String = "",
+    initialStabilityAiApiKey: String = "",
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues()
 ) {
@@ -161,6 +163,7 @@ fun UploadCharacterArtScreen(
     var currentProvider by remember(selectedProvider) { mutableStateOf(selectedProvider) }
     var geminiApiKey by remember(initialGeminiApiKey) { mutableStateOf(initialGeminiApiKey) }
     var huggingFaceApiKey by remember(initialHuggingFaceApiKey) { mutableStateOf(initialHuggingFaceApiKey) }
+    var stabilityAiApiKey by remember(initialStabilityAiApiKey) { mutableStateOf(initialStabilityAiApiKey) }
     var generationPrompt by remember { mutableStateOf("") }
     var selectedStyle by remember { mutableStateOf("digital art") }
     var showApiKeyDialog by remember { mutableStateOf(false) }
@@ -175,7 +178,7 @@ fun UploadCharacterArtScreen(
     val currentApiKey = when (currentProvider) {
         AIProviderOption.GEMINI -> geminiApiKey
         AIProviderOption.HUGGING_FACE -> huggingFaceApiKey
-        AIProviderOption.STABILITY_AI -> "" // TODO: Add stabilityAiApiKey state
+        AIProviderOption.STABILITY_AI -> stabilityAiApiKey
         AIProviderOption.POLLINATIONS -> "" // No key needed
     }
     
@@ -196,7 +199,8 @@ fun UploadCharacterArtScreen(
                         onHuggingFaceApiKeyChanged(key)
                     }
                     AIProviderOption.STABILITY_AI -> {
-                        // TODO: Add stabilityAiApiKey state and callback
+                        stabilityAiApiKey = key
+                        onStabilityAiApiKeyChanged(key)
                     }
                     AIProviderOption.POLLINATIONS -> { /* No key needed */ }
                 }
@@ -295,7 +299,7 @@ fun UploadCharacterArtScreen(
                                         onFetchModels(provider, when (provider) {
                                             AIProviderOption.GEMINI -> geminiApiKey
                                             AIProviderOption.HUGGING_FACE -> huggingFaceApiKey
-                                            AIProviderOption.STABILITY_AI -> ""
+                                            AIProviderOption.STABILITY_AI -> stabilityAiApiKey
                                             AIProviderOption.POLLINATIONS -> ""
                                         })
                                         showProviderSelector = false
@@ -1615,8 +1619,10 @@ fun UploadCharacterArtScreen(
         onFetchModels = { _, _ -> },
         onGeminiApiKeyChanged = {},
         onHuggingFaceApiKeyChanged = {},
+        onStabilityAiApiKeyChanged = {},
         initialGeminiApiKey = "",
         initialHuggingFaceApiKey = "",
+        initialStabilityAiApiKey = "",
         modifier = modifier,
         paddingValues = paddingValues
     )

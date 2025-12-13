@@ -142,8 +142,12 @@ class CharacterArtUploadScreenSpec {
             onHuggingFaceApiKeyChanged = { apiKey ->
                 vm.setHuggingFaceApiKey(apiKey)
             },
+            onStabilityAiApiKeyChanged = { apiKey ->
+                vm.setStabilityAiApiKey(apiKey)
+            },
             initialGeminiApiKey = state.geminiApiKey,
             initialHuggingFaceApiKey = state.huggingFaceApiKey,
+            initialStabilityAiApiKey = state.stabilityAiApiKey,
             paddingValues = PaddingValues(0.dp)
         )
     }

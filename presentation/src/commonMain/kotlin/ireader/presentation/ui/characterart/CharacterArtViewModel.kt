@@ -49,7 +49,8 @@ data class CharacterArtScreenState(
     val generationError: String? = null,
     // API keys for different providers
     val geminiApiKey: String = "",
-    val huggingFaceApiKey: String = ""
+    val huggingFaceApiKey: String = "",
+    val stabilityAiApiKey: String = ""
 )
 
 /**
@@ -81,10 +82,12 @@ class CharacterArtViewModel(
     private fun loadSavedApiKeys() {
         val savedGeminiKey = readerPreferences?.geminiApiKey()?.get() ?: ""
         val savedHuggingFaceKey = readerPreferences?.huggingFaceApiKey()?.get() ?: ""
+        val savedStabilityAiKey = readerPreferences?.stabilityAiApiKey()?.get() ?: ""
         _state.update { 
             it.copy(
                 geminiApiKey = savedGeminiKey,
-                huggingFaceApiKey = savedHuggingFaceKey
+                huggingFaceApiKey = savedHuggingFaceKey,
+                stabilityAiApiKey = savedStabilityAiKey
             ) 
         }
     }
@@ -430,6 +433,18 @@ class CharacterArtViewModel(
     }
     
     /**
+     * Set the Stability AI API key, save to preferences
+     */
+    fun setStabilityAiApiKey(apiKey: String) {
+        _state.update { it.copy(stabilityAiApiKey = apiKey) }
+        // Save to preferences for persistence
+        readerPreferences?.stabilityAiApiKey()?.set(apiKey)
+        if (apiKey.isNotBlank() && _state.value.selectedProvider == ImageProvider.STABILITY_AI) {
+            loadModelsForCurrentProvider()
+        }
+    }
+    
+    /**
      * Fetch available image generation models from Gemini API
      */
     fun fetchAvailableModels(apiKey: String) {
@@ -487,7 +502,8 @@ class CharacterArtViewModel(
             val apiKey = when (currentState.selectedProvider) {
                 ImageProvider.GEMINI -> currentState.geminiApiKey
                 ImageProvider.HUGGING_FACE -> currentState.huggingFaceApiKey
-                else -> ""
+                ImageProvider.STABILITY_AI -> currentState.stabilityAiApiKey
+                ImageProvider.POLLINATIONS -> ""
             }
             
             generator.getModelsForProvider(currentState.selectedProvider, apiKey)
@@ -536,8 +552,8 @@ class CharacterArtViewModel(
         val apiKey = when (provider) {
             ImageProvider.GEMINI -> currentState.geminiApiKey
             ImageProvider.HUGGING_FACE -> currentState.huggingFaceApiKey
+            ImageProvider.STABILITY_AI -> currentState.stabilityAiApiKey
             ImageProvider.POLLINATIONS -> "" // No key needed
-            ImageProvider.STABILITY_AI -> readerPreferences?.stabilityAiApiKey()?.get() ?: ""
         }
         
         if (provider != ImageProvider.POLLINATIONS && apiKey.isBlank()) {
