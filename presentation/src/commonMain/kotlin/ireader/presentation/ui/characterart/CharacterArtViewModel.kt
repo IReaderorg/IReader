@@ -406,6 +406,89 @@ class CharacterArtViewModel(
         }
     }
     
+    /**
+     * Approve all pending art at once (admin only)
+     */
+    fun approveAllPendingArt(featured: Boolean = false) {
+        scope.launch {
+            val pendingArt = _state.value.pendingArt
+            if (pendingArt.isEmpty()) {
+                _state.update { it.copy(successMessage = "No pending art to approve") }
+                return@launch
+            }
+            
+            _state.update { it.copy(isLoading = true) }
+            
+            var successCount = 0
+            var failCount = 0
+            
+            for (art in pendingArt) {
+                repository.approveArt(art.id, featured)
+                    .onSuccess { successCount++ }
+                    .onFailure { failCount++ }
+            }
+            
+            _state.update { state ->
+                state.copy(
+                    pendingArt = emptyList(),
+                    isLoading = false,
+                    successMessage = "Approved $successCount art${if (failCount > 0) ", $failCount failed" else ""}"
+                )
+            }
+            
+            loadArt(refresh = true)
+        }
+    }
+    
+    /**
+     * Auto-approve pending art older than 7 days (admin only)
+     */
+    fun autoApproveOldPendingArt(days: Int = 7) {
+        scope.launch {
+            _state.update { it.copy(isLoading = true) }
+            
+            repository.getPendingArtOlderThan(days)
+                .onSuccess { oldPendingArt ->
+                    if (oldPendingArt.isEmpty()) {
+                        _state.update { 
+                            it.copy(
+                                isLoading = false,
+                                successMessage = "No pending art older than $days days"
+                            )
+                        }
+                        return@launch
+                    }
+                    
+                    var successCount = 0
+                    var failCount = 0
+                    
+                    for (art in oldPendingArt) {
+                        repository.autoApproveArt(art.id)
+                            .onSuccess { successCount++ }
+                            .onFailure { failCount++ }
+                    }
+                    
+                    _state.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            successMessage = "Auto-approved $successCount art older than $days days${if (failCount > 0) ", $failCount failed" else ""}"
+                        )
+                    }
+                    
+                    loadPendingArtForVerification()
+                    loadArt(refresh = true)
+                }
+                .onFailure { error ->
+                    _state.update { 
+                        it.copy(
+                            isLoading = false,
+                            error = "Failed to auto-approve: ${error.message}"
+                        )
+                    }
+                }
+        }
+    }
+    
     // ==================== Gemini AI Generation ====================
     
     /**

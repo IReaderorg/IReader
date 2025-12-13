@@ -36,12 +36,39 @@ class AdminCharacterArtVerificationScreenSpec {
         var selectedArt by remember { mutableStateOf<CharacterArt?>(null) }
         var showRejectDialog by remember { mutableStateOf(false) }
         var rejectReason by remember { mutableStateOf("") }
+        var showApproveAllDialog by remember { mutableStateOf(false) }
         
         // Load pending art when screen is shown
         // Use loadPendingArtForVerification to bypass admin check since
         // this screen is only accessible to admins anyway
         LaunchedEffect(Unit) {
             vm.loadPendingArtForVerification()
+        }
+        
+        // Approve All dialog
+        if (showApproveAllDialog) {
+            AlertDialog(
+                onDismissRequest = { showApproveAllDialog = false },
+                title = { Text("Approve All") },
+                text = {
+                    Text("Are you sure you want to approve all ${state.pendingArt.size} pending submissions?")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            vm.approveAllPendingArt(featured = false)
+                            showApproveAllDialog = false
+                        }
+                    ) {
+                        Text("Approve All")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showApproveAllDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
         
         // Reject dialog
@@ -100,6 +127,16 @@ class AdminCharacterArtVerificationScreenSpec {
                         }
                     },
                     actions = {
+                        // Auto-approve old pending art (7+ days)
+                        IconButton(onClick = { vm.autoApproveOldPendingArt(7) }) {
+                            Icon(Icons.Default.Schedule, contentDescription = "Auto-approve 7+ days old")
+                        }
+                        // Approve All button
+                        if (state.pendingArt.isNotEmpty()) {
+                            IconButton(onClick = { showApproveAllDialog = true }) {
+                                Icon(Icons.Default.DoneAll, contentDescription = "Approve All")
+                            }
+                        }
                         // Refresh button
                         IconButton(onClick = { vm.loadPendingArtForVerification() }) {
                             Icon(Icons.Default.Refresh, contentDescription = "Refresh")

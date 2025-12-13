@@ -15,8 +15,15 @@ import kotlinx.coroutines.launch
 
 /**
  * Screen specification for Character Art Upload
+ * @param prefilledBookTitle Optional book title from chapter art generation
+ * @param prefilledChapterTitle Optional chapter title from chapter art generation
+ * @param prefilledPrompt Optional AI prompt from chapter art generation
  */
-class CharacterArtUploadScreenSpec {
+class CharacterArtUploadScreenSpec(
+    private val prefilledBookTitle: String = "",
+    private val prefilledChapterTitle: String = "",
+    private val prefilledPrompt: String = ""
+) {
     
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -28,6 +35,9 @@ class CharacterArtUploadScreenSpec {
         
         var selectedImageBytes by remember { mutableStateOf<ByteArray?>(null) }
         var selectedImagePath by remember { mutableStateOf<String?>(null) }
+        
+        // Track if we've applied prefilled values
+        var hasAppliedPrefill by remember { mutableStateOf(false) }
         
         val imagePicker = rememberImagePicker()
         
@@ -148,6 +158,10 @@ class CharacterArtUploadScreenSpec {
             initialGeminiApiKey = state.geminiApiKey,
             initialHuggingFaceApiKey = state.huggingFaceApiKey,
             initialStabilityAiApiKey = state.stabilityAiApiKey,
+            // Prefilled values from chapter art generation
+            prefilledBookTitle = prefilledBookTitle,
+            prefilledChapterTitle = prefilledChapterTitle,
+            prefilledPrompt = prefilledPrompt,
             paddingValues = PaddingValues(0.dp)
         )
     }

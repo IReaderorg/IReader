@@ -60,9 +60,6 @@ class CommunityHubScreenSpec {
             onAdminBadgeVerification = {
                 navController.navigate(NavigationRoutes.adminBadgeVerification)
             },
-            onAdminQuoteVerification = {
-                navController.navigate(NavigationRoutes.adminQuoteVerification)
-            },
             onAdminCharacterArtVerification = {
                 navController.navigate(NavigationRoutes.adminCharacterArtVerification)
             },

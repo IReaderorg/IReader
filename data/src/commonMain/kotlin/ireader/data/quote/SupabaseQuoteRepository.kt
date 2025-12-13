@@ -109,13 +109,14 @@ class SupabaseQuoteRepository(
         val userId = supabaseClient.auth.currentUserOrNull()?.id
             ?: throw Exception("User not logged in")
         
+        // Auto-approve quotes - no manual verification needed
         val quoteData = buildJsonObject {
             put("user_id", userId)
             put("quote_text", request.quoteText)
             put("book_title", request.bookTitle)
             put("author", request.author)
             put("chapter_title", request.chapterTitle)
-            put("status", "PENDING")
+            put("status", "APPROVED")
         }
         
         val result = backendService.insert(

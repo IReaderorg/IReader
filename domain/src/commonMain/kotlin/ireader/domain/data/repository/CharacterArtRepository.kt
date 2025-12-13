@@ -89,4 +89,14 @@ interface CharacterArtRepository {
      * Report inappropriate art
      */
     suspend fun reportArt(artId: String, reason: String): Result<Unit>
+    
+    /**
+     * Get pending art older than specified days (for auto-approval)
+     */
+    suspend fun getPendingArtOlderThan(days: Int): Result<List<CharacterArt>>
+    
+    /**
+     * Auto-approve character art (admin only)
+     */
+    suspend fun autoApproveArt(artId: String): Result<Unit>
 }

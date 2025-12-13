@@ -144,18 +144,23 @@ fun UploadCharacterArtScreen(
     initialGeminiApiKey: String = "",
     initialHuggingFaceApiKey: String = "",
     initialStabilityAiApiKey: String = "",
+    // Prefilled values from chapter art generation
+    prefilledBookTitle: String = "",
+    prefilledChapterTitle: String = "",
+    prefilledPrompt: String = "",
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues()
 ) {
     val isWideScreen = isTableUi()
     val scrollState = rememberScrollState()
     
+    // Initialize with prefilled values if provided
     var characterName by remember { mutableStateOf("") }
-    var bookTitle by remember { mutableStateOf("") }
+    var bookTitle by remember { mutableStateOf(prefilledBookTitle) }
     var bookAuthor by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf(if (prefilledChapterTitle.isNotBlank()) "From chapter: $prefilledChapterTitle" else "") }
     var aiModel by remember { mutableStateOf("") }
-    var prompt by remember { mutableStateOf("") }
+    var prompt by remember { mutableStateOf(prefilledPrompt) }
     var selectedTags by remember { mutableStateOf<List<ArtStyleFilter>>(emptyList()) }
     
     // AI generation state - supports multiple providers

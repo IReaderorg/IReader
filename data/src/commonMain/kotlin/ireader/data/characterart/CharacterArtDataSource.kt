@@ -184,6 +184,16 @@ interface MetadataStorageProvider {
     suspend fun rejectArt(artId: String, reason: String): Result<Unit>
     suspend fun deleteArt(artId: String): Result<Unit>
     suspend fun reportArt(artId: String, reason: String): Result<Unit>
+    
+    /**
+     * Get pending art older than specified days for auto-approval
+     */
+    suspend fun getPendingArtOlderThan(days: Int): Result<List<CharacterArt>>
+    
+    /**
+     * Auto-approve art (marks as auto-approved)
+     */
+    suspend fun autoApproveArt(artId: String): Result<Unit>
 }
 
 /**

@@ -408,4 +408,33 @@ class SupabaseCharacterArtMetadata(
         CharacterArtSort.BOOK_TITLE -> "book_title"
         CharacterArtSort.CHARACTER_NAME -> "character_name"
     }
+    
+    override suspend fun getPendingArtOlderThan(days: Int): Result<List<CharacterArt>> = 
+        RemoteErrorMapper.withErrorMapping {
+            val cutoffTime = ireader.domain.utils.extensions.currentTimeToLong() - (days * 24 * 60 * 60 * 1000L)
+            
+            val queryResult = backendService.query(
+                table = tableName,
+                filters = mapOf("status" to CharacterArtStatus.PENDING.name),
+                orderBy = "submitted_at",
+                ascending = true
+            ).getOrThrow()
+            
+            queryResult
+                .filter { 
+                    val submittedAt = it.jsonObject["submitted_at"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
+                    submittedAt < cutoffTime
+                }
+                .map { it.toDomain(false) }
+        }
+    
+    override suspend fun autoApproveArt(artId: String): Result<Unit> = 
+        RemoteErrorMapper.withErrorMapping {
+            val data = buildJsonObject {
+                put("status", CharacterArtStatus.APPROVED.name)
+                put("is_featured", false)
+                put("auto_approved", true)
+            }
+            backendService.update(table = tableName, filters = mapOf("id" to artId), data = data, returning = false).getOrThrow()
+        }
 }

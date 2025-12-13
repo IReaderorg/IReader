@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Search
@@ -55,6 +56,7 @@ fun ReaderScreenTopBar(
     onWebView: () -> Unit,
     onBookMark: () -> Unit,
     onPopBackStack: () -> Unit,
+    onChapterArt: () -> Unit = {},
     isLoaded: Boolean = false,
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -136,6 +138,11 @@ fun ReaderScreenTopBar(
                             imageVector = Icons.Default.Report,
                             contentDescription = localizeHelper.localize(Res.string.report_broken_chapter),
                             onClick = { vm.toggleReportDialog() }
+                        )
+                        AppIconButton(
+                            imageVector = Icons.Default.Brush,
+                            contentDescription = "Generate Chapter Art",
+                            onClick = { onChapterArt() }
                         )
                         if (!vm.webViewIntegration.value) {
                             AppIconButton(

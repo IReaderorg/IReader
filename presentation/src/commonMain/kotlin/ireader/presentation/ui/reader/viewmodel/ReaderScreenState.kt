@@ -97,6 +97,12 @@ sealed interface ReaderState {
         
         // Scroll target when chapter changes (null = start, true = end)
         val scrollToEndOnChapterChange: Boolean = false,
+        
+        // Chapter Art Generation
+        val showChapterArtDialog: Boolean = false,
+        val isGeneratingArtPrompt: Boolean = false,
+        val generatedArtPrompt: String? = null,
+        val chapterArtError: String? = null,
     ) : ReaderState {
         
         /**
@@ -175,6 +181,10 @@ sealed interface ReaderDialog {
     data object TranslationApiKeyPrompt : ReaderDialog
     data object ReadingBreak : ReaderDialog
     data object ChapterReviews : ReaderDialog
+    data object ChapterArtFocus : ReaderDialog
+    data object ChapterArtGenerating : ReaderDialog
+    data class ChapterArtResult(val prompt: String) : ReaderDialog
+    data class ChapterArtError(val error: String) : ReaderDialog
 }
 
 /**

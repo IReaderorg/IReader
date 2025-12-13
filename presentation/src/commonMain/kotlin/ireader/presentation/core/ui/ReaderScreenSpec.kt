@@ -462,6 +462,11 @@ data class ReaderScreenSpec(
                         onNavigateToTranslationSettings = {
                             navController.navigate(NavigationRoutes.translationSettings)
                         },
+                        onNavigateToCharacterArtUpload = { bookTitle, chapterTitle, prompt ->
+                            navController.navigate(
+                                NavigationRoutes.characterArtUploadWithData(bookTitle, chapterTitle, prompt)
+                            )
+                        },
                         onChangeBrightness = { brightness ->
                             platformReader.apply {
                                 if (context != null) {
@@ -526,6 +531,9 @@ data class ReaderScreenSpec(
                             },
                             onPopBackStack = {
                                 navController.popBackStack()
+                            },
+                            onChapterArt = {
+                                vm.showChapterArtDialog()
                             }
                         )
                     

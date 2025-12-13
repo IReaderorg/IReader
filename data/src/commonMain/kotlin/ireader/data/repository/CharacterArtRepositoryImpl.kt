@@ -270,6 +270,37 @@ class CharacterArtRepositoryImpl(
         }
     }
     
+    override suspend fun getPendingArtOlderThan(days: Int): Result<List<CharacterArt>> {
+        return try {
+            metadataStorage?.getPendingArtOlderThan(days)
+                ?: run {
+                    val cutoffTime = currentTimeToLong() - (days * 24 * 60 * 60 * 1000L)
+                    Result.success(
+                        artCache.value
+                            .filter { it.status == CharacterArtStatus.PENDING && it.submittedAt < cutoffTime }
+                    )
+                }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    override suspend fun autoApproveArt(artId: String): Result<Unit> {
+        return try {
+            metadataStorage?.autoApproveArt(artId)
+                ?: run {
+                    artCache.value = artCache.value.map { art ->
+                        if (art.id == artId) {
+                            art.copy(status = CharacterArtStatus.APPROVED)
+                        } else art
+                    }
+                    Result.success(Unit)
+                }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
     private fun getSortComparator(sort: CharacterArtSort): Comparator<CharacterArt> {
         return when (sort) {
             CharacterArtSort.NEWEST -> compareByDescending { it.submittedAt }

@@ -39,12 +39,34 @@ object NavigationRoutes {
     const val webView = "webView"
     const val browseSettings = "browseSettings"
     const val readingBuddy = "readingBuddy"
-    const val adminQuoteVerification = "adminQuoteVerification"
     const val communityHub = "communityHub"
     const val characterArtGallery = "characterArtGallery"
     const val characterArtUpload = "characterArtUpload"
     const val characterArtDetail = "characterArtDetail"
     const val adminCharacterArtVerification = "adminCharacterArtVerification"
+    
+    /**
+     * Navigate to character art upload with pre-filled data from chapter.
+     * Uses Base64 encoding for prompt to handle special characters safely.
+     */
+    fun characterArtUploadWithData(
+        bookTitle: String,
+        chapterTitle: String,
+        prompt: String
+    ): String {
+        // Simple URL encoding for title fields
+        fun encodeSimple(s: String) = s
+            .replace("&", "%26")
+            .replace("=", "%3D")
+            .replace("?", "%3F")
+            .replace("/", "%2F")
+            .replace(" ", "%20")
+        
+        // Base64 encode the prompt to handle all special characters
+        val encodedPrompt = kotlin.io.encoding.Base64.encode(prompt.encodeToByteArray())
+        
+        return "characterArtUpload?bookTitle=${encodeSimple(bookTitle)}&chapterTitle=${encodeSimple(chapterTitle)}&prompt=$encodedPrompt"
+    }
     const val glossary = "glossary"
     const val adminUserPanel = "adminUserPanel"
     

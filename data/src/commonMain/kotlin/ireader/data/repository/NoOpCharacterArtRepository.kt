@@ -65,4 +65,10 @@ object NoOpCharacterArtRepository : NoOpRepositoryBase(), CharacterArtRepository
     
     override suspend fun reportArt(artId: String, reason: String): Result<Unit> =
         featureNotAvailable(FEATURE_NAME)
+    
+    override suspend fun getPendingArtOlderThan(days: Int): Result<List<CharacterArt>> =
+        emptyListResult()
+    
+    override suspend fun autoApproveArt(artId: String): Result<Unit> =
+        featureNotAvailable(FEATURE_NAME)
 }

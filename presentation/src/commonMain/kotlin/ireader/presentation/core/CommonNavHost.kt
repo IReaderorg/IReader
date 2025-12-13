@@ -126,10 +126,6 @@ fun CommonNavHost(
             ireader.presentation.core.ui.ReadingBuddyScreenSpec().Content()
         }
         
-        composable(NavigationRoutes.adminQuoteVerification) {
-            ireader.presentation.core.ui.AdminQuoteVerificationScreenSpec().Content()
-        }
-        
         // Community Hub - parent screen for all community features
         composable(NavigationRoutes.communityHub) {
             ireader.presentation.core.ui.CommunityHubScreenSpec().Content()
@@ -140,8 +136,38 @@ fun CommonNavHost(
             ireader.presentation.core.ui.CharacterArtGalleryScreenSpec().Content()
         }
         
-        composable(NavigationRoutes.characterArtUpload) {
-            ireader.presentation.core.ui.CharacterArtUploadScreenSpec().Content()
+        // Character Art Upload - single route with optional parameters
+        composable(
+            route = "characterArtUpload?bookTitle={bookTitle}&chapterTitle={chapterTitle}&prompt={prompt}",
+            arguments = listOf(
+                navArgument("bookTitle") { type = NavType.StringType; defaultValue = "" },
+                navArgument("chapterTitle") { type = NavType.StringType; defaultValue = "" },
+                navArgument("prompt") { type = NavType.StringType; defaultValue = "" }
+            )
+        ) { backStackEntry ->
+            val bookTitle = remember(backStackEntry) {
+                (backStackEntry.savedStateHandle.get<String>("bookTitle") ?: "").decodeUrlParam()
+            }
+            val chapterTitle = remember(backStackEntry) {
+                (backStackEntry.savedStateHandle.get<String>("chapterTitle") ?: "").decodeUrlParam()
+            }
+            val prompt = remember(backStackEntry) {
+                val encoded = backStackEntry.savedStateHandle.get<String>("prompt") ?: ""
+                try {
+                    // Try to decode as Base64 first
+                    if (encoded.isNotBlank()) {
+                        kotlin.io.encoding.Base64.decode(encoded).decodeToString()
+                    } else ""
+                } catch (e: Exception) {
+                    // Fallback to URL decoding
+                    encoded.decodeUrlParam()
+                }
+            }
+            ireader.presentation.core.ui.CharacterArtUploadScreenSpec(
+                prefilledBookTitle = bookTitle,
+                prefilledChapterTitle = chapterTitle,
+                prefilledPrompt = prompt
+            ).Content()
         }
         
         composable(NavigationRoutes.adminCharacterArtVerification) {
@@ -155,7 +181,9 @@ fun CommonNavHost(
                 navArgument("artId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val artId =  backStackEntry.savedStateHandle.get<String>("artId") ?: return@composable
+            val artId = remember(backStackEntry) {
+                backStackEntry.savedStateHandle.get<String>("artId")
+            } ?: return@composable
             ireader.presentation.core.ui.CharacterArtDetailScreenSpec(artId).Content()
         }
         
@@ -450,4 +478,16 @@ fun CommonNavHost(
         additionalRoutes?.invoke(this)
         }
     }
+}
+
+/**
+ * Decode URL-encoded parameter
+ */
+private fun String.decodeUrlParam(): String {
+    return this
+        .replace("%26", "&")
+        .replace("%3D", "=")
+        .replace("%3F", "?")
+        .replace("%2F", "/")
+        .replace("%20", " ")
 }

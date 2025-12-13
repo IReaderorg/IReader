@@ -51,6 +51,10 @@ import ireader.presentation.ui.reader.components.PreloadIndicator
 import ireader.presentation.ui.reader.components.ReaderSettingsBottomSheet
 import ireader.presentation.ui.reader.components.ReadingTimeEstimator
 import ireader.presentation.ui.reader.components.ReportBrokenChapterDialog
+import ireader.presentation.ui.reader.components.ChapterArtFocusDialog
+import ireader.presentation.ui.reader.components.ChapterArtGeneratingDialog
+import ireader.presentation.ui.reader.components.ChapterArtPromptResultDialog
+import ireader.presentation.ui.reader.components.ChapterArtErrorDialog
 import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
@@ -94,6 +98,7 @@ fun ReadingScreen(
         onChapterShown: (chapter: Chapter) -> Unit,
         paddingValues: PaddingValues,
         onNavigateToTranslationSettings: () -> Unit,
+        onNavigateToCharacterArtUpload: (bookTitle: String, chapterTitle: String, prompt: String) -> Unit = { _, _, _ -> },
         onChangeBrightness: (Float) -> Unit = {},
         onToggleAutoBrightness: () -> Unit = {}
 ) {
@@ -126,6 +131,7 @@ fun ReadingScreen(
             onChapterShown = onChapterShown,
             paddingValues = paddingValues,
             onNavigateToTranslationSettings = onNavigateToTranslationSettings,
+            onNavigateToCharacterArtUpload = onNavigateToCharacterArtUpload,
             scope = scope,
             chapter = chapter,
             showChapterReviews = showChapterReviews,
@@ -158,6 +164,7 @@ private fun ReadingScreenContent(
         onChapterShown: (chapter: Chapter) -> Unit,
         paddingValues: PaddingValues,
         onNavigateToTranslationSettings: () -> Unit,
+        onNavigateToCharacterArtUpload: (bookTitle: String, chapterTitle: String, prompt: String) -> Unit,
         scope: kotlinx.coroutines.CoroutineScope,
         chapter: Chapter?,
         showChapterReviews: androidx.compose.runtime.MutableState<Boolean>,
@@ -360,6 +367,40 @@ private fun ReadingScreenContent(
                                     .padding(top = 16.dp)
                             )
                             
+                            // Chapter Art Generation progress indicator
+                            if (vm.isGeneratingArtPrompt) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .background(
+                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                                            RoundedCornerShape(16.dp)
+                                        )
+                                        .padding(24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(48.dp),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        androidx.compose.material3.Text(
+                                            text = "Generating art prompt...",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        androidx.compose.material3.Text(
+                                            text = "Analyzing chapter with Gemini AI",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                            
                             // Autoscroll speed control
                             AutoScrollSpeedControl(
                                 visible = vm.autoScrollMode,
@@ -437,6 +478,60 @@ private fun ReadingScreenContent(
                                 onReport = { category, description ->
                                     vm.reportBrokenChapter(category, description)
                                 }
+                            )
+                        }
+                        
+                        // Chapter Art Generation - Focus selection dialog
+                        if (vm.showChapterArtDialog) {
+                            ChapterArtFocusDialog(
+                                bookTitle = vm.book?.title ?: "Unknown Book",
+                                chapterTitle = vm.stateChapter?.name ?: "Unknown Chapter",
+                                onDismiss = { vm.dismissChapterArtDialog() },
+                                onGenerate = { focus ->
+                                    vm.generateChapterArtPrompt(focus)
+                                }
+                            )
+                        }
+                        
+                        // Chapter Art Generation - Loading dialog
+                        if (vm.isGeneratingArtPrompt) {
+                            ChapterArtGeneratingDialog(
+                                onDismiss = { vm.dismissChapterArtDialog() }
+                            )
+                        }
+                        
+                        // Chapter Art Generation - Result dialog
+                        vm.generatedArtPrompt?.let { prompt ->
+                            val bookTitle = vm.book?.title ?: "Unknown Book"
+                            val chapterTitle = vm.stateChapter?.name ?: "Unknown Chapter"
+                            ChapterArtPromptResultDialog(
+                                prompt = prompt,
+                                bookTitle = bookTitle,
+                                chapterTitle = chapterTitle,
+                                onDismiss = { vm.clearGeneratedArtPrompt() },
+                                onProceedToUpload = {
+                                    // Navigate to upload screen with pre-filled data
+                                    vm.clearGeneratedArtPrompt()
+                                    onNavigateToCharacterArtUpload(bookTitle, chapterTitle, prompt)
+                                },
+                                onCopyPrompt = {
+                                    // Show success message when copied
+                                    scope.launch {
+                                        snackBarHostState.showSnackbar(
+                                            message = "Prompt copied to clipboard!",
+                                            duration = androidx.compose.material3.SnackbarDuration.Short
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                        
+                        // Chapter Art Generation - Error dialog
+                        vm.chapterArtError?.let { error ->
+                            ChapterArtErrorDialog(
+                                error = error,
+                                onDismiss = { vm.clearGeneratedArtPrompt() },
+                                onRetry = { vm.showChapterArtDialog() }
                             )
                         }
                         
@@ -529,7 +624,7 @@ private fun ReadingScreenContent(
                                         onSliderChange = onSliderChange,
                                         onSliderFinished = onSliderFinished,
                                         onPlay = onReaderPlay,
-                                        onAutoScrollToggle = { vm.toggleAutoScroll() },
+                                        onAutoScrollToggle = { vm.toggleAutoScroll() }
                                     )
                                 }
                             }

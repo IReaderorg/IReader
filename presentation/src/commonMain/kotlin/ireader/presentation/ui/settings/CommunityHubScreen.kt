@@ -42,7 +42,6 @@ fun CommunityHubScreen(
     onBadgeManagement: () -> Unit,
     isAdmin: Boolean = false,
     onAdminBadgeVerification: () -> Unit = {},
-    onAdminQuoteVerification: () -> Unit = {},
     onAdminCharacterArtVerification: () -> Unit = {},
     onAdminUserPanel: () -> Unit = {},
 ) {
@@ -227,15 +226,6 @@ fun CommunityHubScreen(
                         description = "Review and approve badge purchase requests",
                         icon = Icons.Outlined.VerifiedUser,
                         onClick = onAdminBadgeVerification
-                    )
-                }
-                
-                item {
-                    SettingsItem(
-                        title = "Quote Verification",
-                        description = "Review and approve community quote submissions",
-                        icon = Icons.Outlined.FormatQuote,
-                        onClick = onAdminQuoteVerification
                     )
                 }
                 

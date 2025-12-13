@@ -21,7 +21,6 @@ data class ReadingBuddyScreenState(
     val dailyQuote: Quote? = null,
     val approvedQuotes: List<Quote> = emptyList(),
     val userQuotes: List<Quote> = emptyList(),
-    val pendingQuotes: List<Quote> = emptyList(), // Admin only
     val selectedCardStyle: QuoteCardStyle = QuoteCardStyle.GRADIENT_SUNSET,
     val isLoading: Boolean = false,
     val isSubmitting: Boolean = false,
@@ -81,10 +80,6 @@ class ReadingBuddyViewModel(
             loadDailyQuote()
             loadApprovedQuotes()
             
-            if (isAdmin) {
-                loadPendingQuotes()
-            }
-            
             _state.update { it.copy(isLoading = false) }
         }
     }
@@ -113,18 +108,6 @@ class ReadingBuddyViewModel(
         }
     }
     
-    fun loadPendingQuotes() {
-        scope.launch {
-            quoteRepository.getPendingQuotes()
-                .onSuccess { quotes ->
-                    _state.update { it.copy(pendingQuotes = quotes) }
-                }
-                .onFailure { error ->
-                    // Silent fail for admin feature
-                }
-        }
-    }
-    
     fun submitQuote(quoteText: String, bookTitle: String, author: String, chapterTitle: String) {
         scope.launch {
             _state.update { it.copy(isSubmitting = true, error = null) }
@@ -141,10 +124,12 @@ class ReadingBuddyViewModel(
                     _state.update { current ->
                         current.copy(
                             isSubmitting = false,
-                            successMessage = "Quote submitted for review! 📚",
+                            successMessage = "Quote published! 📚",
                             userQuotes = current.userQuotes + quote
                         )
                     }
+                    // Refresh approved quotes to show the new one
+                    loadApprovedQuotes()
                 }
                 .onFailure { error ->
                     _state.update { 
@@ -173,41 +158,6 @@ class ReadingBuddyViewModel(
                         }
                         current.copy(approvedQuotes = updatedQuotes)
                     }
-                }
-        }
-    }
-    
-    fun approveQuote(quoteId: String, featured: Boolean = false) {
-        scope.launch {
-            quoteRepository.approveQuote(quoteId, featured)
-                .onSuccess {
-                    _state.update { current ->
-                        current.copy(
-                            pendingQuotes = current.pendingQuotes.filter { it.id != quoteId },
-                            successMessage = "Quote approved! ✅"
-                        )
-                    }
-                    loadApprovedQuotes()
-                }
-                .onFailure { error ->
-                    _state.update { it.copy(error = "Failed to approve: ${error.message}") }
-                }
-        }
-    }
-    
-    fun rejectQuote(quoteId: String) {
-        scope.launch {
-            quoteRepository.rejectQuote(quoteId)
-                .onSuccess {
-                    _state.update { current ->
-                        current.copy(
-                            pendingQuotes = current.pendingQuotes.filter { it.id != quoteId },
-                            successMessage = "Quote rejected"
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    _state.update { it.copy(error = "Failed to reject: ${error.message}") }
                 }
         }
     }

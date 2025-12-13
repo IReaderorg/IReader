@@ -1077,6 +1077,159 @@ class ReaderScreenViewModel(
         }
     }
 
+    // ==================== Chapter Art Generation ====================
+    
+    /**
+     * Show the chapter art generation dialog.
+     * This allows users to generate an AI image prompt from the current chapter.
+     */
+    fun showChapterArtDialog() {
+        updateSuccessState { it.copy(showChapterArtDialog = true) }
+    }
+    
+    /**
+     * Dismiss the chapter art dialog
+     */
+    fun dismissChapterArtDialog() {
+        updateSuccessState { 
+            it.copy(
+                showChapterArtDialog = false,
+                isGeneratingArtPrompt = false,
+                generatedArtPrompt = null,
+                chapterArtError = null
+            ) 
+        }
+    }
+    
+    /**
+     * Get chapter art dialog visibility
+     */
+    val showChapterArtDialog: Boolean
+        get() = (_state.value as? ReaderState.Success)?.showChapterArtDialog ?: false
+    
+    /**
+     * Get chapter art generation loading state
+     */
+    val isGeneratingArtPrompt: Boolean
+        get() = (_state.value as? ReaderState.Success)?.isGeneratingArtPrompt ?: false
+    
+    /**
+     * Get generated art prompt
+     */
+    val generatedArtPrompt: String?
+        get() = (_state.value as? ReaderState.Success)?.generatedArtPrompt
+    
+    /**
+     * Get chapter art error
+     */
+    val chapterArtError: String?
+        get() = (_state.value as? ReaderState.Success)?.chapterArtError
+    
+    // Lazy-initialized HttpClient for chapter art generation (reused across calls)
+    private val chapterArtHttpClientLazy = lazy { io.ktor.client.HttpClient() }
+    private val chapterArtHttpClient by chapterArtHttpClientLazy
+    
+    // Lazy-initialized prompt generator (reuses HttpClient)
+    private val chapterArtPromptGenerator by lazy {
+        ireader.data.characterart.ChapterArtPromptGenerator(httpClient = chapterArtHttpClient)
+    }
+    
+    /**
+     * Generate an image prompt from the current chapter using Gemini AI.
+     * @param focus The type of visual element to focus on (CHARACTER, SCENE, SETTING, or AUTO)
+     */
+    fun generateChapterArtPrompt(focus: ireader.data.characterart.PromptFocus) {
+        val currentState = _state.value as? ReaderState.Success ?: return
+        
+        val apiKey = readerPreferences.geminiApiKey().get()
+        if (apiKey.isBlank()) {
+            updateSuccessState { 
+                it.copy(
+                    showChapterArtDialog = false,
+                    chapterArtError = "Please set your Gemini API key in Settings > Translation"
+                )
+            }
+            showSnackBar(UiText.DynamicString("Please set your Gemini API key in Settings > Translation"))
+            return
+        }
+        
+        // Extract text from chapter content
+        val chapterText = currentState.content
+            .filterIsInstance<Text>()
+            .joinToString("\n\n") { it.text }
+        
+        if (chapterText.length < 100) {
+            updateSuccessState { 
+                it.copy(
+                    showChapterArtDialog = false,
+                    chapterArtError = "Chapter text is too short to analyze"
+                )
+            }
+            showSnackBar(UiText.DynamicString("Chapter text is too short to analyze"))
+            return
+        }
+        
+        // Show loading state
+        updateSuccessState { 
+            it.copy(
+                showChapterArtDialog = false,
+                isGeneratingArtPrompt = true,
+                chapterArtError = null
+            )
+        }
+        
+        scope.launch {
+            try {
+                // Get user's selected Gemini model (or use default if not set)
+                val selectedModel = readerPreferences.geminiModel().get()
+                
+                chapterArtPromptGenerator.generateImagePrompt(
+                    apiKey = apiKey,
+                    chapterText = chapterText,
+                    bookTitle = currentState.book.title,
+                    chapterTitle = currentState.currentChapter.name,
+                    preferredFocus = focus,
+                    model = selectedModel
+                ).onSuccess { result ->
+                    updateSuccessState { 
+                        it.copy(
+                            isGeneratingArtPrompt = false,
+                            generatedArtPrompt = result.imagePrompt
+                        )
+                    }
+                }.onFailure { error ->
+                    updateSuccessState { 
+                        it.copy(
+                            isGeneratingArtPrompt = false,
+                            chapterArtError = error.message ?: "Failed to generate prompt"
+                        )
+                    }
+                    showSnackBar(UiText.DynamicString("Failed to generate prompt: ${error.message}"))
+                }
+            } catch (e: Exception) {
+                updateSuccessState { 
+                    it.copy(
+                        isGeneratingArtPrompt = false,
+                        chapterArtError = e.message ?: "Failed to generate prompt"
+                    )
+                }
+                showSnackBar(UiText.DynamicString("Failed to generate prompt: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Clear the generated art prompt (after navigating to upload screen)
+     */
+    fun clearGeneratedArtPrompt() {
+        updateSuccessState { 
+            it.copy(
+                generatedArtPrompt = null,
+                chapterArtError = null
+            )
+        }
+    }
+    
     // ==================== Bookmark ====================
 
     fun bookmarkChapter() {
@@ -1553,5 +1706,14 @@ class ReaderScreenViewModel(
         
         // Cleanup ChapterController state (Requirements: 9.2, 9.4, 9.5)
         chapterController.dispatch(ChapterCommand.Cleanup)
+        
+        // Close chapter art HttpClient only if it was initialized
+        if (chapterArtHttpClientLazy.isInitialized()) {
+            try {
+                chapterArtHttpClient.close()
+            } catch (_: Exception) {
+                // Ignore close errors
+            }
+        }
     }
 }
