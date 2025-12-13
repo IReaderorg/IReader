@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -2156,4 +2157,19 @@
     <string name="your_review_will_appear_as">نظر شما به صورت زیر نمایش داده می شود:</string>
     <string name="your_username">نام کاربری شما</string>
     <string name="youve_reached_the_end">شما به پایان رسیدید!</string>
+    <string name="loading_features">Loading features...</string>
+    <string name="source_broken_help_description">Support the development with a $5 donation and help us prioritize fixing this source.</string>
+    <string name="source_needs_update">Source Needs Update</string>
+    <string name="source_broken_help_title">Want to help fix this?</string>
+    <string name="source_website_changed">The source website has changed its structure</string>
+    <string name="source_broken_description">The website structure has changed and the source needs to be updated by a developer. This is not a network issue.</string>
+    <string name="source_broken_title">This Source is Broken</string>
+    <string name="feature_store_description">Discover and purchase premium plugins and features</string>
+    <string name="no_plugins_available">No plugins available</string>
+    <string name="parsing_error">Parsing Error</string>
+    <string name="donate_crypto">Donate Crypto</string>
+    <string name="feature_store">Feature Store</string>
+    <string name="crypto_donation_preferred">💡 Tip: Crypto donations are preferred! Card payments via Reymit take ~40% fees on small amounts. Sending crypto directly means 100% goes to development.</string>
+    <string name="support_development_5">Support Development ($5)</string>
+    <string name="search_features">Search features...</string>
 </resources>
