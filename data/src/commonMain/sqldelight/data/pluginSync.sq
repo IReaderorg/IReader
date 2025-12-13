@@ -1,0 +1,92 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Plugin sync changes table for tracking local changes
+CREATE TABLE IF NOT EXISTS plugin_sync_change (
+    id TEXT NOT NULL PRIMARY KEY,
+    change_type TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    old_value TEXT,
+    new_value TEXT,
+    timestamp INTEGER AS Long NOT NULL,
+    synced INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_sync_change_entity ON plugin_sync_change(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_sync_change_synced ON plugin_sync_change(synced);
+CREATE INDEX IF NOT EXISTS idx_sync_change_timestamp ON plugin_sync_change(timestamp);
+
+-- Plugin sync conflicts table
+CREATE TABLE IF NOT EXISTS plugin_sync_conflict (
+    id TEXT NOT NULL PRIMARY KEY,
+    plugin_id TEXT NOT NULL,
+    conflict_type TEXT NOT NULL,
+    local_value TEXT NOT NULL,
+    remote_value TEXT NOT NULL,
+    local_timestamp INTEGER AS Long NOT NULL,
+    remote_timestamp INTEGER AS Long NOT NULL,
+    device_id TEXT NOT NULL,
+    resolved INTEGER AS Boolean NOT NULL DEFAULT 0,
+    resolution TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_sync_conflict_plugin ON plugin_sync_conflict(plugin_id);
+CREATE INDEX IF NOT EXISTS idx_sync_conflict_resolved ON plugin_sync_conflict(resolved);
+
+-- Queries for changes
+selectAllChanges:
+SELECT * FROM plugin_sync_change ORDER BY timestamp DESC;
+
+selectPendingChanges:
+SELECT * FROM plugin_sync_change WHERE synced = 0 ORDER BY timestamp ASC;
+
+selectChangeByEntity:
+SELECT * FROM plugin_sync_change WHERE entity_type = ? AND entity_id = ? ORDER BY timestamp DESC LIMIT 1;
+
+insertChange:
+INSERT OR REPLACE INTO plugin_sync_change(
+    id, change_type, entity_type, entity_id, old_value, new_value, timestamp, synced
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+markSynced:
+UPDATE plugin_sync_change SET synced = 1 WHERE id = ?;
+
+deleteSyncedChanges:
+DELETE FROM plugin_sync_change WHERE synced = 1;
+
+deleteAllChanges:
+DELETE FROM plugin_sync_change;
+
+-- Queries for conflicts
+selectAllConflicts:
+SELECT * FROM plugin_sync_conflict WHERE resolved = 0;
+
+selectConflictById:
+SELECT * FROM plugin_sync_conflict WHERE id = ? LIMIT 1;
+
+selectConflictsByPlugin:
+SELECT * FROM plugin_sync_conflict WHERE plugin_id = ? AND resolved = 0;
+
+insertConflict:
+INSERT OR REPLACE INTO plugin_sync_conflict(
+    id, plugin_id, conflict_type, local_value, remote_value,
+    local_timestamp, remote_timestamp, device_id, resolved, resolution
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+resolveConflict:
+UPDATE plugin_sync_conflict SET resolved = 1, resolution = ? WHERE id = ?;
+
+deleteResolvedConflicts:
+DELETE FROM plugin_sync_conflict WHERE resolved = 1;
+
+deleteAllConflicts:
+DELETE FROM plugin_sync_conflict;
+
+countPendingChanges:
+SELECT COUNT(*) FROM plugin_sync_change WHERE synced = 0;
+
+countUnresolvedConflicts:
+SELECT COUNT(*) FROM plugin_sync_conflict WHERE resolved = 0;

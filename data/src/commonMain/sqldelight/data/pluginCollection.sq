@@ -1,0 +1,91 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Plugin collections table for storing user-created collections
+CREATE TABLE IF NOT EXISTS plugin_collection (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    author_id TEXT NOT NULL,
+    author_name TEXT NOT NULL,
+    plugin_ids TEXT NOT NULL DEFAULT '',
+    cover_image_url TEXT,
+    tags TEXT NOT NULL DEFAULT '',
+    is_public INTEGER AS Boolean NOT NULL DEFAULT 1,
+    is_featured INTEGER AS Boolean NOT NULL DEFAULT 0,
+    likes_count INTEGER NOT NULL DEFAULT 0,
+    saves_count INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    is_synced INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_collection_author ON plugin_collection(author_id);
+CREATE INDEX IF NOT EXISTS idx_plugin_collection_public ON plugin_collection(is_public);
+CREATE INDEX IF NOT EXISTS idx_plugin_collection_featured ON plugin_collection(is_featured);
+
+-- Queries
+selectAll:
+SELECT * FROM plugin_collection ORDER BY updated_at DESC;
+
+selectById:
+SELECT * FROM plugin_collection WHERE id = ? LIMIT 1;
+
+selectByAuthor:
+SELECT * FROM plugin_collection WHERE author_id = ? ORDER BY updated_at DESC;
+
+selectPublic:
+SELECT * FROM plugin_collection WHERE is_public = 1 ORDER BY likes_count DESC;
+
+selectFeatured:
+SELECT * FROM plugin_collection WHERE is_featured = 1 ORDER BY likes_count DESC;
+
+selectUnsynced:
+SELECT * FROM plugin_collection WHERE is_synced = 0;
+
+insert:
+INSERT OR REPLACE INTO plugin_collection(
+    id, name, description, author_id, author_name, plugin_ids,
+    cover_image_url, tags, is_public, is_featured, likes_count,
+    saves_count, created_at, updated_at, is_synced
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE plugin_collection SET
+    name = ?,
+    description = ?,
+    plugin_ids = ?,
+    cover_image_url = ?,
+    tags = ?,
+    is_public = ?,
+    updated_at = ?,
+    is_synced = 0
+WHERE id = ?;
+
+updatePluginIds:
+UPDATE plugin_collection SET plugin_ids = ?, updated_at = ?, is_synced = 0 WHERE id = ?;
+
+updateLikesCount:
+UPDATE plugin_collection SET likes_count = ? WHERE id = ?;
+
+updateSavesCount:
+UPDATE plugin_collection SET saves_count = ? WHERE id = ?;
+
+markSynced:
+UPDATE plugin_collection SET is_synced = 1 WHERE id = ?;
+
+delete:
+DELETE FROM plugin_collection WHERE id = ?;
+
+deleteByAuthor:
+DELETE FROM plugin_collection WHERE author_id = ?;
+
+deleteAll:
+DELETE FROM plugin_collection;
+
+countByAuthor:
+SELECT COUNT(*) FROM plugin_collection WHERE author_id = ?;
+
+searchByName:
+SELECT * FROM plugin_collection WHERE name LIKE '%' || ? || '%' AND is_public = 1 ORDER BY likes_count DESC;

@@ -1,0 +1,227 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Reading sessions table
+CREATE TABLE IF NOT EXISTS reading_session (
+    id TEXT NOT NULL PRIMARY KEY,
+    book_id INTEGER AS Long NOT NULL,
+    book_title TEXT NOT NULL,
+    start_time INTEGER AS Long NOT NULL,
+    end_time INTEGER AS Long,
+    start_chapter_id INTEGER AS Long NOT NULL,
+    end_chapter_id INTEGER AS Long,
+    start_position INTEGER NOT NULL,
+    end_position INTEGER,
+    pages_read INTEGER NOT NULL DEFAULT 0,
+    words_read INTEGER NOT NULL DEFAULT 0,
+    characters_read INTEGER NOT NULL DEFAULT 0,
+    pause_duration_ms INTEGER AS Long NOT NULL DEFAULT 0,
+    device_type TEXT NOT NULL,
+    is_completed INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_session_book ON reading_session(book_id);
+CREATE INDEX IF NOT EXISTS idx_session_start ON reading_session(start_time);
+CREATE INDEX IF NOT EXISTS idx_session_completed ON reading_session(is_completed);
+
+-- Daily reading stats table (aggregated)
+CREATE TABLE IF NOT EXISTS daily_reading_stats (
+    date TEXT NOT NULL PRIMARY KEY,
+    total_reading_time_ms INTEGER AS Long NOT NULL DEFAULT 0,
+    sessions_count INTEGER NOT NULL DEFAULT 0,
+    books_read INTEGER NOT NULL DEFAULT 0,
+    chapters_read INTEGER NOT NULL DEFAULT 0,
+    pages_read INTEGER NOT NULL DEFAULT 0,
+    words_read INTEGER NOT NULL DEFAULT 0,
+    average_wpm REAL NOT NULL DEFAULT 0,
+    longest_session_ms INTEGER AS Long NOT NULL DEFAULT 0,
+    peak_reading_hour INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_daily_stats_date ON daily_reading_stats(date);
+
+-- Reading goals table
+CREATE TABLE IF NOT EXISTS reading_goal (
+    id TEXT NOT NULL PRIMARY KEY,
+    type TEXT NOT NULL,
+    target INTEGER NOT NULL,
+    period TEXT NOT NULL,
+    start_date INTEGER AS Long NOT NULL,
+    end_date INTEGER AS Long,
+    current_progress INTEGER NOT NULL DEFAULT 0,
+    is_active INTEGER AS Boolean NOT NULL DEFAULT 1,
+    is_completed INTEGER AS Boolean NOT NULL DEFAULT 0,
+    completed_date INTEGER AS Long,
+    streak_days INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_goal_active ON reading_goal(is_active);
+CREATE INDEX IF NOT EXISTS idx_goal_type ON reading_goal(type);
+
+-- Reading achievements table
+CREATE TABLE IF NOT EXISTS reading_achievement (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    icon_url TEXT,
+    category TEXT NOT NULL,
+    tier TEXT NOT NULL,
+    requirement_type TEXT NOT NULL,
+    requirement_value INTEGER NOT NULL,
+    requirement_description TEXT NOT NULL,
+    progress INTEGER NOT NULL DEFAULT 0,
+    is_unlocked INTEGER AS Boolean NOT NULL DEFAULT 0,
+    unlocked_date INTEGER AS Long,
+    points INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_achievement_unlocked ON reading_achievement(is_unlocked);
+CREATE INDEX IF NOT EXISTS idx_achievement_category ON reading_achievement(category);
+
+-- Reading milestones table
+CREATE TABLE IF NOT EXISTS reading_milestone (
+    id TEXT NOT NULL PRIMARY KEY,
+    type TEXT NOT NULL,
+    value INTEGER AS Long NOT NULL,
+    reached_date INTEGER AS Long NOT NULL,
+    book_id INTEGER AS Long,
+    book_title TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_milestone_type ON reading_milestone(type);
+
+-- Reading streak table
+CREATE TABLE IF NOT EXISTS reading_streak (
+    id INTEGER NOT NULL PRIMARY KEY,
+    current_streak INTEGER NOT NULL DEFAULT 0,
+    longest_streak INTEGER NOT NULL DEFAULT 0,
+    last_read_date TEXT,
+    streak_start_date TEXT
+);
+
+-- Queries for sessions
+selectAllSessions:
+SELECT * FROM reading_session ORDER BY start_time DESC;
+
+selectRecentSessions:
+SELECT * FROM reading_session WHERE is_completed = 1 ORDER BY start_time DESC LIMIT ?;
+
+selectSessionsByBook:
+SELECT * FROM reading_session WHERE book_id = ? ORDER BY start_time DESC;
+
+selectSessionsByDateRange:
+SELECT * FROM reading_session WHERE start_time >= ? AND start_time <= ? ORDER BY start_time ASC;
+
+selectCurrentSession:
+SELECT * FROM reading_session WHERE is_completed = 0 ORDER BY start_time DESC LIMIT 1;
+
+insertSession:
+INSERT OR REPLACE INTO reading_session(
+    id, book_id, book_title, start_time, end_time, start_chapter_id, end_chapter_id,
+    start_position, end_position, pages_read, words_read, characters_read,
+    pause_duration_ms, device_type, is_completed
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+completeSession:
+UPDATE reading_session SET end_time = ?, is_completed = 1 WHERE id = ?;
+
+getTotalReadingTime:
+SELECT SUM(end_time - start_time - pause_duration_ms) FROM reading_session WHERE is_completed = 1;
+
+getTotalSessions:
+SELECT COUNT(*) FROM reading_session WHERE is_completed = 1;
+
+getTotalWordsRead:
+SELECT SUM(words_read) FROM reading_session;
+
+-- Queries for daily stats
+selectDailyStats:
+SELECT * FROM daily_reading_stats WHERE date = ? LIMIT 1;
+
+selectWeeklyStats:
+SELECT * FROM daily_reading_stats ORDER BY date DESC LIMIT 7;
+
+selectMonthlyStats:
+SELECT * FROM daily_reading_stats WHERE date LIKE ? || '%' ORDER BY date ASC;
+
+insertDailyStats:
+INSERT OR REPLACE INTO daily_reading_stats(
+    date, total_reading_time_ms, sessions_count, books_read, chapters_read,
+    pages_read, words_read, average_wpm, longest_session_ms, peak_reading_hour
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Queries for goals
+selectActiveGoals:
+SELECT * FROM reading_goal WHERE is_active = 1 ORDER BY start_date DESC;
+
+selectAllGoals:
+SELECT * FROM reading_goal ORDER BY start_date DESC;
+
+selectGoalById:
+SELECT * FROM reading_goal WHERE id = ? LIMIT 1;
+
+insertGoal:
+INSERT OR REPLACE INTO reading_goal(
+    id, type, target, period, start_date, end_date, current_progress,
+    is_active, is_completed, completed_date, streak_days
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateGoalProgress:
+UPDATE reading_goal SET current_progress = ?, is_completed = ?, completed_date = ? WHERE id = ?;
+
+deleteGoal:
+DELETE FROM reading_goal WHERE id = ?;
+
+-- Queries for achievements
+selectAllAchievements:
+SELECT * FROM reading_achievement ORDER BY category, tier;
+
+selectUnlockedAchievements:
+SELECT * FROM reading_achievement WHERE is_unlocked = 1 ORDER BY unlocked_date DESC;
+
+selectAchievementsByCategory:
+SELECT * FROM reading_achievement WHERE category = ? ORDER BY tier;
+
+insertAchievement:
+INSERT OR REPLACE INTO reading_achievement(
+    id, name, description, icon_url, category, tier, requirement_type,
+    requirement_value, requirement_description, progress, is_unlocked, unlocked_date, points
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+unlockAchievement:
+UPDATE reading_achievement SET is_unlocked = 1, unlocked_date = ?, progress = requirement_value WHERE id = ?;
+
+updateAchievementProgress:
+UPDATE reading_achievement SET progress = ? WHERE id = ?;
+
+getTotalAchievementPoints:
+SELECT SUM(points) FROM reading_achievement WHERE is_unlocked = 1;
+
+-- Queries for milestones
+selectAllMilestones:
+SELECT * FROM reading_milestone ORDER BY reached_date DESC;
+
+selectMilestonesByType:
+SELECT * FROM reading_milestone WHERE type = ? ORDER BY reached_date DESC;
+
+insertMilestone:
+INSERT INTO reading_milestone(id, type, value, reached_date, book_id, book_title)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- Queries for streak
+selectStreak:
+SELECT * FROM reading_streak WHERE id = 1 LIMIT 1;
+
+insertOrUpdateStreak:
+INSERT OR REPLACE INTO reading_streak(id, current_streak, longest_streak, last_read_date, streak_start_date)
+VALUES (1, ?, ?, ?, ?);
+
+updateCurrentStreak:
+UPDATE reading_streak SET current_streak = ?, last_read_date = ? WHERE id = 1;
+
+resetStreak:
+UPDATE reading_streak SET current_streak = 0, streak_start_date = NULL WHERE id = 1;

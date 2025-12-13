@@ -5,22 +5,40 @@ import data.Book
 import data.Catalog
 import data.Chapter
 import data.ChapterHealth
+import data.Character
+import data.Character_appearance
+import data.Character_group
+import data.Character_note
+import data.Character_relationship
+import data.Character_timeline_event
+import data.Daily_reading_stats
 import data.Download
 import data.Global_glossary
 import data.Glossary
 import data.NftWallets
 import data.Plugin
+import data.Plugin_analytics_event
+import data.Plugin_cache
+import data.Plugin_collection
+import data.Plugin_crash_report
 import data.Plugin_permission
+import data.Plugin_pipeline
 import data.Plugin_purchase
 import data.Plugin_repository
 import data.Plugin_review
+import data.Plugin_sync_change
+import data.Plugin_sync_conflict
 import data.Plugin_trial
 import data.Reader_theme
+import data.Reading_goal
+import data.Reading_milestone
+import data.Reading_session
 import data.SourceComparison
 import data.Theme
 import data.Translated_chapter
 import ir.kazemcodes.infinityreader.Database
 import ireader.data.book.bookGenresConverter
+import ireader.data.book.booleanIntAdapter
 import ireader.data.book.floatDoubleColumnAdapter
 import ireader.data.book.intLongColumnAdapter
 import ireader.data.book.longConverter
@@ -125,6 +143,80 @@ fun createDatabase(driver: SqlDriver): Database {
         plugin_repositoryAdapter = Plugin_repository.Adapter(
             last_updatedAdapter = longConverter,
             created_atAdapter = longConverter
+        ),
+        // Character tables
+        characterAdapter = Character.Adapter(
+            created_atAdapter = longConverter,
+            updated_atAdapter = longConverter
+        ),
+        character_appearanceAdapter = Character_appearance.Adapter(
+            book_idAdapter = longConverter,
+            chapter_idAdapter = longConverter,
+            timestampAdapter = longConverter
+        ),
+        character_groupAdapter = Character_group.Adapter(
+            created_atAdapter = longConverter
+        ),
+        character_noteAdapter = Character_note.Adapter(
+            created_atAdapter = longConverter,
+            updated_atAdapter = longConverter
+        ),
+        character_relationshipAdapter = Character_relationship.Adapter(
+            created_atAdapter = longConverter,
+            updated_atAdapter = longConverter
+        ),
+        character_timeline_eventAdapter = Character_timeline_event.Adapter(
+            book_idAdapter = longConverter,
+            chapter_idAdapter = longConverter,
+            timestampAdapter = longConverter
+        ),
+        // Reading analytics tables
+        daily_reading_statsAdapter = Daily_reading_stats.Adapter(
+            total_reading_time_msAdapter = longConverter,
+            longest_session_msAdapter = longConverter
+        ),
+        reading_goalAdapter = Reading_goal.Adapter(
+            start_dateAdapter = longConverter
+        ),
+        reading_milestoneAdapter = Reading_milestone.Adapter(
+            value_Adapter = longConverter,
+            reached_dateAdapter = longConverter
+        ),
+        reading_sessionAdapter = Reading_session.Adapter(
+            book_idAdapter = longConverter,
+            start_timeAdapter = longConverter,
+            start_chapter_idAdapter = longConverter,
+            pause_duration_msAdapter = longConverter
+        ),
+        // Plugin analytics tables
+        plugin_analytics_eventAdapter = Plugin_analytics_event.Adapter(
+            timestampAdapter = longConverter
+        ),
+        plugin_crash_reportAdapter = Plugin_crash_report.Adapter(
+            timestampAdapter = longConverter
+        ),
+        // Plugin cache table
+        plugin_cacheAdapter = Plugin_cache.Adapter(
+            cached_atAdapter = longConverter,
+            file_sizeAdapter = longConverter
+        ),
+        // Plugin collection table
+        plugin_collectionAdapter = Plugin_collection.Adapter(
+            created_atAdapter = longConverter,
+            updated_atAdapter = longConverter
+        ),
+        // Plugin pipeline table
+        plugin_pipelineAdapter = Plugin_pipeline.Adapter(
+            created_atAdapter = longConverter,
+            updated_atAdapter = longConverter
+        ),
+        // Plugin sync tables
+        plugin_sync_changeAdapter = Plugin_sync_change.Adapter(
+            timestampAdapter = longConverter
+        ),
+        plugin_sync_conflictAdapter = Plugin_sync_conflict.Adapter(
+            local_timestampAdapter = longConverter,
+            remote_timestampAdapter = longConverter
         ),
     )
 

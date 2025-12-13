@@ -1,0 +1,58 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Plugin pipelines table for storing workflow definitions
+CREATE TABLE IF NOT EXISTS plugin_pipeline (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    steps_json TEXT NOT NULL,
+    input_type TEXT NOT NULL,
+    output_type TEXT NOT NULL,
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    is_public INTEGER AS Boolean NOT NULL DEFAULT 0,
+    author_id TEXT,
+    tags TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_pipeline_author ON plugin_pipeline(author_id);
+CREATE INDEX IF NOT EXISTS idx_plugin_pipeline_public ON plugin_pipeline(is_public);
+
+-- Queries
+selectAll:
+SELECT * FROM plugin_pipeline ORDER BY updated_at DESC;
+
+selectById:
+SELECT * FROM plugin_pipeline WHERE id = ? LIMIT 1;
+
+selectByAuthor:
+SELECT * FROM plugin_pipeline WHERE author_id = ? ORDER BY updated_at DESC;
+
+selectPublic:
+SELECT * FROM plugin_pipeline WHERE is_public = 1 ORDER BY updated_at DESC;
+
+insert:
+INSERT OR REPLACE INTO plugin_pipeline(
+    id, name, description, steps_json, input_type, output_type,
+    created_at, updated_at, is_public, author_id, tags
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE plugin_pipeline SET
+    name = ?,
+    description = ?,
+    steps_json = ?,
+    input_type = ?,
+    output_type = ?,
+    updated_at = ?,
+    is_public = ?,
+    tags = ?
+WHERE id = ?;
+
+delete:
+DELETE FROM plugin_pipeline WHERE id = ?;
+
+deleteAll:
+DELETE FROM plugin_pipeline;

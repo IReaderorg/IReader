@@ -29,5 +29,12 @@ enum class PluginType {
      * Feature plugins add custom functionality.
      * Implement [FeaturePlugin] interface.
      */
-    FEATURE
+    FEATURE,
+    
+    /**
+     * AI plugins provide intelligent text processing.
+     * Implement [AIPlugin] interface.
+     * Supports local (llama.cpp, ONNX) and cloud (OpenAI, Claude, Gemini) providers.
+     */
+    AI
 }

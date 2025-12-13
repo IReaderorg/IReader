@@ -1,0 +1,68 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Plugin cache table for offline plugin storage
+CREATE TABLE IF NOT EXISTS plugin_cache (
+    plugin_id TEXT NOT NULL,
+    version TEXT NOT NULL,
+    plugin_name TEXT NOT NULL,
+    version_code INTEGER NOT NULL,
+    cached_at INTEGER AS Long NOT NULL,
+    expires_at INTEGER AS Long,
+    file_path TEXT NOT NULL,
+    file_size INTEGER AS Long NOT NULL,
+    checksum TEXT NOT NULL,
+    is_update INTEGER AS Boolean NOT NULL DEFAULT 0,
+    current_installed_version TEXT,
+    download_url TEXT NOT NULL,
+    status TEXT NOT NULL,
+    PRIMARY KEY (plugin_id, version)
+);
+
+CREATE INDEX IF NOT EXISTS idx_plugin_cache_status ON plugin_cache(status);
+CREATE INDEX IF NOT EXISTS idx_plugin_cache_expires ON plugin_cache(expires_at);
+
+-- Queries
+selectAll:
+SELECT * FROM plugin_cache ORDER BY cached_at DESC;
+
+selectByPluginId:
+SELECT * FROM plugin_cache WHERE plugin_id = ? ORDER BY version_code DESC;
+
+selectByPluginIdAndVersion:
+SELECT * FROM plugin_cache WHERE plugin_id = ? AND version = ? LIMIT 1;
+
+selectByStatus:
+SELECT * FROM plugin_cache WHERE status = ? ORDER BY cached_at DESC;
+
+selectExpired:
+SELECT * FROM plugin_cache WHERE expires_at IS NOT NULL AND expires_at < ?;
+
+insert:
+INSERT OR REPLACE INTO plugin_cache(
+    plugin_id, version, plugin_name, version_code, cached_at, expires_at,
+    file_path, file_size, checksum, is_update, current_installed_version,
+    download_url, status
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateStatus:
+UPDATE plugin_cache SET status = ? WHERE plugin_id = ? AND version = ?;
+
+delete:
+DELETE FROM plugin_cache WHERE plugin_id = ? AND version = ?;
+
+deleteByPluginId:
+DELETE FROM plugin_cache WHERE plugin_id = ?;
+
+deleteExpired:
+DELETE FROM plugin_cache WHERE expires_at IS NOT NULL AND expires_at < ?;
+
+deleteAll:
+DELETE FROM plugin_cache;
+
+getTotalSize:
+SELECT SUM(file_size) FROM plugin_cache WHERE status = 'CACHED';
+
+countByStatus:
+SELECT COUNT(*) FROM plugin_cache WHERE status = ?;

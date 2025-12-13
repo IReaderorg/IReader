@@ -100,5 +100,6 @@ private fun getCategoryIndex(category: PluginType?): Int {
         PluginType.TRANSLATION -> 2
         PluginType.TTS -> 3
         PluginType.FEATURE -> 4
+        PluginType.AI -> 5
     }
 }

@@ -1,0 +1,207 @@
+import kotlin.Boolean;
+import kotlin.Long;
+
+-- Characters table
+CREATE TABLE IF NOT EXISTS character (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    aliases TEXT NOT NULL DEFAULT '',
+    description TEXT NOT NULL DEFAULT '',
+    image_url TEXT,
+    role TEXT NOT NULL DEFAULT 'UNKNOWN',
+    traits TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '',
+    book_ids TEXT NOT NULL DEFAULT '',
+    series_id TEXT,
+    first_appearance_id TEXT,
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    is_user_created INTEGER AS Boolean NOT NULL DEFAULT 0,
+    confidence REAL NOT NULL DEFAULT 1.0,
+    metadata TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_character_name ON character(name);
+CREATE INDEX IF NOT EXISTS idx_character_series ON character(series_id);
+CREATE INDEX IF NOT EXISTS idx_character_role ON character(role);
+
+-- Character relationships table
+CREATE TABLE IF NOT EXISTS character_relationship (
+    id TEXT NOT NULL PRIMARY KEY,
+    character1_id TEXT NOT NULL,
+    character2_id TEXT NOT NULL,
+    relationship_type TEXT NOT NULL,
+    custom_type TEXT,
+    description TEXT NOT NULL DEFAULT '',
+    strength REAL NOT NULL DEFAULT 0.5,
+    is_symmetric INTEGER AS Boolean NOT NULL DEFAULT 1,
+    book_ids TEXT NOT NULL DEFAULT '',
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    FOREIGN KEY (character1_id) REFERENCES character(id) ON DELETE CASCADE,
+    FOREIGN KEY (character2_id) REFERENCES character(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_relationship_char1 ON character_relationship(character1_id);
+CREATE INDEX IF NOT EXISTS idx_relationship_char2 ON character_relationship(character2_id);
+
+-- Character appearances table
+CREATE TABLE IF NOT EXISTS character_appearance (
+    id TEXT NOT NULL PRIMARY KEY,
+    character_id TEXT NOT NULL,
+    book_id INTEGER AS Long NOT NULL,
+    chapter_id INTEGER AS Long NOT NULL,
+    chapter_title TEXT NOT NULL,
+    paragraph_index INTEGER NOT NULL,
+    text_snippet TEXT NOT NULL,
+    appearance_type TEXT NOT NULL,
+    timestamp INTEGER AS Long NOT NULL,
+    FOREIGN KEY (character_id) REFERENCES character(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_appearance_character ON character_appearance(character_id);
+CREATE INDEX IF NOT EXISTS idx_appearance_book ON character_appearance(book_id);
+CREATE INDEX IF NOT EXISTS idx_appearance_chapter ON character_appearance(chapter_id);
+
+-- Character notes table
+CREATE TABLE IF NOT EXISTS character_note (
+    id TEXT NOT NULL PRIMARY KEY,
+    character_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    book_id INTEGER AS Long,
+    chapter_id INTEGER AS Long,
+    note_type TEXT NOT NULL,
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    FOREIGN KEY (character_id) REFERENCES character(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_note_character ON character_note(character_id);
+
+-- Character timeline events table
+CREATE TABLE IF NOT EXISTS character_timeline_event (
+    id TEXT NOT NULL PRIMARY KEY,
+    character_id TEXT NOT NULL,
+    book_id INTEGER AS Long NOT NULL,
+    chapter_id INTEGER AS Long NOT NULL,
+    event_type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    order_index INTEGER NOT NULL,
+    timestamp INTEGER AS Long NOT NULL,
+    FOREIGN KEY (character_id) REFERENCES character(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_timeline_character ON character_timeline_event(character_id);
+
+-- Character groups table
+CREATE TABLE IF NOT EXISTS character_group (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    character_ids TEXT NOT NULL DEFAULT '',
+    group_type TEXT NOT NULL,
+    book_ids TEXT NOT NULL DEFAULT '',
+    image_url TEXT,
+    created_at INTEGER AS Long NOT NULL
+);
+
+-- Queries for characters
+selectAllCharacters:
+SELECT * FROM character ORDER BY name ASC;
+
+selectCharacterById:
+SELECT * FROM character WHERE id = ? LIMIT 1;
+
+selectCharactersByBook:
+SELECT * FROM character WHERE book_ids LIKE '%' || ? || '%' ORDER BY name ASC;
+
+selectCharactersBySeries:
+SELECT * FROM character WHERE series_id = ? ORDER BY name ASC;
+
+selectCharactersByRole:
+SELECT * FROM character WHERE role = ? ORDER BY name ASC;
+
+searchCharacters:
+SELECT * FROM character WHERE name LIKE '%' || ? || '%' OR aliases LIKE '%' || ? || '%' ORDER BY name ASC;
+
+insertCharacter:
+INSERT OR REPLACE INTO character(
+    id, name, aliases, description, image_url, role, traits, tags,
+    book_ids, series_id, first_appearance_id, created_at, updated_at,
+    is_user_created, confidence, metadata
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteCharacter:
+DELETE FROM character WHERE id = ?;
+
+-- Queries for relationships
+selectRelationshipsByCharacter:
+SELECT * FROM character_relationship WHERE character1_id = ? OR character2_id = ?;
+
+selectRelationshipsByBook:
+SELECT * FROM character_relationship WHERE book_ids LIKE '%' || ? || '%';
+
+insertRelationship:
+INSERT OR REPLACE INTO character_relationship(
+    id, character1_id, character2_id, relationship_type, custom_type,
+    description, strength, is_symmetric, book_ids, created_at, updated_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteRelationship:
+DELETE FROM character_relationship WHERE id = ?;
+
+-- Queries for appearances
+selectAppearancesByCharacter:
+SELECT * FROM character_appearance WHERE character_id = ? ORDER BY timestamp ASC;
+
+selectAppearancesByCharacterAndBook:
+SELECT * FROM character_appearance WHERE character_id = ? AND book_id = ? ORDER BY chapter_id ASC, paragraph_index ASC;
+
+insertAppearance:
+INSERT INTO character_appearance(
+    id, character_id, book_id, chapter_id, chapter_title,
+    paragraph_index, text_snippet, appearance_type, timestamp
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+countAppearancesByCharacter:
+SELECT COUNT(*) FROM character_appearance WHERE character_id = ?;
+
+-- Queries for notes
+selectNotesByCharacter:
+SELECT * FROM character_note WHERE character_id = ? ORDER BY created_at DESC;
+
+insertNote:
+INSERT OR REPLACE INTO character_note(
+    id, character_id, content, book_id, chapter_id, note_type, created_at, updated_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteNote:
+DELETE FROM character_note WHERE id = ?;
+
+-- Queries for timeline
+selectTimelineByCharacter:
+SELECT * FROM character_timeline_event WHERE character_id = ? ORDER BY order_index ASC;
+
+insertTimelineEvent:
+INSERT INTO character_timeline_event(
+    id, character_id, book_id, chapter_id, event_type, title, description, order_index, timestamp
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Queries for groups
+selectGroupsByBook:
+SELECT * FROM character_group WHERE book_ids LIKE '%' || ? || '%';
+
+insertGroup:
+INSERT OR REPLACE INTO character_group(
+    id, name, description, character_ids, group_type, book_ids, image_url, created_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteGroup:
+DELETE FROM character_group WHERE id = ?;

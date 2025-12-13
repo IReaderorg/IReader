@@ -1,0 +1,103 @@
+import kotlin.Long;
+
+-- Plugin analytics events table (local cache before upload)
+CREATE TABLE IF NOT EXISTS plugin_analytics_event (
+    id TEXT NOT NULL PRIMARY KEY,
+    plugin_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    timestamp INTEGER AS Long NOT NULL,
+    session_id TEXT NOT NULL,
+    user_id TEXT,
+    properties_json TEXT NOT NULL DEFAULT '{}',
+    metrics_json TEXT NOT NULL DEFAULT '{}',
+    device_info_json TEXT,
+    uploaded INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_analytics_event_plugin ON plugin_analytics_event(plugin_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_event_type ON plugin_analytics_event(event_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_event_timestamp ON plugin_analytics_event(timestamp);
+CREATE INDEX IF NOT EXISTS idx_analytics_event_uploaded ON plugin_analytics_event(uploaded);
+
+-- Plugin crash reports table (local cache)
+CREATE TABLE IF NOT EXISTS plugin_crash_report (
+    id TEXT NOT NULL PRIMARY KEY,
+    plugin_id TEXT NOT NULL,
+    plugin_version TEXT NOT NULL,
+    timestamp INTEGER AS Long NOT NULL,
+    error_type TEXT NOT NULL,
+    error_message TEXT NOT NULL,
+    stack_trace TEXT NOT NULL,
+    device_info_json TEXT NOT NULL,
+    breadcrumbs_json TEXT NOT NULL DEFAULT '[]',
+    custom_data_json TEXT NOT NULL DEFAULT '{}',
+    uploaded INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_crash_report_plugin ON plugin_crash_report(plugin_id);
+CREATE INDEX IF NOT EXISTS idx_crash_report_timestamp ON plugin_crash_report(timestamp);
+CREATE INDEX IF NOT EXISTS idx_crash_report_uploaded ON plugin_crash_report(uploaded);
+
+-- Queries for events
+selectAllEvents:
+SELECT * FROM plugin_analytics_event ORDER BY timestamp DESC;
+
+selectEventsByPlugin:
+SELECT * FROM plugin_analytics_event WHERE plugin_id = ? ORDER BY timestamp DESC;
+
+selectEventsByType:
+SELECT * FROM plugin_analytics_event WHERE event_type = ? ORDER BY timestamp DESC;
+
+selectPendingEvents:
+SELECT * FROM plugin_analytics_event WHERE uploaded = 0 ORDER BY timestamp ASC LIMIT ?;
+
+insertEvent:
+INSERT INTO plugin_analytics_event(
+    id, plugin_id, event_type, timestamp, session_id, user_id,
+    properties_json, metrics_json, device_info_json, uploaded
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0);
+
+markEventUploaded:
+UPDATE plugin_analytics_event SET uploaded = 1 WHERE id = ?;
+
+deleteUploadedEvents:
+DELETE FROM plugin_analytics_event WHERE uploaded = 1 AND timestamp < ?;
+
+deleteAllEvents:
+DELETE FROM plugin_analytics_event;
+
+-- Queries for crash reports
+selectAllCrashReports:
+SELECT * FROM plugin_crash_report ORDER BY timestamp DESC;
+
+selectCrashReportsByPlugin:
+SELECT * FROM plugin_crash_report WHERE plugin_id = ? ORDER BY timestamp DESC;
+
+selectPendingCrashReports:
+SELECT * FROM plugin_crash_report WHERE uploaded = 0 ORDER BY timestamp ASC LIMIT ?;
+
+selectCrashReportById:
+SELECT * FROM plugin_crash_report WHERE id = ? LIMIT 1;
+
+insertCrashReport:
+INSERT INTO plugin_crash_report(
+    id, plugin_id, plugin_version, timestamp, error_type, error_message,
+    stack_trace, device_info_json, breadcrumbs_json, custom_data_json, uploaded
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0);
+
+markCrashReportUploaded:
+UPDATE plugin_crash_report SET uploaded = 1 WHERE id = ?;
+
+deleteUploadedCrashReports:
+DELETE FROM plugin_crash_report WHERE uploaded = 1 AND timestamp < ?;
+
+deleteAllCrashReports:
+DELETE FROM plugin_crash_report;
+
+countPendingEvents:
+SELECT COUNT(*) FROM plugin_analytics_event WHERE uploaded = 0;
+
+countPendingCrashReports:
+SELECT COUNT(*) FROM plugin_crash_report WHERE uploaded = 0;
