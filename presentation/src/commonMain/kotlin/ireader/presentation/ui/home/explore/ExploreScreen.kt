@@ -69,7 +69,9 @@ fun ExploreScreen(
     headers: ((url: String) -> Map<String, String>?)? = null,
     getColumnsForOrientation: CoroutineScope.(Boolean) -> StateFlow<Int>,
     prevPaddingValues: PaddingValues,
-    onListingSelected: ((Listing) -> Unit)? = null
+    onListingSelected: ((Listing) -> Unit)? = null,
+    onNavigateToBadgeStore: () -> Unit = {},
+    onNavigateToDonation: () -> Unit = {}
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
@@ -291,7 +293,20 @@ fun ExploreScreen(
                     state.isInitialLoading -> {
                         BookShimmerLoading(columns = columns)
                     }
-                    // Error with no content
+                    // Broken source state (parsing error, not network error)
+                    state.isBrokenSourceError -> {
+                        BrokenSourceScreen(
+                            sourceName = source.name,
+                            source = source,
+                            onRetry = { getBooks(null, null, emptyList()) },
+                            onWebView = { src -> 
+                                (src as? HttpSource)?.let { onAppbarWebView(it.baseUrl) }
+                            },
+                            onNavigateToBadgeStore = onNavigateToBadgeStore,
+                            onNavigateToDonation = onNavigateToDonation
+                        )
+                    }
+                    // Error with no content (network error)
                     state.isErrorWithNoContent -> {
                         ExploreScreenError(
                             error = state.error?.asString(localizeHelper) ?: localize(Res.string.no_results_found),

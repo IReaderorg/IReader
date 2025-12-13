@@ -315,12 +315,85 @@ class ExploreViewModel(
         
         val errorText = exceptionHandler(error)
         
+        // Detect if this is a broken source (parsing error vs network error)
+        val isBrokenSource = isParsingError(error)
+        
         _state.update { currentState ->
             currentState.copy(
                 error = errorText,
-                endReached = true
+                endReached = true,
+                isSourceBroken = isBrokenSource
             )
         }
+    }
+    
+    /**
+     * Detect if an error is a parsing/broken source error vs a network error.
+     * 
+     * Parsing errors indicate the source website has changed and needs developer update.
+     * Network errors are temporary and can be retried by the user.
+     */
+    private fun isParsingError(error: Throwable): Boolean {
+        // Check for explicit parsing exceptions
+        if (error is ireader.i18n.SourceBrokenException || 
+            error is ireader.i18n.ParsingException) {
+            return true
+        }
+        
+        // Check error message patterns that indicate parsing issues
+        val message = error.message?.lowercase() ?: ""
+        val cause = error.cause?.message?.lowercase() ?: ""
+        
+        val parsingIndicators = listOf(
+            "parse", "parsing",
+            "selector", "css selector",
+            "element not found", "no such element",
+            "null", "nullpointer",
+            "index out of bounds", "indexoutofbounds",
+            "json", "jsonexception", "malformed json",
+            "unexpected token", "unexpected character",
+            "cannot deserialize", "deserialization",
+            "class cast", "classcast",
+            "number format", "numberformat",
+            "illegal argument", "illegalargument",
+            "no value", "missing value",
+            "empty response", "empty body",
+            "invalid format", "format error"
+        )
+        
+        // Network error indicators - these are NOT parsing errors
+        val networkIndicators = listOf(
+            "timeout", "timed out",
+            "connection", "connect",
+            "socket", "network",
+            "unreachable", "host",
+            "ssl", "certificate",
+            "dns", "resolve",
+            "refused", "reset",
+            "interrupted", "abort"
+        )
+        
+        // Check if it's a network error first
+        val isNetworkError = networkIndicators.any { indicator ->
+            message.contains(indicator) || cause.contains(indicator)
+        }
+        
+        if (isNetworkError) {
+            return false
+        }
+        
+        // Check if it's a parsing error
+        val isParsingIndicator = parsingIndicators.any { indicator ->
+            message.contains(indicator) || cause.contains(indicator)
+        }
+        
+        // Also consider it a parsing error if we got an empty result with no network issues
+        // This often happens when selectors don't match anymore
+        val isEmptyResultError = message.contains("empty") || 
+            message.contains("no results") ||
+            message.contains("not found")
+        
+        return isParsingIndicator || isEmptyResultError
     }
     
     /**

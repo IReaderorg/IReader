@@ -76,19 +76,34 @@ class PluginMarketplaceViewModel(
         scope.launch {
             try {
                 val repositories = repositoryRepository.getEnabled().first()
+                
+                if (repositories.isEmpty()) {
+                    _state.value = _state.value.copy(
+                        plugins = emptyList(),
+                        filteredPlugins = emptyList(),
+                        featuredPlugins = emptyList(),
+                        isLoading = false,
+                        error = "No plugin repositories configured"
+                    )
+                    return@launch
+                }
+
                 val allPlugins = mutableListOf<PluginInfo>()
+                val errors = mutableListOf<String>()
 
                 // Fetch plugins from all enabled repositories in parallel
                 val results = repositories.map { repo ->
                     async {
-                        fetchPluginsFromRepository(repo)
+                        repo to fetchPluginsFromRepository(repo)
                     }
                 }.awaitAll()
 
-                // Combine results
-                results.forEach { result ->
+                // Combine results and collect errors
+                results.forEach { (repo, result) ->
                     result.onSuccess { plugins ->
                         allPlugins.addAll(plugins)
+                    }.onFailure { error ->
+                        errors.add("${repo.name}: ${error.message}")
                     }
                 }
 
@@ -98,7 +113,10 @@ class PluginMarketplaceViewModel(
                 _state.value = _state.value.copy(
                     plugins = uniquePlugins,
                     featuredPlugins = getFeaturedPlugins(uniquePlugins),
-                    isLoading = false
+                    isLoading = false,
+                    error = if (uniquePlugins.isEmpty() && errors.isNotEmpty()) {
+                        "Failed to load plugins: ${errors.joinToString("; ")}"
+                    } else null
                 )
                 applyFilters()
             } catch (e: Exception) {

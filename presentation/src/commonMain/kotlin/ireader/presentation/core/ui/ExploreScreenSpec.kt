@@ -219,6 +219,12 @@ data class ExploreScreenSpec(
                         },
                         onListingSelected = { listing ->
                             vm.stateListing = listing
+                        },
+                        onNavigateToBadgeStore = {
+                            navController.navigate(NavigationRoutes.badgeStore)
+                        },
+                        onNavigateToDonation = {
+                            navController.navigate(NavigationRoutes.donation)
                         }
                     )
                 } else {

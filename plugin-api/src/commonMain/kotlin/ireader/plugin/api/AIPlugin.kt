@@ -391,7 +391,7 @@ sealed class AIError {
     fun toException(): Exception = when (this) {
         is ModelNotReady -> IllegalStateException("AI model not ready")
         is ModelLoadFailed -> IllegalStateException("Model load failed: $reason")
-        is AuthenticationFailed -> SecurityException("Authentication failed: $reason")
+        is AuthenticationFailed -> IllegalStateException("Authentication failed: $reason")
         is RateLimitExceeded -> RuntimeException("Rate limit exceeded")
         is ContextTooLong -> IllegalArgumentException("Context too long: $actualLength > $maxLength")
         is NetworkError -> RuntimeException("Network error: $reason")

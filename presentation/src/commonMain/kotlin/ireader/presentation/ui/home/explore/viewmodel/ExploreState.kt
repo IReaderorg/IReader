@@ -33,7 +33,9 @@ data class ExploreScreenState(
     val savedScrollIndex: Int = 0,
     val savedScrollOffset: Int = 0,
     // Dialog state
-    val dialog: ExploreDialog? = null
+    val dialog: ExploreDialog? = null,
+    // Broken source state - indicates parsing failure due to website changes
+    val isSourceBroken: Boolean = false
 ) {
     /**
      * Derived property for the source from catalog
@@ -64,7 +66,19 @@ data class ExploreScreenState(
      */
     @Stable
     val isErrorWithNoContent: Boolean
-        get() = error != null && books.isEmpty() && !isLoading
+        get() = error != null && books.isEmpty() && !isLoading && !isSourceBroken
+    
+    /**
+     * Check if the source is broken (parsing error, not network error).
+     * This is true when:
+     * - There's an error
+     * - No books were loaded
+     * - Not currently loading
+     * - The error indicates a parsing/broken source issue
+     */
+    @Stable
+    val isBrokenSourceError: Boolean
+        get() = isSourceBroken && books.isEmpty() && !isLoading
 }
 
 /**
