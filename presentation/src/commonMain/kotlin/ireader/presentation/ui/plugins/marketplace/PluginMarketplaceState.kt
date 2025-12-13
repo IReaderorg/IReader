@@ -1,6 +1,7 @@
 package ireader.presentation.ui.plugins.marketplace
 
 import ireader.domain.plugins.PluginInfo
+import ireader.domain.plugins.PluginRepositoryEntity
 import ireader.domain.plugins.PluginType
 
 /**
@@ -11,7 +12,9 @@ data class PluginMarketplaceState(
     val plugins: List<PluginInfo> = emptyList(),
     val filteredPlugins: List<PluginInfo> = emptyList(),
     val featuredPlugins: List<PluginInfo> = emptyList(),
+    val repositories: List<PluginRepositoryEntity> = emptyList(),
     val selectedCategory: PluginType? = null,
+    val selectedRepository: PluginRepositoryEntity? = null,
     val searchQuery: String = "",
     val sortOrder: SortOrder = SortOrder.POPULARITY,
     val priceFilter: PriceFilter = PriceFilter.ALL,

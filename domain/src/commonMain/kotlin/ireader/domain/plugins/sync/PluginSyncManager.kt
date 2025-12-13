@@ -248,9 +248,9 @@ class PluginSyncManager(
                 pluginName = info.manifest.name,
                 version = info.manifest.version,
                 versionCode = info.manifest.versionCode,
-                repositoryUrl = null,
+                repositoryUrl = info.repositoryUrl,
                 isEnabled = info.status == ireader.domain.plugins.PluginStatus.ENABLED,
-                installedAt = info.installDate
+                installedAt = info.installDate ?: 0L
             )
         }
         

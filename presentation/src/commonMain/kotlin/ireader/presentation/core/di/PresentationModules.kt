@@ -252,9 +252,11 @@ val PresentationModules = module {
             uiPreferences = get()
         )
     }
-    factory { 
+    factory {
         ireader.presentation.ui.plugins.marketplace.PluginMarketplaceViewModel(
-            pluginManager = get()
+            pluginManager = get(),
+            repositoryRepository = get(),
+            indexFetcher = get()
         )
     }
 

@@ -39,7 +39,7 @@ class PluginRepositoryImpl(
                 description = plugin.manifest.description,
                 icon_url = plugin.manifest.iconUrl,
                 status = plugin.status.name,
-                install_date = plugin.installDate,
+                install_date = plugin.installDate ?: 0L,
                 last_update = plugin.lastUpdate,
                 manifest_json = json.encodeToString(plugin.manifest)
             )

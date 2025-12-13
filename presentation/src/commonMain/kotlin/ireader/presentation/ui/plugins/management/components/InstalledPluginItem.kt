@@ -88,6 +88,7 @@ fun InstalledPluginItem(
                     // Status with color coding
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         val (statusText, statusColor) = when (plugin.status) {
+                            PluginStatus.NOT_INSTALLED -> "Not Installed" to Color.Gray
                             PluginStatus.ENABLED -> "Enabled" to Color(0xFF4CAF50) // Green
                             PluginStatus.DISABLED -> "Disabled" to Color.Gray
                             PluginStatus.ERROR -> "Error" to Color(0xFFF44336) // Red

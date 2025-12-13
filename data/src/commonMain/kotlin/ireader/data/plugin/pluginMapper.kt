@@ -32,7 +32,7 @@ fun Plugin.toPluginInfo(): PluginInfo {
         id = id,
         manifest = manifest,
         status = PluginStatus.valueOf(status),
-        installDate = install_date,
+        installDate = install_date ?: 0L,
         lastUpdate = last_update,
         isPurchased = false, // Will be set by repository based on purchase records
         rating = null, // Will be calculated by repository from reviews
@@ -54,7 +54,7 @@ fun PluginInfo.toPluginEntity(): Plugin {
         description = manifest.description,
         icon_url = manifest.iconUrl,
         status = status.name,
-        install_date = installDate,
+        install_date = installDate ?: 0L,
         last_update = lastUpdate,
         manifest_json = json.encodeToString(manifest)
     )

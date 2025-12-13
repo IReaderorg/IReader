@@ -44,6 +44,7 @@ class PluginDetailsViewModel(
                     _state.value = _state.value.copy(
                         plugin = plugin,
                         installationState = when (plugin.status) {
+                            PluginStatus.NOT_INSTALLED -> InstallationState.NotInstalled
                             PluginStatus.ENABLED, PluginStatus.DISABLED -> InstallationState.Installed
                             PluginStatus.ERROR -> InstallationState.Error("Plugin error")
                             PluginStatus.UPDATING -> InstallationState.Installing

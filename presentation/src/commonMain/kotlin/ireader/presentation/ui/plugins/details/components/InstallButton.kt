@@ -218,6 +218,15 @@ private fun InstalledButton(
                 Text(localizeHelper.localize(Res.string.updating))
             }
         }
+        PluginStatus.NOT_INSTALLED -> {
+            // This shouldn't happen for InstalledButton, but handle it gracefully
+            Button(
+                onClick = onOpen,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(localizeHelper.localize(Res.string.install))
+            }
+        }
     }
 }
 

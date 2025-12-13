@@ -9,20 +9,25 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class PluginStatus {
     /**
+     * Plugin is not installed (available in marketplace)
+     */
+    NOT_INSTALLED,
+
+    /**
      * Plugin is loaded and active
      */
     ENABLED,
-    
+
     /**
      * Plugin is installed but not active
      */
     DISABLED,
-    
+
     /**
      * Plugin encountered an error
      */
     ERROR,
-    
+
     /**
      * Plugin is being updated
      */
