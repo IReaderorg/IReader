@@ -17,7 +17,7 @@ class PluginPipeline private constructor(
     private val _events = MutableSharedFlow<PipelineEvent>(replay = 0)
     val events: Flow<PipelineEvent> = _events.asSharedFlow()
     
-    @Volatile
+    @kotlin.concurrent.Volatile
     private var isCancelled = false
     
     /**

@@ -105,7 +105,7 @@ class FileWatcherImpl(
             
             val hashingSink = HashingSink.sha256(blackholeSink())
             val content = file.readBytes()
-            hashingSink.buffer().use { sink ->
+            hashingSink.buffer().use<okio.BufferedSink, Unit> { sink ->
                 sink.write(content)
             }
             hashingSink.hash.hex()
