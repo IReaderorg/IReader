@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -39,7 +40,7 @@
     <string name="all_category">Semua</string>
     <string name="all_chapters">Semua Bab</string>
     <string name="all_chapters_already_downloaded">Semua bab sudah diunduh</string>
-    <string name="all_data_collection_is_optional">Semua pengumpulan data bersifat opsional dan dapat dinonaktifkan kapan saja. </string>
+    <string name="all_data_collection_is_optional">Semua pengumpulan data bersifat opsional dan dapat dinonaktifkan kapan saja.</string>
     <string name="all_donors">Semua Donatur</string>
     <string name="all_extensions_up_to_date">Semua ekstensi sudah yang terbaru</string>
     <string name="all_google_fonts">Semua Font Google</string>
@@ -216,7 +217,7 @@
     <string name="cache_expires">Cache Kedaluwarsa:</string>
     <string name="cache_management">Manajemen Cache</string>
     <string name="cached">Di-cache</string>
-    <string name="cancel_all_for_this_series">"Batalkan semua untuk seri ini</string>
+    <string name="cancel_all_for_this_series">Batalkan semua untuk seri ini</string>
     <string name="cancel_export">Batalkan Ekspor</string>
     <string name="cancel_export_confirmation">Anda yakin ingin membatalkan ekspor?</string>
     <string name="cancel_import">Batalkan Impor</string>
@@ -320,16 +321,14 @@
     <string name="color_selected">warna dipilih</string>
     <string name="color_theme">Tema Warna</string>
     <string name="colors">Warna</string>
-    <string name="comfortable_grid_layout_description">3 kolom dalam kisi dengan gambar sampul lebih besar
-    </string>
+    <string name="comfortable_grid_layout_description">3 kolom dalam kisi dengan gambar sampul lebih besar</string>
     <string name="commit">Komit</string>
     <string name="community">Komunitas</string>
     <string name="community_endpoint">Titik Akhir Komunitas</string>
     <string name="community_leaderboard">Komunitas &amp; Papan Peringkat</string>
     <string name="community_reviews">Ulasan Komunitas</string>
     <string name="community_reviews_desc">Baca dan tulis ulasan untuk buku dan bab</string>
-    <string name="compact_grid_layout_description">2 kolom dalam kisi dengan gambar sampul lebih kecil
-    </string>
+    <string name="compact_grid_layout_description">2 kolom dalam kisi dengan gambar sampul lebih kecil</string>
     <string name="complete">Selesai</string>
     <string name="complete_captcha">Selesaikan CAPTCHA untuk melanjutkan</string>
     <string name="complete_your_donation">Selesaikan donasi Anda</string>
@@ -417,9 +416,7 @@
     <string name="decrease_speed">Kurangi kecepatan</string>
     <string name="deepseek_api_key">Kunci API DeepSeek</string>
     <string name="deepseek_api_key_invalid">Kunci api DeepSeek tidak valid</string>
-    <string name="deepseek_api_key_not_set">Kunci API DeepSeek belum diatur. Harap konfigurasi di
-        pengaturan.
-    </string>
+    <string name="deepseek_api_key_not_set">Kunci API DeepSeek belum diatur. Harap konfigurasi di pengaturan.</string>
     <string name="deepseek_login_required">Diperlukan Login DeepSeek</string>
     <string name="deepseek_payment_required">Pembayaran DeepSeek diperlukan atau kuota API terlampaui</string>
     <string name="default_chapter_sort">Urutan Bab Default</string>
@@ -495,9 +492,7 @@
     <string name="download_notifier_no_network">Tidak ada koneksi jaringan yang tersedia</string>
     <string name="download_notifier_text_only_wifi">Tidak ada koneksi Wi-Fi yang tersedia</string>
     <string name="download_notifier_title_error">Kesalahan</string>
-    <string name="download_notifier_unknown_error">Tidak dapat mengunduh bab karena kesalahan yang tidak
-        terduga
-    </string>
+    <string name="download_notifier_unknown_error">Tidak dapat mengunduh bab karena kesalahan yang tidak terduga</string>
     <string name="download_only_over_wifi">Unduh Hanya Melalui WiFi</string>
     <string name="download_progress">Kemajuan Unduhan</string>
     <string name="download_progress_1">download_progress</string>
@@ -529,8 +524,7 @@
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">Kunci Sumber 18+</string>
     <string name="email">Email</string>
-    <string name="empty_library">Tidak ada buku di Perpustakaan, Anda dapat menambahkan buku di layar Jelajahi.
-    </string>
+    <string name="empty_library">Tidak ada buku di Perpustakaan, Anda dapat menambahkan buku di layar Jelajahi.</string>
     <string name="empty_response">Menerima respons kosong dari layanan terjemahan.</string>
     <string name="enable">Aktifkan</string>
     <string name="enable_app_lock">Aktifkan Kunci Aplikasi</string>
@@ -613,7 +607,7 @@
     <string name="example_url">Contoh URL:</string>
     <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Contoh:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Kecualikan Kategori</string>
-    <string name="excluded"> (dikecualikan)</string>
+    <string name="excluded">(dikecualikan)</string>
     <string name="exclusive">Eksklusif</string>
     <string name="exclusive_designs">Desain Eksklusif</string>
     <string name="execution_timeout">Waktu Tunggu Eksekusi</string>
@@ -741,9 +735,7 @@
     <string name="gb_total_storage_7_500mb">Penyimpanan total 3,5GB (7 × 500MB) - Konfigurasikan setiap proyek atau gunakan URL yang sama untuk semua</string>
     <string name="gemini_api_information">Informasi API Gemini</string>
     <string name="gemini_api_key">Kunci API Gemini</string>
-    <string name="gemini_api_key_not_set">Kunci API Gemini belum diatur. Harap konfigurasi di
-        pengaturan.
-    </string>
+    <string name="gemini_api_key_not_set">Kunci API Gemini belum diatur. Harap konfigurasi di pengaturan.</string>
     <string name="gemini_model">Model Gemini</string>
     <string name="gemini_payment_required">Anda melebihi kuota Anda saat ini untuk Gemini API. Silakan periksa paket dan detail penagihan Anda di https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="gender">Jenis Kelamin</string>
@@ -767,7 +759,7 @@
     <string name="go_to_badge_store">Buka Toko Lencana</string>
     <string name="go_to_chapter">Buka Bab</string>
     <string name="go_to_last_chapter">Pergi ke bab terakhir</string>
-    <string name="go_to_settings_generaln2_toggle">1. Buka Pengaturan → Umum\n2. Alihkan \</string>
+    <string name="go_to_settings_generaln2_toggle">1. Buka Pengaturan → Umum\n2. Alihkan \\</string>
     <string name="goal_reached">Tujuan Tercapai</string>
     <string name="goal_reached_1">Tujuan Tercapai!</string>
     <string name="goal_reached_thank_you">Tujuan Tercapai! Terima kasih!</string>
@@ -786,7 +778,7 @@
     <string name="has_unread_chapters">Memiliki bab yang belum dibaca</string>
     <string name="header_alpha">header_alpha</string>
     <string name="hello_this_is_a_test">Halo, ini adalah tes.</string>
-    <string name="help_us_improve">Bantu kami meningkatkan \</string>
+    <string name="help_us_improve">Bantu kami meningkatkan \\</string>
     <string name="helpful">Bermanfaat</string>
     <string name="hide">Sembunyikan</string>
     <string name="hide_backdrop">Sembunyikan Latar Belakang</string>
@@ -829,7 +821,7 @@
     <string name="importing_epub_files">Mengimpor File ePub</string>
     <string name="in_library_1">Di Perpustakaan</string>
     <string name="include_cover_image">Sertakan Gambar Sampul</string>
-    <string name="included"> (termasuk)</string>
+    <string name="included">(termasuk)</string>
     <string name="incognito_mode">Mode Incognito</string>
     <string name="increase_font_size">Perbesar ukuran font</string>
     <string name="increase_speed">Tingkatkan kecepatan</string>
@@ -850,14 +842,9 @@
     <string name="installation_error_Storage">PackageManger: Ruang Penyimpanan Tidak Cukup</string>
     <string name="installation_error_aborted">PackageManger: Dibatalkan</string>
     <string name="installation_error_blocked">PackageManger: Pemasang diblokir</string>
-    <string name="installation_error_conflicted">PackageManger: Konflik dengan paket yang terpasang
-    </string>
-    <string name="installation_error_incompatible">PackageManger: Tidak kompatibel dengan paket yang
-        terpasang
-    </string>
-    <string name="installation_error_invalid">PackageManger: Ada apk lain yang terpasang dengan
-        versi lebih tinggi dari paket ini
-    </string>
+    <string name="installation_error_conflicted">PackageManger: Konflik dengan paket yang terpasang</string>
+    <string name="installation_error_incompatible">PackageManger: Tidak kompatibel dengan paket yang terpasang</string>
+    <string name="installation_error_invalid">PackageManger: Ada apk lain yang terpasang dengan versi lebih tinggi dari paket ini</string>
     <string name="installation_failed">Pemasangan gagal: %1$s</string>
     <string name="installation_failed_generic">Pemasangan gagal</string>
     <string name="installation_in_progress_this_may">Instalasi sedang berlangsung... Ini mungkin memakan waktu beberapa menit.</string>
@@ -908,8 +895,7 @@
     <string name="last_verified">Terakhir Diverifikasi:</string>
     <string name="latest_book">Terbaru</string>
     <string name="layout">Tata Letak</string>
-    <string name="layout_description_comfortable">3 kolom dalam kisi dengan gambar sampul lebih besar
-    </string>
+    <string name="layout_description_comfortable">3 kolom dalam kisi dengan gambar sampul lebih besar</string>
     <string name="layout_description_compact">2 kolom dalam kisi dengan gambar sampul lebih kecil</string>
     <string name="layout_description_cover_only">2 kolom gambar sampul saja (tanpa teks)</string>
     <string name="layout_description_list">Buku ditampilkan dalam daftar vertikal</string>
@@ -1116,7 +1102,7 @@
     <string name="no_rankings_yet">Belum Ada Peringkat</string>
     <string name="no_reliable_content_found">Tidak ada konten yang andal ditemukan. Coba halaman atau sumber lain.</string>
     <string name="no_repositories_configured">Tidak ada repositori yang dikonfigurasi</string>
-    <string name="no_results_for">Tidak ada hasil untuk \</string>
+    <string name="no_results_for">Tidak ada hasil untuk \\</string>
     <string name="no_results_found">Tidak ada hasil ditemukan</string>
     <string name="no_results_found_1">Tidak ada hasil yang ditemukan</string>
     <string name="no_reviews">Tidak ada ulasan</string>
@@ -1153,7 +1139,7 @@
     <string name="offset">Ofset</string>
     <string name="ok">Oke</string>
     <string name="ollama_information">Informasi Ollama</string>
-    <string name="ollama_is_a_local_llm">Ollama adalah server LLM lokal untuk terjemahan. Pastikan Ollama terpasang dan berjalan di perangkat atau jaringan Anda. Anda perlu menarik model terlebih dahulu dengan 'ollama pull modelname'.</string>
+    <string name="ollama_is_a_local_llm">Ollama adalah server LLM lokal untuk terjemahan. Pastikan Ollama terpasang dan berjalan di perangkat atau jaringan Anda. Anda perlu menarik model terlebih dahulu dengan \'ollama pull modelname\'.</string>
     <string name="ollama_model">Model Ollama</string>
     <string name="ollama_server_url_not_set">Url server OOllama belum diatur</string>
     <string name="ollama_url">URL Ollama</string>
@@ -1173,9 +1159,7 @@
     <string name="open_tts_settings">Buka Pengaturan TTS</string>
     <string name="openai_api_key">Kunci API OpenAI</string>
     <string name="openai_api_key_invalid">Kunci api Openai tidak valid</string>
-    <string name="openai_api_key_not_set">Kunci API OpenAI belum diatur. Harap konfigurasi di
-        pengaturan.
-    </string>
+    <string name="openai_api_key_not_set">Kunci API OpenAI belum diatur. Harap konfigurasi di pengaturan.</string>
     <string name="openai_quota_exceeded">Kuota Openai terlampaui</string>
     <string name="optimize">Optimalkan</string>
     <string name="optimize_database">Optimalkan Database</string>
@@ -1194,9 +1178,7 @@
     <string name="other_source">Lainnya</string>
     <string name="overall_progress">Progres Keseluruhan</string>
     <string name="owner">Pemilik</string>
-    <string name="package_installer_failed_to_install_packages">Pemasang paket gagal memasang
-        paket: STATUS_CODE:
-    </string>
+    <string name="package_installer_failed_to_install_packages">Pemasang paket gagal memasang paket: STATUS_CODE:</string>
     <string name="package_name">Nama Paket</string>
     <string name="padding">Padding</string>
     <string name="page">Halaman</string>
@@ -1237,7 +1219,7 @@
     <string name="pitch">Nada</string>
     <string name="play">Putar</string>
     <string name="playback">Pemutaran</string>
-    <string name="please_click_refresh_available_models">Silakan klik 'Segarkan Model yang Tersedia' di atas untuk memuat model dari Gemini API.</string>
+    <string name="please_click_refresh_available_models">Silakan klik \'Segarkan Model yang Tersedia\' di atas untuk memuat model dari Gemini API.</string>
     <string name="please_describe_the_issue">Mohon jelaskan masalahnya:</string>
     <string name="please_download_and_select_a">Silakan unduh dan pilih model suara untuk mengaktifkan TTS</string>
     <string name="please_enter_a_valid_repository">Silakan masukkan URL repositori yang valid yang diakhiri dengan .json</string>
@@ -1547,7 +1529,7 @@
     <string name="shimmer">shimmer</string>
     <string name="shimmeranimation">shimmerAnimation</string>
     <string name="shimmertransition">shimmerTransition</string>
-    <string name="show_all_category_tab">Tampilkan Tab Kategori "Semua"</string>
+    <string name="show_all_category_tab">Tampilkan Tab Kategori Semua</string>
     <string name="show_archived">Tampilkan Diarsipkan</string>
     <string name="show_archived_books">Tampilkan Buku yang Diarsipkan</string>
     <string name="show_category_tabs">Tampilkan Tab Kategori</string>
@@ -1595,8 +1577,7 @@
     <string name="snooze">Tunda</string>
     <string name="snooze_reminder">Tunda Pengingat</string>
     <string name="something_is_wrong_with_this_book">Ada yang salah dengan buku ini.</string>
-    <string name="something_is_wrong_with_this_chapter">Ada yang salah dengan bab ini.
-    </string>
+    <string name="something_is_wrong_with_this_chapter">Ada yang salah dengan bab ini.</string>
     <string name="something_went_wrong">Terjadi kesalahan</string>
     <string name="something_wrong_with_book">Ada yang salah dengan buku ini</string>
     <string name="sort_by">Urutkan Berdasarkan</string>
@@ -1622,8 +1603,7 @@
     <string name="stats">Statistik</string>
     <string name="stop">Berhenti</string>
     <string name="storage">Penyimpanan</string>
-    <string name="storage_permission_required_explanation">Penjelasan Izin Penyimpanan Diperlukan
-    </string>
+    <string name="storage_permission_required_explanation">Penjelasan Izin Penyimpanan Diperlukan</string>
     <string name="storage_usage">Penggunaan Penyimpanan</string>
     <string name="storage_used">Penyimpanan yang Digunakan</string>
     <string name="style_features">Fitur Gaya</string>
@@ -1713,9 +1693,7 @@
     <string name="theme_plugin_errors">Kesalahan Plugin Tema</string>
     <string name="themes">Tema</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">Tidak ada novel di sumber ini untuk dipindahkan</string>
-    <string name="there_was_a_problem_in_getting_chapter">Ada masalah saat mendapatkan
-        bab.
-    </string>
+    <string name="there_was_a_problem_in_getting_chapter">Ada masalah saat mendapatkan bab.</string>
     <string name="these_actions_are_destructive_and">Tindakan ini bersifat merusak dan tidak dapat dibatalkan. Lanjutkan dengan hati-hati.</string>
     <string name="these_are_all_the_popular_books">Ini adalah semua buku populer</string>
     <string name="these_are_all_the_reviews">Ini adalah semua ulasan</string>
@@ -1814,7 +1792,7 @@
     <string name="tts_with_translated_text">TTS dengan Teks Terjemahan</string>
     <string name="turn_off_vibration_feedback_for_interactions">Matikan umpan balik getaran untuk interaksi</string>
     <string name="type">Jenis</string>
-    <string name="type_1">Jenis \</string>
+    <string name="type_1">Jenis \\</string>
     <string name="typography">Tipografi</string>
     <string name="ui_improvements">Peningkatan UI</string>
     <string name="unable_to_open_link">Tidak Dapat Membuka Tautan</string>
@@ -1942,7 +1920,7 @@
     <string name="yesterday">Kemarin</string>
     <string name="you">(Anda)</string>
     <string name="you_1">ANDA</string>
-    <string name="you_are_about_to_report">Anda akan melaporkan \</string>
+    <string name="you_are_about_to_report">Anda akan melaporkan \\</string>
     <string name="you_dont_have_any_badges_yet">Anda belum memiliki lencana</string>
     <string name="you_own_an_ireader_nft">Anda memiliki NFT IReader!</string>
     <string name="youll_receive_a_gentle_reminder">Anda akan menerima pengingat lembut setelah membaca terus menerus selama durasi yang dipilih.</string>
@@ -1960,4 +1938,21 @@
     <string name="your_review_will_appear_as">Ulasan Anda akan muncul sebagai:</string>
     <string name="your_username">Nama Pengguna Anda</string>
     <string name="youve_reached_the_end">Anda telah mencapai akhir!</string>
+    <string name="loading_features"></string>
+    <string name="export_translated_content"></string>
+    <string name="source_broken_help_description"></string>
+    <string name="export_translated_content_description"></string>
+    <string name="source_needs_update"></string>
+    <string name="source_broken_help_title"></string>
+    <string name="source_website_changed"></string>
+    <string name="source_broken_description"></string>
+    <string name="source_broken_title"></string>
+    <string name="feature_store_description"></string>
+    <string name="no_plugins_available"></string>
+    <string name="parsing_error"></string>
+    <string name="donate_crypto"></string>
+    <string name="feature_store"></string>
+    <string name="crypto_donation_preferred"></string>
+    <string name="support_development_5"></string>
+    <string name="search_features"></string>
 </resources>
