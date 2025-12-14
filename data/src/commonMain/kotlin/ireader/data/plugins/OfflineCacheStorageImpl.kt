@@ -58,8 +58,11 @@ class OfflineCacheStorageImpl(
             // Calculate SHA-256 checksum
             val hashingSink = HashingSink.sha256(blackholeSink())
             val content = file.readBytes()
-            hashingSink.buffer().use { sink ->
-                sink.write(content)
+            val bufferedSink = hashingSink.buffer()
+            try {
+                bufferedSink.write(content)
+            } finally {
+                bufferedSink.close()
             }
             
             hashingSink.hash.hex() == expectedChecksum
