@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -182,7 +183,7 @@
     <string name="cached">Uložené v pamäti</string>
     <string name="cancel">Zrušiť</string>
     <string name="cancel_all">Zrušiť všetko</string>
-    <string name="cancel_all_for_this_series">"Zrušiť všetko pre túto sériu</string>
+    <string name="cancel_all_for_this_series">Zrušiť všetko pre túto sériu</string>
     <string name="cancel_export">Zrušiť export</string>
     <string name="cancel_export_confirmation">Ste si istý, že chcete zrušiť export?</string>
     <string name="cancel_import">Zrušiť import</string>
@@ -252,11 +253,9 @@
     <string name="color_selected">farba vybraná</string>
     <string name="colors">Farby</string>
     <string name="columns">Stĺpce</string>
-    <string name="comfortable_grid_layout_description">3 stĺpce v mriežke s väčšími obrázkami obalov
-</string>
+    <string name="comfortable_grid_layout_description">3 stĺpce v mriežke s väčšími obrázkami obalov</string>
     <string name="comfortable_layout">Pohodlná mriežka</string>
-    <string name="compact_grid_layout_description">2 stĺpce v mriežke s menšími obrázkami obalov
-</string>
+    <string name="compact_grid_layout_description">2 stĺpce v mriežke s menšími obrázkami obalov</string>
     <string name="compact_layout">Kompaktné rozloženie</string>
     <string name="complete">Dokončené</string>
     <string name="complete_captcha">Na pokračovanie dokončite CAPTCHA</string>
@@ -309,9 +308,7 @@
     <string name="decrease_speed">Znížiť rýchlosť</string>
     <string name="deepseek_api_key">Kľúč DeepSeek API</string>
     <string name="deepseek_api_key_invalid">Neplatný kľúč DeepSeek api</string>
-    <string name="deepseek_api_key_not_set">Kľúč DeepSeek API nie je nastavený. Nastavte ho v
-nastaveniach.
-</string>
+    <string name="deepseek_api_key_not_set">Kľúč DeepSeek API nie je nastavený. Nastavte ho v nastaveniach.</string>
     <string name="deepseek_payment_required">Je potrebná platba DeepSeek alebo bola prekročená kvóta API</string>
     <string name="default_sort">Predvolené triedenie</string>
     <string name="default_value">Predvolená hodnota</string>
@@ -333,15 +330,9 @@ nastaveniach.
     <string name="describe_the_issue">Popíšte problém...</string>
     <string name="description">Popis</string>
     <string name="description_placeholder">Žiadny popis</string>
-    <string name="dialog_remove_chapter_book_description">Toto odstráni dátum prečítania tejto
-        knihy. Ste si istý?
-    </string>
-    <string name="dialog_remove_chapter_books_description">Toto odstráni dátum prečítania všetkých
-        kníh. Ste si istý?
-    </string>
-    <string name="dialog_remove_chapter_history_description">Toto odstráni dátum prečítania tejto
-        kapitoly. Ste si istý?
-    </string>
+    <string name="dialog_remove_chapter_book_description">Toto odstráni dátum prečítania tejto knihy. Ste si istý?</string>
+    <string name="dialog_remove_chapter_books_description">Toto odstráni dátum prečítania všetkých kníh. Ste si istý?</string>
+    <string name="dialog_remove_chapter_history_description">Toto odstráni dátum prečítania tejto kapitoly. Ste si istý?</string>
     <string name="did_not_get_anything">Nič som nedostal.</string>
     <string name="disable">Zakázať</string>
     <string name="disable_privacy_mode">Zakázať režim súkromia</string>
@@ -370,9 +361,7 @@ nastaveniach.
     <string name="download_notifier_no_network">Nie je k dispozícii žiadne sieťové pripojenie</string>
     <string name="download_notifier_text_only_wifi">Nie je k dispozícii žiadne pripojenie Wi-Fi</string>
     <string name="download_notifier_title_error">Chyba</string>
-    <string name="download_notifier_unknown_error">Kapitolu sa nepodarilo stiahnuť kvôli neočakávanej
-        chybe
-    </string>
+    <string name="download_notifier_unknown_error">Kapitolu sa nepodarilo stiahnuť kvôli neočakávanej chybe</string>
     <string name="download_of">Sťahovanie</string>
     <string name="download_unread">Stiahnuť neprečítané</string>
     <string name="download_update">Stiahnuť aktualizáciu</string>
@@ -397,9 +386,7 @@ nastaveniach.
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">Zámok zdroja 18+</string>
     <string name="email">Email</string>
-    <string name="empty_library">V knižnici nie je žiadna kniha, knihy môžete pridať na obrazovke
-        Preskúmať.
-    </string>
+    <string name="empty_library">V knižnici nie je žiadna kniha, knihy môžete pridať na obrazovke Preskúmať.</string>
     <string name="empty_response">Prijatá prázdna odpoveď zo služby prekladu.</string>
     <string name="enable">Povoliť</string>
     <string name="enable_book_cover">Povoliť obal knihy</string>
@@ -529,9 +516,7 @@ nastaveniach.
     <string name="full">Plný</string>
     <string name="gb_total_storage_7_500mb">3.5GB celkové úložisko (7 × 500MB) - Nakonfigurujte každý projekt alebo použite rovnakú URL pre všetky</string>
     <string name="gemini_api_key">Kľúč Gemini API</string>
-    <string name="gemini_api_key_not_set">Kľúč Gemini API nie je nastavený. Nastavte ho v
-nastaveniach.
-</string>
+    <string name="gemini_api_key_not_set">Kľúč Gemini API nie je nastavený. Nastavte ho v nastaveniach.</string>
     <string name="gemini_payment_required">Prekročili ste svoju aktuálnu kvótu pre Gemini API. Skontrolujte svoj plán a fakturačné údaje na stránke https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="general">Všeobecné</string>
     <string name="get_started">Začať</string>
@@ -548,7 +533,7 @@ nastaveniach.
     <string name="go_to_badge_store">Prejsť do obchodu s odznakmi</string>
     <string name="go_to_chapter">Prejsť na kapitolu</string>
     <string name="go_to_last_chapter">Prejsť na poslednú kapitolu</string>
-    <string name="go_to_settings_generaln2_toggle">1. Prejdite do Nastavenia → Všeobecné\n2. Prepnúť \</string>
+    <string name="go_to_settings_generaln2_toggle">1. Prejdite do Nastavenia → Všeobecné\n2. Prepnúť \\</string>
     <string name="goal_reached">Cieľ dosiahnutý</string>
     <string name="google_drive_authentication">Overenie Google Drive</string>
     <string name="google_drive_backup">Zálohovanie na Google Drive</string>
@@ -599,14 +584,9 @@ nastaveniach.
     <string name="installation_error_Storage">PackageManger: Nedostatočné úložisko</string>
     <string name="installation_error_aborted">PackageManger: Zrušené</string>
     <string name="installation_error_blocked">PackageManger: Inštalátor bol zablokovaný</string>
-    <string name="installation_error_conflicted">PackageManger: Konflikt s nainštalovaným balíkom
-    </string>
-    <string name="installation_error_incompatible">PackageManger: Nekompatibilné s nainštalovaným
-        balíkom
-    </string>
-    <string name="installation_error_invalid">PackageManger: Je nainštalovaná iná apk s
-        vyššou verziou ako tento balík
-    </string>
+    <string name="installation_error_conflicted">PackageManger: Konflikt s nainštalovaným balíkom</string>
+    <string name="installation_error_incompatible">PackageManger: Nekompatibilné s nainštalovaným balíkom</string>
+    <string name="installation_error_invalid">PackageManger: Je nainštalovaná iná apk s vyššou verziou ako tento balík</string>
     <string name="installation_failed">Inštalácia zlyhala: %1$s</string>
     <string name="installation_failed_generic">Inštalácia zlyhala</string>
     <string name="installation_successful">Inštalácia bola úspešná.</string>
@@ -634,8 +614,7 @@ nastaveniach.
     <string name="last_used_source">Naposledy použité</string>
     <string name="latest_book">Najnovšie</string>
     <string name="layout">Rozloženie</string>
-    <string name="layout_description_comfortable">3 stĺpce v mriežke s väčšími obrázkami obalov
-</string>
+    <string name="layout_description_comfortable">3 stĺpce v mriežke s väčšími obrázkami obalov</string>
     <string name="layout_description_compact">2 stĺpce v mriežke s menšími obrázkami obalov</string>
     <string name="layout_description_cover_only">2 stĺpce iba s obrázkami obalov (žiadny text)</string>
     <string name="layout_description_list">Knihy zobrazené vo vertikálnom zozname</string>
@@ -745,9 +724,7 @@ nastaveniach.
     <string name="no_active_downloads">Žiadne aktívne sťahovania</string>
     <string name="no_active_downloads_subtitle">Sťahovania sa tu zobrazia, keď začnete sťahovať kapitoly</string>
     <string name="no_alternative_sources_available">Nie sú k dispozícii žiadne alternatívne zdroje. Celkový počet zdrojov: %1$s, Aktuálny: %2$s</string>
-    <string name="no_app_was_found_to_lauch">Niečo sa pokazilo. Nemáte požadovanú
-        aplikáciu.
-    </string>
+    <string name="no_app_was_found_to_lauch">Niečo sa pokazilo. Nemáte požadovanú aplikáciu.</string>
     <string name="no_badge">Žiadny odznak</string>
     <string name="no_book_found_error">Žiadna kniha s týmto ID.</string>
     <string name="no_categories_found">Nenašli sa žiadne kategórie</string>
@@ -797,9 +774,7 @@ nastaveniach.
     <string name="open_tts_screen">Zobraziť</string>
     <string name="openai_api_key">Kľúč OpenAI API</string>
     <string name="openai_api_key_invalid">Neplatný kľúč OpenAI api</string>
-    <string name="openai_api_key_not_set">Kľúč OpenAI API nie je nastavený. Nastavte ho v
-nastaveniach.
-</string>
+    <string name="openai_api_key_not_set">Kľúč OpenAI API nie je nastavený. Nastavte ho v nastaveniach.</string>
     <string name="openai_quota_exceeded">Bola prekročená kvóta OpenAI</string>
     <string name="optimize">Optimalizovať</string>
     <string name="optimize_database">Optimalizovať databázu</string>
@@ -809,9 +784,7 @@ nastaveniach.
     <string name="other_source">Ostatné</string>
     <string name="overall_progress">Celkový priebeh</string>
     <string name="owner">Vlastník</string>
-    <string name="package_installer_failed_to_install_packages">Inštalátor balíkov zlyhal pri inštalácii
-        balíkov: STATUS_CODE:
-    </string>
+    <string name="package_installer_failed_to_install_packages">Inštalátor balíkov zlyhal pri inštalácii balíkov: STATUS_CODE:</string>
     <string name="package_manager">Správca balíčkov</string>
     <string name="padding">Odsadenie</string>
     <string name="page">Strana</string>
@@ -829,9 +802,7 @@ nastaveniach.
     <string name="pause_all">Pozastaviť všetky</string>
     <string name="paused">Pozastavené</string>
     <string name="performance">Výkon</string>
-    <string name="permission_not_given">Nedostatočné povolenie, skontrolujte svoje
-        povolenia
-    </string>
+    <string name="permission_not_given">Nedostatočné povolenie, skontrolujte svoje povolenia</string>
     <string name="permission_required">Je potrebné povolenie</string>
     <string name="permissions">Povolenia</string>
     <string name="pin">Pripnúť</string>
@@ -1009,7 +980,7 @@ nastaveniach.
     <string name="share">Zdieľať</string>
     <string name="share_report">Zdieľať správu</string>
     <string name="share_your_experience_with_this_plugin">Podeľte sa o svoje skúsenosti s týmto zásuvným modulom...</string>
-    <string name="show_all_category_tab">Zobraziť záložku kategórie "Všetko"</string>
+    <string name="show_all_category_tab">Zobraziť záložku kategórie Všetko</string>
     <string name="show_archived">Zobraziť archivované</string>
     <string name="show_archived_books">Zobraziť archivované knihy</string>
     <string name="show_category_tabs">Zobraziť záložky kategórií</string>
@@ -1043,8 +1014,7 @@ nastaveniach.
     <string name="sleep_timer">Časovač vypnutia</string>
     <string name="snooze">Odložiť</string>
     <string name="something_is_wrong_with_this_book">S touto knihou je niečo zle.</string>
-    <string name="something_is_wrong_with_this_chapter">S touto kapitolou je niečo zle.
-</string>
+    <string name="something_is_wrong_with_this_chapter">S touto kapitolou je niečo zle.</string>
     <string name="something_wrong_with_book">S touto knihou je niečo nesprávne</string>
     <string name="sort">Zoradiť</string>
     <string name="source">Zdroj</string>
@@ -1064,8 +1034,7 @@ nastaveniach.
     <string name="status">Stav</string>
     <string name="stop">Zastaviť</string>
     <string name="storage">Úložisko</string>
-    <string name="storage_permission_required_explanation">Je potrebné povolenie na ukladanie
-</string>
+    <string name="storage_permission_required_explanation">Je potrebné povolenie na ukladanie</string>
     <string name="submit">Odoslať</string>
     <string name="submit_report">Odoslať správu</string>
     <string name="success">Úspech</string>
@@ -1114,9 +1083,7 @@ nastaveniach.
     <string name="theme_was_not_valid">Téma nie je súčasťou základných tém</string>
     <string name="theme_was_saved">Téma bola uložená</string>
     <string name="there_is_no_chapter">Neexistuje žiadna kapitola.</string>
-    <string name="there_was_a_problem_in_getting_chapter">Vyskytol sa problém pri získavaní 
-kapitoly.
-</string>
+    <string name="there_was_a_problem_in_getting_chapter">Vyskytol sa problém pri získavaní kapitoly.</string>
     <string name="thirty_min">30 min</string>
     <string name="this_is_first_chapter">Toto je prvá kapitola</string>
     <string name="this_is_last_chapter">Toto je posledná kapitola</string>
@@ -1233,4 +1200,21 @@ kapitoly.
     <string name="yesterday">Včera</string>
     <string name="you_are_on_latest_version">Používate najnovšiu verziu</string>
     <string name="your_review_optional">Vaša recenzia (voliteľná)</string>
+    <string name="loading_features"></string>
+    <string name="export_translated_content"></string>
+    <string name="source_broken_help_description"></string>
+    <string name="export_translated_content_description"></string>
+    <string name="source_needs_update"></string>
+    <string name="source_broken_help_title"></string>
+    <string name="source_website_changed"></string>
+    <string name="source_broken_description"></string>
+    <string name="source_broken_title"></string>
+    <string name="feature_store_description"></string>
+    <string name="no_plugins_available"></string>
+    <string name="parsing_error"></string>
+    <string name="donate_crypto"></string>
+    <string name="feature_store"></string>
+    <string name="crypto_donation_preferred"></string>
+    <string name="support_development_5"></string>
+    <string name="search_features"></string>
 </resources>
