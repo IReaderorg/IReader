@@ -219,7 +219,7 @@ fun CommonNavHost(
                 navArgument("pluginId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val pluginId = backStackEntry.arguments?.getString("pluginId") ?: return@composable
+            val pluginId = backStackEntry.savedStateHandle.get<String>("pluginId") ?: return@composable
             ireader.presentation.core.ui.PluginDetailsScreenSpec(pluginId).Content()
         }
         
