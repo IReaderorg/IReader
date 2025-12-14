@@ -104,7 +104,7 @@ sealed class ApiError {
     fun toException(): Exception = when (this) {
         is ApiNotFound -> IllegalArgumentException("API not found: $apiId")
         is MethodNotFound -> IllegalArgumentException("Method not found: $apiId.$methodName")
-        is PermissionDenied -> IllegalAccessException("Permission denied: $reason")
+        is PermissionDenied -> RuntimeException("Permission denied: $reason")
         is InvalidParameters -> IllegalArgumentException("Invalid parameters: $message")
         is ExecutionFailed -> RuntimeException("Execution failed: $message")
         is Timeout -> RuntimeException("API call timed out after ${timeoutMs}ms")
