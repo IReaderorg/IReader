@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -48,7 +49,7 @@
     <string name="all_category">Tümü</string>
     <string name="all_chapters">Tüm Bölümler</string>
     <string name="all_chapters_already_downloaded">Tüm bölümler zaten indirildi</string>
-    <string name="all_data_collection_is_optional">Tüm veri toplama isteğe bağlıdır ve istendiği zaman devre dışı bırakılabilir. </string>
+    <string name="all_data_collection_is_optional">Tüm veri toplama isteğe bağlıdır ve istendiği zaman devre dışı bırakılabilir.</string>
     <string name="all_donors">Tüm Bağışçılar</string>
     <string name="all_extensions_up_to_date">Tüm uzantılar güncel</string>
     <string name="all_google_fonts">Tüm Google Yazı Tipleri</string>
@@ -160,13 +161,13 @@
     <string name="backup_all">Tümünü Yedekle</string>
     <string name="backup_and_restore">Yedekle ve geri yükle</string>
     <string name="backup_and_restore_your_custom_themes">Özel temalarınızı yedekleyin ve geri yükleyin</string>
-    <string name="backup_and_restore_your_library_to_google_drive">Kütüphanenizi Google Drive'a yedekleyin ve geri yükleyin</string>
+    <string name="backup_and_restore_your_library_to_google_drive">Kütüphanenizi Google Drive\'a yedekleyin ve geri yükleyin</string>
     <string name="backup_cancelled">Yedekleme iptal edildi</string>
     <string name="backup_created_successfully">Yedek Başarıyla Oluşturuldu</string>
     <string name="backup_error">Yedekleme hatası: %1$s</string>
     <string name="backup_restore">Yedekleme &amp; Geri Yükleme</string>
     <string name="backup_restored_successfully">Yedek başarıyla geri yüklendi</string>
-    <string name="backup_to_google_drive_or_dropbox">Google Drive veya Dropbox'a yedekle</string>
+    <string name="backup_to_google_drive_or_dropbox">Google Drive veya Dropbox\'a yedekle</string>
     <string name="badge">Rozet</string>
     <string name="badge_granted_immediately_upon_successful">• Rozet, başarılı doğrulama üzerine anında verilir</string>
     <string name="badge_placeholder">Rozet yer tutucusu</string>
@@ -354,8 +355,7 @@
     <string name="color_theme">Renk Teması</string>
     <string name="colors">Renkler</string>
     <string name="columns">Sütunlar</string>
-    <string name="comfortable_grid_layout_description">Daha büyük kapak resimleriyle 3 sütunlu ızgara
-    </string>
+    <string name="comfortable_grid_layout_description">Daha büyük kapak resimleriyle 3 sütunlu ızgara</string>
     <string name="comfortable_layout">Rahat Izgara</string>
     <string name="commit">Onayla</string>
     <string name="community">Topluluk</string>
@@ -363,11 +363,10 @@
     <string name="community_leaderboard">Topluluk &amp; Skor Tablosu</string>
     <string name="community_reviews">Topluluk Yorumları</string>
     <string name="community_reviews_desc">Kitaplar ve bölümler için yorumları okuyun ve yazın</string>
-    <string name="compact_grid_layout_description">Daha küçük kapak resimleriyle 2 sütunlu ızgara
-    </string>
+    <string name="compact_grid_layout_description">Daha küçük kapak resimleriyle 2 sütunlu ızgara</string>
     <string name="compact_layout">Kompakt Düzen</string>
     <string name="complete">Tamamlandı</string>
-    <string name="complete_captcha">Devam etmek için CAPTCHA'yı tamamlayın</string>
+    <string name="complete_captcha">Devam etmek için CAPTCHA\'yı tamamlayın</string>
     <string name="complete_your_donation">Bağışınızı tamamlayın</string>
     <string name="completed">Tamamlandı</string>
     <string name="completed_downloads">Tamamlananlar</string>
@@ -377,17 +376,17 @@
     <string name="concurrent_searches">Eşzamanlı Aramalar</string>
     <string name="configure">Yapılandır</string>
     <string name="configure_advanced_options">Gelişmiş seçenekleri yapılandır</string>
-    <string name="configure_androids_built_in_text_to_speech_engine">Android'in yerleşik metin okuma motorunu yapılandır</string>
-    <string name="configure_gradio_based_tts_coqui">Gradio tabanlı TTS'yi yapılandır (Coqui, Edge TTS, Persian TTS, vb.)</string>
-    <string name="configure_gradio_tts">Gradio TTS'yi Yapılandır</string>
+    <string name="configure_androids_built_in_text_to_speech_engine">Android\'in yerleşik metin okuma motorunu yapılandır</string>
+    <string name="configure_gradio_based_tts_coqui">Gradio tabanlı TTS\'yi yapılandır (Coqui, Edge TTS, Persian TTS, vb.)</string>
+    <string name="configure_gradio_tts">Gradio TTS\'yi Yapılandır</string>
     <string name="configure_js_plugins_and_enable">JS eklentilerini yapılandır ve LNReader uyumlu kaynakları etkinleştir</string>
-    <string name="configure_oauth2_credentials_in">1. Google Cloud Console'da OAuth2 kimlik bilgilerini yapılandırın\n</string>
+    <string name="configure_oauth2_credentials_in">1. Google Cloud Console\'da OAuth2 kimlik bilgilerini yapılandırın\n</string>
     <string name="confirm">Onayla</string>
     <string name="confirm_exit">Çıkışı Onayla</string>
     <string name="confirm_exit_message">Çıkmak için tekrar geri tuşuna basın</string>
     <string name="confirm_password">Şifreyi Onayla</string>
-    <string name="confirm_pin">PIN'i Onayla</string>
-    <string name="connect_to_google_drive">Google Drive'a Bağlan</string>
+    <string name="confirm_pin">PIN\'i Onayla</string>
+    <string name="connect_to_google_drive">Google Drive\'a Bağlan</string>
     <string name="connect_with_us">Bizimle Bağlantı Kurun</string>
     <string name="connected">Bağlandı</string>
     <string name="content">İçerik</string>
@@ -411,7 +410,7 @@
     <string name="cover_cache_cleared">Kapak önbelleği temizlendi.</string>
     <string name="cover_only_layout">Sadece Kapak Izgarası</string>
     <string name="cover_only_layout_description">Yalnızca kapak resimlerinin 2 sütunu (metin yok)</string>
-    <string name="cover_url_must_start_with_http_https_or_file">Kapak URL'si http://, https:// veya file:// ile başlamalıdır</string>
+    <string name="cover_url_must_start_with_http_https_or_file">Kapak URL\'si http://, https:// veya file:// ile başlamalıdır</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">Çökme Raporlaması</string>
     <string name="crashes">Çökmeler</string>
@@ -466,8 +465,7 @@
     <string name="decrease_speed">Hızı azalt</string>
     <string name="deepseek_api_key">DeepSeek API Anahtarı</string>
     <string name="deepseek_api_key_invalid">DeepSeek api anahtarı geçersiz</string>
-    <string name="deepseek_api_key_not_set">DeepSeek API anahtarı ayarlanmadı. Lütfen ayarlardan yapılandırın.
-    </string>
+    <string name="deepseek_api_key_not_set">DeepSeek API anahtarı ayarlanmadı. Lütfen ayarlardan yapılandırın.</string>
     <string name="deepseek_login_required">DeepSeek Girişi Gerekli</string>
     <string name="deepseek_payment_required">DeepSeek ödemesi gerekiyor veya API kotası aşıldı</string>
     <string name="default_chapter_sort">Varsayılan Bölüm Sıralaması</string>
@@ -500,15 +498,9 @@
     <string name="developer">Geliştirici</string>
     <string name="diagnostic_data">Tanılama Verileri</string>
     <string name="diagnostic_report">Tanılama Raporu</string>
-    <string name="dialog_remove_chapter_book_description">Bu, bu kitabın okuma tarihini kaldıracaktır.
-        Emin misin?
-    </string>
-    <string name="dialog_remove_chapter_books_description">Bu, tüm kitapların okuma tarihini kaldıracaktır.
-        Emin misin?
-    </string>
-    <string name="dialog_remove_chapter_history_description">Bu, bu bölümün okuma tarihini kaldıracaktır.
-        Emin misin?
-    </string>
+    <string name="dialog_remove_chapter_book_description">Bu, bu kitabın okuma tarihini kaldıracaktır. Emin misin?</string>
+    <string name="dialog_remove_chapter_books_description">Bu, tüm kitapların okuma tarihini kaldıracaktır. Emin misin?</string>
+    <string name="dialog_remove_chapter_history_description">Bu, bu bölümün okuma tarihini kaldıracaktır. Emin misin?</string>
     <string name="did_not_get_anything">Hiçbir şey almadım.</string>
     <string name="disable">Devre Dışı</string>
     <string name="disable_haptic_feedback">Dokunsal Geri Bildirimi Devre Dışı Bırak</string>
@@ -534,7 +526,7 @@
     <string name="donate_via_card_1">💳 Kartla Bağış Yap</string>
     <string name="donations">Bağışlar</string>
     <string name="done">Bitti</string>
-    <string name="dont_have_an_ireader_nft">IReader NFT'niz yok mu?</string>
+    <string name="dont_have_an_ireader_nft">IReader NFT\'niz yok mu?</string>
     <string name="dots_collision">Noktalar çarpışması</string>
     <string name="dots_elastic">Noktalar elastik</string>
     <string name="dots_flashing">Noktalar yanıp sönüyor</string>
@@ -564,8 +556,7 @@
     <string name="download_notifier_no_network">Ağ bağlantısı yok</string>
     <string name="download_notifier_text_only_wifi">Wi-Fi bağlantısı yok</string>
     <string name="download_notifier_title_error">Hata</string>
-    <string name="download_notifier_unknown_error">Beklenmedik bir hata nedeniyle bölüm indirilemedi
-    </string>
+    <string name="download_notifier_unknown_error">Beklenmedik bir hata nedeniyle bölüm indirilemedi</string>
     <string name="download_of">İndirme:</string>
     <string name="download_only_over_wifi">Sadece WiFi Üzerinden İndir</string>
     <string name="download_progress">İndirme İlerlemesi</string>
@@ -603,8 +594,7 @@
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">18+ Kaynak Kilidi</string>
     <string name="email">E-posta</string>
-    <string name="empty_library">Kütüphanede kitap yok, Keşfet ekranından kitap ekleyebilirsiniz.
-    </string>
+    <string name="empty_library">Kütüphanede kitap yok, Keşfet ekranından kitap ekleyebilirsiniz.</string>
     <string name="empty_response">Çeviri hizmetinden boş bir yanıt alındı.</string>
     <string name="enable">Etkinleştir</string>
     <string name="enable_app_lock">Uygulama Kilidini Etkinleştir</string>
@@ -644,8 +634,8 @@
     <string name="enter_gemini_api_key">Gemini API anahtarınızı girin</string>
     <string name="enter_query_and_tap_search">Kitap bulmak için bir sorgu girin ve aramaya dokunun</string>
     <string name="enter_quote_text">Alıntı metnini girin...</string>
-    <string name="enter_the_repository_url">Depo URL'sini girin:</string>
-    <string name="enter_the_url_of_the">Eklemek istediğiniz deponun URL'sini girin. Depo, mevcut kaynakları içeren bir index.min.json dosyası içermelidir.</string>
+    <string name="enter_the_repository_url">Depo URL\'sini girin:</string>
+    <string name="enter_the_url_of_the">Eklemek istediğiniz deponun URL\'sini girin. Depo, mevcut kaynakları içeren bir index.min.json dosyası içermelidir.</string>
     <string name="enter_your_ethereum_wallet_address">Ethereum cüzdan adresinizi girin. Bu, sunucu özelliklerine erişmek için bir API anahtarı olarak kullanılacaktır.</string>
     <string name="enter_your_ethereum_wallet_address_1">NFT sahipliğini doğrulamak için Ethereum cüzdan adresinizi girin</string>
     <string name="enter_your_transaction_id">İşlem kimliğinizi girin</string>
@@ -689,7 +679,7 @@
     <string name="example_url">Örnek URL:</string>
     <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Örnekler:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Kategorileri Hariç Tut</string>
-    <string name="excluded"> (hariç tutuldu)</string>
+    <string name="excluded">(hariç tutuldu)</string>
     <string name="exclusive">Özel</string>
     <string name="exclusive_designs">Özel Tasarımlar</string>
     <string name="execution_timeout">Yürütme Zaman Aşımı</string>
@@ -704,7 +694,7 @@
     <string name="export_book_as_epub">Kitabı Epub Olarak Dışa Aktar</string>
     <string name="export_cancelled">Dışa aktarma iptal edildi</string>
     <string name="export_diagnostics">Tanılamayı Dışa Aktar</string>
-    <string name="export_epub">ePub'a Aktar</string>
+    <string name="export_epub">ePub\'a Aktar</string>
     <string name="export_epub_option_description">Çevrimdışı okuma için ePub dosyası olarak indir</string>
     <string name="export_epub_option_title">ePub olarak dışa aktar</string>
     <string name="export_failed">Dışa Aktarma Başarısız</string>
@@ -816,7 +806,7 @@
     <string name="font_weight">Yazı Kalınlığı</string>
     <string name="font_weight_1">font_weight</string>
     <string name="fonts">Yazı Tipleri</string>
-    <string name="for_more_powerful_and_natural">Android'de daha güçlü ve doğal sesler için, Play Store veya F-Droid'den Sherpa TTS uygulamasını yükleyin.</string>
+    <string name="for_more_powerful_and_natural">Android\'de daha güçlü ve doğal sesler için, Play Store veya F-Droid\'den Sherpa TTS uygulamasını yükleyin.</string>
     <string name="for_private_spaces">Özel alanlar için</string>
     <string name="formal">Resmi</string>
     <string name="formatting">Biçimlendirme</string>
@@ -826,11 +816,10 @@
     <string name="full">Tam</string>
     <string name="fullscreen">Tam Ekran</string>
     <string name="fund_a_feature">Bir Özelliği Finanse Et</string>
-    <string name="gb_total_storage_7_500mb">3.5 GB toplam depolama alanı (7 × 500MB) - Her projeyi yapılandırın veya tümü için aynı URL'yi kullanın</string>
+    <string name="gb_total_storage_7_500mb">3.5 GB toplam depolama alanı (7 × 500MB) - Her projeyi yapılandırın veya tümü için aynı URL\'yi kullanın</string>
     <string name="gemini_api_information">Gemini API Bilgileri</string>
     <string name="gemini_api_key">Gemini API Anahtarı</string>
-    <string name="gemini_api_key_not_set">Gemini API anahtarı ayarlanmadı. Lütfen ayarlardan yapılandırın.
-    </string>
+    <string name="gemini_api_key_not_set">Gemini API anahtarı ayarlanmadı. Lütfen ayarlardan yapılandırın.</string>
     <string name="gemini_model">Gemini Modeli</string>
     <string name="gemini_payment_required">Gemini API için mevcut kotanızı aştınız. Lütfen planınızı ve fatura bilgilerinizi https://ai.google.dev/gemini-api/docs/rate-limits adresinden kontrol edin.</string>
     <string name="gender">Cinsiyet</string>
@@ -858,17 +847,17 @@
     <string name="go_to_badge_store">Rozet Mağazasına Git</string>
     <string name="go_to_chapter">Bölüme Git</string>
     <string name="go_to_last_chapter">Son bölüme git</string>
-    <string name="go_to_settings_generaln2_toggle">1. Ayarlar → Genel'e gidin\n2. \'yi Aç/Kapa </string>
+    <string name="go_to_settings_generaln2_toggle">1. Ayarlar → Genel\'e gidin\n2. \'yi Aç/Kapa</string>
     <string name="goal_reached">Hedefe Ulaşıldı</string>
     <string name="goal_reached_1">Hedefe Ulaşıldı!</string>
     <string name="goal_reached_thank_you">Hedefe Ulaşıldı! Teşekkür ederim!</string>
     <string name="google_drive">Google Drive</string>
     <string name="google_drive_authentication">Google Drive Kimlik Doğrulaması</string>
     <string name="google_drive_backup">Google Drive Yedeklemesi</string>
-    <string name="googles_gemini_api_provides_high">Google'ın Gemini API'si, AI platformu aracılığıyla yüksek kaliteli çeviriler sağlar. Bu özelliği kullanmak için Google AI Studio'dan (https://aistudio.google.com) bir API anahtarı almanız gerekir.</string>
+    <string name="googles_gemini_api_provides_high">Google\'ın Gemini API\'si, AI platformu aracılığıyla yüksek kaliteli çeviriler sağlar. Bu özelliği kullanmak için Google AI Studio\'dan (https://aistudio.google.com) bir API anahtarı almanız gerekir.</string>
     <string name="got_it">Anladım</string>
     <string name="gradio">Gradio</string>
-    <string name="gradio_tts_connects_to_hugging">Gradio TTS, konuşma sentezi için Hugging Face Spaces'e bağlanır. İnternet bağlantısı gerektirir.</string>
+    <string name="gradio_tts_connects_to_hugging">Gradio TTS, konuşma sentezi için Hugging Face Spaces\'e bağlanır. İnternet bağlantısı gerektirir.</string>
     <string name="gradio_tts_online">Gradio TTS (Çevrimiçi)</string>
     <string name="gradio_tts_uses_a_huggingface">Gradio TTS, konuşmayı sentezlemek için bir HuggingFace Space kullanır. Varsayılan alanı kullanabilir veya kendinizinkini dağıtabilirsiniz.</string>
     <string name="grid">Izgara</string>
@@ -878,7 +867,7 @@
     <string name="header_alpha">header_alpha</string>
     <string name="hello_this_is_a_test">Merhaba, bu bir testtir.</string>
     <string name="help">Yardım</string>
-    <string name="help_us_improve">İyileştirmemize yardım edin \</string>
+    <string name="help_us_improve">İyileştirmemize yardım edin \\</string>
     <string name="helpful">Yardımcı</string>
     <string name="hide">Gizle</string>
     <string name="hide_backdrop">Arka Planı Gizle</string>
@@ -892,7 +881,7 @@
     <string name="high_brightness">Yüksek parlaklık</string>
     <string name="high_performance_neural_tts_with">100+ sesle yüksek performanslı sinirsel TTS (paketlenmiş)</string>
     <string name="high_quality_neural_voicesn_works">✓ Yüksek kaliteli sinirsel sesler\n✓ Çevrimdışı çalışır\n✓ Birden çok dil\n✓ Android TTS ile entegre olur</string>
-    <string name="high_quality_offline_neural_voices">Yüksek kaliteli çevrimdışı sinirsel sesler. 30'dan fazla dilde 100'den fazla sesi tarayın, indirin ve yönetin.</string>
+    <string name="high_quality_offline_neural_voices">Yüksek kaliteli çevrimdışı sinirsel sesler. 30\'dan fazla dilde 100\'den fazla sesi tarayın, indirin ve yönetin.</string>
     <string name="hint">…</string>
     <string name="history">Geçmiş</string>
     <string name="history_screen_label">Geçmiş</string>
@@ -902,7 +891,7 @@
     <string name="how_it_appears_on_your_profile">Profilinizde nasıl görünür:</string>
     <string name="how_it_appears_on_your_reviews">İncelemelerinizde nasıl görünür:</string>
     <string name="how_to_purchase">Nasıl Satın Alınır</string>
-    <string name="huggingface_space_url">HuggingFace Space URL'si</string>
+    <string name="huggingface_space_url">HuggingFace Space URL\'si</string>
     <string name="humorous">Mizahi</string>
     <string name="if_a_captcha_appears_you">Bir CAPTCHA görünürse, manuel olarak tamamlamanız gerekecektir.</string>
     <string name="image">resim</string>
@@ -917,7 +906,7 @@
     <string name="import_epub_files_into_your_library">EPUB dosyalarını kitaplığınıza aktarın</string>
     <string name="import_failed">İçe aktarma başarısız: %1$s</string>
     <string name="import_font">Yazı Tipi İçe Aktar</string>
-    <string name="import_from_lnreader">LNReader'dan İçe Aktar</string>
+    <string name="import_from_lnreader">LNReader\'dan İçe Aktar</string>
     <string name="import_from_lnreader_desc">LNReader yedeğinden (.zip) kütüphaneyi içe aktar</string>
     <string name="import_from_other_apps">Diğer Uygulamalardan İçe Aktar</string>
     <string name="import_theme">Tema İçe Aktar</string>
@@ -928,7 +917,7 @@
     <string name="in_library_1">Kitaplıkta</string>
     <string name="in_progress">Devam Ediyor</string>
     <string name="include_cover_image">Kapak Resmini Dahil Et</string>
-    <string name="included"> (dahil edildi)</string>
+    <string name="included">(dahil edildi)</string>
     <string name="incognito_mode">Gizli Mod</string>
     <string name="increase">Artır</string>
     <string name="increase_font_size">Yazı tipi boyutunu büyüt</string>
@@ -950,13 +939,9 @@
     <string name="installation_error_Storage">Paket Yöneticisi: Yetersiz Depolama</string>
     <string name="installation_error_aborted">Paket Yöneticisi: İptal Edildi</string>
     <string name="installation_error_blocked">Paket Yöneticisi: Yükleyici engellendi</string>
-    <string name="installation_error_conflicted">Paket Yöneticisi: Yüklü paketle çakışıyor
-    </string>
-    <string name="installation_error_incompatible">Paket Yöneticisi: Yüklü paketle uyumsuz
-    </string>
-    <string name="installation_error_invalid">Paket Yöneticisi: Zaten daha yüksek sürümde bir apk
-        yüklü
-    </string>
+    <string name="installation_error_conflicted">Paket Yöneticisi: Yüklü paketle çakışıyor</string>
+    <string name="installation_error_incompatible">Paket Yöneticisi: Yüklü paketle uyumsuz</string>
+    <string name="installation_error_invalid">Paket Yöneticisi: Zaten daha yüksek sürümde bir apk yüklü</string>
     <string name="installation_failed">Yükleme başarısız: %1$s</string>
     <string name="installation_failed_generic">Yükleme başarısız</string>
     <string name="installation_in_progress_this_may">Kurulum devam ediyor... Bu birkaç dakika sürebilir.</string>
@@ -1008,8 +993,7 @@
     <string name="last_verified">Son Doğrulama:</string>
     <string name="latest_book">Son</string>
     <string name="layout">Düzen</string>
-    <string name="layout_description_comfortable">Daha büyük kapak resimleriyle 3 sütunlu ızgara
-    </string>
+    <string name="layout_description_comfortable">Daha büyük kapak resimleriyle 3 sütunlu ızgara</string>
     <string name="layout_description_compact">Daha küçük kapak resimleriyle 2 sütunlu ızgara</string>
     <string name="layout_description_cover_only">Yalnızca kapak resimlerinin 2 sütunu (metin yok)</string>
     <string name="layout_description_list">Kitaplar dikey bir listede görüntülenir</string>
@@ -1053,7 +1037,7 @@
     <string name="lnreader_error_database_failed">İçe aktarma sırasında veritabanı hatası: %1$s</string>
     <string name="lnreader_error_empty_backup">Yedekleme dosyası, içe aktarılacak roman içermiyor.</string>
     <string name="lnreader_error_file_not_found">Yedekleme dosyası bulunamadı veya erişilemiyor.</string>
-    <string name="lnreader_error_invalid_backup">Geçersiz bir LNReader yedekleme dosyası. Lütfen LNReader'dan dışa aktarılmış bir .zip dosyası seçin.</string>
+    <string name="lnreader_error_invalid_backup">Geçersiz bir LNReader yedekleme dosyası. Lütfen LNReader\'dan dışa aktarılmış bir .zip dosyası seçin.</string>
     <string name="lnreader_error_novel_failed">\"%1$s\" romanı içe aktarılamadı: %2$s</string>
     <string name="lnreader_error_out_of_memory">Bu yedeklemeyi işlemek için yeterli bellek yok. Diğer uygulamaları kapatmayı deneyin.</string>
     <string name="lnreader_error_parse_failed">Yedekleme verileri ayrıştırılamadı: %1$s</string>
@@ -1200,14 +1184,12 @@
     <string name="no_active_funding_goals_at_the_moment">Şu anda aktif bir fonlama hedefi bulunmuyor</string>
     <string name="no_alternative_sources_available">Alternatif kaynak bulunamadı. Toplam kaynak: %1$s, Mevcut: %2$s</string>
     <string name="no_alternative_sources_available_1">Alternatif kaynak bulunmuyor</string>
-    <string name="no_app_was_found_to_lauch">Bir şeyler ters gitti. Gerekli uygulamaya
-        sahip değilsiniz.
-    </string>
+    <string name="no_app_was_found_to_lauch">Bir şeyler ters gitti. Gerekli uygulamaya sahip değilsiniz.</string>
     <string name="no_backups_found">Yedekleme bulunamadı</string>
     <string name="no_badge">Rozet Yok</string>
     <string name="no_badges_available">Rozet bulunmuyor</string>
-    <string name="no_badges_yet_earn_badges">Henüz rozet yok. Satın alarak veya IReader NFT'lerine sahip olarak rozet kazanın!</string>
-    <string name="no_book_found_error">Bu id'ye sahip kitap bulunamadı.</string>
+    <string name="no_badges_yet_earn_badges">Henüz rozet yok. Satın alarak veya IReader NFT\'lerine sahip olarak rozet kazanın!</string>
+    <string name="no_book_found_error">Bu id\'ye sahip kitap bulunamadı.</string>
     <string name="no_categories_found">Kategori bulunamadı</string>
     <string name="no_chapter_found_error">Bu isimde bölüm yok.</string>
     <string name="no_chapter_is_available">Bölüm Mevcut Değil.</string>
@@ -1268,7 +1250,7 @@
     <string name="note_cloud_backup_integration_requires">Not: Bulut yedekleme entegrasyonu API kimlik bilgileri gerektirir.</string>
     <string name="note_google_drive_backup_integration">Not: Google Drive yedekleme entegrasyonu API kimlik bilgileri ve OAuth2 kurulumu gerektirir.</string>
     <string name="note_if_a_models_quota">Not: Bir modelin kotası aşılırsa, uygulama otomatik olarak diğer modelleri deneyecektir.</string>
-    <string name="note_some_engines_require_installation">Not: Bazı motorlar kurulum gerektirir. Kurulum seçenekleri için Ayarlar'daki tam TTS Yöneticisini kullanın.</string>
+    <string name="note_some_engines_require_installation">Not: Bazı motorlar kurulum gerektirir. Kurulum seçenekleri için Ayarlar\'daki tam TTS Yöneticisini kullanın.</string>
     <string name="notes_optional">Notlar (isteğe bağlı)</string>
     <string name="nothing_read_recently">Son zamanlarda okunan bir şey yok</string>
     <string name="notification_behavior">Bildirim Davranışı</string>
@@ -1283,19 +1265,19 @@
     <string name="offset">Ofset</string>
     <string name="ok">Tamam</string>
     <string name="ollama_information">Ollama Bilgisi</string>
-    <string name="ollama_is_a_local_llm">Ollama, çeviriler için yerel bir LLM sunucusudur. Ollama'nın cihazınızda veya ağınızda kurulu ve çalıştığından emin olun. Önce 'ollama pull modelname' ile modeli çekmeniz gerekir.</string>
+    <string name="ollama_is_a_local_llm">Ollama, çeviriler için yerel bir LLM sunucusudur. Ollama\'nın cihazınızda veya ağınızda kurulu ve çalıştığından emin olun. Önce \'ollama pull modelname\' ile modeli çekmeniz gerekir.</string>
     <string name="ollama_model">Ollama Modeli</string>
-    <string name="ollama_server_url_not_set">OOllama sunucu URL'si ayarlanmadı</string>
-    <string name="ollama_url">Ollama URL'si</string>
+    <string name="ollama_server_url_not_set">OOllama sunucu URL\'si ayarlanmadı</string>
+    <string name="ollama_url">Ollama URL\'si</string>
     <string name="on">Açık</string>
-    <string name="once_installed_go_to_android">Kurulum tamamlandıktan sonra Android Ayarları → Erişilebilirlik → Metin Okuma → Tercih edilen motor bölümüne gidin ve Sherpa TTS'yi seçin.</string>
+    <string name="once_installed_go_to_android">Kurulum tamamlandıktan sonra Android Ayarları → Erişilebilirlik → Metin Okuma → Tercih edilen motor bölümüne gidin ve Sherpa TTS\'yi seçin.</string>
     <string name="online_tts_engines">Çevrimiçi TTS Motorları</string>
     <string name="only_update_on_finding_novel">Sadece Roman Bulunduğunda Güncelle</string>
     <string name="open">Aç</string>
     <string name="open_explore">keşfetmeyi aç</string>
     <string name="open_in_browser">Tarayıcıda Aç</string>
     <string name="open_in_wallet">Cüzdanda Aç</string>
-    <string name="open_in_webView">WebView'de Aç</string>
+    <string name="open_in_webView">WebView\'de Aç</string>
     <string name="open_last_chapter">Son bölümü aç</string>
     <string name="open_local_folder">Yerel Klasörü Aç</string>
     <string name="open_location">Konumu Aç</string>
@@ -1306,8 +1288,7 @@
     <string name="open_tts_settings">TTS Ayarlarını Aç</string>
     <string name="openai_api_key">OpenAI API Anahtarı</string>
     <string name="openai_api_key_invalid">Openai api anahtarı geçersiz</string>
-    <string name="openai_api_key_not_set">OpenAI API anahtarı ayarlanmadı. Lütfen ayarlardan yapılandırın.
-    </string>
+    <string name="openai_api_key_not_set">OpenAI API anahtarı ayarlanmadı. Lütfen ayarlardan yapılandırın.</string>
     <string name="openai_quota_exceeded">Openai kotası aşıldı</string>
     <string name="optimize">Optimize Et</string>
     <string name="optimize_database">Veritabanını Optimize Et</string>
@@ -1326,9 +1307,7 @@
     <string name="other_source">Diğerleri</string>
     <string name="overall_progress">Genel İlerleme</string>
     <string name="owner">Sahibi</string>
-    <string name="package_installer_failed_to_install_packages">Paket yükleyici yüklenemedi
-        paketler: DURUM KODU:
-    </string>
+    <string name="package_installer_failed_to_install_packages">Paket yükleyici yüklenemedi paketler: DURUM KODU:</string>
     <string name="package_manager">Paket Yöneticisi</string>
     <string name="package_name">Paket Adı</string>
     <string name="padding">Dolgulu</string>
@@ -1343,8 +1322,8 @@
     <string name="partial">Kısmi</string>
     <string name="password">Şifre</string>
     <string name="past_7_days">Son 7 Gün</string>
-    <string name="paste_json_here">JSON'u buraya yapıştırın...</string>
-    <string name="paste_the_theme_json_below">Tema JSON'unu aşağıya yapıştırın:</string>
+    <string name="paste_json_here">JSON\'u buraya yapıştırın...</string>
+    <string name="paste_the_theme_json_below">Tema JSON\'unu aşağıya yapıştırın:</string>
     <string name="pause">Duraklat</string>
     <string name="pause_all">Tümünü Duraklat</string>
     <string name="paused">Duraklatıldı</string>
@@ -1356,9 +1335,7 @@
     <string name="performance_metrics">Performans Metrikleri</string>
     <string name="performance_monitoring">Performans İzleme</string>
     <string name="permanently_delete_entire_database">⚠️ Tüm veritabanını kalıcı olarak sil</string>
-    <string name="permission_not_given">Yeterli izin verilmedi, lütfen
-        izinlerinizi kontrol edin
-    </string>
+    <string name="permission_not_given">Yeterli izin verilmedi, lütfen izinlerinizi kontrol edin</string>
     <string name="permission_required">İzin Gerekli</string>
     <string name="permissions">İzinler</string>
     <string name="pill_offset">pill_offset</string>
@@ -1375,17 +1352,17 @@
     <string name="pitch">Perde</string>
     <string name="play">Oynat</string>
     <string name="playback">Oynatma</string>
-    <string name="please_click_refresh_available_models">Gemini API'sinden modelleri yüklemek için lütfen yukarıdaki 'Kullanılabilir Modelleri Yenile'ye tıklayın.</string>
+    <string name="please_click_refresh_available_models">Gemini API\'sinden modelleri yüklemek için lütfen yukarıdaki \'Kullanılabilir Modelleri Yenile\'ye tıklayın.</string>
     <string name="please_describe_the_issue">Lütfen sorunu açıklayın:</string>
-    <string name="please_download_and_select_a">Lütfen TTS'yi etkinleştirmek için bir ses modeli indirip seçin</string>
-    <string name="please_enter_a_valid_repository">Lütfen .json ile biten geçerli bir depo URL'si girin</string>
-    <string name="please_enter_a_valid_repository_url">Lütfen geçerli bir depo URL'si girin</string>
+    <string name="please_download_and_select_a">Lütfen TTS\'yi etkinleştirmek için bir ses modeli indirip seçin</string>
+    <string name="please_enter_a_valid_repository">Lütfen .json ile biten geçerli bir depo URL\'si girin</string>
+    <string name="please_enter_a_valid_repository_url">Lütfen geçerli bir depo URL\'si girin</string>
     <string name="please_enter_a_valid_url">Lütfen geçerli bir URL girin</string>
     <string name="please_provide_more_details_about_the_issue">Lütfen sorun hakkında daha fazla ayrıntı sağlayın...</string>
     <string name="please_select_at_least_one_novel">Lütfen en az bir roman seçin</string>
     <string name="please_select_target_source">Lütfen bir hedef kaynak seçin</string>
     <string name="please_wait_a_moment_before_loading_more">Lütfen daha fazla yüklemeden önce biraz bekleyin...</string>
-    <string name="please_wait_while_we_connect_to_google_drive">Lütfen Google Drive'a bağlanırken bekleyin</string>
+    <string name="please_wait_while_we_connect_to_google_drive">Lütfen Google Drive\'a bağlanırken bekleyin</string>
     <string name="plugin_already_enabled">Eklenti zaten etkin</string>
     <string name="plugin_based_translation">Eklenti tabanlı çeviri</string>
     <string name="plugin_configuration">Eklenti Yapılandırması</string>
@@ -1416,7 +1393,7 @@
     <string name="pref_relative_time_long">Uzun (Kısa+, n gün önce)</string>
     <string name="pref_relative_time_short">Kısa (Bugün, Dün)</string>
     <string name="preload_next_chapter">Sonraki Bölümü Önceden Yükle</string>
-    <string name="preload_only_on_wifi">Yalnızca WiFi'da ön yükle</string>
+    <string name="preload_only_on_wifi">Yalnızca WiFi\'da ön yükle</string>
     <string name="preload_only_on_wifi_summary">Otomatik ön yüklemeyi yalnızca WiFi bağlantılarıyla sınırla</string>
     <string name="preload_previous_chapter">Önceki Bölümü Önceden Yükle</string>
     <string name="preload_settings">Bölüm Ön Yüklemesi</string>
@@ -1562,7 +1539,7 @@
     <string name="repository_explanation">Depo, çevrimiçi olarak barındırılan bir uzantı koleksiyonudur. Kitaplar ve romanlar için ek kaynaklara erişmek üzere özel depolar ekleyebilirsiniz.</string>
     <string name="repository_name">Depo Adı</string>
     <string name="repository_type">Depo Türü</string>
-    <string name="repository_url">Depo URL'si</string>
+    <string name="repository_url">Depo URL\'si</string>
     <string name="require_authentication_for_adult_sources">Yetişkin kaynaklar için kimlik doğrulama gerektir</string>
     <string name="require_authentication_to_open_the_app">Uygulamayı açmak için kimlik doğrulama gerektir</string>
     <string name="required">Gerekli</string>
@@ -1713,7 +1690,7 @@
     <string name="shimmer">parıltı</string>
     <string name="shimmeranimation">parıltıAnimasyonu</string>
     <string name="shimmertransition">parıltıGeçişi</string>
-    <string name="show_all_category_tab">"Tümü" Kategori Sekmesini Göster</string>
+    <string name="show_all_category_tab">Tümü Kategori Sekmesini Göster</string>
     <string name="show_archived">Arşivlenmişleri Göster</string>
     <string name="show_archived_books">Arşivlenmiş Kitapları Göster</string>
     <string name="show_category_tabs">Kategori Sekmelerini Göster</string>
@@ -1747,12 +1724,12 @@
     <string name="sign_in">Giriş Yap</string>
     <string name="sign_in_again">Tekrar Oturum Aç</string>
     <string name="sign_in_sign_up">Giriş Yap / Kaydol</string>
-    <string name="sign_in_to_chatgpt">ChatGPT'ye giriş yap</string>
-    <string name="sign_in_to_deepseek">DeepSeek'e Giriş Yap</string>
+    <string name="sign_in_to_chatgpt">ChatGPT\'ye giriş yap</string>
+    <string name="sign_in_to_deepseek">DeepSeek\'e Giriş Yap</string>
     <string name="sign_in_to_sync">Senkronize Etmek için Giriş Yapın</string>
     <string name="sign_in_to_sync_your">Tüm cihazlarınızda okuma ilerlemenizi senkronize etmek için giriş yapın</string>
     <string name="sign_out">Çıkış Yap</string>
-    <string name="signature_hash">İmza Hash'i</string>
+    <string name="signature_hash">İmza Hash\'i</string>
     <string name="simple_row">Basit Satır</string>
     <string name="simulation_mode_does_not_use_real_voices">Simülasyon modu gerçek sesler kullanmaz.</string>
     <string name="skip">Atla</string>
@@ -1767,8 +1744,7 @@
     <string name="snooze">Ertele</string>
     <string name="snooze_reminder">Hatırlatıcıyı Ertele</string>
     <string name="something_is_wrong_with_this_book">Bu kitapta bir sorun var.</string>
-    <string name="something_is_wrong_with_this_chapter">Bu bölümde bir sorun var.
-    </string>
+    <string name="something_is_wrong_with_this_chapter">Bu bölümde bir sorun var.</string>
     <string name="something_went_wrong">Bir şeyler ters gitti</string>
     <string name="something_wrong_with_book">Bu kitapta bir sorun var</string>
     <string name="sort">Sırala</string>
@@ -1782,7 +1758,7 @@
     <string name="source_not_available">Bu Kaynak cihazınızda mevcut değil.</string>
     <string name="source_title">Kaynak Başlığı</string>
     <string name="sources">Göz At</string>
-    <string name="space_url">Alan URL'si</string>
+    <string name="space_url">Alan URL\'si</string>
     <string name="speech_rate">Konuşma Hızı</string>
     <string name="speed">Hız</string>
     <string name="split_tall_images">Uzun Resimleri Böl</string>
@@ -1797,8 +1773,7 @@
     <string name="status">Durum</string>
     <string name="stop">Durdur</string>
     <string name="storage">Depolama</string>
-    <string name="storage_permission_required_explanation">Depolama İzni Gerekli Açıklama
-    </string>
+    <string name="storage_permission_required_explanation">Depolama İzni Gerekli Açıklama</string>
     <string name="storage_usage">Depolama Kullanımı</string>
     <string name="storage_used">Kullanılan Depolama</string>
     <string name="style_features">Stil Özellikleri</string>
@@ -1810,9 +1785,9 @@
     <string name="submitted">Gönderildi</string>
     <string name="success">Başarılı</string>
     <string name="successful_imports">Başarılı İçe Aktarmalar</string>
-    <string name="successfully_migrated_to">%1$s'e başarıyla geçildi</string>
+    <string name="successfully_migrated_to">%1$s\'e başarıyla geçildi</string>
     <string name="supabase_configuration">Supabase Yapılandırması</string>
-    <string name="supabase_url">Supabase URL'si</string>
+    <string name="supabase_url">Supabase URL\'si</string>
     <string name="support">Destek</string>
     <string name="support_collect">Destek &amp; Topla</string>
     <string name="support_development">Geliştirmeyi Destekle</string>
@@ -1831,7 +1806,7 @@
     <string name="sync_my_stats">İstatistiklerimi Senkronize Et</string>
     <string name="sync_now">Şimdi Senkronize Et</string>
     <string name="sync_only_over_wifi">Yalnızca WiFi Üzerinden Senkronize Et</string>
-    <string name="sync_only_when_connected_to_wifi">Yalnızca WiFi'ye bağlıyken senkronize et</string>
+    <string name="sync_only_when_connected_to_wifi">Yalnızca WiFi\'ye bağlıyken senkronize et</string>
     <string name="sync_remote">Uzağı Eşle</string>
     <string name="sync_settings">Senkronizasyon Ayarları</string>
     <string name="sync_stats">İstatistikleri Senkronize Et</string>
@@ -1862,7 +1837,7 @@
     <string name="ten_min">10 dk</string>
     <string name="test">Test</string>
     <string name="test_connection">Bağlantıyı Test Et</string>
-    <string name="test_coqui_tts">Coqui TTS'yi Test Et</string>
+    <string name="test_coqui_tts">Coqui TTS\'yi Test Et</string>
     <string name="test_notifications">Bildirimleri Test Et</string>
     <string name="testing_connection">Bağlantı Test Ediliyor…</string>
     <string name="testing_connection_1">Bağlantı Test Ediliyor...</string>
@@ -1897,8 +1872,7 @@
     <string name="themes">Temalar</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">Bu kaynakta taşınacak roman yok</string>
     <string name="there_is_no_chapter">Bölüm yok.</string>
-    <string name="there_was_a_problem_in_getting_chapter">Bölümü alırken bir sorun oluştu.
-    </string>
+    <string name="there_was_a_problem_in_getting_chapter">Bölümü alırken bir sorun oluştu.</string>
     <string name="these_actions_are_destructive_and">Bu eylemler yıkıcıdır ve geri alınamaz. Dikkatli ilerleyin.</string>
     <string name="these_are_all_the_popular_books">Bunlar popüler kitapların hepsi</string>
     <string name="these_are_all_the_reviews">Bunlar tüm incelemeler</string>
@@ -1922,9 +1896,9 @@
     <string name="this_plugin_does_not_provide_custom_settings">Bu eklenti özel ayarlar sağlamaz.</string>
     <string name="this_purchase_will_be_synced">Bu satın alma işlemi tüm cihazlarınızda senkronize edilecektir.</string>
     <string name="this_source_requires_authentication_please">Bu kaynak kimlik doğrulama gerektiriyor. Lütfen kimlik bilgilerinizi girin.</string>
-    <string name="this_translation_engine_uses_a">Bu çeviri motoru, doğrudan ChatGPT'ye erişmek için bir WebView kullanır. Bu özelliği kullanmak için hesabınızla ChatGPT'ye giriş yapmanız gerekir. Uygulama, gelecekteki çeviriler için çerezlerinizi kaydedecektir.</string>
-    <string name="this_translation_engine_uses_a_1">Bu çeviri motoru, doğrudan DeepSeek'e erişmek için bir WebView kullanır. Bu özelliği kullanmak için hesabınızla DeepSeek'e giriş yapmanız gerekir. Uygulama, gelecekteki çeviriler için çerezlerinizi kaydedecektir.</string>
-    <string name="this_wallet_does_not_own_an_ireader_nft">Bu cüzdan bir IReader NFT'sine sahip değil</string>
+    <string name="this_translation_engine_uses_a">Bu çeviri motoru, doğrudan ChatGPT\'ye erişmek için bir WebView kullanır. Bu özelliği kullanmak için hesabınızla ChatGPT\'ye giriş yapmanız gerekir. Uygulama, gelecekteki çeviriler için çerezlerinizi kaydedecektir.</string>
+    <string name="this_translation_engine_uses_a_1">Bu çeviri motoru, doğrudan DeepSeek\'e erişmek için bir WebView kullanır. Bu özelliği kullanmak için hesabınızla DeepSeek\'e giriş yapmanız gerekir. Uygulama, gelecekteki çeviriler için çerezlerinizi kaydedecektir.</string>
+    <string name="this_wallet_does_not_own_an_ireader_nft">Bu cüzdan bir IReader NFT\'sine sahip değil</string>
     <string name="this_will_compact_the_database">Bu, veritabanını sıkıştıracak ve performansı artırabilir. İşlem birkaç dakika sürebilir.</string>
     <string name="this_will_reset_all_data">Bu, tüm veri ve depolama ayarlarını varsayılan değerlerine sıfırlayacaktır.</string>
     <string name="time_for_a_break">Mola Zamanı!</string>
@@ -1936,7 +1910,7 @@
     <string name="title_copied_to_clipboard">Başlık panoya kopyalandı</string>
     <string name="to_enable_google_drive_backup_you_need_to">Google Drive yedeklemesini etkinleştirmek için şunları yapmanız gerekir:</string>
     <string name="to_enable_js_plugins">JS eklentilerini etkinleştirmek için:</string>
-    <string name="to_use_lnreader_compatible_plugins">LNReader uyumlu eklentileri kullanmak için Genel Ayarlar'da eklenti özelliğini etkinleştirmeniz gerekir.</string>
+    <string name="to_use_lnreader_compatible_plugins">LNReader uyumlu eklentileri kullanmak için Genel Ayarlar\'da eklenti özelliğini etkinleştirmeniz gerekir.</string>
     <string name="todays_quote">Bugünün Sözü</string>
     <string name="toggle_in_library">kütüphanede değiştir</string>
     <string name="toggle_search_mode_off">Arama modunu kapat</string>
@@ -1972,7 +1946,7 @@
     <string name="translation_engine">Çeviri Motoru</string>
     <string name="translation_engines_refreshed">Çeviri motorları yenilendi</string>
     <string name="translation_error">Çeviri Hatası</string>
-    <string name="translation_plugins_extend_ireader_with">Çeviri eklentileri, IReader'ı ek çeviri hizmetleriyle genişletir</string>
+    <string name="translation_plugins_extend_ireader_with">Çeviri eklentileri, IReader\'ı ek çeviri hizmetleriyle genişletir</string>
     <string name="translation_progress">Çeviri İlerlemesi</string>
     <string name="translation_settings">Çeviri Ayarları</string>
     <string name="translations">çeviri</string>
@@ -1983,7 +1957,7 @@
     <string name="trust_level_updated">Güven seviyesi güncellendi</string>
     <string name="try_a_different_search_term">Farklı bir arama terimi deneyin</string>
     <string name="try_again">Tekrar Dene</string>
-    <string name="try_alternative_url">Alternatif URL'yi Dene</string>
+    <string name="try_alternative_url">Alternatif URL\'yi Dene</string>
     <string name="try_another_search">Başka bir arama deneyin</string>
     <string name="try_different_search">Farklı bir arama terimi deneyin</string>
     <string name="trying_in_few_second">Birkaç saniye içinde tekrar deneyin.</string>
@@ -1999,7 +1973,7 @@
     <string name="tts_with_translated_text">Çevrilmiş Metinle TTS</string>
     <string name="turn_off_vibration_feedback_for_interactions">Etkileşimler için titreşim geri bildirimini kapatın</string>
     <string name="type">Tür</string>
-    <string name="type_1">Tip \</string>
+    <string name="type_1">Tip \\</string>
     <string name="typography">Tipografi</string>
     <string name="ui_improvements">UI İyileştirmeleri</string>
     <string name="unable_to_get_package_version">Paket Sürümü Alınamadı</string>
@@ -2015,7 +1989,7 @@
     <string name="unknown">Bilinmiyor</string>
     <string name="unknown_error">Bilinmeyen Hata</string>
     <string name="unlock_app">Kilidi Aç</string>
-    <string name="unlock_ireader">IReader'ın Kilidini Aç</string>
+    <string name="unlock_ireader">IReader\'ın Kilidini Aç</string>
     <string name="unlock_with_fingerprint_or_face">Parmak izi veya yüz ile kilidi aç</string>
     <string name="unpin">Sabitlemeyi Kaldır</string>
     <string name="unread">Okunmamış</string>
@@ -2052,7 +2026,7 @@
     <string name="url">Url</string>
     <string name="url_1">URL</string>
     <string name="url_is_invalid">Url geçersiz</string>
-    <string name="url_of_your_ollama_api_server">Ollama API sunucunuzun URL'si</string>
+    <string name="url_of_your_ollama_api_server">Ollama API sunucunuzun URL\'si</string>
     <string name="usage_count">Kullanım Sayısı</string>
     <string name="usage_history_last_hour">Kullanım Geçmişi (Son Saat)</string>
     <string name="usage_statistics">Kullanım İstatistikleri</string>
@@ -2067,7 +2041,7 @@
     <string name="use_fab_in_library">Kütüphanede FAB Kullan</string>
     <string name="use_fab_instead_of_buttons">Düğmeler Yerine FAB Kullan</string>
     <string name="use_local_cache">Yerel Önbelleği Kullan</string>
-    <string name="use_online_tts_engines_from_hugging_face_spaces">Hugging Face Spaces'ten çevrimiçi TTS motorlarını kullan</string>
+    <string name="use_online_tts_engines_from_hugging_face_spaces">Hugging Face Spaces\'ten çevrimiçi TTS motorlarını kullan</string>
     <string name="use_password">Şifre Kullan</string>
     <string name="use_pin">PIN Kullan</string>
     <string name="use_pinpassword_instead">PIN/Şifre Kullan</string>
@@ -2075,7 +2049,7 @@
     <string name="use_static_indicators_instead_of_animated_ones">Animasyonlu göstergeler yerine statik göstergeler kullan</string>
     <string name="use_translated_text_for_text">Mevcut olduğunda metin okuma için çevrilmiş metni kullan</string>
     <string name="use_true_black_amoled">Gerçek Siyah (AMOLED) Kullan</string>
-    <string name="use_your_fingerprint_or_face">Uygulamanın kilidini açmak için parmak izinizi veya yüzünüzü kullanın. Yedek olarak cihazınızın PIN'ini kullanmaya devam edebilirsiniz.</string>
+    <string name="use_your_fingerprint_or_face">Uygulamanın kilidini açmak için parmak izinizi veya yüzünüzü kullanın. Yedek olarak cihazınızın PIN\'ini kullanmaya devam edebilirsiniz.</string>
     <string name="user_interface">Kullanıcı Arayüzü</string>
     <string name="username">Kullanıcı adı</string>
     <string name="verification_details">Doğrulama Detayları</string>
@@ -2106,7 +2080,7 @@
     <string name="voice_model_settings">Ses Modeli Ayarları</string>
     <string name="voice_models">Ses Modelleri</string>
     <string name="voice_selection">Ses Seçimi</string>
-    <string name="voice_selection_is_managed_through">Ses seçimi, Android'in TTS ayarları aracılığıyla yönetilir.</string>
+    <string name="voice_selection_is_managed_through">Ses seçimi, Android\'in TTS ayarları aracılığıyla yönetilir.</string>
     <string name="voice_settings">Ses Ayarları</string>
     <string name="voices">Sesler</string>
     <string name="volume">Ses Seviyesi</string>
@@ -2123,7 +2097,7 @@
     <string name="webview_is_not_available_on_this_device">WebView bu cihazda kullanılamıyor.</string>
     <string name="weekly">Haftalık</string>
     <string name="weeks">Hafta</string>
-    <string name="welcome_to_ireader">IReader'a Hoş Geldiniz!</string>
+    <string name="welcome_to_ireader">IReader\'a Hoş Geldiniz!</string>
     <string name="well_remind_you_again_in_30_days">Size 30 gün sonra tekrar hatırlatacağız</string>
     <string name="what_is_repository">Depo nedir?</string>
     <string name="what_readers_think_about_these_books">Okurların bu kitaplar hakkında ne düşündüğü</string>
@@ -2148,10 +2122,10 @@
     <string name="you_are_about_to_report">\'i rapor etmek üzeresiniz</string>
     <string name="you_are_on_latest_version">En son sürümü kullanıyorsunuz</string>
     <string name="you_dont_have_any_badges_yet">Henüz hiç rozetiniz yok</string>
-    <string name="you_own_an_ireader_nft">Bir IReader NFT'sine sahipsiniz!</string>
+    <string name="you_own_an_ireader_nft">Bir IReader NFT\'sine sahipsiniz!</string>
     <string name="youll_receive_a_gentle_reminder">Seçilen süre boyunca sürekli okuduktan sonra nazik bir hatırlatma alacaksınız.</string>
     <string name="your_badges">Rozetleriniz</string>
-    <string name="your_contribution_helps_keep_ireader">Katkınız, IReader'ı herkes için ücretsiz ve reklamsız tutmaya yardımcı olur.</string>
+    <string name="your_contribution_helps_keep_ireader">Katkınız, IReader\'ı herkes için ücretsiz ve reklamsız tutmaya yardımcı olur.</string>
     <string name="your_donation_rank">Bağış Sıralamanız</string>
     <string name="your_personal_book_reading_companion">Kişisel kitap okuma arkadaşınız</string>
     <string name="your_privacy_matters">Gizliliğiniz Önemli</string>
@@ -2164,4 +2138,21 @@
     <string name="your_review_will_appear_as">Yorumunuz şu şekilde görünecektir:</string>
     <string name="your_username">Kullanıcı Adınız</string>
     <string name="youve_reached_the_end">Sona ulaştınız!</string>
+    <string name="loading_features"></string>
+    <string name="export_translated_content"></string>
+    <string name="source_broken_help_description"></string>
+    <string name="export_translated_content_description"></string>
+    <string name="source_needs_update"></string>
+    <string name="source_broken_help_title"></string>
+    <string name="source_website_changed"></string>
+    <string name="source_broken_description"></string>
+    <string name="source_broken_title"></string>
+    <string name="feature_store_description"></string>
+    <string name="no_plugins_available"></string>
+    <string name="parsing_error"></string>
+    <string name="donate_crypto"></string>
+    <string name="feature_store"></string>
+    <string name="crypto_donation_preferred"></string>
+    <string name="support_development_5"></string>
+    <string name="search_features"></string>
 </resources>
