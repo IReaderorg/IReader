@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -88,7 +89,7 @@
     <string name="apply_filters">Filter anwenden</string>
     <string name="approve">Genehmigen</string>
     <string name="archive">Archiv</string>
-    <string name="archive_option_description">In die Kategorie "Archiviert" verschieben, aus der Hauptbibliothek ausgeblendet</string>
+    <string name="archive_option_description">In die Kategorie Archiviert verschieben, aus der Hauptbibliothek ausgeblendet</string>
     <string name="archive_option_title">Archivieren</string>
     <string name="archived">Archiviert</string>
     <string name="archived_1">ARCHIVIERT</string>
@@ -195,7 +196,7 @@
     <string name="block">Blockieren</string>
     <string name="block_screenshots_and_screen_recording">Screenshots und Bildschirmaufzeichnung blockieren</string>
     <string name="blur_library_covers_until_tapped">Bibliotheks-Cover verwischen, bis sie angetippt werden</string>
-    <string name="book_added_to_library">Buch '%1$s' zur Bibliothek hinzugefügt</string>
+    <string name="book_added_to_library">Buch \'%1$s\' zur Bibliothek hinzugefügt</string>
     <string name="book_archived">%1$s wurde archiviert</string>
     <string name="book_cover">Buchcover</string>
     <string name="book_cover_1">Buchcover</string>
@@ -258,13 +259,13 @@
     <string name="catalog_not_found_error">Keine Erweiterungen gefunden.</string>
     <string name="catalog_settings">Katalogeinstellungen</string>
     <string name="category">Kategorien</string>
-    <string name="category_already_exists">Kategorie '%1$s' ist bereits vorhanden</string>
+    <string name="category_already_exists">Kategorie \'%1$s\' ist bereits vorhanden</string>
     <string name="category_hint">Name…</string>
     <string name="category_management">Kategorieverwaltung</string>
     <string name="category_name">Kategoriename</string>
     <string name="category_name_empty">Der Kategoriename darf nicht leer sein</string>
     <string name="category_not_found">Kategorie nicht gefunden</string>
-    <string name="category_renamed">Kategorie umbenannt in '%1$s'</string>
+    <string name="category_renamed">Kategorie umbenannt in \'%1$s\'</string>
     <string name="center">Mitte</string>
     <string name="change_category">Kategorie ändern</string>
     <string name="change_category_1">Kategorie ändern</string>
@@ -354,8 +355,7 @@
     <string name="color_theme">Farbthema</string>
     <string name="colors">Farben</string>
     <string name="columns">Spalten</string>
-    <string name="comfortable_grid_layout_description">3 Spalten im Raster mit größeren Coverbildern
-    </string>
+    <string name="comfortable_grid_layout_description">3 Spalten im Raster mit größeren Coverbildern</string>
     <string name="comfortable_layout">Komfortables Raster</string>
     <string name="commit">Commit</string>
     <string name="community">Community</string>
@@ -363,8 +363,7 @@
     <string name="community_leaderboard">Community &amp; Bestenliste</string>
     <string name="community_reviews">Community-Rezensionen</string>
     <string name="community_reviews_desc">Lese und schreibe Rezensionen für Bücher und Kapitel</string>
-    <string name="compact_grid_layout_description">2 Spalten im Raster mit kleineren Coverbildern
-    </string>
+    <string name="compact_grid_layout_description">2 Spalten im Raster mit kleineren Coverbildern</string>
     <string name="compact_layout">Kompaktes Layout</string>
     <string name="complete">Abgeschlossen</string>
     <string name="complete_captcha">CAPTCHA abschließen, um fortzufahren</string>
@@ -466,9 +465,7 @@
     <string name="decrease_speed">Geschwindigkeit verringern</string>
     <string name="deepseek_api_key">DeepSeek API-Schlüssel</string>
     <string name="deepseek_api_key_invalid">DeepSeek API-Schlüssel ist ungültig</string>
-    <string name="deepseek_api_key_not_set">DeepSeek API-Schlüssel ist nicht gesetzt. Bitte konfigurieren Sie ihn in den
-        Einstellungen.
-    </string>
+    <string name="deepseek_api_key_not_set">DeepSeek API-Schlüssel ist nicht gesetzt. Bitte konfigurieren Sie ihn in den Einstellungen.</string>
     <string name="deepseek_login_required">DeepSeek-Anmeldung erforderlich</string>
     <string name="deepseek_payment_required">DeepSeek Zahlung erforderlich oder API-Kontingent überschritten</string>
     <string name="default_chapter_sort">Standardkapitelsortierung</string>
@@ -501,15 +498,9 @@
     <string name="developer">Entwickler</string>
     <string name="diagnostic_data">Diagnosedaten</string>
     <string name="diagnostic_report">Diagnosebericht</string>
-    <string name="dialog_remove_chapter_book_description">Dies entfernt das Lesedatum dieses
-        Buches. Sind Sie sicher?
-    </string>
-    <string name="dialog_remove_chapter_books_description">Dies entfernt das Lesedatum aller
-        Bücher. Sind Sie sicher?
-    </string>
-    <string name="dialog_remove_chapter_history_description">Dies entfernt das Lesedatum dieses
-        Kapitels. Sind Sie sicher?
-    </string>
+    <string name="dialog_remove_chapter_book_description">Dies entfernt das Lesedatum dieses Buches. Sind Sie sicher?</string>
+    <string name="dialog_remove_chapter_books_description">Dies entfernt das Lesedatum aller Bücher. Sind Sie sicher?</string>
+    <string name="dialog_remove_chapter_history_description">Dies entfernt das Lesedatum dieses Kapitels. Sind Sie sicher?</string>
     <string name="did_not_get_anything">Ich habe nichts bekommen.</string>
     <string name="disable">Deaktivieren</string>
     <string name="disable_haptic_feedback">Haptisches Feedback deaktivieren</string>
@@ -565,9 +556,7 @@
     <string name="download_notifier_no_network">Keine Netzwerkverbindung verfügbar</string>
     <string name="download_notifier_text_only_wifi">Keine WLAN-Verbindung verfügbar</string>
     <string name="download_notifier_title_error">Fehler</string>
-    <string name="download_notifier_unknown_error">Kapitel konnte aufgrund eines unerwarteten Fehlers nicht heruntergeladen werden
-        Fehler
-    </string>
+    <string name="download_notifier_unknown_error">Kapitel konnte aufgrund eines unerwarteten Fehlers nicht heruntergeladen werden Fehler</string>
     <string name="download_of">Download von</string>
     <string name="download_only_over_wifi">Nur über WLAN herunterladen</string>
     <string name="download_progress">Download-Fortschritt</string>
@@ -605,9 +594,7 @@
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">18+ Quellensperre</string>
     <string name="email">E-Mail</string>
-    <string name="empty_library">Es befindet sich kein Buch in der Bibliothek. Sie können Bücher im Explore
-        Bildschirm hinzufügen.
-    </string>
+    <string name="empty_library">Es befindet sich kein Buch in der Bibliothek. Sie können Bücher im Explore Bildschirm hinzufügen.</string>
     <string name="empty_response">Empfing eine leere Antwort vom Übersetzungsdienst.</string>
     <string name="enable">Aktivieren</string>
     <string name="enable_app_lock">App-Sperre aktivieren</string>
@@ -692,7 +679,7 @@
     <string name="example_url">Beispiel-URL:</string>
     <string name="examplesn_ireader_httpsrawgithubusercontentcomireaderorgireader_extensionsrepoindexminjsonn_lnreader">Beispiele:\n• IReader: https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json\n• LNReader: https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/master/plugins/plugins.min.json</string>
     <string name="exclude_categories">Kategorien ausschließen</string>
-    <string name="excluded"> (ausgeschlossen)</string>
+    <string name="excluded">(ausgeschlossen)</string>
     <string name="exclusive">Exklusiv</string>
     <string name="exclusive_designs">Exklusive Designs</string>
     <string name="execution_timeout">Ausführungs-Timeout</string>
@@ -832,9 +819,7 @@
     <string name="gb_total_storage_7_500mb">3,5 GB Gesamtspeicher (7 × 500 MB) - Konfigurieren Sie jedes Projekt oder verwenden Sie dieselbe URL für alle</string>
     <string name="gemini_api_information">Gemini API Informationen</string>
     <string name="gemini_api_key">Gemini API Schlüssel</string>
-    <string name="gemini_api_key_not_set">Gemini API-Schlüssel ist nicht gesetzt. Bitte konfigurieren Sie ihn in den
-        Einstellungen.
-    </string>
+    <string name="gemini_api_key_not_set">Gemini API-Schlüssel ist nicht gesetzt. Bitte konfigurieren Sie ihn in den Einstellungen.</string>
     <string name="gemini_model">Gemini Model</string>
     <string name="gemini_payment_required">Sie haben Ihr aktuelles Kontingent für die Gemini API überschritten. Bitte überprüfen Sie Ihre Pläne und Abrechnungsdetails unter https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="gender">Geschlecht</string>
@@ -862,7 +847,7 @@
     <string name="go_to_badge_store">Zum Badge-Shop gehen</string>
     <string name="go_to_chapter">Zum Kapitel gehen</string>
     <string name="go_to_last_chapter">Zum letzten Kapitel gehen</string>
-    <string name="go_to_settings_generaln2_toggle">1. Gehen Sie zu Einstellungen → Allgemein\n2. Umschalten \</string>
+    <string name="go_to_settings_generaln2_toggle">1. Gehen Sie zu Einstellungen → Allgemein\n2. Umschalten \\</string>
     <string name="goal_reached">Ziel erreicht</string>
     <string name="goal_reached_1">Ziel erreicht!</string>
     <string name="goal_reached_thank_you">Ziel erreicht! Danke!</string>
@@ -882,7 +867,7 @@
     <string name="header_alpha">header_alpha</string>
     <string name="hello_this_is_a_test">Hallo, dies ist ein Test.</string>
     <string name="help">Hilfe</string>
-    <string name="help_us_improve">Hilf uns, \ zu verbessern</string>
+    <string name="help_us_improve">"Hilf uns,  zu verbessern"</string>
     <string name="helpful">Hilfreich</string>
     <string name="hide">Verstecken</string>
     <string name="hide_backdrop">Hintergrund ausblenden</string>
@@ -932,7 +917,7 @@
     <string name="in_library_1">In Bibliothek</string>
     <string name="in_progress">In Bearbeitung</string>
     <string name="include_cover_image">Coverbild einschließen</string>
-    <string name="included"> (eingeschlossen)</string>
+    <string name="included">(eingeschlossen)</string>
     <string name="incognito_mode">Inkognito-Modus</string>
     <string name="increase">Erhöhen</string>
     <string name="increase_font_size">Schriftgröße erhöhen</string>
@@ -954,14 +939,9 @@
     <string name="installation_error_Storage">PackageManger: Unzureichender Speicherplatz</string>
     <string name="installation_error_aborted">PackageManger: Abgebrochen</string>
     <string name="installation_error_blocked">PackageManger: Installer wurde blockiert</string>
-    <string name="installation_error_conflicted">PackageManger: Konflikt mit installiertem Paket
-    </string>
-    <string name="installation_error_incompatible">PackageManger: Inkompatibel mit installiertem
-        Paket
-    </string>
-    <string name="installation_error_invalid">PackageManger: Es ist eine andere APK mit
-        höherer Version als dieses Paket installiert
-    </string>
+    <string name="installation_error_conflicted">PackageManger: Konflikt mit installiertem Paket</string>
+    <string name="installation_error_incompatible">PackageManger: Inkompatibel mit installiertem Paket</string>
+    <string name="installation_error_invalid">PackageManger: Es ist eine andere APK mit höherer Version als dieses Paket installiert</string>
     <string name="installation_failed">Installation fehlgeschlagen: %1$s</string>
     <string name="installation_failed_generic">Installation fehlgeschlagen</string>
     <string name="installation_in_progress_this_may">Installation läuft... Dies kann einige Minuten dauern.</string>
@@ -1013,8 +993,7 @@
     <string name="last_verified">Letzte Überprüfung:</string>
     <string name="latest_book">Neueste</string>
     <string name="layout">Layout</string>
-    <string name="layout_description_comfortable">3 Spalten im Raster mit größeren Coverbildern
-    </string>
+    <string name="layout_description_comfortable">3 Spalten im Raster mit größeren Coverbildern</string>
     <string name="layout_description_compact">2 Spalten im Raster mit kleineren Coverbildern</string>
     <string name="layout_description_cover_only">2 Spalten nur mit Coverbildern (kein Text)</string>
     <string name="layout_description_list">Bücher werden in einer vertikalen Liste angezeigt</string>
@@ -1205,9 +1184,7 @@
     <string name="no_active_funding_goals_at_the_moment">Im Moment keine aktiven Finanzierungsziele</string>
     <string name="no_alternative_sources_available">Keine alternativen Quellen verfügbar. Gesamtquellen: %1$s, Aktuell: %2$s</string>
     <string name="no_alternative_sources_available_1">Keine alternativen Quellen verfügbar</string>
-    <string name="no_app_was_found_to_lauch">Es ist ein Fehler aufgetreten. Sie haben nicht die erforderliche
-        App.
-    </string>
+    <string name="no_app_was_found_to_lauch">Es ist ein Fehler aufgetreten. Sie haben nicht die erforderliche App.</string>
     <string name="no_backups_found">Keine Backups gefunden</string>
     <string name="no_badge">Kein Badge</string>
     <string name="no_badges_available">Keine Badges verfügbar</string>
@@ -1249,7 +1226,7 @@
     <string name="no_repositories_added">Keine Repositories hinzugefügt</string>
     <string name="no_repositories_added_subtitle">Fügen Sie ein Repository hinzu, um auf zusätzliche Quellen zuzugreifen</string>
     <string name="no_repositories_configured">Keine Repositories konfiguriert</string>
-    <string name="no_results_for">Keine Ergebnisse für \</string>
+    <string name="no_results_for">Keine Ergebnisse für \\</string>
     <string name="no_results_found">Keine Ergebnisse gefunden</string>
     <string name="no_results_found_1">Keine Ergebnisse gefunden</string>
     <string name="no_reviews">Keine Rezensionen</string>
@@ -1288,7 +1265,7 @@
     <string name="offset">Versatz</string>
     <string name="ok">OK</string>
     <string name="ollama_information">Ollama-Informationen</string>
-    <string name="ollama_is_a_local_llm">Ollama ist ein lokaler LLM-Server für Übersetzungen. Stelle sicher, dass Ollama auf deinem Gerät oder im Netzwerk installiert ist und läuft. Du musst das Modell zuerst mit 'ollama pull modelname' herunterladen.</string>
+    <string name="ollama_is_a_local_llm">Ollama ist ein lokaler LLM-Server für Übersetzungen. Stelle sicher, dass Ollama auf deinem Gerät oder im Netzwerk installiert ist und läuft. Du musst das Modell zuerst mit \'ollama pull modelname\' herunterladen.</string>
     <string name="ollama_model">Ollama Modell</string>
     <string name="ollama_server_url_not_set">Ollama Server URL nicht gesetzt</string>
     <string name="ollama_url">Ollama URL</string>
@@ -1311,9 +1288,7 @@
     <string name="open_tts_settings">TTS-Einstellungen öffnen</string>
     <string name="openai_api_key">OpenAI API-Schlüssel</string>
     <string name="openai_api_key_invalid">OpenAI API-Schlüssel ist ungültig</string>
-    <string name="openai_api_key_not_set">OpenAI API-Schlüssel ist nicht gesetzt. Bitte konfigurieren Sie ihn in den
-        Einstellungen.
-    </string>
+    <string name="openai_api_key_not_set">OpenAI API-Schlüssel ist nicht gesetzt. Bitte konfigurieren Sie ihn in den Einstellungen.</string>
     <string name="openai_quota_exceeded">OpenAI-Kontingent überschritten</string>
     <string name="optimize">Optimieren</string>
     <string name="optimize_database">Datenbank optimieren</string>
@@ -1332,9 +1307,7 @@
     <string name="other_source">Andere</string>
     <string name="overall_progress">Gesamtfortschritt</string>
     <string name="owner">Besitzer</string>
-    <string name="package_installer_failed_to_install_packages">Paketinstaller konnte Pakete nicht installieren:
-        STATUS_CODE:
-    </string>
+    <string name="package_installer_failed_to_install_packages">Paketinstaller konnte Pakete nicht installieren: STATUS_CODE:</string>
     <string name="package_manager">Paketmanager</string>
     <string name="package_name">Paketname</string>
     <string name="padding">Abstand</string>
@@ -1362,10 +1335,7 @@
     <string name="performance_metrics">Leistungsmetriken</string>
     <string name="performance_monitoring">Leistungsüberwachung</string>
     <string name="permanently_delete_entire_database">⚠️ Datenbank dauerhaft löschen</string>
-    <string name="permission_not_given">Nicht genügend Berechtigungen erteilt. Bitte
-        überprüfen Sie Ihre
-        Berechtigungen.
-    </string>
+    <string name="permission_not_given">Nicht genügend Berechtigungen erteilt. Bitte überprüfen Sie Ihre Berechtigungen.</string>
     <string name="permission_required">Berechtigung erforderlich</string>
     <string name="permissions">Berechtigungen</string>
     <string name="pill_offset">pill_offset</string>
@@ -1382,7 +1352,7 @@
     <string name="pitch">Tonhöhe</string>
     <string name="play">Abspielen</string>
     <string name="playback">Wiedergabe</string>
-    <string name="please_click_refresh_available_models">Bitte klicke oben auf 'Verfügbare Modelle aktualisieren', um Modelle von der Gemini-API zu laden.</string>
+    <string name="please_click_refresh_available_models">Bitte klicke oben auf \'Verfügbare Modelle aktualisieren\', um Modelle von der Gemini-API zu laden.</string>
     <string name="please_describe_the_issue">Bitte beschreibe das Problem:</string>
     <string name="please_download_and_select_a">Bitte lade ein Sprachmodell herunter und wähle es aus, um TTS zu aktivieren</string>
     <string name="please_enter_a_valid_repository">Bitte gib eine gültige Repository-URL mit der Endung .json ein</string>
@@ -1720,7 +1690,7 @@
     <string name="shimmer">Schimmer</string>
     <string name="shimmeranimation">shimmerAnimation</string>
     <string name="shimmertransition">shimmerTransition</string>
-    <string name="show_all_category_tab">"Alle" Kategorie-Tab anzeigen</string>
+    <string name="show_all_category_tab">Alle Kategorie-Tab anzeigen</string>
     <string name="show_archived">Archiviert anzeigen</string>
     <string name="show_archived_books">Archivierte Bücher anzeigen</string>
     <string name="show_category_tabs">Kategorie-Tabs anzeigen</string>
@@ -1774,8 +1744,7 @@
     <string name="snooze">Schlummern</string>
     <string name="snooze_reminder">Erinnerung verschieben</string>
     <string name="something_is_wrong_with_this_book">Etwas stimmt mit diesem Buch nicht.</string>
-    <string name="something_is_wrong_with_this_chapter">Etwas stimmt mit diesem Kapitel nicht.
-    </string>
+    <string name="something_is_wrong_with_this_chapter">Etwas stimmt mit diesem Kapitel nicht.</string>
     <string name="something_went_wrong">Etwas ist schief gelaufen</string>
     <string name="something_wrong_with_book">Mit diesem Buch stimmt etwas nicht</string>
     <string name="sort">Sortieren</string>
@@ -1804,8 +1773,7 @@
     <string name="status">Status</string>
     <string name="stop">Stopp</string>
     <string name="storage">Speicher</string>
-    <string name="storage_permission_required_explanation">Speicherberechtigung erforderlich Erklärung
-    </string>
+    <string name="storage_permission_required_explanation">Speicherberechtigung erforderlich Erklärung</string>
     <string name="storage_usage">Speichernutzung</string>
     <string name="storage_used">Verwendeter Speicher</string>
     <string name="style_features">Stilmerkmale</string>
@@ -1904,9 +1872,7 @@
     <string name="themes">Themen</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">Es gibt keine Romane in dieser Quelle, die migriert werden können</string>
     <string name="there_is_no_chapter">Es gibt kein Kapitel.</string>
-    <string name="there_was_a_problem_in_getting_chapter">Es gab ein Problem beim Abrufen des
-        Kapitels.
-    </string>
+    <string name="there_was_a_problem_in_getting_chapter">Es gab ein Problem beim Abrufen des Kapitels.</string>
     <string name="these_actions_are_destructive_and">Diese Aktionen sind destruktiv und können nicht rückgängig gemacht werden. Mit Vorsicht fortfahren.</string>
     <string name="these_are_all_the_popular_books">Dies sind alle beliebten Bücher</string>
     <string name="these_are_all_the_reviews">Das sind alle Bewertungen</string>
@@ -2007,7 +1973,7 @@
     <string name="tts_with_translated_text">TTS mit übersetztem Text</string>
     <string name="turn_off_vibration_feedback_for_interactions">Vibrationsfeedback für Interaktionen deaktivieren</string>
     <string name="type">Typ</string>
-    <string name="type_1">Typ \</string>
+    <string name="type_1">Typ \\</string>
     <string name="typography">Typografie</string>
     <string name="ui_improvements">UI-Verbesserungen</string>
     <string name="unable_to_get_package_version">Paketversion konnte nicht ermittelt werden</string>
@@ -2153,7 +2119,7 @@
     <string name="yesterday">Gestern</string>
     <string name="you">(Du)</string>
     <string name="you_1">DU</string>
-    <string name="you_are_about_to_report">Du bist im Begriff, \ zu melden</string>
+    <string name="you_are_about_to_report">"Du bist im Begriff,  zu melden"</string>
     <string name="you_are_on_latest_version">Sie verwenden die neueste Version</string>
     <string name="you_dont_have_any_badges_yet">Du hast noch keine Abzeichen</string>
     <string name="you_own_an_ireader_nft">Du besitzt ein IReader NFT!</string>
@@ -2172,4 +2138,21 @@
     <string name="your_review_will_appear_as">Deine Bewertung wird angezeigt als:</string>
     <string name="your_username">Dein Benutzername</string>
     <string name="youve_reached_the_end">Du hast das Ende erreicht!</string>
+    <string name="loading_features"></string>
+    <string name="export_translated_content"></string>
+    <string name="source_broken_help_description"></string>
+    <string name="export_translated_content_description"></string>
+    <string name="source_needs_update"></string>
+    <string name="source_broken_help_title"></string>
+    <string name="source_website_changed"></string>
+    <string name="source_broken_description"></string>
+    <string name="source_broken_title"></string>
+    <string name="feature_store_description"></string>
+    <string name="no_plugins_available"></string>
+    <string name="parsing_error"></string>
+    <string name="donate_crypto"></string>
+    <string name="feature_store"></string>
+    <string name="crypto_donation_preferred"></string>
+    <string name="support_development_5"></string>
+    <string name="search_features"></string>
 </resources>
