@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -354,8 +355,7 @@
     <string name="color_theme">تم رنگ</string>
     <string name="colors">رنگ ها</string>
     <string name="columns">ستون ها</string>
-    <string name="comfortable_grid_layout_description">3 ستون در شبکه با تصاویر جلد بزرگتر
-    </string>
+    <string name="comfortable_grid_layout_description">3 ستون در شبکه با تصاویر جلد بزرگتر</string>
     <string name="comfortable_layout">شبکه راحت</string>
     <string name="commit">تایید</string>
     <string name="community">انجمن</string>
@@ -363,8 +363,7 @@
     <string name="community_leaderboard">انجمن و تابلوی امتیازات</string>
     <string name="community_reviews">نقد و بررسی‌های انجمن</string>
     <string name="community_reviews_desc">خواندن و نوشتن بررسی برای کتاب ها و فصل ها</string>
-    <string name="compact_grid_layout_description">2 ستون در شبکه با تصاویر جلد کوچکتر
-    </string>
+    <string name="compact_grid_layout_description">2 ستون در شبکه با تصاویر جلد کوچکتر</string>
     <string name="compact_layout">چیدمان فشرده</string>
     <string name="complete">کامل</string>
     <string name="complete_captcha">برای ادامه CAPTCHA را تکمیل کنید</string>
@@ -466,9 +465,7 @@
     <string name="decrease_speed">کاهش سرعت</string>
     <string name="deepseek_api_key">کلید API DeepSeek</string>
     <string name="deepseek_api_key_invalid">کلید DeepSeek api نامعتبر است</string>
-    <string name="deepseek_api_key_not_set">کلید DeepSeek API تنظیم نشده است. لطفا آن را در
-تنظیمات پیکربندی کنید.
-</string>
+    <string name="deepseek_api_key_not_set">کلید DeepSeek API تنظیم نشده است. لطفا آن را در تنظیمات پیکربندی کنید.</string>
     <string name="deepseek_login_required">ورود به DeepSeek الزامی است</string>
     <string name="deepseek_payment_required">پرداخت DeepSeek مورد نیاز است یا سهمیه API فراتر رفته است</string>
     <string name="default_chapter_sort">مرتب سازی پیش فرض فصل</string>
@@ -559,8 +556,7 @@
     <string name="download_notifier_no_network">هیچ اتصال شبکه ای در دسترس نیست</string>
     <string name="download_notifier_text_only_wifi">هیچ اتصال Wi-Fi در دسترس نیست</string>
     <string name="download_notifier_title_error">خطا</string>
-    <string name="download_notifier_unknown_error">به دلیل خطای غیر منتظره، فصل قابل بارگیری نیست
-    </string>
+    <string name="download_notifier_unknown_error">به دلیل خطای غیر منتظره، فصل قابل بارگیری نیست</string>
     <string name="download_of">دانلود</string>
     <string name="download_only_over_wifi">فقط از طریق WiFi دانلود کنید</string>
     <string name="download_progress">پیشرفت دانلود</string>
@@ -598,8 +594,7 @@
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">قفل منبع 18+</string>
     <string name="email">ایمیل</string>
-    <string name="empty_library">هیچ کتابی در کتابخانه وجود ندارد، می توانید کتاب ها را در صفحه کاوش اضافه کنید.
-    </string>
+    <string name="empty_library">هیچ کتابی در کتابخانه وجود ندارد، می توانید کتاب ها را در صفحه کاوش اضافه کنید.</string>
     <string name="empty_response">پاسخ خالی از سرویس ترجمه دریافت شد.</string>
     <string name="enable">فعال کردن</string>
     <string name="enable_app_lock">فعال کردن قفل برنامه</string>
@@ -824,9 +819,7 @@
     <string name="gb_total_storage_7_500mb">3.5 گیگابایت فضای ذخیره سازی کل (7 × 500 مگابایت) - هر پروژه را پیکربندی کنید یا از آدرس URL یکسان برای همه استفاده کنید</string>
     <string name="gemini_api_information">اطلاعات API جمینی</string>
     <string name="gemini_api_key">کلید Gemini API</string>
-    <string name="gemini_api_key_not_set">کلید Gemini API تنظیم نشده است. لطفا آن را در
-تنظیمات پیکربندی کنید.
-</string>
+    <string name="gemini_api_key_not_set">کلید Gemini API تنظیم نشده است. لطفا آن را در تنظیمات پیکربندی کنید.</string>
     <string name="gemini_model">مدل جمینی</string>
     <string name="gemini_payment_required">شما از سهمیه فعلی خود برای Gemini API فراتر رفته اید. لطفا طرح و جزئیات پرداخت خود را در https://ai.google.dev/gemini-api/docs/rate-limits بررسی کنید</string>
     <string name="gender">جنسیت</string>
@@ -854,7 +847,7 @@
     <string name="go_to_badge_store">رفتن به فروشگاه نشان</string>
     <string name="go_to_chapter">رفتن به فصل</string>
     <string name="go_to_last_chapter">رفتن به آخرین فصل</string>
-    <string name="go_to_settings_generaln2_toggle">1. به تنظیمات → عمومی بروید\n2. تغییر وضعیت \</string>
+    <string name="go_to_settings_generaln2_toggle">1. به تنظیمات → عمومی بروید\n2. تغییر وضعیت \\</string>
     <string name="goal_reached">هدف رسید</string>
     <string name="goal_reached_1">هدف رسید!</string>
     <string name="goal_reached_thank_you">هدف رسید! متشکرم!</string>
@@ -874,7 +867,7 @@
     <string name="header_alpha">header_alpha</string>
     <string name="hello_this_is_a_test">سلام، این یک تست است.</string>
     <string name="help">راهنما</string>
-    <string name="help_us_improve">به ما در بهبود کمک کنید \</string>
+    <string name="help_us_improve">به ما در بهبود کمک کنید \\</string>
     <string name="helpful">مفید</string>
     <string name="hide">مخفی کردن</string>
     <string name="hide_backdrop">مخفی کردن پس زمینه</string>
@@ -924,7 +917,7 @@
     <string name="in_library_1">در کتابخانه</string>
     <string name="in_progress">در حال انجام</string>
     <string name="include_cover_image">شامل تصویر جلد</string>
-    <string name="included"> (شامل)</string>
+    <string name="included">(شامل)</string>
     <string name="incognito_mode">حالت ناشناس</string>
     <string name="increase">افزایش</string>
     <string name="increase_font_size">افزایش اندازه فونت</string>
@@ -946,12 +939,9 @@
     <string name="installation_error_Storage">مدیریت بسته: فضای ذخیره سازی کافی نیست</string>
     <string name="installation_error_aborted">مدیریت بسته: لغو شد</string>
     <string name="installation_error_blocked">مدیریت بسته: نصب کننده مسدود شده بود</string>
-    <string name="installation_error_conflicted">مدیریت بسته: با بسته نصب شده تداخل دارد
-    </string>
-    <string name="installation_error_incompatible">مدیریت بسته: ناسازگار با بسته نصب شده
-    </string>
-    <string name="installation_error_invalid">مدیریت بسته: یک apk دیگر با نسخه بالاتری نسبت به این بسته نصب شده است
-    </string>
+    <string name="installation_error_conflicted">مدیریت بسته: با بسته نصب شده تداخل دارد</string>
+    <string name="installation_error_incompatible">مدیریت بسته: ناسازگار با بسته نصب شده</string>
+    <string name="installation_error_invalid">مدیریت بسته: یک apk دیگر با نسخه بالاتری نسبت به این بسته نصب شده است</string>
     <string name="installation_failed">نصب ناموفق بود: %1$s</string>
     <string name="installation_failed_generic">نصب ناموفق بود</string>
     <string name="installation_in_progress_this_may">درحال نصب... ممکن است چند دقیقه طول بکشد.</string>
@@ -1003,8 +993,7 @@
     <string name="last_verified">آخرین بررسی:</string>
     <string name="latest_book">آخرین</string>
     <string name="layout">طرح بندی</string>
-    <string name="layout_description_comfortable">3 ستون در شبکه با تصاویر جلد بزرگتر
-    </string>
+    <string name="layout_description_comfortable">3 ستون در شبکه با تصاویر جلد بزرگتر</string>
     <string name="layout_description_compact">2 ستون در شبکه با تصاویر جلد کوچکتر</string>
     <string name="layout_description_cover_only">2 ستون فقط از تصاویر جلد (بدون متن)</string>
     <string name="layout_description_list">کتاب ها در یک لیست عمودی نمایش داده می شوند</string>
@@ -1237,7 +1226,7 @@
     <string name="no_repositories_added">هیچ مخزنی اضافه نشده است</string>
     <string name="no_repositories_added_subtitle">برای دسترسی به منابع اضافی، یک مخزن اضافه کنید</string>
     <string name="no_repositories_configured">هیچ مخزنی پیکربندی نشده است</string>
-    <string name="no_results_for">هیچ نتیجه ای برای \</string>
+    <string name="no_results_for">هیچ نتیجه ای برای \\</string>
     <string name="no_results_found">نتیجه ای یافت نشد</string>
     <string name="no_results_found_1">هیچ نتیجه ای یافت نشد</string>
     <string name="no_reviews">بدون نظر</string>
@@ -1276,7 +1265,7 @@
     <string name="offset">افست</string>
     <string name="ok">باشه</string>
     <string name="ollama_information">اطلاعات Ollama</string>
-    <string name="ollama_is_a_local_llm">Ollama یک سرور LLM محلی برای ترجمه ها است. مطمئن شوید که Ollama روی دستگاه یا شبکه شما نصب و در حال اجرا است. ابتدا باید مدل را با 'ollama pull modelname' بکشید.</string>
+    <string name="ollama_is_a_local_llm">Ollama یک سرور LLM محلی برای ترجمه ها است. مطمئن شوید که Ollama روی دستگاه یا شبکه شما نصب و در حال اجرا است. ابتدا باید مدل را با \'ollama pull modelname\' بکشید.</string>
     <string name="ollama_model">مدل اولاما</string>
     <string name="ollama_server_url_not_set">آدرس سرور OOllama تنظیم نشده است</string>
     <string name="ollama_url">URL اولاما</string>
@@ -1299,9 +1288,7 @@
     <string name="open_tts_settings">باز کردن تنظیمات TTS</string>
     <string name="openai_api_key">کلید API OpenAI</string>
     <string name="openai_api_key_invalid">کلید Openai api نامعتبر است</string>
-    <string name="openai_api_key_not_set">کلید API OpenAI تنظیم نشده است. لطفا آن را در
-تنظیمات پیکربندی کنید.
-</string>
+    <string name="openai_api_key_not_set">کلید API OpenAI تنظیم نشده است. لطفا آن را در تنظیمات پیکربندی کنید.</string>
     <string name="openai_quota_exceeded">سهمیه Openai فراتر رفت</string>
     <string name="optimize">بهینه سازی</string>
     <string name="optimize_database">بهینه سازی پایگاه داده</string>
@@ -1320,8 +1307,7 @@
     <string name="other_source">سایر</string>
     <string name="overall_progress">پیشرفت کلی</string>
     <string name="owner">مالک</string>
-    <string name="package_installer_failed_to_install_packages">نصب کننده بسته نتوانست بسته ها را نصب کند: STATUS_CODE:
-    </string>
+    <string name="package_installer_failed_to_install_packages">نصب کننده بسته نتوانست بسته ها را نصب کند: STATUS_CODE:</string>
     <string name="package_manager">مدیریت بسته</string>
     <string name="package_name">نام بسته</string>
     <string name="padding">فاصله داخلی</string>
@@ -1704,7 +1690,7 @@
     <string name="shimmer">درخشش</string>
     <string name="shimmeranimation">shimmerAnimation</string>
     <string name="shimmertransition">shimmerTransition</string>
-    <string name="show_all_category_tab">نمایش تب دسته بندی "همه"</string>
+    <string name="show_all_category_tab">نمایش تب دسته بندی همه</string>
     <string name="show_archived">نمایش بایگانی شده</string>
     <string name="show_archived_books">نمایش کتاب های بایگانی شده</string>
     <string name="show_category_tabs">نمایش تب های دسته بندی</string>
@@ -1758,8 +1744,7 @@
     <string name="snooze">چرت زدن</string>
     <string name="snooze_reminder">به تعویق انداختن یادآوری</string>
     <string name="something_is_wrong_with_this_book">مشکلی در این کتاب وجود دارد.</string>
-    <string name="something_is_wrong_with_this_chapter">مشکلی در این فصل وجود دارد.
-</string>
+    <string name="something_is_wrong_with_this_chapter">مشکلی در این فصل وجود دارد.</string>
     <string name="something_went_wrong">مشکلی پیش آمد</string>
     <string name="something_wrong_with_book">مشکلی در این کتاب وجود دارد</string>
     <string name="sort">مرتب سازی</string>
@@ -1788,8 +1773,7 @@
     <string name="status">وضعیت</string>
     <string name="stop">توقف</string>
     <string name="storage">ذخیره سازی</string>
-    <string name="storage_permission_required_explanation">توضیح مجوز مورد نیاز برای ذخیره سازی
-    </string>
+    <string name="storage_permission_required_explanation">توضیح مجوز مورد نیاز برای ذخیره سازی</string>
     <string name="storage_usage">میزان استفاده از حافظه</string>
     <string name="storage_used">حافظه استفاده شده</string>
     <string name="style_features">ویژگی‌های استایل</string>
@@ -1888,9 +1872,7 @@
     <string name="themes">قالب‌ها</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">هیچ رمانی در این منبع برای انتقال وجود ندارد</string>
     <string name="there_is_no_chapter">هیچ فصلی وجود ندارد.</string>
-    <string name="there_was_a_problem_in_getting_chapter">در دریافت 
-فصل مشکلی وجود داشت.
-</string>
+    <string name="there_was_a_problem_in_getting_chapter">در دریافت فصل مشکلی وجود داشت.</string>
     <string name="these_actions_are_destructive_and">این اقدامات مخرب هستند و قابل لغو نیستند. با احتیاط ادامه دهید.</string>
     <string name="these_are_all_the_popular_books">اینها همه کتاب‌های محبوب هستند</string>
     <string name="these_are_all_the_reviews">اینها همه نظرات هستند</string>
@@ -1991,7 +1973,7 @@
     <string name="tts_with_translated_text">TTS با متن ترجمه شده</string>
     <string name="turn_off_vibration_feedback_for_interactions">بازخورد لرزشی برای تعاملات را خاموش کنید</string>
     <string name="type">نوع</string>
-    <string name="type_1">نوع \</string>
+    <string name="type_1">نوع \\</string>
     <string name="typography">تایپوگرافی</string>
     <string name="ui_improvements">بهبودهای رابط کاربری</string>
     <string name="unable_to_get_package_version">قادر به دریافت نسخه بسته نیست</string>
@@ -2137,7 +2119,7 @@
     <string name="yesterday">دیروز</string>
     <string name="you">(شما)</string>
     <string name="you_1">شما</string>
-    <string name="you_are_about_to_report">شما در حال گزارش \ هستید</string>
+    <string name="you_are_about_to_report">"شما در حال گزارش  هستید"</string>
     <string name="you_are_on_latest_version">شما از آخرین نسخه استفاده می کنید</string>
     <string name="you_dont_have_any_badges_yet">شما هنوز هیچ نشان ندارید</string>
     <string name="you_own_an_ireader_nft">شما صاحب یک NFT IReader هستید!</string>
@@ -2156,4 +2138,21 @@
     <string name="your_review_will_appear_as">نظر شما به صورت زیر نمایش داده می شود:</string>
     <string name="your_username">نام کاربری شما</string>
     <string name="youve_reached_the_end">شما به پایان رسیدید!</string>
+    <string name="loading_features"></string>
+    <string name="export_translated_content"></string>
+    <string name="source_broken_help_description"></string>
+    <string name="export_translated_content_description"></string>
+    <string name="source_needs_update"></string>
+    <string name="source_broken_help_title"></string>
+    <string name="source_website_changed"></string>
+    <string name="source_broken_description"></string>
+    <string name="source_broken_title"></string>
+    <string name="feature_store_description"></string>
+    <string name="no_plugins_available"></string>
+    <string name="parsing_error"></string>
+    <string name="donate_crypto"></string>
+    <string name="feature_store"></string>
+    <string name="crypto_donation_preferred"></string>
+    <string name="support_development_5"></string>
+    <string name="search_features"></string>
 </resources>
