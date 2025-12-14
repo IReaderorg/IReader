@@ -8,42 +8,23 @@ An extension repository is a collection of sources (plugins) that let you browse
 
 ## Quick Setup (Recommended)
 
-### Step 1: Enable JavaScript Plugins
-
-1. Open **IReader**
-2. Go to **Settings** → **General**
-3. Find **"Enable Javascript Plugin"** and turn it **ON**
-
-![Enable JS Toggle](../../screenshots/enable-js.png)
-
-### Step 2: Add the Official IReader Repository
-
-1. Go to **Settings** → **Repository**
-2. Tap the **+ (Add)** button
-3. Select **"Add Custom Repository"**
-4. Paste this URL:
-   ```
-   https://raw.githubusercontent.com/IReaderorg/IReader-extensions/master/index.min.json
-   ```
-5. Tap **Save**
-
-### Step 3: Add LNReader Repository (Optional but Recommended)
+### Step 1: Add Repositories (Using Quick Add)
 
 1. Go to **Settings** → **Repository**
 2. Tap the **+ (Add)** button
 3. Select **"Quick Add Popular Repo"**
-4. Choose **LNReader**
-5. Tap **Save**
+4. Choose **IReader** (Official) - tap **Save**
+5. Repeat and also add **LNReader** for more sources
 
-> 💡 Adding both gives you the best of both worlds - native performance + maximum source coverage!
+> 💡 **We recommend adding both!** IReader Extensions are native and faster, while LNReader gives you 100+ additional sources.
 
-### Step 4: Refresh Sources
+### Step 2: Refresh Sources
 
 1. Go to the **Browse** or **Sources** screen
 2. Pull down to refresh, or tap the refresh icon
 3. You should now see all available sources!
 
-### Step 5: Start Reading!
+### Step 3: Start Reading!
 
 1. Browse the available sources
 2. Tap on a source to explore novels
@@ -65,12 +46,20 @@ If you have a specific repository URL:
 
 ### Official & Recommended Repositories
 
-| Repository | URL | Description |
-|------------|-----|-------------|
-| **IReader Extensions** (Official) | `https://raw.githubusercontent.com/IReaderorg/IReader-extensions/master/index.min.json` | Official native IReader extensions - optimized for best performance |
-| **LNReader** | Built-in (use Quick Add) | 100+ JavaScript sources, community maintained |
+| Repository | Quick Add Name | Description |
+|------------|----------------|-------------|
+| **IReader Extensions** (Official) | `IReader` | Official native extensions - optimized for best performance |
+| **LNReader** | `LNReader` | 100+ JavaScript sources, community maintained |
 
-> 💡 **Tip:** We recommend adding **both** repositories! IReader Extensions are native and faster, while LNReader provides access to many more sources.
+> 💡 **Tip:** Use **Quick Add Popular Repo** for the easiest setup! Both IReader and LNReader are available there.
+
+### Manual URLs (if needed)
+
+If Quick Add doesn't work, you can manually add these URLs:
+
+| Repository | URL |
+|------------|-----|
+| IReader Extensions | `https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json` |
 
 ---
 
