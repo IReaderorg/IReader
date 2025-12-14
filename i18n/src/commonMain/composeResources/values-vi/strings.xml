@@ -2184,4 +2184,21 @@
     <string name="lnreader"></string>
     <string name="sign_in"></string>
     <string name="speech_rate"></string>
+    <string name="loading_features"></string>
+    <string name="export_translated_content"></string>
+    <string name="source_broken_help_description"></string>
+    <string name="export_translated_content_description"></string>
+    <string name="source_needs_update"></string>
+    <string name="source_broken_help_title"></string>
+    <string name="source_website_changed"></string>
+    <string name="source_broken_description"></string>
+    <string name="source_broken_title"></string>
+    <string name="feature_store_description"></string>
+    <string name="no_plugins_available"></string>
+    <string name="parsing_error"></string>
+    <string name="donate_crypto"></string>
+    <string name="feature_store"></string>
+    <string name="crypto_donation_preferred"></string>
+    <string name="support_development_5"></string>
+    <string name="search_features"></string>
 </resources>
