@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -354,8 +355,7 @@
     <string name="color_theme">颜色主题</string>
     <string name="colors">颜色</string>
     <string name="columns">列</string>
-    <string name="comfortable_grid_layout_description">网格中 3 列，封面图像较大
-    </string>
+    <string name="comfortable_grid_layout_description">网格中 3 列，封面图像较大</string>
     <string name="comfortable_layout">舒适网格</string>
     <string name="commit">提交</string>
     <string name="community">社区</string>
@@ -363,8 +363,7 @@
     <string name="community_leaderboard">社区 &amp; 排行榜</string>
     <string name="community_reviews">社区评论</string>
     <string name="community_reviews_desc">阅读和撰写书籍和章节的评论</string>
-    <string name="compact_grid_layout_description">网格中 2 列，封面图像较小
-    </string>
+    <string name="compact_grid_layout_description">网格中 2 列，封面图像较小</string>
     <string name="compact_layout">紧凑布局</string>
     <string name="complete">完成</string>
     <string name="complete_captcha">完成验证码以继续</string>
@@ -466,8 +465,7 @@
     <string name="decrease_speed">降低速度</string>
     <string name="deepseek_api_key">DeepSeek API 密钥</string>
     <string name="deepseek_api_key_invalid">DeepSeek API 密钥无效</string>
-    <string name="deepseek_api_key_not_set">DeepSeek API 密钥未设置。请在设置中配置。
-    </string>
+    <string name="deepseek_api_key_not_set">DeepSeek API 密钥未设置。请在设置中配置。</string>
     <string name="deepseek_login_required">需要 DeepSeek 登录</string>
     <string name="deepseek_payment_required">需要 DeepSeek 付款或 API 配额超出</string>
     <string name="default_chapter_sort">默认章节排序</string>
@@ -558,8 +556,7 @@
     <string name="download_notifier_no_network">没有可用的网络连接</string>
     <string name="download_notifier_text_only_wifi">没有可用的 Wi-Fi 连接</string>
     <string name="download_notifier_title_error">错误</string>
-    <string name="download_notifier_unknown_error">由于意外错误，无法下载章节
-</string>
+    <string name="download_notifier_unknown_error">由于意外错误，无法下载章节</string>
     <string name="download_of">下载</string>
     <string name="download_only_over_wifi">仅通过 WiFi 下载</string>
     <string name="download_progress">下载进度</string>
@@ -597,8 +594,7 @@
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">18+ 来源锁</string>
     <string name="email">电子邮件</string>
-    <string name="empty_library">书库中没有书籍，您可以在浏览屏幕中添加书籍。
-</string>
+    <string name="empty_library">书库中没有书籍，您可以在浏览屏幕中添加书籍。</string>
     <string name="empty_response">从翻译服务收到空响应。</string>
     <string name="enable">启用</string>
     <string name="enable_app_lock">启用应用锁</string>
@@ -823,8 +819,7 @@
     <string name="gb_total_storage_7_500mb">总存储3.5GB (7 × 500MB) - 为每个项目配置或为所有项目使用相同的URL</string>
     <string name="gemini_api_information">Gemini API 信息</string>
     <string name="gemini_api_key">Gemini API Key</string>
-    <string name="gemini_api_key_not_set">Gemini API 密钥未设置。请在设置中配置。
-    </string>
+    <string name="gemini_api_key_not_set">Gemini API 密钥未设置。请在设置中配置。</string>
     <string name="gemini_model">Gemini 模型</string>
     <string name="gemini_payment_required">您已超过 Gemini API 的当前配额。请查看您的计划和账单详情：https://ai.google.dev/gemini-api/docs/rate-limits</string>
     <string name="gender">性别</string>
@@ -852,7 +847,7 @@
     <string name="go_to_badge_store">前往徽章商店</string>
     <string name="go_to_chapter">前往章节</string>
     <string name="go_to_last_chapter">转到最后一章</string>
-    <string name="go_to_settings_generaln2_toggle">1. 前往设置 → 常规\n2. 切换 \</string>
+    <string name="go_to_settings_generaln2_toggle">1. 前往设置 → 常规\n2. 切换 \\</string>
     <string name="goal_reached">已达成目标</string>
     <string name="goal_reached_1">目标达成！</string>
     <string name="goal_reached_thank_you">目标达成！谢谢！</string>
@@ -872,7 +867,7 @@
     <string name="header_alpha">标题透明度</string>
     <string name="hello_this_is_a_test">你好，这是一个测试。</string>
     <string name="help">帮助</string>
-    <string name="help_us_improve">帮助我们改进 \</string>
+    <string name="help_us_improve">帮助我们改进 \\</string>
     <string name="helpful">有帮助</string>
     <string name="hide">隐藏</string>
     <string name="hide_backdrop">隐藏背景</string>
@@ -944,12 +939,9 @@
     <string name="installation_error_Storage">PackageManger: 存储空间不足</string>
     <string name="installation_error_aborted">PackageManger: 已取消</string>
     <string name="installation_error_blocked">PackageManger: 安装程序被阻止</string>
-    <string name="installation_error_conflicted">PackageManger: 与已安装的程序包冲突
-</string>
-    <string name="installation_error_incompatible">PackageManger: 与已安装的程序包不兼容
-</string>
-    <string name="installation_error_invalid">PackageManger: 已经安装了更高版本的 apk
-</string>
+    <string name="installation_error_conflicted">PackageManger: 与已安装的程序包冲突</string>
+    <string name="installation_error_incompatible">PackageManger: 与已安装的程序包不兼容</string>
+    <string name="installation_error_invalid">PackageManger: 已经安装了更高版本的 apk</string>
     <string name="installation_failed">安装失败: %1$s</string>
     <string name="installation_failed_generic">安装失败</string>
     <string name="installation_in_progress_this_may">安装进行中... 这可能需要几分钟。</string>
@@ -1001,8 +993,7 @@
     <string name="last_verified">上次验证：</string>
     <string name="latest_book">最新</string>
     <string name="layout">布局</string>
-    <string name="layout_description_comfortable">网格中 3 列，封面图像较大
-    </string>
+    <string name="layout_description_comfortable">网格中 3 列，封面图像较大</string>
     <string name="layout_description_compact">网格中 2 列，封面图像较小</string>
     <string name="layout_description_cover_only">仅 2 列封面图像 (无文本)</string>
     <string name="layout_description_list">书籍显示在垂直列表中</string>
@@ -1235,7 +1226,7 @@
     <string name="no_repositories_added">未添加存储库</string>
     <string name="no_repositories_added_subtitle">添加存储库以访问其他源</string>
     <string name="no_repositories_configured">未配置存储库</string>
-    <string name="no_results_for">没有 \ 的结果</string>
+    <string name="no_results_for">"没有  的结果"</string>
     <string name="no_results_found">未找到结果</string>
     <string name="no_results_found_1">未找到结果</string>
     <string name="no_reviews">没有评论</string>
@@ -1274,7 +1265,7 @@
     <string name="offset">偏移</string>
     <string name="ok">确定</string>
     <string name="ollama_information">Ollama 信息</string>
-    <string name="ollama_is_a_local_llm">Ollama 是一个用于翻译的本地 LLM 服务器。确保 Ollama 已安装并在您的设备或网络上运行。您需要首先使用 'ollama pull modelname' 来拉取模型。</string>
+    <string name="ollama_is_a_local_llm">Ollama 是一个用于翻译的本地 LLM 服务器。确保 Ollama 已安装并在您的设备或网络上运行。您需要首先使用 \'ollama pull modelname\' 来拉取模型。</string>
     <string name="ollama_model">Ollama 模型</string>
     <string name="ollama_server_url_not_set">OOllama 服务器 URL 未设置</string>
     <string name="ollama_url">Ollama URL</string>
@@ -1297,8 +1288,7 @@
     <string name="open_tts_settings">打开 TTS 设置</string>
     <string name="openai_api_key">OpenAI API 密钥</string>
     <string name="openai_api_key_invalid">OpenAI API 密钥无效</string>
-    <string name="openai_api_key_not_set">OpenAI API 密钥未设置。请在设置中配置。
-    </string>
+    <string name="openai_api_key_not_set">OpenAI API 密钥未设置。请在设置中配置。</string>
     <string name="openai_quota_exceeded">OpenAI 配额超出</string>
     <string name="optimize">优化</string>
     <string name="optimize_database">优化数据库</string>
@@ -1317,9 +1307,7 @@
     <string name="other_source">其他源</string>
     <string name="overall_progress">总进度</string>
     <string name="owner">拥有者</string>
-    <string name="package_installer_failed_to_install_packages">程序包安装程序无法安装
-程序包：状态代码：
-</string>
+    <string name="package_installer_failed_to_install_packages">程序包安装程序无法安装 程序包：状态代码：</string>
     <string name="package_manager">程序包管理器</string>
     <string name="package_name">包名</string>
     <string name="padding">内边距</string>
@@ -1756,8 +1744,7 @@
     <string name="snooze">小睡</string>
     <string name="snooze_reminder">稍后提醒</string>
     <string name="something_is_wrong_with_this_book">本书存在问题。</string>
-    <string name="something_is_wrong_with_this_chapter">此章节存在问题。
-    </string>
+    <string name="something_is_wrong_with_this_chapter">此章节存在问题。</string>
     <string name="something_went_wrong">发生了一些错误</string>
     <string name="something_wrong_with_book">这本书好像有问题</string>
     <string name="sort">排序</string>
@@ -1786,8 +1773,7 @@
     <string name="status">状态</string>
     <string name="stop">停止</string>
     <string name="storage">存储</string>
-    <string name="storage_permission_required_explanation">需要存储权限说明
-    </string>
+    <string name="storage_permission_required_explanation">需要存储权限说明</string>
     <string name="storage_usage">存储使用情况</string>
     <string name="storage_used">已用存储</string>
     <string name="style_features">样式功能</string>
@@ -1886,8 +1872,7 @@
     <string name="themes">主题</string>
     <string name="there_are_no_novels_in_this_source_to_migrate">此源中没有小说可供迁移</string>
     <string name="there_is_no_chapter">没有章节。</string>
-    <string name="there_was_a_problem_in_getting_chapter">获取章节时出现问题。
-    </string>
+    <string name="there_was_a_problem_in_getting_chapter">获取章节时出现问题。</string>
     <string name="these_actions_are_destructive_and">这些操作具有破坏性，并且无法撤消。 请谨慎操作。</string>
     <string name="these_are_all_the_popular_books">这些都是热门书籍</string>
     <string name="these_are_all_the_reviews">这些都是评论</string>
@@ -1988,7 +1973,7 @@
     <string name="tts_with_translated_text">带有翻译文本的TTS</string>
     <string name="turn_off_vibration_feedback_for_interactions">关闭交互的振动反馈</string>
     <string name="type">类型</string>
-    <string name="type_1">类型 \</string>
+    <string name="type_1">类型 \\</string>
     <string name="typography">排版</string>
     <string name="ui_improvements">UI 改进</string>
     <string name="unable_to_get_package_version">无法获取软件包版本</string>
@@ -2134,7 +2119,7 @@
     <string name="yesterday">昨天</string>
     <string name="you">（您）</string>
     <string name="you_1">您</string>
-    <string name="you_are_about_to_report">您将要举报 \</string>
+    <string name="you_are_about_to_report">您将要举报 \\</string>
     <string name="you_are_on_latest_version">您已是最新版本</string>
     <string name="you_dont_have_any_badges_yet">您还没有任何徽章</string>
     <string name="you_own_an_ireader_nft">您拥有一个 IReader NFT！</string>
@@ -2153,4 +2138,21 @@
     <string name="your_review_will_appear_as">您的评论将显示为：</string>
     <string name="your_username">您的用户名</string>
     <string name="youve_reached_the_end">您已到达结尾！</string>
+    <string name="loading_features"></string>
+    <string name="export_translated_content"></string>
+    <string name="source_broken_help_description"></string>
+    <string name="export_translated_content_description"></string>
+    <string name="source_needs_update"></string>
+    <string name="source_broken_help_title"></string>
+    <string name="source_website_changed"></string>
+    <string name="source_broken_description"></string>
+    <string name="source_broken_title"></string>
+    <string name="feature_store_description"></string>
+    <string name="no_plugins_available"></string>
+    <string name="parsing_error"></string>
+    <string name="donate_crypto"></string>
+    <string name="feature_store"></string>
+    <string name="crypto_donation_preferred"></string>
+    <string name="support_development_5"></string>
+    <string name="search_features"></string>
 </resources>
