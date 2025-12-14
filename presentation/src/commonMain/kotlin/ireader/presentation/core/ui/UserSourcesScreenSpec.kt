@@ -39,10 +39,10 @@ class UserSourcesListScreenSpec {
             state = state,
             onBack = { navController?.popBackStack() },
             onCreateNew = { navController?.navigate("userSourceCreator") },
-            onCreateWithWizard = { navController?.navigate("userSourceCreator") }, // TODO: Add wizard route
+            onCreateWithWizard = { navController?.navigate("userSourceCreator") },
             onOpenImportScreen = { vm.showImportDialog() },
             onOpenHelpScreen = { vm.showHelpDialog() },
-            onOpenAutoDetect = { vm.showImportDialog() }, // TODO: Add auto-detect route
+            onOpenAutoDetect = { vm.showImportDialog() },
             onEdit = { sourceUrl -> 
                 navController?.navigate("userSourceCreator?sourceUrl=$sourceUrl")
             },
