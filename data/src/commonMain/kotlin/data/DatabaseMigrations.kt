@@ -1257,14 +1257,15 @@ object DatabaseMigrations {
 
     /**
      * Migration from version 20 to version 21
-     * Adds user_source table for user-defined sources
+     * Adds multiple new tables: user_source, character tables, global_glossary, 
+     * piperVoice, reader_theme, reading analytics, custom fonts, and plugin tables
      */
     private fun migrateV20toV21(driver: SqlDriver) {
         try {
             Logger.logMigrationStart(20, 21)
             
-            // Create user_source table for user-defined sources
-            val createUserSourceSql = """
+            // ==================== User Source Table ====================
+            driver.execute(null, """
                 CREATE TABLE IF NOT EXISTS user_source (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     source_url TEXT NOT NULL UNIQUE,
@@ -1285,16 +1286,419 @@ object DatabaseMigrations {
                     rule_content TEXT NOT NULL DEFAULT '{}',
                     rule_explore TEXT NOT NULL DEFAULT '{}'
                 );
-            """.trimIndent()
-            
-            driver.execute(null, createUserSourceSql, 0)
-            Logger.logTableCreated("user_source")
-            
-            // Create indexes for better performance
+            """.trimIndent(), 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_user_source_enabled ON user_source(enabled);", 0)
             driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_user_source_group ON user_source(source_group);", 0)
-            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_user_source_order ON user_source(custom_order);", 0)
-            Logger.logIndexCreated("user_source indexes")
+            Logger.logTableCreated("user_source")
+            
+            // ==================== Character Tables ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS character (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    aliases TEXT NOT NULL DEFAULT '',
+                    description TEXT NOT NULL DEFAULT '',
+                    image_url TEXT,
+                    role TEXT NOT NULL DEFAULT 'UNKNOWN',
+                    traits TEXT NOT NULL DEFAULT '',
+                    tags TEXT NOT NULL DEFAULT '',
+                    book_ids TEXT NOT NULL DEFAULT '',
+                    series_id TEXT,
+                    first_appearance_id TEXT,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    is_user_created INTEGER NOT NULL DEFAULT 0,
+                    confidence REAL NOT NULL DEFAULT 1.0,
+                    metadata TEXT NOT NULL DEFAULT '{}'
+                );
+            """.trimIndent(), 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_character_name ON character(name);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_character_series ON character(series_id);", 0)
+            Logger.logTableCreated("character")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS character_relationship (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    character1_id TEXT NOT NULL,
+                    character2_id TEXT NOT NULL,
+                    relationship_type TEXT NOT NULL,
+                    custom_type TEXT,
+                    description TEXT NOT NULL DEFAULT '',
+                    strength REAL NOT NULL DEFAULT 0.5,
+                    is_symmetric INTEGER NOT NULL DEFAULT 1,
+                    book_ids TEXT NOT NULL DEFAULT '',
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    FOREIGN KEY (character1_id) REFERENCES character(id) ON DELETE CASCADE,
+                    FOREIGN KEY (character2_id) REFERENCES character(id) ON DELETE CASCADE
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("character_relationship")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS character_appearance (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    character_id TEXT NOT NULL,
+                    book_id INTEGER NOT NULL,
+                    chapter_id INTEGER NOT NULL,
+                    chapter_title TEXT NOT NULL,
+                    paragraph_index INTEGER NOT NULL,
+                    text_snippet TEXT NOT NULL,
+                    appearance_type TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    FOREIGN KEY (character_id) REFERENCES character(id) ON DELETE CASCADE
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("character_appearance")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS character_note (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    character_id TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    book_id INTEGER,
+                    chapter_id INTEGER,
+                    note_type TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    FOREIGN KEY (character_id) REFERENCES character(id) ON DELETE CASCADE
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("character_note")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS character_timeline_event (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    character_id TEXT NOT NULL,
+                    book_id INTEGER NOT NULL,
+                    chapter_id INTEGER NOT NULL,
+                    event_type TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    order_index INTEGER NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    FOREIGN KEY (character_id) REFERENCES character(id) ON DELETE CASCADE
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("character_timeline_event")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS character_group (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    character_ids TEXT NOT NULL DEFAULT '',
+                    group_type TEXT NOT NULL,
+                    book_ids TEXT NOT NULL DEFAULT '',
+                    image_url TEXT,
+                    created_at INTEGER NOT NULL
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("character_group")
+            
+            // ==================== Global Glossary Table ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS global_glossary(
+                    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    book_key TEXT NOT NULL,
+                    book_title TEXT NOT NULL,
+                    source_term TEXT NOT NULL,
+                    target_term TEXT NOT NULL,
+                    term_type TEXT NOT NULL,
+                    notes TEXT,
+                    source_language TEXT NOT NULL DEFAULT 'auto',
+                    target_language TEXT NOT NULL DEFAULT 'en',
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    synced_at INTEGER,
+                    remote_id TEXT,
+                    UNIQUE(book_key, source_term)
+                );
+            """.trimIndent(), 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS global_glossary_book_key_index ON global_glossary(book_key);", 0)
+            Logger.logTableCreated("global_glossary")
+            
+            // ==================== Piper Voice Table ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS piperVoice (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    language TEXT NOT NULL,
+                    locale TEXT NOT NULL,
+                    gender TEXT NOT NULL,
+                    quality TEXT NOT NULL,
+                    sampleRate INTEGER NOT NULL DEFAULT 22050,
+                    modelSize INTEGER NOT NULL DEFAULT 0,
+                    downloadUrl TEXT NOT NULL,
+                    configUrl TEXT NOT NULL,
+                    checksum TEXT NOT NULL DEFAULT '',
+                    license TEXT NOT NULL DEFAULT 'MIT',
+                    description TEXT NOT NULL DEFAULT '',
+                    tags TEXT NOT NULL DEFAULT '',
+                    isDownloaded INTEGER NOT NULL DEFAULT 0,
+                    lastUpdated INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("piperVoice")
+            
+            // ==================== Reader Theme Table ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS reader_theme (
+                    _id INTEGER NOT NULL PRIMARY KEY,
+                    background_color INTEGER NOT NULL,
+                    on_textcolor INTEGER NOT NULL
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("reader_theme")
+            
+            // ==================== Custom Fonts Table ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS customFonts(
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    filePath TEXT NOT NULL,
+                    isSystemFont INTEGER NOT NULL DEFAULT 0,
+                    dateAdded INTEGER NOT NULL
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("customFonts")
+            
+            // ==================== Reading Analytics Tables ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS reading_session (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    book_id INTEGER NOT NULL,
+                    book_title TEXT NOT NULL,
+                    start_time INTEGER NOT NULL,
+                    end_time INTEGER,
+                    start_chapter_id INTEGER NOT NULL,
+                    end_chapter_id INTEGER,
+                    start_position INTEGER NOT NULL,
+                    end_position INTEGER,
+                    pages_read INTEGER NOT NULL DEFAULT 0,
+                    words_read INTEGER NOT NULL DEFAULT 0,
+                    characters_read INTEGER NOT NULL DEFAULT 0,
+                    pause_duration_ms INTEGER NOT NULL DEFAULT 0,
+                    device_type TEXT NOT NULL,
+                    is_completed INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_session_book ON reading_session(book_id);", 0)
+            Logger.logTableCreated("reading_session")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS daily_reading_stats (
+                    date TEXT NOT NULL PRIMARY KEY,
+                    total_reading_time_ms INTEGER NOT NULL DEFAULT 0,
+                    sessions_count INTEGER NOT NULL DEFAULT 0,
+                    books_read INTEGER NOT NULL DEFAULT 0,
+                    chapters_read INTEGER NOT NULL DEFAULT 0,
+                    pages_read INTEGER NOT NULL DEFAULT 0,
+                    words_read INTEGER NOT NULL DEFAULT 0,
+                    average_wpm REAL NOT NULL DEFAULT 0,
+                    longest_session_ms INTEGER NOT NULL DEFAULT 0,
+                    peak_reading_hour INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("daily_reading_stats")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS reading_goal (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    type TEXT NOT NULL,
+                    target INTEGER NOT NULL,
+                    period TEXT NOT NULL,
+                    start_date INTEGER NOT NULL,
+                    end_date INTEGER,
+                    current_progress INTEGER NOT NULL DEFAULT 0,
+                    is_active INTEGER NOT NULL DEFAULT 1,
+                    is_completed INTEGER NOT NULL DEFAULT 0,
+                    completed_date INTEGER,
+                    streak_days INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("reading_goal")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS reading_achievement (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    icon_url TEXT,
+                    category TEXT NOT NULL,
+                    tier TEXT NOT NULL,
+                    requirement_type TEXT NOT NULL,
+                    requirement_value INTEGER NOT NULL,
+                    requirement_description TEXT NOT NULL,
+                    progress INTEGER NOT NULL DEFAULT 0,
+                    is_unlocked INTEGER NOT NULL DEFAULT 0,
+                    unlocked_date INTEGER,
+                    points INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("reading_achievement")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS reading_milestone (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    type TEXT NOT NULL,
+                    value INTEGER NOT NULL,
+                    reached_date INTEGER NOT NULL,
+                    book_id INTEGER,
+                    book_title TEXT
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("reading_milestone")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS reading_streak (
+                    id INTEGER NOT NULL PRIMARY KEY,
+                    current_streak INTEGER NOT NULL DEFAULT 0,
+                    longest_streak INTEGER NOT NULL DEFAULT 0,
+                    last_read_date TEXT,
+                    streak_start_date TEXT
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("reading_streak")
+            
+            // ==================== Plugin Analytics Tables ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS plugin_analytics_event (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    plugin_id TEXT NOT NULL,
+                    event_type TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    session_id TEXT NOT NULL,
+                    user_id TEXT,
+                    properties_json TEXT NOT NULL DEFAULT '{}',
+                    metrics_json TEXT NOT NULL DEFAULT '{}',
+                    device_info_json TEXT,
+                    uploaded INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("plugin_analytics_event")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS plugin_crash_report (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    plugin_id TEXT NOT NULL,
+                    plugin_version TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    error_type TEXT NOT NULL,
+                    error_message TEXT NOT NULL,
+                    stack_trace TEXT NOT NULL,
+                    device_info_json TEXT NOT NULL,
+                    breadcrumbs_json TEXT NOT NULL DEFAULT '[]',
+                    custom_data_json TEXT NOT NULL DEFAULT '{}',
+                    uploaded INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("plugin_crash_report")
+            
+            // ==================== Plugin Cache Table ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS plugin_cache (
+                    plugin_id TEXT NOT NULL,
+                    version TEXT NOT NULL,
+                    plugin_name TEXT NOT NULL,
+                    version_code INTEGER NOT NULL,
+                    cached_at INTEGER NOT NULL,
+                    expires_at INTEGER,
+                    file_path TEXT NOT NULL,
+                    file_size INTEGER NOT NULL,
+                    checksum TEXT NOT NULL,
+                    is_update INTEGER NOT NULL DEFAULT 0,
+                    current_installed_version TEXT,
+                    download_url TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    PRIMARY KEY (plugin_id, version)
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("plugin_cache")
+            
+            // ==================== Plugin Collection Table ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS plugin_collection (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    author_id TEXT NOT NULL,
+                    author_name TEXT NOT NULL,
+                    plugin_ids TEXT NOT NULL DEFAULT '',
+                    cover_image_url TEXT,
+                    tags TEXT NOT NULL DEFAULT '',
+                    is_public INTEGER NOT NULL DEFAULT 1,
+                    is_featured INTEGER NOT NULL DEFAULT 0,
+                    likes_count INTEGER NOT NULL DEFAULT 0,
+                    saves_count INTEGER NOT NULL DEFAULT 0,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    is_synced INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("plugin_collection")
+            
+            // ==================== Plugin Permission Table ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS plugin_permission (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    plugin_id TEXT NOT NULL,
+                    permission TEXT NOT NULL,
+                    granted_at INTEGER NOT NULL,
+                    is_active INTEGER NOT NULL DEFAULT 1,
+                    UNIQUE(plugin_id, permission)
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("plugin_permission")
+            
+            // ==================== Plugin Pipeline Table ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS plugin_pipeline (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    steps_json TEXT NOT NULL,
+                    input_type TEXT NOT NULL,
+                    output_type TEXT NOT NULL,
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    is_public INTEGER NOT NULL DEFAULT 0,
+                    author_id TEXT,
+                    tags TEXT NOT NULL DEFAULT ''
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("plugin_pipeline")
+            
+            // ==================== Plugin Sync Tables ====================
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS plugin_sync_change (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    change_type TEXT NOT NULL,
+                    entity_type TEXT NOT NULL,
+                    entity_id TEXT NOT NULL,
+                    old_value TEXT,
+                    new_value TEXT,
+                    timestamp INTEGER NOT NULL,
+                    synced INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("plugin_sync_change")
+            
+            driver.execute(null, """
+                CREATE TABLE IF NOT EXISTS plugin_sync_conflict (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    plugin_id TEXT NOT NULL,
+                    conflict_type TEXT NOT NULL,
+                    local_value TEXT NOT NULL,
+                    remote_value TEXT NOT NULL,
+                    local_timestamp INTEGER NOT NULL,
+                    remote_timestamp INTEGER NOT NULL,
+                    device_id TEXT NOT NULL,
+                    resolved INTEGER NOT NULL DEFAULT 0,
+                    resolution TEXT
+                );
+            """.trimIndent(), 0)
+            Logger.logTableCreated("plugin_sync_conflict")
             
             Logger.logMigrationSuccess(21)
             
