@@ -10,6 +10,12 @@ Learn how to listen to your novels using various TTS engines.
 *   **[Kokoro TTS](guides/tts.md#kokoro-tts-setup)**: High-quality, natural-sounding offline voice.
 *   **[Gradio TTS](guides/tts.md#gradio-tts-online)**: Connect to powerful online AI models.
 
+### 📦 [Extension Repository Guide](guides/extension_repository_guide.md) ⭐ NEW
+Get started with novel sources quickly!
+*   **[Quick Setup](guides/extension_repository_guide.md#quick-setup-recommended)**: Add repositories in 2 minutes.
+*   **[Custom Repositories](guides/extension_repository_guide.md#adding-a-custom-repository-url)**: Add your own repository URLs.
+*   **[Troubleshooting](guides/extension_repository_guide.md#troubleshooting)**: Fix common issues.
+
 ### 📚 [Sources & Extensions](guides/sources.md)
 Manage where you get your novels from.
 *   **[Installing Extensions](guides/sources.md#installing-extensions)**: How to add new sources.
