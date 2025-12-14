@@ -60,6 +60,7 @@ fun ModernCatalogCard(
         is ireader.domain.models.entities.CommunityCatalog -> catalog.source.lang
         is CatalogInstalled -> catalog.source?.lang
         is CatalogRemote -> catalog.lang
+        is ireader.domain.models.entities.UserSourceCatalog -> catalog.source?.lang
     }?.let { Language(it) }
 
     Card(

@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 20
+    const val CURRENT_VERSION = 21
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -85,6 +85,7 @@ object DatabaseMigrations {
             17 -> migrateV17toV18(driver)
             18 -> migrateV18toV19(driver)
             19 -> migrateV19toV20(driver)
+            20 -> migrateV20toV21(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -1251,6 +1252,54 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(20, e)
+        }
+    }
+
+    /**
+     * Migration from version 20 to version 21
+     * Adds user_source table for user-defined sources
+     */
+    private fun migrateV20toV21(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(20, 21)
+            
+            // Create user_source table for user-defined sources
+            val createUserSourceSql = """
+                CREATE TABLE IF NOT EXISTS user_source (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    source_url TEXT NOT NULL UNIQUE,
+                    source_name TEXT NOT NULL,
+                    source_group TEXT NOT NULL DEFAULT '',
+                    source_type INTEGER NOT NULL DEFAULT 0,
+                    enabled INTEGER NOT NULL DEFAULT 1,
+                    lang TEXT NOT NULL DEFAULT 'en',
+                    custom_order INTEGER NOT NULL DEFAULT 0,
+                    comment TEXT NOT NULL DEFAULT '',
+                    last_update_time INTEGER NOT NULL DEFAULT 0,
+                    header TEXT NOT NULL DEFAULT '',
+                    search_url TEXT NOT NULL DEFAULT '',
+                    explore_url TEXT NOT NULL DEFAULT '',
+                    rule_search TEXT NOT NULL DEFAULT '{}',
+                    rule_book_info TEXT NOT NULL DEFAULT '{}',
+                    rule_toc TEXT NOT NULL DEFAULT '{}',
+                    rule_content TEXT NOT NULL DEFAULT '{}',
+                    rule_explore TEXT NOT NULL DEFAULT '{}'
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createUserSourceSql, 0)
+            Logger.logTableCreated("user_source")
+            
+            // Create indexes for better performance
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_user_source_enabled ON user_source(enabled);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_user_source_group ON user_source(source_group);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_user_source_order ON user_source(custom_order);", 0)
+            Logger.logIndexCreated("user_source indexes")
+            
+            Logger.logMigrationSuccess(21)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(21, e)
         }
     }
 

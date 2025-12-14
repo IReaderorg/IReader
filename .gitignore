@@ -67,3 +67,4 @@ native/cmake-build-*/
 # Supabase configuration files (contain sensitive credentials)
 config.properties
 IReader-plugins
+legado-master

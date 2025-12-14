@@ -216,6 +216,11 @@ val repositoryInjectModule = module {
         ireader.data.glossary.GlossaryRepositoryImpl(get())
     }
     
+    // User Source repository - for user-defined sources
+    single<ireader.domain.usersource.repository.UserSourceRepository> {
+        ireader.data.usersource.UserSourceRepositoryImpl(get())
+    }
+    
     // Global Glossary repository - for glossaries independent of library with Supabase sync
     single<ireader.domain.data.repository.GlobalGlossaryRepository> {
         val provider = get<ireader.domain.data.repository.SupabaseClientProvider>()

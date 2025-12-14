@@ -47,6 +47,9 @@ class CommunityHubScreenSpec {
             onGlossary = {
                 navController.navigate(NavigationRoutes.glossary)
             },
+            onUserSources = {
+                navController.navigate(NavigationRoutes.userSources)
+            },
             onFeatureStore = {
                 navController.navigate(NavigationRoutes.featureStore)
             },

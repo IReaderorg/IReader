@@ -29,6 +29,7 @@ import data.Plugin_review
 import data.Plugin_sync_change
 import data.Plugin_sync_conflict
 import data.Plugin_trial
+import data.User_source
 import data.Reader_theme
 import data.Reading_goal
 import data.Reading_milestone
@@ -217,6 +218,11 @@ fun createDatabase(driver: SqlDriver): Database {
         plugin_sync_conflictAdapter = Plugin_sync_conflict.Adapter(
             local_timestampAdapter = longConverter,
             remote_timestampAdapter = longConverter
+        ),
+        // User source table
+        user_sourceAdapter = User_source.Adapter(
+            source_typeAdapter = intLongColumnAdapter,
+            custom_orderAdapter = intLongColumnAdapter
         ),
     )
 

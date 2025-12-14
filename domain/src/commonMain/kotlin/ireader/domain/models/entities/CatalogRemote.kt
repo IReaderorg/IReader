@@ -92,6 +92,32 @@ sealed class CatalogInstalled : CatalogLocal() {
     ) : CatalogInstalled()
 }
 
+/**
+ * Catalog for user-defined sources created through the Source Creator feature.
+ */
+data class UserSourceCatalog(
+    override val name: String,
+    override val sourceId: Long,
+    override val source: Source?,
+    val userSource: ireader.domain.usersource.model.UserSource,
+    override val description: String = userSource.comment,
+    override val nsfw: Boolean = false,
+    override val isPinned: Boolean = false,
+) : CatalogLocal() {
+    
+    fun copy(isPinned: Boolean): UserSourceCatalog {
+        return UserSourceCatalog(
+            name = name,
+            sourceId = sourceId,
+            source = source,
+            userSource = userSource,
+            description = description,
+            nsfw = nsfw,
+            isPinned = isPinned
+        )
+    }
+}
+
 enum class SourceState {
     Pinned,
     UnPinned,

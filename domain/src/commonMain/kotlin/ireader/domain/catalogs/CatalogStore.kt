@@ -48,6 +48,7 @@ class CatalogStore(
     private val catalogRemoteRepository: CatalogRemoteRepository,
     private val installationChanges: CatalogInstallationChanges,
     private val localCatalogSource: LocalCatalogSource,
+    private val userSourceLoader: ireader.domain.usersource.catalog.UserSourceCatalogLoader,
 ) {
     companion object {
         /** Maximum concurrent plugin loads to balance speed vs memory */
@@ -187,6 +188,15 @@ class CatalogStore(
             // Process catalogs efficiently
             val processedCatalogs = loadedCatalogs.map { catalog ->
                 processCatalog(catalog)
+            }.toMutableList()
+            
+            // Load user-defined sources
+            try {
+                val userSourceCatalogs = userSourceLoader.getEnabledCatalogs()
+                processedCatalogs.addAll(userSourceCatalogs)
+                Log.debug { "CatalogStore: Loaded ${userSourceCatalogs.size} user sources" }
+            } catch (e: Exception) {
+                Log.error("CatalogStore: Failed to load user sources", e)
             }
             
             catalogs = processedCatalogs
@@ -305,6 +315,32 @@ class CatalogStore(
         ensureInitialized()
         // Use efficient map lookup instead of list search
         return catalogsBySourceMap[sourceId]
+    }
+    
+    /**
+     * Refreshes user-defined sources in the catalog store.
+     * Call this when user sources are added, updated, or deleted.
+     */
+    suspend fun refreshUserSources() {
+        if (!_isInitialized.value) return
+        
+        lock.withLock {
+            val currentCatalogs = catalogs.toMutableList()
+            
+            // Remove existing user source catalogs
+            currentCatalogs.removeAll { it is ireader.domain.models.entities.UserSourceCatalog }
+            
+            // Add updated user source catalogs
+            try {
+                val userSourceCatalogs = userSourceLoader.getEnabledCatalogs()
+                currentCatalogs.addAll(userSourceCatalogs)
+                Log.debug { "CatalogStore: Refreshed ${userSourceCatalogs.size} user sources" }
+            } catch (e: Exception) {
+                Log.error("CatalogStore: Failed to refresh user sources", e)
+            }
+            
+            catalogs = currentCatalogs
+        }
     }
     
     /**
@@ -499,6 +535,7 @@ class CatalogStore(
             is CatalogInstalled.SystemWide -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
             is ireader.domain.models.entities.JSPluginCatalog -> copy(isPinned = isPinned, hasUpdate = hasUpdate)
             is ireader.domain.models.entities.CommunityCatalog -> copy(isPinned = isPinned)
+            is ireader.domain.models.entities.UserSourceCatalog -> copy(isPinned = isPinned)
         }
     }
 

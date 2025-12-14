@@ -28,7 +28,7 @@ val CatalogModule = module {
 
     // CatalogStore - now lazy-initialized internally, safe as singleton
     // The actual catalog loading is deferred until first access
-    single<CatalogStore> { CatalogStore(get(),get(),get(),get(),get()) }
+    single<CatalogStore> { CatalogStore(get(),get(),get(),get(),get(),get()) }
 
     single {
         ReaderPreferences(

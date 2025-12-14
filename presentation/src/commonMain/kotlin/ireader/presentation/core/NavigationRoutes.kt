@@ -72,6 +72,8 @@ object NavigationRoutes {
     const val featureStore = "featureStore"
     const val pluginRepository = "pluginRepository"
     const val developerPortal = "developerPortal"
+    const val userSources = "userSources"
+    const val userSourceCreator = "userSourceCreator"
     const val PLUGIN_DETAILS = "pluginDetails/{pluginId}"
     const val PLUGIN_DETAILS_BASE = "pluginDetails"
     

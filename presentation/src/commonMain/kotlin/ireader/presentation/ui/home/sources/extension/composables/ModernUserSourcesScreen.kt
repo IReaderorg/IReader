@@ -38,6 +38,7 @@ fun ModernUserSourcesScreen(
     onClickTogglePinned: (Catalog) -> Unit,
     onShowDetails: ((Catalog) -> Unit)? = null,
     onMigrateFromSource: ((Long) -> Unit)? = null,
+    onNavigateToUserSources: (() -> Unit)? = null,
 ) {
     val scrollState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -86,18 +87,15 @@ fun ModernUserSourcesScreen(
         state = scrollState,
         verticalArrangement = Arrangement.Top,
     ) {
-//        // Language filter - Requirements: 5.1
-//        item(key = "language_filter") {
-//            LanguageChipGroup(
-//                choices = state.languageChoices,
-//                selected = state.selectedUserSourceLanguage,
-//                onClick = { vm.setUserSourceLanguage(it) },
-//                isVisible = vm.showLanguageFilter.value,
-//                onToggleVisibility = { visible ->
-//                    vm.uiPreferences.showLanguageFilter().set(visible)
-//                }
-//            )
-//        }
+        // User Sources Creator Card
+        if (onNavigateToUserSources != null) {
+            item(key = "user_sources_card") {
+                UserSourcesCreatorCard(
+                    onClick = onNavigateToUserSources,
+                    modifier = Modifier.animateItem()
+                )
+            }
+        }
         
         items(
             items = usersSources,

@@ -221,6 +221,11 @@ fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.PluginDetail
     }
 }
 
+fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.UserSourcesListScreenSpec) {
+    if (isCurrentRoute(NavigationRoutes.userSources)) return
+    navigate(NavigationRoutes.userSources, NavOptions.singleTop)
+}
+
 // Expect functions for platform-specific screen specs
 expect fun NavHostController.navigateTo(spec: ireader.presentation.core.ui.WebViewScreenSpec)
 

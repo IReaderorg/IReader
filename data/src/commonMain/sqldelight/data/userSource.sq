@@ -1,0 +1,71 @@
+import kotlin.Boolean;
+import kotlin.Long;
+import kotlin.String;
+import kotlin.Int;
+
+-- User-defined sources for scraping novels from any website
+CREATE TABLE IF NOT EXISTS `user_source` (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_url TEXT NOT NULL UNIQUE,
+    source_name TEXT NOT NULL,
+    source_group TEXT NOT NULL DEFAULT '',
+    source_type INTEGER AS Int NOT NULL DEFAULT 0,
+    enabled INTEGER AS Boolean NOT NULL DEFAULT 1,
+    lang TEXT NOT NULL DEFAULT 'en',
+    custom_order INTEGER AS Int NOT NULL DEFAULT 0,
+    comment TEXT NOT NULL DEFAULT '',
+    last_update_time INTEGER NOT NULL DEFAULT 0,
+    header TEXT NOT NULL DEFAULT '',
+    search_url TEXT NOT NULL DEFAULT '',
+    explore_url TEXT NOT NULL DEFAULT '',
+    -- Rules stored as JSON strings
+    rule_search TEXT NOT NULL DEFAULT '{}',
+    rule_book_info TEXT NOT NULL DEFAULT '{}',
+    rule_toc TEXT NOT NULL DEFAULT '{}',
+    rule_content TEXT NOT NULL DEFAULT '{}',
+    rule_explore TEXT NOT NULL DEFAULT '{}'
+);
+
+-- Queries
+findAll:
+SELECT * FROM user_source ORDER BY custom_order, source_name;
+
+findEnabled:
+SELECT * FROM user_source WHERE enabled = 1 ORDER BY custom_order, source_name;
+
+findByUrl:
+SELECT * FROM user_source WHERE source_url = ?;
+
+findById:
+SELECT * FROM user_source WHERE id = ?;
+
+findByGroup:
+SELECT * FROM user_source WHERE source_group = ? ORDER BY custom_order, source_name;
+
+getGroups:
+SELECT DISTINCT source_group FROM user_source WHERE source_group != '' ORDER BY source_group;
+
+insert:
+INSERT OR REPLACE INTO user_source (
+    source_url, source_name, source_group, source_type, enabled, lang,
+    custom_order, comment, last_update_time, header, search_url, explore_url,
+    rule_search, rule_book_info, rule_toc, rule_content, rule_explore
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateEnabled:
+UPDATE user_source SET enabled = ? WHERE source_url = ?;
+
+updateOrder:
+UPDATE user_source SET custom_order = ? WHERE source_url = ?;
+
+deleteByUrl:
+DELETE FROM user_source WHERE source_url = ?;
+
+deleteById:
+DELETE FROM user_source WHERE id = ?;
+
+deleteAll:
+DELETE FROM user_source;
+
+count:
+SELECT COUNT(*) FROM user_source;

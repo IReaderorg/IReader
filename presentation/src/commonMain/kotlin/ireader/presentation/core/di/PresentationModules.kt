@@ -303,6 +303,24 @@ val PresentationModules = module {
         )
     }
 
+    // User Sources ViewModels
+    factory { 
+        ireader.presentation.ui.sourcecreator.UserSourcesListViewModel(
+            getUserSources = get(),
+            deleteUserSource = get(),
+            toggleUserSourceEnabled = get(),
+            importExportUserSources = get()
+        )
+    }
+    factory {
+        ireader.presentation.ui.sourcecreator.SourceCreatorViewModel(
+            getUserSource = get(),
+            saveUserSource = get(),
+            validateUserSource = get(),
+            importExportUserSources = get()
+        )
+    }
+
     // New StateScreenModel implementations following Mihon's pattern
     includes(screenModelModule)
 

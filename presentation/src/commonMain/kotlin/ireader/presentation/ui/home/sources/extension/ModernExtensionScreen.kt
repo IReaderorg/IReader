@@ -85,6 +85,7 @@ fun ModernExtensionScreen(
     onShowDetails: ((Catalog) -> Unit)? = null,
     onMigrateFromSource: ((Long) -> Unit)? = null,
     onNavigateToBrowseSettings: (() -> Unit)? = null,
+    onNavigateToUserSources: (() -> Unit)? = null,
     scaffoldPadding: PaddingValues
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current)
@@ -141,6 +142,7 @@ fun ModernExtensionScreen(
                     vm = vm,
                     onShowDetails = onShowDetails,
                     onMigrateFromSource = onMigrateFromSource,
+                    onNavigateToUserSources = onNavigateToUserSources,
                 )
                 1 -> ModernRemoteSourcesScreen(
                     vm = vm,

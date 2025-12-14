@@ -376,6 +376,9 @@ val DomainServices = module {
     // Requirements: 3.1, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 5.1
     includes(bookDetailModule)
     
+    // User Source Module - Custom user-defined sources for scraping
+    includes(userSourceModule)
+    
     // Note: Preferences, UseCases, and Repository UseCases are loaded separately
     // to avoid circular dependencies with UseCasesInject module
 

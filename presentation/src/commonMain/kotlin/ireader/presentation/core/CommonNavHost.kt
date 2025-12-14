@@ -212,6 +212,28 @@ fun CommonNavHost(
             ireader.presentation.core.ui.DeveloperPortalScreenSpec().Content()
         }
         
+        // User Sources - Create custom sources for scraping
+        composable(NavigationRoutes.userSources) {
+            ireader.presentation.core.ui.UserSourcesListScreenSpec().Content()
+        }
+        
+        // User Source Creator - Create/edit a user source
+        composable(
+            route = "userSourceCreator?sourceUrl={sourceUrl}",
+            arguments = listOf(
+                navArgument("sourceUrl") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val sourceUrl = remember(backStackEntry) {
+                backStackEntry.savedStateHandle.get<String>("sourceUrl")
+            }
+            ireader.presentation.core.ui.UserSourceCreatorScreenSpec(sourceUrl).Content()
+        }
+        
         // Plugin Details - Show detailed plugin information
         composable(
             route = NavigationRoutes.PLUGIN_DETAILS,

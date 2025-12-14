@@ -38,6 +38,7 @@ fun CommunityHubScreen(
     onCharacterArtGallery: () -> Unit,
     onReadingBuddy: () -> Unit = {},
     onGlossary: () -> Unit = {},
+    onUserSources: () -> Unit = {},
     onFeatureStore: () -> Unit = {},
     onPluginRepository: () -> Unit = {},
     onDeveloperPortal: () -> Unit = {},
@@ -177,6 +178,15 @@ fun CommunityHubScreen(
                     description = "Manage translation glossaries for your books",
                     icon = Icons.Filled.Translate,
                     onClick = onGlossary
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "User Sources",
+                    description = "Create custom sources to scrape novels from any website",
+                    icon = Icons.Filled.Extension,
+                    onClick = onUserSources
                 )
             }
             
