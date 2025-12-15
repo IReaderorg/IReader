@@ -176,6 +176,24 @@ class BackupScreenViewModel(
     }
     
     /**
+     * Create backup to specified URI (called from UI after file picker)
+     */
+    fun createBackupToUri(uri: ireader.domain.models.common.Uri) {
+        scope.launch {
+            createBackupToLocation(uri)
+        }
+    }
+    
+    /**
+     * Restore backup from specified URI (called from UI after file picker)
+     */
+    fun restoreBackupFromUri(uri: ireader.domain.models.common.Uri) {
+        scope.launch {
+            restoreFromLocation(uri)
+        }
+    }
+    
+    /**
      * Create backup to specified location
      */
     private suspend fun createBackupToLocation(uri: ireader.domain.models.common.Uri) {

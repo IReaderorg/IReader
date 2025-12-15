@@ -9,6 +9,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.usecases.backup.lnreader.ImportLNReaderBackup
@@ -31,9 +34,48 @@ fun BackUpAndRestoreScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
+    // State for showing file pickers
+    var showLNReaderPicker by remember { mutableStateOf(false) }
+    var showBackupSaver by remember { mutableStateOf(false) }
+    var showRestorePicker by remember { mutableStateOf(false) }
+    
     // LNReader import progress
     val lnReaderProgress by vm.lnReaderImportProgress.collectAsState()
     val lnReaderResult by vm.lnReaderImportResult.collectAsState()
+    
+    // Platform-specific file picker for LNReader backup
+    OnPickLNReaderBackup(
+        show = showLNReaderPicker,
+        onFileSelected = { uri ->
+            showLNReaderPicker = false
+            if (uri != null) {
+                vm.importLNReaderBackupFromUri(uri)
+            }
+        }
+    )
+    
+    // Platform-specific file picker for creating backup
+    OnSaveBackupFile(
+        show = showBackupSaver,
+        defaultFileName = "IReader_backup_${ireader.domain.utils.extensions.currentTimeToLong()}",
+        onLocationSelected = { uri ->
+            showBackupSaver = false
+            if (uri != null) {
+                vm.createBackupToUri(uri)
+            }
+        }
+    )
+    
+    // Platform-specific file picker for restoring backup
+    OnPickBackupFile(
+        show = showRestorePicker,
+        onFileSelected = { uri ->
+            showRestorePicker = false
+            if (uri != null) {
+                vm.restoreBackupFromUri(uri)
+            }
+        }
+    )
     
     // Get import progress text
     val importProgressText = when (val progress = lnReaderProgress) {
@@ -52,14 +94,14 @@ fun BackUpAndRestoreScreen(
         listOf<Components>(
             Components.Row(
                 localizeHelper.localize(Res.string.create_backup), onClick = {
-                    // Use ViewModel method instead of deprecated composable
-                    vm.pickBackupLocation()
+                    // Show platform-specific file saver
+                    showBackupSaver = true
                 }
             ),
             Components.Row(
                 localizeHelper.localize(Res.string.restore), onClick = {
-                    // Use ViewModel method instead of deprecated composable
-                    vm.pickRestoreFile()
+                    // Show platform-specific file picker
+                    showRestorePicker = true
                 }
             ),
             Components.Header(localizeHelper.localize(Res.string.import_from_other_apps)),
@@ -69,8 +111,8 @@ fun BackUpAndRestoreScreen(
                 icon = Icons.Filled.FileDownload,
                 onClick = {
                     if (importProgressText == null) {
-                        // Use ViewModel method instead of deprecated composable
-                        vm.pickLNReaderBackupFile()
+                        // Show platform-specific file picker
+                        showLNReaderPicker = true
                     }
                 }
             ),
