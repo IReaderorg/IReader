@@ -75,6 +75,7 @@ data class ExploreScreenState(
      * - Not in search mode (browsing default listing)
      * - Not currently loading
      * - Either explicitly marked as broken OR got empty results without search
+     * - NOT a built-in source (Community Source, Local Source)
      * 
      * When browsing (not searching), a source should always return books.
      * Empty results without search mode indicates the source parsing is broken.
@@ -82,6 +83,11 @@ data class ExploreScreenState(
     @Stable
     val isLikelyBrokenSource: Boolean
         get() {
+            // Built-in sources should never be marked as broken
+            // Community Source (-300) and Local Source (-1, -2) are built-in
+            val sourceId = catalog?.sourceId ?: 0L
+            if (sourceId < 0) return false
+            
             // If explicitly marked as broken
             if (isSourceBroken) return true
             

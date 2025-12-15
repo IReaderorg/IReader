@@ -222,7 +222,9 @@ val UseCasesInject = module {
             saveTranslatedChapterUseCase = get(),
             getTranslatedChapterUseCase = get(),
             getGlossaryAsMapUseCase = get(),
-            applyGlossaryToTextUseCase = get()
+            applyGlossaryToTextUseCase = get(),
+            autoShareTranslationUseCase = getOrNull(),
+            bookRepository = getOrNull()
         ) 
     }
     factory { 

@@ -41,6 +41,10 @@ class CatalogRemoteMapper : Mapper<Catalog,Uri> {
                     null
                 }
             }
+            is ireader.domain.models.entities.CommunityCatalog -> {
+                // Community Source has a fixed icon URL
+                ireader.domain.models.entities.CommunityCatalog.ICON_URL.toUri()
+            }
             else -> {
                 null
             }
@@ -53,6 +57,10 @@ class CatalogKeyer : Keyer<Catalog> {
             is CatalogRemote -> {
                 // Use iconUrl if available, otherwise use pkgName as fallback
                 data.iconUrl.ifBlank { "catalog-remote-${data.pkgName}" }
+            }
+            is ireader.domain.models.entities.CommunityCatalog -> {
+                // Community Source has a fixed icon URL as key
+                "community-source-${ireader.domain.models.entities.CommunityCatalog.ICON_URL}"
             }
             is CatalogLocal -> data.sourceId.toString()
             else -> null

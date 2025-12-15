@@ -13,12 +13,15 @@ import ireader.domain.community.CommunityPreferences
 import ireader.domain.community.CommunityRepository
 import ireader.domain.community.CommunityRepositoryImpl
 import ireader.domain.community.CommunitySource
+import ireader.domain.community.cloudflare.communityTranslationModule
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.extensions_insstaller_service.GetDefaultRepo
 import ireader.domain.usecases.services.LoadJSPluginsInBackgroundUseCase
 import org.koin.dsl.module
 
 val CatalogModule = module {
+    // Include Cloudflare-based community translation module
+    includes(communityTranslationModule)
 
     // Preferences - lightweight, can be singleton
     single<CommunityPreferences> { CommunityPreferences(get()) }

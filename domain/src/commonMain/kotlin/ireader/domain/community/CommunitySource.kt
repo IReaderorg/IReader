@@ -34,6 +34,22 @@ class CommunitySource(
         const val SOURCE_ID = -300L
         const val SOURCE_NAME = "Community Source"
         const val SOURCE_LANG = "multi"
+        const val ICON_URL = "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/app-icon.png"
+        
+        /** Message shown when source is not configured */
+        private const val NOT_CONFIGURED_MESSAGE = """
+Welcome to Community Source!
+
+This source allows you to browse and read novels translated by the community, 
+and share your own AI translations with others.
+
+To get started:
+1. Go to Settings → Community Source
+2. Configure your Supabase or Cloudflare backend
+3. Set your contributor name to share translations
+
+Once configured, you'll see community-translated novels here.
+        """
     }
     
     override val id: Long = SOURCE_ID
@@ -41,41 +57,92 @@ class CommunitySource(
     override val lang: String = SOURCE_LANG
     
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
-        return repository.getBookDetails(manga.key)
+        return try {
+            repository.getBookDetails(manga.key)
+        } catch (e: Exception) {
+            manga // Return original manga info if fetch fails
+        }
     }
     
     override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
-        val language = commands.filterIsInstance<Command.Chapter.Select>()
-            .firstOrNull()?.value?.toString()
-        return repository.getChapters(manga.key, language)
+        return try {
+            val language = commands.filterIsInstance<Command.Chapter.Select>()
+                .firstOrNull()?.value?.toString()
+            repository.getChapters(manga.key, language)
+        } catch (e: Exception) {
+            emptyList() // Return empty list if not configured
+        }
     }
     
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
-        val content = repository.getChapterContent(chapter.key)
-        return listOf(Text(content))
+        return try {
+            val content = repository.getChapterContent(chapter.key)
+            listOf(Text(content))
+        } catch (e: Exception) {
+            listOf(Text("Unable to load chapter content. Please check your Community Source configuration in Settings."))
+        }
     }
     
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
-        return when (sort) {
-            is LatestListing -> repository.getLatestBooks(page)
-            is PopularListing -> repository.getPopularBooks(page)
-            is RecentlyTranslatedListing -> repository.getRecentlyTranslatedBooks(page)
-            else -> repository.getLatestBooks(page)
+        return try {
+            when (sort) {
+                is LatestListing -> repository.getLatestBooks(page)
+                is PopularListing -> repository.getPopularBooks(page)
+                is RecentlyTranslatedListing -> repository.getRecentlyTranslatedBooks(page)
+                else -> repository.getLatestBooks(page)
+            }
+        } catch (e: Exception) {
+            // Return a helpful placeholder when not configured
+            if (page == 1) {
+                MangasPageInfo(
+                    mangas = listOf(createWelcomePlaceholder()),
+                    hasNextPage = false
+                )
+            } else {
+                MangasPageInfo.empty()
+            }
         }
     }
     
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
-        val query = filters.filterIsInstance<Filter.Title>().firstOrNull()?.value ?: ""
-        val language = filters.filterIsInstance<LanguageFilter>().firstOrNull()?.selected
-        val genre = filters.filterIsInstance<GenreFilter>().firstOrNull()?.selected
-        val status = filters.filterIsInstance<StatusFilter>().firstOrNull()?.selected
-        
-        return repository.searchBooks(
-            query = query,
-            language = language,
-            genre = genre,
-            status = status,
-            page = page
+        return try {
+            val query = filters.filterIsInstance<Filter.Title>().firstOrNull()?.value ?: ""
+            val language = filters.filterIsInstance<LanguageFilter>().firstOrNull()?.selected
+            val genre = filters.filterIsInstance<GenreFilter>().firstOrNull()?.selected
+            val status = filters.filterIsInstance<StatusFilter>().firstOrNull()?.selected
+            
+            repository.searchBooks(
+                query = query,
+                language = language,
+                genre = genre,
+                status = status,
+                page = page
+            )
+        } catch (e: Exception) {
+            // Return a helpful placeholder when not configured
+            if (page == 1) {
+                MangasPageInfo(
+                    mangas = listOf(createWelcomePlaceholder()),
+                    hasNextPage = false
+                )
+            } else {
+                MangasPageInfo.empty()
+            }
+        }
+    }
+    
+    /**
+     * Create a welcome placeholder manga that explains how to configure the source.
+     */
+    private fun createWelcomePlaceholder(): MangaInfo {
+        return MangaInfo(
+            key = "welcome",
+            title = "Welcome to Community Source",
+            author = "IReader Team",
+            description = NOT_CONFIGURED_MESSAGE.trimIndent(),
+            cover = ICON_URL,
+            genres = listOf("Guide", "Setup"),
+            status = MangaInfo.UNKNOWN
         )
     }
     

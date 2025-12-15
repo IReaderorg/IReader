@@ -44,6 +44,13 @@ expect object PlatformConfig {
     fun getR2BucketName(): String
     fun getR2PublicUrl(): String
     
+    // Cloudflare D1 + R2 (Community Translations)
+    fun getCommunityCloudflareAccountId(): String
+    fun getCommunityCloudflareApiToken(): String
+    fun getCommunityD1DatabaseId(): String
+    fun getCommunityR2BucketName(): String
+    fun getCommunityR2PublicUrl(): String
+    
     // Device identification for license binding
     fun getDeviceId(): String
 }

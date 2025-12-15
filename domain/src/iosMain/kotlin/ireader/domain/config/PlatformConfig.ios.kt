@@ -28,6 +28,14 @@ actual object PlatformConfig {
     actual fun getR2BucketName(): String = "ireader-character-art"
     actual fun getR2PublicUrl(): String = ""
     
+    // Cloudflare D1 + R2 (Community Translations)
+    // TODO: Read from Info.plist or environment configuration
+    actual fun getCommunityCloudflareAccountId(): String = ""
+    actual fun getCommunityCloudflareApiToken(): String = ""
+    actual fun getCommunityD1DatabaseId(): String = ""
+    actual fun getCommunityR2BucketName(): String = "ireader-community-translations"
+    actual fun getCommunityR2PublicUrl(): String = ""
+    
     // Device identification for license binding
     actual fun getDeviceId(): String {
         // iOS: Use identifierForVendor or generate UUID

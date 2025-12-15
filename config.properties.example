@@ -84,6 +84,28 @@ r2.publicUrl=https://pub-your-bucket-id.r2.dev
 # 7. See QUICK_START_7PROJECT.md for detailed setup guide
 
 # ============================================
+# CLOUDFLARE D1 + R2 (Community Translations)
+# ============================================
+# Optional: Pre-configure community translation storage
+# Users can override these in Settings → Community Source
+# See docs/CLOUDFLARE_COMMUNITY_TRANSLATIONS.md for setup guide
+
+# Cloudflare Account ID (from dashboard URL)
+# community.cloudflare.accountId=your-account-id
+
+# API Token with D1 and R2 permissions
+# community.cloudflare.apiToken=your-api-token
+
+# D1 Database ID for translation metadata
+# community.d1.databaseId=your-d1-database-id
+
+# R2 Bucket name for translation content
+# community.r2.bucketName=ireader-community-translations
+
+# R2 Public URL (optional, for CDN access)
+# community.r2.publicUrl=https://your-bucket.r2.dev
+
+# ============================================
 # MULTI-PROJECT SETUP (3.5GB) - ADVANCED
 # ============================================
 # For maximum storage, create 7 separate projects

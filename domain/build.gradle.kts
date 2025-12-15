@@ -54,6 +54,13 @@ android {
         buildConfigField("String", "R2_SECRET_ACCESS_KEY", "\"${getConfigProperty("R2_SECRET_ACCESS_KEY", "r2.secretAccessKey")}\"")
         buildConfigField("String", "R2_BUCKET_NAME", "\"${getConfigProperty("R2_BUCKET_NAME", "r2.bucketName")}\"")
         buildConfigField("String", "R2_PUBLIC_URL", "\"${getConfigProperty("R2_PUBLIC_URL", "r2.publicUrl")}\"")
+        
+        // Cloudflare D1 + R2 Community Translations Configuration
+        buildConfigField("String", "COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "\"${getConfigProperty("COMMUNITY_CLOUDFLARE_ACCOUNT_ID", "community.cloudflare.accountId")}\"")
+        buildConfigField("String", "COMMUNITY_CLOUDFLARE_API_TOKEN", "\"${getConfigProperty("COMMUNITY_CLOUDFLARE_API_TOKEN", "community.cloudflare.apiToken")}\"")
+        buildConfigField("String", "COMMUNITY_D1_DATABASE_ID", "\"${getConfigProperty("COMMUNITY_D1_DATABASE_ID", "community.d1.databaseId")}\"")
+        buildConfigField("String", "COMMUNITY_R2_BUCKET_NAME", "\"${getConfigProperty("COMMUNITY_R2_BUCKET_NAME", "community.r2.bucketName")}\"")
+        buildConfigField("String", "COMMUNITY_R2_PUBLIC_URL", "\"${getConfigProperty("COMMUNITY_R2_PUBLIC_URL", "community.r2.publicUrl")}\"")
 
         // Use standard flavor by default when consumed by modules with flavors
         missingDimensionStrategy("default", "standard")

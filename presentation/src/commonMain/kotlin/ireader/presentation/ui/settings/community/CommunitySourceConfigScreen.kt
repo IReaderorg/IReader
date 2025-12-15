@@ -23,6 +23,9 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Compress
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -118,10 +121,37 @@ class CommunitySourceConfigScreen {
                         ContributorSettingsCard(
                             contributorName = state.contributorName,
                             autoShareTranslations = state.autoShareTranslations,
+                            autoShareAiOnly = state.autoShareAiOnly,
                             showContributorBadge = state.showContributorBadge,
+                            checkCommunityFirst = state.checkCommunityFirst,
                             onContributorNameChanged = { viewModel.setContributorName(it) },
                             onAutoShareChanged = { viewModel.setAutoShareTranslations(it) },
-                            onShowBadgeChanged = { viewModel.setShowContributorBadge(it) }
+                            onAutoShareAiOnlyChanged = { viewModel.setAutoShareAiOnly(it) },
+                            onShowBadgeChanged = { viewModel.setShowContributorBadge(it) },
+                            onCheckCommunityFirstChanged = { viewModel.setCheckCommunityFirst(it) }
+                        )
+                    }
+                    
+                    // Cloudflare D1 + R2 Configuration
+                    item {
+                        CloudflareConfigCard(
+                            accountId = state.cloudflareAccountId,
+                            apiToken = state.cloudflareApiToken,
+                            d1DatabaseId = state.cloudflareD1DatabaseId,
+                            r2BucketName = state.cloudflareR2BucketName,
+                            r2PublicUrl = state.cloudflareR2PublicUrl,
+                            compressionEnabled = state.cloudflareCompressionEnabled,
+                            isConfigured = state.isCloudflareConfigured,
+                            isTesting = state.isTestingCloudflare,
+                            testResult = state.cloudflareTestResult,
+                            onAccountIdChanged = { viewModel.setCloudflareAccountId(it) },
+                            onApiTokenChanged = { viewModel.setCloudflareApiToken(it) },
+                            onD1DatabaseIdChanged = { viewModel.setCloudflareD1DatabaseId(it) },
+                            onR2BucketNameChanged = { viewModel.setCloudflareR2BucketName(it) },
+                            onR2PublicUrlChanged = { viewModel.setCloudflareR2PublicUrl(it) },
+                            onCompressionEnabledChanged = { viewModel.setCloudflareCompressionEnabled(it) },
+                            onSave = { viewModel.saveCloudflareConfiguration() },
+                            onTest = { viewModel.testCloudflareConnection() }
                         )
                     }
                     
@@ -356,10 +386,14 @@ private fun UrlConfigCard(
 private fun ContributorSettingsCard(
     contributorName: String,
     autoShareTranslations: Boolean,
+    autoShareAiOnly: Boolean,
     showContributorBadge: Boolean,
+    checkCommunityFirst: Boolean,
     onContributorNameChanged: (String) -> Unit,
     onAutoShareChanged: (Boolean) -> Unit,
-    onShowBadgeChanged: (Boolean) -> Unit
+    onAutoShareAiOnlyChanged: (Boolean) -> Unit,
+    onShowBadgeChanged: (Boolean) -> Unit,
+    onCheckCommunityFirstChanged: (Boolean) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -417,6 +451,56 @@ private fun ContributorSettingsCard(
                 Switch(
                     checked = autoShareTranslations,
                     onCheckedChange = onAutoShareChanged
+                )
+            }
+            
+            if (autoShareTranslations) {
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "AI Translations Only",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "Only share high-quality AI translations (OpenAI, Gemini, DeepSeek)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = autoShareAiOnly,
+                        onCheckedChange = onAutoShareAiOnlyChanged
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Check Community First",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "Look for existing community translations before translating",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = checkCommunityFirst,
+                    onCheckedChange = onCheckCommunityFirstChanged
                 )
             }
             
@@ -664,6 +748,248 @@ private fun SchemaTable(tableName: String, columns: List<String>) {
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(start = 8.dp, top = 2.dp)
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CloudflareConfigCard(
+    accountId: String,
+    apiToken: String,
+    d1DatabaseId: String,
+    r2BucketName: String,
+    r2PublicUrl: String,
+    compressionEnabled: Boolean,
+    isConfigured: Boolean,
+    isTesting: Boolean,
+    testResult: String?,
+    onAccountIdChanged: (String) -> Unit,
+    onApiTokenChanged: (String) -> Unit,
+    onD1DatabaseIdChanged: (String) -> Unit,
+    onR2BucketNameChanged: (String) -> Unit,
+    onR2PublicUrlChanged: (String) -> Unit,
+    onCompressionEnabledChanged: (Boolean) -> Unit,
+    onSave: () -> Unit,
+    onTest: () -> Unit
+) {
+    var showApiToken by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(!isConfigured) }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isConfigured) 
+                MaterialTheme.colorScheme.secondaryContainer 
+            else 
+                MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Cloud,
+                        contentDescription = null,
+                        tint = if (isConfigured) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = "Cloudflare D1 + R2",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = if (isConfigured) "✓ Configured" else "Not configured",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (isConfigured) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                IconButton(onClick = { expanded = !expanded }) {
+                    Text(if (expanded) "▲" else "▼")
+                }
+            }
+            
+            if (!expanded) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "High-capacity storage for community translations with compression",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            if (expanded) {
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text(
+                    text = "Cloudflare provides 5GB D1 + 10GB R2 free tier for translation storage",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = accountId,
+                    onValueChange = onAccountIdChanged,
+                    label = { Text("Account ID") },
+                    placeholder = { Text("Your Cloudflare Account ID") },
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                OutlinedTextField(
+                    value = apiToken,
+                    onValueChange = onApiTokenChanged,
+                    label = { Text("API Token") },
+                    placeholder = { Text("Token with D1 and R2 permissions") },
+                    leadingIcon = { Icon(Icons.Default.Key, contentDescription = null) },
+                    trailingIcon = {
+                        IconButton(onClick = { showApiToken = !showApiToken }) {
+                            Icon(
+                                imageVector = if (showApiToken) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (showApiToken) "Hide" else "Show"
+                            )
+                        }
+                    },
+                    visualTransformation = if (showApiToken) VisualTransformation.None else PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                OutlinedTextField(
+                    value = d1DatabaseId,
+                    onValueChange = onD1DatabaseIdChanged,
+                    label = { Text("D1 Database ID") },
+                    placeholder = { Text("UUID of your D1 database") },
+                    leadingIcon = { Icon(Icons.Default.Storage, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                OutlinedTextField(
+                    value = r2BucketName,
+                    onValueChange = onR2BucketNameChanged,
+                    label = { Text("R2 Bucket Name") },
+                    placeholder = { Text("e.g., community-translations") },
+                    leadingIcon = { Icon(Icons.Default.Cloud, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                OutlinedTextField(
+                    value = r2PublicUrl,
+                    onValueChange = onR2PublicUrlChanged,
+                    label = { Text("R2 Public URL (Optional)") },
+                    placeholder = { Text("https://your-bucket.r2.dev") },
+                    leadingIcon = { Icon(Icons.Default.Link, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Compress,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                text = "Enable Compression",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "Reduce storage usage by ~40%",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Switch(
+                        checked = compressionEnabled,
+                        onCheckedChange = onCompressionEnabledChanged
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onTest,
+                        enabled = !isTesting,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        if (isTesting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Text("Validate")
+                        }
+                    }
+                    
+                    Button(
+                        onClick = onSave,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Save")
+                    }
+                }
+                
+                testResult?.let { result ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = result,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (result.contains("✓"))
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }

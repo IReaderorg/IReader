@@ -123,6 +123,12 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
+          # Cloudflare D1 + R2 Community Translations
+          COMMUNITY_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.COMMUNITY_CLOUDFLARE_ACCOUNT_ID }}
+          COMMUNITY_CLOUDFLARE_API_TOKEN: ${{ secrets.COMMUNITY_CLOUDFLARE_API_TOKEN }}
+          COMMUNITY_D1_DATABASE_ID: ${{ secrets.COMMUNITY_D1_DATABASE_ID }}
+          COMMUNITY_R2_BUCKET_NAME: ${{ secrets.COMMUNITY_R2_BUCKET_NAME }}
+          COMMUNITY_R2_PUBLIC_URL: ${{ secrets.COMMUNITY_R2_PUBLIC_URL }}
         with:
           arguments: >
             ${{ matrix.build }}

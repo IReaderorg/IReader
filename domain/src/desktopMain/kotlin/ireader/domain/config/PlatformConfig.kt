@@ -130,6 +130,37 @@ actual object PlatformConfig {
             ?: ConfigLoader.get("r2.publicUrl", "")
     }
     
+    // Cloudflare D1 + R2 (Community Translations)
+    actual fun getCommunityCloudflareAccountId(): String {
+        return System.getProperty("community.cloudflare.accountId")
+            ?: System.getenv("COMMUNITY_CLOUDFLARE_ACCOUNT_ID")
+            ?: ConfigLoader.get("community.cloudflare.accountId", "")
+    }
+    
+    actual fun getCommunityCloudflareApiToken(): String {
+        return System.getProperty("community.cloudflare.apiToken")
+            ?: System.getenv("COMMUNITY_CLOUDFLARE_API_TOKEN")
+            ?: ConfigLoader.get("community.cloudflare.apiToken", "")
+    }
+    
+    actual fun getCommunityD1DatabaseId(): String {
+        return System.getProperty("community.d1.databaseId")
+            ?: System.getenv("COMMUNITY_D1_DATABASE_ID")
+            ?: ConfigLoader.get("community.d1.databaseId", "")
+    }
+    
+    actual fun getCommunityR2BucketName(): String {
+        return System.getProperty("community.r2.bucketName")
+            ?: System.getenv("COMMUNITY_R2_BUCKET_NAME")
+            ?: ConfigLoader.get("community.r2.bucketName", "ireader-community-translations")
+    }
+    
+    actual fun getCommunityR2PublicUrl(): String {
+        return System.getProperty("community.r2.publicUrl")
+            ?: System.getenv("COMMUNITY_R2_PUBLIC_URL")
+            ?: ConfigLoader.get("community.r2.publicUrl", "")
+    }
+    
     // Device identification for license binding
     actual fun getDeviceId(): String {
         // Desktop: Use combination of hostname and MAC address hash
