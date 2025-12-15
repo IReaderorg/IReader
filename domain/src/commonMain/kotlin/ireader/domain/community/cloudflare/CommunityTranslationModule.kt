@@ -2,6 +2,7 @@ package ireader.domain.community.cloudflare
 
 import ireader.core.http.HttpClients
 import ireader.domain.community.CommunityPreferences
+import ireader.domain.data.repository.RemoteRepository
 import org.koin.dsl.module
 
 /**
@@ -60,7 +61,8 @@ val communityTranslationModule = module {
     single<AutoShareTranslationUseCase> {
         AutoShareTranslationUseCase(
             communityPreferences = get(),
-            translationRepository = get()
+            translationRepository = get(),
+            remoteRepository = getOrNull() // Optional - for getting user ID if authenticated
         )
     }
 }

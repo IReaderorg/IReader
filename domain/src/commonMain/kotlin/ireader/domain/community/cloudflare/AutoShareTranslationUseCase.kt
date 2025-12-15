@@ -3,6 +3,7 @@ package ireader.domain.community.cloudflare
 import ireader.core.log.Log
 import ireader.domain.community.CommunityPreferences
 import ireader.domain.data.engines.TranslateEngine
+import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 
@@ -17,7 +18,8 @@ import ireader.domain.models.entities.Chapter
  */
 class AutoShareTranslationUseCase(
     private val communityPreferences: CommunityPreferences,
-    private val translationRepository: CommunityTranslationRepository?
+    private val translationRepository: CommunityTranslationRepository?,
+    private val remoteRepository: RemoteRepository? = null
 ) {
     
     // AI engine IDs that produce high-quality translations
@@ -97,7 +99,14 @@ class AutoShareTranslationUseCase(
         }
         
         val contributorName = communityPreferences.contributorName().get()
-        val contributorId = "" // TODO: Get from auth if available
+        
+        // Get contributor ID from auth if available (anonymous if not logged in)
+        val contributorId = try {
+            remoteRepository?.getCurrentUser()?.getOrNull()?.id ?: ""
+        } catch (e: Exception) {
+            Log.debug { "AutoShare: Could not get user ID, contributing anonymously" }
+            ""
+        }
         
         val engineName = TranslateEngine.valueOf(engineId).lowercase()
         
