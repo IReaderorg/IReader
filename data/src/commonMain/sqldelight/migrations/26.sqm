@@ -1,0 +1,5 @@
+-- Migration 26: Add custom_cover column to book table
+-- This allows users to set custom cover images that persist across book updates
+-- The custom_cover is separate from thumbnail_url (source cover) to preserve user customizations
+
+ALTER TABLE book ADD COLUMN custom_cover TEXT NOT NULL DEFAULT '';

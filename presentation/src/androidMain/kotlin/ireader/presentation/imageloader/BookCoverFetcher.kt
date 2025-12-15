@@ -68,13 +68,35 @@ class BookCoverFetcher(
         if (url == null) error("No cover specified")
         return when (getResourceType(url)) {
             Type.File -> {
-                val path = url.substringAfter("file://")
-                httpLoader()
+                // Load from local file path (file:// URL or absolute path)
+                val path = if (url.startsWith("file://")) {
+                    url.substringAfter("file://")
+                } else {
+                    url
+                }
+                filePathLoader(path)
             }
             Type.URI -> fileUriLoader(url)
             Type.URL -> httpLoader()
             null -> error("Invalid image")
         }
+    }
+    
+    private suspend fun filePathLoader(path: String): FetchResult {
+        val file = java.io.File(path)
+        if (!file.exists()) {
+            error("File not found: $path")
+        }
+        val okioPath = path.toPath()
+        return SourceFetchResult(
+            source = ImageSource(
+                file = okioPath,
+                fileSystem = FileSystem.SYSTEM,
+                diskCacheKey = diskCacheKey
+            ),
+            mimeType = "image/*",
+            dataSource = DataSource.DISK,
+        )
     }
 
     private suspend fun fileLoader(file: VirtualFile): FetchResult {
@@ -325,13 +347,14 @@ class BookCoverFetcher(
     ) : Fetcher.Factory<Book> {
 
         override fun create(data: Book, options: Options, imageLoader: ImageLoader): Fetcher {
+            val bookCover = BookCover.from(data)
             return BookCoverFetcher(
-                url = data.cover,
+                url = bookCover.cover, // Use cover from BookCover which prioritizes customCover
                 isLibraryManga = data.favorite,
                 options = options,
-                bookCover = BookCover.from(data),
+                bookCover = bookCover,
                 coverCache = coverCache,
-                diskCacheKeyLazy = lazy { BookCoverKeyer().key(BookCover.from(data), options) },
+                diskCacheKeyLazy = lazy { BookCoverKeyer().key(bookCover, options) },
                 sourceLazy = lazy { catalogStore.get(data.sourceId)?.source as? HttpSource },
                 callFactoryLazy = callFactoryLazy,
                 diskCacheLazy = diskCacheLazy,

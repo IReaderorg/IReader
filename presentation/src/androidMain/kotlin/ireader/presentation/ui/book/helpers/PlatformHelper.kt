@@ -5,16 +5,23 @@ import android.content.ClipboardManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import ireader.core.log.Log
+import ireader.domain.image.cache.DiskUtil
 import java.io.File
 
 /**
  * Android implementation of platform-specific helper functions.
  */
 actual class PlatformHelper(private val context: Context) {
+    
+    companion object {
+        private const val CUSTOM_COVERS_DIR = "IReader/cache/covers/custom"
+    }
+    
     actual fun shareText(text: String, title: String) {
         try {
             val intent = Intent(Intent.ACTION_SEND).apply {
@@ -85,6 +92,46 @@ actual class PlatformHelper(private val context: Context) {
             clipboard?.setPrimaryClip(clip)
         } catch (e: Exception) {
             Log.error("Failed to copy to clipboard", e)
+        }
+    }
+    
+    /**
+     * Copy an image from a URI to the app's custom cover directory.
+     * The image is stored in the cache directory with a hashed filename based on bookId.
+     * 
+     * @param sourceUri The URI of the source image (content:// or file://)
+     * @param bookId The ID of the book to save the cover for
+     * @return The file path of the saved cover (file:// URI), or null if failed
+     */
+    actual suspend fun copyImageToCustomCover(sourceUri: String, bookId: Long): String? {
+        return try {
+            val uri = Uri.parse(sourceUri)
+            val customCoverDir = File(context.cacheDir, CUSTOM_COVERS_DIR)
+            if (!customCoverDir.exists()) {
+                customCoverDir.mkdirs()
+            }
+            
+            // Use hashed filename for consistency with CoverCache
+            val fileName = DiskUtil.hashKeyForDisk(bookId.toString())
+            val destFile = File(customCoverDir, fileName)
+            
+            // Copy the image from URI to destination file
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                destFile.outputStream().use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            } ?: run {
+                Log.error { "Failed to open input stream for URI: $sourceUri" }
+                return null
+            }
+            
+            Log.info { "Custom cover saved to: ${destFile.absolutePath}" }
+            
+            // Return file:// URI that can be loaded by image loader
+            "file://${destFile.absolutePath}"
+        } catch (e: Exception) {
+            Log.error("Failed to copy image to custom cover", e)
+            null
         }
     }
 }

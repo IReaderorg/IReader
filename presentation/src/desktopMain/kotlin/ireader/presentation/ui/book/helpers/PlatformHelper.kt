@@ -90,4 +90,37 @@ actual class PlatformHelper {
             Log.error("Failed to copy to clipboard", e)
         }
     }
+    
+    /**
+     * Copy an image from a file path to the app's custom cover directory.
+     * 
+     * @param sourceUri The file path of the source image
+     * @param bookId The ID of the book to save the cover for
+     * @return The file path of the saved cover, or null if failed
+     */
+    actual suspend fun copyImageToCustomCover(sourceUri: String, bookId: Long): String? {
+        return try {
+            val sourceFile = File(sourceUri.removePrefix("file://"))
+            if (!sourceFile.exists()) {
+                Log.error { "Source file does not exist: $sourceUri" }
+                return null
+            }
+            
+            // Create custom covers directory in user home
+            val customCoverDir = File(System.getProperty("user.home"), ".ireader/cache/covers/custom")
+            if (!customCoverDir.exists()) {
+                customCoverDir.mkdirs()
+            }
+            
+            // Use bookId as filename for consistency
+            val destFile = File(customCoverDir, "$bookId")
+            sourceFile.copyTo(destFile, overwrite = true)
+            
+            Log.info { "Custom cover saved to: ${destFile.absolutePath}" }
+            "file://${destFile.absolutePath}"
+        } catch (e: Exception) {
+            Log.error("Failed to copy image to custom cover", e)
+            null
+        }
+    }
 }

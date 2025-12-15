@@ -27,36 +27,58 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 
+/**
+ * Modern book header component displaying cover and book info.
+ * 
+ * The cover displays customCover if set by user, otherwise shows the default cover.
+ * Custom covers are preserved when updating book details from remote source.
+ * 
+ * Tap on cover opens the cover preview dialog with options to:
+ * - Pick local image
+ * - Edit cover URL
+ * - Share cover
+ * - Reset to original
+ * 
+ * @param book The book to display
+ * @param source The source of the book
+ * @param onTitle Callback when title is clicked
+ * @param onCopyTitle Callback when title is long-pressed (copy)
+ * @param onCoverClick Callback when cover is clicked (opens cover preview dialog)
+ * @param modifier Modifier for the component
+ */
 @Composable
 fun ModernBookHeader(
     book: Book,
     source: Source?,
     onTitle: (String) -> Unit,
     onCopyTitle: (String) -> Unit,
+    onCoverClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Enhanced cover with shadow
+        // Enhanced cover with shadow - uses BookCover.from() which prioritizes customCover
         Card(
             modifier = Modifier
                 .width(120.dp)
                 .height(170.dp),
             shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            onClick = { onCoverClick?.invoke() }
         ) {
-            Box {
+            Box(modifier = Modifier.fillMaxSize()) {
                 BookImageCover.Book(
                     data = BookCover.from(book),
                     modifier = Modifier.fillMaxSize()
                 )
                 
-                // Status badge overlay
+                // Status badge overlay (top-right)
                 if (book.status != MangaInfo.UNKNOWN) {
                     Surface(
                         modifier = Modifier

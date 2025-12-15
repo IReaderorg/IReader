@@ -15,6 +15,7 @@ SELECT
     book.source,
     book.favorite,
     book.thumbnail_url AS thumbnailUrl,
+    book.custom_cover AS customCover,
     book.cover_last_modified AS coverLastModified,
     chapter.date_upload AS dateUpload,
     chapter.date_fetch AS datefetch,

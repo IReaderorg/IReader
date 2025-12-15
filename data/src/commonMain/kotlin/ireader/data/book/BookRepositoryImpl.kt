@@ -148,6 +148,7 @@ class BookRepositoryImpl(
                 chapterFlags = book.flags,
                 coverLastModified = 0,
                 thumbnailUrl = book.cover,
+                customCover = book.customCover,
                 viewer = book.viewer,
                 id = book.id,
                 initialized = book.initialized,
@@ -184,6 +185,7 @@ class BookRepositoryImpl(
                         chapterFlags = bookItem.flags,
                         coverLastModified = 0,
                         thumbnailUrl = bookItem.cover,
+                        customCover = bookItem.customCover,
                         viewer = bookItem.viewer,
                         id = bookItem.id,
                         initialized = bookItem.initialized,
@@ -222,6 +224,7 @@ class BookRepositoryImpl(
                 coverLastModified = 0,
                 nextUpdate = 0,
                 thumbnailUrl = book.cover,
+                customCover = book.customCover,
                 viewerFlags = book.viewer,
                 isPinned = book.isPinned,
                 pinnedOrder = book.pinnedOrder.toLong(),
@@ -241,6 +244,12 @@ class BookRepositoryImpl(
         
         return if (existingBook != null) {
             // Book exists - update it and return existing ID
+            // Preserve customCover if not explicitly set in the new book
+            val customCoverToUse = if (book.customCover.isNotBlank()) {
+                book.customCover
+            } else {
+                existingBook.customCover
+            }
             handler.await(inTransaction = true) {
                 bookQueries.update(
                     source = book.sourceId,
@@ -254,6 +263,7 @@ class BookRepositoryImpl(
                     chapterFlags = book.flags,
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
+                    customCover = customCoverToUse,
                     viewer = book.viewer,
                     id = existingBook.id,
                     initialized = book.initialized,
@@ -286,6 +296,7 @@ class BookRepositoryImpl(
                     coverLastModified = 0,
                     nextUpdate = 0,
                     thumbnailUrl = book.cover,
+                    customCover = book.customCover,
                     viewerFlags = book.viewer,
                     isPinned = book.isPinned,
                     pinnedOrder = book.pinnedOrder.toLong(),
@@ -316,6 +327,7 @@ class BookRepositoryImpl(
                 coverLastModified = 0,
                 nextUpdate = 0,
                 thumbnailUrl = book.cover,
+                customCover = book.customCover,
                 viewerFlags = book.viewer,
                 isPinned = book.isPinned,
                 pinnedOrder = book.pinnedOrder.toLong(),
@@ -390,6 +402,7 @@ class BookRepositoryImpl(
                     chapterFlags = book.flags,
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
+                    customCover = book.customCover,
                     viewerFlags = book.viewer,
                     initialized = book.initialized,
                     favorite = book.favorite,
@@ -423,6 +436,7 @@ class BookRepositoryImpl(
                     chapterFlags = book.flags,
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
+                    customCover = book.customCover,
                     viewerFlags = book.viewer,
                     initialized = book.initialized,
                     favorite = book.favorite,
@@ -453,6 +467,7 @@ class BookRepositoryImpl(
                     chapterFlags = book.flags,
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
+                    customCover = book.customCover,
                     viewer = book.viewer,
                     id = book.id,
                     initialized = book.initialized,
@@ -482,6 +497,7 @@ class BookRepositoryImpl(
                     chapterFlags = book.flags,
                     coverLastModified = 0,
                     thumbnailUrl = book.cover,
+                    customCover = book.customCover,
                     viewer = book.viewer,
                     id = book.id,
                     initialized = book.initialized,

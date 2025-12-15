@@ -75,7 +75,9 @@ private class NavigationCallbacks(
     val onNavigateToReader: (bookId: Long, chapterId: Long) -> Unit,
     val onNavigateToGlobalSearch: (query: String) -> Unit,
     val onNavigateToWebView: (url: String, sourceId: Long, bookId: Long) -> Unit,
-    val onPopBackStack: () -> Unit
+    val onPopBackStack: () -> Unit,
+    val onNavigateToCharacterArtGallery: () -> Unit,
+    val onNavigateToCharacterArtDetail: (artId: String) -> Unit
 )
 
 data class BookDetailScreenSpec constructor(
@@ -180,6 +182,12 @@ data class BookDetailScreenSpec constructor(
                     ScreenProfiler.startScreen("Navigation_DetailToLibrary")
                     ScreenProfiler.mark("Navigation_DetailToLibrary", "back_pressed")
                     navController.popBackStack() 
+                },
+                onNavigateToCharacterArtGallery = {
+                    navController.navigate(ireader.presentation.core.NavigationRoutes.characterArtGallery)
+                },
+                onNavigateToCharacterArtDetail = { artId ->
+                    navController.navigate("${ireader.presentation.core.NavigationRoutes.characterArtDetail}/$artId")
                 }
             )
         }
@@ -561,6 +569,11 @@ data class BookDetailScreenSpec constructor(
                             },
                             onFavorite = { vm.toggleInLibrary(state.book) },
                             onCopyTitle = { title -> vm.copyToClipboard("Title", title) },
+                            onEditInfo = { vm.showDialog = true },
+                            onPickLocalCover = { vm.showImagePickerDialog = true },
+                            onShowCoverPreview = { vm.showCoverPreviewDialog = true },
+                            onCharacterArtGallery = navigationCallbacks.onNavigateToCharacterArtGallery,
+                            onCharacterArtDetail = navigationCallbacks.onNavigateToCharacterArtDetail,
                         )
                     }
                 }
@@ -614,6 +627,45 @@ data class BookDetailScreenSpec constructor(
                     vm.scope.launch {
                         vm.insertUseCases.insertBook(updatedBook)
                     }
+                }
+            )
+        }
+        
+        // Image picker for custom cover
+        ireader.presentation.ui.book.components.ImagePickerDialog(
+            show = vm.showImagePickerDialog,
+            onImageSelected = { uri ->
+                vm.showImagePickerDialog = false
+                vm.handleImageSelected(uri)
+            },
+            onDismiss = { vm.showImagePickerDialog = false }
+        )
+        
+        // Cover preview dialog with options
+        if (vm.showCoverPreviewDialog) {
+            ireader.presentation.ui.book.components.CoverPreviewDialog(
+                book = state.book,
+                onDismiss = { vm.showCoverPreviewDialog = false },
+                onPickLocalImage = { 
+                    vm.showCoverPreviewDialog = false
+                    vm.showImagePickerDialog = true 
+                },
+                onEditCoverUrl = { 
+                    vm.showCoverPreviewDialog = false
+                    vm.showDialog = true 
+                },
+                onShareCover = {
+                    // Share the cover URL
+                    val coverUrl = if (state.book.customCover.isNotBlank()) {
+                        state.book.customCover
+                    } else {
+                        state.book.cover
+                    }
+                    vm.shareText(coverUrl, state.book.title)
+                },
+                onResetCover = {
+                    vm.showCoverPreviewDialog = false
+                    vm.resetCustomCover()
                 }
             )
         }

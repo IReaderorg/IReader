@@ -173,6 +173,7 @@ data class LibraryBook(
     override val title: String,
     val status: Long,
     val cover: String,
+    val customCover: String = "",
     val lastUpdate: Long = 0,
 ) : BookBase {
     var dateFetched: Long = 0
@@ -189,6 +190,10 @@ data class LibraryBook(
     var isPinned: Boolean = false
     var pinnedOrder: Int = 0
     var isArchived: Boolean = false
+    
+    /** Returns the effective cover URL, prioritizing customCover if set */
+    val effectiveCover: String
+        get() = if (customCover.isNotBlank() && customCover != cover) customCover else cover
 
     fun toBookItem(): BookItem {
         return BookItem(
@@ -199,7 +204,7 @@ data class LibraryBook(
             unread = unreadCount,
             downloaded = readCount,
             key = key,
-            customCover = cover,
+            customCover = customCover,
             lastRead = lastRead,
             totalChapters = totalChapters,
             favorite = hasStarted,
@@ -215,6 +220,7 @@ data class LibraryBook(
             sourceId = sourceId,
             title = title,
             key = key,
+            customCover = customCover,
         )
     }
 }

@@ -104,6 +104,11 @@ fun BookDetailScreen(
     onFavorite: () -> Unit,
     onWebView: () -> Unit,
     onCopyTitle: (bookTitle: String) -> Unit,
+    onEditInfo: () -> Unit = {},
+    onPickLocalCover: () -> Unit = {},
+    onShowCoverPreview: () -> Unit = {},
+    onCharacterArtGallery: () -> Unit = {},
+    onCharacterArtDetail: (String) -> Unit = {},
     uiPreferences: UiPreferences = koinInject(),
 ) {
     val focusManager = LocalFocusManager.current
@@ -230,8 +235,12 @@ fun BookDetailScreen(
                     onWebView = onWebView,
                     onCopyTitle = onCopyTitle,
                     onMigrate = { vm.loadMigrationSources() },
+                    onShowCoverPreview = onShowCoverPreview,
                     hideBackdrop = hideBackdrop,
-                    chapterCount = chapters.value.size
+                    chapterCount = chapters.value.size,
+                    uiPreferences = uiPreferences,
+                    onCharacterArtGallery = onCharacterArtGallery,
+                    onCharacterArtDetail = onCharacterArtDetail
                 )
             },
             endContent = {
@@ -273,7 +282,8 @@ fun BookDetailScreen(
                             book = book,
                             source = source,
                             onTitle = onTitle,
-                            onCopyTitle = onCopyTitle
+                            onCopyTitle = onCopyTitle,
+                            onCoverClick = onShowCoverPreview
                         )
                     }
                     item {
@@ -313,7 +323,9 @@ fun BookDetailScreen(
                     item {
                         CharacterArtSectionWrapper(
                             bookTitle = book.title,
-                            uiPreferences = uiPreferences
+                            uiPreferences = uiPreferences,
+                            onViewAllClick = onCharacterArtGallery,
+                            onArtClick = { art -> onCharacterArtDetail(art.id) }
                         )
                     }
                     item {
@@ -451,8 +463,12 @@ private fun BookInfoPanel(
     onWebView: () -> Unit,
     onCopyTitle: (String) -> Unit,
     onMigrate: () -> Unit,
+    onShowCoverPreview: () -> Unit,
     hideBackdrop: Boolean,
     chapterCount: Int = 0,
+    uiPreferences: UiPreferences,
+    onCharacterArtGallery: () -> Unit,
+    onCharacterArtDetail: (String) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Backdrop behind everything
@@ -476,7 +492,8 @@ private fun BookInfoPanel(
                     book = book,
                     source = source,
                     onTitle = onCopyTitle,
-                    onCopyTitle = onCopyTitle
+                    onCopyTitle = onCopyTitle,
+                    onCoverClick = onShowCoverPreview
                 )
             }
             
@@ -510,6 +527,16 @@ private fun BookInfoPanel(
                 BookReviewsIntegration(
                     bookTitle = book.title,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
+            
+            // Character Art Section (if enabled)
+            item {
+                CharacterArtSectionWrapper(
+                    bookTitle = book.title,
+                    uiPreferences = uiPreferences,
+                    onViewAllClick = onCharacterArtGallery,
+                    onArtClick = { art -> onCharacterArtDetail(art.id) }
                 )
             }
         }
@@ -660,12 +687,15 @@ private fun ChapterListPanel(
 
 /**
  * Wrapper composable for Character Art Section that handles preference checking
- * and data loading. Only shows when the preference is enabled.
+ * and data loading. Only shows when the preference is enabled AND there is at least
+ * one image available for the book.
  */
 @Composable
 private fun CharacterArtSectionWrapper(
     bookTitle: String,
-    uiPreferences: UiPreferences
+    uiPreferences: UiPreferences,
+    onViewAllClick: () -> Unit,
+    onArtClick: (ireader.domain.models.characterart.CharacterArt) -> Unit
 ) {
     val showCharacterArt by uiPreferences.showCharacterArtInDetails().changes().collectAsState(initial = false)
     
@@ -699,12 +729,15 @@ private fun CharacterArtSectionWrapper(
         }
     }
     
-    CharacterArtSection(
-        bookTitle = bookTitle,
-        characterArtList = characterArtList,
-        isLoading = isLoading,
-        onViewAll = { /* Navigate to character art gallery with filter */ },
-        onArtClick = { /* Navigate to character art detail */ }
-    )
+    // Only show section when we have at least one image (not during loading, not when empty)
+    if (characterArtList.isNotEmpty()) {
+        CharacterArtSection(
+            bookTitle = bookTitle,
+            characterArtList = characterArtList,
+            isLoading = false, // Never show loading state since we only render when we have data
+            onViewAll = onViewAllClick,
+            onArtClick = onArtClick
+        )
+    }
 }
 

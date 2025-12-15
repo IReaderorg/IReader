@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS book(
     title TEXT NOT NULL,
     status INTEGER NOT NULL,
     thumbnail_url TEXT,
+    custom_cover TEXT NOT NULL DEFAULT '',
     favorite INTEGER AS Boolean NOT NULL,
     last_update INTEGER AS Long,
     next_update INTEGER AS Long,
@@ -241,14 +242,14 @@ INSERT OR IGNORE INTO book(
 _id,source,url,
 artist,author,description,
 genre,title,status,
-thumbnail_url,favorite,
+thumbnail_url,custom_cover,favorite,
 last_update,next_update,initialized,
 viewer,chapter_flags,cover_last_modified,
 date_added,is_pinned,pinned_order,is_archived)
 VALUES (:id,:source,:url,
 :artist,:author,:description,
 :genre,:title,:status,:thumbnailUrl,
-:favorite,:lastUpdate,:nextUpdate,:initialized,
+:customCover,:favorite,:lastUpdate,:nextUpdate,:initialized,
 :viewerFlags,:chapterFlags,:coverLastModified,
 :dateAdded,:isPinned,:pinnedOrder,:isArchived);
 
@@ -263,6 +264,7 @@ UPDATE book SET
     title = coalesce(:title, title),
     status = coalesce(:status, status),
     thumbnail_url = coalesce(:thumbnailUrl, thumbnail_url),
+    custom_cover = coalesce(:customCover, custom_cover),
     favorite = coalesce(:favorite, favorite),
     last_update = coalesce(:lastUpdate, last_update),
     initialized = coalesce(:initialized, initialized),

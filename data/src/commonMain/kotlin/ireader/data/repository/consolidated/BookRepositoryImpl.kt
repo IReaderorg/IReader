@@ -174,6 +174,7 @@ class BookRepositoryImpl(
                         title = book.title,
                         status = book.status,
                         thumbnailUrl = book.cover,
+                        customCover = book.customCover,
                         favorite = book.favorite,
                         lastUpdate = book.lastUpdate.toDB(),
                         nextUpdate = null,
@@ -238,6 +239,7 @@ class BookRepositoryImpl(
                 genre = update.genres?.joinToString(";"),
                 status = update.status,
                 thumbnailUrl = update.cover,
+                customCover = null, // Preserve existing customCover on partial updates
                 favorite = update.favorite,
                 lastUpdate = update.lastUpdate,
                 dateAdded = update.dateAdded,

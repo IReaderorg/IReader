@@ -72,19 +72,20 @@ val mangaChapterMapper: (Long, Long, String, String?, String?, String?, List<Str
     }
 
 val libraryManga:
-            (Long, Long, String, String?, String?, String?, List<String>?, String, Long, String?, Boolean, Long?, Long?, Boolean, Long, Long, Long, Long, Boolean, Long, Boolean, Long?) -> LibraryBook =
+            (Long, Long, String, String?, String?, String?, List<String>?, String, Long, String?, String, Boolean, Long?, Long?, Boolean, Long, Long, Long, Long, Boolean, Long, Boolean, Long?) -> LibraryBook =
     { _id, source, url, artist, author, description, genre, title,
-        status, thumbnail_url, favorite, last_update,
+        status, thumbnail_url, custom_cover, favorite, last_update,
       next_update, initialized, viewer, chapter_flags,
         cover_last_modified, date_added, is_pinned, pinned_order, is_archived, max ->
         LibraryBook(
-            _id,
-            source,
-            url,
-            title,
-            status,
-            thumbnail_url?:"",
-            last_update?:0L,
+            id = _id,
+            sourceId = source,
+            key = url,
+            title = title,
+            status = status,
+            cover = thumbnail_url?:"",
+            customCover = custom_cover,
+            lastUpdate = last_update?:0L,
         ).apply {
             this.unreadCount = unreadCount.toInt()
             this.readCount = readCount.toInt()
@@ -106,6 +107,7 @@ val booksMapper= { _id: Long,
                    title: String,
                    status: Long,
                    thumbnail_url: String?,
+                   custom_cover: String,
                    favorite: Boolean,
                    last_update: Long?,
                    next_update: Long?,
@@ -132,6 +134,7 @@ val booksMapper= { _id: Long,
         genres = genre ?: emptyList(),
         status = status ?: MangaInfo.UNKNOWN,
         cover = thumbnail_url ?:"",
+        customCover = custom_cover,
         initialized = initialized,
         isPinned = is_pinned,
         pinnedOrder = pinned_order.toInt(),
@@ -152,6 +155,7 @@ val getLibraryMapper = { _id: Long,
                          title: String,
                          status: Long,
                          thumbnail_url: String?,
+                         custom_cover: String,
                          favorite: Boolean,
                          last_update: Long?,
                          next_update: Long?,
@@ -168,13 +172,14 @@ val getLibraryMapper = { _id: Long,
                          category: Long, ->
 
     LibraryBook(
-        _id,
-        source,
-        url,
-        title,
-        status,
-        thumbnail_url?:"",
-        last_update?:0L,
+        id = _id,
+        sourceId = source,
+        key = url,
+        title = title,
+        status = status,
+        cover = thumbnail_url?:"",
+        customCover = custom_cover,
+        lastUpdate = last_update?:0L,
     ).apply {
         this.unreadCount = unread_count.toInt()
         this.readCount = read_count.toInt()
@@ -201,6 +206,7 @@ val getLibraryFastMapper = { _id: Long,
                               title: String,
                               status: Long,
                               thumbnail_url: String?,
+                              custom_cover: String,
                               favorite: Boolean,
                               last_update: Long?,
                               next_update: Long?,
@@ -217,13 +223,14 @@ val getLibraryFastMapper = { _id: Long,
                               read_count: Long, ->
 
     LibraryBook(
-        _id,
-        source,
-        url,
-        title,
-        status,
-        thumbnail_url ?: "",
-        last_update ?: 0L,
+        id = _id,
+        sourceId = source,
+        key = url,
+        title = title,
+        status = status,
+        cover = thumbnail_url ?: "",
+        customCover = custom_cover,
+        lastUpdate = last_update ?: 0L,
     ).apply {
         // Chapter counts are 0 from the fast query (hardcoded in SQL)
         this.unreadCount = unread_count.toInt()

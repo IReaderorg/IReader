@@ -1366,6 +1366,12 @@
     <string name="current_progress">Current Progress</string>
     <string name="currently_reading">Currently Reading</string>
     <string name="custom_cover">Custom Cover</string>
+    <string name="reset_cover">Reset</string>
+    <string name="custom_cover_set">Custom cover set successfully</string>
+    <string name="custom_cover_failed">Failed to set custom cover</string>
+    <string name="pick_image">Pick Image</string>
+    <string name="edit_url">Edit URL</string>
+    <string name="cover_reset_success">Cover reset to original</string>
     <string name="custom_fonts">Custom Fonts</string>
     <string name="customize_individual_colors_to_create">Customize individual colors to create your own theme</string>
     <string name="cutout_area_behavior">Cutout Area Behavior</string>

@@ -14,9 +14,11 @@ val historyMapper: (Long, Long, Long?, Long, Double?) -> History = { id, chapter
   )
 }
 
-val historyWithRelationsMapper: (Long, Long, Long, String, String?, Long, Boolean, Long, Float, Long?, Long, Double?, String) -> HistoryWithRelations = {
-    historyId, bookId, chapterId, title, thumbnailUrl, source, favorite, cover_last_modified,
+val historyWithRelationsMapper: (Long, Long, Long, String, String?, String, Long, Boolean, Long, Float, Long?, Long, Double?, String) -> HistoryWithRelations = {
+    historyId, bookId, chapterId, title, thumbnailUrl, customCover, source, favorite, cover_last_modified,
     chapterNumber, readAt, readDuration, progress, chapterName ->
+  // Use customCover if set, otherwise fall back to thumbnailUrl
+  val effectiveCover = if (customCover.isNotBlank() && customCover != thumbnailUrl) customCover else thumbnailUrl
   HistoryWithRelations(
     id = historyId,
     chapterId = chapterId,
@@ -29,8 +31,9 @@ val historyWithRelationsMapper: (Long, Long, Long, String, String?, Long, Boolea
       bookId = bookId,
       sourceId = source,
       favorite = favorite,
-      cover = thumbnailUrl,
+      cover = effectiveCover,
       lastModified = cover_last_modified,
+      hasCustomCover = customCover.isNotBlank() && customCover != thumbnailUrl,
     ),
     chapterName =chapterName,
   )

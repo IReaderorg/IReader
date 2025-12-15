@@ -15,6 +15,7 @@ val updatesMapper = {
         source: Long,
         favorite: Boolean,
         thumbnailUrl: String?,
+        customCover: String,
         coverLastModified: Long,
         dateUpload: Long,
         datefetch: Long,
@@ -22,6 +23,8 @@ val updatesMapper = {
         readingProgress: Double?,
         lastReadAt: Long?, ->
 
+    // Use customCover if set, otherwise fall back to thumbnailUrl
+    val effectiveCover = if (customCover.isNotBlank() && customCover != thumbnailUrl) customCover else thumbnailUrl
     UpdatesWithRelations(
         bookId = mangaId,
         bookTitle = mangaTitle,
@@ -36,8 +39,9 @@ val updatesMapper = {
             bookId = mangaId,
             sourceId = source,
             favorite = favorite,
-            cover = thumbnailUrl,
+            cover = effectiveCover,
             lastModified = coverLastModified,
+            hasCustomCover = customCover.isNotBlank() && customCover != thumbnailUrl,
         ),
          downloaded = downlaoded
     )

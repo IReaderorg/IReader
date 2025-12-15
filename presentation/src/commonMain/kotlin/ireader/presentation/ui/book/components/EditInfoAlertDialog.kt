@@ -11,6 +11,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Book
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.components.ChipPreference
@@ -18,6 +19,12 @@ import ireader.presentation.ui.component.components.IAlertDialog
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
+/**
+ * Dialog for editing book information.
+ * 
+ * Custom cover is stored in `customCover` field which is preserved when updating
+ * book details from remote source. This ensures user-set covers are not overwritten.
+ */
 @Composable
 fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm: (Book) -> Unit) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -33,16 +40,27 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
     var description by remember {
         mutableStateOf(book.description)
     }
-    var cover by remember {
-        mutableStateOf(book.cover)
+    // Use customCover if set, otherwise fall back to cover
+    // This allows users to see and edit their custom cover
+    var customCover by remember {
+        mutableStateOf(
+            if (book.customCover.isNotBlank() && book.customCover != book.cover) {
+                book.customCover
+            } else {
+                book.cover
+            }
+        )
     }
     var status by remember {
         mutableStateOf(book.status)
     }
     
+    // Track if user has modified the cover
+    val hasCustomCover = customCover.isNotBlank() && customCover != book.cover
+    
     // Validation state
     val isTitleValid = title.isNotBlank()
-    val isCoverUrlValid = cover.isBlank() || cover.startsWith("http://") || cover.startsWith("https://") || cover.startsWith("file://")
+    val isCoverUrlValid = customCover.isBlank() || customCover.startsWith("http://") || customCover.startsWith("https://") || customCover.startsWith("file://")
     val canSave = isTitleValid && isCoverUrlValid
     
     IAlertDialog(
@@ -63,13 +81,19 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                         if (canSave) {
                             onStateChange(state)
                             state = false
+                            // Update customCover field - this is preserved on remote updates
+                            // The cover field remains unchanged (source cover)
+                            // Update lastUpdate if customCover changed to invalidate image cache
+                            val coverChanged = customCover.trim() != book.customCover && 
+                                customCover.trim() != book.cover
                             onConfirm(
                                 book.copy(
                                     title = title.trim(),
                                     author = author.trim(),
                                     description = description.trim(),
-                                    cover = cover.trim(),
-                                    status = status
+                                    customCover = customCover.trim(),
+                                    status = status,
+                                    lastUpdate = if (coverChanged) currentTimeToLong() else book.lastUpdate
                                 )
                             )
                         }
@@ -129,11 +153,12 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                     maxLines = 5
                 )
                 
+                // Custom cover field with reset option
                 SimpleTextField(
-                    query = cover,
-                    onValueChange = { cover = it },
+                    query = customCover,
+                    onValueChange = { customCover = it },
                     onConfirm = {},
-                    hint = "Cover URL",
+                    hint = localizeHelper.localize(Res.string.custom_cover),
                     isError = !isCoverUrlValid
                 )
                 if (!isCoverUrlValid) {
@@ -143,6 +168,20 @@ fun EditInfoAlertDialog(onStateChange: (Boolean) -> Unit, book: Book, onConfirm:
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                     )
+                }
+                
+                // Show reset button if custom cover is set
+                if (hasCustomCover) {
+                    TextButton(
+                        onClick = { customCover = book.cover },
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Text(
+                            text = localizeHelper.localize(Res.string.reset_cover),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }

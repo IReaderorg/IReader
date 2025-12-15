@@ -167,6 +167,7 @@ class BookDetailViewModel(
     var showDialog by mutableStateOf(false)
     var showMigrationDialog by mutableStateOf(false)
     var showEpubExportDialog by mutableStateOf(false)
+    var showImagePickerDialog by mutableStateOf(false)
     var availableMigrationSources by mutableStateOf<List<CatalogLocal>>(emptyList())
     
     // Translation export state
@@ -1471,6 +1472,104 @@ class BookDetailViewModel(
         } else emptyList()
         modifiedCommandsState = commands
         updateSuccessState { it.copy(modifiedCommands = commands.toImmutableList()) }
+    }
+    
+    // ==================== Custom Cover ====================
+    
+    /**
+     * Handle image selection from the image picker.
+     * Copies the image to app storage and updates the book's customCover field.
+     * Also updates lastUpdate to invalidate image cache.
+     * 
+     * @param sourceUri The URI of the selected image (content:// or file://)
+     */
+    fun handleImageSelected(sourceUri: String) {
+        val currentBook = book ?: return
+        
+        scope.launch {
+            try {
+                // Copy the image to app's custom cover directory
+                val localFileUri = platformHelper.copyImageToCustomCover(sourceUri, currentBook.id)
+                
+                if (localFileUri != null) {
+                    // Update the book's customCover field and lastUpdate in the database
+                    // lastUpdate change ensures the image cache key changes
+                    val updatedBook = currentBook.copy(
+                        customCover = localFileUri,
+                        lastUpdate = currentTimeToLong()
+                    )
+                    localInsertUseCases.updateBook.update(updatedBook)
+                    
+                    Log.info { "Custom cover updated to: $localFileUri" }
+                    emitEvent(BookDetailEvent.ShowSnackbar("Custom cover set successfully"))
+                } else {
+                    emitEvent(BookDetailEvent.ShowSnackbar("Failed to copy image"))
+                }
+            } catch (e: Exception) {
+                Log.error("Failed to set custom cover", e)
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to set custom cover: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Update the book's custom cover from a local file URI.
+     * The URI should be a file:// path pointing to the copied image in app storage.
+     * This is called after the platform-specific image picker copies the image.
+     * 
+     * @param localFileUri The file:// URI of the copied image
+     */
+    fun updateCustomCoverFromLocal(localFileUri: String) {
+        val currentBook = book ?: return
+        
+        scope.launch {
+            try {
+                // Update the book's customCover field in the database
+                val updatedBook = currentBook.copy(customCover = localFileUri)
+                localInsertUseCases.updateBook.update(updatedBook)
+                
+                Log.info { "Custom cover updated to: $localFileUri" }
+                emitEvent(BookDetailEvent.ShowSnackbar("Custom cover set successfully"))
+            } catch (e: Exception) {
+                Log.error("Failed to update custom cover", e)
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to set custom cover: ${e.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Reset the custom cover to the original cover from source.
+     * Clears the customCover field and updates lastUpdate to invalidate cache.
+     */
+    fun resetCustomCover() {
+        val currentBook = book ?: return
+        
+        scope.launch {
+            try {
+                // Reset customCover to empty (will fall back to original cover)
+                val updatedBook = currentBook.copy(
+                    customCover = "",
+                    lastUpdate = currentTimeToLong()
+                )
+                localInsertUseCases.updateBook.update(updatedBook)
+                
+                Log.info { "Custom cover reset to original" }
+                emitEvent(BookDetailEvent.ShowSnackbar("Cover reset to original"))
+            } catch (e: Exception) {
+                Log.error("Failed to reset custom cover", e)
+                emitEvent(BookDetailEvent.ShowSnackbar("Failed to reset cover: ${e.message}"))
+            }
+        }
+    }
+    
+    // Cover preview dialog state
+    var showCoverPreviewDialog by mutableStateOf(false)
+    
+    /**
+     * Share text using platform-specific sharing mechanism.
+     */
+    fun shareText(text: String, title: String) {
+        platformHelper.shareText(text, title)
     }
     
     // ==================== Cleanup ====================

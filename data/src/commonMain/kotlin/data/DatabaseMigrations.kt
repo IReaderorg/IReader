@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 21
+    const val CURRENT_VERSION = 27
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -86,6 +86,12 @@ object DatabaseMigrations {
             18 -> migrateV18toV19(driver)
             19 -> migrateV19toV20(driver)
             20 -> migrateV20toV21(driver)
+            21 -> migrateV21toV22(driver)
+            22 -> migrateV22toV23(driver)
+            23 -> migrateV23toV24(driver)
+            24 -> migrateV24toV25(driver)
+            25 -> migrateV25toV26(driver)
+            26 -> migrateV26toV27(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -651,7 +657,7 @@ object DatabaseMigrations {
                 // Ignore
             }
             
-            // Create historyView with progress column
+            // Create historyView with progress column and customCover
             val historyViewSql = """
                 CREATE VIEW IF NOT EXISTS historyView AS
                 SELECT
@@ -661,6 +667,7 @@ object DatabaseMigrations {
                     chapter.name AS chapterName,
                     book.title,
                     book.thumbnail_url AS thumbnailUrl,
+                    COALESCE(book.custom_cover, '') AS customCover,
                     book.source,
                     book.favorite,
                     book.cover_last_modified,
@@ -693,7 +700,7 @@ object DatabaseMigrations {
                 verifyRequiredTables(driver)
             }
             
-            // Create updatesView with progress information
+            // Create updatesView with progress information and customCover
             val updatesViewSql = """
                 CREATE VIEW updatesView AS
                 SELECT
@@ -707,6 +714,7 @@ object DatabaseMigrations {
                     book.source,
                     book.favorite,
                     book.thumbnail_url AS thumbnailUrl,
+                    COALESCE(book.custom_cover, '') AS customCover,
                     book.cover_last_modified AS coverLastModified,
                     chapter.date_upload AS dateUpload,
                     chapter.date_fetch AS datefetch,
@@ -1704,6 +1712,271 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(21, e)
+        }
+    }
+
+    /**
+     * Migration from version 21 to version 22
+     * Adds Piper Voice Model table for TTS voice catalog
+     */
+    private fun migrateV21toV22(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(21, 22)
+            
+            val createPiperVoiceSql = """
+                CREATE TABLE IF NOT EXISTS piperVoice (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    language TEXT NOT NULL,
+                    locale TEXT NOT NULL,
+                    gender TEXT NOT NULL,
+                    quality TEXT NOT NULL,
+                    sampleRate INTEGER NOT NULL DEFAULT 22050,
+                    modelSize INTEGER NOT NULL DEFAULT 0,
+                    downloadUrl TEXT NOT NULL,
+                    configUrl TEXT NOT NULL,
+                    checksum TEXT NOT NULL DEFAULT '',
+                    license TEXT NOT NULL DEFAULT 'MIT',
+                    description TEXT NOT NULL DEFAULT '',
+                    tags TEXT NOT NULL DEFAULT '',
+                    isDownloaded INTEGER NOT NULL DEFAULT 0,
+                    lastUpdated INTEGER NOT NULL DEFAULT 0
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createPiperVoiceSql, 0)
+            Logger.logTableCreated("piperVoice")
+            
+            Logger.logMigrationSuccess(22)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(22, e)
+        }
+    }
+
+    /**
+     * Migration from version 22 to version 23
+     * Adds global_glossary table for glossaries independent of library books
+     */
+    private fun migrateV22toV23(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(22, 23)
+            
+            val createGlobalGlossarySql = """
+                CREATE TABLE IF NOT EXISTS global_glossary(
+                    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    book_key TEXT NOT NULL,
+                    book_title TEXT NOT NULL,
+                    source_term TEXT NOT NULL,
+                    target_term TEXT NOT NULL,
+                    term_type TEXT NOT NULL,
+                    notes TEXT,
+                    source_language TEXT NOT NULL DEFAULT 'auto',
+                    target_language TEXT NOT NULL DEFAULT 'en',
+                    created_at INTEGER NOT NULL,
+                    updated_at INTEGER NOT NULL,
+                    synced_at INTEGER,
+                    remote_id TEXT,
+                    UNIQUE(book_key, source_term)
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createGlobalGlossarySql, 0)
+            Logger.logTableCreated("global_glossary")
+            
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS global_glossary_book_key_index ON global_glossary(book_key);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS global_glossary_source_term_index ON global_glossary(source_term);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS global_glossary_remote_id_index ON global_glossary(remote_id);", 0)
+            Logger.logIndexCreated("global_glossary indexes")
+            
+            Logger.logMigrationSuccess(23)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(23, e)
+        }
+    }
+
+    /**
+     * Migration from version 23 to version 24
+     * Adds plugin_repository table for managing plugin sources
+     */
+    private fun migrateV23toV24(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(23, 24)
+            
+            val createPluginRepositorySql = """
+                CREATE TABLE IF NOT EXISTS plugin_repository (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    url TEXT NOT NULL UNIQUE,
+                    name TEXT NOT NULL,
+                    is_enabled INTEGER NOT NULL DEFAULT 1,
+                    is_official INTEGER NOT NULL DEFAULT 0,
+                    plugin_count INTEGER NOT NULL DEFAULT 0,
+                    last_updated INTEGER NOT NULL DEFAULT 0,
+                    last_error TEXT,
+                    created_at INTEGER NOT NULL
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createPluginRepositorySql, 0)
+            Logger.logTableCreated("plugin_repository")
+            
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_repository_enabled ON plugin_repository(is_enabled);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_repository_official ON plugin_repository(is_official);", 0)
+            Logger.logIndexCreated("plugin_repository indexes")
+            
+            Logger.logMigrationSuccess(24)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(24, e)
+        }
+    }
+
+    /**
+     * Migration from version 24 to version 25
+     * Adds plugin_permission table for storing granted permissions
+     */
+    private fun migrateV24toV25(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(24, 25)
+            
+            val createPluginPermissionSql = """
+                CREATE TABLE IF NOT EXISTS plugin_permission (
+                    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    plugin_id TEXT NOT NULL,
+                    permission TEXT NOT NULL,
+                    granted_at INTEGER NOT NULL,
+                    is_active INTEGER NOT NULL DEFAULT 1,
+                    UNIQUE(plugin_id, permission)
+                );
+            """.trimIndent()
+            
+            driver.execute(null, createPluginPermissionSql, 0)
+            Logger.logTableCreated("plugin_permission")
+            
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_permission_plugin ON plugin_permission(plugin_id);", 0)
+            driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_plugin_permission_active ON plugin_permission(is_active);", 0)
+            Logger.logIndexCreated("plugin_permission indexes")
+            
+            Logger.logMigrationSuccess(25)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(25, e)
+        }
+    }
+
+    /**
+     * Migration from version 25 to version 26
+     * Adds Reading Buddy fields to reading_statistics table
+     */
+    private fun migrateV25toV26(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(25, 26)
+            
+            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN longest_streak INTEGER NOT NULL DEFAULT 0;", 0)
+            Logger.logColumnAdded("reading_statistics", "longest_streak")
+            
+            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN buddy_level INTEGER NOT NULL DEFAULT 1;", 0)
+            Logger.logColumnAdded("reading_statistics", "buddy_level")
+            
+            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN buddy_experience INTEGER NOT NULL DEFAULT 0;", 0)
+            Logger.logColumnAdded("reading_statistics", "buddy_experience")
+            
+            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN unlocked_achievements TEXT NOT NULL DEFAULT '';", 0)
+            Logger.logColumnAdded("reading_statistics", "unlocked_achievements")
+            
+            driver.execute(null, "ALTER TABLE reading_statistics ADD COLUMN last_interaction_time INTEGER NOT NULL DEFAULT 0;", 0)
+            Logger.logColumnAdded("reading_statistics", "last_interaction_time")
+            
+            Logger.logMigrationSuccess(26)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(26, e)
+        }
+    }
+
+    /**
+     * Migration from version 26 to version 27
+     * Adds custom_cover column to book table for user-set cover images
+     * Also recreates views to include custom_cover column
+     */
+    private fun migrateV26toV27(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(26, 27)
+            
+            driver.execute(null, "ALTER TABLE book ADD COLUMN custom_cover TEXT NOT NULL DEFAULT '';", 0)
+            Logger.logColumnAdded("book", "custom_cover")
+            
+            // Drop and recreate views to include custom_cover
+            driver.execute(null, "DROP VIEW IF EXISTS historyView;", 0)
+            driver.execute(null, "DROP VIEW IF EXISTS updatesView;", 0)
+            Logger.logDebug("Dropped views for recreation with custom_cover")
+            
+            // Recreate historyView with custom_cover
+            val historyViewSql = """
+                CREATE VIEW IF NOT EXISTS historyView AS
+                SELECT
+                    history._id AS id,
+                    book._id AS bookId,
+                    chapter._id AS chapterId,
+                    chapter.name AS chapterName,
+                    book.title,
+                    book.thumbnail_url AS thumbnailUrl,
+                    book.custom_cover AS customCover,
+                    book.source,
+                    book.favorite,
+                    book.cover_last_modified,
+                    chapter.chapter_number AS chapterNumber,
+                    history.last_read AS readAt,
+                    history.time_read AS readDuration,
+                    history.progress,
+                    max_last_read.last_read AS maxReadAt,
+                    max_last_read.chapter_id AS maxReadAtChapterId
+                FROM book
+                JOIN chapter ON book._id = chapter.book_id
+                JOIN history ON chapter._id = history.chapter_id
+                JOIN (
+                    SELECT chapter.book_id, chapter._id AS chapter_id, MAX(history.last_read) AS last_read
+                    FROM chapter JOIN history ON chapter._id = history.chapter_id
+                    GROUP BY chapter.book_id
+                ) AS max_last_read ON chapter.book_id = max_last_read.book_id;
+            """.trimIndent()
+            driver.execute(null, historyViewSql, 0)
+            Logger.logDebug("Recreated historyView with custom_cover")
+            
+            // Recreate updatesView with custom_cover
+            val updatesViewSql = """
+                CREATE VIEW IF NOT EXISTS updatesView AS
+                SELECT
+                    book._id AS mangaId,
+                    book.title AS mangaTitle,
+                    chapter._id AS chapterId,
+                    chapter.name AS chapterName,
+                    chapter.scanlator,
+                    chapter.read,
+                    chapter.bookmark,
+                    book.source,
+                    book.favorite,
+                    book.thumbnail_url AS thumbnailUrl,
+                    book.custom_cover AS customCover,
+                    book.cover_last_modified AS coverLastModified,
+                    chapter.date_upload AS dateUpload,
+                    chapter.date_fetch AS datefetch,
+                    chapter.content IS NOT '' AS downlaoded,
+                    history.progress AS readingProgress,
+                    history.last_read AS lastReadAt
+                FROM book JOIN chapter ON book._id = chapter.book_id
+                LEFT JOIN history ON chapter._id = history.chapter_id
+                WHERE favorite = 1 AND date_fetch > date_added
+                ORDER BY date_fetch DESC;
+            """.trimIndent()
+            driver.execute(null, updatesViewSql, 0)
+            Logger.logDebug("Recreated updatesView with custom_cover")
+            
+            Logger.logMigrationSuccess(27)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(27, e)
         }
     }
 
