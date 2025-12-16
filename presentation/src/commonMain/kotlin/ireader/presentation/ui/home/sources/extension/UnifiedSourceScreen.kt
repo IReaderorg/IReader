@@ -185,6 +185,7 @@ fun UnifiedSourceScreen(
                     onShowDetails = onShowDetails,
                     onMigrateFromSource = onMigrateFromSource,
                     onNavigateToUserSources = onNavigateToUserSources,
+                    onDeleteUserSource = { sourceId -> vm.deleteUserSourceById(sourceId) },
                 )
                 1 -> AvailableSourcesContent(
                     vm = vm,
@@ -339,6 +340,7 @@ private fun InstalledSourcesContent(
     onShowDetails: ((Catalog) -> Unit)? = null,
     onMigrateFromSource: ((Long) -> Unit)? = null,
     onNavigateToUserSources: (() -> Unit)? = null,
+    onDeleteUserSource: ((Long) -> Unit)? = null,
 ) {
     val scrollState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -442,6 +444,7 @@ private fun InstalledSourcesContent(
                             showLoginDialog = true
                         },
                         onMigrate = onMigrateFromSource?.let { { it(catalogItem.source.sourceId) } },
+                        onDeleteUserSource = onDeleteUserSource?.let { { it(catalogItem.source.sourceId) } },
                     )
                 }
             }
