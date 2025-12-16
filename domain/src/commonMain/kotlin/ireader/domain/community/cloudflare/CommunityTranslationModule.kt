@@ -10,51 +10,39 @@ import org.koin.dsl.module
  */
 val communityTranslationModule = module {
     
-    // Cloudflare configuration - built from preferences (user override or platform default)
-    factory<CloudflareConfig?> {
+    // Cloudflare configuration - built from preferences
+    single<CloudflareConfig> {
         val prefs: CommunityPreferences = get()
-        
-        if (!prefs.isCloudflareConfigured()) {
-            null
-        } else {
-            CloudflareConfig(
-                accountId = prefs.getEffectiveCloudflareAccountId(),
-                apiToken = prefs.getEffectiveCloudflareApiToken(),
-                d1DatabaseId = prefs.getEffectiveD1DatabaseId(),
-                r2BucketName = prefs.getEffectiveR2BucketName(),
-                r2PublicUrl = prefs.getEffectiveR2PublicUrl(),
-                enableCompression = prefs.cloudflareCompressionEnabled().get()
-            )
-        }
+        CloudflareConfig(
+            accountId = prefs.getEffectiveCloudflareAccountId(),
+            apiToken = prefs.getEffectiveCloudflareApiToken(),
+            d1DatabaseId = prefs.getEffectiveD1DatabaseId(),
+            r2BucketName = prefs.getEffectiveR2BucketName(),
+            r2PublicUrl = prefs.getEffectiveR2PublicUrl(),
+            enableCompression = prefs.cloudflareCompressionEnabled().get()
+        )
     }
     
     // D1 Client
-    factory<CloudflareD1Client?> {
-        val config: CloudflareConfig? = get()
+    single<CloudflareD1Client> {
+        val config: CloudflareConfig = get()
         val httpClients: HttpClients = get()
-        
-        config?.let { CloudflareD1Client(httpClients.default, it) }
+        CloudflareD1Client(httpClients.default, config)
     }
     
     // R2 Client
-    factory<CloudflareR2Client?> {
-        val config: CloudflareConfig? = get()
+    single<CloudflareR2Client> {
+        val config: CloudflareConfig = get()
         val httpClients: HttpClients = get()
-        
-        config?.let { CloudflareR2Client(httpClients.default, it) }
+        CloudflareR2Client(httpClients.default, config)
     }
     
     // Community Translation Repository
-    single<CommunityTranslationRepository?> {
-        val config: CloudflareConfig? = get()
-        val d1Client: CloudflareD1Client? = get()
-        val r2Client: CloudflareR2Client? = get()
-        
-        if (config != null && d1Client != null && r2Client != null) {
-            CommunityTranslationRepository(d1Client, r2Client, config)
-        } else {
-            null
-        }
+    single<CommunityTranslationRepository> {
+        val config: CloudflareConfig = get()
+        val d1Client: CloudflareD1Client = get()
+        val r2Client: CloudflareR2Client = get()
+        CommunityTranslationRepository(d1Client, r2Client, config)
     }
     
     // Auto-share use case
@@ -62,7 +50,7 @@ val communityTranslationModule = module {
         AutoShareTranslationUseCase(
             communityPreferences = get(),
             translationRepository = get(),
-            remoteRepository = getOrNull() // Optional - for getting user ID if authenticated
+            remoteRepository = getOrNull() // Only this one is optional - for user auth
         )
     }
 }

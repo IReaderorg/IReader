@@ -223,9 +223,9 @@ val UseCasesInject = module {
             getTranslatedChapterUseCase = get(),
             getGlossaryAsMapUseCase = get(),
             applyGlossaryToTextUseCase = get(),
-            autoShareTranslationUseCase = getOrNull(),
+            autoShareTranslationUseCase = get(),
             bookRepository = getOrNull()
-        ) 
+        )
     }
     factory { 
         ireader.domain.usecases.translate.TranslateParagraphUseCase(

@@ -34,6 +34,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -183,11 +184,16 @@ private fun ReadingScreenContent(
         }
     }
     
-    // Memoize navigation callbacks
-    val onNextWithReset = remember(onNext) { { onNext(true) } }
-    val onPrevWithReset = remember(onPrev) { { onPrev(true) } }
-    val onNextWithoutReset = remember(onNext) { { onNext(false) } }
-    val onPrevWithoutReset = remember(onPrev) { { onPrev(false) } }
+    // Use rememberUpdatedState to always have the latest callback references
+    // This ensures the callbacks use the current state values, not stale captured values
+    val currentOnNext by rememberUpdatedState(onNext)
+    val currentOnPrev by rememberUpdatedState(onPrev)
+    
+    // Create stable callback wrappers that always call the latest callback
+    val onNextWithReset = remember { { currentOnNext(true) } }
+    val onPrevWithReset = remember { { currentOnPrev(true) } }
+    val onNextWithoutReset = remember { { currentOnNext(false) } }
+    val onPrevWithoutReset = remember { { currentOnPrev(false) } }
     
     // Calculate reading time when chapter changes
     LaunchedEffect(key1 = chapter?.id, key2 = vm.isLoading) {

@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import ireader.core.log.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -99,6 +100,9 @@ private class SwipeRefreshNestedScrollConnection(
 ) : NestedScrollConnection {
     var enabled: Boolean = false
     var refreshTrigger: Float = 0f
+    
+    // Track if THIS connection initiated the current swipe
+    private var isActiveSwipe: Boolean = false
 
     override fun onPreScroll(
         available: Offset,
@@ -108,6 +112,8 @@ private class SwipeRefreshNestedScrollConnection(
         !enabled -> Offset.Zero
         // If we're refreshing, return zero
         state.isRefreshing -> Offset.Zero
+        // If another connection is handling the swipe, don't interfere
+        state.isSwipeInProgress && !isActiveSwipe -> Offset.Zero
         // If the user is swiping and there's y remaining, handle it
         scrollFromTop && source == NestedScrollSource.Drag && available.y < 0f -> onScroll(available)
         !scrollFromTop && source == NestedScrollSource.Drag && available.y > 0f -> onScroll(
@@ -120,20 +126,28 @@ private class SwipeRefreshNestedScrollConnection(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource,
-    ): Offset = when {
-        // If swiping isn't enabled, return zero
-        !enabled -> Offset.Zero
-        // If we're refreshing, return zero
-        state.isRefreshing -> Offset.Zero
-        // If the user is swiping and there's y remaining, handle it
-        scrollFromTop && source == NestedScrollSource.Drag && available.y > 0f -> onScroll(available)
-        !scrollFromTop && source == NestedScrollSource.Drag && available.y < 0f -> onScroll(
-            available
-        )
-        else -> Offset.Zero
+    ): Offset {
+        return when {
+            // If swiping isn't enabled, return zero
+            !enabled -> Offset.Zero
+            // If we're refreshing, return zero
+            state.isRefreshing -> Offset.Zero
+            // If another connection is handling the swipe, don't interfere
+            state.isSwipeInProgress && !isActiveSwipe -> Offset.Zero
+            // If the user is swiping and there's y remaining, handle it
+            scrollFromTop && source == NestedScrollSource.Drag && available.y > 0f -> onScroll(available)
+            !scrollFromTop && source == NestedScrollSource.Drag && available.y < 0f -> onScroll(
+                available
+            )
+            else -> Offset.Zero
+        }
     }
 
     private fun onScroll(available: Offset): Offset {
+        // Mark this connection as the active one handling the swipe
+        if (!state.isSwipeInProgress) {
+            isActiveSwipe = true
+        }
         state.isSwipeInProgress = true
 
         val dragConsumed = getDragConsumed(available)
@@ -154,14 +168,17 @@ private class SwipeRefreshNestedScrollConnection(
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
-        // If we're dragging, not currently refreshing and scrolled
-        // past the trigger point, refresh!
-        if (!state.isRefreshing && state.indicatorOffset >= refreshTrigger) {
+        Log.debug { "SwipeRefresh onPreFling: scrollFromTop=$scrollFromTop, enabled=$enabled, isActiveSwipe=$isActiveSwipe, indicatorOffset=${state.indicatorOffset}, refreshTrigger=$refreshTrigger" }
+        
+        // Only trigger refresh if THIS connection was handling the swipe
+        if (isActiveSwipe && !state.isRefreshing && state.indicatorOffset >= refreshTrigger) {
+            Log.debug { "SwipeRefresh: Triggering refresh for scrollFromTop=$scrollFromTop" }
             onRefresh()
         }
 
         // Reset the drag in progress state
         state.isSwipeInProgress = false
+        isActiveSwipe = false
 
         // Don't consume any velocity, to allow the scrolling layout to fling
         return Velocity.Zero
@@ -251,12 +268,11 @@ fun MultiSwipeRefresh(
         }
     }
 
-    // Find the first enabled indicator to use for nested scroll
-    val enabledIndicators = indicators.filter { it.enable }
-    
-    // Create nested scroll connections for all enabled indicators
-    val nestedScrollConnections = enabledIndicators.map { indicator ->
+    // Create nested scroll connections for ALL indicators (not just enabled ones)
+    // The enabled state is checked dynamically in the connection itself
+    val nestedScrollConnections = indicators.map { indicator ->
         val updatedOnRefresh = rememberUpdatedState(indicator.onRefresh)
+        val updatedEnabled = rememberUpdatedState(indicator.enable)
         remember(state, coroutineScope, indicator.alignment) {
             SwipeRefreshNestedScrollConnection(
                 state = state,
@@ -267,10 +283,14 @@ fun MultiSwipeRefresh(
                 scrollFromTop = (indicator.alignment as BiasAlignment).verticalBias != 1f
             )
         }.apply {
-            this.enabled = swipeEnabled
+            // Use the updated enabled state so it reacts to isAtBottom/isAtTop changes
+            this.enabled = swipeEnabled && updatedEnabled.value
             this.refreshTrigger = refreshTriggerPx
         }
     }
+    
+    // Filter enabled indicators for rendering (this is reactive since it's in the composable body)
+    val enabledIndicators = indicators.filter { it.enable }
 
     // Apply all nested scroll connections to a single Box
     var boxModifier = modifier

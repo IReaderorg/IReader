@@ -736,19 +736,53 @@ class ReaderScreenViewModel(
     }
     
     /**
-     * Dispatch next chapter command to ChapterController.
-     * Requirements: 9.2, 9.4, 9.5
+     * Navigate to the next chapter.
+     * Uses ReaderScreenViewModel's own state for reliable navigation.
      */
     fun dispatchNextChapter() {
-        chapterController.dispatch(ChapterCommand.NextChapter)
+        val currentState = _state.value
+        if (currentState !is ReaderState.Success) return
+        
+        val chapters = currentState.chapters
+        val currentChapterIndex = currentState.currentChapterIndex
+        
+        if (currentChapterIndex < chapters.lastIndex) {
+            val nextChapter = chapters.getOrNull(currentChapterIndex + 1)
+            if (nextChapter != null) {
+                Log.debug { "dispatchNextChapter: navigating from index $currentChapterIndex to ${currentChapterIndex + 1}" }
+                navigateToChapter(nextChapter.id, next = true)
+            }
+        } else {
+            Log.debug { "dispatchNextChapter: already at last chapter (index $currentChapterIndex of ${chapters.size})" }
+        }
     }
     
     /**
-     * Dispatch previous chapter command to ChapterController.
-     * Requirements: 9.2, 9.4, 9.5
+     * Navigate to the previous chapter.
+     * Uses ReaderScreenViewModel's own state for reliable navigation.
      */
     fun dispatchPrevChapter() {
-        chapterController.dispatch(ChapterCommand.PreviousChapter)
+        val currentState = _state.value
+        if (currentState !is ReaderState.Success) return
+        
+        val chapters = currentState.chapters
+        val currentChapterIndex = currentState.currentChapterIndex
+        val currentChapter = currentState.currentChapter
+        
+        Log.debug { "dispatchPrevChapter: currentChapter=${currentChapter?.name}, currentIndex=$currentChapterIndex, totalChapters=${chapters.size}" }
+        
+        if (currentChapterIndex > 0) {
+            val prevChapter = chapters.getOrNull(currentChapterIndex - 1)
+            Log.debug { "dispatchPrevChapter: prevChapter=${prevChapter?.name}, prevChapterId=${prevChapter?.id}" }
+            if (prevChapter != null) {
+                Log.debug { "dispatchPrevChapter: navigating from '${currentChapter?.name}' (index $currentChapterIndex) to '${prevChapter.name}' (index ${currentChapterIndex - 1})" }
+                // Set flag to scroll to end when loading previous chapter
+                scrollToEndOnChapterChange = true
+                navigateToChapter(prevChapter.id, next = false)
+            }
+        } else {
+            Log.debug { "dispatchPrevChapter: already at first chapter (index $currentChapterIndex)" }
+        }
     }
 
     /**

@@ -170,11 +170,16 @@ fun ReaderText(
             } else {
                 // At bottom if last item is fully visible
                 val isLastItemVisible = lastVisibleItem?.index == totalItems - 1
+                val viewportEnd = layoutInfo.viewportEndOffset
                 val isLastItemFullyVisible = if (lastVisibleItem != null) {
-                    val viewportEnd = layoutInfo.viewportEndOffset
                     lastVisibleItem.offset + lastVisibleItem.size <= viewportEnd + 20
                 } else false
-                isLastItemVisible && isLastItemFullyVisible
+                val result = isLastItemVisible && isLastItemFullyVisible
+                // Debug logging
+                if (isLastItemVisible) {
+                    ireader.core.log.Log.debug { "isAtBottom check: lastIndex=${lastVisibleItem?.index}, totalItems=$totalItems, viewportEnd=$viewportEnd, itemEnd=${lastVisibleItem?.let { it.offset + it.size }}, result=$result" }
+                }
+                result
             }
         }}
         

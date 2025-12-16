@@ -25,7 +25,7 @@ class TranslateChapterWithStorageUseCase(
     private val getTranslatedChapterUseCase: GetTranslatedChapterUseCase,
     private val getGlossaryAsMapUseCase: GetGlossaryAsMapUseCase,
     private val applyGlossaryToTextUseCase: ApplyGlossaryToTextUseCase,
-    private val autoShareTranslationUseCase: AutoShareTranslationUseCase? = null,
+    private val autoShareTranslationUseCase: AutoShareTranslationUseCase,
     private val bookRepository: BookRepository? = null
 ) {
     fun execute(
@@ -71,7 +71,7 @@ class TranslateChapterWithStorageUseCase(
             val originalContent = originalTexts.joinToString("\n\n")
             
             // Check community for existing translation first (if enabled)
-            if (!forceRetranslate && autoShareTranslationUseCase != null) {
+            if (!forceRetranslate) {
                 try {
                     val communityResult = autoShareTranslationUseCase.checkExistingTranslation(
                         originalContent = originalContent,
@@ -190,7 +190,7 @@ class TranslateChapterWithStorageUseCase(
             )
             
             // Auto-share to community if enabled (AI translations only)
-            if (autoShareTranslationUseCase != null && autoShareTranslationUseCase.shouldAutoShare(engineId)) {
+            if (autoShareTranslationUseCase.shouldAutoShare(engineId)) {
                 try {
                     val book = bookRepository?.findBookById(chapter.bookId)
                     if (book != null) {

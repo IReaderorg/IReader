@@ -20,11 +20,13 @@ import ireader.domain.usecases.services.LoadJSPluginsInBackgroundUseCase
 import org.koin.dsl.module
 
 val CatalogModule = module {
-    // Include Cloudflare-based community translation module
-    includes(communityTranslationModule)
-
     // Preferences - lightweight, can be singleton
+    // Must be registered BEFORE communityTranslationModule which depends on it
     single<CommunityPreferences> { CommunityPreferences(get()) }
+    
+    // Include Cloudflare-based community translation module
+    // This depends on CommunityPreferences, so it must come after
+    includes(communityTranslationModule)
     single<CommunityRepository> { CommunityRepositoryImpl(get(), get(),get()) }
     single<CommunitySource> { CommunitySource(get()) }
     single<CatalogPreferences> { CatalogPreferences(get()) }
