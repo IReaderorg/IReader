@@ -170,7 +170,8 @@ kotlin {
 
                 // REMOVED: slf4j-android - not used
                 // implementation("org.slf4j:slf4j-android:1.7.25")
-                // SimpleStorage and DocumentFile removed - using Okio for file operations
+                // DocumentFile for SAF (Storage Access Framework) support
+                implementation(androidx.documentfile)
                 implementation(androidx.biometric)
                 implementation(androidx.security.crypto)
                 implementation(androidx.lifecycle.viewmodelktx)

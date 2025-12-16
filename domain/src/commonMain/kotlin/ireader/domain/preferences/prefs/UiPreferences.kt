@@ -29,7 +29,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     }
     
         fun installerMode(): Preference<PreferenceValues.Installer> {
-        return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.LocalInstaller)
+        return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.HybridInstaller)
     }
     fun showSystemWideCatalogs(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_system_catalogs", true)

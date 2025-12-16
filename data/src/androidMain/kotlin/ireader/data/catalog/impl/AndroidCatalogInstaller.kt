@@ -112,6 +112,7 @@ class AndroidCatalogInstaller(
 
     /**
      * Starts an intent to uninstall the extension by the given package name.
+     * Uses SAF (Storage Access Framework) when available.
      *
      * @param pkgName The package name of the extension to uninstall
      */
@@ -125,30 +126,14 @@ class AndroidCatalogInstaller(
                 deleted = true
             }
             
-            // Try to delete JS plugin files from secure storage
-            val cacheJsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
-            val cacheJsFile = File(cacheJsPluginsDir, "$pkgName.js")
-            if (cacheJsFile.exists()) {
-                deleted = cacheJsFile.delete() || deleted
-            }
-            val cacheIconFile = File(cacheJsPluginsDir, "$pkgName.png")
-            if (cacheIconFile.exists()) {
-                cacheIconFile.delete()
-            }
+            // Delete JS plugin files using SecureStorageHelper (handles SAF + fallback)
+            val jsFileName = "$pkgName.js"
+            val metaFileName = "$pkgName.meta.json"
+            val iconFileName = "$pkgName.png"
             
-            // External storage directory
-            val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
-            if (externalDir != null) {
-                val externalJsPluginsDir = File(File(externalDir, "ireader"), "js-plugins")
-                val externalJsFile = File(externalJsPluginsDir, "$pkgName.js")
-                if (externalJsFile.exists()) {
-                    deleted = externalJsFile.delete() || deleted
-                }
-                val externalIconFile = File(externalJsPluginsDir, "$pkgName.png")
-                if (externalIconFile.exists()) {
-                    externalIconFile.delete()
-                }
-            }
+            deleted = ireader.domain.storage.SecureStorageHelper.deleteJsPlugin(context, jsFileName) || deleted
+            ireader.domain.storage.SecureStorageHelper.deleteJsPlugin(context, metaFileName)
+            ireader.domain.storage.SecureStorageHelper.deleteJsPlugin(context, iconFileName)
             
             installationChanges.notifyAppUninstall(pkgName)
             if (deleted) InstallStep.Success else apkResult

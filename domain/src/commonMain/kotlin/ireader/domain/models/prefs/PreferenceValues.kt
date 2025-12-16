@@ -33,7 +33,13 @@ object PreferenceValues {
     }
     enum class Installer {
         AndroidPackageManager,
-        LocalInstaller;
+        LocalInstaller,
+        HybridInstaller;
+        
+        companion object {
+            // Alias for clearer naming
+            val PackageInstaller = AndroidPackageManager
+        }
     }
 
     /**

@@ -99,51 +99,56 @@ class AndroidLocalInstaller(
     /**
      * Install a JavaScript plugin (LNReader format)
      * This is a suspend function that will be called from the channelFlow
+     * Uses SAF (Storage Access Framework) when available for proper permission handling.
      */
     private suspend fun kotlinx.coroutines.channels.ProducerScope<InstallStep>.installJSPlugin(catalog: CatalogRemote) {
         try {
             send(InstallStep.Downloading)
             
-            // Use secure storage for JS plugins
-            val jsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
-            Log.info("AndroidLocalInstaller: Installing JS plugin ${catalog.name} to ${jsPluginsDir.absolutePath}")
-            Log.info("AndroidLocalInstaller: jsPluginsDir exists=${jsPluginsDir.exists()}, canWrite=${jsPluginsDir.canWrite()}")
+            Log.info("AndroidLocalInstaller: Installing JS plugin ${catalog.name}")
             
-            // Download the JS plugin file
-            val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
-            val metadataFile = File(jsPluginsDir, "${catalog.pkgName}.meta.json")
-            Log.info("AndroidLocalInstaller: Target files - js=${jsFile.absolutePath}, meta=${metadataFile.absolutePath}")
-            
+            // Download the JS plugin content first
             val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
             }.body()
-            jsResponse.saveTo(jsFile.absolutePath.toPath(), FileSystem.SYSTEM)
             
-            // Save metadata from remote catalog (including language)
-            // This ensures the language from the remote API is preserved
-            val metadata = """
-                {
-                  "id": "${catalog.pkgName}",
-                  "name": "${catalog.name.replace("\"", "\\\"")}",
-                  "lang": "${catalog.lang}",
-                  "version": "${catalog.versionName}",
-                  "site": "${catalog.description.replace("\"", "\\\"")}",
-                  "icon": "${catalog.iconUrl.replace("\"", "\\\"")}"
+            // Read content into memory
+            val tempFile = ireader.domain.storage.SecureStorageHelper.createTempFile(context, "js_plugin_", ".js")
+            try {
+                jsResponse.saveTo(tempFile.absolutePath.toPath(), FileSystem.SYSTEM)
+                val jsContent = tempFile.readBytes()
+                
+                // Prepare metadata
+                val metadata = """
+                    {
+                      "id": "${catalog.pkgName}",
+                      "name": "${catalog.name.replace("\"", "\\\"")}",
+                      "lang": "${catalog.lang}",
+                      "version": "${catalog.versionName}",
+                      "site": "${catalog.description.replace("\"", "\\\"")}",
+                      "icon": "${catalog.iconUrl.replace("\"", "\\\"")}"
+                    }
+                """.trimIndent()
+                
+                // Write using SecureStorageHelper (handles SAF vs fallback automatically)
+                val jsFileName = "${catalog.pkgName}.js"
+                val metaFileName = "${catalog.pkgName}.meta.json"
+                
+                val jsWritten = ireader.domain.storage.SecureStorageHelper.writeJsPluginBytes(context, jsFileName, jsContent)
+                val metaWritten = ireader.domain.storage.SecureStorageHelper.writeJsPluginMetadata(context, metaFileName, metadata)
+                
+                if (jsWritten && metaWritten) {
+                    Log.info("AndroidLocalInstaller: Successfully installed JS plugin ${catalog.name}")
+                    installationChanges.notifyAppInstall(catalog.pkgName)
+                    send(InstallStep.Success)
+                } else {
+                    Log.error("AndroidLocalInstaller: Failed to write JS plugin files: js=$jsWritten, meta=$metaWritten")
+                    send(InstallStep.Error("Failed to write plugin files"))
                 }
-            """.trimIndent()
-            metadataFile.writeText(metadata)
+            } finally {
+                tempFile.delete()
+            }
             
-            // No need to download icon - Coil will handle it via iconUrl with caching
-            
-            // Verify files were created
-            Log.info("AndroidLocalInstaller: JS file created=${jsFile.exists()}, size=${if (jsFile.exists()) jsFile.length() else 0}")
-            Log.info("AndroidLocalInstaller: Metadata file created=${metadataFile.exists()}, size=${if (metadataFile.exists()) metadataFile.length() else 0}")
-            
-            // Notify installation complete
-            installationChanges.notifyAppInstall(catalog.pkgName)
-            Log.info("AndroidLocalInstaller: Successfully installed JS plugin ${catalog.name}")
-            
-            send(InstallStep.Success)
             send(InstallStep.Idle)
             
         } catch (e: Exception) {
@@ -155,6 +160,7 @@ class AndroidLocalInstaller(
 
     /**
      * Starts an intent to uninstall the extension by the given package name.
+     * Uses SAF (Storage Access Framework) when available.
      *
      * @param pkgName The package name of the extension to uninstall
      */
@@ -166,20 +172,12 @@ class AndroidLocalInstaller(
             file.deleteRecursively()
             cacheFile.deleteRecursively()
             
-            // Also try to uninstall as JS plugin from secure storage
-            val jsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
+            // Uninstall JS plugin using SecureStorageHelper (handles SAF + fallback)
+            val jsFileName = "$pkgName.js"
+            val metaFileName = "$pkgName.meta.json"
             
-            val jsFile = File(jsPluginsDir, "$pkgName.js")
-            val metadataFile = File(jsPluginsDir, "$pkgName.meta.json")
-            
-            if (jsFile.exists()) {
-                jsFile.delete()
-            }
-            
-            // Also delete metadata file
-            if (metadataFile.exists()) {
-                metadataFile.delete()
-            }
+            ireader.domain.storage.SecureStorageHelper.deleteJsPlugin(context, jsFileName)
+            ireader.domain.storage.SecureStorageHelper.deleteJsPlugin(context, metaFileName)
             
             installationChanges.notifyAppUninstall(pkgName)
             InstallStep.Success

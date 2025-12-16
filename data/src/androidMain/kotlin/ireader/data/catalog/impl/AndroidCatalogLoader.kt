@@ -206,11 +206,9 @@ class AndroidCatalogLoader(
      * contains the required feature flag before trying to load it.
      */
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
-        // Check if this is a JS plugin in secure storage - if so, return null as JS plugins are loaded via loadAll()
-        val jsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
-        val jsFile = File(jsPluginsDir, "$pkgName.js")
-        
-        if (jsFile.exists() && jsFile.canRead()) {
+        // Check if this is a JS plugin - check both SAF and fallback locations
+        val jsFileName = "$pkgName.js"
+        if (ireader.domain.storage.SecureStorageHelper.jsPluginExists(context, jsFileName)) {
             // JS plugins are handled by loadAll(), not loadLocalCatalog()
             // Return null to avoid the "catalog not found" warning
             return null

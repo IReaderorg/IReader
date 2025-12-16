@@ -139,6 +139,7 @@
     <string name="installer_mode">Installer Mode</string>
     <string name="package_manager">Package Manager</string>
     <string name="local_installer">Local Installer</string>
+    <string name="hybrid_installer">Hybrid (Local + Package)</string>
     <string name="use_auth">Require unlock</string>
     <string name="manage_notification">Manage Notification</string>
     <string name="confirm_exit_message">Press back again to exit</string>

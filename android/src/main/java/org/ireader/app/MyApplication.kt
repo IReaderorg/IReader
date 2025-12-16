@@ -134,10 +134,22 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             AppModule
         ))
         
-        // Initialize SecureStorageHelper with UiPreferences
+        // Initialize SecureStorageHelper with Context and UiPreferences
         try {
             val uiPreferences: ireader.domain.preferences.prefs.UiPreferences by inject()
-            ireader.domain.storage.SecureStorageHelper.init(uiPreferences)
+            ireader.domain.storage.SecureStorageHelper.init(this@MyApplication, uiPreferences)
+            
+            // Sync JS plugins from SAF to fallback in background (if SAF is available)
+            backgroundScope.launch {
+                try {
+                    val (fromSaf, toSaf) = ireader.domain.storage.SecureStorageHelper.syncJsPluginsBidirectional(this@MyApplication)
+                    if (fromSaf > 0 || toSaf > 0) {
+                        println("Synced JS plugins: $fromSaf from SAF, $toSaf to SAF")
+                    }
+                } catch (e: Exception) {
+                    println("JS plugin sync failed: ${e.message}")
+                }
+            }
         } catch (e: Exception) {
             // Fallback - SecureStorageHelper will use default cache dir
             println("SecureStorageHelper init failed: ${e.message}")

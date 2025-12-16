@@ -76,6 +76,7 @@ import ireader.i18n.resources.download_new_chapters
 import ireader.i18n.resources.download_settings
 import ireader.i18n.resources.enable_javascript_plugins
 import ireader.i18n.resources.global_search
+import ireader.i18n.resources.hybrid_installer
 import ireader.i18n.resources.installer_mode
 import ireader.i18n.resources.javascript_plugin_settings
 import ireader.i18n.resources.language_translation
@@ -402,6 +403,7 @@ fun GeneralSettingScreen(
                                 Res.string.package_manager
                             ),
                             PreferenceValues.Installer.LocalInstaller to localizeHelper.localize(Res.string.local_installer),
+                            PreferenceValues.Installer.HybridInstaller to localizeHelper.localize(Res.string.hybrid_installer),
                         ),
                         title = localizeHelper.localize(
                             Res.string.installer_mode
