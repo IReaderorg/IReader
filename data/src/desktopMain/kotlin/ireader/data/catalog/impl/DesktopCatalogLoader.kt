@@ -34,10 +34,15 @@ class DesktopCatalogLoader(
 ) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
     private val catalogPreferences = preferences.create("catalogs_data")
     
-    // JavaScript plugin loader
+    // JavaScript plugin loader - uses lambda to get directory dynamically
     private val jsPluginLoader: JSPluginLoader by lazy {
-        val jsPluginsDir = File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }
-        JSPluginLoader(jsPluginsDir.absolutePath.toPath(), httpClients.default, preferences)
+        JSPluginLoader(
+            pluginsDirectoryProvider = {
+                File(System.getProperty("user.home"), ".ireader/js-plugins").apply { mkdirs() }.absolutePath.toPath()
+            },
+            httpClient = httpClients.default,
+            preferenceStoreFactory = preferences
+        )
     }
     
     /**

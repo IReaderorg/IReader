@@ -60,10 +60,13 @@ class AndroidCatalogLoader(
     private val secureDexCacheDir = File(context.codeCacheDir, "dex-cache").apply { mkdirs() }
     
     // JavaScript plugin loader - uses converter approach (no JS engine needed!)
+    // Uses a lambda to get the directory dynamically, so it picks up storage folder changes
     private val jsPluginLoader: JSPluginLoader by lazy {
-        // Use the appropriate directory based on user preference
-        val jsPluginsDir = getJSPluginsDirectory()
-        JSPluginLoader(jsPluginsDir.absolutePath.toPath(), httpClients.default, preferenceStore)
+        JSPluginLoader(
+            pluginsDirectoryProvider = { getJSPluginsDirectory().absolutePath.toPath() },
+            httpClient = httpClients.default,
+            preferenceStoreFactory = preferenceStore
+        )
     }
     
     /**

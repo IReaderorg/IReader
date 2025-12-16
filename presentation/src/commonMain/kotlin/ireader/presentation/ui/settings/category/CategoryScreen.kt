@@ -244,12 +244,15 @@ private fun CategoryContent(
     onDelete: (CategoryWithCount) -> Unit,
     onRename: (CategoryWithCount) -> Unit
 ) {
+    // Filter out system categories (All, Uncategorized) - they cannot be deleted or reordered
+    val userCategories = data.filter { !it.isSystemCategory }
+    
     LazyColumn(
         state = state.listState,
         modifier = Modifier.reorderable(state)
     ) {
         items(
-            items = data,
+            items = userCategories,
             key = {
                 it.id
             }

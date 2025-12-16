@@ -160,6 +160,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                 onFolderUriSelected = { uriString ->
                                     // Take persistent SAF permissions for the selected folder
                                     try {
+                                        android.util.Log.d("MainActivity", "Folder selected: $uriString")
                                         if (uriString.startsWith("content://")) {
                                             val uri = android.net.Uri.parse(uriString)
                                             ireader.domain.storage.SecureStorageHelper.takePersistentPermissions(
@@ -167,6 +168,9 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                                 uri
                                             )
                                         }
+                                        // Clear cached directory so new path is used
+                                        ireader.domain.storage.SecureStorageHelper.clearCache()
+                                        android.util.Log.d("MainActivity", "SecureStorageHelper cache cleared")
                                     } catch (e: Exception) {
                                         e.printStackTrace()
                                     }

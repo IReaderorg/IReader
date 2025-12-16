@@ -31,6 +31,15 @@ object SecureStorageHelper {
     fun init(preferences: UiPreferences) {
         uiPreferences = preferences
         cachedSecureDir = null // Reset cache
+        android.util.Log.d("SecureStorageHelper", "Initialized with UiPreferences, hasSecureStorage=${hasSecureStorage()}")
+    }
+    
+    /**
+     * Clear the cached directory. Call this when the storage preference changes.
+     */
+    fun clearCache() {
+        cachedSecureDir = null
+        android.util.Log.d("SecureStorageHelper", "Cache cleared")
     }
     
     /**
@@ -38,7 +47,9 @@ object SecureStorageHelper {
      */
     fun hasSecureStorage(): Boolean {
         val selectedUri = uiPreferences?.selectedStorageFolderUri()?.get()
-        return !selectedUri.isNullOrEmpty()
+        val result = !selectedUri.isNullOrEmpty()
+        android.util.Log.d("SecureStorageHelper", "hasSecureStorage: $result, uri=$selectedUri, uiPreferences=${uiPreferences != null}")
+        return result
     }
     
     /**
@@ -52,6 +63,38 @@ object SecureStorageHelper {
             } catch (e: Exception) {
                 null
             }
+        }
+        return null
+    }
+    
+    /**
+     * Try to extract actual file path from SAF URI.
+     * Works for primary storage URIs like:
+     * content://com.android.externalstorage.documents/tree/primary%3AIReader
+     */
+    private fun getFilePathFromSafUri(uri: Uri): String? {
+        try {
+            val docId = uri.lastPathSegment ?: return null
+            android.util.Log.d("SecureStorageHelper", "Parsing SAF URI docId: $docId")
+            
+            // Handle tree URIs: primary:IReader or primary%3AIReader
+            val decodedDocId = java.net.URLDecoder.decode(docId, "UTF-8")
+            
+            // Extract the path part after "primary:" or from document path
+            val pathPart = when {
+                decodedDocId.startsWith("primary:") -> decodedDocId.substringAfter("primary:")
+                decodedDocId.contains("/document/primary:") -> decodedDocId.substringAfter("/document/primary:")
+                decodedDocId.contains(":") -> decodedDocId.substringAfter(":")
+                else -> return null
+            }
+            
+            if (pathPart.isNotEmpty()) {
+                val fullPath = "/storage/emulated/0/$pathPart"
+                android.util.Log.d("SecureStorageHelper", "Extracted path from SAF URI: $fullPath")
+                return fullPath
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SecureStorageHelper", "Failed to parse SAF URI: ${e.message}")
         }
         return null
     }
@@ -71,20 +114,53 @@ object SecureStorageHelper {
     
     /**
      * Get the base directory for app data.
-     * Uses external files directory which persists even if app is uninstalled
-     * (unless user clears app data).
+     * If user selected a SAF folder on primary storage, try to use that path directly.
+     * Otherwise falls back to app's external files directory.
      */
     private fun getSecureBaseDir(context: Context): File {
+        android.util.Log.d("SecureStorageHelper", "getSecureBaseDir called, cachedSecureDir=${cachedSecureDir?.absolutePath}")
+        
         cachedSecureDir?.let { 
-            if (it.exists() || it.mkdirs()) return it 
+            if (it.exists() || it.mkdirs()) {
+                android.util.Log.d("SecureStorageHelper", "Using cached secure dir: ${it.absolutePath}")
+                return it 
+            }
         }
         
-        // If user selected a folder, use external files dir (more persistent)
-        if (hasSecureStorage()) {
+        // Check if user selected a folder
+        val hasStorage = hasSecureStorage()
+        android.util.Log.d("SecureStorageHelper", "hasSecureStorage=$hasStorage")
+        
+        // If user selected a folder, try to use the actual SAF path first
+        if (hasStorage) {
+            // Try to extract actual path from SAF URI
+            val safUri = getSafUri()
+            if (safUri != null) {
+                val actualPath = getFilePathFromSafUri(safUri)
+                android.util.Log.d("SecureStorageHelper", "SAF URI actual path: $actualPath")
+                if (actualPath != null) {
+                    val safDir = File(actualPath)
+                    if (safDir.exists() && safDir.canWrite()) {
+                        android.util.Log.d("SecureStorageHelper", "Using SAF directory directly: ${safDir.absolutePath}")
+                        cachedSecureDir = safDir
+                        return safDir
+                    } else if (!safDir.exists() && safDir.mkdirs()) {
+                        android.util.Log.d("SecureStorageHelper", "Created SAF directory: ${safDir.absolutePath}")
+                        cachedSecureDir = safDir
+                        return safDir
+                    }
+                    android.util.Log.d("SecureStorageHelper", "SAF dir not accessible: exists=${safDir.exists()}, canWrite=${safDir.canWrite()}")
+                }
+            }
+            
+            // Fallback to external files dir if SAF path not accessible
             val externalDir = context.getExternalFilesDir(null)
+            android.util.Log.d("SecureStorageHelper", "Fallback to external files dir: $externalDir")
             if (externalDir != null) {
                 val secureDir = File(externalDir, "IReader")
-                if (secureDir.exists() || secureDir.mkdirs()) {
+                val created = secureDir.exists() || secureDir.mkdirs()
+                android.util.Log.d("SecureStorageHelper", "Secure dir: ${secureDir.absolutePath}, created=$created, exists=${secureDir.exists()}")
+                if (created || secureDir.exists()) {
                     cachedSecureDir = secureDir
                     return secureDir
                 }
@@ -95,6 +171,7 @@ object SecureStorageHelper {
         val cacheDir = File(context.cacheDir, "IReader")
         cacheDir.mkdirs()
         cachedSecureDir = cacheDir
+        android.util.Log.d("SecureStorageHelper", "Fallback to cache dir: ${cacheDir.absolutePath}")
         return cacheDir
     }
     
@@ -140,7 +217,8 @@ object SecureStorageHelper {
     fun getJsPluginsDir(context: Context): File {
         val baseDir = getSecureBaseDir(context)
         val jsDir = File(baseDir, "js-plugins")
-        jsDir.mkdirs()
+        val created = jsDir.mkdirs()
+        android.util.Log.d("SecureStorageHelper", "getJsPluginsDir: ${jsDir.absolutePath}, exists=${jsDir.exists()}, created=$created, canWrite=${jsDir.canWrite()}")
         return jsDir
     }
     

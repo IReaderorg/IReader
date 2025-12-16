@@ -106,10 +106,13 @@ class AndroidLocalInstaller(
             
             // Use secure storage for JS plugins
             val jsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
+            Log.info("AndroidLocalInstaller: Installing JS plugin ${catalog.name} to ${jsPluginsDir.absolutePath}")
+            Log.info("AndroidLocalInstaller: jsPluginsDir exists=${jsPluginsDir.exists()}, canWrite=${jsPluginsDir.canWrite()}")
             
             // Download the JS plugin file
             val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
             val metadataFile = File(jsPluginsDir, "${catalog.pkgName}.meta.json")
+            Log.info("AndroidLocalInstaller: Target files - js=${jsFile.absolutePath}, meta=${metadataFile.absolutePath}")
             
             val jsResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                 headers.append(HttpHeaders.CacheControl, "no-store")
@@ -132,14 +135,19 @@ class AndroidLocalInstaller(
             
             // No need to download icon - Coil will handle it via iconUrl with caching
             
+            // Verify files were created
+            Log.info("AndroidLocalInstaller: JS file created=${jsFile.exists()}, size=${if (jsFile.exists()) jsFile.length() else 0}")
+            Log.info("AndroidLocalInstaller: Metadata file created=${metadataFile.exists()}, size=${if (metadataFile.exists()) metadataFile.length() else 0}")
+            
             // Notify installation complete
             installationChanges.notifyAppInstall(catalog.pkgName)
+            Log.info("AndroidLocalInstaller: Successfully installed JS plugin ${catalog.name}")
             
             send(InstallStep.Success)
             send(InstallStep.Idle)
             
         } catch (e: Exception) {
-            Log.error("Failed to install JS plugin: ${catalog.name}", e)
+            Log.error("AndroidLocalInstaller: Failed to install JS plugin: ${catalog.name}", e)
             send(InstallStep.Error(UiText.ExceptionString(e).asString(localizeHelper)))
             send(InstallStep.Idle)
         }

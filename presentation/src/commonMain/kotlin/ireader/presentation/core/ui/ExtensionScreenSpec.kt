@@ -56,10 +56,10 @@ import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.ui.SnackBarListener
-import ireader.presentation.ui.home.sources.extension.CleanExtensionScreen
-import ireader.presentation.ui.home.sources.extension.ExtensionScreenTopAppBar
 import ireader.presentation.ui.home.sources.extension.ExtensionViewModel
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
+import ireader.presentation.ui.home.sources.extension.UnifiedSourceScreen
+import ireader.presentation.ui.home.sources.extension.UnifiedSourceTopAppBar
 
 /**
  * Extension screen specification - provides tab metadata and content
@@ -108,16 +108,11 @@ object ExtensionScreenSpec {
             IScaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = { scrollBehavior ->
-                    ExtensionScreenTopAppBar(
+                    UnifiedSourceTopAppBar(
                         searchMode = searchMode,
                         query = state.searchQuery ?: "",
                         onValueChange = { vm.setSearchQuery(it) },
                         onConfirm = { focusManager.clearFocus() },
-                        currentPage = state.currentPagerPage,
-                        onClose = {
-                            searchMode = false
-                            vm.setSearchQuery(null)
-                        },
                         onSearchDisable = {
                             searchMode = false
                             vm.setSearchQuery(null)
@@ -131,7 +126,6 @@ object ExtensionScreenSpec {
                         onBrowseSettings = {
                             navController.navigateTo(BrowseSettingsScreenSpec())
                         },
-                        repositoryFilterText = vm.getRepositoryTypeDisplayName(),
                         scrollBehavior = scrollBehavior,
                         onAddRepository = {
                             navController.navigateTo(RepositoryAddScreenSpec())
@@ -139,8 +133,7 @@ object ExtensionScreenSpec {
                     )
                 }
             ) { scaffoldPadding ->
-                CleanExtensionScreen(
-                    modifier = Modifier.padding(scaffoldPadding),
+                UnifiedSourceScreen(
                     vm = vm,
                     onClickCatalog = {
                         if (!vm.incognito.value) {
@@ -163,6 +156,9 @@ object ExtensionScreenSpec {
                     },
                     onMigrateFromSource = { sourceId ->
                         navController.navigateTo(SourceMigrationScreenSpec(sourceId))
+                    },
+                    onNavigateToAddRepository = {
+                        navController.navigateTo(RepositoryAddScreenSpec())
                     },
                     scaffoldPadding = scaffoldPadding,
                 )

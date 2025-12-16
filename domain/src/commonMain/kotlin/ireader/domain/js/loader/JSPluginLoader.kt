@@ -54,11 +54,15 @@ private data class LoadedPlugin(
  * Uses Okio for KMP-compatible file operations.
  */
 class JSPluginLoader(
-    private val pluginsDirectory: Path,
+    private val pluginsDirectoryProvider: () -> Path,
     private val httpClient: HttpClient,
     private val preferenceStoreFactory: PreferenceStoreFactory,
     private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
+    
+    // Get the current plugins directory (may change if user selects new storage folder)
+    private val pluginsDirectory: Path
+        get() = pluginsDirectoryProvider()
     
     private val pluginCache = mutableMapOf<String, LoadedPlugin>()
     private val stubManager = JSPluginStubManager(preferenceStoreFactory.create("js_plugin_stubs"))
