@@ -909,21 +909,33 @@ class BookDetailViewModel(
     }
     
     /**
-     * Select all chapters - delegates to ChapterController.
+     * Select all chapters - dispatches to ChapterController for SSOT.
      */
     fun selectAllChapters() {
-        chapterController.dispatch(ChapterCommand.SelectAll)
+        val allChapterIds = chapters.map { it.id }
+        // First clear, then select all via ChapterController
+        chapterController.dispatch(ChapterCommand.ClearSelection)
+        allChapterIds.forEach { id ->
+            chapterController.dispatch(ChapterCommand.SelectChapter(id))
+        }
     }
     
     /**
-     * Invert selection - delegates to ChapterController.
+     * Invert selection - dispatches to ChapterController for SSOT.
      */
     fun invertSelection() {
-        chapterController.dispatch(ChapterCommand.InvertSelection)
+        val allChapterIds = chapters.map { it.id }.toSet()
+        val currentSelection = selection.toSet()
+        val invertedSelection = allChapterIds - currentSelection
+        // Clear and add inverted selection via ChapterController
+        chapterController.dispatch(ChapterCommand.ClearSelection)
+        invertedSelection.forEach { id ->
+            chapterController.dispatch(ChapterCommand.SelectChapter(id))
+        }
     }
     
     /**
-     * Clear selection - delegates to ChapterController.
+     * Clear selection - dispatches to ChapterController for SSOT.
      */
     fun clearSelection() {
         chapterController.dispatch(ChapterCommand.ClearSelection)
