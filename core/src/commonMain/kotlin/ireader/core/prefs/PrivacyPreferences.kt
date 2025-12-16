@@ -122,13 +122,21 @@ class PrivacyPreferencesImpl(
     override suspend fun setPrivacyConsentTimestamp(timestamp: Long) = privacyConsentTimestampPref.set(timestamp)
     
     override suspend fun isPrivacyModeEnabled(): Boolean {
-        return !analyticsEnabledPref.get() &&
-                !crashReportingEnabledPref.get() &&
-                !performanceMonitoringEnabledPref.get() &&
-                !usageStatisticsEnabledPref.get() &&
-                !diagnosticDataEnabledPref.get() &&
-                !autoErrorReportingEnabledPref.get() &&
-                !anonymousTrackingEnabledPref.get()
+        val analyticsEnabled: Boolean = analyticsEnabledPref.get()
+        val crashReportingEnabled: Boolean = crashReportingEnabledPref.get()
+        val performanceMonitoringEnabled: Boolean = performanceMonitoringEnabledPref.get()
+        val usageStatisticsEnabled: Boolean = usageStatisticsEnabledPref.get()
+        val diagnosticDataEnabled: Boolean = diagnosticDataEnabledPref.get()
+        val autoErrorReportingEnabled: Boolean = autoErrorReportingEnabledPref.get()
+        val anonymousTrackingEnabled: Boolean = anonymousTrackingEnabledPref.get()
+        
+        return !analyticsEnabled &&
+                !crashReportingEnabled &&
+                !performanceMonitoringEnabled &&
+                !usageStatisticsEnabled &&
+                !diagnosticDataEnabled &&
+                !autoErrorReportingEnabled &&
+                !anonymousTrackingEnabled
     }
     
     override suspend fun enablePrivacyMode() {

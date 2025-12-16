@@ -134,6 +134,15 @@ class MyApplication : Application(), SingletonImageLoader.Factory, KoinComponent
             AppModule
         ))
         
+        // Initialize SecureStorageHelper with UiPreferences
+        try {
+            val uiPreferences: ireader.domain.preferences.prefs.UiPreferences by inject()
+            ireader.domain.storage.SecureStorageHelper.init(uiPreferences)
+        } catch (e: Exception) {
+            // Fallback - SecureStorageHelper will use default cache dir
+            println("SecureStorageHelper init failed: ${e.message}")
+        }
+        
         // Phase 3: Non-essential modules (background)
         backgroundScope.launch {
             koinApp.koin.loadModules(listOf(

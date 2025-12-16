@@ -43,23 +43,10 @@ class AndroidCatalogInstaller(
     
     /**
      * Get the JS plugins directory based on user preference.
-     * If savedLocalCatalogLocation is true, uses app cache (no permissions needed).
-     * Otherwise uses external storage for easier access.
+     * Uses SecureStorageHelper to get the secure storage folder if available.
      */
     private fun getJSPluginsDirectory(): File {
-        val useCacheDir = uiPreferences.savedLocalCatalogLocation().get()
-        
-        return if (useCacheDir) {
-            // Use app cache directory - no permissions needed
-            File(context.cacheDir, "js-plugins").apply { mkdirs() }
-        } else {
-            // Use external storage for easier access
-            val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
-            val ireaderDir = File(externalDir, "ireader")
-            val jsPluginsDir = File(ireaderDir, "js-plugins")
-            jsPluginsDir.mkdirs()
-            jsPluginsDir
-        }
+        return ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
     }
 
     /**
@@ -74,8 +61,9 @@ class AndroidCatalogInstaller(
             
             // This installer only handles APK installations using Package Installer
             // JS plugins should be routed to AndroidLocalInstaller by InstallCatalogImpl
-            val tmpApkFile = File(context.cacheDir, "${catalog.pkgName}.apk")
-            val tmpIconFile = File(context.cacheDir, "${catalog.pkgName}.png")
+            val secureCache = ireader.domain.storage.SecureStorageHelper.getBaseCacheDir(context)
+            val tmpApkFile = File(secureCache, "${catalog.pkgName}.apk")
+            val tmpIconFile = File(secureCache, "${catalog.pkgName}.png")
             try {
                     val apkResponse: ByteReadChannel = client.get(catalog.pkgUrl) {
                         headers.append(HttpHeaders.CacheControl, "no-store")
@@ -87,7 +75,7 @@ class AndroidCatalogInstaller(
                     
                     // Save the icon to storage
                     iconResponse.saveTo(tmpIconFile.absolutePath.toPath(), okio.FileSystem.SYSTEM)
-                    val extDir = File(context.cacheDir, catalog.pkgName).apply { mkdirs() }
+                    val extDir = File(secureCache, catalog.pkgName).apply { mkdirs() }
                     val iconFile = File(extDir, tmpIconFile.name)
                     tmpIconFile.copyRecursively(iconFile, true)
                     
@@ -137,9 +125,8 @@ class AndroidCatalogInstaller(
                 deleted = true
             }
             
-            // Try to delete JS plugin files from both possible locations
-            // Cache directory
-            val cacheJsPluginsDir = File(context.cacheDir, "js-plugins")
+            // Try to delete JS plugin files from secure storage
+            val cacheJsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
             val cacheJsFile = File(cacheJsPluginsDir, "$pkgName.js")
             if (cacheJsFile.exists()) {
                 deleted = cacheJsFile.delete() || deleted

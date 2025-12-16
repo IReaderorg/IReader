@@ -1,33 +1,27 @@
 package ireader.domain.usecases.files
 
 import android.content.Context
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import com.anggrayudi.storage.SimpleStorage
-import com.anggrayudi.storage.SimpleStorageHelper
-import com.anggrayudi.storage.file.DocumentFileCompat
-import androidx.documentfile.provider.DocumentFile
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.storage.AndroidCacheManager
 import ireader.domain.storage.AndroidStorageManager
 import ireader.domain.storage.CacheManager
 import ireader.domain.storage.StorageManager
+import okio.FileSystem
 import okio.Path
 
-
+/**
+ * Android implementation of GetSimpleStorage.
+ * Uses StorageManager and CacheManager for directory operations.
+ * File picking is now handled by FileKit in the presentation layer.
+ */
 class AndroidGetSimpleStorage(
     private val context: Context,
+    private val uiPreferences: UiPreferences,
 ) : GetSimpleStorage {
-
-    lateinit var storage: SimpleStorage
-    lateinit var simpleStorageHelper: SimpleStorageHelper
     
-    private val storageManager: StorageManager = AndroidStorageManager(context)
+    private val storageManager: StorageManager = AndroidStorageManager(context, uiPreferences)
     private val cacheManager: CacheManager = AndroidCacheManager(context)
-
-    fun provideActivity(activity: ComponentActivity, savedState: Bundle?) {
-        storage = SimpleStorage(activity, savedState)
-        simpleStorageHelper = SimpleStorageHelper(activity, savedState)
-    }
+    private val fileSystem = FileSystem.SYSTEM
 
     override val mainIReaderDir: Path
         get() = storageManager.appDirectory
@@ -80,16 +74,15 @@ class AndroidGetSimpleStorage(
         return cacheManager.getCacheSize()
     }
 
-    fun get(dirName: String): DocumentFile {
-        val dir = ireaderDirectory(dirName).toFile()
-        if (!dir.exists()) {
-            dir.mkdirs()
+    /**
+     * Get Path for a directory using Okio.
+     * Creates the directory if it doesn't exist.
+     */
+    fun get(dirName: String): Path {
+        val dir = ireaderDirectory(dirName)
+        if (!fileSystem.exists(dir)) {
+            fileSystem.createDirectories(dir)
         }
-        return DocumentFileCompat.fromFile(
-            context,
-            dir,
-            requiresWriteAccess = true,
-            considerRawFile = true
-        )!!
+        return dir
     }
 }

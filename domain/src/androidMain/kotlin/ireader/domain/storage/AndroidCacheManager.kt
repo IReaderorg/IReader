@@ -2,23 +2,33 @@ package ireader.domain.storage
 
 import android.content.Context
 import coil3.imageLoader
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.utils.getCacheSize
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
+import okio.Path.Companion.toPath
 import java.io.File
 
 class AndroidCacheManager(
-    private val context: Context
+    private val context: Context,
+    private val uiPreferences: UiPreferences? = null
 ) : CacheManager {
     
     private val fileSystem = FileSystem.SYSTEM
     
+    /**
+     * Returns the base directory for cache operations.
+     * Uses SecureStorageHelper which handles SAF URIs properly.
+     */
+    private val baseCacheDir: File
+        get() = SecureStorageHelper.getBaseCacheDir(context)
+    
     override val cacheDirectory: Path
-        get() = File(context.cacheDir, "IReader/cache/").toOkioPath()
+        get() = SecureStorageHelper.getBaseCacheDir(context).toOkioPath()
     
     override val extensionCacheDirectory: Path
-        get() = File(context.cacheDir, "IReader/Extensions/").toOkioPath()
+        get() = SecureStorageHelper.getExtensionsDir(context).toOkioPath()
     
     override fun getCacheSubDirectory(name: String): Path {
         val subDir = cacheDirectory / name
@@ -33,7 +43,7 @@ class AndroidCacheManager(
     }
     
     override fun clearAllCache() {
-        context.cacheDir.deleteRecursively()
+        baseCacheDir.deleteRecursively()
     }
     
     override fun getCacheSize(): String {
@@ -41,7 +51,7 @@ class AndroidCacheManager(
     }
     
     override fun getCacheSizeBytes(): Long {
-        return context.cacheDir.walkTopDown()
+        return baseCacheDir.walkTopDown()
             .filter { it.isFile }
             .map { it.length() }
             .sum()
@@ -49,7 +59,7 @@ class AndroidCacheManager(
     
     override fun clearCacheDirectory(directory: Path) {
         val dirFile = directory.toFile()
-        if (dirFile.exists() && dirFile.startsWith(context.cacheDir)) {
+        if (dirFile.exists() && dirFile.startsWith(baseCacheDir)) {
             dirFile.deleteRecursively()
         }
     }

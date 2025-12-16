@@ -124,7 +124,7 @@ class PackageInstaller(
                     session.commit(sender)
                     Log.info("Session committed successfully")
                   } catch (e: SecurityException) {
-                    Log.error("Security exception during commit: ${e.message}", e)
+                    Log.error(e, "Security exception during commit: ${e.message}")
                     val errorMsg = "Security exception: ${e.message}"
                     withContext(Dispatchers.Main) {
                       Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
@@ -133,7 +133,7 @@ class PackageInstaller(
                     return@withContext
                   } catch (e: IllegalArgumentException) {
                     val errorMsg = "Invalid argument: ${e.message}"
-                    Log.error("Invalid argument during commit: ${e.message}", e)
+                    Log.error(e, "Invalid argument during commit: ${e.message}")
                     // For Android 14, add extra information about the specific error
                     if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
                       Log.error("This error often occurs on Android 14+ if the APK file has issues or the PendingIntent configuration is incorrect")
@@ -173,7 +173,7 @@ class PackageInstaller(
                         InstallStep.Downloading // We've started a manual installation
                         return@withContext
                       } catch (fallbackException: Exception) {
-                        Log.error("Fallback installation method also failed: ${fallbackException.message}", fallbackException)
+                        Log.error(fallbackException, "Fallback installation method also failed: ${fallbackException.message}")
                       }
                     }
                     
@@ -184,7 +184,7 @@ class PackageInstaller(
                     return@withContext
                   }
                 } catch (e: Exception) {
-                  Log.error("Failed to commit session", e.message)
+                  Log.error(e, "Failed to commit session: ${e.message}")
                   val errorMsg = "Session commit failed: ${e.message}"
                   withContext(Dispatchers.Main) {
                     Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
@@ -193,7 +193,7 @@ class PackageInstaller(
                   return@withContext
                 }
               } catch (e: Exception) {
-                Log.error("Session operation failed", e)
+                Log.error(e, "Session operation failed: ${e.message}")
                 val errorMsg = "Session operation failed: ${e.message}"
                 withContext(Dispatchers.Main) {
                   Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
@@ -203,7 +203,7 @@ class PackageInstaller(
               }
             }
           } catch (e: Exception) {
-            Log.error("Failed to create or use session", e.message)
+            Log.error(e, "Failed to create or use session: ${e.message}")
             val errorMsg = "Failed to create or use session: ${e.message}"
             withContext(Dispatchers.Main) {
               Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
@@ -216,7 +216,7 @@ class PackageInstaller(
           Log.info("Installation process initiated, waiting for user confirmation")
           InstallStep.Downloading
         } catch (e: Exception) {
-          Log.error("Failed to install package", e.message)
+          Log.error(e, "Failed to install package: ${e.message}")
           val errorMsg = localizeHelper.localize(Res.string.installation_error) + ": ${e.message}"
           
           withContext(Dispatchers.Main) {
@@ -300,7 +300,7 @@ class PackageInstaller(
       try {
         context.unregisterReceiver(receiver)
       } catch (e: Exception) {
-        Log.warn("Failed to unregister receiver", e)
+        Log.warn { "Failed to unregister receiver: ${e.message}" }
       }
       broadcast.cancel()
       packageInstaller.unregisterSessionCallback(packageInstallerCallBack)
@@ -370,7 +370,7 @@ class PackageInstaller(
             // We don't complete the deferred here because the user still needs to confirm
             // The final result will come in a separate broadcast
           } catch (e: Throwable) {
-            Log.warn("Error while showing installation dialog", e)
+            Log.warn { "Error while showing installation dialog: ${e.message}" }
             val errorMessage = localizeHelper.localize(Res.string.installation_error) + ": " + e.message
             Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
             deferred.complete(InstallStep.Error(errorMessage))

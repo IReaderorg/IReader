@@ -1,73 +1,75 @@
-package ireader.presentation.core
+package ireader.presentation.ui.update
 
 import ireader.core.log.Log
+import ireader.domain.models.update_service_models.Release
+import ireader.domain.models.update_service_models.ReleaseAsset
 import ireader.domain.preferences.prefs.AppPreferences
-import ireader.domain.preferences.prefs.UiPreferences
-import ireader.presentation.ui.update.AppUpdateChecker
-import ireader.presentation.ui.update.AppUpdateState
+import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 
-class ScreenContentViewModel(
-    private val uiPreferences: UiPreferences,
-    private val appPreferences: AppPreferences,
-    private val appUpdateChecker: AppUpdateChecker,
-) : ireader.presentation.ui.core.viewmodel.BaseViewModel() {
+/**
+ * State for the app update screen
+ */
+data class AppUpdateState(
+    val isLoading: Boolean = false,
+    val release: Release? = null,
+    val currentVersion: String = "",
+    val newVersion: String = "",
+    val releaseNotes: String = "",
+    val downloadUrl: String = "",
+    val apkAsset: ReleaseAsset? = null,
+    val downloadProgress: Float = 0f,
+    val isDownloading: Boolean = false,
+    val isDownloaded: Boolean = false,
+    val downloadedFilePath: String? = null,
+    val error: String? = null,
+    val shouldShowDialog: Boolean = false,
+)
 
-    var showUpdate = uiPreferences.showUpdatesInButtonBar().asState()
-    var showHistory = uiPreferences.showHistoryInButtonBar().asState()
-    var confirmExit = uiPreferences.confirmExit().asState()
+/**
+ * ViewModel for managing app updates with modern UI
+ */
+class AppUpdateViewModel(
+    private val appPreferences: AppPreferences,
+    private val updateChecker: AppUpdateChecker,
+) : BaseViewModel() {
     
-    // App update state
-    private val _appUpdateState = MutableStateFlow(AppUpdateState())
-    val appUpdateState: StateFlow<AppUpdateState> = _appUpdateState.asStateFlow()
+    private val _state = MutableStateFlow(AppUpdateState())
+    val state: StateFlow<AppUpdateState> = _state.asStateFlow()
     
     companion object {
-        private const val TAG = "ScreenContentViewModel"
+        private const val TAG = "AppUpdateViewModel"
         private const val REMIND_LATER_DAYS = 7L
         private const val MILLIS_PER_DAY = 24 * 60 * 60 * 1000L
     }
     
     init {
-        checkForAppUpdates()
+        loadCurrentVersion()
+    }
+    
+    private fun loadCurrentVersion() {
+        val currentVersion = ireader.i18n.BuildKonfig.VERSION_NAME
+        _state.value = _state.value.copy(currentVersion = currentVersion)
     }
     
     /**
-     * Check for app updates on startup
+     * Check for updates and determine if dialog should be shown
      */
-    private fun checkForAppUpdates() {
-        // Only check if app updater is enabled
-        if (!appPreferences.appUpdater().get()) {
-            Log.info { "$TAG: App updater disabled, skipping check" }
-            return
-        }
-        
-        // Skip in debug/preview builds
-        if (ireader.i18n.BuildKonfig.DEBUG || ireader.i18n.BuildKonfig.PREVIEW) {
-            Log.info { "$TAG: Debug/Preview build, skipping update check" }
-            return
-        }
-        
+    fun checkForUpdates() {
         scope.launch {
-            _appUpdateState.value = _appUpdateState.value.copy(
-                isLoading = true,
-                currentVersion = ireader.i18n.BuildKonfig.VERSION_NAME
-            )
+            _state.value = _state.value.copy(isLoading = true, error = null)
             
             try {
-                val result = appUpdateChecker.checkForUpdate()
+                val result = updateChecker.checkForUpdate()
                 
                 result.onSuccess { release ->
-                    if (release != null && shouldShowUpdateDialog(release.tag_name)) {
-                        val apkAsset = release.assets.find { asset ->
-                            asset.name.endsWith(".apk") && 
-                            !asset.name.contains("debug", ignoreCase = true)
-                        } ?: release.assets.find { it.name.endsWith(".apk") }
-                        
-                        _appUpdateState.value = _appUpdateState.value.copy(
+                    if (release != null && shouldShowUpdateDialog(release)) {
+                        val apkAsset = findApkAsset(release.assets)
+                        _state.value = _state.value.copy(
                             isLoading = false,
                             release = release,
                             newVersion = release.tag_name ?: "",
@@ -78,32 +80,36 @@ class ScreenContentViewModel(
                         )
                         Log.info { "$TAG: Update available: ${release.tag_name}" }
                     } else {
-                        _appUpdateState.value = _appUpdateState.value.copy(
+                        _state.value = _state.value.copy(
                             isLoading = false,
                             shouldShowDialog = false,
                         )
+                        Log.info { "$TAG: No update available or dialog suppressed" }
                     }
                 }.onFailure { error ->
-                    _appUpdateState.value = _appUpdateState.value.copy(
+                    _state.value = _state.value.copy(
                         isLoading = false,
                         error = error.message,
                     )
                     Log.error("$TAG: Failed to check for updates", error)
                 }
             } catch (e: Exception) {
-                _appUpdateState.value = _appUpdateState.value.copy(
+                _state.value = _state.value.copy(
                     isLoading = false,
                     error = e.message,
                 )
+                Log.error("$TAG: Exception checking for updates", e)
             }
         }
     }
     
+    /**
+     * Determine if update dialog should be shown based on user preferences
+     */
     @OptIn(ExperimentalTime::class)
-    private fun shouldShowUpdateDialog(tagName: String?): Boolean {
-        if (tagName == null) return false
-        
-        val currentVersion = ireader.i18n.BuildKonfig.VERSION_NAME
+    private fun shouldShowUpdateDialog(release: Release): Boolean {
+        val tagName = release.tag_name ?: return false
+        val currentVersion = _state.value.currentVersion
         
         // Check if this is actually a newer version
         if (!ireader.domain.models.update_service_models.Version.isNewVersion(tagName, currentVersion)) {
@@ -136,16 +142,29 @@ class ScreenContentViewModel(
         return true
     }
     
+    /**
+     * Find the APK asset from release assets
+     */
+    private fun findApkAsset(assets: List<ReleaseAsset>): ReleaseAsset? {
+        return assets.find { asset ->
+            asset.name.endsWith(".apk") && 
+            !asset.name.contains("debug", ignoreCase = true)
+        } ?: assets.find { it.name.endsWith(".apk") }
+    }
+    
+    /**
+     * Parse and format release notes from GitHub markdown
+     */
     private fun parseReleaseNotes(body: String?): String {
         if (body.isNullOrBlank()) return ""
         
         return body
-            .replace(Regex("^#+\\s*"), "")
-            .replace(Regex("\\*\\*(.+?)\\*\\*"), "$1")
-            .replace(Regex("\\*(.+?)\\*"), "$1")
-            .replace(Regex("^-\\s*", RegexOption.MULTILINE), "• ")
+            .replace(Regex("^#+\\s*"), "") // Remove markdown headers
+            .replace(Regex("\\*\\*(.+?)\\*\\*"), "$1") // Remove bold
+            .replace(Regex("\\*(.+?)\\*"), "$1") // Remove italic
+            .replace(Regex("^-\\s*", RegexOption.MULTILINE), "• ") // Convert list items
             .replace(Regex("^\\*\\s*", RegexOption.MULTILINE), "• ")
-            .replace(Regex("\\[(.+?)\\]\\(.+?\\)"), "$1")
+            .replace(Regex("\\[(.+?)\\]\\(.+?\\)"), "$1") // Remove links but keep text
             .trim()
     }
     
@@ -156,7 +175,7 @@ class ScreenContentViewModel(
     fun remindLater() {
         val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
         appPreferences.updateRemindLaterTime().set(now)
-        _appUpdateState.value = _appUpdateState.value.copy(shouldShowDialog = false)
+        _state.value = _state.value.copy(shouldShowDialog = false)
         Log.info { "$TAG: User chose remind later" }
     }
     
@@ -164,43 +183,43 @@ class ScreenContentViewModel(
      * User clicked "Skip this version"
      */
     fun skipVersion() {
-        val version = _appUpdateState.value.newVersion
+        val version = _state.value.newVersion
         if (version.isNotEmpty()) {
             appPreferences.skippedUpdateVersion().set(version)
         }
-        _appUpdateState.value = _appUpdateState.value.copy(shouldShowDialog = false)
+        _state.value = _state.value.copy(shouldShowDialog = false)
         Log.info { "$TAG: User skipped version $version" }
     }
     
     /**
      * Dismiss the update dialog
      */
-    fun dismissUpdateDialog() {
-        _appUpdateState.value = _appUpdateState.value.copy(shouldShowDialog = false)
+    fun dismissDialog() {
+        _state.value = _state.value.copy(shouldShowDialog = false)
     }
     
     /**
      * Start downloading the APK
      */
     fun startDownload() {
-        val asset = _appUpdateState.value.apkAsset ?: return
+        val asset = _state.value.apkAsset ?: return
         
         scope.launch {
-            _appUpdateState.value = _appUpdateState.value.copy(
+            _state.value = _state.value.copy(
                 isDownloading = true,
                 downloadProgress = 0f,
                 error = null,
             )
             
             try {
-                appUpdateChecker.downloadApk(
+                updateChecker.downloadApk(
                     url = asset.browserDownloadUrl,
                     fileName = asset.name,
                     onProgress = { progress ->
-                        _appUpdateState.value = _appUpdateState.value.copy(downloadProgress = progress)
+                        _state.value = _state.value.copy(downloadProgress = progress)
                     },
                     onComplete = { filePath ->
-                        _appUpdateState.value = _appUpdateState.value.copy(
+                        _state.value = _state.value.copy(
                             isDownloading = false,
                             isDownloaded = true,
                             downloadedFilePath = filePath,
@@ -208,7 +227,7 @@ class ScreenContentViewModel(
                         Log.info { "$TAG: Download complete: $filePath" }
                     },
                     onError = { error ->
-                        _appUpdateState.value = _appUpdateState.value.copy(
+                        _state.value = _state.value.copy(
                             isDownloading = false,
                             error = error,
                         )
@@ -216,10 +235,11 @@ class ScreenContentViewModel(
                     }
                 )
             } catch (e: Exception) {
-                _appUpdateState.value = _appUpdateState.value.copy(
+                _state.value = _state.value.copy(
                     isDownloading = false,
                     error = e.message,
                 )
+                Log.error("$TAG: Download exception", e)
             }
         }
     }
@@ -228,12 +248,13 @@ class ScreenContentViewModel(
      * Install the downloaded APK
      */
     fun installApk() {
-        val filePath = _appUpdateState.value.downloadedFilePath ?: return
+        val filePath = _state.value.downloadedFilePath ?: return
         
         try {
-            appUpdateChecker.installApk(filePath)
+            updateChecker.installApk(filePath)
         } catch (e: Exception) {
-            _appUpdateState.value = _appUpdateState.value.copy(error = e.message)
+            _state.value = _state.value.copy(error = e.message)
+            Log.error("$TAG: Install failed", e)
         }
     }
     
@@ -241,10 +262,17 @@ class ScreenContentViewModel(
      * Cancel ongoing download
      */
     fun cancelDownload() {
-        appUpdateChecker.cancelDownload()
-        _appUpdateState.value = _appUpdateState.value.copy(
+        updateChecker.cancelDownload()
+        _state.value = _state.value.copy(
             isDownloading = false,
             downloadProgress = 0f,
         )
+    }
+    
+    /**
+     * Clear error state
+     */
+    fun clearError() {
+        _state.value = _state.value.copy(error = null)
     }
 }

@@ -146,11 +146,11 @@ actual val DomainModule = module {
     }
     
     // Storage and Cache Managers
-    single<StorageManager> { AndroidStorageManager(get()) }
-    single<CacheManager> { AndroidCacheManager(get()) }
+    single<StorageManager> { AndroidStorageManager(get(), get()) }
+    single<CacheManager> { AndroidCacheManager(get(), get()) }
     
-    single<GetSimpleStorage>{ AndroidGetSimpleStorage(get()) }
-    single<AndroidGetSimpleStorage>{ AndroidGetSimpleStorage(get()) }
+    single<GetSimpleStorage>{ AndroidGetSimpleStorage(get(), get()) }
+    single<AndroidGetSimpleStorage>{ AndroidGetSimpleStorage(get(), get()) }
     single<DefaultNotificationHelper> { DefaultNotificationHelper(get(),get()) }
     factory <ScreenAlwaysOn> {
         ScreenAlwaysOnImpl(get())

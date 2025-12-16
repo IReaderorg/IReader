@@ -67,24 +67,10 @@ class AndroidCatalogLoader(
     }
     
     /**
-     * Get the JS plugins directory based on user preference.
-     * If savedLocalCatalogLocation is true, uses app cache (no permissions needed).
-     * Otherwise uses external storage for easier access.
+     * Get the JS plugins directory using secure storage.
      */
     private fun getJSPluginsDirectory(): File {
-        val useCacheDir = uiPreferences.savedLocalCatalogLocation().get()
-        
-        return if (useCacheDir) {
-            // Use app cache directory - no permissions needed
-            File(context.cacheDir, "js-plugins").apply { mkdirs() }
-        } else {
-            // Use external storage for easier access
-            val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
-            val ireaderDir = File(externalDir, "ireader")
-            val jsPluginsDir = File(ireaderDir, "js-plugins")
-            jsPluginsDir.mkdirs()
-            jsPluginsDir
-        }
+        return ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
     }
     
     init {
@@ -217,19 +203,11 @@ class AndroidCatalogLoader(
      * contains the required feature flag before trying to load it.
      */
     override fun loadLocalCatalog(pkgName: String): CatalogInstalled.Locally? {
-        // Check if this is a JS plugin in either location - if so, return null as JS plugins are loaded via loadAll()
-        // Check cache directory
-        val cacheJsPluginsDir = File(context.cacheDir, "js-plugins")
-        val cacheJsFile = File(cacheJsPluginsDir, "$pkgName.js")
+        // Check if this is a JS plugin in secure storage - if so, return null as JS plugins are loaded via loadAll()
+        val jsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
+        val jsFile = File(jsPluginsDir, "$pkgName.js")
         
-        // Check external storage directory
-        val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
-        val externalJsFile = if (externalDir != null) {
-            File(File(File(externalDir, "ireader"), "js-plugins"), "$pkgName.js")
-        } else null
-        
-        if ((cacheJsFile.exists() && cacheJsFile.canRead()) || 
-            (externalJsFile?.exists() == true && externalJsFile.canRead())) {
+        if (jsFile.exists() && jsFile.canRead()) {
             // JS plugins are handled by loadAll(), not loadLocalCatalog()
             // Return null to avoid the "catalog not found" warning
             return null
@@ -266,7 +244,8 @@ class AndroidCatalogLoader(
      */
     override fun loadSystemCatalog(pkgName: String): CatalogInstalled.SystemWide? {
         val iconFile = File(simpleStorage.extensionDirectory().toFile(), "${pkgName}/${pkgName}.png")
-        val cacheFile = File(context.cacheDir, "${pkgName}/${pkgName}.apk")
+        val secureCache = ireader.domain.storage.SecureStorageHelper.getBaseCacheDir(context)
+        val cacheFile = File(secureCache, "${pkgName}/${pkgName}.apk")
         val icon = if (iconFile.exists() && iconFile.canRead()) {
             iconFile
         } else {

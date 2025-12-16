@@ -29,7 +29,7 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     }
     
         fun installerMode(): Preference<PreferenceValues.Installer> {
-        return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.AndroidPackageManager)
+        return preferenceStore.getEnum("installer_mode", ireader.domain.models.prefs.PreferenceValues.Installer.LocalInstaller)
     }
     fun showSystemWideCatalogs(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_system_catalogs", true)
@@ -433,6 +433,15 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
      */
     fun hasRequestedStoragePermission(): Preference<Boolean> {
         return preferenceStore.getBoolean("has_requested_storage_permission", false)
+    }
+    
+    /**
+     * Whether the user has completed the unified onboarding flow.
+     * This includes storage setup (required) and cloud sync setup (optional).
+     * Default: false (show onboarding on first launch)
+     */
+    fun hasCompletedOnboarding(): Preference<Boolean> {
+        return preferenceStore.getBoolean("has_completed_onboarding", false)
     }
     
     /**

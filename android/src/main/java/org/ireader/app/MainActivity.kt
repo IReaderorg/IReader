@@ -33,7 +33,7 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
-import ireader.domain.usecases.files.AndroidGetSimpleStorage
+
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.Args
 import ireader.i18n.SHORTCUTS.SHORTCUT_DETAIL
@@ -60,7 +60,7 @@ import ireader.presentation.ui.component.getPerformanceConfigForDevice
 import ireader.presentation.ui.core.theme.themes
 import ireader.presentation.ui.settings.storage.StorageFolderPickerScreen
 import ireader.presentation.ui.core.ui.asStateIn
-import ireader.presentation.ui.settings.FirstLaunchDialog
+// FirstLaunchDialog removed - now handled in OnboardingScreen
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
@@ -75,8 +75,6 @@ import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivityDelegateImpl() {
 
-
-    private val getSimpleStorage: AndroidGetSimpleStorage by inject()
     private val uiPreferences: UiPreferences by inject()
     private val supabasePreferences: SupabasePreferences by inject()
     val initializers: AppInitializers by inject()
@@ -99,7 +97,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         
         // MUST be on main thread
         registerSecureActivity(this, uiPreferences, initializers)
-        getSimpleStorage.provideActivity(this, null)
+        // Note: SimpleStorage.provideActivity removed - FileKit handles file picking via Compose
         localeHelper.setLocaleLang()
         
         // Trigger lazy initialization
@@ -147,25 +145,35 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             color = MaterialTheme.colorScheme.surface,
                             contentColor = MaterialTheme.colorScheme.onSurface,
                         ) {
-                        // Check if we need to show storage permission screen
-                        var hasRequestedPermission by remember { 
-                            mutableStateOf(uiPreferences.hasRequestedStoragePermission().get()) 
+                        // Check if we need to show onboarding screen
+                        var hasCompletedOnboarding by remember { 
+                            mutableStateOf(uiPreferences.hasCompletedOnboarding().get()) 
                         }
-                        var showPermissionScreen by remember { mutableStateOf(!hasRequestedPermission) }
+                        var showOnboarding by remember { mutableStateOf(!hasCompletedOnboarding) }
                         
-                        if (showPermissionScreen) {
-                            // Show beautiful storage folder selection screen (KMP - FileKit)
-                            StorageFolderPickerScreen(
+                        if (showOnboarding) {
+                            // Show unified onboarding screen (language + storage + cloud setup)
+                            ireader.presentation.ui.onboarding.OnboardingScreen(
                                 uiPreferences = uiPreferences,
-                                onFolderSelected = { path ->
-                                    // Folder selected via FileKit - path is already saved in preferences
-                                    hasRequestedPermission = true
-                                    showPermissionScreen = false
+                                supabasePreferences = supabasePreferences,
+                                localeHelper = localeHelper,
+                                onFolderUriSelected = { uriString ->
+                                    // Take persistent SAF permissions for the selected folder
+                                    try {
+                                        if (uriString.startsWith("content://")) {
+                                            val uri = android.net.Uri.parse(uriString)
+                                            ireader.domain.storage.SecureStorageHelper.takePersistentPermissions(
+                                                this@MainActivity,
+                                                uri
+                                            )
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
                                 },
-                                onSkip = {
-                                    // User skipped - will use app cache storage
-                                    hasRequestedPermission = true
-                                    showPermissionScreen = false
+                                onComplete = {
+                                    hasCompletedOnboarding = true
+                                    showOnboarding = false
                                 }
                             )
                         } else {
@@ -190,7 +198,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                     handleIntentAction(this@MainActivity.intent, navController)
                                 }
                                 
-                                FirstLaunchDialogHandler()
+                                // FirstLaunchDialog removed - now handled in OnboardingScreen
                                 HandleOnNewIntent(this, navController)
                             }
                         }
@@ -245,36 +253,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         (application as? MyApplication)?.onAppVisible()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        getSimpleStorage.simpleStorageHelper.onSaveInstanceState(outState)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        getSimpleStorage.simpleStorageHelper.onRestoreInstanceState(savedInstanceState)
-
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        // Mandatory for Activity, but not for Fragment & ComponentActivity
-        getSimpleStorage.simpleStorageHelper.storage.onActivityResult(requestCode, resultCode, data)
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        // Mandatory for Activity, but not for Fragment & ComponentActivity
-        getSimpleStorage.simpleStorageHelper.onRequestPermissionsResult(
-            requestCode,
-            permissions,
-            grantResults
-        )
-    }
+    // Note: SimpleStorage lifecycle methods removed - FileKit handles file picking via Compose
 
     @Composable
     fun HandleOnNewIntent(context: Context, navController: NavHostController) {
@@ -446,37 +425,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         }
     }
     
-    @Composable
-    private fun FirstLaunchDialogHandler() {
-        val scope = rememberCoroutineScope()
-        var hasCompletedFirstLaunch by remember { 
-            mutableStateOf(uiPreferences.hasCompletedFirstLaunch().get()) 
-        }
-        var supabaseEnabled by remember { 
-            mutableStateOf(supabasePreferences.supabaseEnabled().get()) 
-        }
-        
-        if (!hasCompletedFirstLaunch) {
-            FirstLaunchDialog(
-                supabaseEnabled = supabaseEnabled,
-                onSupabaseEnabledChange = { enabled ->
-                    supabaseEnabled = enabled
-                },
-                onDismiss = {
-                    // Save preferences and dismiss
-                    supabasePreferences.supabaseEnabled().set(supabaseEnabled)
-                    uiPreferences.hasCompletedFirstLaunch().set(true)
-                    hasCompletedFirstLaunch = true
-                },
-                onGetStarted = {
-                    // Save preferences and dismiss
-                    supabasePreferences.supabaseEnabled().set(supabaseEnabled)
-                    uiPreferences.hasCompletedFirstLaunch().set(true)
-                    hasCompletedFirstLaunch = true
-                }
-            )
-        }
-    }
+    // FirstLaunchDialogHandler removed - now handled in OnboardingScreen
 
 }
 

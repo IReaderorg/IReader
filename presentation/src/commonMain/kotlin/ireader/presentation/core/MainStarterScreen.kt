@@ -24,6 +24,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
@@ -45,6 +46,7 @@ import ireader.presentation.ui.component.navigation.ModernBottomNavigationBar
 import ireader.presentation.ui.component.navigation.ModernNavigationItem
 import ireader.presentation.ui.component.navigation.ModernNavigationRailItem
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
+import ireader.presentation.ui.update.AppUpdateDialog
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -330,6 +332,18 @@ object MainStarterScreen {
             IBackHandler(
                 enabled = currentTabIndex != 0,
                 onBack = { currentTabIndex = 0 },
+            )
+            
+            // App Update Dialog
+            val appUpdateState by vm.appUpdateState.collectAsState()
+            AppUpdateDialog(
+                state = appUpdateState,
+                onDownload = vm::startDownload,
+                onInstall = vm::installApk,
+                onRemindLater = vm::remindLater,
+                onSkipVersion = vm::skipVersion,
+                onDismiss = vm::dismissUpdateDialog,
+                onCancelDownload = vm::cancelDownload,
             )
         }
     }

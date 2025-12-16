@@ -9,6 +9,8 @@ import ireader.data.catalog.impl.AndroidLocalInstaller
 import ireader.domain.preferences.prefs.AndroidUiPreferences
 import ireader.i18n.ProjectConfig
 import ireader.presentation.imageloader.LibraryCovers
+import ireader.presentation.ui.update.AndroidAppUpdateChecker
+import ireader.presentation.ui.update.AppUpdateChecker
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
 import org.ireader.app.BuildConfig
@@ -76,4 +78,7 @@ import java.io.File
         )
     }
     single<PreferenceStoreFactory> { PreferenceStoreFactory(androidContext()) }
+    
+    // App Update Checker
+    single<AppUpdateChecker> { AndroidAppUpdateChecker(androidApplication(), get(), get()) }
 }

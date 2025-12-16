@@ -2,21 +2,55 @@ package ireader.domain.storage
 
 import android.content.Context
 import android.os.Environment
-import androidx.documentfile.provider.DocumentFile
+import ireader.domain.preferences.prefs.UiPreferences
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toOkioPath
+import okio.Path.Companion.toPath
 import java.io.File
 
 class AndroidStorageManager(
-    private val context: Context
+    private val context: Context,
+    private val uiPreferences: UiPreferences? = null
 ) : StorageManager {
     
     private val fileSystem = FileSystem.SYSTEM
-    private val appDirFile = File(Environment.getExternalStorageDirectory(), "IReader/")
     
+    // Default fallback directory
+    private val defaultAppDirPath: Path = File(Environment.getExternalStorageDirectory(), "IReader/").toOkioPath()
+    
+    /**
+     * Returns the app directory - uses user-selected folder if available, otherwise falls back to default.
+     * The user-selected folder is set during onboarding and persists even if app is uninstalled.
+     */
     override val appDirectory: Path
-        get() = appDirFile.toOkioPath()
+        get() {
+            val selectedUri = uiPreferences?.selectedStorageFolderUri()?.get()
+            if (!selectedUri.isNullOrEmpty()) {
+                return try {
+                    // Handle content:// URIs from SAF - use external files dir as base
+                    if (selectedUri.startsWith("content://")) {
+                        // For SAF URIs, we use the app's external files directory
+                        // The actual SAF URI is stored for reference but we use a local path
+                        val externalDir = context.getExternalFilesDir(null)
+                        if (externalDir != null) {
+                            return File(externalDir, "IReader").toOkioPath()
+                        }
+                        return defaultAppDirPath
+                    }
+                    // Handle regular file paths (e.g., /storage/emulated/0/IReader)
+                    val path = selectedUri.toPath()
+                    // Ensure it's a valid path
+                    if (selectedUri.startsWith("/")) {
+                        return path
+                    }
+                    defaultAppDirPath
+                } catch (e: Exception) {
+                    defaultAppDirPath
+                }
+            }
+            return defaultAppDirPath
+        }
     
     override val booksDirectory: Path
         get() = appDirectory / "Books"
@@ -37,11 +71,11 @@ class AndroidStorageManager(
     }
     
     override fun hasStoragePermission(): Boolean {
-        // Clean up invalid directories
+        // Clean up invalid directories using Okio
         listOf(appDirectory, backupDirectory, automaticBackupDirectory, booksDirectory).forEach { dir ->
-            val file = dir.toFile()
-            if (file.exists() && !file.isDirectory) {
-                file.deleteRecursively()
+            val metadata = fileSystem.metadataOrNull(dir)
+            if (metadata != null && !metadata.isDirectory) {
+                fileSystem.deleteRecursively(dir)
             }
         }
         return true
@@ -49,10 +83,8 @@ class AndroidStorageManager(
     
     override fun initializeDirectories() {
         kotlin.runCatching {
-            if (!appDirFile.exists()) {
-                DocumentFile.fromFile(Environment.getExternalStorageDirectory())
-                    ?.createDirectory("IReader")
-            }
+            // Create app directory using Okio
+            fileSystem.createDirectories(appDirectory)
         }
         
         // Ensure subdirectories exist - wrap in runCatching to handle permission issues gracefully
@@ -65,9 +97,12 @@ class AndroidStorageManager(
     
     override fun preventMediaIndexing() {
         kotlin.runCatching {
-            val noMediaFile = File(appDirFile, ".nomedia")
-            if (!noMediaFile.exists()) {
-                DocumentFile.fromFile(appDirFile)?.createFile("", ".nomedia")
+            val noMediaPath = appDirectory / ".nomedia"
+            if (!fileSystem.exists(noMediaPath)) {
+                // Create empty .nomedia file using Okio
+                fileSystem.write(noMediaPath) {
+                    // Empty file
+                }
             }
         }
     }

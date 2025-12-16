@@ -97,7 +97,6 @@ kotlin {
             dependencies {
                 api(libs.koin.android)
                 api(androidx.biometric)
-                api(libs.bundles.simplestorage)
                 api(libs.core.splashscreen)
                 api(composeLib.compose.googlFonts)
                 api(composeLib.compose.activity)

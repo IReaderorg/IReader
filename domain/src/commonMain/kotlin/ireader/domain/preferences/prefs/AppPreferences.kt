@@ -247,4 +247,28 @@ class AppPreferences(
     fun activeGradioApiKey(): Preference<String> {
         return preferenceStore.getString("active_gradio_api_key", "")
     }
+    
+    // ==================== App Update Settings ====================
+    
+    /**
+     * Timestamp when user clicked "Remind me later" for app update
+     * Update dialog will be shown again after 7 days
+     */
+    fun updateRemindLaterTime(): Preference<Long> {
+        return preferenceStore.getLong("update_remind_later_time", 0L)
+    }
+    
+    /**
+     * Version that was skipped by user (won't show update dialog for this version)
+     */
+    fun skippedUpdateVersion(): Preference<String> {
+        return preferenceStore.getString("skipped_update_version", "")
+    }
+    
+    /**
+     * Whether to show the full-screen update dialog on app start
+     */
+    fun showUpdateDialog(): Preference<Boolean> {
+        return preferenceStore.getBoolean("show_update_dialog", true)
+    }
 }

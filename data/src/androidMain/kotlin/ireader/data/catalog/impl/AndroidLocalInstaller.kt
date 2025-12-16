@@ -104,15 +104,8 @@ class AndroidLocalInstaller(
         try {
             send(InstallStep.Downloading)
             
-            // Determine JS plugins directory based on user preference
-            val useCacheDir = uiPreferences.savedLocalCatalogLocation().get()
-            val jsPluginsDir = if (useCacheDir) {
-                File(context.cacheDir, "js-plugins").apply { mkdirs() }
-            } else {
-                val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
-                val ireaderDir = File(externalDir, "ireader")
-                File(ireaderDir, "js-plugins").apply { mkdirs() }
-            }
+            // Use secure storage for JS plugins
+            val jsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
             
             // Download the JS plugin file
             val jsFile = File(jsPluginsDir, "${catalog.pkgName}.js")
@@ -165,15 +158,8 @@ class AndroidLocalInstaller(
             file.deleteRecursively()
             cacheFile.deleteRecursively()
             
-            // Also try to uninstall as JS plugin
-            val useCacheDir = uiPreferences.savedLocalCatalogLocation().get()
-            val jsPluginsDir = if (useCacheDir) {
-                File(context.cacheDir, "js-plugins")
-            } else {
-                val externalDir = context.getExternalFilesDir(null)?.parentFile?.parentFile?.parentFile
-                val ireaderDir = File(externalDir, "ireader")
-                File(ireaderDir, "js-plugins")
-            }
+            // Also try to uninstall as JS plugin from secure storage
+            val jsPluginsDir = ireader.domain.storage.SecureStorageHelper.getJsPluginsDir(context)
             
             val jsFile = File(jsPluginsDir, "$pkgName.js")
             val metadataFile = File(jsPluginsDir, "$pkgName.meta.json")

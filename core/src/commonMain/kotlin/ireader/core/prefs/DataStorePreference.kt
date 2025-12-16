@@ -75,10 +75,10 @@ internal class DataStorePreference<T>(
                 }
             } catch (e: IOException) {
                 // Log error but don't crash
-                Log.error(e, "IOException while setting preference '{}' to value '{}'", key, value)
+                Log.error(e, "IOException while setting preference '$key' to value '$value'")
             } catch (e: Exception) {
                 // Handle other exceptions
-                Log.error(e, "Unexpected exception while setting preference '{}' to value '{}'", key, value)
+                Log.error(e, "Unexpected exception while setting preference '$key' to value '$value'")
             }
         }
     }
@@ -112,10 +112,10 @@ internal class DataStorePreference<T>(
                 }
             } catch (e: IOException) {
                 // Log error but don't crash
-                Log.error(e, "IOException while deleting preference '{}'", key)
+                Log.error(e, "IOException while deleting preference '$key'")
             } catch (e: Exception) {
                 // Handle other exceptions
-                Log.error(e, "Unexpected exception while deleting preference '{}'", key)
+                Log.error(e, "Unexpected exception while deleting preference '$key'")
             }
         }
     }

@@ -1,10 +1,6 @@
 package ireader.domain.usecases.backup
 
 import android.content.Context
-import android.os.Environment
-import com.anggrayudi.storage.file.CreateMode
-import com.anggrayudi.storage.file.DocumentFileCompat
-import com.anggrayudi.storage.file.createBinaryFile
 import ireader.core.log.Log
 import ireader.domain.models.common.Uri
 import ireader.domain.models.prefs.PreferenceValues
@@ -13,8 +9,8 @@ import ireader.domain.usecases.files.GetSimpleStorage
 import ireader.domain.utils.extensions.convertLongToTime
 import ireader.domain.utils.extensions.withUIContext
 import ireader.domain.utils.toast
-import ireader.i18n.R
-import java.io.File
+import okio.FileSystem
+import okio.Path.Companion.toPath
 import java.util.*
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -27,6 +23,8 @@ class AutomaticBackup(
     val simpleStorage: GetSimpleStorage,
     private val context: Context
 ) {
+    private val fileSystem = FileSystem.SYSTEM
+    
     suspend fun initialize() {
         create(false)
     }
@@ -42,25 +40,32 @@ class AutomaticBackup(
         if (force || now - lastCheck > backupEveryXTime) {
             try {
                 simpleStorage.checkPermission()
-                val root = Environment.getExternalStorageDirectory()
-                val dir = File(root, "IReader/Backups/Automatic")
-                if (!dir.exists()) {
-                    dir.mkdirs()
+                val dir = simpleStorage.automaticBackupDirectory
+                
+                // Ensure directory exists using Okio
+                fileSystem.createDirectories(dir)
+                
+                val name = "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"
+                
+                // Use Okio to list files
+                val allFiles = fileSystem.list(dir)
+                
+                // Clean up old backups if exceeding max
+                if (allFiles.size > maxFiles) {
+                    allFiles
+                        .mapNotNull { path -> 
+                            fileSystem.metadataOrNull(path)?.let { meta -> path to (meta.lastModifiedAtMillis ?: 0L) }
+                        }
+                        .sortedBy { it.second }
+                        .take(allFiles.size - maxFiles)
+                        .forEach { (path, _) -> fileSystem.delete(path) }
                 }
-                val name =
-                        "IReader_${convertLongToTime(Calendar.getInstance().timeInMillis)}.gz"
-                val file = DocumentFileCompat.fromFile(
-                        context,
-                        dir,
-                        requiresWriteAccess = true,
-                        considerRawFile = true
-                )
-                val allFiles = file?.listFiles()
-                if ((allFiles?.size ?: 0) > maxFiles) {
-                    allFiles?.map { it.delete() }
-                }
-                val backupFile = file!!.createBinaryFile(context, name, mode = CreateMode.CREATE_NEW)
-                createBackup.saveTo(Uri(backupFile!!.uri), onError = {}, onSuccess = {}, currentEvent = {})
+                
+                // Create new backup file path
+                val backupPath = dir / name
+                val backupUri = Uri(android.net.Uri.fromFile(backupPath.toFile()))
+                
+                createBackup.saveTo(backupUri, onError = {}, onSuccess = {}, currentEvent = {})
                 lastCheckPref.set(now.toEpochMilliseconds())
             } catch (e: Exception) {
                 Log.error(e, "AutomaticBackup")
@@ -70,7 +75,6 @@ class AutomaticBackup(
                 }
             }
         }
-
     }
 
     internal companion object {

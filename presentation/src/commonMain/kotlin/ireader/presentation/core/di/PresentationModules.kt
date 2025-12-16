@@ -54,7 +54,7 @@ val PresentationModules = module {
     factory <DownloadStateImpl> { DownloadStateImpl() }
     factory <FontScreenStateImpl> { FontScreenStateImpl() }
 
-    factory  { ScreenContentViewModel(get()) }
+    factory  { ScreenContentViewModel(get(), get(), get()) }
     single<AppThemeViewModel> { AppThemeViewModel(get(), get(), get(), get()) }
 
     // ExploreViewModel - Simplified with ExploreUseCases aggregate (Requirements: 4.2, 4.4)

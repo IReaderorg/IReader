@@ -170,7 +170,7 @@ kotlin {
 
                 // REMOVED: slf4j-android - not used
                 // implementation("org.slf4j:slf4j-android:1.7.25")
-                implementation(libs.bundles.simplestorage)
+                // SimpleStorage and DocumentFile removed - using Okio for file operations
                 implementation(androidx.biometric)
                 implementation(androidx.security.crypto)
                 implementation(androidx.lifecycle.viewmodelktx)

@@ -331,7 +331,7 @@ dependencies {
     "standardImplementation"(libs.googleTranslator)
     "devImplementation"(libs.googleTranslator)
     
-    implementation(libs.bundles.simplestorage)
+    // SimpleStorage and DocumentFile removed - using Okio for file operations
     implementation(accompanist.permissions)
 
     /** Kotlin Reflection - Required for Supabase **/

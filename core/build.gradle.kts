@@ -84,8 +84,8 @@ kotlin {
                 // Immutable Collections - Critical for Compose performance (Mihon pattern)
                 api(libs.kotlinx.collections.immutable)
                 
-                // Kermit logging - available transitively from source-api
-                // Explicitly included here for direct usage in core module
+                // Kermit logging - explicitly included for direct usage in core module
+                api(libs.kermit)
             }
         }
         commonTest {
