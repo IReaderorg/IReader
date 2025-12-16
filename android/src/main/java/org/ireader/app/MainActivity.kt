@@ -58,6 +58,7 @@ import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.getPerformanceConfigForDevice
 import ireader.presentation.ui.core.theme.themes
+import ireader.presentation.ui.settings.storage.StorageFolderPickerScreen
 import ireader.presentation.ui.core.ui.asStateIn
 import ireader.presentation.ui.settings.FirstLaunchDialog
 import kotlinx.coroutines.channels.awaitClose
@@ -146,27 +147,52 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             color = MaterialTheme.colorScheme.surface,
                             contentColor = MaterialTheme.colorScheme.onSurface,
                         ) {
-                        val navController = rememberNavController()
+                        // Check if we need to show storage permission screen
+                        var hasRequestedPermission by remember { 
+                            mutableStateOf(uiPreferences.hasRequestedStoragePermission().get()) 
+                        }
+                        var showPermissionScreen by remember { mutableStateOf(!hasRequestedPermission) }
                         
-                        ProvideNavigator(navController) {
-                            if (navController.previousBackStackEntry == null) {
-                                ConfirmExit()
-                            }
+                        if (showPermissionScreen) {
+                            // Show beautiful storage folder selection screen (KMP - FileKit)
+                            StorageFolderPickerScreen(
+                                uiPreferences = uiPreferences,
+                                onFolderSelected = { path ->
+                                    // Folder selected via FileKit - path is already saved in preferences
+                                    hasRequestedPermission = true
+                                    showPermissionScreen = false
+                                },
+                                onSkip = {
+                                    // User skipped - will use app cache storage
+                                    hasRequestedPermission = true
+                                    showPermissionScreen = false
+                                }
+                            )
+                        } else {
+                            // Show main app content
+                            val navController = rememberNavController()
                             
-                            IScaffold {
-                                CommonNavHost(navController)
-                                GetPermissions(uiPreferences, context = this@MainActivity)
+                            ProvideNavigator(navController) {
+                                if (navController.previousBackStackEntry == null) {
+                                    ConfirmExit()
+                                }
+                                
+                                IScaffold {
+                                    CommonNavHost(navController)
+                                    // Legacy permission handler for users who skipped initial permission
+                                    GetPermissions(uiPreferences, context = this@MainActivity)
+                                }
+                                
+                                // Handle initial intent after navigation is set up (like Mihon)
+                                LaunchedEffect(navController) {
+                                    // Wait for navigation graph to be ready
+                                    delay(500)
+                                    handleIntentAction(this@MainActivity.intent, navController)
+                                }
+                                
+                                FirstLaunchDialogHandler()
+                                HandleOnNewIntent(this, navController)
                             }
-                            
-                            // Handle initial intent after navigation is set up (like Mihon)
-                            LaunchedEffect(navController) {
-                                // Wait for navigation graph to be ready
-                                delay(500)
-                                handleIntentAction(this@MainActivity.intent, navController)
-                            }
-                            
-                            FirstLaunchDialogHandler()
-                            HandleOnNewIntent(this, navController)
                         }
                     }
                 }

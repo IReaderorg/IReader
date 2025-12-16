@@ -48,6 +48,37 @@ actual fun instantiatePlugin(pluginClass: Any): Plugin {
 }
 
 /**
+ * iOS implementation of ZIP entry listing for debugging
+ */
+actual suspend fun listZipEntries(file: VirtualFile): List<String> {
+    return try {
+        val zipData = file.readBytes() ?: return emptyList()
+        val entries = mutableListOf<String>()
+        var offset = 0
+        
+        while (offset < zipData.size - 4) {
+            val signature = zipData.readInt32LE(offset)
+            if (signature != 0x04034b50) break
+            
+            val fileNameLength = zipData.readInt16LE(offset + 26)
+            val extraFieldLength = zipData.readInt16LE(offset + 28)
+            val compressedSize = zipData.readInt32LE(offset + 18)
+            
+            val headerSize = 30
+            val fileName = zipData.sliceArray(offset + headerSize until offset + headerSize + fileNameLength)
+                .decodeToString()
+            
+            entries.add(fileName)
+            offset = offset + headerSize + fileNameLength + extraFieldLength + compressedSize
+        }
+        
+        entries
+    } catch (e: Exception) {
+        emptyList()
+    }
+}
+
+/**
  * iOS implementation of file download
  * Uses NSURLSession for downloading plugin files
  */

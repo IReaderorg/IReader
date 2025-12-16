@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import ireader.domain.plugins.PluginInfo
+import ireader.domain.plugins.PluginStatus
 import ireader.plugin.api.PluginMonetization
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
@@ -29,7 +31,8 @@ import ireader.i18n.resources.Res
 fun PluginCard(
     plugin: PluginInfo,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onInstall: ((String) -> Unit)? = null
 ) {
     Card(
         modifier = modifier
@@ -127,8 +130,100 @@ fun PluginCard(
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // Price or Free badge
-            PriceBadge(monetization = plugin.manifest.monetization)
+            // Install button or status
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                InstallStatusButton(
+                    plugin = plugin,
+                    onInstall = onInstall
+                )
+                
+                // Price badge below button
+                PriceBadge(monetization = plugin.manifest.monetization)
+            }
+        }
+    }
+}
+
+/**
+ * Install button showing different states
+ */
+@Composable
+private fun InstallStatusButton(
+    plugin: PluginInfo,
+    onInstall: ((String) -> Unit)?
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    when (plugin.status) {
+        PluginStatus.NOT_INSTALLED -> {
+            if (onInstall != null) {
+                FilledTonalButton(
+                    onClick = { onInstall(plugin.id) },
+                    modifier = Modifier.widthIn(min = 80.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = localizeHelper.localize(Res.string.install),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+        }
+        PluginStatus.UPDATING -> {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                strokeWidth = 2.dp
+            )
+        }
+        PluginStatus.ENABLED, PluginStatus.DISABLED -> {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = localizeHelper.localize(Res.string.installed),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+        }
+        PluginStatus.ERROR -> {
+            if (onInstall != null) {
+                FilledTonalButton(
+                    onClick = { onInstall(plugin.id) },
+                    modifier = Modifier.widthIn(min = 80.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = localizeHelper.localize(Res.string.retry),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
         }
     }
 }

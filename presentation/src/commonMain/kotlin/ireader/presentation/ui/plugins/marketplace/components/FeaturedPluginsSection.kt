@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import ireader.domain.plugins.PluginInfo
+import ireader.domain.plugins.PluginStatus
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
@@ -30,7 +32,8 @@ import ireader.i18n.resources.Res
 fun FeaturedPluginsSection(
     plugins: List<PluginInfo>,
     onPluginClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onInstall: ((String) -> Unit)? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (plugins.isEmpty()) return
@@ -50,7 +53,8 @@ fun FeaturedPluginsSection(
             items(plugins) { plugin ->
                 FeaturedPluginCard(
                     plugin = plugin,
-                    onClick = { onPluginClick(plugin.id) }
+                    onClick = { onPluginClick(plugin.id) },
+                    onInstall = onInstall
                 )
             }
         }
@@ -61,10 +65,11 @@ fun FeaturedPluginsSection(
  * Card for featured plugin in horizontal scroll
  */
 @Composable
-private fun FeaturedPluginCard(
+internal fun FeaturedPluginCard(
     plugin: PluginInfo,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onInstall: ((String) -> Unit)? = null
 ) {
     Card(
         modifier = modifier
@@ -157,6 +162,86 @@ private fun FeaturedPluginCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Install button
+                FeaturedInstallButton(
+                    plugin = plugin,
+                    onInstall = onInstall
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Install button for featured plugin card
+ */
+@Composable
+private fun FeaturedInstallButton(
+    plugin: PluginInfo,
+    onInstall: ((String) -> Unit)?
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    when (plugin.status) {
+        PluginStatus.NOT_INSTALLED -> {
+            if (onInstall != null) {
+                Button(
+                    onClick = { onInstall(plugin.id) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(localizeHelper.localize(Res.string.install))
+                }
+            }
+        }
+        PluginStatus.UPDATING -> {
+            OutlinedButton(
+                onClick = {},
+                enabled = false,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(localizeHelper.localize(Res.string.installing_1))
+            }
+        }
+        PluginStatus.ENABLED, PluginStatus.DISABLED -> {
+            OutlinedButton(
+                onClick = {},
+                enabled = false,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(localizeHelper.localize(Res.string.installed))
+            }
+        }
+        PluginStatus.ERROR -> {
+            if (onInstall != null) {
+                Button(
+                    onClick = { onInstall(plugin.id) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(localizeHelper.localize(Res.string.retry))
                 }
             }
         }

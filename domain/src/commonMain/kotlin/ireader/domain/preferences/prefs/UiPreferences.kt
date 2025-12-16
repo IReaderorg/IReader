@@ -426,6 +426,24 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
         return preferenceStore.getBoolean("has_completed_first_launch", false)
     }
     
+    /**
+     * Whether the user has been shown the storage permission request screen.
+     * This is shown on first launch to request critical storage permissions.
+     * Default: false (show permission screen on first launch)
+     */
+    fun hasRequestedStoragePermission(): Preference<Boolean> {
+        return preferenceStore.getBoolean("has_requested_storage_permission", false)
+    }
+    
+    /**
+     * The URI of the user-selected storage folder for app data.
+     * Uses Storage Access Framework (SAF) for secure folder access.
+     * Empty string means no folder selected (use app cache instead).
+     */
+    fun selectedStorageFolderUri(): Preference<String> {
+        return preferenceStore.getString("selected_storage_folder_uri", "")
+    }
+    
     // ============================================================================
     // Character Art Settings
     // ============================================================================

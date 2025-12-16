@@ -93,6 +93,12 @@ navigation-runtime = { module = "org.jetbrains.androidx.navigation:navigation-ru
 
 storage = { module = "com.anggrayudi:storage", version = "2.2.0" }
 documentfile = { module = "androidx.documentfile:documentfile", version = "1.1.0" }
+
+# FileKit - Modern KMP file picker (replaces SimpleStorage)
+filekit-core = { module = "io.github.vinceglb:filekit-core", version = "0.12.0" }
+filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version = "0.12.0" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version = "0.12.0" }
+filekit-coil = { module = "io.github.vinceglb:filekit-coil", version = "0.12.0" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-core-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-core-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
@@ -173,6 +179,7 @@ androidx-work-testing = { group = "androidx.work", name = "work-testing", versio
 
 [bundles]
 simplestorage = ["storage", "documentfile"]
+filekit = ["filekit-core", "filekit-dialogs", "filekit-dialogs-compose"]
 # Removed unused serialization: gson, jackson (only kotlinx is used)
 ireader = ["jsoup","ktor-core","ktor-core-cio","ktor-okhttp","ktor-contentNegotiation","ktor-contentNegotiation-kotlinx","ktor-core-android"]
 supabase = ["supabase-postgrest", "supabase-auth", "supabase-realtime", "supabase-functions"]

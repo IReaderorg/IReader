@@ -248,6 +248,9 @@ class PluginMarketplaceViewModel(
             )
         }
 
+        // Resolve download URL - if relative, combine with repository base URL
+        val resolvedDownloadUrl = resolveDownloadUrl(downloadUrl, repository.url)
+
         return PluginInfo(
             id = id,
             manifest = PluginManifest(
@@ -273,10 +276,30 @@ class PluginMarketplaceViewModel(
             rating = null,
             downloadCount = 0,
             repositoryUrl = repository.url,
-            downloadUrl = downloadUrl,
+            downloadUrl = resolvedDownloadUrl,
             fileSize = fileSize,
             checksum = checksum
         )
+    }
+    
+    /**
+     * Resolve download URL - handles both absolute and relative URLs
+     */
+    private fun resolveDownloadUrl(downloadUrl: String, repositoryUrl: String): String {
+        // If already absolute URL, return as-is
+        if (downloadUrl.startsWith("http://") || downloadUrl.startsWith("https://")) {
+            return downloadUrl
+        }
+        
+        // Get base URL from repository URL (remove index.json or similar)
+        val baseUrl = repositoryUrl.substringBeforeLast("/")
+        
+        // Combine base URL with relative path
+        return if (downloadUrl.startsWith("/")) {
+            "$baseUrl$downloadUrl"
+        } else {
+            "$baseUrl/$downloadUrl"
+        }
     }
     
     /**
@@ -402,5 +425,76 @@ class PluginMarketplaceViewModel(
             }
             is PluginMonetization.Free, null -> 0.0
         }
+    }
+    
+    /**
+     * Install a plugin from the marketplace
+     */
+    fun installPlugin(pluginId: String) {
+        val plugin = _state.value.plugins.find { it.id == pluginId } ?: return
+        
+        // Check if plugin has a download URL
+        if (plugin.downloadUrl.isNullOrBlank()) {
+            _state.value = _state.value.copy(
+                error = "Plugin ${plugin.manifest.name} has no download URL configured"
+            )
+            return
+        }
+        
+        // Update state to show installing
+        updatePluginStatus(pluginId, PluginStatus.UPDATING)
+        
+        scope.launch {
+            try {
+                pluginManager.installPlugin(plugin)
+                    .onSuccess {
+                        updatePluginStatus(pluginId, PluginStatus.ENABLED)
+                        showSnackBar(ireader.i18n.UiText.DynamicString("${plugin.manifest.name} installed successfully"))
+                    }
+                    .onFailure { error ->
+                        updatePluginStatus(pluginId, PluginStatus.ERROR)
+                        _state.value = _state.value.copy(
+                            error = "Failed to install ${plugin.manifest.name}: ${error.message}"
+                        )
+                    }
+            } catch (e: Exception) {
+                updatePluginStatus(pluginId, PluginStatus.ERROR)
+                _state.value = _state.value.copy(
+                    error = "Failed to install ${plugin.manifest.name}: ${e.message}"
+                )
+            }
+        }
+    }
+    
+    /**
+     * Update a single plugin's status in the state
+     */
+    private fun updatePluginStatus(pluginId: String, status: PluginStatus) {
+        val updatedPlugins = _state.value.plugins.map { plugin ->
+            if (plugin.id == pluginId) {
+                plugin.copy(status = status)
+            } else {
+                plugin
+            }
+        }
+        val updatedFiltered = _state.value.filteredPlugins.map { plugin ->
+            if (plugin.id == pluginId) {
+                plugin.copy(status = status)
+            } else {
+                plugin
+            }
+        }
+        val updatedFeatured = _state.value.featuredPlugins.map { plugin ->
+            if (plugin.id == pluginId) {
+                plugin.copy(status = status)
+            } else {
+                plugin
+            }
+        }
+        _state.value = _state.value.copy(
+            plugins = updatedPlugins,
+            filteredPlugins = updatedFiltered,
+            featuredPlugins = updatedFeatured
+        )
     }
 }

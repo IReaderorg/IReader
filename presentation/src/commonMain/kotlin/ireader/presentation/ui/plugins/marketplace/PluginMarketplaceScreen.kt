@@ -125,6 +125,7 @@ fun PluginMarketplaceScreen(
                         state = state,
                         onCategorySelected = viewModel::selectCategory,
                         onPluginClick = onPluginClick,
+                        onInstall = viewModel::installPlugin,
                         onRefresh = viewModel::refreshPlugins
                     )
                 }
@@ -154,6 +155,7 @@ private fun PluginMarketplaceContent(
     state: PluginMarketplaceState,
     onCategorySelected: (ireader.domain.plugins.PluginType?) -> Unit,
     onPluginClick: (String) -> Unit,
+    onInstall: (String) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -193,6 +195,7 @@ private fun PluginMarketplaceContent(
                     FeaturedPluginsSection(
                         plugins = state.featuredPlugins,
                         onPluginClick = onPluginClick,
+                        onInstall = onInstall,
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }
@@ -223,7 +226,8 @@ private fun PluginMarketplaceContent(
                 items(state.filteredPlugins) { plugin ->
                     PluginCard(
                         plugin = plugin,
-                        onClick = { onPluginClick(plugin.id) }
+                        onClick = { onPluginClick(plugin.id) },
+                        onInstall = onInstall
                     )
                 }
             }

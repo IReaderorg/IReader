@@ -556,6 +556,19 @@
     <string name="permission_required">Permission Required</string>
     <string name="storage_permission_required_explanation">Storage Permission Required Explanation
     </string>
+    
+    <!-- Storage Permission Screen -->
+    <string name="storage_permission_title">Choose Storage Folder</string>
+    <string name="storage_permission_subtitle">Select a folder where IReader will store your downloads, extensions, and backups</string>
+    <string name="permission_feature_download_title">Download Novels</string>
+    <string name="permission_feature_download_desc">Save chapters for offline reading anywhere, anytime</string>
+    <string name="permission_feature_extensions_title">Install Extensions</string>
+    <string name="permission_feature_extensions_desc">Add new sources to discover more content</string>
+    <string name="permission_feature_backup_title">Backup &amp; Restore</string>
+    <string name="permission_feature_backup_desc">Keep your library safe with automatic backups</string>
+    <string name="storage_permission_privacy_note">IReader only accesses the folder you select. Your other files remain private and untouched.</string>
+    <string name="grant_storage_permission">Select Folder</string>
+    <string name="skip_for_now">Use App Storage Instead</string>
     <string name="file_not_found_error">File Not Found Exception</string>
     <string name="installation_successful">Installation was successful.</string>
     <string name="openai_api_key_not_set">OpenAI API key is not set. Please configure it in the

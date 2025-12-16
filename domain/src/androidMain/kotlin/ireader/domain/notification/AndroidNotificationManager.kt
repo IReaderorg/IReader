@@ -4,9 +4,11 @@ import android.Manifest
 import android.app.Application
 import android.app.Notification
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import ireader.core.log.Log
 
 /**
  * Android implementation of PlatformNotificationManager
@@ -18,17 +20,36 @@ class AndroidNotificationManager(
     private val notificationManager = NotificationManagerCompat.from(context.applicationContext)
     
     override fun show(notification: NotificationData) {
-        if (!checkNotificationPermission()) return
+        if (!notificationManager.areNotificationsEnabled()) {
+            Log.warn { "AndroidNotificationManager: Cannot show notification (id=${notification.id}) - notifications are disabled in system settings" }
+            return
+        }
+        
+        if (!checkNotificationPermission()) {
+            Log.warn { "AndroidNotificationManager: Cannot show notification (id=${notification.id}) - POST_NOTIFICATIONS permission not granted" }
+            return
+        }
         
         val platformNotification = buildNotification(notification)
         notificationManager.notify(notification.id, platformNotification)
     }
     
     override fun showPlatformNotification(id: Int, platformNotification: Any) {
-        if (!checkNotificationPermission()) return
+        if (!notificationManager.areNotificationsEnabled()) {
+            Log.warn { "AndroidNotificationManager: Cannot show platform notification (id=$id) - notifications are disabled in system settings" }
+            return
+        }
+        
+        if (!checkNotificationPermission()) {
+            Log.warn { "AndroidNotificationManager: Cannot show platform notification (id=$id) - POST_NOTIFICATIONS permission not granted" }
+            return
+        }
         
         (platformNotification as? Notification)?.let { notification ->
             notificationManager.notify(id, notification)
+            Log.debug { "AndroidNotificationManager: Platform notification shown (id=$id)" }
+        } ?: run {
+            Log.warn { "AndroidNotificationManager: Platform notification (id=$id) is not an Android Notification type" }
         }
     }
     
@@ -41,10 +62,15 @@ class AndroidNotificationManager(
     }
     
     override fun areNotificationsEnabled(): Boolean {
-        return checkNotificationPermission()
+        // Check both system-level notification setting and runtime permission
+        return notificationManager.areNotificationsEnabled() && checkNotificationPermission()
     }
     
     private fun checkNotificationPermission(): Boolean {
+        // POST_NOTIFICATIONS permission is only required on Android 13+ (API 33+)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return true
+        }
         return ActivityCompat.checkSelfPermission(
             context,
             Manifest.permission.POST_NOTIFICATIONS

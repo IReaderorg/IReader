@@ -39,8 +39,21 @@ fun FeatureStoreScreen(
     val state by viewModel.state
     var showSearch by remember { mutableStateOf(false) }
     var showFilters by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    // Show error as snackbar when it occurs
+    LaunchedEffect(state.error) {
+        state.error?.let { error ->
+            snackbarHostState.showSnackbar(
+                message = error,
+                duration = SnackbarDuration.Long
+            )
+            viewModel.clearError()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             if (showSearch) {
                 SearchTopBar(
@@ -108,6 +121,7 @@ fun FeatureStoreScreen(
                         state = state,
                         onCategorySelected = viewModel::selectCategory,
                         onPluginClick = onPluginClick,
+                        onInstall = viewModel::installPlugin,
                         onRefresh = viewModel::refreshPlugins
                     )
                 }
@@ -133,6 +147,7 @@ private fun FeatureStoreContent(
     state: FeatureStoreState,
     onCategorySelected: (PluginType?) -> Unit,
     onPluginClick: (String) -> Unit,
+    onInstall: (String) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -169,6 +184,7 @@ private fun FeatureStoreContent(
                     FeaturedPluginsSection(
                         plugins = state.featuredPlugins,
                         onPluginClick = onPluginClick,
+                        onInstall = onInstall,
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }
@@ -197,7 +213,8 @@ private fun FeatureStoreContent(
                 items(state.filteredPlugins) { plugin ->
                     PluginCard(
                         plugin = plugin,
-                        onClick = { onPluginClick(plugin.id) }
+                        onClick = { onPluginClick(plugin.id) },
+                        onInstall = onInstall
                     )
                 }
             }

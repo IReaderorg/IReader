@@ -35,6 +35,21 @@ actual fun instantiatePlugin(pluginClass: Any): Plugin {
 }
 
 /**
+ * Desktop implementation of ZIP entry listing for debugging
+ */
+actual suspend fun listZipEntries(file: VirtualFile): List<String> {
+    return try {
+        val javaFile = java.io.File(file.path)
+        
+        ZipFile(javaFile).use { zip ->
+            zip.entries().toList().map { it.name }
+        }
+    } catch (e: Exception) {
+        emptyList()
+    }
+}
+
+/**
  * Desktop implementation of file download
  * Uses HttpURLConnection for downloading plugin files
  */

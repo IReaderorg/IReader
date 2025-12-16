@@ -40,6 +40,28 @@ actual fun instantiatePlugin(pluginClass: Any): Plugin {
 }
 
 /**
+ * Android implementation of ZIP entry listing for debugging
+ */
+actual suspend fun listZipEntries(file: VirtualFile): List<String> {
+    return try {
+        val bytes = file.readBytes()
+        val entries = mutableListOf<String>()
+        
+        ZipInputStream(bytes.inputStream()).use { zipStream ->
+            var entry = zipStream.nextEntry
+            while (entry != null) {
+                entries.add(entry.name)
+                entry = zipStream.nextEntry
+            }
+        }
+        
+        entries
+    } catch (e: Exception) {
+        emptyList()
+    }
+}
+
+/**
  * Android implementation of file download
  * Uses HttpURLConnection for downloading plugin files
  */

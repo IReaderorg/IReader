@@ -400,6 +400,84 @@ class PluginManager(
         val file = fileSystem.getDataDirectory().resolve(packagePath.toString())
         return installPlugin(file)
     }
+    
+    /**
+     * Install a plugin from PluginInfo (downloads from remote URL and installs)
+     * This is used by the Feature Store to install plugins from repositories
+     */
+    suspend fun installPlugin(pluginInfo: PluginInfo): Result<PluginInfo> {
+        val downloadUrl = pluginInfo.downloadUrl
+            ?: return Result.failure(Exception("Plugin has no download URL"))
+        
+        println("[PluginManager] Installing plugin: ${pluginInfo.manifest.name}")
+        println("[PluginManager] Download URL: $downloadUrl")
+        
+        return try {
+            // Get plugins directory
+            val pluginsDir = getPluginsDirectory()
+            val fileName = "${pluginInfo.id}-${pluginInfo.manifest.version}.zip"
+            val destination = pluginsDir.resolve(fileName)
+            
+            println("[PluginManager] Destination: $destination")
+            
+            // Download the plugin
+            downloadPlugin(downloadUrl, destination)
+                .onFailure { 
+                    println("[PluginManager] Download failed: ${it.message}")
+                    return Result.failure(Exception("Download failed: ${it.message}")) 
+                }
+            
+            // Check file size after download
+            val downloadedFile = fileSystem.getDataDirectory().resolve(destination.toString())
+            val fileSize = if (downloadedFile.exists()) downloadedFile.size() else 0L
+            println("[PluginManager] Downloaded file size: $fileSize bytes")
+            
+            if (fileSize == 0L) {
+                return Result.failure(Exception("Downloaded file is empty. URL may be invalid: $downloadUrl"))
+            }
+            
+            // Check if it's a valid ZIP by reading first bytes
+            val firstBytes = try {
+                downloadedFile.readBytes().take(4).map { it.toInt() and 0xFF }
+            } catch (e: Exception) {
+                emptyList()
+            }
+            val isZip = firstBytes.size >= 4 && firstBytes[0] == 0x50 && firstBytes[1] == 0x4B
+            println("[PluginManager] Is valid ZIP: $isZip (first bytes: $firstBytes)")
+            
+            if (!isZip) {
+                // Read first 200 chars to see what we got
+                val content = try {
+                    downloadedFile.readBytes().take(200).toByteArray().decodeToString()
+                } catch (e: Exception) {
+                    "Unable to read content"
+                }
+                println("[PluginManager] File content preview: $content")
+                downloadedFile.delete()
+                return Result.failure(Exception("Downloaded file is not a valid ZIP. Got: ${content.take(100)}..."))
+            }
+            
+            // Validate the package
+            validatePluginPackage(destination)
+                .onFailure { 
+                    println("[PluginManager] Validation failed: ${it.message}")
+                    // Clean up invalid package
+                    try {
+                        downloadedFile.delete()
+                    } catch (_: Exception) {}
+                    return Result.failure(it) 
+                }
+            
+            println("[PluginManager] Validation passed, installing...")
+            
+            // Install the plugin
+            installPlugin(destination)
+        } catch (e: Exception) {
+            println("[PluginManager] Installation error: ${e.message}")
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
 }
 
 /**

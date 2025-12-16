@@ -88,28 +88,60 @@ class PluginLoader(
     /**
      * Extract and parse plugin manifest from .iplugin package
      * The manifest is stored as plugin.json in the root of the ZIP archive
+     * Also checks alternative locations for compatibility
      */
     suspend fun extractManifest(file: VirtualFile): PluginManifest {
         try {
-            // Platform-specific ZIP extraction would be implemented here
-            // For now, we'll use a simplified approach
-            val manifestContent = extractZipEntry(file, "plugin.json")
-                ?: throw IllegalArgumentException("plugin.json not found in package")
+            println("[PluginLoader] Extracting manifest from: ${file.name}")
+            println("[PluginLoader] File exists: ${file.exists()}, size: ${file.size()} bytes")
             
+            // List all entries first for debugging
+            val allEntries = listZipEntries(file)
+            println("[PluginLoader] ZIP entries (${allEntries.size}): ${allEntries.take(20).joinToString(", ")}")
+            
+            // Try standard location first
+            var manifestContent = ireader.domain.plugins.extractZipEntry(file, "plugin.json")
+            println("[PluginLoader] plugin.json at root: ${manifestContent != null}")
+            
+            // Try alternative locations if not found at root
+            if (manifestContent == null) {
+                manifestContent = ireader.domain.plugins.extractZipEntry(file, "assets/plugin.json")
+                println("[PluginLoader] plugin.json at assets/: ${manifestContent != null}")
+            }
+            if (manifestContent == null) {
+                manifestContent = ireader.domain.plugins.extractZipEntry(file, "META-INF/plugin.json")
+                println("[PluginLoader] plugin.json at META-INF/: ${manifestContent != null}")
+            }
+            
+            if (manifestContent == null) {
+                val entriesPreview = allEntries.take(10).joinToString(", ")
+                val errorMsg = "plugin.json not found in package. " +
+                    "Expected at root, assets/, or META-INF/. " +
+                    "Package contains ${allEntries.size} entries: $entriesPreview${if (allEntries.size > 10) "..." else ""}"
+                println("[PluginLoader] ERROR: $errorMsg")
+                throw IllegalArgumentException(errorMsg)
+            }
+            
+            println("[PluginLoader] Manifest content length: ${manifestContent.length}")
             return json.decodeFromString(PluginManifest.serializer(), manifestContent)
+        } catch (e: IllegalArgumentException) {
+            throw e
         } catch (e: Exception) {
+            println("[PluginLoader] Exception: ${e.message}")
+            e.printStackTrace()
             throw IllegalArgumentException("Failed to extract manifest from ${file.name}: ${e.message}", e)
         }
     }
     
     /**
-     * Platform-specific ZIP entry extraction
+     * List entries in a ZIP file for debugging
      */
-    private suspend fun extractZipEntry(file: VirtualFile, entryName: String): String? {
-        // This would be implemented platform-specifically
-        // For Android: use ZipInputStream
-        // For Desktop: use java.util.zip.ZipFile
-        throw NotImplementedError("ZIP extraction must be implemented platform-specifically")
+    private suspend fun listZipEntries(file: VirtualFile): List<String> {
+        return try {
+            ireader.domain.plugins.listZipEntries(file)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
     
     /**
@@ -132,6 +164,11 @@ class PluginLoader(
  * Platform-specific ZIP extraction
  */
 expect suspend fun extractZipEntry(file: VirtualFile, entryName: String): String?
+
+/**
+ * Platform-specific ZIP entry listing for debugging
+ */
+expect suspend fun listZipEntries(file: VirtualFile): List<String>
 
 /**
  * Platform-specific plugin instantiation
