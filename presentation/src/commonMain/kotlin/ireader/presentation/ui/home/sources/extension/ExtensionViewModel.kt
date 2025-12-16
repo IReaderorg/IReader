@@ -908,4 +908,24 @@ class ExtensionViewModel(
         }
     }
     
+    /**
+     * Delete a user source by its source URL.
+     */
+    fun deleteUserSourceByUrl(sourceUrl: String) {
+        if (deleteUserSource == null) {
+            showSnackBar(UiText.DynamicString("Delete not available"))
+            return
+        }
+        
+        scope.launch(ioDispatcher) {
+            try {
+                deleteUserSource.byUrl(sourceUrl)
+                catalogStore.refreshUserSources()
+                showSnackBar(UiText.DynamicString("Source deleted"))
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Failed to delete: ${e.message ?: "Unknown error"}"))
+            }
+        }
+    }
+    
 }

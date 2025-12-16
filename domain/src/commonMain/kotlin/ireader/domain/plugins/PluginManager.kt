@@ -385,7 +385,8 @@ class PluginManager(
     suspend fun validatePluginPackage(packagePath: okio.Path): Result<Unit> {
         return try {
             // Extract and validate manifest
-            val file = fileSystem.getDataDirectory().resolve(packagePath.toString())
+            // packagePath is already an absolute path, use it directly
+            val file = fileSystem.getFile(packagePath.toString())
             loader.extractManifest(file)
             Result.success(Unit)
         } catch (e: Exception) {
@@ -397,7 +398,8 @@ class PluginManager(
      * Install plugin from Okio Path
      */
     suspend fun installPlugin(packagePath: okio.Path): Result<PluginInfo> {
-        val file = fileSystem.getDataDirectory().resolve(packagePath.toString())
+        // packagePath is already an absolute path, use it directly
+        val file = fileSystem.getFile(packagePath.toString())
         return installPlugin(file)
     }
     
@@ -428,8 +430,13 @@ class PluginManager(
                 }
             
             // Check file size after download
-            val downloadedFile = fileSystem.getDataDirectory().resolve(destination.toString())
-            val fileSize = if (downloadedFile.exists()) downloadedFile.size() else 0L
+            // destination is already an absolute path from getPluginsDirectory()
+            println("[PluginManager] Checking file at destination: $destination")
+            val downloadedFile = fileSystem.getFile(destination.toString())
+            println("[PluginManager] VirtualFile path: ${downloadedFile.path}")
+            val fileExists = downloadedFile.exists()
+            println("[PluginManager] File exists: $fileExists")
+            val fileSize = if (fileExists) downloadedFile.size() else 0L
             println("[PluginManager] Downloaded file size: $fileSize bytes")
             
             if (fileSize == 0L) {

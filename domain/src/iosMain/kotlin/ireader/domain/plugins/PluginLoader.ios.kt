@@ -80,36 +80,59 @@ actual suspend fun listZipEntries(file: VirtualFile): List<String> {
 
 /**
  * iOS implementation of file download
- * Uses NSURLSession for downloading plugin files
+ * Uses NSURLSession for downloading plugin files with proper redirect handling
  */
 @OptIn(ExperimentalForeignApi::class)
 actual suspend fun downloadFile(url: String, destination: okio.Path) {
+    println("[PluginLoader] Starting download from: $url")
+    println("[PluginLoader] Destination: $destination")
+    
     val nsUrl = NSURL.URLWithString(url) 
         ?: throw Exception("Invalid URL: $url")
     
     val request = NSMutableURLRequest.requestWithURL(nsUrl)
     request.setHTTPMethod("GET")
     request.setTimeoutInterval(30.0)
+    request.setValue("IReader-Plugin-Downloader/1.0", forHTTPHeaderField = "User-Agent")
     
-    val session = NSURLSession.sharedSession
+    // Create a session configuration that follows redirects
+    val config = NSURLSessionConfiguration.defaultSessionConfiguration
+    val session = NSURLSession.sessionWithConfiguration(config)
     
-    // Use synchronous download for simplicity
     var downloadError: NSError? = null
     var responseData: NSData? = null
+    var httpResponse: NSHTTPURLResponse? = null
     
     val semaphore = platform.darwin.dispatch_semaphore_create(0)
     
     session.dataTaskWithRequest(request) { data, response, error ->
         responseData = data
         downloadError = error
+        httpResponse = response as? NSHTTPURLResponse
         platform.darwin.dispatch_semaphore_signal(semaphore)
     }.resume()
     
     platform.darwin.dispatch_semaphore_wait(semaphore, platform.darwin.DISPATCH_TIME_FOREVER)
     
-    downloadError?.let { throw Exception("Download failed: ${it.localizedDescription}") }
+    downloadError?.let { 
+        println("[PluginLoader] Download error: ${it.localizedDescription}")
+        throw Exception("Download failed: ${it.localizedDescription}") 
+    }
+    
+    val statusCode = httpResponse?.statusCode ?: 0
+    println("[PluginLoader] Response status code: $statusCode")
+    
+    if (statusCode !in 200..299) {
+        throw Exception("HTTP error: $statusCode")
+    }
     
     val data = responseData ?: throw Exception("No data received")
+    val bytesReceived = data.length.toLong()
+    println("[PluginLoader] Bytes received: $bytesReceived")
+    
+    if (bytesReceived == 0L) {
+        throw Exception("Downloaded 0 bytes from $url - server may have returned empty response")
+    }
     
     // Write to file
     val destUrl = NSURL.fileURLWithPath(destination.toString())
@@ -118,6 +141,8 @@ actual suspend fun downloadFile(url: String, destination: okio.Path) {
     if (!success) {
         throw Exception("Failed to write file to $destination")
     }
+    
+    println("[PluginLoader] Download complete. Bytes written: $bytesReceived")
 }
 
 /**

@@ -287,6 +287,7 @@ class FeatureStoreViewModel(
     private fun resolveDownloadUrl(downloadUrl: String, repositoryUrl: String): String {
         // If already absolute URL, return as-is
         if (downloadUrl.startsWith("http://") || downloadUrl.startsWith("https://")) {
+            println("[FeatureStore] Download URL is absolute: $downloadUrl")
             return downloadUrl
         }
         
@@ -294,11 +295,14 @@ class FeatureStoreViewModel(
         val baseUrl = repositoryUrl.substringBeforeLast("/")
         
         // Combine base URL with relative path
-        return if (downloadUrl.startsWith("/")) {
+        val resolved = if (downloadUrl.startsWith("/")) {
             "$baseUrl$downloadUrl"
         } else {
             "$baseUrl/$downloadUrl"
         }
+        
+        println("[FeatureStore] Resolved download URL: $downloadUrl -> $resolved (base: $baseUrl)")
+        return resolved
     }
     
     fun selectCategory(category: PluginType?) {

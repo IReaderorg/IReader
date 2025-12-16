@@ -107,6 +107,8 @@ class PluginRepositoryRepositoryImpl : PluginRepositoryRepository {
     }
 
     companion object {
-        const val OFFICIAL_REPO_URL = "https://raw.githubusercontent.com/IReaderorg/IReader-plugins/main/repo/index.json"
+        // Use GitHub raw URL for the official plugin repository
+        // The gh-pages branch hosts the built plugin files
+        const val OFFICIAL_REPO_URL = "https://raw.githubusercontent.com/IReaderorg/IReader-plugins/refs/heads/gh-pages/repo/index.json"
     }
 }

@@ -256,9 +256,23 @@ private fun CleanActions(
                     style = MaterialTheme.typography.labelMedium
                 )
             }
+        } else if (onDeleteUserSource != null && catalog is ireader.domain.models.entities.UserSourceCatalog) {
+            // Uninstall button for user sources (same style as other sources)
+            TextButton(
+                onClick = onDeleteUserSource,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text(
+                    text = localize(Res.string.uninstall),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
         }
         
-        if (onPinToggle != null && catalog is CatalogLocal && onUninstall == null) {
+        if (onPinToggle != null && catalog is CatalogLocal && onUninstall == null && onDeleteUserSource == null) {
             IconButton(
                 onClick = onPinToggle,
                 modifier = Modifier.size(32.dp)
@@ -273,21 +287,6 @@ private fun CleanActions(
                         MaterialTheme.colorScheme.primary 
                     else 
                         MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-        
-        // Delete button for user sources
-        if (onDeleteUserSource != null && catalog is ireader.domain.models.entities.UserSourceCatalog) {
-            IconButton(
-                onClick = onDeleteUserSource,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(18.dp)
                 )
             }

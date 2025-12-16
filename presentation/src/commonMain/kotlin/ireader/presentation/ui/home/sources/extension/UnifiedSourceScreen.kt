@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -35,12 +34,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -51,7 +48,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,7 +57,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,14 +65,13 @@ import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.models.entities.SourceState
+import ireader.domain.models.entities.UserSourceCatalog
 import ireader.domain.models.entities.key
 import ireader.i18n.UiEvent
 import ireader.i18n.asString
-import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.available
 import ireader.i18n.resources.installed
-import ireader.i18n.resources.sources
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.sources.extension.composables.AddRepositoryDialog
 import ireader.presentation.ui.home.sources.extension.composables.CleanCatalogCard
@@ -185,7 +179,6 @@ fun UnifiedSourceScreen(
                     onShowDetails = onShowDetails,
                     onMigrateFromSource = onMigrateFromSource,
                     onNavigateToUserSources = onNavigateToUserSources,
-                    onDeleteUserSource = { sourceId -> vm.deleteUserSourceById(sourceId) },
                 )
                 1 -> AvailableSourcesContent(
                     vm = vm,
@@ -193,6 +186,7 @@ fun UnifiedSourceScreen(
                     onClickUninstall = onClickUninstall,
                     onCancelInstaller = onCancelInstaller,
                     onNavigateToAddRepository = onNavigateToAddRepository,
+                    onDeleteUserSource = { sourceUrl -> vm.deleteUserSourceByUrl(sourceUrl) },
                 )
             }
         }
@@ -340,7 +334,6 @@ private fun InstalledSourcesContent(
     onShowDetails: ((Catalog) -> Unit)? = null,
     onMigrateFromSource: ((Long) -> Unit)? = null,
     onNavigateToUserSources: (() -> Unit)? = null,
-    onDeleteUserSource: ((Long) -> Unit)? = null,
 ) {
     val scrollState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -444,7 +437,6 @@ private fun InstalledSourcesContent(
                             showLoginDialog = true
                         },
                         onMigrate = onMigrateFromSource?.let { { it(catalogItem.source.sourceId) } },
-                        onDeleteUserSource = onDeleteUserSource?.let { { it(catalogItem.source.sourceId) } },
                     )
                 }
             }
@@ -461,6 +453,7 @@ private fun AvailableSourcesContent(
     onClickUninstall: (Catalog) -> Unit,
     onCancelInstaller: ((Catalog) -> Unit)? = null,
     onNavigateToAddRepository: (() -> Unit)? = null,
+    onDeleteUserSource: ((String) -> Unit)? = null,
 ) {
     var showLoginDialog by remember { mutableStateOf(false) }
     var loginSourceId by remember { mutableStateOf<Long?>(null) }
@@ -595,6 +588,13 @@ private fun AvailableSourcesContent(
                                         loginSourceName = catalogItem.source.name
                                         showLoginDialog = true
                                     },
+                                    onDeleteUserSource = if (catalogItem.source is UserSourceCatalog && onDeleteUserSource != null) {
+                                        {
+                                            (catalogItem.source as UserSourceCatalog).userSource.sourceUrl.let { url ->
+                                                onDeleteUserSource(url)
+                                            }
+                                        }
+                                    } else null,
                                 )
                             }
                             is CatalogRemote -> {
