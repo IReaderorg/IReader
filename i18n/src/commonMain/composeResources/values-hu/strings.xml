@@ -266,8 +266,10 @@
     <string name="category_not_found">A kategória nem található</string>
     <string name="category_renamed">A kategória átnevezve erre: \'%1$s\'</string>
     <string name="center">Közép</string>
+    <string name="change">Módosítás</string>
     <string name="change_category">Kategória módosítása</string>
     <string name="change_category_1">Kategória módosítása</string>
+    <string name="change_password">Jelszó módosítása</string>
     <string name="changelog">Változások</string>
     <string name="channel_app_updates">Alkalmazásfrissítések</string>
     <string name="channel_common">Általános</string>
@@ -411,6 +413,7 @@
     <string name="cover_cache_cleared">A borító gyorsítótár törölve.</string>
     <string name="cover_only_layout">Csak borító rács</string>
     <string name="cover_only_layout_description">Csak a borítóképek 2 oszlopa (szöveg nélkül)</string>
+    <string name="cover_reset_success">Borító visszaállítva az eredetire</string>
     <string name="cover_url_must_start_with_http_https_or_file">A borító URL-jének a következővel kell kezdődnie: http://, https:// vagy file://</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">Összeomlás jelentés</string>
@@ -421,6 +424,7 @@
     <string name="creating_backup">Biztonsági mentés készítése…</string>
     <string name="creating_backup_1">Biztonsági mentés készítése...</string>
     <string name="cross_device_sync">Eszközök közötti szinkronizálás</string>
+    <string name="crypto_donation_preferred">💡 Tipp: A kripto adományok előnyben részesülnek! A Reymiten keresztül történő kártyás fizetések ~40% jutalékot vonnak le kis összegeknél. A kriptó közvetlen küldése azt jelenti, hogy 100% a fejlesztésre megy.</string>
     <string name="cryptocurrency_donations_are_non_refundable">A kriptovaluta adományok nem visszatéríthetőek. Kérjük, ellenőrizd a pénztárca címét küldés előtt. Az IReader nem tárolja és nem fér hozzá a privát kulcsaidhoz.</string>
     <string name="cryptocurrency_wallets">Kriptovaluta pénztárcák</string>
     <string name="current_chapter">Aktuális fejezet</string>
@@ -432,6 +436,8 @@
     <string name="custom">Egyéni</string>
     <string name="custom_brightness">Egyéni fényerő</string>
     <string name="custom_cover">Egyéni borító</string>
+    <string name="custom_cover_failed">Nem sikerült beállítani az egyéni borítót</string>
+    <string name="custom_cover_set">Egyéni borító sikeresen beállítva</string>
     <string name="custom_fonts">Egyéni betűtípusok</string>
     <string name="customize_individual_colors_to_create">Egyéni színek testreszabása saját téma létrehozásához</string>
     <string name="cutout_area_behavior">Kivágási terület viselkedése</string>
@@ -530,6 +536,7 @@
     <string name="display_settings">Megjelenítési beállítások</string>
     <string name="display_when_each_novel_was">Mutassa meg, mikor ellenőrizték utoljára az egyes regényeket a frissítésekért</string>
     <string name="displayed_most_frequently_across_your_app">Leggyakrabban megjelenítve az alkalmazásban</string>
+    <string name="donate_crypto">Kriptó adományozása</string>
     <string name="donate_now">Adományozz most</string>
     <string name="donate_via_card">Adományozás kártyával</string>
     <string name="donate_via_card_1">💳 Adományozás kártyával</string>
@@ -549,6 +556,7 @@
     <string name="download_badge">Jelvény letöltése</string>
     <string name="download_behavior">Letöltési viselkedés</string>
     <string name="download_categories">Kategóriák letöltése</string>
+    <string name="download_chapter_audio">Fejezet hanganyag letöltése</string>
     <string name="download_chapters">Fejezetek letöltése</string>
     <string name="download_complete">Letöltés befejezve</string>
     <string name="download_completed">Letöltés befejeződött</string>
@@ -601,6 +609,7 @@
     <string name="edit_category">Kategóriák szerkesztése</string>
     <string name="edit_glossary_entry">Szószedet bejegyzés szerkesztése</string>
     <string name="edit_info">Információ szerkesztése</string>
+    <string name="edit_url">URL szerkesztése</string>
     <string name="eg_source_not_loading_broken">pl. Forrás nem töltődik be, hibás keresés, hiányzó tartalom...</string>
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">18+ Forrás zárolása</string>
@@ -645,6 +654,7 @@
     <string name="enter_chapter_name">Írd be a fejezet nevét...</string>
     <string name="enter_font_name">Adja meg a betűtípus nevét</string>
     <string name="enter_gemini_api_key">Írd be a Gemini API kulcsodat</string>
+    <string name="enter_new_password">Adja meg új jelszavát. Győződjön meg róla, hogy legalább 6 karakter hosszú.</string>
     <string name="enter_query_and_tap_search">Írjon be egy lekérdezést, és koppintson a keresésre a könyvek megtalálásához</string>
     <string name="enter_quote_text">Írd be az idézetet...</string>
     <string name="enter_the_repository_url">Add meg a tároló URL-jét:</string>
@@ -714,6 +724,8 @@
     <string name="export_failed_error">Sikertelen exportálás: %1$s</string>
     <string name="export_successful">Sikeres exportálás</string>
     <string name="export_theme">Téma exportálása</string>
+    <string name="export_translated_content">Fordított verzió exportálása</string>
+    <string name="export_translated_content_description">Fordított tartalom használata az eredeti szöveg helyett</string>
     <string name="exporting_epub">EPUB exportálása</string>
     <string name="extension_added">Kiterjesztés hozzáadva: %1$s</string>
     <string name="extension_installed_successfully">Kiterjesztés sikeresen telepítve</string>
@@ -773,6 +785,8 @@
     <string name="favorite">Kedvenc</string>
     <string name="favorite_genres">Kedvenc műfajok</string>
     <string name="favorited">Kedvencelve</string>
+    <string name="feature_store">Funkcióbolt</string>
+    <string name="feature_store_description">Fedezzen fel és vásároljon prémium bővítményeket és funkciókat</string>
     <string name="featured_badges">Kiemelt jelvények</string>
     <string name="featured_badges_for_profile">Kiemelt jelvények (profilhoz)</string>
     <string name="featured_plugins">Kiemelt bővítmények</string>
@@ -875,6 +889,7 @@
     <string name="gradio_tts_connects_to_hugging">A Gradio TTS a Hugging Face Spaces-hez csatlakozik a beszédszintézishez. Internetkapcsolat szükséges.</string>
     <string name="gradio_tts_online">Gradio TTS (Online)</string>
     <string name="gradio_tts_uses_a_huggingface">A Gradio TTS egy HuggingFace Space-t használ a beszéd szintetizálására. Használhatod az alapértelmezett Space-t vagy telepítheted a sajátodat.</string>
+    <string name="grant_storage_permission">Mappa kiválasztása</string>
     <string name="grid">Rács</string>
     <string name="group_by_novel">Csoportosítás regény szerint</string>
     <string name="group_notifications">Csoportos értesítések</string>
@@ -1083,6 +1098,7 @@
     <string name="loading">Betöltés</string>
     <string name="loading_1">Betöltés...</string>
     <string name="loading_badges">Jelvények betöltése...</string>
+    <string name="loading_features">Funkciók betöltése...</string>
     <string name="loading_fonts">Betűtípusok betöltése...</string>
     <string name="loading_more_books">További könyvek betöltése...</string>
     <string name="loading_more_reviews">További vélemények betöltése...</string>
@@ -1184,6 +1200,7 @@
     <string name="neutral">Semleges</string>
     <string name="new_chapter_notifications">Értesítések új fejezetekről</string>
     <string name="new_components">Új Összetevők</string>
+    <string name="new_password">Új jelszó</string>
     <string name="new_updates">Új Frissítések</string>
     <string name="next">Következő</string>
     <string name="next_chapter">Következő fejezet</string>
@@ -1240,6 +1257,7 @@
     <string name="no_novels_found_in_this_source">Ebben a forrásban nem található regény</string>
     <string name="no_pending_verifications">Nincsenek függőben lévő ellenőrzések</string>
     <string name="no_performance_data_available_yet">Még nincsenek elérhető teljesítményadatok</string>
+    <string name="no_plugins_available">Nincsenek elérhető bővítmények</string>
     <string name="no_plugins_installed">Nincsenek telepített bővítmények</string>
     <string name="no_popular_books_yet">Még nincsenek népszerű könyvek</string>
     <string name="no_primary_badge_selected">Nincs elsődleges jelvény kiválasztva</string>
@@ -1276,8 +1294,30 @@
     <string name="note_some_engines_require_installation">Megjegyzés: Néhány motor telepítést igényel. Használd a teljes TTS Kezelőt a Beállításokban a telepítési lehetőségekért.</string>
     <string name="notes_optional">Jegyzetek (opcionális)</string>
     <string name="nothing_read_recently">Nincs olvasott tartalom a közelmúltban</string>
+    <string name="notification_backup_complete">Biztonsági mentés kész</string>
     <string name="notification_behavior">Értesítési Viselkedés</string>
+    <string name="notification_book_added">Könyv hozzáadva a könyvtárhoz</string>
+    <string name="notification_book_removed">Könyv eltávolítva a könyvtárból</string>
     <string name="notification_channels">Értesítési Csatornák</string>
+    <string name="notification_chapter_downloaded">Fejezet letöltve</string>
+    <string name="notification_connection_restored">Kapcsolat helyreállítva</string>
+    <string name="notification_dismiss">Elvetés</string>
+    <string name="notification_download_complete">Letöltés kész</string>
+    <string name="notification_download_failed">Letöltés sikertelen</string>
+    <string name="notification_error">Hiba</string>
+    <string name="notification_info">Infó</string>
+    <string name="notification_loading">Betöltés</string>
+    <string name="notification_network_error">Hálózati hiba</string>
+    <string name="notification_restore_complete">Visszaállítás kész</string>
+    <string name="notification_retry">Újrapróbálkozás</string>
+    <string name="notification_settings_saved">Beállítások mentve</string>
+    <string name="notification_success">Siker</string>
+    <string name="notification_sync_complete">Szinkronizálás kész</string>
+    <string name="notification_sync_failed">Szinkronizálás sikertelen</string>
+    <string name="notification_undo">Visszavonás</string>
+    <string name="notification_update_available">Frissítés elérhető</string>
+    <string name="notification_view">Megtekintés</string>
+    <string name="notification_warning">Figyelmeztetés</string>
     <string name="notifications">Értesítések</string>
     <string name="novel_info">Regény Információ</string>
     <string name="number_of_sources_to_search">Egyidejűleg keresendő források száma. A magasabb értékek gyorsabbak, de több erőforrást használnak.</string>
@@ -1346,8 +1386,11 @@
     <string name="paragraph_spacing">Bekezdés távolság</string>
     <string name="paragraph_translation_menu">Bekezdés Fordítás Menü</string>
     <string name="parameters">Paraméterek</string>
+    <string name="parsing_error">Elemzési hiba</string>
     <string name="partial">Részleges</string>
     <string name="password">Jelszó</string>
+    <string name="password_updated">Jelszó frissítve</string>
+    <string name="password_updated_successfully">Jelszava sikeresen frissítve lett.</string>
     <string name="past_7_days">Elmúlt 7 nap</string>
     <string name="paste_json_here">Illessze be a JSON-t ide...</string>
     <string name="paste_the_theme_json_below">Illessze be az alábbi téma JSON-t:</string>
@@ -1362,11 +1405,18 @@
     <string name="performance_metrics">Teljesítménymutatók</string>
     <string name="performance_monitoring">Teljesítményfigyelés</string>
     <string name="permanently_delete_entire_database">⚠️ Véglegesen törli a teljes adatbázist</string>
+    <string name="permission_feature_backup_desc">Tartsa biztonságban könyvtárát automatikus biztonsági mentésekkel.</string>
+    <string name="permission_feature_backup_title">Biztonsági mentés és visszaállítás</string>
+    <string name="permission_feature_download_desc">Mentse el a fejezeteket offline olvasáshoz, bárhol, bármikor.</string>
+    <string name="permission_feature_download_title">Regények letöltése</string>
+    <string name="permission_feature_extensions_desc">Új források hozzáadása további tartalmak felfedezéséhez.</string>
+    <string name="permission_feature_extensions_title">Bővítmények telepítése</string>
     <string name="permission_not_given">Nincs elegendő engedély megadva, kérjük, ellenőrizze az
         engedélyeket
     </string>
     <string name="permission_required">Engedély szükséges</string>
     <string name="permissions">Engedélyek</string>
+    <string name="pick_image">Kép kiválasztása</string>
     <string name="pill_offset">pill_offset</string>
     <string name="pin">Rögzítés</string>
     <string name="pin_1">PIN</string>
@@ -1579,6 +1629,7 @@
     <string name="required_tables">Szükséges Táblázatok:</string>
     <string name="reset">Visszaállítás</string>
     <string name="reset_categories">Kategóriák visszaállítása</string>
+    <string name="reset_cover">Visszaállítás</string>
     <string name="reset_data_settings">Adatbeállítások visszaállítása</string>
     <string name="reset_reader_screen_settings">Olvasó képernyő beállításainak visszaállítása</string>
     <string name="reset_setting">Beállítás visszaállítása</string>
@@ -1639,6 +1690,7 @@
     <string name="search">Keresés</string>
     <string name="search_across_all_sources">Keresés az összes forrásban</string>
     <string name="search_across_all_sources_1">Keresés az összes forrásban...</string>
+    <string name="search_features">Funkciók keresése...</string>
     <string name="search_fonts">Betűtípusok keresése...</string>
     <string name="search_glossary">Szójegyzék keresése...</string>
     <string name="search_hint">Keresés…</string>
@@ -1763,6 +1815,7 @@
     <string name="simulation_mode_does_not_use_real_voices">A szimulációs mód nem használ valódi hangokat.</string>
     <string name="skip">Kihagyás</string>
     <string name="skip_backward_10_seconds">Ugrás 10 másodperccel hátra</string>
+    <string name="skip_for_now">Inkább az alkalmazás tárhelyét használja</string>
     <string name="skip_forward_10_seconds">Ugrás 10 másodperccel előre</string>
     <string name="skip_this_book">Könyv kihagyása</string>
     <string name="skip_titles_without_chapters">Fejezetek nélküli címek kihagyása</string>
@@ -1782,11 +1835,17 @@
     <string name="sort_direction">Rendezési irány</string>
     <string name="sound">Hang</string>
     <string name="source">Forrás</string>
+    <string name="source_broken_description">A weboldal szerkezete megváltozott, és a forrást frissítenie kell egy fejlesztőnek. Ez nem hálózati probléma.</string>
+    <string name="source_broken_help_description">Támogassa a fejlesztést egy 5 dolláros adománnyal, és segítsen nekünk prioritást adni ennek a forrásnak a javításában.</string>
+    <string name="source_broken_help_title">Szeretne segíteni a javításban?</string>
+    <string name="source_broken_title">Ez a forrás hibás</string>
     <string name="source_browse_latest">Legfrissebbek böngészése</string>
     <string name="source_extension_not_installed">Forrás kiterjesztés nincs telepítve</string>
     <string name="source_id">Forrás azonosító</string>
+    <string name="source_needs_update">A forrás frissítésre szorul</string>
     <string name="source_not_available">Ez a forrás nem elérhető az eszközén.</string>
     <string name="source_title">Forrás címe</string>
+    <string name="source_website_changed">A forrás weboldal megváltoztatta a szerkezetét</string>
     <string name="sources">Böngészés</string>
     <string name="space_url">Tárhely URL</string>
     <string name="speech_rate">Beszédsebesség</string>
@@ -1803,8 +1862,11 @@
     <string name="status">Állapot</string>
     <string name="stop">Leállítás</string>
     <string name="storage">Tárhely</string>
+    <string name="storage_permission_privacy_note">Az IReader csak a kiválasztott mappához fér hozzá. Más fájljai privátak és érintetlenek maradnak.</string>
     <string name="storage_permission_required_explanation">Tárhely engedély szükséges
     </string>
+    <string name="storage_permission_subtitle">Válasszon egy mappát, ahová az IReader a letöltéseit, bővítményeit és biztonsági mentéseit fogja tárolni.</string>
+    <string name="storage_permission_title">Tárolómappa kiválasztása</string>
     <string name="storage_usage">Tárhely használat</string>
     <string name="storage_used">Felhasznált tárhely</string>
     <string name="style_features">Stílusjellemzők</string>
@@ -1822,6 +1884,7 @@
     <string name="support">Támogatás</string>
     <string name="support_collect">Támogatás és gyűjtés</string>
     <string name="support_development">Fejlesztés támogatása</string>
+    <string name="support_development_5">Fejlesztés támogatása ($5)</string>
     <string name="support_for_any_gradio_based_tts_engine">Bármely Gradio-alapú TTS motor támogatása</string>
     <string name="support_the_app_to_appear_on_the_leaderboard">Támogasd az alkalmazást, hogy megjelenhess a ranglistán!</string>
     <string name="support_the_project_with_a">Támogasd a projektet hitel-/bankkártyás adománnyal</string>
@@ -1997,13 +2060,30 @@
     <string name="trying_to_fetch">Lekérés folyamatban…</string>
     <string name="trying_to_fetch_chapters_content">A fejezet tartalmának lekérése folyamatban…</string>
     <string name="tts">TTS</string>
+    <string name="tts_cache_duration">Gyorsítótár időtartama</string>
+    <string name="tts_cache_duration_desc">Gyorsítótárazott hanganyag automatikus törlése ennyi nap után</string>
+    <string name="tts_cache_status">Gyorsítótár állapota</string>
+    <string name="tts_chapter_caching">Fejezet hanganyag gyorsítótárazása</string>
+    <string name="tts_chapters">fejezetek</string>
+    <string name="tts_clear_cache">Gyorsítótár törlése</string>
+    <string name="tts_days">nap</string>
+    <string name="tts_disabled">Letiltva</string>
+    <string name="tts_download_chapter_audio">Fejezet hanganyag letöltése</string>
+    <string name="tts_download_chapter_audio_desc">Előzetes letöltés a teljes fejezet hanganyagához offline lejátszáshoz (csak távoli motorokhoz)</string>
     <string name="tts_engine">TTS motor</string>
     <string name="tts_engine_manager">TTS Motor Kezelő</string>
     <string name="tts_engine_settings">TTS Motor beállításai</string>
     <string name="tts_error">TTS hiba: %1$s</string>
+    <string name="tts_merge_info">Több bekezdés összevonása nagyobb darabokba a folyamatosabb olvasás érdekében. Ez csökkenti a szerver lekérdezéseket és jobb hangfolyamatosságot biztosít. Állítsa 0-ra az összevonás letiltásához.</string>
+    <string name="tts_merge_words_native">Szavak összevonása Android TTS, Piper, Sherpa motorokhoz</string>
+    <string name="tts_merge_words_remote">Szavak összevonása Gradio/online TTS motorokhoz</string>
+    <string name="tts_native_engines">Natív motorok</string>
     <string name="tts_performance_settings">TTS Teljesítmény Beállítások</string>
+    <string name="tts_remote_engines">Távoli motorok</string>
     <string name="tts_settings">TTS beállítások</string>
+    <string name="tts_text_merging">TTS szövegösszevonás</string>
     <string name="tts_with_translated_text">TTS lefordított szöveggel</string>
+    <string name="tts_words">szavak</string>
     <string name="turn_off_vibration_feedback_for_interactions">Kapcsold ki a rezgés visszajelzést az interakciókhoz</string>
     <string name="type">Típus</string>
     <string name="type_1">Típus \</string>

@@ -266,8 +266,10 @@
     <string name="category_not_found">Kategoriaa ei löydy</string>
     <string name="category_renamed">Kategoria uudelleennimetty nimellä \'%1$s\'</string>
     <string name="center">Keskellä</string>
+    <string name="change">Muuta</string>
     <string name="change_category">Vaihda kategoriaa</string>
     <string name="change_category_1">Muuta kategoriaa</string>
+    <string name="change_password">Vaihda salasana</string>
     <string name="changelog">Muutosloki</string>
     <string name="channel_app_updates">Sovelluspäivitykset</string>
     <string name="channel_common">Yleinen</string>
@@ -411,6 +413,7 @@
     <string name="cover_cache_cleared">Kansikuvien välimuisti tyhjennetty.</string>
     <string name="cover_only_layout">Vain kansi ruudukko</string>
     <string name="cover_only_layout_description">2 saraketta vain kansikuvista (ei tekstiä)</string>
+    <string name="cover_reset_success">Kansikuva palautettu alkuperäiseksi</string>
     <string name="cover_url_must_start_with_http_https_or_file">Kansikuvan URL-osoitteen on alettava http://, https:// tai file://</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">Kaatumisraportointi</string>
@@ -421,6 +424,7 @@
     <string name="creating_backup">Luodaan varmuuskopiota…</string>
     <string name="creating_backup_1">Luodaan varmuuskopiota...</string>
     <string name="cross_device_sync">Laitteiden välinen synkronointi</string>
+    <string name="crypto_donation_preferred">💡 Vinkki: Kryptolahjoitukset ovat suositeltavia! Reymitin kautta tehdyt korttimaksut vievät ~40 % kuluina pienistä summista. Krypton lähettäminen suoraan tarkoittaa, että 100 % menee kehitykseen.</string>
     <string name="cryptocurrency_donations_are_non_refundable">Kryptovaluuttalahjoituksia ei palauteta. Tarkista lompakon osoite ennen lähettämistä. IReader ei tallenna tai pääse käsiksi yksityisiin avaimiisi.</string>
     <string name="cryptocurrency_wallets">Kryptovaluuttalompakot</string>
     <string name="current_chapter">Nykyinen luku</string>
@@ -432,6 +436,8 @@
     <string name="custom">Mukautettu</string>
     <string name="custom_brightness">Mukautettu kirkkaus</string>
     <string name="custom_cover">Mukautettu kansi</string>
+    <string name="custom_cover_failed">Mukautetun kansikuvan asettaminen epäonnistui</string>
+    <string name="custom_cover_set">Mukautettu kansikuva asetettu onnistuneesti</string>
     <string name="custom_fonts">Mukautetut fontit</string>
     <string name="customize_individual_colors_to_create">Mukauta yksittäisiä värejä luodaksesi oman teeman</string>
     <string name="cutout_area_behavior">Loveusalueen käyttäytyminen</string>
@@ -530,6 +536,7 @@
     <string name="display_settings">Näyttöasetukset</string>
     <string name="display_when_each_novel_was">Näytä, milloin kukin romaani tarkistettiin viimeksi päivitysten varalta</string>
     <string name="displayed_most_frequently_across_your_app">Näytetään useimmin sovelluksessasi</string>
+    <string name="donate_crypto">Lahjoita kryptoa</string>
     <string name="donate_now">Lahjoita nyt</string>
     <string name="donate_via_card">Lahjoita kortilla</string>
     <string name="donate_via_card_1">💳 Lahjoita kortilla</string>
@@ -549,6 +556,7 @@
     <string name="download_badge">Lataa merkki</string>
     <string name="download_behavior">Latauskäyttäytyminen</string>
     <string name="download_categories">Lataa kategoriat</string>
+    <string name="download_chapter_audio">Lataa luvun ääni</string>
     <string name="download_chapters">Lataa luvut</string>
     <string name="download_complete">Lataus valmis</string>
     <string name="download_completed">Lataus valmis</string>
@@ -601,6 +609,7 @@
     <string name="edit_category">Muokkaa luokkia</string>
     <string name="edit_glossary_entry">Muokkaa sanastomerkintää</string>
     <string name="edit_info">Muokkaa tietoja</string>
+    <string name="edit_url">Muokkaa URL-osoitetta</string>
     <string name="eg_source_not_loading_broken">esim. Lähde ei lataudu, rikkinäinen haku, puuttuvaa sisältöä...</string>
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">18+ Lähdelukitus</string>
@@ -645,6 +654,7 @@
     <string name="enter_chapter_name">Kirjoita luvun nimi...</string>
     <string name="enter_font_name">Anna fontin nimi</string>
     <string name="enter_gemini_api_key">Anna Gemini API-avaimesi</string>
+    <string name="enter_new_password">Anna uusi salasanasi. Varmista, että se on vähintään 6 merkkiä pitkä.</string>
     <string name="enter_query_and_tap_search">Kirjoita kysely ja etsi kirjoja napauttamalla hakua</string>
     <string name="enter_quote_text">Kirjoita lainauksen teksti...</string>
     <string name="enter_the_repository_url">Syötä arkiston URL:</string>
@@ -714,6 +724,8 @@
     <string name="export_failed_error">Vienti epäonnistui: %1$s</string>
     <string name="export_successful">Vienti onnistui</string>
     <string name="export_theme">Vie teema</string>
+    <string name="export_translated_content">Vie käännetty versio</string>
+    <string name="export_translated_content_description">Käytä käännettyä sisältöä alkuperäisen tekstin sijaan</string>
     <string name="exporting_epub">Viedään ePub-muotoon</string>
     <string name="extension_added">Laajennus lisätty: %1$s</string>
     <string name="extension_installed_successfully">Laajennus asennettu onnistuneesti</string>
@@ -773,6 +785,8 @@
     <string name="favorite">Suosikki</string>
     <string name="favorite_genres">Suosikkigenret</string>
     <string name="favorited">Suosikiksi merkitty</string>
+    <string name="feature_store">Ominaisuuskauppa</string>
+    <string name="feature_store_description">Löydä ja osta premium-laajennuksia ja -ominaisuuksia</string>
     <string name="featured_badges">Esittelyssä olevat merkit</string>
     <string name="featured_badges_for_profile">Esittelyssä olevat merkit (profiiliin)</string>
     <string name="featured_plugins">Esittelyssä olevat lisäosat</string>
@@ -875,6 +889,7 @@
     <string name="gradio_tts_connects_to_hugging">Gradio TTS yhdistää Hugging Face Spacesiin puhesynteesiä varten. Vaatii Internet-yhteyden.</string>
     <string name="gradio_tts_online">Gradio TTS (Online)</string>
     <string name="gradio_tts_uses_a_huggingface">Gradio TTS käyttää HuggingFace Space -tilaa puheen syntetisoimiseksi. Voit käyttää oletustilaa tai ottaa oman tilasi käyttöön.</string>
+    <string name="grant_storage_permission">Valitse kansio</string>
     <string name="grid">Ruudukko</string>
     <string name="group_by_novel">Ryhmittelöi romaanin mukaan</string>
     <string name="group_notifications">Ryhmäilmoitukset</string>
@@ -1083,6 +1098,7 @@
     <string name="loading">Ladataan</string>
     <string name="loading_1">Ladataan...</string>
     <string name="loading_badges">Ladataan merkkejä...</string>
+    <string name="loading_features">Ladataan ominaisuuksia...</string>
     <string name="loading_fonts">Ladataan fontteja...</string>
     <string name="loading_more_books">Ladataan lisää kirjoja...</string>
     <string name="loading_more_reviews">Ladataan lisää arvosteluja...</string>
@@ -1184,6 +1200,7 @@
     <string name="neutral">Neutraali</string>
     <string name="new_chapter_notifications">Uusien lukujen ilmoitukset</string>
     <string name="new_components">Uudet komponentit</string>
+    <string name="new_password">Uusi salasana</string>
     <string name="new_updates">Uudet päivitykset</string>
     <string name="next">Seuraava</string>
     <string name="next_chapter">Seuraava luku</string>
@@ -1240,6 +1257,7 @@
     <string name="no_novels_found_in_this_source">Tästä lähteestä ei löytynyt romaaneja</string>
     <string name="no_pending_verifications">Odottaa vahvistusta ei ole</string>
     <string name="no_performance_data_available_yet">Suorituskykytietoja ei ole vielä saatavilla</string>
+    <string name="no_plugins_available">Ei saatavilla olevia laajennuksia</string>
     <string name="no_plugins_installed">Lisäosia ei ole asennettu</string>
     <string name="no_popular_books_yet">Suosittuja kirjoja ei ole vielä</string>
     <string name="no_primary_badge_selected">Ensisijaista merkkiä ei ole valittu</string>
@@ -1276,8 +1294,30 @@
     <string name="note_some_engines_require_installation">Huomaa: Jotkut moottorit vaativat asennuksen. Käytä täydellistä TTS-hallintaa asetuksissa asennusvaihtoehtoihin.</string>
     <string name="notes_optional">Muistiinpanot (valinnainen)</string>
     <string name="nothing_read_recently">Ei äskettäin luettuja</string>
+    <string name="notification_backup_complete">Varmuuskopiointi valmis</string>
     <string name="notification_behavior">Ilmoitusten toiminta</string>
+    <string name="notification_book_added">Kirja lisätty kirjastoon</string>
+    <string name="notification_book_removed">Kirja poistettu kirjastosta</string>
     <string name="notification_channels">Ilmoituskanavat</string>
+    <string name="notification_chapter_downloaded">Luku ladattu</string>
+    <string name="notification_connection_restored">Yhteys palautettu</string>
+    <string name="notification_dismiss">Hylkää</string>
+    <string name="notification_download_complete">Lataus valmis</string>
+    <string name="notification_download_failed">Lataus epäonnistui</string>
+    <string name="notification_error">Virhe</string>
+    <string name="notification_info">Tiedoksi</string>
+    <string name="notification_loading">Ladataan</string>
+    <string name="notification_network_error">Verkkovirhe</string>
+    <string name="notification_restore_complete">Palautus valmis</string>
+    <string name="notification_retry">Yritä uudelleen</string>
+    <string name="notification_settings_saved">Asetukset tallennettu</string>
+    <string name="notification_success">Onnistui</string>
+    <string name="notification_sync_complete">Synkronointi valmis</string>
+    <string name="notification_sync_failed">Synkronointi epäonnistui</string>
+    <string name="notification_undo">Kumoa</string>
+    <string name="notification_update_available">Päivitys saatavilla</string>
+    <string name="notification_view">Näytä</string>
+    <string name="notification_warning">Varoitus</string>
     <string name="notifications">Ilmoitukset</string>
     <string name="novel_info">Romaanin tiedot</string>
     <string name="number_of_sources_to_search">Haettavien lähteiden määrä samanaikaisesti. Suuremmat arvot ovat nopeampia, mutta käyttävät enemmän resursseja.</string>
@@ -1346,8 +1386,11 @@
     <string name="paragraph_spacing">Kappaleväli</string>
     <string name="paragraph_translation_menu">Kappaleen käännösvalikko</string>
     <string name="parameters">Parametrit</string>
+    <string name="parsing_error">Jäsennysvirhe</string>
     <string name="partial">Osittainen</string>
     <string name="password">Salasana</string>
+    <string name="password_updated">Salasana päivitetty</string>
+    <string name="password_updated_successfully">Salasanasi on päivitetty onnistuneesti.</string>
     <string name="past_7_days">Viimeiset 7 päivää</string>
     <string name="paste_json_here">Liitä JSON tähän...</string>
     <string name="paste_the_theme_json_below">Liitä teeman JSON alle:</string>
@@ -1362,11 +1405,18 @@
     <string name="performance_metrics">Suorituskykymittarit</string>
     <string name="performance_monitoring">Suorituskyvyn valvonta</string>
     <string name="permanently_delete_entire_database">⚠️ Poista pysyvästi koko tietokanta</string>
+    <string name="permission_feature_backup_desc">Pidä kirjastosi turvassa automaattisilla varmuuskopioilla</string>
+    <string name="permission_feature_backup_title">Varmuuskopioi ja palauta</string>
+    <string name="permission_feature_download_desc">Tallenna luvut offline-lukemista varten missä ja milloin tahansa</string>
+    <string name="permission_feature_download_title">Lataa romaaneja</string>
+    <string name="permission_feature_extensions_desc">Lisää uusia lähteitä löytääksesi lisää sisältöä</string>
+    <string name="permission_feature_extensions_title">Asenna laajennuksia</string>
     <string name="permission_not_given">Riittäviä käyttöoikeuksia ei ole myönnetty. Tarkista
         käyttöoikeudet.
     </string>
     <string name="permission_required">Lupa vaaditaan</string>
     <string name="permissions">Käyttöoikeudet</string>
+    <string name="pick_image">Valitse kuva</string>
     <string name="pill_offset">pill_offset</string>
     <string name="pin">Kiinnitä</string>
     <string name="pin_1">PIN-koodi</string>
@@ -1579,6 +1629,7 @@
     <string name="required_tables">Vaaditut taulukot:</string>
     <string name="reset">Palauta</string>
     <string name="reset_categories">Nollaa luokat</string>
+    <string name="reset_cover">Palauta</string>
     <string name="reset_data_settings">Palauta data-asetukset</string>
     <string name="reset_reader_screen_settings">Nollaa lukijan näytön asetukset</string>
     <string name="reset_setting">Nollaa asetukset</string>
@@ -1639,6 +1690,7 @@
     <string name="search">Hae</string>
     <string name="search_across_all_sources">Hae kaikista lähteistä</string>
     <string name="search_across_all_sources_1">Hae kaikista lähteistä...</string>
+    <string name="search_features">Etsi ominaisuuksia...</string>
     <string name="search_fonts">Hae fontteja...</string>
     <string name="search_glossary">Hae sanastosta...</string>
     <string name="search_hint">Hae…</string>
@@ -1763,6 +1815,7 @@
     <string name="simulation_mode_does_not_use_real_voices">Simulointitila ei käytä oikeita ääniä.</string>
     <string name="skip">Ohita</string>
     <string name="skip_backward_10_seconds">Hyppää taaksepäin 10 sekuntia</string>
+    <string name="skip_for_now">Käytä sen sijaan sovelluksen tallennustilaa</string>
     <string name="skip_forward_10_seconds">Hyppää eteenpäin 10 sekuntia</string>
     <string name="skip_this_book">Ohita tämä kirja</string>
     <string name="skip_titles_without_chapters">Ohita otsikot, joissa ei ole lukuja</string>
@@ -1782,11 +1835,17 @@
     <string name="sort_direction">Järjestyssuunta</string>
     <string name="sound">Ääni</string>
     <string name="source">Lähde</string>
+    <string name="source_broken_description">Verkkosivuston rakenne on muuttunut, ja kehittäjän on päivitettävä lähde. Tämä ei ole verkko-ongelma.</string>
+    <string name="source_broken_help_description">Tue kehitystä 5 dollarin lahjoituksella ja auta meitä priorisoimaan tämän lähteen korjaaminen.</string>
+    <string name="source_broken_help_title">Haluatko auttaa tämän korjaamisessa?</string>
+    <string name="source_broken_title">Tämä lähde on rikki</string>
     <string name="source_browse_latest">Selaa uusimpia</string>
     <string name="source_extension_not_installed">Lähdelaajennusta ei ole asennettu</string>
     <string name="source_id">Lähteen tunnus</string>
+    <string name="source_needs_update">Lähde vaatii päivityksen</string>
     <string name="source_not_available">Tämä lähde ei ole käytettävissä laitteessasi.</string>
     <string name="source_title">Lähteen otsikko</string>
+    <string name="source_website_changed">Lähdeverkkosivuston rakenne on muuttunut</string>
     <string name="sources">Selaa</string>
     <string name="space_url">Tilan URL</string>
     <string name="speech_rate">Puhenopeus</string>
@@ -1803,8 +1862,11 @@
     <string name="status">Tila</string>
     <string name="stop">Pysäytä</string>
     <string name="storage">Tallennustila</string>
+    <string name="storage_permission_privacy_note">IReader pääsee käsiksi vain valitsemaasi kansioon. Muut tiedostosi pysyvät yksityisinä ja koskemattomina.</string>
     <string name="storage_permission_required_explanation">Tallennuslupa vaaditaan selitykseen
     </string>
+    <string name="storage_permission_subtitle">Valitse kansio, johon IReader tallentaa lataukset, laajennukset ja varmuuskopiot</string>
+    <string name="storage_permission_title">Valitse tallennuskansio</string>
     <string name="storage_usage">Tallennustilan käyttö</string>
     <string name="storage_used">Käytetty tallennustila</string>
     <string name="style_features">Tyyliominaisuudet</string>
@@ -1822,6 +1884,7 @@
     <string name="support">Tuki</string>
     <string name="support_collect">Tuki &amp; Kerää</string>
     <string name="support_development">Tue kehitystä</string>
+    <string name="support_development_5">Tue kehitystä (5 $)</string>
     <string name="support_for_any_gradio_based_tts_engine">Tuki mille tahansa Gradio-pohjaiselle TTS-moottorille</string>
     <string name="support_the_app_to_appear_on_the_leaderboard">Tue sovellusta päästäksesi tulostaulukkoon!</string>
     <string name="support_the_project_with_a">Tue projektia luotto-/pankkikorttilahjoituksella</string>
@@ -1996,13 +2059,30 @@
     <string name="trying_to_fetch">Yritetään hakea…</string>
     <string name="trying_to_fetch_chapters_content">Yritetään hakea luvun sisältöä…</string>
     <string name="tts">TTS</string>
+    <string name="tts_cache_duration">Välimuistin kesto</string>
+    <string name="tts_cache_duration_desc">Poista välimuistissa oleva ääni automaattisesti tämän monen päivän kuluttua</string>
+    <string name="tts_cache_status">Välimuistin tila</string>
+    <string name="tts_chapter_caching">Luvun äänisisällön välimuistitallennus</string>
+    <string name="tts_chapters">lukua</string>
+    <string name="tts_clear_cache">Tyhjennä välimuisti</string>
+    <string name="tts_days">päivää</string>
+    <string name="tts_disabled">Poissa käytöstä</string>
+    <string name="tts_download_chapter_audio">Lataa luvun ääni</string>
+    <string name="tts_download_chapter_audio_desc">Esilataa koko luvun ääni offline-toistoa varten (vain etämoottorit)</string>
     <string name="tts_engine">TTS-moottori</string>
     <string name="tts_engine_manager">TTS-moottorin hallinta</string>
     <string name="tts_engine_settings">TTS-moottorin asetukset</string>
     <string name="tts_error">TTS-virhe: %1$s</string>
+    <string name="tts_merge_info">Yhdistä useita kappaleita suuremmiksi paloiksi sujuvamman lukukokemuksen saamiseksi. Tämä vähentää palvelinpyyntöjä ja parantaa äänen jatkuvuutta. Aseta arvoksi 0 poistaaksesi yhdistämisen käytöstä.</string>
+    <string name="tts_merge_words_native">Yhdistä sanoja Android TTS-, Piper- ja Sherpa-moottoreille</string>
+    <string name="tts_merge_words_remote">Yhdistä sanoja Gradio/online TTS -moottoreille</string>
+    <string name="tts_native_engines">Natiivimoottorit</string>
     <string name="tts_performance_settings">TTS:n suorituskykyasetukset</string>
+    <string name="tts_remote_engines">Etämoottorit</string>
     <string name="tts_settings">TTS-asetukset</string>
+    <string name="tts_text_merging">TTS-tekstin yhdistäminen</string>
     <string name="tts_with_translated_text">TTS käännetyllä tekstillä</string>
+    <string name="tts_words">sanaa</string>
     <string name="turn_off_vibration_feedback_for_interactions">Poista värinäpalaute vuorovaikutuksista</string>
     <string name="type">Tyyppi</string>
     <string name="type_1">Tyyppi \</string>

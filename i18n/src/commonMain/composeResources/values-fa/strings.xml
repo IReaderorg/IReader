@@ -266,8 +266,10 @@
     <string name="category_not_found">دسته‌بندی یافت نشد</string>
     <string name="category_renamed">دسته‌بندی به \'%1$s\' تغییر نام یافت</string>
     <string name="center">وسط</string>
+    <string name="change">تغییر</string>
     <string name="change_category">تغییر دسته بندی</string>
     <string name="change_category_1">تغییر دسته‌بندی</string>
+    <string name="change_password">تغییر رمز عبور</string>
     <string name="changelog">تغییرات</string>
     <string name="channel_app_updates">به روزرسانی های برنامه</string>
     <string name="channel_common">عمومی</string>
@@ -411,6 +413,7 @@
     <string name="cover_cache_cleared">حافظه پنهان جلد پاک شد.</string>
     <string name="cover_only_layout">شبکه فقط جلد</string>
     <string name="cover_only_layout_description">2 ستون فقط از تصاویر جلد (بدون متن)</string>
+    <string name="cover_reset_success">جلد به حالت اصلی بازنشانی شد</string>
     <string name="cover_url_must_start_with_http_https_or_file">آدرس جلد باید با http://، https:// یا file:// شروع شود</string>
     <string name="cpu">پردازنده</string>
     <string name="crash_reporting">گزارش خرابی</string>
@@ -421,6 +424,7 @@
     <string name="creating_backup">در حال ایجاد پشتیبان…</string>
     <string name="creating_backup_1">در حال ایجاد پشتیبان گیری...</string>
     <string name="cross_device_sync">همگام سازی بین دستگاهی</string>
+    <string name="crypto_donation_preferred">💡 نکته: کمک‌های مالی کریپتو ترجیح داده می‌شوند! پرداخت‌های کارتی از طریق Reymit حدود 40% کارمزد برای مبالغ کم می‌گیرند. ارسال مستقیم کریپتو به این معنی است که 100% آن به توسعه اختصاص می‌یابد.</string>
     <string name="cryptocurrency_donations_are_non_refundable">اهدای ارز رمزنگاری شده غیرقابل استرداد است. لطفاً قبل از ارسال، آدرس کیف پول را تأیید کنید. IReader به کلیدهای خصوصی شما دسترسی ندارد.</string>
     <string name="cryptocurrency_wallets">کیف پول های ارز دیجیتال</string>
     <string name="current_chapter">فصل فعلی</string>
@@ -432,6 +436,8 @@
     <string name="custom">سفارشی</string>
     <string name="custom_brightness">روشنایی سفارشی</string>
     <string name="custom_cover">جلد سفارشی</string>
+    <string name="custom_cover_failed">تنظیم جلد سفارشی با شکست مواجه شد</string>
+    <string name="custom_cover_set">جلد سفارشی با موفقیت تنظیم شد</string>
     <string name="custom_fonts">فونت‌های سفارشی</string>
     <string name="customize_individual_colors_to_create">سفارشی کردن رنگ‌های جداگانه برای ایجاد تم خود</string>
     <string name="cutout_area_behavior">رفتار ناحیه برش</string>
@@ -524,6 +530,7 @@
     <string name="display_settings">تنظیمات نمایش</string>
     <string name="display_when_each_novel_was">نمایش زمان آخرین بررسی بروزرسانی برای هر رمان</string>
     <string name="displayed_most_frequently_across_your_app">بیشترین فراوانی نمایش در سراسر برنامه شما</string>
+    <string name="donate_crypto">اهدای کریپتو</string>
     <string name="donate_now">اهدا کن الان</string>
     <string name="donate_via_card">اهدای از طریق کارت</string>
     <string name="donate_via_card_1">💳 اهدای از طریق کارت</string>
@@ -543,6 +550,7 @@
     <string name="download_badge">نشان دانلود</string>
     <string name="download_behavior">رفتار دانلود</string>
     <string name="download_categories">دسته بندی های دانلود</string>
+    <string name="download_chapter_audio">دانلود صدای فصل</string>
     <string name="download_chapters">دانلود فصل ها</string>
     <string name="download_complete">بارگیری کامل شد</string>
     <string name="download_completed">دانلود به پایان رسید</string>
@@ -594,6 +602,7 @@
     <string name="edit_category">ویرایش دسته‌ها</string>
     <string name="edit_glossary_entry">ویرایش ورودی اصطلاح نامه</string>
     <string name="edit_info">ویرایش اطلاعات</string>
+    <string name="edit_url">ویرایش آدرس اینترنتی</string>
     <string name="eg_source_not_loading_broken">مثال: منبع بارگیری نمی شود، جستجوی خراب، محتوای از دست رفته...</string>
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">قفل منبع 18+</string>
@@ -637,6 +646,7 @@
     <string name="enter_chapter_name">نام فصل را وارد کنید...</string>
     <string name="enter_font_name">نام فونت را وارد کنید</string>
     <string name="enter_gemini_api_key">کلید API جمنای خود را وارد کنید</string>
+    <string name="enter_new_password">رمز عبور جدید خود را وارد کنید. مطمئن شوید حداقل 6 کاراکتر باشد.</string>
     <string name="enter_query_and_tap_search">یک عبارت وارد کرده و برای یافتن کتاب ها، روی جستجو ضربه بزنید</string>
     <string name="enter_quote_text">متن نقل قول را وارد کنید...</string>
     <string name="enter_the_repository_url">URL مخزن را وارد کنید:</string>
@@ -706,6 +716,8 @@
     <string name="export_failed_error">خروجی با خطا مواجه شد: %1$s</string>
     <string name="export_successful">خروجی موفقیت آمیز بود</string>
     <string name="export_theme">خروجی تم</string>
+    <string name="export_translated_content">خروجی گرفتن نسخه ترجمه شده</string>
+    <string name="export_translated_content_description">به جای متن اصلی از محتوای ترجمه شده استفاده کنید</string>
     <string name="exporting_epub">در حال خروجی ePub</string>
     <string name="extension_added">افزونه اضافه شد: %1$s</string>
     <string name="extension_installed_successfully">افزونه با موفقیت نصب شد</string>
@@ -765,6 +777,8 @@
     <string name="favorite">مورد علاقه</string>
     <string name="favorite_genres">ژانرهای مورد علاقه</string>
     <string name="favorited">مورد علاقه</string>
+    <string name="feature_store">فروشگاه امکانات</string>
+    <string name="feature_store_description">پلاگین‌ها و امکانات برتر را کشف و خریداری کنید</string>
     <string name="featured_badges">نشان‌های ویژه</string>
     <string name="featured_badges_for_profile">نشان‌های ویژه (برای پروفایل)</string>
     <string name="featured_plugins">پلاگین‌های ویژه</string>
@@ -867,6 +881,7 @@
     <string name="gradio_tts_connects_to_hugging">Gradio TTS برای ترکیب گفتار به Hugging Face Spaces متصل می شود. نیاز به اتصال اینترنت دارد.</string>
     <string name="gradio_tts_online">Gradio TTS (آنلاین)</string>
     <string name="gradio_tts_uses_a_huggingface">Gradio TTS از یک HuggingFace Space برای ترکیب گفتار استفاده می کند. می توانید از فضای پیش فرض استفاده کنید یا فضای خود را مستقر کنید.</string>
+    <string name="grant_storage_permission">انتخاب پوشه</string>
     <string name="grid">جدول</string>
     <string name="group_by_novel">گروه بندی بر اساس رمان</string>
     <string name="group_notifications">گروه بندی اعلان ها</string>
@@ -1073,6 +1088,7 @@
     <string name="loading">در حال بارگذاری</string>
     <string name="loading_1">در حال بارگیری...</string>
     <string name="loading_badges">درحال بارگیری نشان‌ها...</string>
+    <string name="loading_features">در حال بارگیری امکانات...</string>
     <string name="loading_fonts">درحال بارگیری فونت‌ها...</string>
     <string name="loading_more_books">درحال بارگیری کتاب‌های بیشتر...</string>
     <string name="loading_more_reviews">در حال بارگیری بررسی های بیشتر...</string>
@@ -1174,6 +1190,7 @@
     <string name="neutral">خنثی</string>
     <string name="new_chapter_notifications">اعلان‌های فصل جدید</string>
     <string name="new_components">اجزای جدید</string>
+    <string name="new_password">رمز عبور جدید</string>
     <string name="new_updates">به روز رسانی های جدید</string>
     <string name="next">بعدی</string>
     <string name="next_chapter">فصل بعدی</string>
@@ -1228,6 +1245,7 @@
     <string name="no_novels_found_in_this_source">هیچ رمانی در این منبع یافت نشد</string>
     <string name="no_pending_verifications">هیچ تاییدیه معلقی وجود ندارد</string>
     <string name="no_performance_data_available_yet">هنوز هیچ داده عملکردی در دسترس نیست</string>
+    <string name="no_plugins_available">هیچ پلاگینی در دسترس نیست</string>
     <string name="no_plugins_installed">هیچ پلاگینی نصب نشده است</string>
     <string name="no_popular_books_yet">هنوز هیچ کتاب محبوبی وجود ندارد</string>
     <string name="no_primary_badge_selected">هیچ نشان اصلی انتخاب نشده است</string>
@@ -1264,8 +1282,30 @@
     <string name="note_some_engines_require_installation">توجه: برخی از موتورها نیاز به نصب دارند. از TTS Manager کامل در تنظیمات برای گزینه های نصب استفاده کنید.</string>
     <string name="notes_optional">یادداشت ها (اختیاری)</string>
     <string name="nothing_read_recently">اخیراً چیزی خوانده نشده است</string>
+    <string name="notification_backup_complete">پشتیبان‌گیری کامل شد</string>
     <string name="notification_behavior">رفتار اعلان</string>
+    <string name="notification_book_added">کتاب به کتابخانه اضافه شد</string>
+    <string name="notification_book_removed">کتاب از کتابخانه حذف شد</string>
     <string name="notification_channels">کانال های اعلان</string>
+    <string name="notification_chapter_downloaded">فصل دانلود شد</string>
+    <string name="notification_connection_restored">اتصال بازیابی شد</string>
+    <string name="notification_dismiss">رد کردن</string>
+    <string name="notification_download_complete">دانلود کامل شد</string>
+    <string name="notification_download_failed">دانلود با شکست مواجه شد</string>
+    <string name="notification_error">خطا</string>
+    <string name="notification_info">اطلاعات</string>
+    <string name="notification_loading">در حال بارگیری</string>
+    <string name="notification_network_error">خطای شبکه</string>
+    <string name="notification_restore_complete">بازیابی کامل شد</string>
+    <string name="notification_retry">تلاش مجدد</string>
+    <string name="notification_settings_saved">تنظیمات ذخیره شد</string>
+    <string name="notification_success">موفقیت</string>
+    <string name="notification_sync_complete">همگام‌سازی کامل شد</string>
+    <string name="notification_sync_failed">همگام‌سازی با شکست مواجه شد</string>
+    <string name="notification_undo">لغو</string>
+    <string name="notification_update_available">به‌روزرسانی در دسترس است</string>
+    <string name="notification_view">مشاهده</string>
+    <string name="notification_warning">هشدار</string>
     <string name="notifications">اعلان ها</string>
     <string name="novel_info">اطلاعات رمان</string>
     <string name="number_of_sources_to_search">تعداد منابع برای جستجو به طور همزمان. مقادیر بالاتر سریعتر هستند اما از منابع بیشتری استفاده می کنند.</string>
@@ -1333,8 +1373,11 @@
     <string name="paragraph_spacing">فاصله پاراگراف</string>
     <string name="paragraph_translation_menu">منوی ترجمه پاراگراف</string>
     <string name="parameters">پارامترها</string>
+    <string name="parsing_error">خطای تجزیه</string>
     <string name="partial">جزئی</string>
     <string name="password">رمز عبور</string>
+    <string name="password_updated">رمز عبور به‌روزرسانی شد</string>
+    <string name="password_updated_successfully">رمز عبور شما با موفقیت به‌روزرسانی شد.</string>
     <string name="past_7_days">۷ روز گذشته</string>
     <string name="paste_json_here">JSON را اینجا جایگذاری کنید...</string>
     <string name="paste_the_theme_json_below">JSON تم را در زیر جایگذاری کنید:</string>
@@ -1349,9 +1392,16 @@
     <string name="performance_metrics">معیارهای عملکرد</string>
     <string name="performance_monitoring">نظارت بر عملکرد</string>
     <string name="permanently_delete_entire_database">⚠️ حذف دائمی کل پایگاه داده</string>
+    <string name="permission_feature_backup_desc">کتابخانه خود را با پشتیبان‌گیری خودکار ایمن نگه دارید</string>
+    <string name="permission_feature_backup_title">پشتیبان‌گیری و بازیابی</string>
+    <string name="permission_feature_download_desc">ذخیره فصل‌ها برای مطالعه آفلاین در هر زمان و مکان</string>
+    <string name="permission_feature_download_title">دانلود رمان‌ها</string>
+    <string name="permission_feature_extensions_desc">منابع جدید اضافه کنید تا محتوای بیشتری کشف کنید</string>
+    <string name="permission_feature_extensions_title">نصب افزونه‌ها</string>
     <string name="permission_not_given">مجوز کافی داده نشده است، لطفا مجوز خود را بررسی کنید</string>
     <string name="permission_required">مجوز لازم است</string>
     <string name="permissions">مجوزها</string>
+    <string name="pick_image">انتخاب تصویر</string>
     <string name="pill_offset">pill_offset</string>
     <string name="pin">سنجاق</string>
     <string name="pin_1">PIN</string>
@@ -1564,6 +1614,7 @@
     <string name="required_tables">جداول مورد نیاز:</string>
     <string name="reset">بازنشانی</string>
     <string name="reset_categories">بازنشانی دسته بندی ها</string>
+    <string name="reset_cover">بازنشانی</string>
     <string name="reset_data_settings">بازنشانی تنظیمات داده</string>
     <string name="reset_reader_screen_settings">بازنشانی تنظیمات صفحه خواننده</string>
     <string name="reset_setting">بازنشانی تنظیمات</string>
@@ -1624,6 +1675,7 @@
     <string name="search">جستجو</string>
     <string name="search_across_all_sources">جستجو در همه منابع</string>
     <string name="search_across_all_sources_1">جستجو در تمام منابع...</string>
+    <string name="search_features">جستجوی امکانات...</string>
     <string name="search_fonts">جستجوی فونت ها...</string>
     <string name="search_glossary">جستجوی واژه نامه...</string>
     <string name="search_hint">جستجو…</string>
@@ -1748,6 +1800,7 @@
     <string name="simulation_mode_does_not_use_real_voices">حالت شبیه‌سازی از صداهای واقعی استفاده نمی‌کند.</string>
     <string name="skip">رد کردن</string>
     <string name="skip_backward_10_seconds">پرش به عقب 10 ثانیه</string>
+    <string name="skip_for_now">به‌جای آن از حافظه برنامه استفاده کنید</string>
     <string name="skip_forward_10_seconds">پرش به جلو 10 ثانیه</string>
     <string name="skip_this_book">رد کردن این کتاب</string>
     <string name="skip_titles_without_chapters">نادیده گرفتن عناوینی که فصل ندارند</string>
@@ -1767,11 +1820,17 @@
     <string name="sort_direction">جهت مرتب‌سازی</string>
     <string name="sound">صدا</string>
     <string name="source">منبع</string>
+    <string name="source_broken_description">ساختار وب‌سایت تغییر کرده و منبع باید توسط یک توسعه‌دهنده به‌روزرسانی شود. این یک مشکل شبکه نیست.</string>
+    <string name="source_broken_help_description">با اهدای 5 دلار از توسعه حمایت کنید و به ما کمک کنید تا رفع این منبع را در اولویت قرار دهیم.</string>
+    <string name="source_broken_help_title">آیا می‌خواهید به رفع این مشکل کمک کنید؟</string>
+    <string name="source_broken_title">این منبع خراب است</string>
     <string name="source_browse_latest">مرور آخرین</string>
     <string name="source_extension_not_installed">افزونه منبع نصب نشده است</string>
     <string name="source_id">شناسه منبع</string>
+    <string name="source_needs_update">منبع نیاز به به‌روزرسانی دارد</string>
     <string name="source_not_available">این منبع در دستگاه شما در دسترس نیست.</string>
     <string name="source_title">عنوان منبع</string>
+    <string name="source_website_changed">وب‌سایت منبع ساختار خود را تغییر داده است</string>
     <string name="sources">مرور</string>
     <string name="space_url">آدرس فضا</string>
     <string name="speech_rate">نرخ گفتار</string>
@@ -1788,8 +1847,11 @@
     <string name="status">وضعیت</string>
     <string name="stop">توقف</string>
     <string name="storage">ذخیره سازی</string>
+    <string name="storage_permission_privacy_note">IReader فقط به پوشه‌ای که انتخاب می‌کنید دسترسی دارد. سایر فایل‌های شما خصوصی و دست‌نخورده باقی می‌مانند.</string>
     <string name="storage_permission_required_explanation">توضیح مجوز مورد نیاز برای ذخیره سازی
     </string>
+    <string name="storage_permission_subtitle">پوشه‌ای را انتخاب کنید که IReader دانلودها، افزونه‌ها و پشتیبان‌های شما را در آن ذخیره کند</string>
+    <string name="storage_permission_title">انتخاب پوشه ذخیره‌سازی</string>
     <string name="storage_usage">میزان استفاده از حافظه</string>
     <string name="storage_used">حافظه استفاده شده</string>
     <string name="style_features">ویژگی‌های استایل</string>
@@ -1807,6 +1869,7 @@
     <string name="support">پشتیبانی</string>
     <string name="support_collect">پشتیبانی و جمع‌آوری</string>
     <string name="support_development">پشتیبانی از توسعه</string>
+    <string name="support_development_5">حمایت از توسعه (5 دلار)</string>
     <string name="support_for_any_gradio_based_tts_engine">پشتیبانی از هر موتور TTS مبتنی بر Gradio</string>
     <string name="support_the_app_to_appear_on_the_leaderboard">از برنامه حمایت کنید تا در تابلوی امتیازات ظاهر شوید!</string>
     <string name="support_the_project_with_a">از پروژه با کمک مالی کارت اعتباری/نقدی حمایت کنید</string>
@@ -1982,13 +2045,30 @@
     <string name="trying_to_fetch">تلاش برای واکشی…</string>
     <string name="trying_to_fetch_chapters_content">تلاش برای واکشی محتوای فصل…</string>
     <string name="tts">تبدیل متن به گفتار</string>
+    <string name="tts_cache_duration">مدت زمان کش</string>
+    <string name="tts_cache_duration_desc">حذف خودکار صدای کش شده پس از این تعداد روز</string>
+    <string name="tts_cache_status">وضعیت کش</string>
+    <string name="tts_chapter_caching">کشینگ صوتی فصل</string>
+    <string name="tts_chapters">فصل‌ها</string>
+    <string name="tts_clear_cache">پاک کردن کش</string>
+    <string name="tts_days">روز</string>
+    <string name="tts_disabled">غیرفعال</string>
+    <string name="tts_download_chapter_audio">دانلود صدای فصل</string>
+    <string name="tts_download_chapter_audio_desc">پیش‌دانلود کامل صدای فصل برای پخش آفلاین (فقط موتورهای راه دور)</string>
     <string name="tts_engine">موتور TTS</string>
     <string name="tts_engine_manager">مدیریت موتور TTS</string>
     <string name="tts_engine_settings">تنظیمات موتور TTS</string>
     <string name="tts_error">خطا در TTS: %1$s</string>
+    <string name="tts_merge_info">چندین پاراگراف را در بخش‌های بزرگتر ادغام کنید تا خواندن روان‌تر شود. این کار درخواست‌های سرور را کاهش داده و پیوستگی صوتی بهتری فراهم می‌کند. برای غیرفعال کردن ادغام، آن را روی 0 تنظیم کنید.</string>
+    <string name="tts_merge_words_native">ادغام کلمات برای موتورهای TTS اندروید، Piper، Sherpa</string>
+    <string name="tts_merge_words_remote">ادغام کلمات برای موتورهای TTS آنلاین/Gradio</string>
+    <string name="tts_native_engines">موتورهای بومی</string>
     <string name="tts_performance_settings">تنظیمات عملکرد TTS</string>
+    <string name="tts_remote_engines">موتورهای راه دور</string>
     <string name="tts_settings">تنظیمات TTS</string>
+    <string name="tts_text_merging">ادغام متن TTS</string>
     <string name="tts_with_translated_text">TTS با متن ترجمه شده</string>
+    <string name="tts_words">کلمه</string>
     <string name="turn_off_vibration_feedback_for_interactions">بازخورد لرزشی برای تعاملات را خاموش کنید</string>
     <string name="type">نوع</string>
     <string name="type_1">نوع \</string>

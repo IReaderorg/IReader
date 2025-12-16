@@ -266,8 +266,10 @@
     <string name="category_not_found">ප්‍රවර්ගය හමු නොවීය</string>
     <string name="category_renamed">ප්‍රවර්ගය \'%1$s\' ලෙස නැවත නම් කරන ලදී</string>
     <string name="center">මැද</string>
+    <string name="change">වෙනස් කරන්න</string>
     <string name="change_category">ප්‍රවර්ගය වෙනස් කරන්න</string>
     <string name="change_category_1">ප්‍රවර්ගය වෙනස් කරන්න</string>
+    <string name="change_password">මුරපදය වෙනස් කරන්න</string>
     <string name="changelog">වෙනස්කම් ලැයිස්තුව</string>
     <string name="channel_app_updates">යෙදුම් යාවත්කාලීන කිරීම්</string>
     <string name="channel_common">පොදු</string>
@@ -411,6 +413,7 @@
     <string name="cover_cache_cleared">ආවරණ තාවකාලික මතකය ඉවත් කරන ලදී.</string>
     <string name="cover_only_layout">ආවරණ-පමණක් ජාලකය</string>
     <string name="cover_only_layout_description">කවර රූප පමණක් තීරු 2 (පෙළක් නැත)</string>
+    <string name="cover_reset_success">කවරය මුල් තත්වයට නැවත සකසා ඇත</string>
     <string name="cover_url_must_start_with_http_https_or_file">කවර URL http://, https://, හෝ file:// වලින් ආරම්භ විය යුතුය</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">කඩා වැටීම් වාර්තා කිරීම</string>
@@ -421,6 +424,7 @@
     <string name="creating_backup">උපස්ථිතියක් නිර්මාණය කරමින්…</string>
     <string name="creating_backup_1">උපස්ථයක් නිර්මාණය කරමින්...</string>
     <string name="cross_device_sync">හරස් උපාංග සමමුහුර්තකරණය</string>
+    <string name="crypto_donation_preferred">💡 ඉඟිය: ක්‍රිප්ටෝ පරිත්‍යාග වඩාත් සුදුසුයි! Reymit හරහා කාඩ්පත් ගෙවීම් කුඩා මුදල් සඳහා ~40%ක ගාස්තු අය කරයි. සෘජුවම ක්‍රිප්ටෝ යැවීමෙන් 100%ක් සංවර්ධනයට යයි.</string>
     <string name="cryptocurrency_donations_are_non_refundable">ගුප්තකේතන මුදල් පරිත්‍යාග ආපසු ගෙවිය නොහැක. යැවීමට පෙර කරුණාකර මුදල් පසුම්බි ලිපිනය තහවුරු කරන්න. IReader ඔබගේ පුද්ගලික යතුරු ගබඩා නොකරන අතර ප්‍රවේශයක් ද නොමැත.</string>
     <string name="cryptocurrency_wallets">ගුප්තකේතන මුදල් පසුම්බි</string>
     <string name="current_chapter">වත්මන් පරිච්ඡේදය</string>
@@ -432,6 +436,8 @@
     <string name="custom">අභිරුචි</string>
     <string name="custom_brightness">අභිරුචි දීප්තිය</string>
     <string name="custom_cover">අභිරුචි කවරය</string>
+    <string name="custom_cover_failed">අභිරුචි කවරය සැකසීම අසාර්ථක විය</string>
+    <string name="custom_cover_set">අභිරුචි කවරය සාර්ථකව සකසා ඇත</string>
     <string name="custom_fonts">අභිරුචි අකුරු</string>
     <string name="customize_individual_colors_to_create">ඔබේම තේමාවක් නිර්මාණය කිරීමට තනි වර්ණ අභිරුචිකරණය කරන්න</string>
     <string name="cutout_area_behavior">කැපුම් ප්‍රදේශ හැසිරීම</string>
@@ -529,6 +535,7 @@
     <string name="display_settings">දර්ශන සැකසුම්</string>
     <string name="display_when_each_novel_was">සෑම නවකතාවක්ම යාවත්කාලීන කිරීම් සඳහා අවසන් වරට පරීක්ෂා කළේ කවදාදැයි පෙන්වන්න</string>
     <string name="displayed_most_frequently_across_your_app">ඔබේ යෙදුම හරහා නිතර නිතර ප්‍රදර්ශනය කෙරේ</string>
+    <string name="donate_crypto">ක්‍රිප්ටෝ පරිත්‍යාග කරන්න</string>
     <string name="donate_now">දැන් පරිත්‍යාග කරන්න</string>
     <string name="donate_via_card">කාඩ්පත හරහා පරිත්‍යාග කරන්න</string>
     <string name="donate_via_card_1">💳 කාඩ්පත හරහා පරිත්‍යාග කරන්න</string>
@@ -548,6 +555,7 @@
     <string name="download_badge">බාගැනීම් ලාංඡනය</string>
     <string name="download_behavior">බාගැනීම් හැසිරීම</string>
     <string name="download_categories">ප්‍රවර්ග බාගන්න</string>
+    <string name="download_chapter_audio">පරිච්ඡේද ශ්‍රව්‍ය බාගන්න</string>
     <string name="download_chapters">පරිච්ඡේද බාගන්න</string>
     <string name="download_complete">බාගත කිරීම සම්පූර්ණයි</string>
     <string name="download_completed">බාගැනීම සම්පූර්ණයි</string>
@@ -599,6 +607,7 @@
     <string name="edit_category">ප්‍රවර්ග සංස්කරණය කරන්න</string>
     <string name="edit_glossary_entry">පද මාලාවේ ඇතුළත් කිරීම සංස්කරණය කරන්න</string>
     <string name="edit_info">තොරතුරු සංස්කරණය කරන්න</string>
+    <string name="edit_url">URL සංස්කරණය කරන්න</string>
     <string name="eg_source_not_loading_broken">උදා., මූලාශ්‍රය පූරණය නොවීම, බිඳුණු සෙවීම, අස්ථානගත වූ අන්තර්ගතය...</string>
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">18+ මූලාශ්‍ර අගුල</string>
@@ -643,6 +652,7 @@
     <string name="enter_chapter_name">පරිච්ඡේදයේ නම ඇතුළත් කරන්න...</string>
     <string name="enter_font_name">අකුරු නම ඇතුළත් කරන්න</string>
     <string name="enter_gemini_api_key">ඔබගේ Gemini API යතුර ඇතුළත් කරන්න</string>
+    <string name="enter_new_password">ඔබගේ නව මුරපදය ඇතුළත් කරන්න. එය අවම වශයෙන් අක්ෂර 6ක් දිග බවට වග බලා ගන්න.</string>
     <string name="enter_query_and_tap_search">පොත් සොයා ගැනීමට විමසුමක් ඇතුළත් කර සෙවුම තට්ටු කරන්න</string>
     <string name="enter_quote_text">උපුටා දැක්වීමේ පෙළ ඇතුළත් කරන්න...</string>
     <string name="enter_the_repository_url">ගබඩා URL එක ඇතුළත් කරන්න:</string>
@@ -712,6 +722,8 @@
     <string name="export_failed_error">අපනයනය අසාර්ථක විය: %1$s</string>
     <string name="export_successful">අපනයනය සාර්ථකයි</string>
     <string name="export_theme">තේමාව අපනයනය කරන්න</string>
+    <string name="export_translated_content">පරිවර්තනය කළ අනුවාදය අපනයනය කරන්න</string>
+    <string name="export_translated_content_description">මුල් පිටපත වෙනුවට පරිවර්තනය කළ අන්තර්ගතය භාවිතා කරන්න</string>
     <string name="exporting_epub">ePub අපනයනය කරමින්</string>
     <string name="extension_added">දිගුව එකතු කරන ලදී: %1$s</string>
     <string name="extension_installed_successfully">දිගුව සාර්ථකව ස්ථාපනය කරන ලදී</string>
@@ -771,6 +783,8 @@
     <string name="favorite">ප්‍රියතම</string>
     <string name="favorite_genres">ප්‍රියතම ප්‍රභේද</string>
     <string name="favorited">ප්‍රියතම කරන ලදි</string>
+    <string name="feature_store">විශේෂාංග ගබඩාව</string>
+    <string name="feature_store_description">වාරික ප්ලගීන සහ විශේෂාංග සොයාගෙන මිලදී ගන්න</string>
     <string name="featured_badges">විශේෂාංගී ලාංඡන</string>
     <string name="featured_badges_for_profile">විශේෂාංගී ලාංඡන (පැතිකඩ සඳහා)</string>
     <string name="featured_plugins">විශේෂාංගී ප්ලගීන</string>
@@ -872,6 +886,7 @@
     <string name="gradio_tts_connects_to_hugging">Gradio TTS කථන සංස්ලේෂණය සඳහා Hugging Face Spaces වෙත සම්බන්ධ වේ. අන්තර්ජාල සම්බන්ධතාවයක් අවශ්‍ය වේ.</string>
     <string name="gradio_tts_online">Gradio TTS (මාර්ගගත)</string>
     <string name="gradio_tts_uses_a_huggingface">Gradio TTS කථනය සංස්ලේෂණය කිරීම සඳහා HuggingFace Space භාවිතා කරයි. ඔබට පෙරනිමි අවකාශය භාවිතා කිරීමට හෝ ඔබේම අවකාශය යෙදවීමට හැකිය.</string>
+    <string name="grant_storage_permission">ෆෝල්ඩරය තෝරන්න</string>
     <string name="grid">ජාලය</string>
     <string name="group_by_novel">නවකතාව අනුව කාණ්ඩ කරන්න</string>
     <string name="group_notifications">කණ්ඩායම් දැනුම්දීම්</string>
@@ -1080,6 +1095,7 @@
     <string name="loading">පූරණය වෙමින්</string>
     <string name="loading_1">පූරණය වෙමින්...</string>
     <string name="loading_badges">ලාංඡන පූරණය වෙමින්...</string>
+    <string name="loading_features">විශේෂාංග පූරණය වෙමින් පවතී...</string>
     <string name="loading_fonts">අකුරු පූරණය වෙමින්...</string>
     <string name="loading_more_books">තවත් පොත් පූරණය වෙමින්...</string>
     <string name="loading_more_reviews">තවත් සමාලෝචන පූරණය වෙමින්...</string>
@@ -1181,6 +1197,7 @@
     <string name="neutral">මධ්‍යස්ථ</string>
     <string name="new_chapter_notifications">නව පරිච්ඡේද දැනුම්දීම්</string>
     <string name="new_components">නව සංරචක</string>
+    <string name="new_password">නව මුරපදය</string>
     <string name="new_updates">නව යාවත්කාලීන කිරීම්</string>
     <string name="next">ඊළඟ</string>
     <string name="next_chapter">ඊළඟ පරිච්ඡේදය</string>
@@ -1237,6 +1254,7 @@
     <string name="no_novels_found_in_this_source">මෙම මූලාශ්‍රයේ නවකතා කිසිවක් හමු නොවීය</string>
     <string name="no_pending_verifications">පරික්ෂා කිරීම් කිසිවක් ඉතිරිව නැත</string>
     <string name="no_performance_data_available_yet">මෙතෙක් කාර්ය සාධන දත්ත නොමැත</string>
+    <string name="no_plugins_available">ප්ලගීන නොමැත</string>
     <string name="no_plugins_installed">ස්ථාපනය කර ඇති ප්ලගීන නොමැත</string>
     <string name="no_popular_books_yet">තවම ජනප්‍රිය පොත් නොමැත</string>
     <string name="no_primary_badge_selected">ප්‍රාථමික ලාංඡනය තෝරා නැත</string>
@@ -1273,8 +1291,30 @@
     <string name="note_some_engines_require_installation">සටහන: සමහර එන්ජින් ස්ථාපනය කිරීම අවශ්‍ය වේ. ස්ථාපන විකල්ප සඳහා සැකසීම් තුළ ඇති සම්පූර්ණ TTS කළමනාකරු භාවිතා කරන්න.</string>
     <string name="notes_optional">සටහන් (විකල්ප)</string>
     <string name="nothing_read_recently">මෑතකදී කිසිවක් කියවා නැත</string>
+    <string name="notification_backup_complete">උපස්ථය සම්පූර්ණයි</string>
     <string name="notification_behavior">දැනුම්දීම් හැසිරීම</string>
+    <string name="notification_book_added">පොත පුස්තකාලයට එක් කරන ලදී</string>
+    <string name="notification_book_removed">පොත පුස්තකාලයෙන් ඉවත් කරන ලදී</string>
     <string name="notification_channels">දැනුම්දීම් නාලිකා</string>
+    <string name="notification_chapter_downloaded">පරිච්ඡේදය බාගත කරන ලදී</string>
+    <string name="notification_connection_restored">සම්බන්ධතාවය ප්‍රතිස්ථාපනය කරන ලදී</string>
+    <string name="notification_dismiss">ඉවත් කරන්න</string>
+    <string name="notification_download_complete">බාගැනීම සම්පූර්ණයි</string>
+    <string name="notification_download_failed">බාගැනීම අසාර්ථක විය</string>
+    <string name="notification_error">දෝෂයකි</string>
+    <string name="notification_info">තොරතුරු</string>
+    <string name="notification_loading">පූරණය වෙමින් පවතී</string>
+    <string name="notification_network_error">ජාල දෝෂය</string>
+    <string name="notification_restore_complete">ප්‍රතිස්ථාපනය සම්පූර්ණයි</string>
+    <string name="notification_retry">නැවත උත්සාහ කරන්න</string>
+    <string name="notification_settings_saved">සැකසුම් සුරැකී ඇත</string>
+    <string name="notification_success">සාර්ථකයි</string>
+    <string name="notification_sync_complete">සමමුහුර්තකරණය සම්පූර්ණයි</string>
+    <string name="notification_sync_failed">සමමුහුර්තකරණය අසාර්ථක විය</string>
+    <string name="notification_undo">අහෝසි කරන්න</string>
+    <string name="notification_update_available">යාවත්කාලීන කිරීමක් තිබේ</string>
+    <string name="notification_view">බලන්න</string>
+    <string name="notification_warning">අනතුරු ඇඟවීම</string>
     <string name="notifications">දැනුම්දීම්</string>
     <string name="novel_info">නවකතා තොරතුරු</string>
     <string name="number_of_sources_to_search">එකවර සෙවිය යුතු මූලාශ්‍ර ගණන. වැඩි අගයන් වේගවත් නමුත් වැඩි සම්පත් භාවිතා කරයි.</string>
@@ -1342,8 +1382,11 @@
     <string name="paragraph_spacing">ඡේද පරතරය</string>
     <string name="paragraph_translation_menu">ඡේද පරිවර්තන මෙනුව</string>
     <string name="parameters">පරාමිතීන්</string>
+    <string name="parsing_error">විශ්ලේෂණ දෝෂය</string>
     <string name="partial">අර්ධ</string>
     <string name="password">මුරපදය</string>
+    <string name="password_updated">මුරපදය යාවත්කාලීන කරන ලදී</string>
+    <string name="password_updated_successfully">ඔබගේ මුරපදය සාර්ථකව යාවත්කාලීන කර ඇත.</string>
     <string name="past_7_days">පසුගිය දින 7</string>
     <string name="paste_json_here">JSON මෙහි අලවන්න...</string>
     <string name="paste_the_theme_json_below">තේම JSON පහත අලවන්න:</string>
@@ -1358,11 +1401,18 @@
     <string name="performance_metrics">කාර්ය සාධන මිනුම්</string>
     <string name="performance_monitoring">කාර්ය සාධනය නිරීක්ෂණය කිරීම</string>
     <string name="permanently_delete_entire_database">⚠️ සම්පූර්ණ දත්ත ගබඩාව ස්ථිරවම මකන්න</string>
+    <string name="permission_feature_backup_desc">ස්වයංක්‍රීය උපස්ථ සමඟ ඔබේ පුස්තකාලය සුරක්ෂිතව තබා ගන්න</string>
+    <string name="permission_feature_backup_title">උපස්ථය සහ ප්‍රතිස්ථාපනය</string>
+    <string name="permission_feature_download_desc">ඕනෑම තැනක, ඕනෑම වේලාවක නොබැඳිව කියවීම සඳහා පරිච්ඡේද සුරකින්න</string>
+    <string name="permission_feature_download_title">නවකතා බාගන්න</string>
+    <string name="permission_feature_extensions_desc">වැඩිදුර අන්තර්ගතය සොයා ගැනීමට නව මූලාශ්‍ර එක් කරන්න</string>
+    <string name="permission_feature_extensions_title">දිගු ස්ථාපනය කරන්න</string>
     <string name="permission_not_given">ප්‍රමාණවත් අවසර ලබා දී නොමැත, කරුණාකර ඔබගේ
         අවසර පරීක්ෂා කරන්න
     </string>
     <string name="permission_required">අවසර අවශ්‍යයි</string>
     <string name="permissions">අවසර</string>
+    <string name="pick_image">රූපය තෝරන්න</string>
     <string name="pill_offset">pill_offset</string>
     <string name="pin">අමුණන්න</string>
     <string name="pin_1">PIN</string>
@@ -1575,6 +1625,7 @@
     <string name="required_tables">අවශ්‍ය වගු:</string>
     <string name="reset">නැවත සකසන්න</string>
     <string name="reset_categories">ප්‍රවර්ග යළි පිහිටුවන්න</string>
+    <string name="reset_cover">නැවත සකසන්න</string>
     <string name="reset_data_settings">දත්ත සැකසුම් යළි පිහිටුවන්න</string>
     <string name="reset_reader_screen_settings">කියවීමේ තිර සැකසුම් යළි පිහිටුවන්න</string>
     <string name="reset_setting">සැකසුම් යළි පිහිටුවන්න</string>
@@ -1635,6 +1686,7 @@
     <string name="search">සොයන්න</string>
     <string name="search_across_all_sources">සියලුම මූලාශ්‍ර හරහා සොයන්න</string>
     <string name="search_across_all_sources_1">සියලු මූලාශ්‍ර හරහා සොයන්න...</string>
+    <string name="search_features">විශේෂාංග සොයන්න...</string>
     <string name="search_fonts">අකුරු සොයන්න...</string>
     <string name="search_glossary">පද මාලාව සොයන්න...</string>
     <string name="search_hint">සොයන්න…</string>
@@ -1759,6 +1811,7 @@
     <string name="simulation_mode_does_not_use_real_voices">අනුකරණ මාදිලිය සැබෑ හඬවල් භාවිතා නොකරයි.</string>
     <string name="skip">මඟ හරින්න</string>
     <string name="skip_backward_10_seconds">තත්පර 10ක් පසුපසට මඟ හරින්න</string>
+    <string name="skip_for_now">ඒ වෙනුවට යෙදුම් ගබඩාව භාවිතා කරන්න</string>
     <string name="skip_forward_10_seconds">තත්පර 10ක් ඉදිරියට මඟ හරින්න</string>
     <string name="skip_this_book">මෙම පොත මඟ හරින්න</string>
     <string name="skip_titles_without_chapters">පරිච්ඡේද නොමැති මාතෘකා මඟ හරින්න</string>
@@ -1778,11 +1831,17 @@
     <string name="sort_direction">වර්ග කිරීමේ දිශාව</string>
     <string name="sound">ශබ්දය</string>
     <string name="source">මූලාශ්‍රය</string>
+    <string name="source_broken_description">වෙබ් අඩවි ව්‍යුහය වෙනස් වී ඇති අතර සංවර්ධකයෙකු විසින් මූලාශ්‍රය යාවත්කාලීන කළ යුතුය. මෙය ජාල ගැටලුවක් නොවේ.</string>
+    <string name="source_broken_help_description">$5 ක පරිත්‍යාගයකින් සංවර්ධනයට සහාය වී මෙම මූලාශ්‍රය නිවැරදි කිරීමට අපට ප්‍රමුඛත්වය දීමට උදව් කරන්න.</string>
+    <string name="source_broken_help_title">මෙය නිවැරදි කිරීමට උදව් කිරීමට අවශ්‍යද?</string>
+    <string name="source_broken_title">මෙම මූලාශ්‍රය කැඩී ඇත</string>
     <string name="source_browse_latest">නවතම පිරික්සන්න</string>
     <string name="source_extension_not_installed">මූලාශ්‍ර දිගුව ස්ථාපනය කර නොමැත</string>
     <string name="source_id">මූලාශ්‍ර හැඳුනුම්පත</string>
+    <string name="source_needs_update">මූලාශ්‍රය යාවත්කාලීන කළ යුතුය</string>
     <string name="source_not_available">මෙම මූලාශ්‍රය ඔබගේ උපාංගයේ නොමැත.</string>
     <string name="source_title">මූලාශ්‍ර මාතෘකාව</string>
+    <string name="source_website_changed">මූලාශ්‍ර වෙබ් අඩවිය එහි ව්‍යුහය වෙනස් කර ඇත</string>
     <string name="sources">ගවේෂණය කරන්න</string>
     <string name="space_url">Space URL</string>
     <string name="speech_rate">කථන වේගය</string>
@@ -1799,8 +1858,11 @@
     <string name="status">තත්ත්වය</string>
     <string name="stop">නවත්වන්න</string>
     <string name="storage">ගබඩාව</string>
+    <string name="storage_permission_privacy_note">IReader ප්‍රවේශ වන්නේ ඔබ තෝරන ෆෝල්ඩරයට පමණි. ඔබගේ අනෙකුත් ගොනු පුද්ගලිකව සහ නොවෙනස්ව පවතී.</string>
     <string name="storage_permission_required_explanation">ගබඩා අවසරය අවශ්‍යයි
 </string>
+    <string name="storage_permission_subtitle">IReader මඟින් ඔබගේ බාගැනීම්, දිගු සහ උපස්ථ ගබඩා කරන ෆෝල්ඩරයක් තෝරන්න</string>
+    <string name="storage_permission_title">ගබඩා ෆෝල්ඩරය තෝරන්න</string>
     <string name="storage_usage">ගබඩා භාවිතය</string>
     <string name="storage_used">භාවිතා කළ ගබඩාව</string>
     <string name="style_features">විලාසිතා විශේෂාංග</string>
@@ -1818,6 +1880,7 @@
     <string name="support">සහාය</string>
     <string name="support_collect">සහාය සහ එකතු කිරීම</string>
     <string name="support_development">සංවර්ධනයට සහාය වන්න</string>
+    <string name="support_development_5">සංවර්ධනයට සහාය වන්න ($5)</string>
     <string name="support_for_any_gradio_based_tts_engine">ඕනෑම Gradio-පාදක TTS එන්ජිමක් සඳහා සහාය</string>
     <string name="support_the_app_to_appear_on_the_leaderboard">නායකත්ව මණ්ඩලයේ පෙනී සිටීමට යෙදුමට සහාය වන්න!</string>
     <string name="support_the_project_with_a">ණය/ඩෙබිට් කාඩ් පරිත්‍යාගයක් සමඟ ව්‍යාපෘතියට සහාය වන්න</string>
@@ -1992,13 +2055,30 @@
     <string name="trying_to_fetch">ලබා ගැනීමට උත්සාහ කරමින්…</string>
     <string name="trying_to_fetch_chapters_content">පරිච්ඡේදයේ අන්තර්ගතය ලබා ගැනීමට උත්සාහ කරමින්…</string>
     <string name="tts">TTS</string>
+    <string name="tts_cache_duration">කේෂ් කාලය</string>
+    <string name="tts_cache_duration_desc">මෙම දින ගණනකට පසු කේෂ් කළ ශ්‍රව්‍ය ස්වයංක්‍රීයව මකන්න</string>
+    <string name="tts_cache_status">කේෂ් තත්ත්වය</string>
+    <string name="tts_chapter_caching">පරිච්ඡේද ශ්‍රව්‍ය කේෂ් කිරීම</string>
+    <string name="tts_chapters">පරිච්ඡේද</string>
+    <string name="tts_clear_cache">කේෂ් ඉවත් කරන්න</string>
+    <string name="tts_days">දින</string>
+    <string name="tts_disabled">අක්‍රීයයි</string>
+    <string name="tts_download_chapter_audio">පරිච්ඡේද ශ්‍රව්‍ය බාගන්න</string>
+    <string name="tts_download_chapter_audio_desc">නොබැඳිව ධාවනය කිරීම සඳහා සම්පූර්ණ පරිච්ඡේද ශ්‍රව්‍ය කලින් බාගන්න (දුරස්ථ එන්ජින් සඳහා පමණි)</string>
     <string name="tts_engine">TTS එන්ජිම</string>
     <string name="tts_engine_manager">TTS එන්ජින් කළමනාකරු</string>
     <string name="tts_engine_settings">TTS එන්ජින් සැකසුම්</string>
     <string name="tts_error">TTS දෝෂය: %1$s</string>
+    <string name="tts_merge_info">සුමටව කියවීම සඳහා බහු ඡේද විශාල කොටස් වලට ඒකාබද්ධ කරන්න. මෙය සර්වර් ඉල්ලීම් අඩු කරන අතර වඩා හොඳ ශ්‍රව්‍ය අඛණ්ඩතාවක් සපයයි. ඒකාබද්ධ කිරීම අක්‍රිය කිරීමට 0 ලෙස සකසන්න.</string>
+    <string name="tts_merge_words_native">Android TTS, Piper, Sherpa එන්ජින් සඳහා වචන ඒකාබද්ධ කරන්න</string>
+    <string name="tts_merge_words_remote">Gradio/ඔන්ලයින් TTS එන්ජින් සඳහා වචන ඒකාබද්ධ කරන්න</string>
+    <string name="tts_native_engines">දේශීය එන්ජින්</string>
     <string name="tts_performance_settings">TTS ක්‍රියාකාරීත්ව සැකසුම්</string>
+    <string name="tts_remote_engines">දුරස්ථ එන්ජින්</string>
     <string name="tts_settings">TTS සැකසුම්</string>
+    <string name="tts_text_merging">TTS පෙළ ඒකාබද්ධ කිරීම</string>
     <string name="tts_with_translated_text">පරිවර්තනය කළ පෙළ සමඟ TTS</string>
+    <string name="tts_words">වචන</string>
     <string name="turn_off_vibration_feedback_for_interactions">අන්තර්ක්‍රියා සඳහා කම්පන ප්‍රතිපෝෂණය ක්‍රියා විරහිත කරන්න</string>
     <string name="type">වර්ගය</string>
     <string name="type_1">වර්ගය \</string>

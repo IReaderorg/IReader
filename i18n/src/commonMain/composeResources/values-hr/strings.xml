@@ -266,8 +266,10 @@
     <string name="category_not_found">Kategorija nije pronađena</string>
     <string name="category_renamed">Kategorija preimenovana u \'%1$s\'</string>
     <string name="center">Centar</string>
+    <string name="change">Promijeni</string>
     <string name="change_category">Promijeni kategoriju</string>
     <string name="change_category_1">Promijeni kategoriju</string>
+    <string name="change_password">Promijeni lozinku</string>
     <string name="changelog">Popis izmjena</string>
     <string name="channel_app_updates">Ažuriranja aplikacije</string>
     <string name="channel_common">Općenito</string>
@@ -411,6 +413,7 @@
     <string name="cover_cache_cleared">Predmemorija naslovnica je očišćena.</string>
     <string name="cover_only_layout">Mreža samo s naslovnicama</string>
     <string name="cover_only_layout_description">2 stupca samo sa slikama naslovnica (bez teksta)</string>
+    <string name="cover_reset_success">Naslovnica vraćena na original</string>
     <string name="cover_url_must_start_with_http_https_or_file">URL naslovnice mora započeti s http://, https:// ili file://</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">Izvješćivanje o padovima</string>
@@ -421,6 +424,7 @@
     <string name="creating_backup">Stvaranje sigurnosne kopije...</string>
     <string name="creating_backup_1">Stvaranje sigurnosne kopije...</string>
     <string name="cross_device_sync">Sinkronizacija između uređaja</string>
+    <string name="crypto_donation_preferred">💡 Savjet: Kripto donacije su poželjnije! Plaćanja karticama putem Reymita uzimaju ~40% naknade za male iznose. Slanje kriptovaluta izravno znači da 100% ide na razvoj.</string>
     <string name="cryptocurrency_donations_are_non_refundable">Donacije u kriptovalutama se ne vraćaju. Provjerite adresu novčanika prije slanja. IReader ne pohranjuje niti ima pristup vašim privatnim ključevima.</string>
     <string name="cryptocurrency_wallets">Novčanici za kriptovalute</string>
     <string name="current_chapter">Trenutno poglavlje</string>
@@ -432,6 +436,8 @@
     <string name="custom">Prilagođeno</string>
     <string name="custom_brightness">Prilagođena svjetlina</string>
     <string name="custom_cover">Prilagođena naslovnica</string>
+    <string name="custom_cover_failed">Postavljanje prilagođene naslovnice nije uspjelo</string>
+    <string name="custom_cover_set">Prilagođena naslovnica uspješno postavljena</string>
     <string name="custom_fonts">Prilagođeni fontovi</string>
     <string name="customize_individual_colors_to_create">Prilagodite pojedinačne boje za stvaranje vlastite teme</string>
     <string name="cutout_area_behavior">Ponašanje područja izreza</string>
@@ -530,6 +536,7 @@
     <string name="display_settings">Postavke zaslona</string>
     <string name="display_when_each_novel_was">Prikaži kada je svaka novela zadnji put provjerena za ažuriranja</string>
     <string name="displayed_most_frequently_across_your_app">Prikazuje se najčešće u vašoj aplikaciji</string>
+    <string name="donate_crypto">Donirajte kriptovalute</string>
     <string name="donate_now">Donirajte sada</string>
     <string name="donate_via_card">Donirajte putem kartice</string>
     <string name="donate_via_card_1">💳 Donirajte putem kartice</string>
@@ -549,6 +556,7 @@
     <string name="download_badge">Preuzmi značku</string>
     <string name="download_behavior">Ponašanje preuzimanja</string>
     <string name="download_categories">Preuzmi kategorije</string>
+    <string name="download_chapter_audio">Preuzmi audiozapis poglavlja</string>
     <string name="download_chapters">Preuzmi poglavlja</string>
     <string name="download_complete">Preuzimanje završeno</string>
     <string name="download_completed">Preuzimanje završeno</string>
@@ -599,6 +607,7 @@
     <string name="edit_category">Uredi kategorije</string>
     <string name="edit_glossary_entry">Uredi unos u glosaru</string>
     <string name="edit_info">Uredi informacije</string>
+    <string name="edit_url">Uredi URL</string>
     <string name="eg_source_not_loading_broken">npr. Izvor se ne učitava, pretraga je pokvarena, nedostaje sadržaj...</string>
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">Zaključavanje 18+ izvora</string>
@@ -641,6 +650,7 @@
     <string name="enter_chapter_name">Unesite naziv poglavlja...</string>
     <string name="enter_font_name">Unesite naziv fonta</string>
     <string name="enter_gemini_api_key">Unesite svoj Gemini API ključ</string>
+    <string name="enter_new_password">Unesite svoju novu lozinku. Provjerite je li dugačka barem 6 znakova.</string>
     <string name="enter_query_and_tap_search">Unesite upit i dodirnite pretraživanje za pronalaženje knjiga</string>
     <string name="enter_quote_text">Unesite tekst citata...</string>
     <string name="enter_the_repository_url">Unesite URL repozitorija:</string>
@@ -710,6 +720,8 @@
     <string name="export_failed_error">Izvoz nije uspio: %1$s</string>
     <string name="export_successful">Izvoz uspješan</string>
     <string name="export_theme">Izvezi temu</string>
+    <string name="export_translated_content">Izvezi prevedenu verziju</string>
+    <string name="export_translated_content_description">Koristite prevedeni sadržaj umjesto originalnog teksta</string>
     <string name="exporting_epub">Izvozi se ePub</string>
     <string name="extension_added">Ekstenzija dodana: %1$s</string>
     <string name="extension_installed_successfully">Ekstenzija uspješno instalirana</string>
@@ -769,6 +781,8 @@
     <string name="favorite">Omiljeno</string>
     <string name="favorite_genres">Omiljeni žanrovi</string>
     <string name="favorited">Omiljeno</string>
+    <string name="feature_store">Trgovina značajki</string>
+    <string name="feature_store_description">Otkrijte i kupite premium dodatke i značajke</string>
     <string name="featured_badges">Istaknute značke</string>
     <string name="featured_badges_for_profile">Istaknute značke (za profil)</string>
     <string name="featured_plugins">Istaknuti dodaci</string>
@@ -871,6 +885,7 @@
     <string name="gradio_tts_connects_to_hugging">Gradio TTS povezuje se s Hugging Face Spaces za sintezu govora. Zahtijeva internetsku vezu.</string>
     <string name="gradio_tts_online">Gradio TTS (Online)</string>
     <string name="gradio_tts_uses_a_huggingface">Gradio TTS koristi HuggingFace Space za sintetiziranje govora. Možete koristiti zadani prostor ili implementirati svoj vlastiti.</string>
+    <string name="grant_storage_permission">Odaberite mapu</string>
     <string name="grid">Mreža</string>
     <string name="group_by_novel">Grupiraj po romanu</string>
     <string name="group_notifications">Grupiraj obavijesti</string>
@@ -1074,6 +1089,7 @@
     <string name="loading">Učitavanje</string>
     <string name="loading_1">Učitavanje...</string>
     <string name="loading_badges">Učitavanje znački...</string>
+    <string name="loading_features">Učitavanje značajki...</string>
     <string name="loading_fonts">Učitavanje fontova...</string>
     <string name="loading_more_books">Učitavanje više knjiga...</string>
     <string name="loading_more_reviews">Učitavanje više recenzija...</string>
@@ -1175,6 +1191,7 @@
     <string name="neutral">Neutralno</string>
     <string name="new_chapter_notifications">Obavijesti o novim poglavljima</string>
     <string name="new_components">Nove komponente</string>
+    <string name="new_password">Nova lozinka</string>
     <string name="new_updates">Nova ažuriranja</string>
     <string name="next">Sljedeće</string>
     <string name="next_chapter">Sljedeće poglavlje</string>
@@ -1231,6 +1248,7 @@
     <string name="no_novels_found_in_this_source">Nema pronađenih romana u ovom izvoru</string>
     <string name="no_pending_verifications">Nema verifikacija na čekanju</string>
     <string name="no_performance_data_available_yet">Još nema dostupnih podataka o performansama</string>
+    <string name="no_plugins_available">Nema dostupnih dodataka</string>
     <string name="no_plugins_installed">Nema instaliranih dodataka</string>
     <string name="no_popular_books_yet">Još nema popularnih knjiga</string>
     <string name="no_primary_badge_selected">Nema odabrane primarne značke</string>
@@ -1267,8 +1285,30 @@
     <string name="note_some_engines_require_installation">Napomena: Neki motori zahtijevaju instalaciju. Koristite puni TTS Manager u Postavkama za opcije instalacije.</string>
     <string name="notes_optional">Bilješke (neobavezno)</string>
     <string name="nothing_read_recently">Ništa nedavno pročitano</string>
+    <string name="notification_backup_complete">Sigurnosna kopija dovršena</string>
     <string name="notification_behavior">Ponašanje obavijesti</string>
+    <string name="notification_book_added">Knjiga dodana u knjižnicu</string>
+    <string name="notification_book_removed">Knjiga uklonjena iz knjižnice</string>
     <string name="notification_channels">Kanali obavijesti</string>
+    <string name="notification_chapter_downloaded">Poglavlje preuzeto</string>
+    <string name="notification_connection_restored">Veza uspostavljena</string>
+    <string name="notification_dismiss">Odbaci</string>
+    <string name="notification_download_complete">Preuzimanje dovršeno</string>
+    <string name="notification_download_failed">Preuzimanje nije uspjelo</string>
+    <string name="notification_error">Pogreška</string>
+    <string name="notification_info">Informacije</string>
+    <string name="notification_loading">Učitavanje</string>
+    <string name="notification_network_error">Greška mreže</string>
+    <string name="notification_restore_complete">Vraćanje dovršeno</string>
+    <string name="notification_retry">Pokušaj ponovno</string>
+    <string name="notification_settings_saved">Postavke spremljene</string>
+    <string name="notification_success">Uspjeh</string>
+    <string name="notification_sync_complete">Sinkronizacija dovršena</string>
+    <string name="notification_sync_failed">Sinkronizacija nije uspjela</string>
+    <string name="notification_undo">Poništi</string>
+    <string name="notification_update_available">Dostupno ažuriranje</string>
+    <string name="notification_view">Pregledaj</string>
+    <string name="notification_warning">Upozorenje</string>
     <string name="notifications">Obavijesti</string>
     <string name="novel_info">Informacije o romanu</string>
     <string name="number_of_sources_to_search">Broj izvora za istovremeno pretraživanje. Više vrijednosti su brže, ali troše više resursa.</string>
@@ -1335,8 +1375,11 @@
     <string name="paragraph_spacing">Razmak između odlomaka</string>
     <string name="paragraph_translation_menu">Izbornik za prijevod odlomaka</string>
     <string name="parameters">Parametri</string>
+    <string name="parsing_error">Greška raščlanjivanja</string>
     <string name="partial">Djelomični</string>
     <string name="password">Lozinka</string>
+    <string name="password_updated">Lozinka ažurirana</string>
+    <string name="password_updated_successfully">Vaša lozinka je uspješno ažurirana.</string>
     <string name="past_7_days">Zadnjih 7 dana</string>
     <string name="paste_json_here">Zalijepite JSON ovdje...</string>
     <string name="paste_the_theme_json_below">Zalijepite JSON teme ispod:</string>
@@ -1351,11 +1394,18 @@
     <string name="performance_metrics">Pokazatelji performansi</string>
     <string name="performance_monitoring">Praćenje performansi</string>
     <string name="permanently_delete_entire_database">⚠️ Trajno izbrišite cijelu bazu podataka</string>
+    <string name="permission_feature_backup_desc">Čuvajte svoju knjižnicu uz automatske sigurnosne kopije</string>
+    <string name="permission_feature_backup_title">Sigurnosna kopija i vraćanje</string>
+    <string name="permission_feature_download_desc">Spremite poglavlja za izvanmrežno čitanje bilo gdje, bilo kada</string>
+    <string name="permission_feature_download_title">Preuzmite romane</string>
+    <string name="permission_feature_extensions_desc">Dodajte nove izvore za otkrivanje više sadržaja</string>
+    <string name="permission_feature_extensions_title">Instalirajte proširenja</string>
     <string name="permission_not_given">Nije odobreno dovoljno dopuštenja. Provjerite svoja
         dopuštenja.
     </string>
     <string name="permission_required">Potrebno dopuštenje</string>
     <string name="permissions">Dopuštenja</string>
+    <string name="pick_image">Odaberite sliku</string>
     <string name="pill_offset">pill_offset</string>
     <string name="pin">Prikvači</string>
     <string name="pin_1">PIN</string>
@@ -1568,6 +1618,7 @@
     <string name="required_tables">Potrebne tablice:</string>
     <string name="reset">Resetiraj</string>
     <string name="reset_categories">Resetiraj kategorije</string>
+    <string name="reset_cover">Poništi</string>
     <string name="reset_data_settings">Vrati zadane postavke podataka</string>
     <string name="reset_reader_screen_settings">Resetiraj postavke zaslona čitača</string>
     <string name="reset_setting">Resetiraj postavke</string>
@@ -1628,6 +1679,7 @@
     <string name="search">Pretraži</string>
     <string name="search_across_all_sources">Pretraži sve izvore</string>
     <string name="search_across_all_sources_1">Pretražite po svim izvorima...</string>
+    <string name="search_features">Pretražite značajke...</string>
     <string name="search_fonts">Pretraži fontove...</string>
     <string name="search_glossary">Pretraži pojmovnik...</string>
     <string name="search_hint">Pretraži…</string>
@@ -1752,6 +1804,7 @@
     <string name="simulation_mode_does_not_use_real_voices">Simulacijski način ne koristi stvarne glasove.</string>
     <string name="skip">Preskoči</string>
     <string name="skip_backward_10_seconds">Preskoči unatrag 10 sekundi</string>
+    <string name="skip_for_now">Koristite umjesto toga pohranu aplikacije</string>
     <string name="skip_forward_10_seconds">Preskoči unaprijed 10 sekundi</string>
     <string name="skip_this_book">Preskoči ovu knjigu</string>
     <string name="skip_titles_without_chapters">Preskoči naslove bez poglavlja</string>
@@ -1771,11 +1824,17 @@
     <string name="sort_direction">Smjer sortiranja</string>
     <string name="sound">Zvuk</string>
     <string name="source">Izvor</string>
+    <string name="source_broken_description">Struktura web stranice je promijenjena i izvor treba ažurirati programer. Ovo nije problem s mrežom.</string>
+    <string name="source_broken_help_description">Podržite razvoj donacijom od 5 USD i pomozite nam da damo prioritet popravku ovog izvora.</string>
+    <string name="source_broken_help_title">Želite pomoći popraviti ovo?</string>
+    <string name="source_broken_title">Ovaj izvor je neispravan</string>
     <string name="source_browse_latest">Pregledaj najnovije</string>
     <string name="source_extension_not_installed">Ekstenzija izvora nije instalirana</string>
     <string name="source_id">ID izvora</string>
+    <string name="source_needs_update">Izvor treba ažuriranje</string>
     <string name="source_not_available">ovaj izvor nije dostupan na vašem uređaju.</string>
     <string name="source_title">Naziv izvora</string>
+    <string name="source_website_changed">Struktura web stranice izvora je promijenjena</string>
     <string name="sources">Pretraži</string>
     <string name="space_url">Space URL</string>
     <string name="speech_rate">Brzina govora</string>
@@ -1792,8 +1851,11 @@
     <string name="status">Status</string>
     <string name="stop">Zaustavi</string>
     <string name="storage">Pohrana</string>
+    <string name="storage_permission_privacy_note">IReader pristupa samo mapi koju odaberete. Vaše ostale datoteke ostaju privatne i netaknute.</string>
     <string name="storage_permission_required_explanation">Objašnjenje za potrebno dopuštenje za pohranu
 	</string>
+    <string name="storage_permission_subtitle">Odaberite mapu u koju će IReader spremati vaša preuzimanja, proširenja i sigurnosne kopije</string>
+    <string name="storage_permission_title">Odaberite mapu za pohranu</string>
     <string name="storage_usage">Iskorištenost prostora za pohranu</string>
     <string name="storage_used">Iskorišten prostor za pohranu</string>
     <string name="style_features">Značajke stila</string>
@@ -1811,6 +1873,7 @@
     <string name="support">Podrška</string>
     <string name="support_collect">Podrška i prikupljanje</string>
     <string name="support_development">Podržite razvoj</string>
+    <string name="support_development_5">Podržite razvoj (5 USD)</string>
     <string name="support_for_any_gradio_based_tts_engine">Podrška za bilo koji TTS motor temeljen na Gradio</string>
     <string name="support_the_app_to_appear_on_the_leaderboard">Podržite aplikaciju da se pojavi na ljestvici!</string>
     <string name="support_the_project_with_a">Podržite projekt donacijom kreditnom/debitnom karticom</string>
@@ -1986,13 +2049,30 @@
     <string name="trying_to_fetch">Pokušavam dohvatiti…</string>
     <string name="trying_to_fetch_chapters_content">Pokušavam dohvatiti sadržaj poglavlja…</string>
     <string name="tts">TTS</string>
+    <string name="tts_cache_duration">Trajanje predmemorije</string>
+    <string name="tts_cache_duration_desc">Automatsko brisanje predmemoriranog zvuka nakon određenog broja dana</string>
+    <string name="tts_cache_status">Status predmemorije</string>
+    <string name="tts_chapter_caching">Predmemoriranje audiozapisa poglavlja</string>
+    <string name="tts_chapters">poglavlja</string>
+    <string name="tts_clear_cache">Očisti predmemoriju</string>
+    <string name="tts_days">dana</string>
+    <string name="tts_disabled">Onemogućeno</string>
+    <string name="tts_download_chapter_audio">Preuzmi audiozapis poglavlja</string>
+    <string name="tts_download_chapter_audio_desc">Unaprijed preuzmite cijeli audiozapis poglavlja za izvanmrežnu reprodukciju (samo udaljeni motori)</string>
     <string name="tts_engine">TTS mehanizam</string>
     <string name="tts_engine_manager">Upravitelj TTS motora</string>
     <string name="tts_engine_settings">Postavke TTS motora</string>
     <string name="tts_error">TTS greška: %1$s</string>
+    <string name="tts_merge_info">Spojite više odlomaka u veće dijelove za glađe čitanje. To smanjuje zahtjeve poslužitelja i pruža bolji kontinuitet zvuka. Postavite na 0 da biste onemogućili spajanje.</string>
+    <string name="tts_merge_words_native">Spojite riječi za Android TTS, Piper, Sherpa motore</string>
+    <string name="tts_merge_words_remote">Spojite riječi za Gradio/online TTS motore</string>
+    <string name="tts_native_engines">Izvorni motori</string>
     <string name="tts_performance_settings">Postavke performansi TTS-a</string>
+    <string name="tts_remote_engines">Udaljeni motori</string>
     <string name="tts_settings">TTS postavke</string>
+    <string name="tts_text_merging">TTS spajanje teksta</string>
     <string name="tts_with_translated_text">TTS s prevedenim tekstom</string>
+    <string name="tts_words">riječi</string>
     <string name="turn_off_vibration_feedback_for_interactions">Isključite povratne informacije vibracijom za interakcije</string>
     <string name="type">Vrsta</string>
     <string name="type_1">Vrsta \</string>

@@ -266,8 +266,10 @@
     <string name="category_not_found">الفئة غير موجودة</string>
     <string name="category_renamed">تمت إعادة تسمية الفئة إلى \'%1$s\'</string>
     <string name="center">المركز</string>
+    <string name="change">تغيير</string>
     <string name="change_category">تغيير الفئة</string>
     <string name="change_category_1">تغيير الفئة</string>
+    <string name="change_password">تغيير كلمة المرور</string>
     <string name="changelog">سجل التغييرات</string>
     <string name="channel_app_updates">تحديثات التطبيق</string>
     <string name="channel_common">عام</string>
@@ -411,6 +413,7 @@
     <string name="cover_cache_cleared">تم مسح ذاكرة التخزين المؤقت للغلاف.</string>
     <string name="cover_only_layout">شبكة الغلاف فقط</string>
     <string name="cover_only_layout_description">عمودان من صور الغلاف فقط (بدون نص)</string>
+    <string name="cover_reset_success">تمت إعادة الغلاف إلى الأصل</string>
     <string name="cover_url_must_start_with_http_https_or_file">يجب أن يبدأ عنوان URL للغلاف بـ http:// أو https:// أو file://</string>
     <string name="cpu">وحدة المعالجة المركزية</string>
     <string name="crash_reporting">الإبلاغ عن الأعطال</string>
@@ -421,6 +424,7 @@
     <string name="creating_backup">يتم إنشاء نسخة احتياطية...</string>
     <string name="creating_backup_1">جارٍ إنشاء نسخة احتياطية...</string>
     <string name="cross_device_sync">مزامنة عبر الأجهزة</string>
+    <string name="crypto_donation_preferred">💡 نصيحة: تبرعات العملات المشفرة مفضلة! مدفوعات البطاقة عبر Reymit تأخذ حوالي 40% رسوم على المبالغ الصغيرة. إرسال العملات المشفرة مباشرة يعني أن 100% يذهب للتطوير.</string>
     <string name="cryptocurrency_donations_are_non_refundable">التبرعات بالعملات المشفرة غير قابلة للاسترداد. يرجى التحقق من عنوان المحفظة قبل الإرسال. لا يقوم IReader بتخزين أو الوصول إلى مفاتيحك الخاصة.</string>
     <string name="cryptocurrency_wallets">محافظ العملات المشفرة</string>
     <string name="current_chapter">الفصل الحالي</string>
@@ -432,6 +436,8 @@
     <string name="custom">مخصص</string>
     <string name="custom_brightness">سطوع مخصص</string>
     <string name="custom_cover">غلاف مخصص</string>
+    <string name="custom_cover_failed">فشل تعيين الغلاف المخصص</string>
+    <string name="custom_cover_set">تم تعيين الغلاف المخصص بنجاح</string>
     <string name="custom_fonts">خطوط مخصصة</string>
     <string name="customize_individual_colors_to_create">خصص الألوان الفردية لإنشاء المظهر الخاص بك</string>
     <string name="cutout_area_behavior">سلوك منطقة القطع</string>
@@ -530,6 +536,7 @@
     <string name="display_settings">إعدادات العرض</string>
     <string name="display_when_each_novel_was">عرض آخر مرة تم فيها التحقق من وجود تحديثات لكل رواية</string>
     <string name="displayed_most_frequently_across_your_app">يتم عرضه بشكل متكرر عبر تطبيقك</string>
+    <string name="donate_crypto">تبرع بالعملات المشفرة</string>
     <string name="donate_now">تبرع الآن</string>
     <string name="donate_via_card">تبرع عبر البطاقة</string>
     <string name="donate_via_card_1">💳 تبرع عبر البطاقة</string>
@@ -549,6 +556,7 @@
     <string name="download_badge">تنزيل الشارة</string>
     <string name="download_behavior">سلوك التنزيل</string>
     <string name="download_categories">تنزيل الفئات</string>
+    <string name="download_chapter_audio">تنزيل صوت الفصل</string>
     <string name="download_chapters">تنزيل الفصول</string>
     <string name="download_complete">اكتمل التنزيل</string>
     <string name="download_completed">اكتمل التنزيل</string>
@@ -600,6 +608,7 @@
     <string name="edit_category">تعديل التصنيفات</string>
     <string name="edit_glossary_entry">تعديل إدخال المسرد</string>
     <string name="edit_info">تعديل المعلومات</string>
+    <string name="edit_url">تعديل الرابط</string>
     <string name="eg_source_not_loading_broken">مثال: المصدر لا يتم تحميله، البحث معطل، المحتوى مفقود...</string>
     <string name="eighteen">+18</string>
     <string name="eighteen_source_lock">قفل مصدر +18</string>
@@ -643,6 +652,7 @@
     <string name="enter_chapter_name">أدخل اسم الفصل...</string>
     <string name="enter_font_name">أدخل اسم الخط</string>
     <string name="enter_gemini_api_key">أدخل مفتاح واجهة برمجة تطبيقات Gemini الخاص بك</string>
+    <string name="enter_new_password">أدخل كلمة مرورك الجديدة. تأكد من أنها لا تقل عن 6 أحرف.</string>
     <string name="enter_query_and_tap_search">أدخل استعلامًا وانقر على بحث للعثور على الكتب</string>
     <string name="enter_quote_text">أدخل نص الاقتباس...</string>
     <string name="enter_the_repository_url">أدخل عنوان URL للمستودع:</string>
@@ -712,6 +722,8 @@
     <string name="export_failed_error">فشل التصدير: %1$s</string>
     <string name="export_successful">تم التصدير بنجاح</string>
     <string name="export_theme">تصدير السمات</string>
+    <string name="export_translated_content">تصدير النسخة المترجمة</string>
+    <string name="export_translated_content_description">استخدم المحتوى المترجم بدلاً من النص الأصلي</string>
     <string name="exporting_epub">يتم تصدير ePub</string>
     <string name="extension_added">تمت إضافة ملحق: %1$s</string>
     <string name="extension_installed_successfully">تم تثبيت الملحق بنجاح</string>
@@ -771,6 +783,8 @@
     <string name="favorite">مفضل</string>
     <string name="favorite_genres">الأنواع المفضلة</string>
     <string name="favorited">مفضل</string>
+    <string name="feature_store">متجر الميزات</string>
+    <string name="feature_store_description">اكتشف واشترِ إضافات وميزات مميزة</string>
     <string name="featured_badges">شارات مميزة</string>
     <string name="featured_badges_for_profile">شارات مميزة (للملف الشخصي)</string>
     <string name="featured_plugins">إضافات مميزة</string>
@@ -873,6 +887,7 @@
     <string name="gradio_tts_connects_to_hugging">يرتبط Gradio TTS بـ Hugging Face Spaces لتجميع الكلام. يتطلب اتصالاً بالإنترنت.</string>
     <string name="gradio_tts_online">Gradio TTS (عبر الإنترنت)</string>
     <string name="gradio_tts_uses_a_huggingface">يستخدم Gradio TTS مساحة HuggingFace لتجميع الكلام. يمكنك استخدام المساحة الافتراضية أو نشر المساحة الخاصة بك.</string>
+    <string name="grant_storage_permission">اختر مجلد</string>
     <string name="grid">شبكة</string>
     <string name="group_by_novel">تجميع حسب الرواية</string>
     <string name="group_notifications">تجميع الإشعارات</string>
@@ -1079,6 +1094,7 @@
     <string name="loading">جارٍ التحميل</string>
     <string name="loading_1">جارٍ التحميل...</string>
     <string name="loading_badges">جارٍ تحميل الشارات...</string>
+    <string name="loading_features">جاري تحميل الميزات...</string>
     <string name="loading_fonts">جارٍ تحميل الخطوط...</string>
     <string name="loading_more_books">جارٍ تحميل المزيد من الكتب...</string>
     <string name="loading_more_reviews">جارٍ تحميل المزيد من المراجعات...</string>
@@ -1180,6 +1196,7 @@
     <string name="neutral">محايد</string>
     <string name="new_chapter_notifications">إشعارات الفصول الجديدة</string>
     <string name="new_components">مكونات جديدة</string>
+    <string name="new_password">كلمة مرور جديدة</string>
     <string name="new_updates">تحديثات جديدة</string>
     <string name="next">التالي</string>
     <string name="next_chapter">الفصل التالي</string>
@@ -1236,6 +1253,7 @@
     <string name="no_novels_found_in_this_source">لم يتم العثور على روايات في هذا المصدر</string>
     <string name="no_pending_verifications">لا توجد عمليات تحقق معلقة</string>
     <string name="no_performance_data_available_yet">لا تتوفر بيانات الأداء حتى الآن</string>
+    <string name="no_plugins_available">لا توجد إضافات متاحة</string>
     <string name="no_plugins_installed">لم يتم تثبيت أي ملحقات</string>
     <string name="no_popular_books_yet">لا توجد كتب شائعة حتى الآن</string>
     <string name="no_primary_badge_selected">لم يتم تحديد شارة أساسية</string>
@@ -1272,8 +1290,30 @@
     <string name="note_some_engines_require_installation">ملاحظة: تتطلب بعض المحركات التثبيت. استخدم مدير تحويل النص إلى كلام الكامل في الإعدادات لخيارات التثبيت.</string>
     <string name="notes_optional">ملاحظات (اختياري)</string>
     <string name="nothing_read_recently">لا يوجد شيء تمت قراءته مؤخرًا</string>
+    <string name="notification_backup_complete">اكتمل النسخ الاحتياطي</string>
     <string name="notification_behavior">سلوك الإشعارات</string>
+    <string name="notification_book_added">تمت إضافة الكتاب إلى المكتبة</string>
+    <string name="notification_book_removed">تمت إزالة الكتاب من المكتبة</string>
     <string name="notification_channels">قنوات الإشعارات</string>
+    <string name="notification_chapter_downloaded">تم تنزيل الفصل</string>
+    <string name="notification_connection_restored">تمت استعادة الاتصال</string>
+    <string name="notification_dismiss">تجاهل</string>
+    <string name="notification_download_complete">اكتمل التنزيل</string>
+    <string name="notification_download_failed">فشل التنزيل</string>
+    <string name="notification_error">خطأ</string>
+    <string name="notification_info">معلومات</string>
+    <string name="notification_loading">جاري التحميل</string>
+    <string name="notification_network_error">خطأ في الشبكة</string>
+    <string name="notification_restore_complete">اكتملت الاستعادة</string>
+    <string name="notification_retry">إعادة المحاولة</string>
+    <string name="notification_settings_saved">تم حفظ الإعدادات</string>
+    <string name="notification_success">نجاح</string>
+    <string name="notification_sync_complete">اكتملت المزامنة</string>
+    <string name="notification_sync_failed">فشلت المزامنة</string>
+    <string name="notification_undo">تراجع</string>
+    <string name="notification_update_available">تحديث متاح</string>
+    <string name="notification_view">عرض</string>
+    <string name="notification_warning">تحذير</string>
     <string name="notifications">الإشعارات</string>
     <string name="novel_info">معلومات الرواية</string>
     <string name="number_of_sources_to_search">عدد المصادر المراد البحث فيها في وقت واحد. القيم الأعلى أسرع ولكنها تستهلك المزيد من الموارد.</string>
@@ -1341,8 +1381,11 @@
     <string name="paragraph_spacing">تباعد الفقرات</string>
     <string name="paragraph_translation_menu">قائمة ترجمة الفقرة</string>
     <string name="parameters">المعلمات</string>
+    <string name="parsing_error">خطأ في التحليل</string>
     <string name="partial">جزئي</string>
     <string name="password">كلمة المرور</string>
+    <string name="password_updated">تم تحديث كلمة المرور</string>
+    <string name="password_updated_successfully">تم تحديث كلمة مرورك بنجاح.</string>
     <string name="past_7_days">آخر 7 أيام</string>
     <string name="paste_json_here">ألصق JSON هنا...</string>
     <string name="paste_the_theme_json_below">ألصق JSON الخاص بالسمة أدناه:</string>
@@ -1357,11 +1400,18 @@
     <string name="performance_metrics">مقاييس الأداء</string>
     <string name="performance_monitoring">مراقبة الأداء</string>
     <string name="permanently_delete_entire_database">⚠️ حذف قاعدة البيانات بأكملها بشكل دائم</string>
+    <string name="permission_feature_backup_desc">حافظ على مكتبتك آمنة باستخدام النسخ الاحتياطية التلقائية</string>
+    <string name="permission_feature_backup_title">النسخ الاحتياطي والاستعادة</string>
+    <string name="permission_feature_download_desc">احفظ الفصول للقراءة دون اتصال بالإنترنت في أي مكان وزمان</string>
+    <string name="permission_feature_download_title">تنزيل الروايات</string>
+    <string name="permission_feature_extensions_desc">أضف مصادر جديدة لاكتشاف المزيد من المحتوى</string>
+    <string name="permission_feature_extensions_title">تثبيت الإضافات</string>
     <string name="permission_not_given">لم يتم منح الإذن الكافي ، يرجى التحقق من
         إذنك
     </string>
     <string name="permission_required">إذن مطلوب</string>
     <string name="permissions">الأذونات</string>
+    <string name="pick_image">اختر صورة</string>
     <string name="pill_offset">إزاحة الشريط</string>
     <string name="pin">تثبيت</string>
     <string name="pin_1">رقم التعريف الشخصي</string>
@@ -1574,6 +1624,7 @@
     <string name="required_tables">الجداول المطلوبة:</string>
     <string name="reset">إعادة تعيين</string>
     <string name="reset_categories">إعادة ضبط الفئات</string>
+    <string name="reset_cover">إعادة تعيين</string>
     <string name="reset_data_settings">إعادة تعيين إعدادات البيانات</string>
     <string name="reset_reader_screen_settings">إعادة ضبط إعدادات شاشة القراءة</string>
     <string name="reset_setting">إعادة ضبط الإعدادات</string>
@@ -1634,6 +1685,7 @@
     <string name="search">بحث</string>
     <string name="search_across_all_sources">البحث في جميع المصادر</string>
     <string name="search_across_all_sources_1">البحث في جميع المصادر...</string>
+    <string name="search_features">البحث عن ميزات...</string>
     <string name="search_fonts">البحث عن الخطوط...</string>
     <string name="search_glossary">البحث في المسرد...</string>
     <string name="search_hint">بحث…</string>
@@ -1758,6 +1810,7 @@
     <string name="simulation_mode_does_not_use_real_voices">وضع المحاكاة لا يستخدم أصواتًا حقيقية.</string>
     <string name="skip">تخطي</string>
     <string name="skip_backward_10_seconds">تخطي للخلف 10 ثوانٍ</string>
+    <string name="skip_for_now">استخدم مساحة تخزين التطبيق بدلاً من ذلك</string>
     <string name="skip_forward_10_seconds">تخطي للأمام 10 ثوانٍ</string>
     <string name="skip_this_book">تخطي هذا الكتاب</string>
     <string name="skip_titles_without_chapters">تخطي العناوين بدون فصول</string>
@@ -1777,11 +1830,17 @@
     <string name="sort_direction">اتجاه الفرز</string>
     <string name="sound">صوت</string>
     <string name="source">المصدر</string>
+    <string name="source_broken_description">لقد تغيرت بنية الموقع ويحتاج المصدر إلى التحديث بواسطة مطور. هذه ليست مشكلة شبكة.</string>
+    <string name="source_broken_help_description">ادعم التطوير بتبرع قدره 5 دولارات وساعدنا في إعطاء الأولوية لإصلاح هذا المصدر.</string>
+    <string name="source_broken_help_title">هل تريد المساعدة في إصلاح هذا؟</string>
+    <string name="source_broken_title">هذا المصدر معطّل</string>
     <string name="source_browse_latest">تصفح الأحدث</string>
     <string name="source_extension_not_installed">لم يتم تثبيت ملحق المصدر</string>
     <string name="source_id">معرف المصدر</string>
+    <string name="source_needs_update">المصدر يحتاج إلى تحديث</string>
     <string name="source_not_available">هذا المصدر غير متوفر في جهازك.</string>
     <string name="source_title">عنوان المصدر</string>
+    <string name="source_website_changed">لقد غير موقع المصدر هيكله</string>
     <string name="sources">تصفح</string>
     <string name="space_url">عنوان URL للمساحة</string>
     <string name="speech_rate">معدل الكلام</string>
@@ -1798,8 +1857,11 @@
     <string name="status">الحالة</string>
     <string name="stop">إيقاف</string>
     <string name="storage">التخزين</string>
+    <string name="storage_permission_privacy_note">يصل IReader فقط إلى المجلد الذي تختاره. تظل ملفاتك الأخرى خاصة وغير متأثرة.</string>
     <string name="storage_permission_required_explanation">تفسير إذن التخزين المطلوب
     </string>
+    <string name="storage_permission_subtitle">اختر مجلدًا حيث سيقوم IReader بتخزين تنزيلاتك، إضافاتك، ونسخك الاحتياطية</string>
+    <string name="storage_permission_title">اختر مجلد التخزين</string>
     <string name="storage_usage">استخدام التخزين</string>
     <string name="storage_used">التخزين المستخدم</string>
     <string name="style_features">ميزات النمط</string>
@@ -1817,6 +1879,7 @@
     <string name="support">دعم</string>
     <string name="support_collect">الدعم والتحصيل</string>
     <string name="support_development">دعم التطوير</string>
+    <string name="support_development_5">دعم التطوير (5 دولارات)</string>
     <string name="support_for_any_gradio_based_tts_engine">دعم أي محرك تحويل النص إلى كلام قائم على Gradio</string>
     <string name="support_the_app_to_appear_on_the_leaderboard">ادعم التطبيق للظهور على لوحة المتصدرين!</string>
     <string name="support_the_project_with_a">ادعم المشروع بالتبرع ببطاقة ائتمان/خصم</string>
@@ -1992,13 +2055,30 @@
     <string name="trying_to_fetch">جارٍ محاولة الجلب…</string>
     <string name="trying_to_fetch_chapters_content">جارٍ محاولة جلب محتوى الفصل…</string>
     <string name="tts">TTS</string>
+    <string name="tts_cache_duration">مدة التخزين المؤقت</string>
+    <string name="tts_cache_duration_desc">حذف الصوت المخزن مؤقتًا تلقائيًا بعد هذا العدد من الأيام</string>
+    <string name="tts_cache_status">حالة التخزين المؤقت</string>
+    <string name="tts_chapter_caching">تخزين صوت الفصل مؤقتًا</string>
+    <string name="tts_chapters">فصول</string>
+    <string name="tts_clear_cache">مسح ذاكرة التخزين المؤقت</string>
+    <string name="tts_days">أيام</string>
+    <string name="tts_disabled">معطل</string>
+    <string name="tts_download_chapter_audio">تنزيل صوت الفصل</string>
+    <string name="tts_download_chapter_audio_desc">تنزيل صوت الفصل بالكامل مسبقًا للتشغيل دون اتصال (للمحركات البعيدة فقط)</string>
     <string name="tts_engine">محرك تحويل النص إلى كلام</string>
     <string name="tts_engine_manager">إدارة محرك TTS</string>
     <string name="tts_engine_settings">إعدادات محرك تحويل النص إلى كلام</string>
     <string name="tts_error">خطأ TTS: %1$s</string>
+    <string name="tts_merge_info">دمج فقرات متعددة في أجزاء أكبر لقراءة أكثر سلاسة. هذا يقلل من طلبات الخادم ويوفر استمرارية صوتية أفضل. اضبط على 0 لتعطيل الدمج.</string>
+    <string name="tts_merge_words_native">دمج الكلمات لمحركات Android TTS، Piper، Sherpa</string>
+    <string name="tts_merge_words_remote">دمج الكلمات لمحركات TTS من Gradio/الإنترنت</string>
+    <string name="tts_native_engines">المحركات المحلية</string>
     <string name="tts_performance_settings">إعدادات أداء TTS</string>
+    <string name="tts_remote_engines">المحركات البعيدة</string>
     <string name="tts_settings">إعدادات تحويل النص إلى كلام</string>
+    <string name="tts_text_merging">دمج نص TTS</string>
     <string name="tts_with_translated_text">TTS مع النص المترجم</string>
+    <string name="tts_words">كلمات</string>
     <string name="turn_off_vibration_feedback_for_interactions">إيقاف تشغيل ملاحظات الاهتزاز للتفاعلات</string>
     <string name="type">النوع</string>
     <string name="type_1">النوع \</string>

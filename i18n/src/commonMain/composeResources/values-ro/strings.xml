@@ -266,8 +266,10 @@
     <string name="category_not_found">Categoria nu a fost găsită</string>
     <string name="category_renamed">Categoria a fost redenumită în \'%1$s\'</string>
     <string name="center">Centru</string>
+    <string name="change">Schimbare</string>
     <string name="change_category">Schimbă categoria</string>
     <string name="change_category_1">Schimbă categoria</string>
+    <string name="change_password">Schimbați Parola</string>
     <string name="changelog">Jurnal de modificări</string>
     <string name="channel_app_updates">Actualizări aplicație</string>
     <string name="channel_common">Comun</string>
@@ -411,6 +413,7 @@
     <string name="cover_cache_cleared">Cache-ul copertelor a fost curățat.</string>
     <string name="cover_only_layout">Grilă doar cu copertă</string>
     <string name="cover_only_layout_description">2 coloane doar cu imagini de copertă (fără text)</string>
+    <string name="cover_reset_success">Coperta a fost resetată la original</string>
     <string name="cover_url_must_start_with_http_https_or_file">Adresa URL a copertei trebuie să înceapă cu http://, https:// sau file://</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">Raportare erori</string>
@@ -421,6 +424,7 @@
     <string name="creating_backup">Se creează backup...</string>
     <string name="creating_backup_1">Se creează copia de rezervă...</string>
     <string name="cross_device_sync">Sincronizare între dispozitive</string>
+    <string name="crypto_donation_preferred">💡 Sfat: Donațiile cripto sunt preferate! Plățile cu cardul prin Reymit percep taxe de ~40% pentru sume mici. Trimiterea directă de criptomonede înseamnă că 100% merg către dezvoltare.</string>
     <string name="cryptocurrency_donations_are_non_refundable">Donațiile în criptomonede nu sunt rambursabile. Vă rugăm să verificați adresa portofelului înainte de a trimite. IReader nu stochează și nu are acces la cheile tale private.</string>
     <string name="cryptocurrency_wallets">Portofele de criptomonede</string>
     <string name="current_chapter">Capitolul curent</string>
@@ -432,6 +436,8 @@
     <string name="custom">Personalizat</string>
     <string name="custom_brightness">Luminozitate personalizată</string>
     <string name="custom_cover">Copertă personalizată</string>
+    <string name="custom_cover_failed">Nu s-a putut seta coperta personalizată</string>
+    <string name="custom_cover_set">Copertă personalizată setată cu succes</string>
     <string name="custom_fonts">Fonturi personalizate</string>
     <string name="customize_individual_colors_to_create">Personalizează culori individuale pentru a crea propria temă</string>
     <string name="cutout_area_behavior">Comportament zonă decupată</string>
@@ -530,6 +536,7 @@
     <string name="display_settings">Setări afișare</string>
     <string name="display_when_each_novel_was">Afișează când a fost verificată ultima dată fiecare nuvelă pentru actualizări</string>
     <string name="displayed_most_frequently_across_your_app">Afișat cel mai frecvent în aplicația ta</string>
+    <string name="donate_crypto">Donați Cripto</string>
     <string name="donate_now">Donează acum</string>
     <string name="donate_via_card">Donează prin card</string>
     <string name="donate_via_card_1">💳 Donează prin card</string>
@@ -549,6 +556,7 @@
     <string name="download_badge">Descarcă insigna</string>
     <string name="download_behavior">Comportament descărcare</string>
     <string name="download_categories">Descarcă categorii</string>
+    <string name="download_chapter_audio">Descărcați Audio Capitol</string>
     <string name="download_chapters">Descarcă capitole</string>
     <string name="download_complete">Descărcare finalizată</string>
     <string name="download_completed">Descărcare finalizată</string>
@@ -601,6 +609,7 @@
     <string name="edit_category">Editează categorii</string>
     <string name="edit_glossary_entry">Editează intrarea în glosar</string>
     <string name="edit_info">Editează informațiile</string>
+    <string name="edit_url">Editați URL-ul</string>
     <string name="eg_source_not_loading_broken">de ex., Sursa nu se încarcă, căutare defectă, conținut lipsă...</string>
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">Blocare sursă 18+</string>
@@ -644,6 +653,7 @@
     <string name="enter_chapter_name">Introdu numele capitolului...</string>
     <string name="enter_font_name">Introduceți numele fontului</string>
     <string name="enter_gemini_api_key">Introdu cheia API Gemini</string>
+    <string name="enter_new_password">Introduceți noua parolă. Asigurați-vă că are cel puțin 6 caractere.</string>
     <string name="enter_query_and_tap_search">Introduceți o interogare și atingeți căutare pentru a găsi cărți</string>
     <string name="enter_quote_text">Introdu textul citatului...</string>
     <string name="enter_the_repository_url">Introdu URL-ul depozitului:</string>
@@ -713,6 +723,8 @@
     <string name="export_failed_error">Export a eșuat: %1$s</string>
     <string name="export_successful">Export reușit</string>
     <string name="export_theme">Exportă tema</string>
+    <string name="export_translated_content">Exportați Versiunea Tradusă</string>
+    <string name="export_translated_content_description">Utilizați conținut tradus în loc de textul original</string>
     <string name="exporting_epub">Se exportă ePub</string>
     <string name="extension_added">Extensie adăugată: %1$s</string>
     <string name="extension_installed_successfully">Extensie instalată cu succes</string>
@@ -772,6 +784,8 @@
     <string name="favorite">Favorite</string>
     <string name="favorite_genres">Genuri Favorite</string>
     <string name="favorited">Adăugat la favorite</string>
+    <string name="feature_store">Magazin de Funcții</string>
+    <string name="feature_store_description">Descoperiți și achiziționați pluginuri și funcții premium</string>
     <string name="featured_badges">Insigne Recomandate</string>
     <string name="featured_badges_for_profile">Insigne Recomandate (pentru Profil)</string>
     <string name="featured_plugins">Plugin-uri Recomandate</string>
@@ -874,6 +888,7 @@
     <string name="gradio_tts_connects_to_hugging">Gradio TTS se conectează la Hugging Face Spaces pentru sinteza vorbirii. Necesită conexiune la internet.</string>
     <string name="gradio_tts_online">Gradio TTS (Online)</string>
     <string name="gradio_tts_uses_a_huggingface">Gradio TTS utilizează un spațiu HuggingFace pentru a sintetiza vorbirea. Poți utiliza spațiul implicit sau poți implementa propriul tău.</string>
+    <string name="grant_storage_permission">Selectați Dosar</string>
     <string name="grid">Grilă</string>
     <string name="group_by_novel">Grupează după roman</string>
     <string name="group_notifications">Grupează Notificările</string>
@@ -1082,6 +1097,7 @@
     <string name="loading">Se încarcă</string>
     <string name="loading_1">Se încarcă...</string>
     <string name="loading_badges">Se încarcă insignele...</string>
+    <string name="loading_features">Se încarcă funcțiile...</string>
     <string name="loading_fonts">Se încarcă fonturile...</string>
     <string name="loading_more_books">Se încarcă mai multe cărți...</string>
     <string name="loading_more_reviews">Se încarcă mai multe recenzii...</string>
@@ -1183,6 +1199,7 @@
     <string name="neutral">Neutru</string>
     <string name="new_chapter_notifications">Notificări Capitole Noi</string>
     <string name="new_components">Componente Noi</string>
+    <string name="new_password">Parolă Nouă</string>
     <string name="new_updates">Actualizări Noi</string>
     <string name="next">Următorul</string>
     <string name="next_chapter">Capitolul următor</string>
@@ -1239,6 +1256,7 @@
     <string name="no_novels_found_in_this_source">Nu s-au găsit romane în această sursă</string>
     <string name="no_pending_verifications">Nu există verificări în așteptare</string>
     <string name="no_performance_data_available_yet">Încă nu sunt disponibile date de performanță</string>
+    <string name="no_plugins_available">Niciun plugin disponibil</string>
     <string name="no_plugins_installed">Nu sunt instalate plugin-uri</string>
     <string name="no_popular_books_yet">Încă nu există cărți populare</string>
     <string name="no_primary_badge_selected">Nu este selectată insigna principală</string>
@@ -1275,8 +1293,30 @@
     <string name="note_some_engines_require_installation">Notă: Unele motoare necesită instalare. Utilizați Managerul TTS complet din Setări pentru opțiuni de instalare.</string>
     <string name="notes_optional">Note (opțional)</string>
     <string name="nothing_read_recently">Nimic citit recent</string>
+    <string name="notification_backup_complete">Copie de rezervă finalizată</string>
     <string name="notification_behavior">Comportament Notificări</string>
+    <string name="notification_book_added">Carte adăugată în bibliotecă</string>
+    <string name="notification_book_removed">Carte eliminată din bibliotecă</string>
     <string name="notification_channels">Canale Notificări</string>
+    <string name="notification_chapter_downloaded">Capitol descărcat</string>
+    <string name="notification_connection_restored">Conexiune restabilită</string>
+    <string name="notification_dismiss">Ignorare</string>
+    <string name="notification_download_complete">Descărcare finalizată</string>
+    <string name="notification_download_failed">Descărcare eșuată</string>
+    <string name="notification_error">Eroare</string>
+    <string name="notification_info">Informații</string>
+    <string name="notification_loading">Se încarcă</string>
+    <string name="notification_network_error">Eroare de rețea</string>
+    <string name="notification_restore_complete">Restaurare finalizată</string>
+    <string name="notification_retry">Reîncercare</string>
+    <string name="notification_settings_saved">Setări salvate</string>
+    <string name="notification_success">Succes</string>
+    <string name="notification_sync_complete">Sincronizare finalizată</string>
+    <string name="notification_sync_failed">Sincronizare eșuată</string>
+    <string name="notification_undo">Anulare</string>
+    <string name="notification_update_available">Actualizare disponibilă</string>
+    <string name="notification_view">Vizualizare</string>
+    <string name="notification_warning">Avertisment</string>
     <string name="notifications">Notificări</string>
     <string name="novel_info">Informații Roman</string>
     <string name="number_of_sources_to_search">Numărul de surse de căutat simultan. Valori mai mari sunt mai rapide, dar utilizează mai multe resurse.</string>
@@ -1345,8 +1385,11 @@
     <string name="paragraph_spacing">Spațiere paragraf</string>
     <string name="paragraph_translation_menu">Meniu Traducere Paragraf</string>
     <string name="parameters">Parametri</string>
+    <string name="parsing_error">Eroare de Parsare</string>
     <string name="partial">Parțial</string>
     <string name="password">Parolă</string>
+    <string name="password_updated">Parola Actualizată</string>
+    <string name="password_updated_successfully">Parola dvs. a fost actualizată cu succes.</string>
     <string name="past_7_days">Ultimele 7 zile</string>
     <string name="paste_json_here">Lipește JSON aici...</string>
     <string name="paste_the_theme_json_below">Lipește JSON-ul temei mai jos:</string>
@@ -1361,11 +1404,18 @@
     <string name="performance_metrics">Metrici de Performanță</string>
     <string name="performance_monitoring">Monitorizarea Performanței</string>
     <string name="permanently_delete_entire_database">⚠️ Șterge permanent întreaga bază de date</string>
+    <string name="permission_feature_backup_desc">Păstrați-vă biblioteca în siguranță cu copii de rezervă automate</string>
+    <string name="permission_feature_backup_title">Copie de Rezervă și Restaurare</string>
+    <string name="permission_feature_download_desc">Salvați capitole pentru lectură offline oriunde, oricând</string>
+    <string name="permission_feature_download_title">Descărcați Romane</string>
+    <string name="permission_feature_extensions_desc">Adăugați surse noi pentru a descoperi mai mult conținut</string>
+    <string name="permission_feature_extensions_title">Instalați Extensii</string>
     <string name="permission_not_given">Nu sunt acordate suficiente permisiuni, vă rugăm să verificați
         permisiunile
     </string>
     <string name="permission_required">Permisiune necesară</string>
     <string name="permissions">Permisiuni</string>
+    <string name="pick_image">Alegeți Imaginea</string>
     <string name="pill_offset">pill_offset</string>
     <string name="pin">Fixează</string>
     <string name="pin_1">PIN</string>
@@ -1578,6 +1628,7 @@
     <string name="required_tables">Tabele Necesare:</string>
     <string name="reset">Resetează</string>
     <string name="reset_categories">Resetează categoriile</string>
+    <string name="reset_cover">Resetare</string>
     <string name="reset_data_settings">Resetează setările de date</string>
     <string name="reset_reader_screen_settings">Resetează setările ecranului de citire</string>
     <string name="reset_setting">Resetează setările</string>
@@ -1638,6 +1689,7 @@
     <string name="search">Caută</string>
     <string name="search_across_all_sources">Caută în toate sursele</string>
     <string name="search_across_all_sources_1">Caută în toate sursele...</string>
+    <string name="search_features">Căutați funcții...</string>
     <string name="search_fonts">Caută fonturi...</string>
     <string name="search_glossary">Caută în glosar...</string>
     <string name="search_hint">Caută…</string>
@@ -1762,6 +1814,7 @@
     <string name="simulation_mode_does_not_use_real_voices">Modul de simulare nu folosește voci reale.</string>
     <string name="skip">Sari</string>
     <string name="skip_backward_10_seconds">Sari înapoi 10 secunde</string>
+    <string name="skip_for_now">Folosiți Spațiul de Stocare al Aplicației în Schimb</string>
     <string name="skip_forward_10_seconds">Sari înainte 10 secunde</string>
     <string name="skip_this_book">Sari peste această carte</string>
     <string name="skip_titles_without_chapters">Omite titlurile fără capitole</string>
@@ -1781,11 +1834,17 @@
     <string name="sort_direction">Direcția de sortare</string>
     <string name="sound">Sunet</string>
     <string name="source">Sursă</string>
+    <string name="source_broken_description">Structura site-ului web s-a schimbat și sursa trebuie actualizată de un dezvoltator. Aceasta nu este o problemă de rețea.</string>
+    <string name="source_broken_help_description">Susțineți dezvoltarea cu o donație de 5$ și ajutați-ne să prioritizăm remedierea acestei surse.</string>
+    <string name="source_broken_help_title">Doriți să ajutați la remedierea acesteia?</string>
+    <string name="source_broken_title">Această Sursă este Defectă</string>
     <string name="source_browse_latest">Răsfoiește cele mai recente</string>
     <string name="source_extension_not_installed">Extensia sursei nu este instalată</string>
     <string name="source_id">ID Sursă</string>
+    <string name="source_needs_update">Sursa Necesită Actualizare</string>
     <string name="source_not_available">Această sursă nu este disponibilă pe dispozitivul tău.</string>
     <string name="source_title">Titlul sursei</string>
+    <string name="source_website_changed">Site-ul web al sursei și-a schimbat structura</string>
     <string name="sources">Răsfoiește</string>
     <string name="space_url">URL spațiu</string>
     <string name="speech_rate">Viteza de vorbire</string>
@@ -1802,8 +1861,11 @@
     <string name="status">Stare</string>
     <string name="stop">Oprește</string>
     <string name="storage">Stocare</string>
+    <string name="storage_permission_privacy_note">IReader accesează doar dosarul selectat de dvs. Celelalte fișiere rămân private și neatins.</string>
     <string name="storage_permission_required_explanation">Explicație despre permisiunea de stocare necesară
     </string>
+    <string name="storage_permission_subtitle">Selectați un dosar unde IReader va stoca descărcările, extensiile și copiile de rezervă</string>
+    <string name="storage_permission_title">Alegeți Dosarul de Stocare</string>
     <string name="storage_usage">Utilizare stocare</string>
     <string name="storage_used">Stocare utilizată</string>
     <string name="style_features">Caracteristici stil</string>
@@ -1821,6 +1883,7 @@
     <string name="support">Suport</string>
     <string name="support_collect">Suport &amp; Colectează</string>
     <string name="support_development">Sprijină dezvoltarea</string>
+    <string name="support_development_5">Susțineți Dezvoltarea (5$)</string>
     <string name="support_for_any_gradio_based_tts_engine">Suport pentru orice motor TTS bazat pe Gradio</string>
     <string name="support_the_app_to_appear_on_the_leaderboard">Sprijină aplicația pentru a apărea în clasament!</string>
     <string name="support_the_project_with_a">Sprijină proiectul cu o donație cu cardul de credit/debit</string>
@@ -1996,13 +2059,30 @@
     <string name="trying_to_fetch">Se încearcă preluarea...</string>
     <string name="trying_to_fetch_chapters_content">Se încearcă preluarea conținutului capitolului...</string>
     <string name="tts">TTS</string>
+    <string name="tts_cache_duration">Durata Memoriei Cache</string>
+    <string name="tts_cache_duration_desc">Ștergeți automat audio-ul memorizat în cache după atâtea zile</string>
+    <string name="tts_cache_status">Stare Cache</string>
+    <string name="tts_chapter_caching">Memorizarea Audio a Capitolelor</string>
+    <string name="tts_chapters">capitole</string>
+    <string name="tts_clear_cache">Goliți Cache-ul</string>
+    <string name="tts_days">zile</string>
+    <string name="tts_disabled">Dezactivat</string>
+    <string name="tts_download_chapter_audio">Descărcați Audio Capitol</string>
+    <string name="tts_download_chapter_audio_desc">Pre-descărcați întregul audio al capitolului pentru redare offline (doar pentru motoarele la distanță)</string>
     <string name="tts_engine">Motor TTS</string>
     <string name="tts_engine_manager">Manager motor TTS</string>
     <string name="tts_engine_settings">Setările motorului TTS</string>
     <string name="tts_error">Eroare TTS: %1$s</string>
+    <string name="tts_merge_info">Îmbinați mai multe paragrafe în blocuri mai mari pentru o lectură mai fluentă. Aceasta reduce cererile către server și oferă o continuitate audio mai bună. Setați la 0 pentru a dezactiva îmbinarea.</string>
+    <string name="tts_merge_words_native">Îmbinați cuvinte pentru motoarele TTS Android, Piper, Sherpa</string>
+    <string name="tts_merge_words_remote">Îmbinați cuvinte pentru motoarele TTS Gradio/online</string>
+    <string name="tts_native_engines">Motoare Native</string>
     <string name="tts_performance_settings">Setări de performanță TTS</string>
+    <string name="tts_remote_engines">Motoare la Distanță</string>
     <string name="tts_settings">Setări TTS</string>
+    <string name="tts_text_merging">TTS Îmbinare Text</string>
     <string name="tts_with_translated_text">TTS cu text tradus</string>
+    <string name="tts_words">cuvinte</string>
     <string name="turn_off_vibration_feedback_for_interactions">Dezactivează feedbackul prin vibrații pentru interacțiuni</string>
     <string name="type">Tip</string>
     <string name="type_1">Tip \</string>

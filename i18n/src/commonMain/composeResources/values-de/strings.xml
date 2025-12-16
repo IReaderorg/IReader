@@ -266,8 +266,10 @@
     <string name="category_not_found">Kategorie nicht gefunden</string>
     <string name="category_renamed">Kategorie umbenannt in '%1$s'</string>
     <string name="center">Mitte</string>
+    <string name="change">Ändern</string>
     <string name="change_category">Kategorie ändern</string>
     <string name="change_category_1">Kategorie ändern</string>
+    <string name="change_password">Passwort ändern</string>
     <string name="changelog">Änderungsprotokoll</string>
     <string name="channel_app_updates">App-Updates</string>
     <string name="channel_common">Allgemein</string>
@@ -411,6 +413,7 @@
     <string name="cover_cache_cleared">Cover-Cache wurde geleert.</string>
     <string name="cover_only_layout">Cover-only Raster</string>
     <string name="cover_only_layout_description">2 Spalten nur mit Coverbildern (kein Text)</string>
+    <string name="cover_reset_success">Cover auf Original zurückgesetzt</string>
     <string name="cover_url_must_start_with_http_https_or_file">Cover-URL muss mit http://, https:// oder file:// beginnen</string>
     <string name="cpu">CPU</string>
     <string name="crash_reporting">Absturzberichterstattung</string>
@@ -421,6 +424,7 @@
     <string name="creating_backup">Sicherung erstellen…</string>
     <string name="creating_backup_1">Backup erstellen...</string>
     <string name="cross_device_sync">Geräteübergreifende Synchronisierung</string>
+    <string name="crypto_donation_preferred">💡 Tipp: Krypto-Spenden werden bevorzugt! Kartenzahlungen über Reymit erheben ~40% Gebühren bei kleinen Beträgen. Das direkte Senden von Krypto bedeutet, dass 100% in die Entwicklung fließen.</string>
     <string name="cryptocurrency_donations_are_non_refundable">Kryptowährungsspenden sind nicht erstattungsfähig. Bitte überprüfe die Wallet-Adresse vor dem Senden. IReader speichert oder hat keinen Zugriff auf deine privaten Schlüssel.</string>
     <string name="cryptocurrency_wallets">Kryptowährungs-Wallets</string>
     <string name="current_chapter">Aktuelles Kapitel</string>
@@ -432,6 +436,8 @@
     <string name="custom">Benutzerdefiniert</string>
     <string name="custom_brightness">Benutzerdefinierte Helligkeit</string>
     <string name="custom_cover">Benutzerdefiniertes Cover</string>
+    <string name="custom_cover_failed">Benutzerdefiniertes Cover konnte nicht gesetzt werden</string>
+    <string name="custom_cover_set">Benutzerdefiniertes Cover erfolgreich gesetzt</string>
     <string name="custom_fonts">Benutzerdefinierte Schriftarten</string>
     <string name="customize_individual_colors_to_create">Passe einzelne Farben an, um dein eigenes Design zu erstellen</string>
     <string name="cutout_area_behavior">Verhalten des Ausschnittbereichs</string>
@@ -530,6 +536,7 @@
     <string name="display_settings">Anzeigeeinstellungen</string>
     <string name="display_when_each_novel_was">Anzeigen, wann jeder Roman zuletzt auf Updates überprüft wurde</string>
     <string name="displayed_most_frequently_across_your_app">Am häufigsten in deiner App angezeigt</string>
+    <string name="donate_crypto">Krypto spenden</string>
     <string name="donate_now">Jetzt spenden</string>
     <string name="donate_via_card">Spenden per Karte</string>
     <string name="donate_via_card_1">💳 Spenden per Karte</string>
@@ -549,6 +556,7 @@
     <string name="download_badge">Badge herunterladen</string>
     <string name="download_behavior">Download-Verhalten</string>
     <string name="download_categories">Kategorien herunterladen</string>
+    <string name="download_chapter_audio">Kapitel-Audio herunterladen</string>
     <string name="download_chapters">Kapitel herunterladen</string>
     <string name="download_complete">Download abgeschlossen</string>
     <string name="download_completed">Download abgeschlossen</string>
@@ -601,6 +609,7 @@
     <string name="edit_category">Kategorien bearbeiten</string>
     <string name="edit_glossary_entry">Glossareintrag bearbeiten</string>
     <string name="edit_info">Info bearbeiten</string>
+    <string name="edit_url">URL bearbeiten</string>
     <string name="eg_source_not_loading_broken">z. B. Quelle lädt nicht, Suche defekt, Inhalte fehlen...</string>
     <string name="eighteen">18+</string>
     <string name="eighteen_source_lock">18+ Quellensperre</string>
@@ -645,6 +654,7 @@
     <string name="enter_chapter_name">Gib den Namen des Kapitels ein...</string>
     <string name="enter_font_name">Schriftartnamen eingeben</string>
     <string name="enter_gemini_api_key">Geben Sie Ihren Gemini-API-Schlüssel ein</string>
+    <string name="enter_new_password">Geben Sie Ihr neues Passwort ein. Stellen Sie sicher, dass es mindestens 6 Zeichen lang ist.</string>
     <string name="enter_query_and_tap_search">Geben Sie eine Suchanfrage ein und tippen Sie auf Suchen, um Bücher zu finden</string>
     <string name="enter_quote_text">Gib den Zitattext ein...</string>
     <string name="enter_the_repository_url">Gib die Repository-URL ein:</string>
@@ -714,6 +724,8 @@
     <string name="export_failed_error">Export fehlgeschlagen: %1$s</string>
     <string name="export_successful">Export erfolgreich</string>
     <string name="export_theme">Theme exportieren</string>
+    <string name="export_translated_content">Übersetzte Version exportieren</string>
+    <string name="export_translated_content_description">Übersetzten Inhalt statt Originaltext verwenden</string>
     <string name="exporting_epub">ePub wird exportiert</string>
     <string name="extension_added">Erweiterung hinzugefügt: %1$s</string>
     <string name="extension_installed_successfully">Erweiterung erfolgreich installiert</string>
@@ -773,6 +785,8 @@
     <string name="favorite">Favorit</string>
     <string name="favorite_genres">Lieblingsgenres</string>
     <string name="favorited">Favorisiert</string>
+    <string name="feature_store">Funktions-Shop</string>
+    <string name="feature_store_description">Entdecken und kaufen Sie Premium-Plugins und -Funktionen</string>
     <string name="featured_badges">Empfohlene Badges</string>
     <string name="featured_badges_for_profile">Empfohlene Badges (für Profil)</string>
     <string name="featured_plugins">Empfohlene Plugins</string>
@@ -875,6 +889,7 @@
     <string name="gradio_tts_connects_to_hugging">Gradio TTS verbindet sich mit Hugging Face Spaces für Sprachsynthese. Erfordert eine Internetverbindung.</string>
     <string name="gradio_tts_online">Gradio TTS (Online)</string>
     <string name="gradio_tts_uses_a_huggingface">Gradio TTS verwendet einen HuggingFace Space, um Sprache zu synthetisieren. Du kannst den Standard-Space verwenden oder deinen eigenen bereitstellen.</string>
+    <string name="grant_storage_permission">Ordner auswählen</string>
     <string name="grid">Raster</string>
     <string name="group_by_novel">Nach Roman gruppieren</string>
     <string name="group_notifications">Gruppierungsbenachrichtigungen</string>
@@ -1083,6 +1098,7 @@
     <string name="loading">Laden</string>
     <string name="loading_1">Laden...</string>
     <string name="loading_badges">Badges werden geladen...</string>
+    <string name="loading_features">Funktionen werden geladen...</string>
     <string name="loading_fonts">Schriftarten werden geladen...</string>
     <string name="loading_more_books">Weitere Bücher werden geladen...</string>
     <string name="loading_more_reviews">Weitere Bewertungen werden geladen...</string>
@@ -1184,6 +1200,7 @@
     <string name="neutral">Neutral</string>
     <string name="new_chapter_notifications">Benachrichtigungen über neue Kapitel</string>
     <string name="new_components">Neue Komponenten</string>
+    <string name="new_password">Neues Passwort</string>
     <string name="new_updates">Neue Updates</string>
     <string name="next">Weiter</string>
     <string name="next_chapter">Nächstes Kapitel</string>
@@ -1240,6 +1257,7 @@
     <string name="no_novels_found_in_this_source">Keine Romane in dieser Quelle gefunden</string>
     <string name="no_pending_verifications">Keine ausstehenden Verifizierungen</string>
     <string name="no_performance_data_available_yet">Noch keine Leistungsdaten verfügbar</string>
+    <string name="no_plugins_available">Keine Plugins verfügbar</string>
     <string name="no_plugins_installed">Keine Plugins installiert</string>
     <string name="no_popular_books_yet">Noch keine beliebten Bücher</string>
     <string name="no_primary_badge_selected">Kein primärer Badge ausgewählt</string>
@@ -1276,8 +1294,30 @@
     <string name="note_some_engines_require_installation">Hinweis: Einige Engines erfordern eine Installation. Verwende den vollständigen TTS-Manager in den Einstellungen für Installationsoptionen.</string>
     <string name="notes_optional">Notizen (optional)</string>
     <string name="nothing_read_recently">Kürzlich nichts gelesen</string>
+    <string name="notification_backup_complete">Sicherung abgeschlossen</string>
     <string name="notification_behavior">Benachrichtigungsverhalten</string>
+    <string name="notification_book_added">Buch zur Bibliothek hinzugefügt</string>
+    <string name="notification_book_removed">Buch aus der Bibliothek entfernt</string>
     <string name="notification_channels">Benachrichtigungskanäle</string>
+    <string name="notification_chapter_downloaded">Kapitel heruntergeladen</string>
+    <string name="notification_connection_restored">Verbindung wiederhergestellt</string>
+    <string name="notification_dismiss">Schließen</string>
+    <string name="notification_download_complete">Download abgeschlossen</string>
+    <string name="notification_download_failed">Download fehlgeschlagen</string>
+    <string name="notification_error">Fehler</string>
+    <string name="notification_info">Info</string>
+    <string name="notification_loading">Wird geladen</string>
+    <string name="notification_network_error">Netzwerkfehler</string>
+    <string name="notification_restore_complete">Wiederherstellung abgeschlossen</string>
+    <string name="notification_retry">Erneut versuchen</string>
+    <string name="notification_settings_saved">Einstellungen gespeichert</string>
+    <string name="notification_success">Erfolg</string>
+    <string name="notification_sync_complete">Synchronisierung abgeschlossen</string>
+    <string name="notification_sync_failed">Synchronisierung fehlgeschlagen</string>
+    <string name="notification_undo">Rückgängig machen</string>
+    <string name="notification_update_available">Update verfügbar</string>
+    <string name="notification_view">Anzeigen</string>
+    <string name="notification_warning">Warnung</string>
     <string name="notifications">Benachrichtigungen</string>
     <string name="novel_info">Roman-Info</string>
     <string name="number_of_sources_to_search">Anzahl der gleichzeitig zu durchsuchenden Quellen. Höhere Werte sind schneller, verbrauchen aber mehr Ressourcen.</string>
@@ -1346,8 +1386,11 @@
     <string name="paragraph_spacing">Absatzabstand</string>
     <string name="paragraph_translation_menu">Absatz-Übersetzungsmenü</string>
     <string name="parameters">Parameter</string>
+    <string name="parsing_error">Analysefehler</string>
     <string name="partial">Teilweise</string>
     <string name="password">Passwort</string>
+    <string name="password_updated">Passwort aktualisiert</string>
+    <string name="password_updated_successfully">Ihr Passwort wurde erfolgreich aktualisiert.</string>
     <string name="past_7_days">Letzte 7 Tage</string>
     <string name="paste_json_here">JSON hier einfügen...</string>
     <string name="paste_the_theme_json_below">Fügen Sie das Theme-JSON unten ein:</string>
@@ -1362,12 +1405,19 @@
     <string name="performance_metrics">Leistungsmetriken</string>
     <string name="performance_monitoring">Leistungsüberwachung</string>
     <string name="permanently_delete_entire_database">⚠️ Datenbank dauerhaft löschen</string>
+    <string name="permission_feature_backup_desc">Sichern Sie Ihre Bibliothek mit automatischen Backups</string>
+    <string name="permission_feature_backup_title">Sichern &amp; Wiederherstellen</string>
+    <string name="permission_feature_download_desc">Kapitel für das Offline-Lesen jederzeit und überall speichern</string>
+    <string name="permission_feature_download_title">Romane herunterladen</string>
+    <string name="permission_feature_extensions_desc">Neue Quellen hinzufügen, um mehr Inhalte zu entdecken</string>
+    <string name="permission_feature_extensions_title">Erweiterungen installieren</string>
     <string name="permission_not_given">Nicht genügend Berechtigungen erteilt. Bitte
         überprüfen Sie Ihre
         Berechtigungen.
     </string>
     <string name="permission_required">Berechtigung erforderlich</string>
     <string name="permissions">Berechtigungen</string>
+    <string name="pick_image">Bild auswählen</string>
     <string name="pill_offset">pill_offset</string>
     <string name="pin">Anheften</string>
     <string name="pin_1">PIN</string>
@@ -1580,6 +1630,7 @@
     <string name="required_tables">Erforderliche Tabellen:</string>
     <string name="reset">Zurücksetzen</string>
     <string name="reset_categories">Kategorien zurücksetzen</string>
+    <string name="reset_cover">Zurücksetzen</string>
     <string name="reset_data_settings">Dateneinstellungen zurücksetzen</string>
     <string name="reset_reader_screen_settings">Lesebildschirm-Einstellungen zurücksetzen</string>
     <string name="reset_setting">Einstellungen zurücksetzen</string>
@@ -1640,6 +1691,7 @@
     <string name="search">Suchen</string>
     <string name="search_across_all_sources">Über alle Quellen suchen</string>
     <string name="search_across_all_sources_1">Über alle Quellen suchen...</string>
+    <string name="search_features">Funktionen suchen...</string>
     <string name="search_fonts">Schriftarten suchen...</string>
     <string name="search_glossary">Glossar durchsuchen...</string>
     <string name="search_hint">Suchen…</string>
@@ -1764,6 +1816,7 @@
     <string name="simulation_mode_does_not_use_real_voices">Der Simulationsmodus verwendet keine echten Stimmen.</string>
     <string name="skip">Überspringen</string>
     <string name="skip_backward_10_seconds">10 Sekunden zurückspringen</string>
+    <string name="skip_for_now">Stattdessen App-Speicher verwenden</string>
     <string name="skip_forward_10_seconds">10 Sekunden vorspringen</string>
     <string name="skip_this_book">Dieses Buch überspringen</string>
     <string name="skip_titles_without_chapters">Titel ohne Kapitel überspringen</string>
@@ -1783,11 +1836,17 @@
     <string name="sort_direction">Sortierrichtung</string>
     <string name="sound">Ton</string>
     <string name="source">Quelle</string>
+    <string name="source_broken_description">Die Website-Struktur hat sich geändert und die Quelle muss von einem Entwickler aktualisiert werden. Dies ist kein Netzwerkproblem.</string>
+    <string name="source_broken_help_description">Unterstützen Sie die Entwicklung mit einer Spende von 5 $ und helfen Sie uns, die Behebung dieser Quelle zu priorisieren.</string>
+    <string name="source_broken_help_title">Möchten Sie bei der Behebung helfen?</string>
+    <string name="source_broken_title">Diese Quelle ist defekt</string>
     <string name="source_browse_latest">Neuestes durchsuchen</string>
     <string name="source_extension_not_installed">Quellenerweiterung nicht installiert</string>
     <string name="source_id">Quell-ID</string>
+    <string name="source_needs_update">Quelle muss aktualisiert werden</string>
     <string name="source_not_available">Diese Quelle ist auf Ihrem Gerät nicht verfügbar.</string>
     <string name="source_title">Quellentitel</string>
+    <string name="source_website_changed">Die Quell-Website hat ihre Struktur geändert</string>
     <string name="sources">Durchsuchen</string>
     <string name="space_url">Space-URL</string>
     <string name="speech_rate">Sprechgeschwindigkeit</string>
@@ -1804,8 +1863,11 @@
     <string name="status">Status</string>
     <string name="stop">Stopp</string>
     <string name="storage">Speicher</string>
+    <string name="storage_permission_privacy_note">IReader greift nur auf den von Ihnen ausgewählten Ordner zu. Ihre anderen Dateien bleiben privat und unberührt.</string>
     <string name="storage_permission_required_explanation">Speicherberechtigung erforderlich Erklärung
     </string>
+    <string name="storage_permission_subtitle">Wählen Sie einen Ordner, in dem IReader Ihre Downloads, Erweiterungen und Sicherungen speichern wird.</string>
+    <string name="storage_permission_title">Speicherordner auswählen</string>
     <string name="storage_usage">Speichernutzung</string>
     <string name="storage_used">Verwendeter Speicher</string>
     <string name="style_features">Stilmerkmale</string>
@@ -1823,6 +1885,7 @@
     <string name="support">Unterstützung</string>
     <string name="support_collect">Unterstützung &amp; Sammeln</string>
     <string name="support_development">Entwicklung unterstützen</string>
+    <string name="support_development_5">Entwicklung unterstützen (5 $)</string>
     <string name="support_for_any_gradio_based_tts_engine">Unterstützung für jede Gradio-basierte TTS-Engine</string>
     <string name="support_the_app_to_appear_on_the_leaderboard">Unterstütze die App, um in der Bestenliste zu erscheinen!</string>
     <string name="support_the_project_with_a">Unterstütze das Projekt mit einer Kredit-/Debitkartenspende</string>
@@ -1998,13 +2061,30 @@
     <string name="trying_to_fetch">Versuche abzurufen…</string>
     <string name="trying_to_fetch_chapters_content">Versuche, den Inhalt des Kapitels abzurufen…</string>
     <string name="tts">TTS</string>
+    <string name="tts_cache_duration">Cache-Dauer</string>
+    <string name="tts_cache_duration_desc">Zwischengespeicherte Audios nach dieser Anzahl von Tagen automatisch löschen</string>
+    <string name="tts_cache_status">Cache-Status</string>
+    <string name="tts_chapter_caching">Kapitel-Audio-Caching</string>
+    <string name="tts_chapters">Kapitel</string>
+    <string name="tts_clear_cache">Cache leeren</string>
+    <string name="tts_days">Tage</string>
+    <string name="tts_disabled">Deaktiviert</string>
+    <string name="tts_download_chapter_audio">Kapitel-Audio herunterladen</string>
+    <string name="tts_download_chapter_audio_desc">Das gesamte Kapitel-Audio für die Offline-Wiedergabe vorab herunterladen (nur Remote-Engines)</string>
     <string name="tts_engine">TTS-Engine</string>
     <string name="tts_engine_manager">TTS-Engine-Manager</string>
     <string name="tts_engine_settings">TTS-Engine-Einstellungen</string>
     <string name="tts_error">TTS-Fehler: %1$s</string>
+    <string name="tts_merge_info">Führen Sie mehrere Absätze zu größeren Blöcken zusammen, um ein flüssigeres Lesen zu ermöglichen. Dies reduziert Serveranfragen und sorgt für eine bessere Audiokontinuität. Setzen Sie auf 0, um das Zusammenführen zu deaktivieren.</string>
+    <string name="tts_merge_words_native">Wörter für Android TTS-, Piper-, Sherpa-Engines zusammenführen</string>
+    <string name="tts_merge_words_remote">Wörter für Gradio/Online-TTS-Engines zusammenführen</string>
+    <string name="tts_native_engines">Native Engines</string>
     <string name="tts_performance_settings">TTS-Leistungseinstellungen</string>
+    <string name="tts_remote_engines">Remote-Engines</string>
     <string name="tts_settings">TTS-Einstellungen</string>
+    <string name="tts_text_merging">TTS-Textzusammenführung</string>
     <string name="tts_with_translated_text">TTS mit übersetztem Text</string>
+    <string name="tts_words">Wörter</string>
     <string name="turn_off_vibration_feedback_for_interactions">Vibrationsfeedback für Interaktionen deaktivieren</string>
     <string name="type">Typ</string>
     <string name="type_1">Typ \</string>
