@@ -57,6 +57,8 @@ class ExtensionViewModel(
     private val browsePreferences: BrowsePreferences,
     // ExtensionController for SSOT state management (Requirements: 3.2, 3.3, 3.4, 3.5)
     private val extensionController: ExtensionController? = null,
+    // User source management
+    private val deleteUserSource: ireader.domain.usersource.interactor.DeleteUserSource? = null,
 ) : BaseViewModel() {
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -881,6 +883,28 @@ class ExtensionViewModel(
             LanguageChoice.All -> true
             is LanguageChoice.One -> source?.lang == choice.language.code
             is LanguageChoice.Others -> source?.lang in choice.languages.map { it.code }
+        }
+    }
+    
+    // ==================== User Source Management ====================
+    
+    /**
+     * Delete a user source by its source ID.
+     */
+    fun deleteUserSourceById(sourceId: Long) {
+        if (deleteUserSource == null) {
+            showSnackBar(UiText.DynamicString("Delete not available"))
+            return
+        }
+        
+        scope.launch(ioDispatcher) {
+            try {
+                deleteUserSource.byId(sourceId)
+                catalogStore.refreshUserSources()
+                showSnackBar(UiText.DynamicString("Source deleted"))
+            } catch (e: Exception) {
+                showSnackBar(UiText.DynamicString("Failed to delete: ${e.message ?: "Unknown error"}"))
+            }
         }
     }
     

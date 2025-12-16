@@ -50,6 +50,9 @@ class CommunityHubScreenSpec {
             onUserSources = {
                 navController.navigate(NavigationRoutes.userSources)
             },
+            onLegadoSources = {
+                navController.navigate(NavigationRoutes.legadoSourceImport)
+            },
             onFeatureStore = {
                 navController.navigate(NavigationRoutes.featureStore)
             },

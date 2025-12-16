@@ -217,6 +217,11 @@ fun CommonNavHost(
             ireader.presentation.core.ui.UserSourcesListScreenSpec().Content()
         }
         
+        // Legado Source Import - Import sources from Legado/阅读 format
+        composable(NavigationRoutes.legadoSourceImport) {
+            ireader.presentation.core.ui.LegadoSourceImportScreenSpec().Content()
+        }
+        
         // User Source Creator - Create/edit a user source
         composable(
             route = "userSourceCreator?sourceUrl={sourceUrl}",

@@ -1,5 +1,6 @@
 package ireader.presentation.ui.sourcecreator
 
+import ireader.domain.catalogs.CatalogStore
 import ireader.domain.usersource.interactor.*
 import ireader.domain.usersource.model.UserSource
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -18,7 +19,8 @@ class UserSourcesListViewModel(
     private val getUserSources: GetUserSources,
     private val deleteUserSource: DeleteUserSource,
     private val toggleUserSourceEnabled: ToggleUserSourceEnabled,
-    private val importExportUserSources: ImportExportUserSources
+    private val importExportUserSources: ImportExportUserSources,
+    private val catalogStore: CatalogStore
 ) : BaseViewModel() {
     
     private val _state = MutableStateFlow(UserSourcesListState())
@@ -46,6 +48,8 @@ class UserSourcesListViewModel(
     fun toggleEnabled(sourceUrl: String, enabled: Boolean) {
         scope.launch {
             toggleUserSourceEnabled.await(sourceUrl, enabled)
+            // Refresh the catalog store so changes appear immediately
+            catalogStore.refreshUserSources()
         }
     }
     
@@ -62,6 +66,8 @@ class UserSourcesListViewModel(
         
         scope.launch {
             deleteUserSource.byUrl(source.sourceUrl)
+            // Refresh the catalog store so changes appear immediately
+            catalogStore.refreshUserSources()
             _state.update { 
                 it.copy(
                     showDeleteConfirmDialog = false, 
@@ -77,6 +83,8 @@ class UserSourcesListViewModel(
             val result = importExportUserSources.importFromJson(jsonString)
             result.fold(
                 onSuccess = { count ->
+                    // Refresh the catalog store so sources appear immediately
+                    catalogStore.refreshUserSources()
                     _state.update { it.copy(snackbarMessage = "Imported $count source(s)") }
                 },
                 onFailure = { error ->
@@ -124,5 +132,28 @@ class UserSourcesListViewModel(
     
     fun toggleCreateOptions() {
         _state.update { it.copy(showCreateOptions = !it.showCreateOptions) }
+    }
+    
+    fun showDeleteAllConfirm() {
+        _state.update { it.copy(showDeleteAllConfirmDialog = true) }
+    }
+    
+    fun cancelDeleteAll() {
+        _state.update { it.copy(showDeleteAllConfirmDialog = false) }
+    }
+    
+    fun confirmDeleteAll() {
+        scope.launch {
+            val count = _state.value.sources.size
+            deleteUserSource.all()
+            // Refresh the catalog store so changes appear immediately
+            catalogStore.refreshUserSources()
+            _state.update { 
+                it.copy(
+                    showDeleteAllConfirmDialog = false,
+                    snackbarMessage = "Deleted $count source(s)"
+                ) 
+            }
+        }
     }
 }

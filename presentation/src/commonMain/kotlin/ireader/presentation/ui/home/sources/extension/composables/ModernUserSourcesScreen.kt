@@ -39,6 +39,7 @@ fun ModernUserSourcesScreen(
     onShowDetails: ((Catalog) -> Unit)? = null,
     onMigrateFromSource: ((Long) -> Unit)? = null,
     onNavigateToUserSources: (() -> Unit)? = null,
+    onDeleteUserSource: ((Long) -> Unit)? = null,
 ) {
     val scrollState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -137,6 +138,7 @@ fun ModernUserSourcesScreen(
                         showLoginDialog = true
                     },
                     onMigrate = onMigrateFromSource?.let { { it(catalogItem.source.sourceId) } },
+                    onDeleteUserSource = onDeleteUserSource?.let { { it(catalogItem.source.sourceId) } },
                 )
             }
         }

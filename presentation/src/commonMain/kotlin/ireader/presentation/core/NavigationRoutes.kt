@@ -74,6 +74,7 @@ object NavigationRoutes {
     const val developerPortal = "developerPortal"
     const val userSources = "userSources"
     const val userSourceCreator = "userSourceCreator"
+    const val legadoSourceImport = "legadoSourceImport"
     const val PLUGIN_DETAILS = "pluginDetails/{pluginId}"
     const val PLUGIN_DETAILS_BASE = "pluginDetails"
     

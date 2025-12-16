@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.ui.sourcecreator.SourceCreatorScreen
 import ireader.presentation.ui.sourcecreator.SourceCreatorViewModel
 import ireader.presentation.ui.sourcecreator.UserSourcesListScreen
@@ -43,6 +44,7 @@ class UserSourcesListScreenSpec {
             onOpenImportScreen = { vm.showImportDialog() },
             onOpenHelpScreen = { vm.showHelpDialog() },
             onOpenAutoDetect = { vm.showImportDialog() },
+            onOpenLegadoImport = { navController?.navigate(NavigationRoutes.legadoSourceImport) },
             onEdit = { sourceUrl -> 
                 navController?.navigate("userSourceCreator?sourceUrl=$sourceUrl")
             },
@@ -59,6 +61,9 @@ class UserSourcesListScreenSpec {
             onCancelDelete = { vm.cancelDelete() },
             onClearShareJson = { vm.clearShareJson() },
             onToggleCreateOptions = { vm.toggleCreateOptions() },
+            onShowDeleteAllDialog = { vm.showDeleteAllConfirm() },
+            onConfirmDeleteAll = { vm.confirmDeleteAll() },
+            onCancelDeleteAll = { vm.cancelDeleteAll() },
             snackbarHostState = snackbarHostState
         )
     }

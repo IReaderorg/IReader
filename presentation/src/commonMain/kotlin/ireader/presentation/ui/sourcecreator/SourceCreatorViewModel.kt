@@ -1,5 +1,6 @@
 package ireader.presentation.ui.sourcecreator
 
+import ireader.domain.catalogs.CatalogStore
 import ireader.domain.usersource.interactor.*
 import ireader.domain.usersource.model.UserSource
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -18,7 +19,8 @@ class SourceCreatorViewModel(
     private val getUserSource: GetUserSource,
     private val saveUserSource: SaveUserSource,
     private val validateUserSource: ValidateUserSource,
-    private val importExportUserSources: ImportExportUserSources
+    private val importExportUserSources: ImportExportUserSources,
+    private val catalogStore: CatalogStore
 ) : BaseViewModel() {
     
     private val _state = MutableStateFlow(SourceCreatorState())
@@ -77,6 +79,8 @@ class SourceCreatorViewModel(
             
             try {
                 saveUserSource.await(source)
+                // Refresh the catalog store so sources appear immediately
+                catalogStore.refreshUserSources()
                 _state.update { it.copy(isSaving = false, snackbarMessage = "Source saved successfully") }
             } catch (e: Exception) {
                 _state.update { it.copy(isSaving = false, snackbarMessage = "Error saving: ${e.message}") }

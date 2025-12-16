@@ -24,10 +24,12 @@ data class UserSourcesListState(
     val showImportDialog: Boolean = false,
     val showHelpDialog: Boolean = false,
     val showDeleteConfirmDialog: Boolean = false,
+    val showDeleteAllConfirmDialog: Boolean = false,
     val sourceToDelete: UserSource? = null,
     val shareJson: String? = null,
     val snackbarMessage: String? = null,
-    val showCreateOptions: Boolean = false
+    val showCreateOptions: Boolean = false,
+    val showLegadoImportOption: Boolean = true
 )
 
 /**
@@ -43,6 +45,7 @@ fun UserSourcesListScreen(
     onOpenImportScreen: () -> Unit,
     onOpenHelpScreen: () -> Unit,
     onOpenAutoDetect: () -> Unit,
+    onOpenLegadoImport: () -> Unit = {},
     onEdit: (String) -> Unit,
     onDelete: (UserSource) -> Unit,
     onToggleEnabled: (String, Boolean) -> Unit,
@@ -57,6 +60,9 @@ fun UserSourcesListScreen(
     onCancelDelete: () -> Unit,
     onClearShareJson: () -> Unit,
     onToggleCreateOptions: () -> Unit,
+    onShowDeleteAllDialog: () -> Unit = {},
+    onConfirmDeleteAll: () -> Unit = {},
+    onCancelDeleteAll: () -> Unit = {},
     snackbarHostState: SnackbarHostState
 ) {
     Scaffold(
@@ -78,6 +84,9 @@ fun UserSourcesListScreen(
                     if (state.sources.isNotEmpty()) {
                         IconButton(onClick = onExportAll) {
                             Icon(Icons.Default.FileUpload, contentDescription = "Export All")
+                        }
+                        IconButton(onClick = onShowDeleteAllDialog) {
+                            Icon(Icons.Default.DeleteSweep, contentDescription = "Delete All")
                         }
                     }
                 }
@@ -108,6 +117,7 @@ fun UserSourcesListScreen(
                     onCreateNew = onCreateNew,
                     onCreateWithWizard = onCreateWithWizard,
                     onImport = onOpenImportScreen,
+                    onLegadoImport = onOpenLegadoImport,
                     onHelp = onOpenHelpScreen
                 )
             } else {
@@ -177,6 +187,27 @@ fun UserSourcesListScreen(
             onImport = { /* No import from share dialog */ onClearShareJson() }
         )
     }
+    
+    // Delete all confirmation dialog
+    if (state.showDeleteAllConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = onCancelDeleteAll,
+            title = { Text("Delete All Sources") },
+            text = { 
+                Text("Are you sure you want to delete all ${state.sources.size} user sources? This action cannot be undone.") 
+            },
+            confirmButton = {
+                TextButton(onClick = onConfirmDeleteAll) {
+                    Text("Delete All", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onCancelDeleteAll) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -184,6 +215,7 @@ private fun EmptyState(
     onCreateNew: () -> Unit,
     onCreateWithWizard: () -> Unit,
     onImport: () -> Unit,
+    onLegadoImport: () -> Unit,
     onHelp: () -> Unit
 ) {
     Column(
@@ -246,6 +278,16 @@ private fun EmptyState(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Advanced")
                 }
+            }
+            
+            // Legado import option
+            OutlinedButton(
+                onClick = onLegadoImport,
+                modifier = Modifier.fillMaxWidth(0.8f)
+            ) {
+                Icon(Icons.Default.CloudDownload, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Import Legado Sources")
             }
             
             TextButton(onClick = onHelp) {

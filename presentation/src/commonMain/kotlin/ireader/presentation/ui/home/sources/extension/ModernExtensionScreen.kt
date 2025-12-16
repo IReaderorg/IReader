@@ -143,6 +143,7 @@ fun ModernExtensionScreen(
                     onShowDetails = onShowDetails,
                     onMigrateFromSource = onMigrateFromSource,
                     onNavigateToUserSources = onNavigateToUserSources,
+                    onDeleteUserSource = { sourceId -> vm.deleteUserSourceById(sourceId) },
                 )
                 1 -> ModernRemoteSourcesScreen(
                     vm = vm,

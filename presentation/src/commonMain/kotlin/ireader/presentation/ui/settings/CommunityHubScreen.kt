@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -39,6 +40,7 @@ fun CommunityHubScreen(
     onReadingBuddy: () -> Unit = {},
     onGlossary: () -> Unit = {},
     onUserSources: () -> Unit = {},
+    onLegadoSources: () -> Unit = {},
     onFeatureStore: () -> Unit = {},
     onPluginRepository: () -> Unit = {},
     onDeveloperPortal: () -> Unit = {},
@@ -187,6 +189,15 @@ fun CommunityHubScreen(
                     description = "Create custom sources to scrape novels from any website",
                     icon = Icons.Filled.Extension,
                     onClick = onUserSources
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "Legado Sources",
+                    description = "Import book sources from Legado/阅读 format",
+                    icon = Icons.Filled.CloudDownload,
+                    onClick = onLegadoSources
                 )
             }
             

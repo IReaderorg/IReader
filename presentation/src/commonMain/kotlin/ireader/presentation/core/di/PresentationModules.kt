@@ -95,7 +95,8 @@ val PresentationModules = module {
             uiPreferences = get(),
             startExtensionManagerService = get(),
             catalogStore = get(),
-            browsePreferences = get()
+            browsePreferences = get(),
+            deleteUserSource = get()
         )
     }
     factory { (param: GlobalSearchViewModel.Param) ->
@@ -311,7 +312,8 @@ val PresentationModules = module {
             getUserSources = get(),
             deleteUserSource = get(),
             toggleUserSourceEnabled = get(),
-            importExportUserSources = get()
+            importExportUserSources = get(),
+            catalogStore = get()
         )
     }
     factory {
@@ -319,7 +321,15 @@ val PresentationModules = module {
             getUserSource = get(),
             saveUserSource = get(),
             validateUserSource = get(),
-            importExportUserSources = get()
+            importExportUserSources = get(),
+            catalogStore = get()
+        )
+    }
+    factory {
+        ireader.presentation.ui.sourcecreator.legado.LegadoSourceImportViewModel(
+            httpClient = get(),
+            saveUserSource = get(),
+            catalogStore = get()
         )
     }
 

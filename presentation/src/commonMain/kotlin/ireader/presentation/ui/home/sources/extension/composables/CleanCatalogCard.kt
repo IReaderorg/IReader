@@ -50,6 +50,7 @@ fun CleanCatalogCard(
     sourceStatus: SourceStatus? = null,
     onLogin: (() -> Unit)? = null,
     onMigrate: (() -> Unit)? = null,
+    onDeleteUserSource: (() -> Unit)? = null,
     isLoading: Boolean = false,
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -147,6 +148,7 @@ fun CleanCatalogCard(
             onCancelInstaller = onCancelInstaller,
             sourceStatus = sourceStatus,
             onLogin = onLogin,
+            onDeleteUserSource = onDeleteUserSource,
         )
     }
 }
@@ -197,6 +199,7 @@ private fun CleanActions(
     onCancelInstaller: (() -> Unit)?,
     sourceStatus: SourceStatus?,
     onLogin: (() -> Unit)?,
+    onDeleteUserSource: (() -> Unit)?,
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
@@ -270,6 +273,21 @@ private fun CleanActions(
                         MaterialTheme.colorScheme.primary 
                     else 
                         MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        
+        // Delete button for user sources
+        if (onDeleteUserSource != null && catalog is ireader.domain.models.entities.UserSourceCatalog) {
+            IconButton(
+                onClick = onDeleteUserSource,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(18.dp)
                 )
             }

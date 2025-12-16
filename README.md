@@ -22,6 +22,7 @@ A cross-platform novel reader with support for multiple sources through extensio
 - 📖 Library management with categories and filters
 - 🌙 Dark mode and customizable themes
 - 🔊 AI Text-to-Speech (Desktop)
+- 📦 Import Legado/阅读 book sources
 - 🚫 No ads or tracking
 
 ## 📲 Installation
@@ -42,28 +43,34 @@ Download the latest release from [GitHub Releases](https://github.com/IReaderorg
 
 IReader now supports LNReader sources! Follow these steps:
 
-1. **Enable JavaScript Plugins**
-   - Go to **Settings → General**
-   - Toggle **"Enable Javascript Plugin"**
-
-2. **Add LNReader Repository**
+1. **Add LNReader Repository**
    - Go to **Settings → Repository**
    - Tap the **Add icon (+)**
    - Select **Quick Add Popular Repo**
    - Choose **LNReader**
    - Save and refresh remote sources in the Source screen
 
-3. **Storage Permissions (Optional)**
+2. **Storage Permissions (Optional)**
    - By default, LNReader sources are saved to app cache (no permissions needed)
    - To save sources to external storage for easier access, disable **"Saved Sources to Cache"** in Settings → General
    - If using external storage, grant storage permissions when prompted
 
-4. **Start Reading**
+3. **Start Reading**
    - Browse sources to find novels
    - Add books to your library
    - Download chapters for offline reading
 
 > **Note:** IReader no longer supports the in-app default repository. You must add repositories manually in Settings.
+
+### Using Legado Sources
+
+IReader supports importing book sources from [Legado/阅读](https://github.com/gedoor/legado), a popular Chinese novel reader:
+
+1. Go to **More → Community → Legado Sources**
+2. Enter a Legado source URL or paste JSON directly
+3. Select sources to import and tap **Import**
+
+Imported sources appear immediately in your sources list.
 
 ## 📖 Documentation
 
