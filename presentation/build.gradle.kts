@@ -80,8 +80,6 @@ kotlin {
                 api(libs.coil.core)
                 api(libs.coil.compose)
                 api(libs.coil.network.ktor)
-
-                implementation(libs.zxing.core)
                 
                 // FileKit - Modern KMP file picker
                 api(libs.bundles.filekit)

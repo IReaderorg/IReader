@@ -330,18 +330,10 @@ val UseCasesInject = module {
     
     // Donation use cases - factory
     factory { ireader.domain.usecases.donation.DonationTriggerManager(get(), get()) }
-    factory<ireader.domain.usecases.donation.OpenWalletUseCase> { ireader.domain.usecases.donation.OpenWalletUseCase(get()) }
-    factory<ireader.domain.usecases.donation.CheckWalletInstalledUseCase> { ireader.domain.usecases.donation.CheckWalletInstalledUseCase(get()) }
-    factory<ireader.domain.usecases.donation.CopyAddressUseCase> { ireader.domain.usecases.donation.CopyAddressUseCase(get()) }
-    factory<ireader.domain.usecases.donation.GeneratePaymentUriUseCase> { ireader.domain.usecases.donation.GeneratePaymentUriUseCase(get()) }
     factory<ireader.domain.usecases.donation.GetFundingGoalsUseCase> { ireader.domain.usecases.donation.GetFundingGoalsUseCase(get()) }
     factory<ireader.domain.usecases.donation.UpdateFundingGoalUseCase> { ireader.domain.usecases.donation.UpdateFundingGoalUseCase(get()) }
     factory<ireader.domain.usecases.donation.DonationUseCases> { ireader.domain.usecases.donation.DonationUseCases(
-        donationTriggerManager = get(),
-        openWallet = get(),
-        checkWalletInstalled = get(),
-        copyAddress = get(),
-        generatePaymentUri = get()
+        donationTriggerManager = get()
     ) }
     
     // ePub export use cases - factory

@@ -246,11 +246,6 @@ actual val DomainModule: Module = module {
         )
     }
     
-    // Wallet Integration
-    single<ireader.domain.services.WalletIntegrationManager> {
-        ireader.domain.services.DesktopWalletIntegrationManager()
-    }
-    
     // Payment Processor for plugin monetization
     single<ireader.domain.plugins.PaymentProcessor> {
         ireader.domain.plugins.DesktopPaymentProcessor(

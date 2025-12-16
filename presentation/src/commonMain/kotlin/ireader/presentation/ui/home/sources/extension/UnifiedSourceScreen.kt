@@ -526,16 +526,16 @@ private fun AvailableSourcesContent(
         LazyListState()
     }
 
-    // Check if we have no remote sources (likely no repository configured)
+    // Check if no repository is configured (defaultRepo == -1)
+    val hasNoRepository = vm.defaultRepo.value == -1L
     val hasNoRemoteSources = state.remoteCatalogs.isEmpty()
-    val hasNoInstalledSources = allCatalogs.isEmpty()
     
-    if (hasNoRemoteSources && hasNoInstalledSources) {
+    if (hasNoRepository && hasNoRemoteSources) {
         // No repository configured state
         NoRepositoryStateView(
             onAddRepository = onNavigateToAddRepository
         )
-    } else if (remoteSources.isEmpty()) {
+    } else if (hasNoRemoteSources) {
         EmptyStateView(
             icon = Icons.Default.Extension,
             title = "No Extensions Available",

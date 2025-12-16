@@ -50,7 +50,7 @@ fun DonationTrigger.toPromptMessage(): DonationPromptMessage {
     return when (this) {
         is DonationTrigger.BookCompleted -> DonationPromptMessage(
             title = "Congratulations! 🎉",
-            message = "You've finished \"$bookTitle\" with $chapterCount chapters! If IReader made this journey better, please consider a small crypto donation to support development.",
+            message = "You've finished \"$bookTitle\" with $chapterCount chapters! If IReader made this journey better, please consider a small donation to support development.",
             trigger = this
         )
         is DonationTrigger.FirstMigrationSuccess -> DonationPromptMessage(

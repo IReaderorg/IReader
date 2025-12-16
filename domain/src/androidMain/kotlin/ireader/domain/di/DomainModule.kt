@@ -234,11 +234,6 @@ actual val DomainModule = module {
         )
     }
     
-    // Wallet Integration for donations only
-    single<ireader.domain.services.WalletIntegrationManager> {
-        ireader.domain.services.AndroidWalletIntegrationManager(androidContext())
-    }
-    
     // Payment Processor for plugin monetization
     single<ireader.domain.plugins.PaymentProcessor> {
         ireader.domain.plugins.AndroidPaymentProcessor(

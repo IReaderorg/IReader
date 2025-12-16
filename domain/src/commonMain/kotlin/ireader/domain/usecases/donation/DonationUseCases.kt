@@ -5,9 +5,5 @@ package ireader.domain.usecases.donation
  * Provides a single point of access for donation functionality
  */
 data class DonationUseCases(
-    val donationTriggerManager: DonationTriggerManager,
-    val openWallet: OpenWalletUseCase,
-    val checkWalletInstalled: CheckWalletInstalledUseCase,
-    val copyAddress: CopyAddressUseCase,
-    val generatePaymentUri: GeneratePaymentUriUseCase
+    val donationTriggerManager: DonationTriggerManager
 )
