@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -47,18 +46,22 @@ import ireader.domain.models.characterart.CharacterArt
 /**
  * Section displaying character art related to the current book.
  * Shows a horizontal carousel of AI-generated character images.
+ * 
+ * NO loading indicators - only renders when data is available.
+ * The wrapper composable handles loading state by not rendering this component until data exists.
  */
 @Composable
 fun CharacterArtSection(
     bookTitle: String,
     characterArtList: List<CharacterArt>,
-    isLoading: Boolean,
+    isLoading: Boolean = false, // Kept for API compatibility, but ignored
     onViewAll: () -> Unit,
     onArtClick: (CharacterArt) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (characterArtList.isEmpty() && !isLoading) {
-        return // Don't show section if no art available
+    // Don't show section if no art available
+    if (characterArtList.isEmpty()) {
+        return
     }
     
     Column(
@@ -84,37 +87,23 @@ fun CharacterArtSection(
                 )
             }
             
-            if (characterArtList.isNotEmpty()) {
-                TextButton(onClick = onViewAll) {
-                    Text("View All")
-                }
+            TextButton(onClick = onViewAll) {
+                Text("View All")
             }
         }
         
         Spacer(Modifier.height(8.dp))
         
-        if (isLoading) {
-            // Loading state
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(modifier = Modifier.size(32.dp))
-            }
-        } else {
-            // Character art carousel
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(characterArtList) { art ->
-                    CharacterArtCard(
-                        art = art,
-                        onClick = { onArtClick(art) }
-                    )
-                }
+        // Character art carousel - no loading state, just show data
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(characterArtList) { art ->
+                CharacterArtCard(
+                    art = art,
+                    onClick = { onArtClick(art) }
+                )
             }
         }
     }

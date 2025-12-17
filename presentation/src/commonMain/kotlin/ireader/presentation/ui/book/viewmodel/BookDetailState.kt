@@ -21,35 +21,25 @@ import kotlinx.collections.immutable.toImmutableList
  * This provides clear loading/success/error states and enables
  * Compose compiler optimizations through @Immutable annotations.
  * 
- * OPTIMIZATION: Instead of showing shimmer loading, we show a Placeholder
- * state with minimal book info immediately, then progressively update to
- * Success state as data loads. This provides instant visual feedback.
+ * OPTIMIZATION: No shimmer, no placeholder state. We go directly to Success
+ * with empty/default values (title="Untitled", etc). Data fills in progressively
+ * as it loads. This provides instant visual feedback without loading indicators.
  */
 @Stable
 sealed interface BookDetailState {
     
     /**
-     * Initial loading state - only shown briefly before Placeholder
-     * In practice, we skip this and go directly to Placeholder
+     * Initial loading state - transitions immediately to Success.empty()
+     * Only shown very briefly during initial navigation.
      */
     @Immutable
     data object Loading : BookDetailState
     
     /**
-     * Placeholder state - shows immediately with minimal book info
-     * while full data loads in background. This eliminates perceived lag.
-     */
-    @Immutable
-    data class Placeholder(
-        val bookId: Long,
-        val title: String = "Loading...",
-        val cover: String? = null,
-        val author: String? = null,
-        val isLoading: Boolean = true,
-    ) : BookDetailState
-    
-    /**
-     * Success state with all book detail data
+     * Success state with all book detail data.
+     * Can be initialized with empty/default values for immediate display.
+     * Use Success.empty(bookId) to create an initial state that shows
+     * "Untitled" and empty values, then update with real data as it loads.
      */
     @Immutable
     data class Success(
@@ -140,6 +130,42 @@ sealed interface BookDetailState {
          */
         fun getSelectedChapters(): List<Chapter> {
             return chapters.filter { it.id in selectedChapterIds }
+        }
+        
+        companion object {
+            /**
+             * Creates an empty Success state for immediate display.
+             * Shows "Untitled" for title, empty values for other fields.
+             * Data fills in progressively as it loads.
+             */
+            fun empty(bookId: Long, sourceId: Long = 0L): Success {
+                val emptyBook = Book(
+                    id = bookId,
+                    sourceId = sourceId,
+                    title = "Untitled",
+                    key = "",
+                    author = "",
+                    description = "",
+                    genres = emptyList(),
+                    status = 0,
+                    cover = "",
+                    customCover = "",
+                    favorite = false,
+                    lastUpdate = 0,
+                    initialized = false,
+                    dateAdded = 0,
+                    viewer = 0,
+                    flags = 0,
+                )
+                return Success(
+                    book = emptyBook,
+                    chapters = persistentListOf(),
+                    source = null,
+                    catalogSource = null,
+                    isRefreshingBook = true, // Show as loading initially
+                    isRefreshingChapters = true,
+                )
+            }
         }
     }
     

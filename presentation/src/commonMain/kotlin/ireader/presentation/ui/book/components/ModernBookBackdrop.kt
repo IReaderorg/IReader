@@ -24,7 +24,7 @@ fun ModernBookBackdrop(
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background
-    val surfaceColor = MaterialTheme.colorScheme.surface
+    val surfaceColor = MaterialTheme.colorScheme.surfaceVariant
     
     if (!hideBackdrop) {
         Box(
@@ -32,7 +32,26 @@ fun ModernBookBackdrop(
                 .fillMaxWidth()
                 .height(250.dp)
         ) {
-            // Blurred book cover
+            // Placeholder background - shows immediately before image loads
+            // This prevents UI jump when the image loads
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                surfaceColor.copy(alpha = 0.3f),
+                                surfaceColor.copy(alpha = 0.2f),
+                                backgroundColor.copy(alpha = 0.6f),
+                                backgroundColor,
+                            ),
+                            startY = 0f,
+                            endY = 600f
+                        )
+                    )
+            )
+            
+            // Blurred book cover - loads on top of placeholder
             IImageLoader(
                 model = BookCover.from(book),
                 contentDescription = null,
@@ -77,5 +96,23 @@ fun ModernBookBackdrop(
                     )
             )
         }
+    } else {
+        // Even when backdrop is hidden, reserve the space with a subtle background
+        // to prevent layout jump
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            surfaceColor.copy(alpha = 0.15f),
+                            backgroundColor,
+                        ),
+                        startY = 0f,
+                        endY = 400f
+                    )
+                )
+        )
     }
 }

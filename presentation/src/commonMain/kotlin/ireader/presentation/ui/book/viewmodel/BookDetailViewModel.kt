@@ -192,7 +192,6 @@ class BookDetailViewModel(
     val catalogSource: CatalogLocal? get() = (_state.value as? BookDetailState.Success)?.catalogSource
     val lastRead: Long? get() = (_state.value as? BookDetailState.Success)?.lastReadChapterId
     val detailIsLoading: Boolean get() = _state.value is BookDetailState.Loading || 
-        _state.value is BookDetailState.Placeholder ||
         (_state.value as? BookDetailState.Success)?.isRefreshingBook == true
     val chapterIsLoading: Boolean get() = (_state.value as? BookDetailState.Success)?.isRefreshingChapters == true
     val expandedSummary: Boolean get() = (_state.value as? BookDetailState.Success)?.isSummaryExpanded == true
@@ -205,8 +204,8 @@ class BookDetailViewModel(
             ScreenProfiler.startScreen("BookDetail_$bookId")
             ScreenProfiler.mark("BookDetail_$bookId", "vm_init_start")
             
-            // OPTIMIZATION: Show placeholder immediately - no shimmer needed
-            _state.value = BookDetailState.Placeholder(bookId = bookId)
+            // OPTIMIZATION: Show Success state immediately with empty book - no shimmer needed
+            _state.value = BookDetailState.Success.empty(bookId = bookId)
             initializeBook(bookId)
             
             // Subscribe to ChapterController state for selection sync (Requirements: 9.1, 9.4, 9.5)
@@ -417,16 +416,17 @@ class BookDetailViewModel(
                 ScreenProfiler.mark(screenTag, "book_loaded_from_db")
                 val sourceId = book?.sourceId
                 
-                // OPTIMIZATION: Update placeholder with book info immediately
+                // OPTIMIZATION: Update Success state with book info immediately
                 if (book != null) {
-                    _state.value = BookDetailState.Placeholder(
-                        bookId = bookId,
-                        title = book.title,
-                        cover = book.cover,
-                        author = book.author,
-                        isLoading = true
+                    _state.value = BookDetailState.Success(
+                        book = book,
+                        chapters = persistentListOf(),
+                        source = null,
+                        catalogSource = null,
+                        isRefreshingBook = true,
+                        isRefreshingChapters = true,
                     )
-                    ScreenProfiler.mark(screenTag, "placeholder_updated")
+                    ScreenProfiler.mark(screenTag, "success_state_with_book")
                 }
                 
                 // Get catalog source in parallel with chapters if possible
@@ -660,9 +660,6 @@ class BookDetailViewModel(
                 is BookDetailState.Loading -> {
                     Log.info { "BookDetailState.Loading" }
                 }
-                is BookDetailState.Placeholder -> {
-                    Log.info { "BookDetailState.Placeholder: bookId=${newState.bookId}" }
-                }
                 is BookDetailState.Error -> {
                     Log.error { "BookDetailState.Error: ${newState.message}" }
                 }
@@ -679,7 +676,6 @@ class BookDetailViewModel(
         _state.update { current ->
             when (current) {
                 is BookDetailState.Loading -> current
-                is BookDetailState.Placeholder -> current
                 is BookDetailState.Success -> update(current)
                 is BookDetailState.Error -> current
             }

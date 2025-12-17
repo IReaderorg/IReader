@@ -24,6 +24,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,6 +36,8 @@ import ireader.i18n.resources.Res
  * Compact review summary card for BookDetailScreen
  * Shows review count, average rating, and action buttons
  * Redesigned to match modern book info style
+ * 
+ * Always renders with same layout - starts with 0 reviews, updates when data loads
  */
 @Composable
 fun ReviewSummaryCard(
@@ -45,6 +48,7 @@ fun ReviewSummaryCard(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
     Column(
         modifier = modifier
             .fillMaxWidth()

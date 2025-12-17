@@ -1,8 +1,5 @@
 package ireader.presentation.ui.book.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,32 +12,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /**
- * Placeholder UI for Book Detail screen - shows immediately with minimal info.
- * NO shimmer animation - uses static placeholders for instant display.
- * Data fills in progressively as it loads without freezing the UI.
+ * Placeholder UI for Book Detail screen.
  * 
- * Key optimizations:
- * - No animation overhead (no shimmer)
- * - Static placeholder colors for instant render
- * - Progressive data display with fade-in for smooth UX
- * - Minimal recomposition when data updates
- * - Uses Column instead of LazyColumn for faster initial composition
- *   (LazyColumn has overhead for measuring and layout that slows first frame)
+ * NO shimmer, NO loading indicators, NO "Loading..." text.
+ * Just static placeholder boxes that match the real UI layout.
+ * When real data loads, it replaces this seamlessly.
  */
 @Composable
 fun BookDetailPlaceholder(
@@ -54,18 +43,27 @@ fun BookDetailPlaceholder(
 ) {
     val placeholderColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     val placeholderColorLight = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+    val backgroundColor = MaterialTheme.colorScheme.background
     
     Box(modifier = modifier.fillMaxSize()) {
-        // Simple static background - no animation
+        // Backdrop placeholder - gradient background
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp)
-                .background(placeholderColorLight)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            placeholderColorLight,
+                            placeholderColorLight.copy(alpha = 0.15f),
+                            backgroundColor,
+                        ),
+                        startY = 0f,
+                        endY = 600f
+                    )
+                )
         )
         
-        // Use Column instead of LazyColumn for faster initial composition
-        // LazyColumn has measurement overhead that can cause jank during navigation
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top
@@ -73,105 +71,27 @@ fun BookDetailPlaceholder(
             // Top padding for app bar
             Spacer(modifier = Modifier.height(80.dp))
             
-            // Book header - shows actual data when available
+            // Book header
             PlaceholderHeader(
                 title = title,
                 author = author,
-                isLoading = isLoading,
                 placeholderColor = placeholderColor
             )
             
-            // Stats placeholder - static boxes
+            // Stats
             PlaceholderStats(placeholderColor = placeholderColor)
             
-            // Action buttons placeholder - static boxes
+            // Action buttons
             PlaceholderActions(placeholderColor = placeholderColor)
             
-            // Summary placeholder
+            // Summary
             PlaceholderSummary(placeholderColor = placeholderColor)
             
-            // Chapters header with loading indicator
-            PlaceholderChaptersHeader(
-                isLoading = isLoading,
-                placeholderColor = placeholderColor
-            )
+            // Chapters header
+            PlaceholderChaptersHeader(placeholderColor = placeholderColor)
             
-            // Only show 3 chapter placeholders (visible above fold)
-            // This reduces composition time significantly
-            repeat(3) { index ->
-                PlaceholderChapterRow(placeholderColor = placeholderColorLight)
-            }
-        }
-    }
-}
-
-// Keep the old LazyColumn version for reference but don't use it
-@Composable
-private fun BookDetailPlaceholderLazy(
-    bookId: Long,
-    title: String = "",
-    cover: String? = null,
-    author: String? = null,
-    isLoading: Boolean = true,
-    onBack: () -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    val placeholderColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-    val placeholderColorLight = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
-    
-    Box(modifier = modifier.fillMaxSize()) {
-        // Simple static background - no animation
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-                .background(placeholderColorLight)
-        )
-        
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top
-        ) {
-            // Top padding for app bar
-            item(key = "top_padding") {
-                Spacer(modifier = Modifier.height(80.dp))
-            }
-            
-            // Book header - shows actual data when available
-            item(key = "header") {
-                PlaceholderHeader(
-                    title = title,
-                    author = author,
-                    isLoading = isLoading,
-                    placeholderColor = placeholderColor
-                )
-            }
-            
-            // Stats placeholder - static boxes
-            item(key = "stats") {
-                PlaceholderStats(placeholderColor = placeholderColor)
-            }
-            
-            // Action buttons placeholder - static boxes
-            item(key = "actions") {
-                PlaceholderActions(placeholderColor = placeholderColor)
-            }
-            
-            // Summary placeholder
-            item(key = "summary") {
-                PlaceholderSummary(placeholderColor = placeholderColor)
-            }
-            
-            // Chapters header with loading indicator
-            item(key = "chapters_header") {
-                PlaceholderChaptersHeader(
-                    isLoading = isLoading,
-                    placeholderColor = placeholderColor
-                )
-            }
-            
-            // Static chapter row placeholders - no animation
-            items(5, key = { "chapter_placeholder_$it" }) {
+            // Chapter rows (3 visible)
+            repeat(3) {
                 PlaceholderChapterRow(placeholderColor = placeholderColorLight)
             }
         }
@@ -182,7 +102,6 @@ private fun BookDetailPlaceholderLazy(
 private fun PlaceholderHeader(
     title: String,
     author: String?,
-    isLoading: Boolean,
     placeholderColor: androidx.compose.ui.graphics.Color
 ) {
     Row(
@@ -191,34 +110,22 @@ private fun PlaceholderHeader(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Book cover placeholder - static box with optional loading spinner
+        // Book cover placeholder - just a static box
         Box(
             modifier = Modifier
                 .width(120.dp)
                 .height(180.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(placeholderColor),
-            contentAlignment = Alignment.Center
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                )
-            }
-        }
+                .background(placeholderColor)
+        )
         
         // Title and metadata column
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Title - show actual title with fade-in, or placeholder
-            AnimatedVisibility(
-                visible = title.isNotEmpty(),
-                enter = fadeIn(animationSpec = tween(200))
-            ) {
+            // Show title if available, otherwise placeholder box
+            if (title.isNotEmpty()) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge,
@@ -226,9 +133,7 @@ private fun PlaceholderHeader(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-            if (title.isEmpty()) {
-                // Static placeholder for title
+            } else {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.85f)
@@ -247,18 +152,14 @@ private fun PlaceholderHeader(
             
             Spacer(modifier = Modifier.height(4.dp))
             
-            // Author - show actual author with fade-in, or placeholder
-            AnimatedVisibility(
-                visible = author != null,
-                enter = fadeIn(animationSpec = tween(200))
-            ) {
+            // Show author if available, otherwise placeholder box
+            if (author != null) {
                 Text(
-                    text = author ?: "",
+                    text = author,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-            if (author == null && isLoading) {
+            } else {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
@@ -266,26 +167,6 @@ private fun PlaceholderHeader(
                         .clip(RoundedCornerShape(4.dp))
                         .background(placeholderColor)
                 )
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Loading indicator - small and unobtrusive
-            if (isLoading) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(14.dp),
-                        strokeWidth = 1.5.dp
-                    )
-                    Text(
-                        text = "Loading...",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
-                }
             }
         }
     }
@@ -331,7 +212,6 @@ private fun PlaceholderActions(placeholderColor: androidx.compose.ui.graphics.Co
             .padding(horizontal = 20.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Main action button placeholder
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -339,7 +219,6 @@ private fun PlaceholderActions(placeholderColor: androidx.compose.ui.graphics.Co
                 .clip(RoundedCornerShape(24.dp))
                 .background(placeholderColor)
         )
-        // Secondary action placeholders
         Box(
             modifier = Modifier
                 .size(48.dp)
@@ -369,7 +248,6 @@ private fun PlaceholderSummary(placeholderColor: androidx.compose.ui.graphics.Co
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
         
-        // Static placeholder lines - no animation
         repeat(3) { index ->
             Box(
                 modifier = Modifier
@@ -383,10 +261,7 @@ private fun PlaceholderSummary(placeholderColor: androidx.compose.ui.graphics.Co
 }
 
 @Composable
-private fun PlaceholderChaptersHeader(
-    isLoading: Boolean,
-    placeholderColor: androidx.compose.ui.graphics.Color
-) {
+private fun PlaceholderChaptersHeader(placeholderColor: androidx.compose.ui.graphics.Color) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -399,13 +274,7 @@ private fun PlaceholderChaptersHeader(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
-        
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(18.dp),
-                strokeWidth = 2.dp
-            )
-        }
+        // No loading indicator - just empty space
     }
 }
 
@@ -439,7 +308,6 @@ private fun PlaceholderChapterRow(placeholderColor: androidx.compose.ui.graphics
                 )
             }
         }
-        // Divider
         Box(
             modifier = Modifier
                 .fillMaxWidth()

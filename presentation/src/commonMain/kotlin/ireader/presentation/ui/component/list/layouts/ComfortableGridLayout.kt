@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.UiText
 import ireader.presentation.ui.component.LocalPerformanceConfig
-import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.ui.component.rememberIsGridScrollingFast
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
@@ -121,13 +119,6 @@ fun ComfortableGridLayout(
             }
 
         )
-        if (isLoading && scrollState.isScrolledToTheEnd()) {
-            Spacer(modifier = Modifier.height(45.dp))
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-            )
-        }
+        // No loading indicator - data loads seamlessly without visual interruption
     }
 }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +25,6 @@ import ireader.i18n.UiText
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.LocalPerformanceConfig
-import ireader.presentation.ui.component.list.isScrolledToTheEnd
 import ireader.presentation.ui.component.rememberIsGridScrollingFast
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -114,13 +112,6 @@ fun CoverOnlyGrid(
                 }
             }
         )
-        if (isLoading && scrollState.isScrolledToTheEnd()) {
-            Spacer(modifier = Modifier.height(45.dp))
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-            )
-        }
+        // No loading indicator - data loads seamlessly without visual interruption
     }
 }

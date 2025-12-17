@@ -121,65 +121,64 @@ fun BookReviewsIntegration(
         }
     }
     
-    if (!isLoading) {
-        // Compact summary card
-        ReviewSummaryCard(
-            reviewCount = reviews.size,
-            averageRating = averageRating,
-            onOpenReviews = { showReviewsSheet = true },
-            onWriteReview = { showWriteDialog = true },
-            modifier = modifier
-        )
-        
-        // Bottom sheet with all reviews
-        if (showReviewsSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showReviewsSheet = false },
-                sheetState = sheetState
-            ) {
-                ReviewsBottomSheet(
-                    reviews = reviews,
-                    averageRating = averageRating,
-                    userBadgesMap = userBadgesMap,
-                    onDismiss = {
-                        scope.launch {
-                            sheetState.hide()
-                            showReviewsSheet = false
-                        }
-                    }
-                )
-            }
-        }
-        
-        // Write review dialog
-        if (showWriteDialog) {
-            WriteReviewDialog(
-                onDismiss = { showWriteDialog = false },
-                onSubmit = { rating, reviewText ->
+    // Always show the card - with actual data (starts empty, updates when loaded)
+    // This prevents UI jump when reviews load
+    ReviewSummaryCard(
+        reviewCount = reviews.size,
+        averageRating = averageRating,
+        onOpenReviews = { showReviewsSheet = true },
+        onWriteReview = { showWriteDialog = true },
+        modifier = modifier
+    )
+    
+    // Bottom sheet with all reviews
+    if (showReviewsSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showReviewsSheet = false },
+            sheetState = sheetState
+        ) {
+            ReviewsBottomSheet(
+                reviews = reviews,
+                averageRating = averageRating,
+                userBadgesMap = userBadgesMap,
+                onDismiss = {
                     scope.launch {
-                        submitBookReviewUseCase(bookTitle, rating, reviewText).onSuccess {
-                            showWriteDialog = false
-                            refreshReviews()
-                        }.onFailure { error ->
-                            val message = error.message ?: "Failed to submit review"
-                            // Show user-friendly message for non-critical errors
-                            val isNonCritical = message.contains("maintenance", ignoreCase = true) ||
-                                               message.contains("unavailable", ignoreCase = true) ||
-                                               message.contains("cancelled", ignoreCase = true) ||
-                                               message.contains("Supabase", ignoreCase = true) ||
-                                               message.contains("not configured", ignoreCase = true) ||
-                                               message.contains("timeout", ignoreCase = true)
-                            
-                            errorMessage = if (isNonCritical) {
-                                "Reviews are temporarily unavailable. Please try again later."
-                            } else {
-                                message
-                            }
-                            showWriteDialog = false
-                        }
+                        sheetState.hide()
+                        showReviewsSheet = false
                     }
                 }
             )
         }
+    }
+    
+    // Write review dialog
+    if (showWriteDialog) {
+        WriteReviewDialog(
+            onDismiss = { showWriteDialog = false },
+            onSubmit = { rating, reviewText ->
+                scope.launch {
+                    submitBookReviewUseCase(bookTitle, rating, reviewText).onSuccess {
+                        showWriteDialog = false
+                        refreshReviews()
+                    }.onFailure { error ->
+                        val message = error.message ?: "Failed to submit review"
+                        // Show user-friendly message for non-critical errors
+                        val isNonCritical = message.contains("maintenance", ignoreCase = true) ||
+                                           message.contains("unavailable", ignoreCase = true) ||
+                                           message.contains("cancelled", ignoreCase = true) ||
+                                           message.contains("Supabase", ignoreCase = true) ||
+                                           message.contains("not configured", ignoreCase = true) ||
+                                           message.contains("timeout", ignoreCase = true)
+                        
+                        errorMessage = if (isNonCritical) {
+                            "Reviews are temporarily unavailable. Please try again later."
+                        } else {
+                            message
+                        }
+                        showWriteDialog = false
+                    }
+                }
+            }
+        )
     }
 }

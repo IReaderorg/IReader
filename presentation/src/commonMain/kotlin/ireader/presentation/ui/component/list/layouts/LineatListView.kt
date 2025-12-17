@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -172,16 +171,7 @@ fun LinearListDisplay(
         }
         item {
             Spacer(modifier = Modifier.height(25.dp))
-            if (isLoading) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
+            // No loading indicator - data loads seamlessly without visual interruption
         }
     }
 }

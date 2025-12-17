@@ -52,7 +52,6 @@ import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
-import ireader.presentation.ui.book.components.BookDetailPlaceholder
 import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
 import ireader.presentation.ui.book.components.ChapterScreenBottomTabComposable
 import ireader.presentation.ui.book.viewmodel.BookDetailEvent
@@ -209,23 +208,9 @@ data class BookDetailScreenSpec constructor(
             ) {
                 when (val s = state) {
                     BookDetailState.Loading -> {
-                        // Show placeholder instead of shimmer for instant feedback
-                        BookDetailPlaceholder(
-                            bookId = bookId,
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                    
-                    is BookDetailState.Placeholder -> {
-                        // Show placeholder with minimal info - progressively updates
-                        BookDetailPlaceholder(
-                            bookId = s.bookId,
-                            title = s.title,
-                            cover = s.cover,
-                            author = s.author,
-                            isLoading = s.isLoading,
-                            onBack = { navController.popBackStack() }
-                        )
+                        // Brief loading state - ViewModel transitions to Success.empty() immediately
+                        // No shimmer, no placeholder - just empty box during brief transition
+                        Box(modifier = Modifier.fillMaxSize())
                     }
                     
                     is BookDetailState.Success -> {
