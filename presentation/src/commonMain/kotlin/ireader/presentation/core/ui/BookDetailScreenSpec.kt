@@ -1,6 +1,7 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -30,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import ireader.core.startup.ScreenProfiler
 import androidx.compose.ui.unit.dp
 import ireader.core.source.CatalogSource
@@ -193,47 +196,58 @@ data class BookDetailScreenSpec constructor(
         }
         
         // Wrap entire screen with TransparentStatusBar to prevent UI jump during transition
+        // Use graphicsLayer to promote to separate layer for smoother animation
         TransparentStatusBar {
-            when (val s = state) {
-                BookDetailState.Loading -> {
-                    // Show placeholder instead of shimmer for instant feedback
-                    BookDetailPlaceholder(
-                        bookId = bookId,
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-                
-                is BookDetailState.Placeholder -> {
-                    // Show placeholder with minimal info - progressively updates
-                    BookDetailPlaceholder(
-                        bookId = s.bookId,
-                        title = s.title,
-                        cover = s.cover,
-                        author = s.author,
-                        isLoading = s.isLoading,
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-                
-                is BookDetailState.Success -> {
-                    // Mark UI composition for profiling
-                    LaunchedEffect(Unit) {
-                        ScreenProfiler.mark("BookDetail_$bookId", "ui_composition_started")
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        // Promote to separate layer for GPU-accelerated animation
+                        // This prevents recomposition from affecting the animation
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    }
+            ) {
+                when (val s = state) {
+                    BookDetailState.Loading -> {
+                        // Show placeholder instead of shimmer for instant feedback
+                        BookDetailPlaceholder(
+                            bookId = bookId,
+                            onBack = { navController.popBackStack() }
+                        )
                     }
                     
-                    BookDetailContent(
-                        vm = vm,
-                        state = s,
-                        snackbarHostState = snackbarHostState,
-                        navigationCallbacks = navigationCallbacks,
-                    )
-                }
+                    is BookDetailState.Placeholder -> {
+                        // Show placeholder with minimal info - progressively updates
+                        BookDetailPlaceholder(
+                            bookId = s.bookId,
+                            title = s.title,
+                            cover = s.cover,
+                            author = s.author,
+                            isLoading = s.isLoading,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    
+                    is BookDetailState.Success -> {
+                        // Mark UI composition for profiling
+                        LaunchedEffect(Unit) {
+                            ScreenProfiler.mark("BookDetail_$bookId", "ui_composition_started")
+                        }
+                        
+                        BookDetailContent(
+                            vm = vm,
+                            state = s,
+                            snackbarHostState = snackbarHostState,
+                            navigationCallbacks = navigationCallbacks,
+                        )
+                    }
                 
-                is BookDetailState.Error -> {
-                    ErrorContent(
-                        message = s.message,
-                        onBack = { navController.popBackStack() }
-                    )
+                    is BookDetailState.Error -> {
+                        ErrorContent(
+                            message = s.message,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                 }
             }
         }

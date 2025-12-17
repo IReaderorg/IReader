@@ -39,9 +39,75 @@ import androidx.compose.ui.unit.dp
  * - Static placeholder colors for instant render
  * - Progressive data display with fade-in for smooth UX
  * - Minimal recomposition when data updates
+ * - Uses Column instead of LazyColumn for faster initial composition
+ *   (LazyColumn has overhead for measuring and layout that slows first frame)
  */
 @Composable
 fun BookDetailPlaceholder(
+    bookId: Long,
+    title: String = "",
+    cover: String? = null,
+    author: String? = null,
+    isLoading: Boolean = true,
+    onBack: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    val placeholderColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+    val placeholderColorLight = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+    
+    Box(modifier = modifier.fillMaxSize()) {
+        // Simple static background - no animation
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .background(placeholderColorLight)
+        )
+        
+        // Use Column instead of LazyColumn for faster initial composition
+        // LazyColumn has measurement overhead that can cause jank during navigation
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top
+        ) {
+            // Top padding for app bar
+            Spacer(modifier = Modifier.height(80.dp))
+            
+            // Book header - shows actual data when available
+            PlaceholderHeader(
+                title = title,
+                author = author,
+                isLoading = isLoading,
+                placeholderColor = placeholderColor
+            )
+            
+            // Stats placeholder - static boxes
+            PlaceholderStats(placeholderColor = placeholderColor)
+            
+            // Action buttons placeholder - static boxes
+            PlaceholderActions(placeholderColor = placeholderColor)
+            
+            // Summary placeholder
+            PlaceholderSummary(placeholderColor = placeholderColor)
+            
+            // Chapters header with loading indicator
+            PlaceholderChaptersHeader(
+                isLoading = isLoading,
+                placeholderColor = placeholderColor
+            )
+            
+            // Only show 3 chapter placeholders (visible above fold)
+            // This reduces composition time significantly
+            repeat(3) { index ->
+                PlaceholderChapterRow(placeholderColor = placeholderColorLight)
+            }
+        }
+    }
+}
+
+// Keep the old LazyColumn version for reference but don't use it
+@Composable
+private fun BookDetailPlaceholderLazy(
     bookId: Long,
     title: String = "",
     cover: String? = null,

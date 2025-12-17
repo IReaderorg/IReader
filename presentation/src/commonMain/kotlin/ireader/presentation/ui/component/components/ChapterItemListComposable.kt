@@ -1,7 +1,5 @@
 package ireader.presentation.ui.component.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -23,11 +21,11 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +37,6 @@ import ireader.domain.utils.extensions.toLocalDate
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.bookmarked
 import ireader.i18n.resources.cached
-import ireader.i18n.resources.chapter_background
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -65,28 +62,21 @@ fun ChapterRow(
         chapter.content.isNotEmpty()
     }
     
-    // Animated background color for chapter rows
-    // Use surface color as base to ensure opacity over backdrop images
-    val backgroundColor by animateColorAsState(
-        targetValue = when {
-            isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                .compositeOver(MaterialTheme.colorScheme.surface)
-            isLastRead -> MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                .compositeOver(MaterialTheme.colorScheme.surface)
-            chapter.read -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                .compositeOver(MaterialTheme.colorScheme.surface) // Gray background for read chapters
-            else -> MaterialTheme.colorScheme.surface // Use opaque surface color to prevent backdrop bleed-through
-        },
-        animationSpec = spring(),
-        label = localizeHelper.localize(Res.string.chapter_background),
-    )
+    // PERFORMANCE FIX: Use static background color instead of animated
+    // Animation on every row causes significant jank during scroll on low-end devices
+    // Get theme colors once
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val primaryContainerColor = MaterialTheme.colorScheme.primaryContainer
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
     
-    // Cache text color calculations
-    val titleColor = remember(isLastRead, chapter.read) {
+    // Calculate background color without animation - much faster
+    val backgroundColor = remember(isSelected, isLastRead, chapter.read, surfaceColor, primaryContainerColor, primaryColor, surfaceVariantColor) {
         when {
-            isLastRead -> null // Will use primary color from theme
-            chapter.read -> null // Will use disabled alpha
-            else -> null // Will use current content color
+            isSelected -> primaryContainerColor.copy(alpha = 0.3f).compositeOver(surfaceColor)
+            isLastRead -> primaryColor.copy(alpha = 0.08f).compositeOver(surfaceColor)
+            chapter.read -> surfaceVariantColor.copy(alpha = 0.5f).compositeOver(surfaceColor)
+            else -> surfaceColor
         }
     }
     

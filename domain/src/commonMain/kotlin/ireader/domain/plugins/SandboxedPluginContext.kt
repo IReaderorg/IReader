@@ -1,5 +1,9 @@
 package ireader.domain.plugins
 
+import ireader.domain.plugins.providers.CharacterServiceProviderImpl
+import ireader.domain.plugins.providers.GlossaryServiceProviderImpl
+import ireader.domain.plugins.providers.PluginHttpClientProviderImpl
+import ireader.domain.plugins.providers.SyncServiceProviderImpl
 import ireader.plugin.api.AppVersionInfo
 import ireader.plugin.api.CharacterServiceProvider
 import ireader.plugin.api.GlossaryServiceProvider
@@ -9,6 +13,7 @@ import ireader.plugin.api.Platform
 import ireader.plugin.api.PluginHttpClientProvider
 import ireader.plugin.api.ReaderContextProvider
 import ireader.plugin.api.SyncServiceProvider
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -20,8 +25,31 @@ class SandboxedPluginContext(
     override val pluginId: String,
     override val permissions: List<PluginPermission>,
     private val sandbox: PluginSandbox,
-    private val preferencesStore: PluginPreferencesStore
+    private val preferencesStore: PluginPreferencesStore,
+    private val httpClient: HttpClient? = null,
+    private val libraryServiceProvider: LibraryServiceProvider? = null,
+    private val readerContextProvider: ReaderContextProvider? = null,
+    private val notificationHandler: ((String, String, String) -> Unit)? = null,
+    private val appVersionProvider: (() -> AppVersionInfo)? = null,
+    private val platformProvider: (() -> Platform)? = null
 ) : PluginContext {
+    
+    // Lazy-initialized service providers
+    private val httpClientProvider: PluginHttpClientProvider? by lazy {
+        httpClient?.let { PluginHttpClientProviderImpl(it) }
+    }
+    
+    private val glossaryServiceProvider: GlossaryServiceProvider by lazy {
+        GlossaryServiceProviderImpl()
+    }
+    
+    private val characterServiceProvider: CharacterServiceProvider by lazy {
+        CharacterServiceProviderImpl()
+    }
+    
+    private val syncServiceProvider: SyncServiceProvider by lazy {
+        SyncServiceProviderImpl()
+    }
     
     /**
      * Get the plugin's data directory for storing files
@@ -73,59 +101,57 @@ class SandboxedPluginContext(
     
     override fun getHttpClient(): PluginHttpClientProvider? {
         if (!hasPermission(PluginPermission.NETWORK)) return null
-        // TODO: Implement HTTP client provider
-        return null
+        return httpClientProvider
     }
     
     override fun getGlossaryService(): GlossaryServiceProvider? {
         if (!hasPermission(PluginPermission.GLOSSARY_ACCESS)) return null
-        // TODO: Implement glossary service provider
-        return null
+        return glossaryServiceProvider
     }
     
     override fun getCharacterService(): CharacterServiceProvider? {
         if (!hasPermission(PluginPermission.CHARACTER_DATABASE)) return null
-        // TODO: Implement character service provider
-        return null
+        return characterServiceProvider
     }
     
     override fun getSyncService(): SyncServiceProvider? {
         if (!hasPermission(PluginPermission.SYNC_DATA)) return null
-        // TODO: Implement sync service provider
-        return null
+        return syncServiceProvider
     }
     
     override fun getLibraryService(): LibraryServiceProvider? {
         if (!hasPermission(PluginPermission.LIBRARY_ACCESS)) return null
-        // TODO: Implement library service provider
-        return null
+        return libraryServiceProvider
     }
     
     override fun getReaderContext(): ReaderContextProvider? {
         if (!hasPermission(PluginPermission.READER_CONTEXT)) return null
-        // TODO: Implement reader context provider
-        return null
+        return readerContextProvider
     }
     
     override fun showNotification(title: String, message: String, channelId: String) {
         if (!hasPermission(PluginPermission.NOTIFICATIONS)) return
-        // TODO: Implement notification showing
+        notificationHandler?.invoke(title, message, channelId)
     }
     
     override fun log(level: LogLevel, message: String, throwable: Throwable?) {
         // Always allow logging
         val prefix = "[$pluginId]"
+        val logMessage = if (throwable != null) {
+            "$prefix $message - ${throwable.message}"
+        } else {
+            "$prefix $message"
+        }
         when (level) {
-            LogLevel.DEBUG -> println("DEBUG $prefix $message")
-            LogLevel.INFO -> println("INFO $prefix $message")
-            LogLevel.WARN -> println("WARN $prefix $message")
-            LogLevel.ERROR -> println("ERROR $prefix $message ${throwable?.message ?: ""}")
+            LogLevel.DEBUG -> println("DEBUG $logMessage")
+            LogLevel.INFO -> println("INFO $logMessage")
+            LogLevel.WARN -> println("WARN $logMessage")
+            LogLevel.ERROR -> println("ERROR $logMessage")
         }
     }
     
     override fun getAppVersion(): AppVersionInfo {
-        // TODO: Get actual app version
-        return AppVersionInfo(
+        return appVersionProvider?.invoke() ?: AppVersionInfo(
             versionName = "2.0.0",
             versionCode = 1,
             buildType = "release"
@@ -133,8 +159,7 @@ class SandboxedPluginContext(
     }
     
     override fun getPlatform(): Platform {
-        // TODO: Detect actual platform
-        return Platform.ANDROID
+        return platformProvider?.invoke() ?: Platform.DESKTOP
     }
     
     /**
@@ -202,7 +227,12 @@ class RestrictedPluginPreferencesStore : PluginPreferencesStore {
  */
 class PluginContextFactory(
     private val permissionManager: PluginPermissionManager,
-    private val fileSystem: ireader.core.io.FileSystem
+    private val fileSystem: ireader.core.io.FileSystem,
+    private val httpClient: HttpClient? = null,
+    private val libraryServiceProvider: LibraryServiceProvider? = null,
+    private val notificationHandler: ((String, String, String) -> Unit)? = null,
+    private val appVersionProvider: (() -> AppVersionInfo)? = null,
+    private val platformProvider: (() -> Platform)? = null
 ) {
     /**
      * Create a sandboxed context for a plugin
@@ -211,7 +241,8 @@ class PluginContextFactory(
     fun createContext(
         pluginId: String,
         manifest: PluginManifest,
-        preferencesStore: PluginPreferencesStore
+        preferencesStore: PluginPreferencesStore,
+        readerContextProvider: ReaderContextProvider? = null
     ): SandboxedPluginContext {
         val sandbox = PluginSandbox(
             pluginId = pluginId,
@@ -224,7 +255,13 @@ class PluginContextFactory(
             pluginId = pluginId,
             permissions = manifest.permissions,
             sandbox = sandbox,
-            preferencesStore = preferencesStore
+            preferencesStore = preferencesStore,
+            httpClient = httpClient,
+            libraryServiceProvider = libraryServiceProvider,
+            readerContextProvider = readerContextProvider,
+            notificationHandler = notificationHandler,
+            appVersionProvider = appVersionProvider,
+            platformProvider = platformProvider
         )
     }
 }

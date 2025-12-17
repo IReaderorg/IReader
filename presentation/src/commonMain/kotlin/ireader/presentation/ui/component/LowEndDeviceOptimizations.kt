@@ -85,10 +85,10 @@ data class PerformanceConfig(
         )
         
         val Medium = PerformanceConfig(
-            animationDurationMs = 150,
+            animationDurationMs = 100, // Reduced from 150 for snappier feel
             crossfadeDurationMs = 0, // Disable crossfade for faster display
-            prefetchDistance = 2,
-            maxConcurrentImageLoads = 4,
+            prefetchDistance = 3, // Increased from 2 for smoother scroll
+            maxConcurrentImageLoads = 6, // Increased from 4 for faster image loading
             enableComplexAnimations = false, // Disable for better scroll
             enableBlurEffects = false,
             enableShadows = false, // Disable shadows for performance
@@ -97,7 +97,7 @@ data class PerformanceConfig(
             enableImageCrossfade = false,
             useRgb565 = false,
             enableImagePlaceholder = false,
-            deferImageLoadingOnScroll = false
+            deferImageLoadingOnScroll = true // Enable to reduce jank during fast scroll
         )
     }
 }

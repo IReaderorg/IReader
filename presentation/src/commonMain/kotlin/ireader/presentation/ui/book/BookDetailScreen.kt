@@ -274,10 +274,10 @@ fun BookDetailScreen(
                     verticalArrangement = Arrangement.Top,
                     state = scrollState
                 ) {
-                    item {
+                    item(key = "spacer_top") {
                         Spacer(modifier = Modifier.height(appbarPadding + 16.dp))
                     }
-                    item {
+                    item(key = "book_header") {
                         ModernBookHeader(
                             book = book,
                             source = source,
@@ -286,13 +286,13 @@ fun BookDetailScreen(
                             onCoverClick = onShowCoverPreview
                         )
                     }
-                    item {
+                    item(key = "book_stats") {
                         BookStatsCard(
                             book = book,
                             chapterCount = chapterCount
                         )
                     }
-                    item {
+                    item(key = "action_buttons") {
                         if (!useFab) {
                             ModernActionButtons(
                                 favorite = book.favorite,
@@ -305,7 +305,7 @@ fun BookDetailScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
-                    item {
+                    item(key = "book_summary") {
                         ModernBookSummary(
                             book = book,
                             isSummaryExpanded = isSummaryExpanded,
@@ -313,14 +313,14 @@ fun BookDetailScreen(
                             onCopy = onCopyTitle
                         )
                     }
-                    item {
+                    item(key = "book_reviews") {
                         BookReviewsIntegration(
                             bookTitle = book.title,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                         )
                     }
                     // Character Art Section (if enabled)
-                    item {
+                    item(key = "character_art") {
                         CharacterArtSectionWrapper(
                             bookTitle = book.title,
                             uiPreferences = uiPreferences,
@@ -328,7 +328,7 @@ fun BookDetailScreen(
                             onArtClick = { art -> onCharacterArtDetail(art.id) }
                         )
                     }
-                    item {
+                    item(key = "chapter_bar") {
                         ChapterBar(
                             vm = vm,
                             chapters = chapters.value,
@@ -342,7 +342,7 @@ fun BookDetailScreen(
                     val sourceName = vm.sourceSwitchingState.betterSourceName
                     val comparison = vm.sourceSwitchingState.sourceComparison
                     if (sourceName != null && comparison != null) {
-                        item {
+                        item(key = "source_banner") {
                             ireader.presentation.ui.component.SourceSwitchingBanner(
                                 sourceName = sourceName,
                                 chapterDifference = comparison.chapterDifference,
@@ -353,7 +353,7 @@ fun BookDetailScreen(
                     }
                 }
                 
-                item {
+                item(key = "filter_bar") {
                     ChapterListFilterBar(
                         filters = vm.filters.value,
                         onToggleFilter = { filterType ->
@@ -363,7 +363,7 @@ fun BookDetailScreen(
                 }
                 
                 if (vm.searchMode) {
-                    item {
+                    item(key = "search_field") {
                         AppTextField(
                             modifier = Modifier.padding(
                                 horizontal = 16.dp,

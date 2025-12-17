@@ -51,33 +51,38 @@ fun UpdatesContent(
             }
             
             updates.forEach { (date, updatesList) ->
-                item {
+                item(key = "date_${date.date}") {
                     TextSection(
                         text = date.date.asRelativeTimeString()
                     )
                 }
                 items(
                     count = updatesList.size,
+                    key = { index -> "update_${updatesList[index].chapterId}" },
+                    contentType = { "update_item" }
                 ) { index ->
+                    val update = updatesList[index]
                     UpdatesItem(
-                        book = updatesList[index],
-                        isSelected = updatesList[index].chapterId in selection,
+                        book = update,
+                        isSelected = update.chapterId in selection,
                         onClickItem = onClickItem,
                         onLongClickItem = onLongClickItem,
                         onClickCover = onClickCover,
                         onClickDownload = onClickDownload,
-                        isDownloadable = !updatesList[index].downloaded
+                        isDownloadable = !update.downloaded
                     )
                 }
             }
             
             // Update History Section
             if (updateHistory.isNotEmpty()) {
-                item {
+                item(key = "history_header") {
                     TextSection(text = localizeHelper.localize(Res.string.update_history))
                 }
                 items(
-                    count = updateHistory.size
+                    count = updateHistory.size,
+                    key = { index -> "history_${updateHistory[index].id}" },
+                    contentType = { "history_item" }
                 ) { index ->
                     UpdateHistoryItem(
                         history = updateHistory[index]
