@@ -162,6 +162,40 @@ class SandboxedPluginContext(
         return platformProvider?.invoke() ?: Platform.DESKTOP
     }
     
+    override fun getNativePlatformId(): String {
+        return getNativePlatformIdImpl()
+    }
+    
+    override fun extractNativeLibraries(): String? {
+        // Check if plugin has native libraries for this platform
+        val platformId = getNativePlatformId()
+        val nativeLibs = manifest?.nativeLibraries?.get(platformId)
+        
+        if (nativeLibs.isNullOrEmpty()) {
+            return null
+        }
+        
+        // Extract to plugin's native library directory
+        return extractNativeLibrariesImpl(pluginId, nativeLibs)
+    }
+    
+    override fun loadNativeLibrary(libraryName: String) {
+        val nativeDir = extractNativeLibraries()
+            ?: throw UnsatisfiedLinkError("No native libraries available for platform ${getNativePlatformId()}")
+        
+        loadNativeLibraryImpl(nativeDir, libraryName)
+    }
+    
+    // Store manifest reference for native library extraction
+    private var manifest: PluginManifest? = null
+    
+    /**
+     * Set the plugin manifest (called during initialization)
+     */
+    fun setManifest(manifest: PluginManifest) {
+        this.manifest = manifest
+    }
+    
     /**
      * Validate file access before operation
      * Requirements: 10.3, 10.4

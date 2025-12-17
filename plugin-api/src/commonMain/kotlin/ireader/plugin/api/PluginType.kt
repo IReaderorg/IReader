@@ -78,5 +78,15 @@ enum class PluginType {
      * Implement [GradioTTSPlugin] interface.
      * Coqui TTS, XTTS, and other Gradio endpoints.
      */
-    GRADIO_TTS
+    GRADIO_TTS,
+    
+    /**
+     * JavaScript engine plugins provide JS execution capabilities.
+     * Implement [JSEnginePlugin] interface.
+     * GraalVM (Desktop), J2V8 (Android), QuickJS, etc.
+     * 
+     * These plugins enable running LNReader-compatible source plugins
+     * without bundling the JS engine with the base app.
+     */
+    JS_ENGINE
 }

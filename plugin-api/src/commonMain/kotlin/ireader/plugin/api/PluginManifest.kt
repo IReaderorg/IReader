@@ -35,7 +35,22 @@ data class PluginManifest(
     /** URL to plugin icon (optional) */
     val iconUrl: String? = null,
     /** URLs to plugin screenshots (optional) */
-    val screenshotUrls: List<String> = emptyList()
+    val screenshotUrls: List<String> = emptyList(),
+    /** 
+     * Native libraries required by this plugin, mapped by platform.
+     * Key: platform identifier (e.g., "windows-x64", "macos-arm64", "linux-x64")
+     * Value: List of relative paths to native library files within the plugin package
+     * 
+     * Example:
+     * ```
+     * "nativeLibraries": {
+     *   "windows-x64": ["native/windows-x64/piper.dll", "native/windows-x64/onnxruntime.dll"],
+     *   "macos-arm64": ["native/macos-arm64/libpiper.dylib"],
+     *   "linux-x64": ["native/linux-x64/libpiper.so"]
+     * }
+     * ```
+     */
+    val nativeLibraries: Map<String, List<String>>? = null
 )
 
 /**

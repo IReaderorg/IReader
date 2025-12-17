@@ -46,11 +46,45 @@ actual class PluginClassLoader(
             
             Log.info("Loading plugin class: $className from ${dexFile.absolutePath}")
             
+            // Load the class
+            val loadedClass = classLoader.loadClass(className)
+            Log.info("Class loaded successfully: ${loadedClass.name}")
+            Log.info("Class interfaces: ${loadedClass.interfaces.map { it.name }}")
+            Log.info("Class superclass: ${loadedClass.superclass?.name}")
+            
+            // Check if it implements Plugin interface
+            val pluginInterface = ireader.plugin.api.Plugin::class.java
+            Log.info("Plugin interface class: ${pluginInterface.name}")
+            Log.info("Is assignable from Plugin: ${pluginInterface.isAssignableFrom(loadedClass)}")
+            
+            if (!pluginInterface.isAssignableFrom(loadedClass)) {
+                // List all interfaces to help debug
+                val allInterfaces = mutableListOf<Class<*>>()
+                var current: Class<*>? = loadedClass
+                while (current != null) {
+                    allInterfaces.addAll(current.interfaces)
+                    current = current.superclass
+                }
+                Log.error("Class $className does not implement Plugin interface!")
+                Log.error("All interfaces: ${allInterfaces.map { "${it.name} (classLoader: ${it.classLoader})" }}")
+                Log.error("Plugin interface classLoader: ${pluginInterface.classLoader}")
+                Log.error("Loaded class classLoader: ${loadedClass.classLoader}")
+                throw IllegalStateException(
+                    "Plugin class $className does not implement ireader.plugin.api.Plugin interface. " +
+                    "Interfaces found: ${allInterfaces.map { it.name }}"
+                )
+            }
+            
             @Suppress("UNCHECKED_CAST")
-            return classLoader.loadClass(className) as Class<out Plugin>
+            return loadedClass as Class<out Plugin>
         } catch (e: ClassNotFoundException) {
+            Log.error("ClassNotFoundException for ${manifest.id}: ${e.message}", e)
             throw IllegalStateException("Plugin class not found for ${manifest.id}: ${e.message}", e)
+        } catch (e: NoClassDefFoundError) {
+            Log.error("NoClassDefFoundError for ${manifest.id}: ${e.message}", e)
+            throw IllegalStateException("Missing class dependency for ${manifest.id}: ${e.message}", e)
         } catch (e: Exception) {
+            Log.error("Exception loading plugin class for ${manifest.id}: ${e.message}", e)
             throw IllegalStateException("Failed to load plugin class for ${manifest.id}: ${e.message}", e)
         }
     }
@@ -83,6 +117,14 @@ actual class PluginClassLoader(
      */
     private fun extractDexFromPackage(packageFile: File, pluginId: String): File {
         val dexOutputFile = File(securePluginDir, "${pluginId}.dex")
+        
+        // Delete existing file if it exists (it may be read-only from previous extraction)
+        if (dexOutputFile.exists()) {
+            // Make it writable first so we can delete it
+            dexOutputFile.setWritable(true)
+            val deleted = dexOutputFile.delete()
+            Log.info("Deleted existing DEX file: $deleted")
+        }
         
         java.util.zip.ZipFile(packageFile).use { zip ->
             // Try android/classes.dex first (standard location)
@@ -135,7 +177,12 @@ actual class PluginClassLoader(
     private fun createInMemoryClassLoader(file: File): ClassLoader {
         val dexBytes = file.readBytes()
         val buffer = ByteBuffer.wrap(dexBytes)
-        return InMemoryDexClassLoader(buffer, this::class.java.classLoader)
+        
+        // Use the app's classloader as parent to ensure plugin-api classes are found
+        val parentClassLoader = this::class.java.classLoader
+        Log.info("Creating InMemoryDexClassLoader with parent: $parentClassLoader")
+        
+        return InMemoryDexClassLoader(buffer, parentClassLoader)
     }
     
     /**
@@ -148,15 +195,33 @@ actual class PluginClassLoader(
         file.setReadOnly()
         
         // Create unique dex output directory per plugin
-        val dexOutputDir = File(secureDexCacheDir, pluginId).apply { mkdirs() }
+        // Clear existing optimized DEX cache to avoid stale data
+        val dexOutputDir = File(secureDexCacheDir, pluginId)
+        if (dexOutputDir.exists()) {
+            dexOutputDir.deleteRecursively()
+        }
+        dexOutputDir.mkdirs()
         
+        // Use the app's classloader as parent to ensure plugin-api classes are found
+        val parentClassLoader = this::class.java.classLoader
         Log.info("Creating DexClassLoader for $pluginId from ${file.absolutePath}")
+        Log.info("Parent classloader: $parentClassLoader")
+        Log.info("Parent classloader class: ${parentClassLoader?.javaClass?.name}")
+        
+        // Verify plugin-api classes are available in parent classloader
+        try {
+            val pluginClass = parentClassLoader?.loadClass("ireader.plugin.api.Plugin")
+            Log.info("Plugin interface found in parent classloader: ${pluginClass?.name}")
+            Log.info("Plugin interface classloader: ${pluginClass?.classLoader}")
+        } catch (e: ClassNotFoundException) {
+            Log.error("Plugin interface NOT found in parent classloader!", e)
+        }
         
         return DexClassLoader(
             file.absolutePath,
             dexOutputDir.absolutePath,
             null,
-            this::class.java.classLoader
+            parentClassLoader
         )
     }
 }

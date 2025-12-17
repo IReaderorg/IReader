@@ -1,5 +1,6 @@
 package ireader.domain.di
 
+import ireader.domain.js.engine.JSEngineProvider
 import ireader.domain.monitoring.PerformanceMetricsManager
 import ireader.domain.plugins.*
 import ireader.domain.services.tts.AudioStreamHandler
@@ -88,6 +89,12 @@ val PluginModule = module {
     factory { PluginTTSManager(get()) }
     factory { AudioStreamHandler() }
     factory { TTSErrorHandler() }
+    
+    // JS Engine Provider - manages JS engine plugins for LNReader sources
+    factory { JSEngineProvider(get()) }
+    
+    // JS Engine Requirement - handles prompts when JS engine is needed
+    factory { ireader.domain.js.engine.JSEngineRequirement(get()) }
     
     // Performance Monitoring
     factory { PerformanceMetricsManager(get()) }

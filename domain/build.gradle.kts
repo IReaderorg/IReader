@@ -212,6 +212,8 @@ kotlin {
 
                 // J2V8 - V8 JavaScript engine for Android (full Promise/async support)
                 // Provides native ES6+, Promises, async/await without polyfills
+                // TODO: Move to optional plugin (io.github.ireaderorg.plugins.j2v8-engine)
+                // See docs/PIPER_TTS_PLUGIN_DESIGN.md for migration plan
                 implementation(libs.j2v8)
 
             }
@@ -223,10 +225,15 @@ kotlin {
                 implementation(libs.ktor.okhttp)
 
                 implementation(compose.desktop.currentOs)
+                
                 // Piper JNI for text-to-speech - Testing version 1.2.0-a0f09cd
+                // TODO: Move to optional plugin (io.github.ireaderorg.plugins.piper-tts)
+                // See docs/PIPER_TTS_PLUGIN_DESIGN.md for migration plan
                 implementation("io.github.givimad:piper-jni:1.2.0-a0f09cd")
 
                 // GraalVM JavaScript for JavaScript engine
+                // TODO: Move to optional plugin (io.github.ireaderorg.plugins.graalvm-engine)
+                // See docs/PIPER_TTS_PLUGIN_DESIGN.md for migration plan
                 implementation(libs.polyglot)
                 implementation(libs.js)
             }

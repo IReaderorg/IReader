@@ -101,6 +101,36 @@ interface PluginContext {
      * Get current platform.
      */
     fun getPlatform(): Platform
+    
+    /**
+     * Get the current platform identifier for native library loading.
+     * Returns platform-architecture string like "windows-x64", "macos-arm64", "linux-x64".
+     * 
+     * @return Platform identifier string
+     */
+    fun getNativePlatformId(): String
+    
+    /**
+     * Extract native libraries for the current platform from the plugin package.
+     * The libraries are extracted to a platform-specific directory and can be loaded
+     * using System.load() or System.loadLibrary().
+     * 
+     * Only available if the plugin declares nativeLibraries in its manifest.
+     * 
+     * @return Path to the directory containing extracted native libraries,
+     *         or null if no native libraries are declared for this platform
+     */
+    fun extractNativeLibraries(): String?
+    
+    /**
+     * Load a native library by name from the plugin's native library directory.
+     * This is a convenience method that handles platform-specific library naming
+     * (e.g., "piper" becomes "piper.dll" on Windows, "libpiper.so" on Linux).
+     * 
+     * @param libraryName Base name of the library (without prefix/suffix)
+     * @throws UnsatisfiedLinkError if the library cannot be loaded
+     */
+    fun loadNativeLibrary(libraryName: String)
 }
 
 /**

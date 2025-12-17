@@ -36,7 +36,34 @@ actual suspend fun extractZipEntry(file: VirtualFile, entryName: String): String
 @Suppress("UNCHECKED_CAST")
 actual fun instantiatePlugin(pluginClass: Any): Plugin {
     val clazz = pluginClass as Class<out Plugin>
-    return clazz.getDeclaredConstructor().newInstance()
+    println("[PluginLoader] Instantiating plugin class: ${clazz.name}")
+    
+    try {
+        // Check for no-arg constructor
+        val constructor = clazz.getDeclaredConstructor()
+        println("[PluginLoader] Found no-arg constructor: $constructor")
+        
+        // Make it accessible if private
+        constructor.isAccessible = true
+        
+        val instance = constructor.newInstance()
+        println("[PluginLoader] Plugin instantiated successfully: ${instance::class.java.name}")
+        println("[PluginLoader] Plugin manifest ID: ${instance.manifest.id}")
+        
+        return instance
+    } catch (e: NoSuchMethodException) {
+        println("[PluginLoader] ERROR: No no-arg constructor found for ${clazz.name}")
+        println("[PluginLoader] Available constructors: ${clazz.declaredConstructors.map { it.toString() }}")
+        throw IllegalStateException("Plugin class ${clazz.name} must have a no-arg constructor", e)
+    } catch (e: java.lang.reflect.InvocationTargetException) {
+        println("[PluginLoader] ERROR: Constructor threw exception: ${e.targetException?.message}")
+        e.targetException?.printStackTrace()
+        throw IllegalStateException("Plugin constructor failed: ${e.targetException?.message}", e.targetException ?: e)
+    } catch (e: Exception) {
+        println("[PluginLoader] ERROR: Failed to instantiate plugin: ${e.message}")
+        e.printStackTrace()
+        throw e
+    }
 }
 
 /**
