@@ -36,5 +36,47 @@ enum class PluginType {
      * Implement [AIPlugin] interface.
      * Supports local (llama.cpp, ONNX) and cloud (OpenAI, Claude, Gemini) providers.
      */
-    AI
+    AI,
+    
+    /**
+     * Catalog plugins provide content sources (novels, manga, etc.).
+     * Implement [CatalogPlugin] interface.
+     * Supports LNReader catalogs, UserSource, and custom sources.
+     */
+    CATALOG,
+    
+    /**
+     * Image processing plugins for upscaling, enhancement, etc.
+     * Implement [ImageProcessingPlugin] interface.
+     * Can connect to local servers (Real-ESRGAN, etc.) or cloud services.
+     */
+    IMAGE_PROCESSING,
+    
+    /**
+     * Sync plugins for data synchronization.
+     * Implement [SyncPlugin] interface.
+     * Supports local server sync and cloud sync.
+     */
+    SYNC,
+    
+    /**
+     * Community screen plugins add custom UI screens.
+     * Implement [CommunityScreenPlugin] interface.
+     * Forums, recommendations, social features, etc.
+     */
+    COMMUNITY_SCREEN,
+    
+    /**
+     * Glossary plugins for term/dictionary management.
+     * Implement [GlossaryPlugin] interface.
+     * Character databases, translation glossaries, etc.
+     */
+    GLOSSARY,
+    
+    /**
+     * Gradio TTS plugins for Gradio-based TTS services.
+     * Implement [GradioTTSPlugin] interface.
+     * Coqui TTS, XTTS, and other Gradio endpoints.
+     */
+    GRADIO_TTS
 }

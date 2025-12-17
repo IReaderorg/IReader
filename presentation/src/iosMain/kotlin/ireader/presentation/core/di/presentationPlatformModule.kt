@@ -4,6 +4,8 @@ import ireader.presentation.core.theme.IosDynamicColorScheme
 import ireader.presentation.core.theme.IUseController
 import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.reader.viewmodel.PlatformReaderSettingReader
+import ireader.presentation.ui.update.AppUpdateChecker
+import ireader.presentation.ui.update.IosAppUpdateChecker
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -17,4 +19,7 @@ actual val presentationPlatformModule: Module = module {
     single<ireader.presentation.core.theme.DynamicColorScheme> { 
         IosDynamicColorScheme() 
     }
+    
+    // App update checker for iOS
+    single<AppUpdateChecker> { IosAppUpdateChecker() }
 }

@@ -28,6 +28,8 @@ data class PluginManifest(
     val minIReaderVersion: String,
     /** Supported platforms */
     val platforms: List<Platform>,
+    /** Fully qualified main class name (e.g., "com.example.MyPlugin") */
+    val mainClass: String? = null,
     /** Monetization model (optional) */
     val monetization: PluginMonetization? = null,
     /** URL to plugin icon (optional) */

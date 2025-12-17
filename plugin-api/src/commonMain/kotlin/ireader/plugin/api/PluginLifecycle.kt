@@ -1,182 +1,326 @@
 package ireader.plugin.api
 
 /**
- * Plugin lifecycle callbacks.
- * Plugins can implement this interface to receive lifecycle events.
+ * Extended lifecycle interface for plugins that need more control.
+ * Provides hooks for various app lifecycle events.
  */
 interface PluginLifecycle {
-    
     /**
-     * Called when the plugin is first loaded.
-     * Use this for one-time initialization.
+     * Called when the plugin is first installed.
+     * Use for one-time setup like database migrations.
      */
-    suspend fun onLoad() {}
-    
-    /**
-     * Called when the plugin is enabled.
-     * Use this to start services, register listeners, etc.
-     */
-    suspend fun onEnable() {}
-    
-    /**
-     * Called when the plugin is disabled.
-     * Use this to stop services, unregister listeners, etc.
-     */
-    suspend fun onDisable() {}
-    
-    /**
-     * Called when the plugin is about to be unloaded.
-     * Use this for cleanup, saving state, etc.
-     */
-    suspend fun onUnload() {}
+    suspend fun onInstall(context: PluginContext) {}
     
     /**
      * Called when the plugin is updated from a previous version.
-     * @param previousVersion The version code of the previously installed version
+     * @param previousVersion The version being updated from
      */
-    suspend fun onUpdate(previousVersion: Int) {}
+    suspend fun onUpdate(context: PluginContext, previousVersion: String) {}
     
     /**
-     * Called when the app configuration changes (e.g., language, theme).
+     * Called when the plugin is about to be uninstalled.
+     * Use for cleanup like removing stored data.
      */
-    suspend fun onConfigurationChanged() {}
+    suspend fun onUninstall(context: PluginContext) {}
+    
+    /**
+     * Called when the app starts and plugin is enabled.
+     */
+    suspend fun onAppStart(context: PluginContext) {}
+    
+    /**
+     * Called when the app is going to background.
+     */
+    suspend fun onAppBackground(context: PluginContext) {}
+    
+    /**
+     * Called when the app returns to foreground.
+     */
+    suspend fun onAppForeground(context: PluginContext) {}
+    
+    /**
+     * Called when the app is about to terminate.
+     */
+    suspend fun onAppTerminate(context: PluginContext) {}
+    
+    /**
+     * Called when user opens a book.
+     */
+    suspend fun onBookOpened(context: PluginContext, bookId: String) {}
+    
+    /**
+     * Called when user closes a book.
+     */
+    suspend fun onBookClosed(context: PluginContext, bookId: String) {}
+    
+    /**
+     * Called when user starts reading a chapter.
+     */
+    suspend fun onChapterStarted(context: PluginContext, bookId: String, chapterId: String) {}
+    
+    /**
+     * Called when user finishes reading a chapter.
+     */
+    suspend fun onChapterFinished(context: PluginContext, bookId: String, chapterId: String) {}
+    
+    /**
+     * Called when network connectivity changes.
+     */
+    suspend fun onNetworkChanged(context: PluginContext, isConnected: Boolean) {}
+    
+    /**
+     * Called periodically for background work (if BACKGROUND_SERVICE permission granted).
+     * @param intervalMs The interval in milliseconds since last call
+     */
+    suspend fun onBackgroundWork(context: PluginContext, intervalMs: Long) {}
 }
 
 /**
- * Plugin state that can be saved and restored.
- * Implement this to persist plugin state across sessions.
+ * Interface for plugins that provide configuration UI.
  */
-interface PluginStateful {
+interface ConfigurablePlugin {
+    /**
+     * Get configuration options for this plugin.
+     */
+    fun getConfigurationOptions(): List<ConfigOption>
     
     /**
-     * Save plugin state to a map.
-     * Called when the plugin is disabled or the app is closing.
+     * Validate configuration before saving.
+     * @return null if valid, error message if invalid
      */
-    fun saveState(): Map<String, String>
+    fun validateConfiguration(config: Map<String, Any>): String?
     
     /**
-     * Restore plugin state from a map.
-     * Called when the plugin is enabled.
+     * Called when configuration is updated.
      */
-    fun restoreState(state: Map<String, String>)
+    fun onConfigurationChanged(config: Map<String, Any>)
 }
 
 /**
- * Plugin that can be configured by the user.
+ * Configuration option for plugin settings UI.
  */
-interface PluginConfigurable {
-    
-    /**
-     * Get the configuration schema for this plugin.
-     * Used to generate settings UI.
-     */
-    fun getConfigSchema(): List<ConfigField>
-    
-    /**
-     * Get current configuration values.
-     */
-    fun getConfig(): Map<String, Any?>
-    
-    /**
-     * Update configuration values.
-     */
-    fun updateConfig(values: Map<String, Any?>)
-    
-    /**
-     * Reset configuration to defaults.
-     */
-    fun resetConfig()
-}
-
-/**
- * Configuration field definition.
- */
-sealed class ConfigField {
+sealed class ConfigOption {
     abstract val key: String
-    abstract val label: String
+    abstract val title: String
     abstract val description: String?
     abstract val required: Boolean
     
+    /**
+     * Text input option.
+     */
     data class Text(
         override val key: String,
-        override val label: String,
+        override val title: String,
         override val description: String? = null,
         override val required: Boolean = false,
-        val default: String = "",
-        val maxLength: Int? = null,
+        val defaultValue: String = "",
         val placeholder: String? = null,
-        val isPassword: Boolean = false
-    ) : ConfigField()
+        val inputType: TextInputType = TextInputType.TEXT,
+        val maxLength: Int? = null,
+        val validation: TextValidation? = null
+    ) : ConfigOption()
     
+    /**
+     * Number input option.
+     */
     data class Number(
         override val key: String,
-        override val label: String,
+        override val title: String,
         override val description: String? = null,
         override val required: Boolean = false,
-        val default: Double = 0.0,
+        val defaultValue: Double = 0.0,
         val min: Double? = null,
         val max: Double? = null,
-        val step: Double = 1.0
-    ) : ConfigField()
+        val step: Double = 1.0,
+        val isInteger: Boolean = false
+    ) : ConfigOption()
     
+    /**
+     * Boolean toggle option.
+     */
     data class Toggle(
         override val key: String,
-        override val label: String,
+        override val title: String,
         override val description: String? = null,
         override val required: Boolean = false,
-        val default: Boolean = false
-    ) : ConfigField()
+        val defaultValue: Boolean = false
+    ) : ConfigOption()
     
+    /**
+     * Single selection option.
+     */
     data class Select(
         override val key: String,
-        override val label: String,
+        override val title: String,
         override val description: String? = null,
         override val required: Boolean = false,
         val options: List<SelectOption>,
-        val default: String? = null
-    ) : ConfigField()
+        val defaultValue: String? = null
+    ) : ConfigOption()
     
+    /**
+     * Multi-selection option.
+     */
     data class MultiSelect(
         override val key: String,
-        override val label: String,
+        override val title: String,
         override val description: String? = null,
         override val required: Boolean = false,
         val options: List<SelectOption>,
-        val default: List<String> = emptyList()
-    ) : ConfigField()
+        val defaultValues: List<String> = emptyList(),
+        val maxSelections: Int? = null
+    ) : ConfigOption()
+    
+    /**
+     * Slider option.
+     */
+    data class Slider(
+        override val key: String,
+        override val title: String,
+        override val description: String? = null,
+        override val required: Boolean = false,
+        val defaultValue: Float = 0f,
+        val min: Float = 0f,
+        val max: Float = 100f,
+        val step: Float = 1f,
+        val showValue: Boolean = true,
+        val valueFormat: String? = null
+    ) : ConfigOption()
+    
+    /**
+     * Color picker option.
+     */
+    data class Color(
+        override val key: String,
+        override val title: String,
+        override val description: String? = null,
+        override val required: Boolean = false,
+        val defaultValue: Long = 0xFF000000,
+        val showAlpha: Boolean = false
+    ) : ConfigOption()
+    
+    /**
+     * Server endpoint option.
+     */
+    data class ServerEndpoint(
+        override val key: String,
+        override val title: String,
+        override val description: String? = null,
+        override val required: Boolean = false,
+        val defaultValue: String = "",
+        val placeholder: String = "http://localhost:7860",
+        val testConnection: Boolean = true
+    ) : ConfigOption()
+    
+    /**
+     * API key option (masked input).
+     */
+    data class ApiKey(
+        override val key: String,
+        override val title: String,
+        override val description: String? = null,
+        override val required: Boolean = false,
+        val placeholder: String = "Enter API key",
+        val validateUrl: String? = null
+    ) : ConfigOption()
+    
+    /**
+     * File picker option.
+     */
+    data class FilePicker(
+        override val key: String,
+        override val title: String,
+        override val description: String? = null,
+        override val required: Boolean = false,
+        val allowedExtensions: List<String> = emptyList(),
+        val allowMultiple: Boolean = false
+    ) : ConfigOption()
+    
+    /**
+     * Group of options (for organization).
+     */
+    data class Group(
+        override val key: String,
+        override val title: String,
+        override val description: String? = null,
+        override val required: Boolean = false,
+        val options: List<ConfigOption>,
+        val collapsible: Boolean = true,
+        val initiallyExpanded: Boolean = true
+    ) : ConfigOption()
 }
 
-/**
- * Option for select fields.
- */
 data class SelectOption(
     val value: String,
-    val label: String
+    val label: String,
+    val description: String? = null,
+    val icon: String? = null
+)
+
+enum class TextInputType {
+    TEXT,
+    PASSWORD,
+    EMAIL,
+    URL,
+    NUMBER,
+    MULTILINE
+}
+
+data class TextValidation(
+    val pattern: String? = null,
+    val errorMessage: String? = null
 )
 
 /**
- * Plugin health check interface.
- * Implement this to provide health status information.
+ * Interface for plugins that can be tested.
  */
-interface PluginHealthCheck {
-    
+interface TestablePlugin {
     /**
-     * Check if the plugin is healthy and functioning correctly.
+     * Run self-test to verify plugin is working correctly.
+     * @return Test result with details
      */
-    suspend fun checkHealth(): HealthStatus
+    suspend fun runSelfTest(context: PluginContext): PluginTestResult
 }
 
 /**
- * Health status result.
+ * Plugin test result.
  */
-data class HealthStatus(
-    val isHealthy: Boolean,
-    val message: String? = null,
-    val details: Map<String, String> = emptyMap()
-) {
-    companion object {
-        fun healthy(message: String? = null) = HealthStatus(true, message)
-        fun unhealthy(message: String, details: Map<String, String> = emptyMap()) = 
-            HealthStatus(false, message, details)
-    }
+data class PluginTestResult(
+    val success: Boolean,
+    val message: String,
+    val details: List<TestDetail> = emptyList(),
+    val durationMs: Long
+)
+
+data class TestDetail(
+    val name: String,
+    val passed: Boolean,
+    val message: String? = null
+)
+
+/**
+ * Interface for plugins that provide analytics/metrics.
+ */
+interface MetricsPlugin {
+    /**
+     * Get plugin metrics.
+     */
+    fun getMetrics(): PluginMetrics
+    
+    /**
+     * Reset metrics.
+     */
+    fun resetMetrics()
 }
+
+/**
+ * Plugin metrics.
+ */
+data class PluginMetrics(
+    val totalCalls: Long,
+    val successfulCalls: Long,
+    val failedCalls: Long,
+    val averageResponseTimeMs: Long,
+    val lastUsed: Long?,
+    val customMetrics: Map<String, Any> = emptyMap()
+)
