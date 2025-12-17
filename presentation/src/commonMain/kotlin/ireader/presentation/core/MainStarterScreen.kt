@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -32,7 +34,6 @@ import kotlinx.coroutines.delay
 import ireader.presentation.core.ui.AppTab
 import ireader.presentation.ui.component.ExtensionsShimmerLoading
 import ireader.presentation.ui.component.HistoryShimmerLoading
-import ireader.presentation.ui.component.LibraryShimmerLoading
 import ireader.presentation.ui.component.SettingsShimmerLoading
 import ireader.presentation.ui.component.UpdatesShimmerLoading
 import ireader.presentation.core.ui.GlobalSearchScreenSpec
@@ -384,7 +385,7 @@ private fun PersistentTabContainer(
             tabIndex = 0,
             isVisible = currentTabIndex == 0,
             isInitialized = 0 in visitedTabs,
-            shimmerContent = { LibraryShimmerLoading() }
+            shimmerContent = { CenteredLoadingIndicator() }
         ) {
             libraryContent()
         }
@@ -526,4 +527,18 @@ private fun RowScope.BottomNavTabItem(
         alwaysShowLabel = true,
         onDoubleClick = onDoubleClick
     )
+}
+
+/**
+ * Simple centered loading indicator - replaces shimmer loading.
+ * Shows a CircularProgressIndicator in the center of the screen.
+ */
+@Composable
+private fun CenteredLoadingIndicator() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
 }

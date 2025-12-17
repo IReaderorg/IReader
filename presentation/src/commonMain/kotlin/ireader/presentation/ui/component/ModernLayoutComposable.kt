@@ -1,12 +1,6 @@
 package ireader.presentation.ui.component
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -51,7 +45,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -75,11 +68,9 @@ import ireader.i18n.resources.in_library
 import ireader.i18n.resources.in_library_1
 import ireader.i18n.resources.last_read
 import ireader.i18n.resources.no_results_found
-import ireader.i18n.resources.shimmer
 import ireader.i18n.resources.total_chapter
 import ireader.i18n.resources.try_another_search
 import ireader.i18n.resources.unread_chapters
-import ireader.presentation.ui.component.components.BookShimmerLoading
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.domain.utils.extensions.currentTimeToLong
 
@@ -113,7 +104,13 @@ fun ModernLayoutComposable(
             }
 
             books.isEmpty() && isLoading -> {
-                BookShimmerLoading(columns = columns ?: 3)
+                // Simple centered loading indicator - no shimmer
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
 
             layout == DisplayMode.List -> {
@@ -349,7 +346,12 @@ fun ModernListItem(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
                         loading = {
-                            ShimmerLoadingEffect()
+                            // Simple placeholder - no shimmer
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                            )
                         },
                         error = {
                             Box(
@@ -816,7 +818,12 @@ fun BookCoverImage(
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop,
         loading = {
-            ShimmerLoadingEffect()
+            // Simple placeholder - no shimmer
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
         },
         error = {
             Box(
@@ -833,40 +840,6 @@ fun BookCoverImage(
                 )
             }
         }
-    )
-}
-
-@Composable
-fun ShimmerLoadingEffect() {
-    val localizeHelper =
-        requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val shimmerColors = listOf(
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-    )
-
-    val transition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.shimmer))
-    val translateAnim by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = localizeHelper.localize(Res.string.shimmer)
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.linearGradient(
-                    colors = shimmerColors,
-                    start = Offset(translateAnim - 1000f, translateAnim - 1000f),
-                    end = Offset(translateAnim, translateAnim)
-                )
-            )
     )
 }
 

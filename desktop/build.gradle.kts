@@ -319,3 +319,8 @@ tasks.whenTaskAdded {
         dependsOn("verifyNativeLibraries")
     }
 }
+
+// Enable ZIP64 for uber JAR to support more than 65535 entries
+tasks.withType<Jar> {
+    isZip64 = true
+}

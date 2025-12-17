@@ -48,7 +48,9 @@ import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.utils.extensions.withIOContext
 import ireader.domain.utils.extensions.withUIContext
+import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
+import ireader.i18n.asString
 import ireader.presentation.ui.book.components.ExportOptions
 import ireader.presentation.ui.book.helpers.PlatformHelper
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
@@ -110,6 +112,7 @@ class BookDetailViewModel(
     private val chapterController: ChapterController,
     private val bookController: BookController,
     private val bookDetailController: BookDetailController,
+    private val localizeHelper: LocalizeHelper,
 ) : BaseViewModel() {
     
     // Convenience accessors for aggregate use cases (backward compatibility)
@@ -1455,7 +1458,7 @@ class BookDetailViewModel(
     // ==================== Snackbar ====================
     
     suspend fun showSnackBar(message: UiText) {
-        _events.emit(BookDetailEvent.ShowSnackbar(message.toString()))
+        _events.emit(BookDetailEvent.ShowSnackbar(message.asString(localizeHelper)))
     }
     
     fun showSnackBar(message: String) {

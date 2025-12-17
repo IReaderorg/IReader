@@ -145,7 +145,8 @@ val PresentationModules = module {
             translationService = getOrNull(),
             chapterController = get(),
             bookController = get(),
-            bookDetailController = get()       // BookDetailController for SSOT pattern
+            bookDetailController = get(),      // BookDetailController for SSOT pattern
+            localizeHelper = get()             // For UiText localization
         )
     }
     // Changed from single to factory - settings screen is not always needed
