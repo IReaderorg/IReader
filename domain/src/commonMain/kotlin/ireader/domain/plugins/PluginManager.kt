@@ -518,11 +518,44 @@ private class InMemoryPluginPreferencesStore : PluginPreferencesStore {
         data[key] = value
     }
     
+    override fun getLong(key: String, defaultValue: Long): Long {
+        return data[key] as? Long ?: defaultValue
+    }
+    
+    override fun putLong(key: String, value: Long) {
+        data[key] = value
+    }
+    
+    override fun getFloat(key: String, defaultValue: Float): Float {
+        return data[key] as? Float ?: defaultValue
+    }
+    
+    override fun putFloat(key: String, value: Float) {
+        data[key] = value
+    }
+    
+    @Suppress("UNCHECKED_CAST")
+    override fun getStringSet(key: String, defaultValue: Set<String>): Set<String> {
+        return data[key] as? Set<String> ?: defaultValue
+    }
+    
+    override fun putStringSet(key: String, value: Set<String>) {
+        data[key] = value
+    }
+    
     override fun remove(key: String) {
         data.remove(key)
     }
     
     override fun clear() {
         data.clear()
+    }
+    
+    override fun contains(key: String): Boolean {
+        return data.containsKey(key)
+    }
+    
+    override fun getAllKeys(): Set<String> {
+        return data.keys.toSet()
     }
 }

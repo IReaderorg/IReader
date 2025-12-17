@@ -527,31 +527,70 @@ class LibraryViewModel(
     /**
      * Get library books for a specific category index.
      * Returns a list of LibraryBook filtered by category.
+     * 
+     * Uses the BookCategory join table to properly filter books that belong to multiple categories.
      */
     fun getLibraryForCategoryIndex(categoryIndex: Int): List<ireader.domain.models.entities.LibraryBook> {
         val category = categories.getOrNull(categoryIndex) ?: return emptyList()
-        return state.value.books.filter { book ->
-            book.category.toLong() == category.id || category.id == 0L
+        val allBooks = state.value.books
+        
+        // Category ID 0 means "All" - return all books
+        if (category.id == 0L) {
+            return allBooks
         }
+        
+        // Get book-category associations
+        val bookCategoriesList = bookCategories.value
+        
+        // For uncategorized category (ID -1), return books with no category associations
+        if (category.id == -1L) {
+            val categorizedBookIds = bookCategoriesList.map { it.bookId }.toSet()
+            return allBooks.filter { it.id !in categorizedBookIds }
+        }
+        
+        // For regular categories, filter by BookCategory join table
+        val bookIdsInCategory = bookCategoriesList
+            .filter { it.categoryId == category.id }
+            .map { it.bookId }
+            .toSet()
+        
+        return allBooks.filter { it.id in bookIdsInCategory }
     }
     
     /**
      * Get library books for a specific category index as a Composable State.
      * Used by LibraryPager which expects @Composable (page: Int) -> State<List<BookItem>>.
+     * 
+     * Uses the BookCategory join table to properly filter books that belong to multiple categories.
      */
     @Composable
     fun getLibraryForCategoryIndexAsState(categoryIndex: Int): State<List<BookItem>> {
         val currentState by state.collectAsState()
+        val currentBookCategories = bookCategories.value
         val category = currentState.categories.getOrNull(categoryIndex)
         
-        return remember(currentState.books, category) {
+        return remember(currentState.books, currentBookCategories, category) {
             androidx.compose.runtime.mutableStateOf<List<BookItem>>(
                 if (category == null) {
                     emptyList()
+                } else if (category.id == 0L) {
+                    // "All" category - return all books
+                    currentState.books.map { book -> book.toBookItem() }
+                } else if (category.id == -1L) {
+                    // Uncategorized - return books with no category associations
+                    val categorizedBookIds = currentBookCategories.map { bc -> bc.bookId }.toSet()
+                    currentState.books
+                        .filter { book -> book.id !in categorizedBookIds }
+                        .map { book -> book.toBookItem() }
                 } else {
-                    currentState.books.filter { book ->
-                        book.category.toLong() == category.id || category.id == 0L
-                    }.map { it.toBookItem() }
+                    // Regular category - filter by BookCategory join table
+                    val bookIdsInCategory = currentBookCategories
+                        .filter { bc -> bc.categoryId == category.id }
+                        .map { bc -> bc.bookId }
+                        .toSet()
+                    currentState.books
+                        .filter { book -> book.id in bookIdsInCategory }
+                        .map { book -> book.toBookItem() }
                 }
             )
         }

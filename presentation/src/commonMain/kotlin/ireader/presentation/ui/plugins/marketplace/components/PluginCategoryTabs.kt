@@ -101,5 +101,11 @@ private fun getCategoryIndex(category: PluginType?): Int {
         PluginType.TTS -> 3
         PluginType.FEATURE -> 4
         PluginType.AI -> 5
+        PluginType.CATALOG -> 6
+        PluginType.IMAGE_PROCESSING -> 7
+        PluginType.SYNC -> 8
+        PluginType.COMMUNITY_SCREEN -> 9
+        PluginType.GLOSSARY -> 10
+        PluginType.GRADIO_TTS -> 11
     }
 }

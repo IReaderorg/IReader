@@ -84,6 +84,21 @@ class PluginSandbox(
     }
     
     /**
+     * Get plugin-specific cache directory
+     * Requirements: 10.4
+     */
+    suspend fun getPluginCacheDir(pluginId: String): VirtualFile {
+        val cacheDir = fileSystem.getCacheDirectory().resolve("plugins/cache/$pluginId")
+        
+        // Create directory if it doesn't exist
+        if (!cacheDir.exists()) {
+            cacheDir.mkdirs()
+        }
+        
+        return cacheDir
+    }
+    
+    /**
      * Check if plugin can access reader context
      * Requirements: 10.2
      */

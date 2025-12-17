@@ -181,6 +181,16 @@ class PluginPermissionManager(
             PluginPermission.PREFERENCES -> true
             PluginPermission.READER_CONTEXT -> false
             PluginPermission.NOTIFICATIONS -> false
+            PluginPermission.CATALOG_WRITE -> true
+            PluginPermission.SYNC_DATA -> true
+            PluginPermission.BACKGROUND_SERVICE -> true
+            PluginPermission.LOCAL_SERVER -> true
+            PluginPermission.IMAGE_PROCESSING -> false
+            PluginPermission.UI_INJECTION -> true
+            PluginPermission.GLOSSARY_ACCESS -> false
+            PluginPermission.CHARACTER_DATABASE -> false
+            PluginPermission.AUDIO_PLAYBACK -> false
+            PluginPermission.GRADIO_ACCESS -> true
         }
     }
     
@@ -201,6 +211,26 @@ class PluginPermissionManager(
                 "Access and modify app preferences"
             PluginPermission.NOTIFICATIONS -> 
                 "Show notifications"
+            PluginPermission.CATALOG_WRITE ->
+                "Add or modify content catalog sources"
+            PluginPermission.SYNC_DATA ->
+                "Synchronize your reading data across devices"
+            PluginPermission.BACKGROUND_SERVICE ->
+                "Run background services for sync or downloads"
+            PluginPermission.LOCAL_SERVER ->
+                "Connect to local servers on your network"
+            PluginPermission.IMAGE_PROCESSING ->
+                "Process and enhance images"
+            PluginPermission.UI_INJECTION ->
+                "Add custom screens and UI elements"
+            PluginPermission.GLOSSARY_ACCESS ->
+                "Access and modify glossaries and dictionaries"
+            PluginPermission.CHARACTER_DATABASE ->
+                "Access the character database"
+            PluginPermission.AUDIO_PLAYBACK ->
+                "Play audio for text-to-speech"
+            PluginPermission.GRADIO_ACCESS ->
+                "Connect to Gradio AI endpoints"
         }
     }
     
@@ -215,6 +245,16 @@ class PluginPermissionManager(
             PluginPermission.PREFERENCES -> PermissionRiskLevel.MEDIUM
             PluginPermission.READER_CONTEXT -> PermissionRiskLevel.LOW
             PluginPermission.NOTIFICATIONS -> PermissionRiskLevel.LOW
+            PluginPermission.CATALOG_WRITE -> PermissionRiskLevel.HIGH
+            PluginPermission.SYNC_DATA -> PermissionRiskLevel.HIGH
+            PluginPermission.BACKGROUND_SERVICE -> PermissionRiskLevel.MEDIUM
+            PluginPermission.LOCAL_SERVER -> PermissionRiskLevel.MEDIUM
+            PluginPermission.IMAGE_PROCESSING -> PermissionRiskLevel.LOW
+            PluginPermission.UI_INJECTION -> PermissionRiskLevel.HIGH
+            PluginPermission.GLOSSARY_ACCESS -> PermissionRiskLevel.LOW
+            PluginPermission.CHARACTER_DATABASE -> PermissionRiskLevel.LOW
+            PluginPermission.AUDIO_PLAYBACK -> PermissionRiskLevel.LOW
+            PluginPermission.GRADIO_ACCESS -> PermissionRiskLevel.MEDIUM
         }
     }
 }

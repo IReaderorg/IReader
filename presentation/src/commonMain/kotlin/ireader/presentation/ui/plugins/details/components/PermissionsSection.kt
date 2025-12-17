@@ -92,6 +92,16 @@ private fun getPermissionIcon(permission: PluginPermission): ImageVector {
         PluginPermission.LIBRARY_ACCESS -> Icons.Default.LibraryBooks
         PluginPermission.PREFERENCES -> Icons.Default.Settings
         PluginPermission.NOTIFICATIONS -> Icons.Default.Notifications
+        PluginPermission.CATALOG_WRITE -> Icons.Default.Source
+        PluginPermission.SYNC_DATA -> Icons.Default.Sync
+        PluginPermission.BACKGROUND_SERVICE -> Icons.Default.PlayArrow
+        PluginPermission.LOCAL_SERVER -> Icons.Default.Computer
+        PluginPermission.IMAGE_PROCESSING -> Icons.Default.Image
+        PluginPermission.UI_INJECTION -> Icons.Default.Dashboard
+        PluginPermission.GLOSSARY_ACCESS -> Icons.Default.Book
+        PluginPermission.CHARACTER_DATABASE -> Icons.Default.Person
+        PluginPermission.AUDIO_PLAYBACK -> Icons.Default.VolumeUp
+        PluginPermission.GRADIO_ACCESS -> Icons.Default.Cloud
     }
 }
 
@@ -106,6 +116,16 @@ private fun getPermissionTitle(permission: PluginPermission): String {
         PluginPermission.LIBRARY_ACCESS -> "Library Access"
         PluginPermission.PREFERENCES -> "Preferences Access"
         PluginPermission.NOTIFICATIONS -> "Notifications"
+        PluginPermission.CATALOG_WRITE -> "Catalog Write"
+        PluginPermission.SYNC_DATA -> "Sync Data"
+        PluginPermission.BACKGROUND_SERVICE -> "Background Service"
+        PluginPermission.LOCAL_SERVER -> "Local Server"
+        PluginPermission.IMAGE_PROCESSING -> "Image Processing"
+        PluginPermission.UI_INJECTION -> "UI Injection"
+        PluginPermission.GLOSSARY_ACCESS -> "Glossary Access"
+        PluginPermission.CHARACTER_DATABASE -> "Character Database"
+        PluginPermission.AUDIO_PLAYBACK -> "Audio Playback"
+        PluginPermission.GRADIO_ACCESS -> "Gradio Access"
     }
 }
 
@@ -120,5 +140,15 @@ private fun getPermissionDescription(permission: PluginPermission): String {
         PluginPermission.LIBRARY_ACCESS -> "View and modify your library contents"
         PluginPermission.PREFERENCES -> "Access and modify app preferences"
         PluginPermission.NOTIFICATIONS -> "Show notifications to keep you informed"
+        PluginPermission.CATALOG_WRITE -> "Add or modify content catalog sources"
+        PluginPermission.SYNC_DATA -> "Synchronize your reading data across devices"
+        PluginPermission.BACKGROUND_SERVICE -> "Run background services for sync or downloads"
+        PluginPermission.LOCAL_SERVER -> "Connect to local servers on your network"
+        PluginPermission.IMAGE_PROCESSING -> "Process and enhance images"
+        PluginPermission.UI_INJECTION -> "Add custom screens and UI elements"
+        PluginPermission.GLOSSARY_ACCESS -> "Access and modify glossaries and dictionaries"
+        PluginPermission.CHARACTER_DATABASE -> "Access the character database"
+        PluginPermission.AUDIO_PLAYBACK -> "Play audio for text-to-speech"
+        PluginPermission.GRADIO_ACCESS -> "Connect to Gradio AI endpoints"
     }
 }
