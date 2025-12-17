@@ -1,11 +1,11 @@
 package ireader.presentation.ui.settings.repository
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -26,15 +27,13 @@ import androidx.compose.ui.unit.dp
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.remember.rememberMutableString
-import ireader.presentation.ui.component.reusable_composable.SmallTextComposable
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AddingRepositoryScreen(
-        scaffoldPadding: PaddingValues,
-        onSave: (RepositoryInfo) -> Unit,
+    scaffoldPadding: PaddingValues,
+    onSave: (RepositoryInfo) -> Unit,
 ) {
     val name = rememberMutableString()
     val url = rememberMutableString()
@@ -42,747 +41,328 @@ internal fun AddingRepositoryScreen(
     val source = rememberMutableString()
     val username = rememberMutableString()
     val password = rememberMutableString()
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current)
     val focusManager = LocalFocusManager.current
-    
-    // Repository type selection
+
     var repositoryType by remember { mutableStateOf(RepositoryType.IREADER) }
-    
-    // Validation states
     var nameError by remember { mutableStateOf<String?>(null) }
     var urlError by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    var showHelpDialog by remember { mutableStateOf(false) }
     var showPasswordFields by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
-    
-    // Quick add presets
-    val quickAddPresets = remember {
-        listOf(
-            QuickAddPreset(
-                name = "IReader Official",
-                url = "https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json",
-                owner = "IReaderorg",
-                source = "https://github.com/IReaderorg/IReader-extensions",
-                type = RepositoryType.IREADER
-            ),
-            QuickAddPreset(
-                name = "LNReader Plugins",
-                url = "https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/repo/plugins/plugins.min.json",
-                owner = "LNReader",
-                source = "https://github.com/kazemcodes/lnreader-plugins-unminified",
-                type = RepositoryType.LNREADER
-            )
-        )
-    }
-    
     var showQuickAddDialog by remember { mutableStateOf(false) }
     var showJSPluginPrompt by remember { mutableStateOf(false) }
-    
-    // Validation function
-    fun validateFields(): Boolean {
-        var isValid = true
-        
-        if (name.value.isBlank()) {
-            nameError = "Name is required"
-            isValid = false
-        } else {
-            nameError = null
-        }
-        
-        if (url.value.isBlank()) {
-            urlError = "URL is required"
-            isValid = false
-        } else if (!url.value.startsWith("http://") && !url.value.startsWith("https://")) {
-            urlError = "URL must start with http:// or https://"
-            isValid = false
-        } else {
-            urlError = null
-        }
-        
-        return isValid
-    }
-    Scaffold(
-            modifier = Modifier.fillMaxSize().padding(top = scaffoldPadding.calculateTopPadding()),
-            topBar = {
-                TopAppBar(
-                    title = { Text(localizeHelper.localize(Res.string.add_repository)) },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    actions = {
-                        IconButton(
-                            onClick = { showHelpDialog = true }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Help,
-                                contentDescription = localizeHelper.localize(Res.string.help),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                )
-            },
-            floatingActionButtonPosition = FabPosition.End,
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                        onClick = {
-                            if (validateFields() && !isLoading) {
-                                isLoading = true
-                                onSave(RepositoryInfo(
-                                        name = name.value.trim(),
-                                        key = url.value.trim(),
-                                        owner = owner.value.trim(),
-                                        source = source.value.trim(),
-                                        username = username.value.trim(),
-                                        password = password.value,
-                                        repositoryType = repositoryType.name
-                                ))
-                                // Reset loading state after a delay (in real app, this would be in callback)
-                                isLoading = false
-                            }
-                        },
-                        icon = {
-                            if (isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Save,
-                                    contentDescription = localizeHelper.localize(Res.string.save)
-                                )
-                            }
-                        },
-                        text = { Text(if (isLoading) "Saving..." else "Save Repository") },
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        expanded = !isLoading
-                )
-            },
-    ) { padding ->
 
+    val quickAddPresets = remember {
+        listOf(
+            QuickAddPreset("IReader Official",
+                "https://raw.githubusercontent.com/IReaderorg/IReader-extensions/repov2/index.min.json",
+                "IReaderorg", "https://github.com/IReaderorg/IReader-extensions", RepositoryType.IREADER),
+            QuickAddPreset("LNReader Plugins",
+                "https://raw.githubusercontent.com/kazemcodes/lnreader-plugins-unminified/refs/heads/repo/plugins/plugins.min.json",
+                "LNReader", "https://github.com/kazemcodes/lnreader-plugins-unminified", RepositoryType.LNREADER)
+        )
+    }
+
+    fun validateFields(): Boolean {
+        nameError = if (name.value.isBlank()) "Name is required" else null
+        urlError = when {
+            url.value.isBlank() -> "URL is required"
+            !url.value.startsWith("http://") && !url.value.startsWith("https://") -> "URL must start with http:// or https://"
+            else -> null
+        }
+        return nameError == null && urlError == null
+    }
+
+    Box(modifier = Modifier.fillMaxSize().padding(scaffoldPadding)) {
         LazyColumn(
-                modifier = Modifier
-                        .padding(padding)
-                        .fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Quick Add Button
+            // Quick Add Card
             item {
-                OutlinedButton(
+                Card(
                     onClick = { showQuickAddDialog = true },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Bolt,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(localizeHelper.localize(Res.string.quick_add_popular_repositories))
-                }
-            }
-            
-            // Divider with "OR"
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    HorizontalDivider(modifier = Modifier.weight(1f))
-                    Text(
-                        text = localizeHelper.localize(Res.string.or),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    HorizontalDivider(modifier = Modifier.weight(1f))
-                }
-            }
-            
-            // Repository Type Selector
-            item {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = localizeHelper.localize(Res.string.repository_type),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        FilterChip(
-                            selected = repositoryType == RepositoryType.IREADER,
-                            onClick = { repositoryType = RepositoryType.IREADER },
-                            label = { Text(localizeHelper.localize(Res.string.website)) },
-                            leadingIcon = if (repositoryType == RepositoryType.IREADER) {
-                                { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
-                            } else null,
-                            modifier = Modifier.weight(1f)
-                        )
-                        
-                        FilterChip(
-                            selected = repositoryType == RepositoryType.LNREADER,
-                            onClick = { 
-                                repositoryType = RepositoryType.LNREADER
-                                showJSPluginPrompt = true
-                            },
-                            label = { Text(localizeHelper.localize(Res.string.lnreader)) },
-                            leadingIcon = if (repositoryType == RepositoryType.LNREADER) {
-                                { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
-                            } else null,
-                            modifier = Modifier.weight(1f)
-                        )
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Bolt, null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(localizeHelper.localize(Res.string.quick_add_popular_repositories),
+                                style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text("Add popular repositories with one tap",
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    
-                    // Type info card
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = when (repositoryType) {
-                                        RepositoryType.IREADER -> "IReader format repositories contain extensions and plugins"
-                                        RepositoryType.LNREADER -> "LNReader format repositories are compatible with LNReader plugins"
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            
-                            // Warning about mixing repository types
-                            if (repositoryType == RepositoryType.LNREADER) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(vertical = 4.dp),
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                                )
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.Top
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Warning,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Text(
-                                        text = localizeHelper.localize(Res.string.important_you_need_to_enable),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.error,
-                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
-                                    )
-                                }
+                }
+            }
+
+            // Divider
+            item {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    HorizontalDivider(Modifier.weight(1f))
+                    Text(localizeHelper.localize(Res.string.or), Modifier.padding(horizontal = 12.dp),
+                        style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    HorizontalDivider(Modifier.weight(1f))
+                }
+            }
+
+            // Repository Type
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(localizeHelper.localize(Res.string.repository_type),
+                        style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        RepositoryTypeChip(repositoryType == RepositoryType.IREADER,
+                            { repositoryType = RepositoryType.IREADER }, localizeHelper.localize(Res.string.website), Modifier.weight(1f))
+                        RepositoryTypeChip(repositoryType == RepositoryType.LNREADER,
+                            { repositoryType = RepositoryType.LNREADER; showJSPluginPrompt = true },
+                            localizeHelper.localize(Res.string.lnreader), Modifier.weight(1f))
+                    }
+                    if (repositoryType == RepositoryType.LNREADER) {
+                        Surface(Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(12.dp)) {
+                            Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Icon(Icons.Default.Warning, null, Modifier.size(18.dp), MaterialTheme.colorScheme.error)
+                                Text(localizeHelper.localize(Res.string.important_you_need_to_enable),
+                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                             }
                         }
                     }
                 }
             }
-            
-            // Required fields section
+
+            // Required Fields Section
             item {
-                Text(
-                    text = localizeHelper.localize(Res.string.required_information),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                Text(localizeHelper.localize(Res.string.required_information),
+                    style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary)
             }
-            
+
             item {
-                EnhancedFormComponent(
-                    label = localizeHelper.localize(Res.string.name),
-                    icon = Icons.Default.Badge,
-                    state = name,
-                    error = nameError,
-                    placeholder = "My Repository",
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    )
-                )
+                ModernTextField(name.value, { name.value = it }, localizeHelper.localize(Res.string.name),
+                    Icons.Default.Badge, nameError, "My Repository",
+                    KeyboardOptions(imeAction = ImeAction.Next), KeyboardActions { focusManager.moveFocus(FocusDirection.Down) })
             }
-            
+
             item {
-                EnhancedFormComponent(
-                    label = localizeHelper.localize(Res.string.url),
-                    icon = Icons.Default.Link,
-                    state = url,
-                    error = urlError,
-                    placeholder = "https://example.com/repo.json",
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Next
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    )
-                )
+                ModernTextField(url.value, { url.value = it }, localizeHelper.localize(Res.string.url),
+                    Icons.Default.Link, urlError, "https://example.com/repo.json",
+                    KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next),
+                    KeyboardActions { focusManager.moveFocus(FocusDirection.Down) })
             }
-            
-            // Optional fields section
+
+            // Optional Fields Section
             item {
-                Text(
-                    text = localizeHelper.localize(Res.string.optional_information),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                Text(localizeHelper.localize(Res.string.optional_information),
+                    style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            
+
             item {
-                EnhancedFormComponent(
-                    label = localizeHelper.localize(Res.string.owner),
-                    icon = Icons.Default.Copyright,
-                    state = owner,
-                    placeholder = "Repository owner",
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    )
-                )
+                ModernTextField(owner.value, { owner.value = it }, localizeHelper.localize(Res.string.owner),
+                    Icons.Default.Person, placeholder = "Repository owner",
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions { focusManager.moveFocus(FocusDirection.Down) })
             }
-            
+
             item {
-                EnhancedFormComponent(
-                    label = localizeHelper.localize(Res.string.source),
-                    icon = Icons.Default.HideSource,
-                    state = source,
-                    placeholder = "Source identifier",
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = { 
-                            if (showPasswordFields) {
-                                focusManager.moveFocus(FocusDirection.Down)
-                            } else {
-                                focusManager.clearFocus()
-                            }
-                        }
-                    )
-                )
+                ModernTextField(source.value, { source.value = it }, localizeHelper.localize(Res.string.source),
+                    Icons.Default.Code, placeholder = "Source URL",
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions { focusManager.clearFocus() })
             }
-            
-            // Authentication section (collapsible)
+
+            // Authentication Section
             item {
-                Row(
+                Card(
+                    onClick = { showPasswordFields = !showPasswordFields },
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(
-                        text = localizeHelper.localize(Res.string.authentication_optional),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    IconButton(onClick = { showPasswordFields = !showPasswordFields }) {
-                        Icon(
-                            imageVector = if (showPasswordFields) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = if (showPasswordFields) "Hide" else "Show"
-                        )
+                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Lock, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.width(12.dp))
+                        Text(localizeHelper.localize(Res.string.authentication_optional),
+                            Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
+                        Icon(if (showPasswordFields) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
                     }
                 }
             }
-            
+
             item {
-                AnimatedVisibility(
-                    visible = showPasswordFields,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        EnhancedFormComponent(
-                            label = localizeHelper.localize(Res.string.username),
-                            icon = Icons.Default.Person,
-                            state = username,
-                            placeholder = "Username",
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Email,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                            )
-                        )
-                        
-                        EnhancedFormComponent(
-                            label = localizeHelper.localize(Res.string.password),
-                            icon = Icons.Default.Key,
-                            state = password,
-                            placeholder = "Password",
-                            isPassword = true,
-                            passwordVisible = passwordVisible,
-                            onPasswordVisibilityToggle = { passwordVisible = !passwordVisible },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = { focusManager.clearFocus() }
-                            )
-                        )
+                AnimatedVisibility(showPasswordFields, enter = expandVertically(), exit = shrinkVertically()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ModernTextField(username.value, { username.value = it }, localizeHelper.localize(Res.string.username),
+                            Icons.Default.Person, placeholder = "Username",
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            keyboardActions = KeyboardActions { focusManager.moveFocus(FocusDirection.Down) })
+                        ModernTextField(password.value, { password.value = it }, localizeHelper.localize(Res.string.password),
+                            Icons.Default.Key, placeholder = "Password", isPassword = true, passwordVisible = passwordVisible,
+                            onPasswordToggle = { passwordVisible = !passwordVisible },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions { focusManager.clearFocus() })
                     }
                 }
             }
-            
-            // Bottom spacing for FAB
+
+            // Save Button
             item {
-                Spacer(modifier = Modifier.height(80.dp))
+                Button(onClick = {
+                    if (validateFields()) {
+                        onSave(RepositoryInfo(name.value.trim(), url.value.trim(), owner.value.trim(),
+                            source.value.trim(), username.value.trim(), password.value, repositoryType.name))
+                    }
+                }, Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(16.dp)) {
+                    Icon(Icons.Default.Save, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Save Repository", style = MaterialTheme.typography.titleMedium)
+                }
             }
+
+            item { Spacer(Modifier.height(16.dp)) }
         }
     }
-    
+
     // Quick Add Dialog
     if (showQuickAddDialog) {
-        AlertDialog(
-            onDismissRequest = { showQuickAddDialog = false },
-            icon = {
-                Icon(
-                    imageVector = Icons.Outlined.Bolt,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            title = {
-                Text(
-                    text = localizeHelper.localize(Res.string.quick_add_repository),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            },
+        AlertDialog(onDismissRequest = { showQuickAddDialog = false },
+            icon = { Icon(Icons.Outlined.Bolt, null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text(localizeHelper.localize(Res.string.quick_add_repository)) },
             text = {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(quickAddPresets.size) { index ->
-                        val preset = quickAddPresets[index]
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                name.value = preset.name
-                                url.value = preset.url
-                                owner.value = preset.owner
-                                source.value = preset.source
-                                repositoryType = preset.type
-                                showQuickAddDialog = false
-                            },
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = preset.name,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
-                                    )
-                                    Surface(
-                                        shape = MaterialTheme.shapes.small,
-                                        color = if (preset.type == RepositoryType.IREADER) {
-                                            MaterialTheme.colorScheme.primaryContainer
-                                        } else {
-                                            MaterialTheme.colorScheme.secondaryContainer
-                                        }
-                                    ) {
-                                        Text(
-                                            text = preset.type.name,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                        )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    quickAddPresets.forEach { preset ->
+                        Card(onClick = {
+                            name.value = preset.name; url.value = preset.url
+                            owner.value = preset.owner; source.value = preset.source
+                            repositoryType = preset.type; showQuickAddDialog = false
+                        }, Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                            Column(Modifier.padding(16.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(preset.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                                    Spacer(Modifier.width(8.dp))
+                                    Surface(shape = RoundedCornerShape(4.dp),
+                                        color = if (preset.type == RepositoryType.IREADER) MaterialTheme.colorScheme.primaryContainer
+                                        else MaterialTheme.colorScheme.secondaryContainer) {
+                                        Text(preset.type.name, Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                            style = MaterialTheme.typography.labelSmall)
                                     }
                                 }
-                                Text(
-                                    text = preset.owner,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Text(preset.owner, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
                 }
             },
-            confirmButton = {
-                TextButton(onClick = { showQuickAddDialog = false }) {
-                    Text(localizeHelper.localize(Res.string.cancel))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp
-        )
+            confirmButton = { TextButton({ showQuickAddDialog = false }) { Text(localizeHelper.localize(Res.string.cancel)) } })
     }
-    
-    // Help dialog with enhanced Material Design 3 styling
-    if (showHelpDialog) {
-        AlertDialog(
-            onDismissRequest = { showHelpDialog = false },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            title = {
-                Text(
-                    text = localizeHelper.localize(Res.string.what_is_repository),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            },
-            text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = localizeHelper.localize(Res.string.repository_explanation),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(12.dp)
-                        ) {
-                            Text(
-                                text = localizeHelper.localize(Res.string.example_url),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = localizeHelper.localize(Res.string.repository_example_url),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { showHelpDialog = false }
-                ) {
-                    Text(localizeHelper.localize(Res.string.got_it))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp
-        )
-    }
-    
-    // JS Plugin prompt dialog
+
+    // JS Plugin Prompt
     if (showJSPluginPrompt) {
-        AlertDialog(
-            onDismissRequest = { showJSPluginPrompt = false },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Warning,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            title = {
-                Text(
-                    text = localizeHelper.localize(Res.string.enable_javascript_plugins),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            },
+        AlertDialog(onDismissRequest = { showJSPluginPrompt = false },
+            icon = { Icon(Icons.Default.Warning, null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text(localizeHelper.localize(Res.string.enable_javascript_plugins)) },
             text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = localizeHelper.localize(Res.string.lnreader_repositories_require_javascript_plugins),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.small,
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = localizeHelper.localize(Res.string.to_enable_js_plugins),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
-                            )
-                            Text(
-                                text = localizeHelper.localize(Res.string.go_to_settings_generaln2_toggle),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(localizeHelper.localize(Res.string.lnreader_repositories_require_javascript_plugins),
+                        style = MaterialTheme.typography.bodyMedium)
+                    Surface(Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(8.dp)) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text(localizeHelper.localize(Res.string.to_enable_js_plugins),
+                                style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                            Text(localizeHelper.localize(Res.string.go_to_settings_generaln2_toggle),
+                                style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
             },
-            confirmButton = {
-                TextButton(
-                    onClick = { showJSPluginPrompt = false }
-                ) {
-                    Text(localizeHelper.localize(Res.string.got_it))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp
+            confirmButton = { TextButton({ showJSPluginPrompt = false }) { Text(localizeHelper.localize(Res.string.got_it)) } })
+    }
+}
+
+
+@Composable
+private fun RepositoryTypeChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label) },
+        leadingIcon = if (selected) {
+            { Icon(Icons.Default.Check, null, Modifier.size(18.dp)) }
+        } else null,
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModernTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: ImageVector,
+    error: String? = null,
+    placeholder: String = "",
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    isPassword: Boolean = false,
+    passwordVisible: Boolean = false,
+    onPasswordToggle: (() -> Unit)? = null
+) {
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(label) },
+            placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)) },
+            leadingIcon = { Icon(icon, label, tint = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant) },
+            trailingIcon = if (isPassword && onPasswordToggle != null) {
+                { IconButton(onClick = onPasswordToggle) {
+                    Icon(if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        if (passwordVisible) "Hide" else "Show")
+                } }
+            } else null,
+            isError = error != null,
+            supportingText = error?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
+            visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            )
         )
     }
 }
 
 internal data class RepositoryInfo(
-        val name: String,
-        val key: String,
-        val owner: String,
-        val source: String,
-        val username: String,
-        val password: String,
-        val repositoryType: String = "IREADER"
+    val name: String,
+    val key: String,
+    val owner: String,
+    val source: String,
+    val username: String,
+    val password: String,
+    val repositoryType: String = "IREADER"
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EnhancedFormComponent(
-        label: String,
-        icon: ImageVector,
-        state: MutableState<String>,
-        error: String? = null,
-        placeholder: String = "",
-        isPassword: Boolean = false,
-        passwordVisible: Boolean = false,
-        onPasswordVisibilityToggle: (() -> Unit)? = null,
-        keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-        keyboardActions: KeyboardActions = KeyboardActions.Default,
-        enable: Boolean = true
-) {
-    OutlinedTextField(
-            value = state.value,
-            onValueChange = { state.value = it },
-            modifier = Modifier.fillMaxWidth(),
-            leadingIcon = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = label,
-                    tint = if (error != null) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
-            },
-            trailingIcon = if (isPassword && onPasswordVisibilityToggle != null) {
-                {
-                    IconButton(onClick = onPasswordVisibilityToggle) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
-                        )
-                    }
-                }
-            } else null,
-            enabled = enable,
-            label = {
-                Text(text = label)
-            },
-            placeholder = {
-                Text(
-                    text = placeholder,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            },
-            isError = error != null,
-            supportingText = if (error != null) {
-                {
-                    Text(
-                        text = error,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            } else null,
-            visualTransformation = if (isPassword && !passwordVisible) {
-                PasswordVisualTransformation()
-            } else {
-                VisualTransformation.None
-            },
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            singleLine = true,
-            shape = MaterialTheme.shapes.medium,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                errorBorderColor = MaterialTheme.colorScheme.error,
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-    )
-}
-
-
-@Composable
-private fun AddingRepositoryScreenPrev() {
-    AddingRepositoryScreen(
-            scaffoldPadding = PaddingValues(0.dp),
-            onSave = {},
-    )
-}
-
-enum class RepositoryType {
-    IREADER,
-    LNREADER
-}
-
-data class QuickAddPreset(
+internal data class QuickAddPreset(
     val name: String,
     val url: String,
     val owner: String,
@@ -790,3 +370,7 @@ data class QuickAddPreset(
     val type: RepositoryType
 )
 
+enum class RepositoryType {
+    IREADER,
+    LNREADER
+}
