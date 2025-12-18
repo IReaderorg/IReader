@@ -9,10 +9,10 @@ import io.github.vinceglb.filekit.dialogs.compose.rememberDirectoryPickerLaunche
  * Uses FileKit's directory picker.
  */
 private class DesktopDirectoryPickerLauncherImpl(
-    private val launcher: io.github.vinceglb.filekit.dialogs.DirectoryPickerLauncher
+    private val launchFn: () -> Unit
 ) : DirectoryPickerLauncher {
     override fun launch() {
-        launcher.launch()
+        launchFn()
     }
 }
 
@@ -29,6 +29,6 @@ actual fun rememberPlatformDirectoryPickerLauncher(
     }
     
     return remember(fileKitLauncher) {
-        DesktopDirectoryPickerLauncherImpl(fileKitLauncher)
+        DesktopDirectoryPickerLauncherImpl { fileKitLauncher.launch() }
     }
 }

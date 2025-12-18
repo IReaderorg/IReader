@@ -52,16 +52,28 @@ object J2V8EngineHelper : KoinComponent {
     private var initAttempted = false
     private var j2v8ClassLoader: ClassLoader? = null
     
+    // Cached method references for performance
+    private var cachedV8Class: Class<*>? = null
+    private var cachedCreateRuntimeMethod: Method? = null
+    private var cachedExecuteVoidScriptMethod: Method? = null
+    private var cachedExecuteStringScriptMethod: Method? = null
+    private var cachedReleaseMethod: Method? = null
+    
     private val pluginManager: PluginManager by inject()
     
     fun isJ2V8Ready(): Boolean = j2v8Ready
     fun isJ2V8Loaded(): Boolean = j2v8Ready
     fun getJ2V8ClassLoader(): ClassLoader? = j2v8ClassLoader
     
+    // Provide cached method references
+    fun getV8Class(): Class<*>? = cachedV8Class
+    fun getCreateRuntimeMethod(): Method? = cachedCreateRuntimeMethod
+    fun getExecuteVoidScriptMethod(): Method? = cachedExecuteVoidScriptMethod
+    fun getExecuteStringScriptMethod(): Method? = cachedExecuteStringScriptMethod
+    fun getReleaseMethod(): Method? = cachedReleaseMethod
+    
     @Synchronized
     fun tryInitializeJ2V8(): Boolean {
-        Log.info { "J2V8EngineHelper: tryInitializeJ2V8 called, j2v8Ready=$j2v8Ready, initAttempted=$initAttempted" }
-        
         if (j2v8Ready) return true
         
         val pluginClassLoader = PluginClassLoader.getClassLoader(J2V8_PLUGIN_ID)
@@ -70,25 +82,22 @@ object J2V8EngineHelper : KoinComponent {
             return false
         }
         
-        if (initAttempted) {
-            Log.info { "J2V8EngineHelper: Already attempted initialization and failed" }
-            return false
-        }
+        if (initAttempted) return false
         
-        Log.info { "J2V8EngineHelper: *** FIRST INITIALIZATION ATTEMPT ***" }
+        Log.info { "J2V8EngineHelper: Initializing J2V8..." }
         
         try {
-            // Load V8 class - this triggers native library loading via DexClassLoader's native path
+            // Load and cache V8 class and methods
             val v8Class = pluginClassLoader.loadClass("com.eclipsesource.v8.V8")
-            Log.info { "J2V8EngineHelper: V8 class loaded: ${v8Class.name}" }
+            cachedV8Class = v8Class
+            cachedCreateRuntimeMethod = v8Class.getMethod("createV8Runtime")
+            cachedExecuteVoidScriptMethod = v8Class.getMethod("executeVoidScript", String::class.java)
+            cachedExecuteStringScriptMethod = v8Class.getMethod("executeStringScript", String::class.java)
+            cachedReleaseMethod = v8Class.getMethod("release")
             
             // Test creating a runtime
-            val createMethod = v8Class.getMethod("createV8Runtime")
-            val runtime = createMethod.invoke(null)
-            Log.info { "J2V8EngineHelper: V8 runtime created successfully!" }
-            
-            val releaseMethod = v8Class.getMethod("release")
-            releaseMethod.invoke(runtime)
+            val runtime = cachedCreateRuntimeMethod?.invoke(null)
+            cachedReleaseMethod?.invoke(runtime)
             
             j2v8ClassLoader = pluginClassLoader
             j2v8Ready = true
@@ -97,8 +106,7 @@ object J2V8EngineHelper : KoinComponent {
             return true
             
         } catch (e: Exception) {
-            Log.error { "J2V8EngineHelper: Failed to initialize: ${e.javaClass.name}: ${e.message}" }
-            e.printStackTrace()
+            Log.error { "J2V8EngineHelper: Failed to initialize: ${e.message}" }
             initAttempted = true
             return false
         }
@@ -108,6 +116,11 @@ object J2V8EngineHelper : KoinComponent {
         initAttempted = false
         j2v8Ready = false
         j2v8ClassLoader = null
+        cachedV8Class = null
+        cachedCreateRuntimeMethod = null
+        cachedExecuteVoidScriptMethod = null
+        cachedExecuteStringScriptMethod = null
+        cachedReleaseMethod = null
     }
     
     fun isJ2V8PluginAvailable(): Boolean {
@@ -137,8 +150,261 @@ private class StubJSEngine : JSEngine {
 }
 
 /**
- * J2V8 engine implementation using reflection.
- * Mirrors the original AndroidJSEngine implementation.
+ * Shared V8 thread pool for all engines.
+ * V8 runtimes are single-threaded but we can have multiple runtimes on different threads.
+ */
+private object V8ThreadPool {
+    // Use a small pool of threads for V8 operations
+    private val executor = Executors.newFixedThreadPool(2) { r ->
+        Thread(r, "V8-Pool-${System.nanoTime()}").apply { isDaemon = true }
+    }
+    val dispatcher = executor.asCoroutineDispatcher()
+}
+
+/**
+ * Cached adapter code - parsed once, reused for all plugins.
+ */
+private object AdapterCodeCache {
+    val code: String by lazy { generateAdapterCode() }
+    
+    private fun generateAdapterCode(): String = """
+        // Console polyfill
+        (function() {
+            var console = {};
+            console.log = function() { globalThis.__consoleLog = Array.prototype.slice.call(arguments).join(' '); };
+            console.error = function() { globalThis.__consoleError = Array.prototype.slice.call(arguments).join(' '); };
+            console.warn = function() { };
+            console.info = function() { };
+            console.debug = function() { };
+            globalThis.console = console;
+        })();
+
+        // URL polyfill
+        if (typeof URL === 'undefined') {
+            globalThis.URL = function(url, base) {
+                if (url === null || url === undefined) throw new Error('Invalid URL');
+                url = String(url);
+                var fullUrl = url;
+                if (base && !url.match(/^https?:\/\//)) {
+                    base = String(base);
+                    if (url.indexOf('/') === 0) {
+                        var baseMatch = base.match(/^(https?:\/\/[^\/]+)/);
+                        fullUrl = baseMatch ? baseMatch[1] + url : url;
+                    } else {
+                        fullUrl = base.replace(/\/[^\/]*${'$'}/, '/') + url;
+                    }
+                }
+                var match = fullUrl.match(/^(https?):\/\/([^\/\?#]+)(\/[^\?#]*)?(\?[^#]*)?(#.*)?${'$'}/);
+                if (!match) throw new Error('Invalid URL: ' + fullUrl);
+                this.protocol = (match[1] || 'http') + ':';
+                this.host = match[2] || '';
+                this.hostname = (match[2] || '').split(':')[0];
+                this.port = (match[2] || '').split(':')[1] || '';
+                this.pathname = match[3] || '/';
+                this.search = match[4] || '';
+                this.hash = match[5] || '';
+                this.href = fullUrl;
+                this.origin = this.protocol + '//' + this.host;
+                this.toString = function() { return this.href; };
+            };
+        }
+
+        if (typeof URLSearchParams === 'undefined') {
+            globalThis.URLSearchParams = function(init) {
+                this.params = {};
+                if (typeof init === 'string') {
+                    var query = init.indexOf('?') === 0 ? init.substring(1) : init;
+                    if (query) {
+                        var self = this;
+                        query.split('&').forEach(function(pair) {
+                            var parts = pair.split('=');
+                            var key = decodeURIComponent(parts[0]);
+                            var value = parts[1] ? decodeURIComponent(parts[1]) : '';
+                            if (!self.params[key]) self.params[key] = [];
+                            self.params[key].push(value);
+                        });
+                    }
+                }
+                this.get = function(key) { return this.params[key] ? this.params[key][0] : null; };
+                this.toString = function() {
+                    var parts = [];
+                    for (var key in this.params) {
+                        if (this.params.hasOwnProperty(key)) {
+                            this.params[key].forEach(function(value) {
+                                parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                            });
+                        }
+                    }
+                    return parts.join('&');
+                };
+            };
+        }
+
+        // Headers polyfill
+        if (typeof Headers === 'undefined') {
+            globalThis.Headers = function(init) {
+                this.headers = {};
+                if (init && typeof init === 'object') {
+                    for (var key in init) {
+                        if (init.hasOwnProperty(key)) {
+                            this.headers[key.toLowerCase()] = String(init[key]);
+                        }
+                    }
+                }
+                this.get = function(name) { return this.headers[name.toLowerCase()] || null; };
+                this.set = function(name, value) { this.headers[name.toLowerCase()] = String(value); };
+            };
+        }
+
+        // TextEncoder/TextDecoder polyfills
+        if (typeof TextEncoder === 'undefined') {
+            globalThis.TextEncoder = function() {
+                this.encode = function(str) {
+                    var utf8 = [];
+                    for (var i = 0; i < str.length; i++) {
+                        var c = str.charCodeAt(i);
+                        if (c < 0x80) utf8.push(c);
+                        else if (c < 0x800) utf8.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+                        else utf8.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+                    }
+                    return new Uint8Array(utf8);
+                };
+            };
+        }
+
+        if (typeof TextDecoder === 'undefined') {
+            globalThis.TextDecoder = function() {
+                this.decode = function(bytes) {
+                    var str = '';
+                    for (var i = 0; i < bytes.length; i++) {
+                        str += String.fromCharCode(bytes[i]);
+                    }
+                    return str;
+                };
+            };
+        }
+
+        // setTimeout/setInterval stubs
+        globalThis.setTimeout = function(callback, delay) { callback(); return 0; };
+        globalThis.setInterval = function(callback, delay) { return 0; };
+        globalThis.clearTimeout = function(id) { };
+        globalThis.clearInterval = function(id) { };
+
+        // Wrapper function for plugins
+        function wrapPlugin(plugin) {
+            var wrapper = {};
+            wrapper.getId = function() { return plugin.id || "unknown"; };
+            wrapper.getName = function() { return plugin.name || "Unknown Plugin"; };
+            wrapper.getSite = function() { return plugin.site || ""; };
+            wrapper.getVersion = function() { return plugin.version || "1.0.0"; };
+            wrapper.getLang = function() { return plugin.lang || "en"; };
+            wrapper.getIcon = function() { return plugin.icon || ""; };
+
+            wrapper.searchNovels = function(query, page) {
+                if (typeof plugin.searchNovels === 'function') {
+                    return Promise.resolve(plugin.searchNovels(query, page)).then(function(results) {
+                        if (!Array.isArray(results)) return [];
+                        return results.map(function(r) {
+                            return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
+                        });
+                    });
+                }
+                return Promise.resolve([]);
+            };
+
+            wrapper.popularNovels = function(page) {
+                if (typeof plugin.popularNovels === 'function') {
+                    var result;
+                    if (plugin.popularNovels.length <= 1) {
+                        result = plugin.popularNovels(page);
+                    } else {
+                        result = plugin.popularNovels(page, { showLatestNovels: false, filters: plugin.filters || {} });
+                    }
+                    return Promise.resolve(result).then(function(results) {
+                        if (!Array.isArray(results)) return [];
+                        return results.map(function(r) {
+                            return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
+                        });
+                    });
+                }
+                return Promise.resolve([]);
+            };
+
+            wrapper.latestNovels = function(page) {
+                if (typeof plugin.latestNovels === 'function') {
+                    var result;
+                    if (plugin.latestNovels.length <= 1) {
+                        result = plugin.latestNovels(page);
+                    } else {
+                        result = plugin.latestNovels(page, { showLatestNovels: true, filters: plugin.filters || {} });
+                    }
+                    return Promise.resolve(result).then(function(results) {
+                        if (!Array.isArray(results)) return [];
+                        return results.map(function(r) {
+                            return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
+                        });
+                    });
+                }
+                return wrapper.popularNovels(page);
+            };
+
+            wrapper.getNovelDetails = function(url) {
+                if (typeof plugin.parseNovel === 'function') {
+                    return Promise.resolve(plugin.parseNovel(url)).then(function(d) {
+                        return {
+                            name: d.name || d.title || "",
+                            url: d.url || d.path || url,
+                            cover: d.cover || d.image || "",
+                            author: d.author || null,
+                            description: d.description || d.summary || null,
+                            genres: Array.isArray(d.genres) ? d.genres : [],
+                            status: d.status || null
+                        };
+                    });
+                }
+                return Promise.resolve({ name: "", url: url, cover: "", author: null, description: null, genres: [], status: null });
+            };
+
+            wrapper.getChapters = function(url) {
+                if (typeof plugin.parseNovel === 'function') {
+                    return Promise.resolve(plugin.parseNovel(url)).then(function(novel) {
+                        if (novel && Array.isArray(novel.chapters)) {
+                            return novel.chapters.map(function(c) {
+                                return { name: c.name || c.title || "", url: c.url || c.path || "", releaseTime: c.releaseTime || c.date || null };
+                            });
+                        }
+                        return [];
+                    });
+                }
+                return Promise.resolve([]);
+            };
+
+            wrapper.getChapterContent = function(url) {
+                if (typeof plugin.parseChapter === 'function') {
+                    return Promise.resolve(plugin.parseChapter(url)).then(function(content) {
+                        var text = typeof content === 'string' ? content : (content.text || "");
+                        return text.replace(/[\n\r\t]/g, '');
+                    });
+                }
+                return Promise.resolve("");
+            };
+
+            return wrapper;
+        }
+        globalThis.wrapPlugin = wrapPlugin;
+    """.trimIndent()
+}
+
+
+/**
+ * Optimized J2V8 engine implementation.
+ * 
+ * Performance optimizations:
+ * 1. Uses shared thread pool instead of per-engine threads
+ * 2. Caches method references in J2V8EngineHelper
+ * 3. Caches adapter code (parsed once)
+ * 4. Extracts metadata during load to avoid repeated V8 calls
+ * 5. Uses faster promise polling (1ms instead of 10ms)
  */
 private class J2V8ReflectionEngine(
     private val bridgeService: JSBridgeService
@@ -148,37 +414,13 @@ private class J2V8ReflectionEngine(
     private var isEngineLoaded = false
     private val mutex = Mutex()
     
-    // V8 method references
-    private var v8Class: Class<*>? = null
-    private var createRuntimeMethod: Method? = null
-    private var executeVoidScriptMethod: Method? = null
-    private var executeStringScriptMethod: Method? = null
-    private var executeObjectScriptMethod: Method? = null
-    private var releaseMethod: Method? = null
+    // Use cached method references from helper
+    private val executeVoidScriptMethod = J2V8EngineHelper.getExecuteVoidScriptMethod()
+    private val executeStringScriptMethod = J2V8EngineHelper.getExecuteStringScriptMethod()
+    private val createRuntimeMethod = J2V8EngineHelper.getCreateRuntimeMethod()
+    private val releaseMethod = J2V8EngineHelper.getReleaseMethod()
     
-    // V8 requires single-threaded access
-    private val v8Executor = Executors.newSingleThreadExecutor { r ->
-        Thread(r, "V8-Engine-${System.identityHashCode(this)}").apply { isDaemon = true }
-    }
-    private val v8Dispatcher = v8Executor.asCoroutineDispatcher()
-    
-    init {
-        try {
-            val classLoader = J2V8EngineHelper.getJ2V8ClassLoader()
-                ?: throw IllegalStateException("J2V8 ClassLoader not available")
-            
-            v8Class = classLoader.loadClass("com.eclipsesource.v8.V8")
-            createRuntimeMethod = v8Class?.getMethod("createV8Runtime")
-            executeVoidScriptMethod = v8Class?.getMethod("executeVoidScript", String::class.java)
-            executeStringScriptMethod = v8Class?.getMethod("executeStringScript", String::class.java)
-            executeObjectScriptMethod = v8Class?.getMethod("executeObjectScript", String::class.java)
-            releaseMethod = v8Class?.getMethod("release")
-        } catch (e: Exception) {
-            Log.error { "J2V8ReflectionEngine: Failed to initialize: ${e.message}" }
-        }
-    }
-    
-    override suspend fun loadPlugin(jsCode: String, pluginId: String): LNReaderPlugin = withContext(v8Dispatcher) {
+    override suspend fun loadPlugin(jsCode: String, pluginId: String): LNReaderPlugin = withContext(V8ThreadPool.dispatcher) {
         mutex.withLock {
             try {
                 // Close existing engine if any
@@ -191,28 +433,37 @@ private class J2V8ReflectionEngine(
                     ?: throw ireader.domain.js.engine.PluginLoadException("Failed to create V8 runtime")
                 v8Runtime = runtime
                 
-                // Load adapter code with polyfills
-                Log.debug { "J2V8ReflectionEngine: Loading adapter code" }
-                executeVoidScriptMethod?.invoke(runtime, getAdapterCode())
+                // Load cached adapter code
+                executeVoidScriptMethod?.invoke(runtime, AdapterCodeCache.code)
                 
                 // Setup bridge for fetch
-                setupBridge(runtime, bridgeService, pluginId)
+                setupBridge(runtime)
                 
                 // Initialize module system
-                executeVoidScriptMethod?.invoke(runtime, "if (typeof exports === 'undefined') { var exports = {}; }")
-                executeVoidScriptMethod?.invoke(runtime, "if (typeof module === 'undefined') { var module = { exports: exports }; }")
+                executeVoidScriptMethod?.invoke(runtime, "var exports = {}; var module = { exports: exports };")
                 
                 // Load the plugin code
-                Log.debug { "J2V8ReflectionEngine: Loading plugin code (${jsCode.length} chars)" }
                 executeVoidScriptMethod?.invoke(runtime, jsCode)
                 
-                // Wrap the plugin
-                executeVoidScriptMethod?.invoke(runtime, "globalThis.__wrappedPlugin = wrapPlugin(exports.default || exports);")
+                // Wrap the plugin and extract metadata in one call
+                val metadataScript = """
+                    globalThis.__wrappedPlugin = wrapPlugin(exports.default || exports);
+                    JSON.stringify({
+                        id: __wrappedPlugin.getId(),
+                        name: __wrappedPlugin.getName(),
+                        site: __wrappedPlugin.getSite(),
+                        version: __wrappedPlugin.getVersion(),
+                        lang: __wrappedPlugin.getLang(),
+                        icon: __wrappedPlugin.getIcon()
+                    });
+                """.trimIndent()
+                
+                val metadataJson = executeStringScriptMethod?.invoke(runtime, metadataScript) as? String
                 
                 isEngineLoaded = true
                 
-                // Create wrapper
-                J2V8PluginWrapper(this@J2V8ReflectionEngine, pluginId, bridgeService, v8Dispatcher)
+                // Create wrapper with pre-extracted metadata
+                J2V8PluginWrapper(this@J2V8ReflectionEngine, pluginId, bridgeService, metadataJson)
                 
             } catch (e: Exception) {
                 Log.error { "J2V8ReflectionEngine: Failed to load plugin: ${e.message}" }
@@ -223,10 +474,10 @@ private class J2V8ReflectionEngine(
         }
     }
     
-    private fun setupBridge(runtime: Any, bridge: JSBridgeService, pluginId: String) {
+    private fun setupBridge(runtime: Any) {
         executeVoidScriptMethod?.invoke(runtime, """
             globalThis.fetch = function(url, options) {
-                return new Promise((resolve, reject) => {
+                return new Promise(function(resolve, reject) {
                     globalThis.__pendingFetch = {
                         url: String(url || ''),
                         method: (options && options.method) || 'GET',
@@ -242,35 +493,10 @@ private class J2V8ReflectionEngine(
         """.trimIndent())
     }
     
-    fun evaluateScript(script: String): Any? {
-        return try {
-            // Use executeStringScript and parse the result
-            // This is more reliable than executeObjectScript which returns V8Object
-            val wrappedScript = "JSON.stringify($script)"
-            val result = executeStringScriptMethod?.invoke(v8Runtime, wrappedScript) as? String
-            if (result == null || result == "null" || result == "undefined") {
-                null
-            } else if (result.startsWith("\"") && result.endsWith("\"")) {
-                // It's a JSON string, parse it
-                result.substring(1, result.length - 1)
-            } else if (result == "true") {
-                true
-            } else if (result == "false") {
-                false
-            } else {
-                result
-            }
-        } catch (e: Exception) {
-            Log.warn { "J2V8ReflectionEngine: evaluateScript error: ${e.cause?.message ?: e.message}" }
-            null
-        }
-    }
-    
     fun evaluateStringScript(script: String): String? {
         return try {
             executeStringScriptMethod?.invoke(v8Runtime, script) as? String
         } catch (e: Exception) {
-            Log.warn { "J2V8ReflectionEngine: evaluateStringScript error: ${e.cause?.message ?: e.message}" }
             null
         }
     }
@@ -279,305 +505,67 @@ private class J2V8ReflectionEngine(
         try {
             executeVoidScriptMethod?.invoke(v8Runtime, script)
         } catch (e: Exception) {
-            Log.warn { "J2V8ReflectionEngine: evaluateVoidScript error: ${e.cause?.message ?: e.message}" }
+            Log.warn { "J2V8: evaluateVoidScript error: ${e.cause?.message ?: e.message}" }
         }
     }
     
     override fun close() {
         try {
-            v8Executor.submit {
-                try { v8Runtime?.let { releaseMethod?.invoke(it) } } catch (e: Exception) {}
-                v8Runtime = null
-            }.get()
+            v8Runtime?.let { releaseMethod?.invoke(it) }
         } catch (e: Exception) {}
-        v8Executor.shutdown()
+        v8Runtime = null
         isEngineLoaded = false
     }
     
     override fun isLoaded(): Boolean = isEngineLoaded
-
-    
-    private fun getAdapterCode(): String {
-        return """
-            // Console polyfill
-            (function() {
-                var console = {};
-                console.log = function() { globalThis.__consoleLog = Array.prototype.slice.call(arguments).join(' '); };
-                console.error = function() { globalThis.__consoleError = Array.prototype.slice.call(arguments).join(' '); };
-                console.warn = function() { };
-                console.info = function() { };
-                console.debug = function() { };
-                globalThis.console = console;
-            })();
-
-            // URL polyfill
-            if (typeof URL === 'undefined') {
-                globalThis.URL = function(url, base) {
-                    if (url === null || url === undefined) throw new Error('Invalid URL');
-                    url = String(url);
-                    var fullUrl = url;
-                    if (base && !url.match(/^https?:\/\//)) {
-                        base = String(base);
-                        if (url.indexOf('/') === 0) {
-                            var baseMatch = base.match(/^(https?:\/\/[^\/]+)/);
-                            fullUrl = baseMatch ? baseMatch[1] + url : url;
-                        } else {
-                            fullUrl = base.replace(/\/[^\/]*${'$'}/, '/') + url;
-                        }
-                    }
-                    var match = fullUrl.match(/^(https?):\/\/([^\/\?#]+)(\/[^\?#]*)?(\?[^#]*)?(#.*)?${'$'}/);
-                    if (!match) throw new Error('Invalid URL: ' + fullUrl);
-                    this.protocol = (match[1] || 'http') + ':';
-                    this.host = match[2] || '';
-                    this.hostname = (match[2] || '').split(':')[0];
-                    this.port = (match[2] || '').split(':')[1] || '';
-                    this.pathname = match[3] || '/';
-                    this.search = match[4] || '';
-                    this.hash = match[5] || '';
-                    this.href = fullUrl;
-                    this.origin = this.protocol + '//' + this.host;
-                    this.toString = function() { return this.href; };
-                };
-            }
-
-            if (typeof URLSearchParams === 'undefined') {
-                globalThis.URLSearchParams = function(init) {
-                    this.params = {};
-                    if (typeof init === 'string') {
-                        var query = init.indexOf('?') === 0 ? init.substring(1) : init;
-                        if (query) {
-                            var self = this;
-                            query.split('&').forEach(function(pair) {
-                                var parts = pair.split('=');
-                                var key = decodeURIComponent(parts[0]);
-                                var value = parts[1] ? decodeURIComponent(parts[1]) : '';
-                                if (!self.params[key]) self.params[key] = [];
-                                self.params[key].push(value);
-                            });
-                        }
-                    }
-                    this.get = function(key) { return this.params[key] ? this.params[key][0] : null; };
-                    this.toString = function() {
-                        var parts = [];
-                        for (var key in this.params) {
-                            if (this.params.hasOwnProperty(key)) {
-                                var self = this;
-                                this.params[key].forEach(function(value) {
-                                    parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
-                                });
-                            }
-                        }
-                        return parts.join('&');
-                    };
-                };
-            }
-
-            // Headers polyfill
-            if (typeof Headers === 'undefined') {
-                globalThis.Headers = function(init) {
-                    this.headers = {};
-                    if (init && typeof init === 'object') {
-                        for (var key in init) {
-                            if (init.hasOwnProperty(key)) {
-                                this.headers[key.toLowerCase()] = String(init[key]);
-                            }
-                        }
-                    }
-                    this.get = function(name) { return this.headers[name.toLowerCase()] || null; };
-                    this.set = function(name, value) { this.headers[name.toLowerCase()] = String(value); };
-                };
-            }
-
-            // TextEncoder/TextDecoder polyfills
-            if (typeof TextEncoder === 'undefined') {
-                globalThis.TextEncoder = function() {
-                    this.encode = function(str) {
-                        var utf8 = [];
-                        for (var i = 0; i < str.length; i++) {
-                            var c = str.charCodeAt(i);
-                            if (c < 0x80) utf8.push(c);
-                            else if (c < 0x800) utf8.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
-                            else utf8.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
-                        }
-                        return new Uint8Array(utf8);
-                    };
-                };
-            }
-
-            if (typeof TextDecoder === 'undefined') {
-                globalThis.TextDecoder = function() {
-                    this.decode = function(bytes) {
-                        var str = '';
-                        for (var i = 0; i < bytes.length; i++) {
-                            str += String.fromCharCode(bytes[i]);
-                        }
-                        return str;
-                    };
-                };
-            }
-
-            // setTimeout/setInterval stubs
-            globalThis.setTimeout = function(callback, delay) { callback(); return 0; };
-            globalThis.setInterval = function(callback, delay) { return 0; };
-            globalThis.clearTimeout = function(id) { };
-            globalThis.clearInterval = function(id) { };
-
-            // Wrapper function for plugins
-            function wrapPlugin(plugin) {
-                var wrapper = {};
-                wrapper.getId = function() { return plugin.id || "unknown"; };
-                wrapper.getName = function() { return plugin.name || "Unknown Plugin"; };
-                wrapper.getSite = function() { return plugin.site || ""; };
-                wrapper.getVersion = function() { return plugin.version || "1.0.0"; };
-                wrapper.getLang = function() { return plugin.lang || "en"; };
-                wrapper.getIcon = function() { return plugin.icon || ""; };
-
-                wrapper.searchNovels = function(query, page) {
-                    if (typeof plugin.searchNovels === 'function') {
-                        return Promise.resolve(plugin.searchNovels(query, page)).then(function(results) {
-                            if (!Array.isArray(results)) return [];
-                            return results.map(function(r) {
-                                return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
-                            });
-                        });
-                    }
-                    return Promise.resolve([]);
-                };
-
-                wrapper.popularNovels = function(page) {
-                    if (typeof plugin.popularNovels === 'function') {
-                        var result;
-                        if (plugin.popularNovels.length <= 1) {
-                            result = plugin.popularNovels(page);
-                        } else {
-                            result = plugin.popularNovels(page, { showLatestNovels: false, filters: plugin.filters || {} });
-                        }
-                        return Promise.resolve(result).then(function(results) {
-                            if (!Array.isArray(results)) return [];
-                            return results.map(function(r) {
-                                return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
-                            });
-                        });
-                    }
-                    return Promise.resolve([]);
-                };
-
-                wrapper.latestNovels = function(page) {
-                    if (typeof plugin.latestNovels === 'function') {
-                        var result;
-                        if (plugin.latestNovels.length <= 1) {
-                            result = plugin.latestNovels(page);
-                        } else {
-                            result = plugin.latestNovels(page, { showLatestNovels: true, filters: plugin.filters || {} });
-                        }
-                        return Promise.resolve(result).then(function(results) {
-                            if (!Array.isArray(results)) return [];
-                            return results.map(function(r) {
-                                return { name: r.name || r.title || "", url: r.url || r.path || "", cover: r.cover || r.image || "" };
-                            });
-                        });
-                    }
-                    return wrapper.popularNovels(page);
-                };
-
-                wrapper.getNovelDetails = function(url) {
-                    if (typeof plugin.parseNovel === 'function') {
-                        return Promise.resolve(plugin.parseNovel(url)).then(function(d) {
-                            return {
-                                name: d.name || d.title || "",
-                                url: d.url || d.path || url,
-                                cover: d.cover || d.image || "",
-                                author: d.author || null,
-                                description: d.description || d.summary || null,
-                                genres: Array.isArray(d.genres) ? d.genres : [],
-                                status: d.status || null
-                            };
-                        });
-                    }
-                    return Promise.resolve({ name: "", url: url, cover: "", author: null, description: null, genres: [], status: null });
-                };
-
-                wrapper.getChapters = function(url) {
-                    if (typeof plugin.parseNovel === 'function') {
-                        return Promise.resolve(plugin.parseNovel(url)).then(function(novel) {
-                            if (novel && Array.isArray(novel.chapters)) {
-                                return novel.chapters.map(function(c) {
-                                    return { name: c.name || c.title || "", url: c.url || c.path || "", releaseTime: c.releaseTime || c.date || null };
-                                });
-                            }
-                            return [];
-                        });
-                    }
-                    return Promise.resolve([]);
-                };
-
-                wrapper.getChapterContent = function(url) {
-                    if (typeof plugin.parseChapter === 'function') {
-                        return Promise.resolve(plugin.parseChapter(url)).then(function(content) {
-                            return typeof content === 'string' ? content : (content.text || "");
-                        });
-                    }
-                    return Promise.resolve("");
-                };
-
-                return wrapper;
-            }
-            globalThis.wrapPlugin = wrapPlugin;
-        """.trimIndent()
-    }
 }
 
-
 /**
- * Wrapper that adapts J2V8 to LNReaderPlugin interface.
+ * Optimized plugin wrapper with cached metadata.
  */
 private class J2V8PluginWrapper(
     private val engine: J2V8ReflectionEngine,
     private val pluginId: String,
     private val bridgeService: JSBridgeService,
-    private val v8Dispatcher: kotlinx.coroutines.CoroutineDispatcher
+    metadataJson: String?
 ) : LNReaderPlugin {
 
     private val mutex = Mutex()
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
-
-    override suspend fun getId(): String = withContext(v8Dispatcher) {
-        mutex.withLock {
-            engine.evaluateScript("__wrappedPlugin.getId()") as? String ?: pluginId
+    
+    // Cache metadata extracted during load
+    private val cachedId: String
+    private val cachedName: String
+    private val cachedSite: String
+    private val cachedVersion: String
+    private val cachedLang: String
+    private val cachedIcon: String
+    
+    init {
+        // Parse metadata from JSON extracted during load
+        val metadata = metadataJson?.let {
+            try {
+                json.parseToJsonElement(it).jsonObject
+            } catch (e: Exception) { null }
         }
+        
+        cachedId = metadata?.get("id")?.jsonPrimitive?.content ?: pluginId
+        cachedName = metadata?.get("name")?.jsonPrimitive?.content ?: "Unknown"
+        cachedSite = metadata?.get("site")?.jsonPrimitive?.content ?: ""
+        cachedVersion = metadata?.get("version")?.jsonPrimitive?.content ?: "1.0.0"
+        cachedLang = metadata?.get("lang")?.jsonPrimitive?.content ?: "en"
+        cachedIcon = metadata?.get("icon")?.jsonPrimitive?.content ?: ""
     }
 
-    override suspend fun getName(): String = withContext(v8Dispatcher) {
-        mutex.withLock {
-            engine.evaluateScript("__wrappedPlugin.getName()") as? String ?: "Unknown"
-        }
-    }
+    // Return cached values - no V8 calls needed
+    override suspend fun getId(): String = cachedId
+    override suspend fun getName(): String = cachedName
+    override suspend fun getSite(): String = cachedSite
+    override suspend fun getVersion(): String = cachedVersion
+    override suspend fun getLang(): String = cachedLang
+    override suspend fun getIcon(): String = cachedIcon
 
-    override suspend fun getSite(): String = withContext(v8Dispatcher) {
-        mutex.withLock {
-            engine.evaluateScript("__wrappedPlugin.getSite()") as? String ?: ""
-        }
-    }
-
-    override suspend fun getVersion(): String = withContext(v8Dispatcher) {
-        mutex.withLock {
-            engine.evaluateScript("__wrappedPlugin.getVersion()") as? String ?: "1.0.0"
-        }
-    }
-
-    override suspend fun getLang(): String = withContext(v8Dispatcher) {
-        mutex.withLock {
-            engine.evaluateScript("__wrappedPlugin.getLang()") as? String ?: "en"
-        }
-    }
-
-    override suspend fun getIcon(): String = withContext(v8Dispatcher) {
-        mutex.withLock {
-            engine.evaluateScript("__wrappedPlugin.getIcon()") as? String ?: ""
-        }
-    }
-
-    override suspend fun searchNovels(query: String, page: Int): List<PluginNovel> = withContext(v8Dispatcher) {
+    override suspend fun searchNovels(query: String, page: Int): List<PluginNovel> = withContext(V8ThreadPool.dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.searchNovels('${query.replace("'", "\\'")}', $page)")
@@ -589,7 +577,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(v8Dispatcher) {
+    override suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(V8ThreadPool.dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.popularNovels($page)")
@@ -601,7 +589,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun latestNovels(page: Int): List<PluginNovel> = withContext(v8Dispatcher) {
+    override suspend fun latestNovels(page: Int): List<PluginNovel> = withContext(V8ThreadPool.dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.latestNovels($page)")
@@ -613,7 +601,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun getNovelDetails(url: String): PluginNovelDetails = withContext(v8Dispatcher) {
+    override suspend fun getNovelDetails(url: String): PluginNovelDetails = withContext(V8ThreadPool.dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.getNovelDetails('${url.replace("'", "\\'")}')")
@@ -625,7 +613,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun getChapters(url: String): List<PluginChapter> = withContext(v8Dispatcher) {
+    override suspend fun getChapters(url: String): List<PluginChapter> = withContext(V8ThreadPool.dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.getChapters('${url.replace("'", "\\'")}')")
@@ -637,7 +625,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun getChapterContent(url: String): String = withContext(v8Dispatcher) {
+    override suspend fun getChapterContent(url: String): String = withContext(V8ThreadPool.dispatcher) {
         mutex.withLock {
             try {
                 awaitPromise("__wrappedPlugin.getChapterContent('${url.replace("'", "\\'")}')")
@@ -651,20 +639,20 @@ private class J2V8PluginWrapper(
     override fun getFilters(): Map<String, Any> = emptyMap()
 
     /**
-     * Wait for a JavaScript Promise to resolve.
+     * Optimized promise awaiting with faster polling.
      */
     private suspend fun awaitPromise(jsExpression: String): String {
-        val promiseId = System.currentTimeMillis()
+        val promiseId = System.nanoTime()
 
         engine.evaluateVoidScript("""
             (async function() {
                 try {
                     const result = await ($jsExpression);
-                    globalThis.__promiseResult_$promiseId = JSON.stringify(result);
-                    globalThis.__promiseStatus_$promiseId = 'resolved';
+                    globalThis.__pr_$promiseId = JSON.stringify(result);
+                    globalThis.__ps_$promiseId = 1;
                 } catch (e) {
-                    globalThis.__promiseError_$promiseId = e.message || String(e);
-                    globalThis.__promiseStatus_$promiseId = 'rejected';
+                    globalThis.__pe_$promiseId = e.message || String(e);
+                    globalThis.__ps_$promiseId = 2;
                 }
             })();
         """.trimIndent())
@@ -676,35 +664,31 @@ private class J2V8PluginWrapper(
             // Process any pending fetch requests
             processPendingFetch()
 
-            val status = engine.evaluateStringScript("globalThis.__promiseStatus_$promiseId")
+            val status = engine.evaluateStringScript("String(globalThis.__ps_$promiseId || 0)")
 
             when (status) {
-                "resolved" -> {
-                    // Get the raw result without double-stringifying
-                    val result = engine.evaluateStringScript("globalThis.__promiseResult_$promiseId") ?: ""
-                    engine.evaluateVoidScript("delete globalThis.__promiseResult_$promiseId; delete globalThis.__promiseStatus_$promiseId;")
+                "1" -> {
+                    val result = engine.evaluateStringScript("globalThis.__pr_$promiseId") ?: ""
+                    engine.evaluateVoidScript("delete globalThis.__pr_$promiseId; delete globalThis.__ps_$promiseId;")
                     return result
                 }
-                "rejected" -> {
-                    val error = engine.evaluateStringScript("globalThis.__promiseError_$promiseId") ?: "Unknown error"
-                    engine.evaluateVoidScript("delete globalThis.__promiseError_$promiseId; delete globalThis.__promiseStatus_$promiseId;")
+                "2" -> {
+                    val error = engine.evaluateStringScript("globalThis.__pe_$promiseId") ?: "Unknown error"
+                    engine.evaluateVoidScript("delete globalThis.__pe_$promiseId; delete globalThis.__ps_$promiseId;")
                     throw Exception("Promise rejected: $error")
                 }
             }
 
-            delay(10)
+            delay(1) // Faster polling
         }
 
-        engine.evaluateVoidScript("delete globalThis.__promiseResult_$promiseId; delete globalThis.__promiseStatus_$promiseId; delete globalThis.__promiseError_$promiseId;")
+        engine.evaluateVoidScript("delete globalThis.__pr_$promiseId; delete globalThis.__ps_$promiseId; delete globalThis.__pe_$promiseId;")
         throw Exception("Promise timeout after ${timeout}ms")
     }
 
-    /**
-     * Process pending fetch requests.
-     */
     private suspend fun processPendingFetch() {
         try {
-            val fetchReadyStr = engine.evaluateStringScript("String(globalThis.__fetchReady)")
+            val fetchReadyStr = engine.evaluateStringScript("String(globalThis.__fetchReady || false)")
             if (fetchReadyStr != "true") return
 
             engine.evaluateVoidScript("globalThis.__fetchReady = false;")
@@ -715,30 +699,24 @@ private class J2V8PluginWrapper(
             val url = fetchData["url"]?.jsonPrimitive?.content ?: return
             val method = fetchData["method"]?.jsonPrimitive?.content ?: "GET"
 
-            Log.debug { "J2V8PluginWrapper: Processing fetch: $method $url" }
-
             val response = withContext(Dispatchers.IO) {
                 bridgeService.fetch(url, FetchOptions(method = method))
             }
 
-            // Store response body
-            val responseBodyVar = "__responseBody_${System.currentTimeMillis()}"
+            // Store response and resolve promise
+            val responseBodyVar = "__rb_${System.nanoTime()}"
             engine.evaluateVoidScript("globalThis.$responseBodyVar = ${Json.encodeToString(JsonPrimitive.serializer(), JsonPrimitive(response.text))};")
 
-            // Resolve the Promise
             engine.evaluateVoidScript("""
                 if (globalThis.__pendingFetch && globalThis.__pendingFetch.resolve) {
-                    const bodyText = globalThis.$responseBodyVar;
+                    var bodyText = globalThis.$responseBodyVar;
                     delete globalThis.$responseBodyVar;
-                    const response = {
+                    globalThis.__pendingFetch.resolve({
                         ok: ${response.status in 200..299},
                         status: ${response.status},
-                        statusText: "${response.statusText.replace("\"", "\\\"")}",
-                        url: "${url.replace("\"", "\\\"")}",
                         text: function() { return Promise.resolve(bodyText); },
                         json: function() { return Promise.resolve(JSON.parse(bodyText)); }
-                    };
-                    globalThis.__pendingFetch.resolve(response);
+                    });
                     delete globalThis.__pendingFetch;
                 }
             """.trimIndent())
@@ -760,7 +738,6 @@ private class J2V8PluginWrapper(
                 )
             }
         } catch (e: Exception) {
-            Log.error { "J2V8PluginWrapper: Error parsing novel list: ${e.message}" }
             emptyList()
         }
     }
@@ -778,7 +755,6 @@ private class J2V8PluginWrapper(
                 status = obj["status"]?.jsonPrimitive?.content
             )
         } catch (e: Exception) {
-            Log.error { "J2V8PluginWrapper: Error parsing novel details: ${e.message}" }
             PluginNovelDetails("", "", "", null, null, emptyList(), null)
         }
     }
@@ -795,7 +771,6 @@ private class J2V8PluginWrapper(
                 )
             }
         } catch (e: Exception) {
-            Log.error { "J2V8PluginWrapper: Error parsing chapter list: ${e.message}" }
             emptyList()
         }
     }

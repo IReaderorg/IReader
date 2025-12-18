@@ -140,19 +140,19 @@ class RequiredPluginChecker(
     }
     
     /**
-     * Observe a CatalogStore's JS engine missing status and auto-request when needed.
-     * Call this during app initialization to automatically show the JS engine dialog
-     * when JS plugins are installed but the engine is missing.
+     * Observe a CatalogStore's JS engine missing status.
+     * This no longer auto-shows the dialog - instead, the dialog is shown when user
+     * tries to use a JS source (click on it in the sources list).
+     * 
+     * Call this during app initialization to track JS engine status.
      */
     fun observeCatalogStoreJSEngineStatus(jsEngineMissingFlow: StateFlow<Boolean>) {
         ireader.core.log.Log.info("RequiredPluginChecker: Starting to observe JS engine missing status")
         jsEngineMissingFlow
             .onEach { isMissing ->
                 ireader.core.log.Log.info("RequiredPluginChecker: JS engine missing status changed: $isMissing, isJSEngineAvailable=${isJSEngineAvailable()}")
-                if (isMissing && !isJSEngineAvailable()) {
-                    ireader.core.log.Log.info("RequiredPluginChecker: Setting jsEngineRequired=true to show dialog")
-                    _jsEngineRequired.value = true
-                }
+                // Don't auto-show dialog - let user see JS sources first
+                // Dialog will be shown when user clicks on a JS source
             }
             .launchIn(scope)
     }

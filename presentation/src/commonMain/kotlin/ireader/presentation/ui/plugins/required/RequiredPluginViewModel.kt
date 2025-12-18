@@ -7,6 +7,10 @@ import ireader.domain.plugins.PluginManager
 import ireader.domain.plugins.PluginRepositoryIndexFetcher
 import ireader.domain.plugins.PluginRepositoryRepository
 import ireader.domain.plugins.PluginStatus
+import ireader.domain.services.common.PluginDownloadProgress
+import ireader.domain.services.common.PluginDownloadService
+import ireader.domain.services.common.PluginDownloadStatus
+import ireader.domain.services.common.ServiceResult
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -14,12 +18,14 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for Required Plugin installation screen
  * Handles downloading and installing required plugins like JS Engine or Piper TTS
+ * Uses PluginDownloadService for background installation with progress tracking
  */
 class RequiredPluginViewModel(
     private val pluginManager: PluginManager,
     private val repositoryRepository: PluginRepositoryRepository,
     private val indexFetcher: PluginRepositoryIndexFetcher,
-    private val catalogStore: ireader.domain.catalogs.CatalogStore
+    private val catalogStore: ireader.domain.catalogs.CatalogStore,
+    private val downloadService: PluginDownloadService
 ) : BaseViewModel() {
 
     private val _state = mutableStateOf(RequiredPluginState(pluginType = RequiredPluginType.JS_ENGINE))
@@ -165,7 +171,8 @@ class RequiredPluginViewModel(
     }
 
     /**
-     * Install the required plugin
+     * Install the required plugin using PluginDownloadService
+     * This provides background installation with progress tracking and notifications
      */
     fun installPlugin() {
         val plugin = targetPluginInfo ?: run {
@@ -181,33 +188,91 @@ class RequiredPluginViewModel(
         
         scope.launch {
             try {
-                // Simulate progress updates (actual progress would come from download)
-                // For now, we'll show indeterminate progress
-                _state.value = _state.value.copy(downloadProgress = 0.1f)
+                // Start observing download progress
+                observeDownloadProgress(plugin.id)
                 
-                pluginManager.installPlugin(plugin)
-                    .onSuccess { installedPlugin ->
-                        _state.value = _state.value.copy(
-                            isDownloading = false,
-                            downloadProgress = 1f,
-                            isInstalled = true,
-                            isEnabled = false, // Need to enable after install
-                            pluginInfo = installedPlugin.toDisplayInfo()
-                        )
-                    }
-                    .onFailure { error ->
+                // Queue download via service (handles background download with notifications)
+                when (val result = downloadService.downloadPlugin(plugin)) {
+                    is ServiceResult.Error -> {
                         _state.value = _state.value.copy(
                             isDownloading = false,
                             downloadProgress = 0f,
-                            error = "Installation failed: ${error.message}"
+                            error = "Installation failed: ${result.message}"
                         )
                     }
+                    is ServiceResult.Success -> {
+                        // Download started, progress will be observed via observeDownloadProgress
+                    }
+                    is ServiceResult.Loading -> {
+                        // Still loading, wait for result
+                    }
+                }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isDownloading = false,
                     downloadProgress = 0f,
                     error = "Installation failed: ${e.message}"
                 )
+            }
+        }
+    }
+    
+    /**
+     * Observe download progress from the service
+     */
+    private fun observeDownloadProgress(pluginId: String) {
+        scope.launch {
+            downloadService.downloads.collect { downloads ->
+                val progress = downloads[pluginId] ?: return@collect
+                
+                when (progress.status) {
+                    PluginDownloadStatus.QUEUED -> {
+                        _state.value = _state.value.copy(
+                            isDownloading = true,
+                            downloadProgress = 0f
+                        )
+                    }
+                    PluginDownloadStatus.DOWNLOADING -> {
+                        _state.value = _state.value.copy(
+                            isDownloading = true,
+                            downloadProgress = progress.progress
+                        )
+                    }
+                    PluginDownloadStatus.VALIDATING -> {
+                        _state.value = _state.value.copy(
+                            isDownloading = true,
+                            downloadProgress = 0.9f
+                        )
+                    }
+                    PluginDownloadStatus.INSTALLING -> {
+                        _state.value = _state.value.copy(
+                            isDownloading = true,
+                            downloadProgress = 0.95f
+                        )
+                    }
+                    PluginDownloadStatus.COMPLETED -> {
+                        _state.value = _state.value.copy(
+                            isDownloading = false,
+                            downloadProgress = 1f,
+                            isInstalled = true,
+                            isEnabled = false // Need to enable after install
+                        )
+                    }
+                    PluginDownloadStatus.FAILED -> {
+                        _state.value = _state.value.copy(
+                            isDownloading = false,
+                            downloadProgress = 0f,
+                            error = progress.errorMessage ?: "Installation failed"
+                        )
+                    }
+                    PluginDownloadStatus.CANCELLED -> {
+                        _state.value = _state.value.copy(
+                            isDownloading = false,
+                            downloadProgress = 0f,
+                            error = "Installation cancelled"
+                        )
+                    }
+                }
             }
         }
     }

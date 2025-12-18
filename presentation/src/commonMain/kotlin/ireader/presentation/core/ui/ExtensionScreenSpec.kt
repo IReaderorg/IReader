@@ -86,6 +86,7 @@ object ExtensionScreenSpec {
         val snackBarHostState = SnackBarListener(vm)
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val pullToRefreshState = rememberPullToRefreshState()
+        val requiredPluginChecker: ireader.domain.plugins.RequiredPluginChecker = org.koin.compose.koinInject()
 
         // Migration source selection dialog
         if (showMigrationSourceDialog) {
@@ -135,16 +136,28 @@ object ExtensionScreenSpec {
             ) { scaffoldPadding ->
                 UnifiedSourceScreen(
                     vm = vm,
-                    onClickCatalog = {
-                        if (!vm.incognito.value) {
-                            vm.lastUsedSource.value = it.sourceId
-                        }
-                        navController.navigateTo(
-                            ExploreScreenSpec(
-                                sourceId = it.sourceId,
-                                query = ""
+                    onClickCatalog = { catalog ->
+                        // Check if this is a JS source that requires JS engine
+                        val isJSSource = catalog is ireader.domain.models.entities.JSPluginCatalog
+                        val isPendingSource = isJSSource && 
+                            (catalog as ireader.domain.models.entities.JSPluginCatalog).source is ireader.domain.js.loader.JSPluginPendingSource
+                        val jsEngineAvailable = requiredPluginChecker.isJSEngineAvailable()
+                        
+                        if (isPendingSource || (isJSSource && !jsEngineAvailable)) {
+                            // JS source but no engine - show required plugin dialog
+                            requiredPluginChecker.requestJSEngine()
+                        } else {
+                            // Native source or JS engine available - navigate normally
+                            if (!vm.incognito.value) {
+                                vm.lastUsedSource.value = catalog.sourceId
+                            }
+                            navController.navigateTo(
+                                ExploreScreenSpec(
+                                    sourceId = catalog.sourceId,
+                                    query = ""
+                                )
                             )
-                        )
+                        }
                     },
                     onClickInstall = { vm.installCatalog(it) },
                     onClickTogglePinned = { vm.togglePinnedCatalog(it) },

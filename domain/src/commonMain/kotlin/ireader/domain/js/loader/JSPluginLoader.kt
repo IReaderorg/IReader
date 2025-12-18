@@ -81,7 +81,8 @@ class JSPluginLoader(
     
     /**
      * Loads all JavaScript plugins from the plugins directory.
-     * @return List of loaded catalogs
+     * Uses fast metadata extraction - no JS engine required for initial load.
+     * @return List of loaded catalogs (may include pending catalogs if JS engine is missing)
      */
     suspend fun loadAllPlugins(): List<JSPluginCatalog> {
         val startTime = currentTimeToLong()
@@ -106,27 +107,181 @@ class JSPluginLoader(
         }
         ireader.core.log.Log.info("JSPluginLoader: Found ${pluginFiles.size} .js files: ${pluginFiles.map { it.name }}")
         
-        // Load each plugin
+        // Fast load: Extract metadata without JS engine, create pending catalogs
         val catalogs = pluginFiles.mapNotNull { file ->
             try {
+                // Try full load first (if JS engine is available)
                 loadPlugin(file)
             } catch (e: ireader.domain.js.engine.NoJSEngineException) {
-                // Track that JS engine is missing
+                // JS engine not available - create pending catalog from metadata
                 jsEngineMissing = true
                 pendingPluginsCount++
-                ireader.core.log.Log.warn("JSPluginLoader: JS engine not available for ${file.name}. Install J2V8/GraalVM plugin from Feature Store.")
-                null
+                ireader.core.log.Log.info("JSPluginLoader: Creating pending catalog for ${file.name} (JS engine not available)")
+                createPendingCatalog(file)
             } catch (e: Exception) {
                 ireader.core.log.Log.error("JSPluginLoader: Failed to load plugin ${file.name}", e)
-                null
+                // Try to create pending catalog even on error
+                createPendingCatalog(file)
             }
         }
         
-        if (jsEngineMissing && pendingPluginsCount > 0) {
-            ireader.core.log.Log.info("JSPluginLoader: $pendingPluginsCount JS plugins pending - JS engine plugin required")
-        }
+        val loadTime = currentTimeToLong() - startTime
+        ireader.core.log.Log.info("JSPluginLoader: Loaded ${catalogs.size} catalogs in ${loadTime}ms (${pendingPluginsCount} pending)")
         
         return catalogs
+    }
+    
+    /**
+     * Creates a pending catalog from a plugin file by extracting metadata without JS engine.
+     * This allows showing the source in the list even when JS engine is not available.
+     */
+    private fun createPendingCatalog(file: Path): JSPluginCatalog? {
+        val pluginId = file.name.substringBeforeLast(".")
+        
+        try {
+            // First try to load saved metadata (fastest)
+            val metadataFile = file.parent!! / "${pluginId}.meta.json"
+            val savedMetadata = if (fileSystem.exists(metadataFile)) {
+                try {
+                    val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                    val content = fileSystem.source(metadataFile).buffer().use { it.readUtf8() }
+                    json.decodeFromString<PluginMetadata>(content)
+                } catch (e: Exception) {
+                    null
+                }
+            } else {
+                null
+            }
+            
+            val metadata = savedMetadata ?: run {
+                // Extract metadata from JS code without executing it
+                val jsCode = fileSystem.source(file).buffer().use { it.readUtf8() }
+                extractMetadataFromCode(jsCode, pluginId)
+            }
+            
+            if (metadata == null) {
+                ireader.core.log.Log.warn("JSPluginLoader: Could not extract metadata for ${file.name}")
+                return null
+            }
+            
+            // Save metadata for future fast loading
+            if (savedMetadata == null) {
+                try {
+                    val json = kotlinx.serialization.json.Json { 
+                        prettyPrint = true
+                        ignoreUnknownKeys = true 
+                    }
+                    val metadataJson = json.encodeToString(PluginMetadata.serializer(), metadata)
+                    fileSystem.sink(metadataFile).buffer().use { it.writeUtf8(metadataJson) }
+                } catch (e: Exception) {
+                    // Ignore save errors
+                }
+            }
+            
+            // Create pending source (shows "JS Engine Required" message)
+            val pluginPreferenceStore = preferenceStoreFactory.create("js_plugin_$pluginId")
+            val httpClientsInterface = object : ireader.core.http.HttpClientsInterface {
+                override val default: HttpClient = httpClient
+                override val cloudflareClient: HttpClient = httpClient
+                override val browser: ireader.core.http.BrowserEngine = ireader.core.http.BrowserEngine()
+                override val config: ireader.core.http.NetworkConfig = ireader.core.http.NetworkConfig()
+                override val sslConfig: ireader.core.http.SSLConfiguration = ireader.core.http.SSLConfiguration()
+                override val cookieSynchronizer: ireader.core.http.CookieSynchronizer = createCookieSynchronizer()
+            }
+            val dependencies = ireader.core.source.Dependencies(
+                httpClients = httpClientsInterface,
+                preferences = pluginPreferenceStore
+            )
+            
+            val pendingSource = JSPluginPendingSource(metadata, dependencies)
+            
+            return JSPluginCatalog(
+                source = pendingSource,
+                metadata = metadata,
+                pluginFile = file
+            )
+        } catch (e: Exception) {
+            ireader.core.log.Log.error("JSPluginLoader: Failed to create pending catalog for ${file.name}", e)
+            return null
+        }
+    }
+    
+    /**
+     * Extracts metadata from JS code without executing it.
+     * Uses regex patterns to find id, name, version, site, lang, icon.
+     */
+    private fun extractMetadataFromCode(jsCode: String, fallbackId: String): PluginMetadata? {
+        // Validate that the file contains JavaScript
+        if (jsCode.contains("404") && jsCode.contains("Not Found") && jsCode.length < 1000) {
+            return null
+        }
+        if (jsCode.trim().startsWith("<!DOCTYPE") || jsCode.trim().startsWith("<html")) {
+            return null
+        }
+        if (jsCode.isBlank()) {
+            return null
+        }
+        
+        // Extract id
+        val idPatterns = listOf(
+            """id\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """['"]id['"]\s*:\s*['"]([^'"]+)['"]""".toRegex()
+        )
+        val id = idPatterns.firstNotNullOfOrNull { it.find(jsCode)?.groupValues?.get(1) } ?: fallbackId
+        
+        // Extract name
+        val namePatterns = listOf(
+            """name\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """['"]name['"]\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """sourceName\s*:\s*['"]([^'"]+)['"]""".toRegex()
+        )
+        val name = namePatterns.firstNotNullOfOrNull { 
+            it.find(jsCode)?.groupValues?.get(1)?.takeIf { n -> n.length > 2 } 
+        } ?: id.split(".").lastOrNull()?.replaceFirstChar { it.uppercase() } ?: "Unknown"
+        
+        // Extract version
+        val versionPatterns = listOf(
+            """version\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """['"]version['"]\s*:\s*['"]([^'"]+)['"]""".toRegex()
+        )
+        val version = versionPatterns.firstNotNullOfOrNull { 
+            it.find(jsCode)?.groupValues?.get(1)?.takeIf { v -> v.matches(Regex("""[\d.]+""")) }
+        } ?: "1.0.0"
+        
+        // Extract site/baseUrl
+        val sitePatterns = listOf(
+            """site\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """baseUrl\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """sourceSite\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """['"]site['"]\s*:\s*['"]([^'"]+)['"]""".toRegex()
+        )
+        val site = sitePatterns.firstNotNullOfOrNull { 
+            it.find(jsCode)?.groupValues?.get(1)?.takeIf { s -> s.startsWith("http") }
+        } ?: ""
+        
+        // Extract lang
+        val langPatterns = listOf(
+            """lang\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """['"]lang['"]\s*:\s*['"]([^'"]+)['"]""".toRegex()
+        )
+        val rawLang = langPatterns.firstNotNullOfOrNull { it.find(jsCode)?.groupValues?.get(1) } ?: "en"
+        val lang = convertLanguageNameToCode(rawLang)
+        
+        // Extract icon
+        val iconPatterns = listOf(
+            """icon\s*:\s*['"]([^'"]+)['"]""".toRegex(),
+            """['"]icon['"]\s*:\s*['"]([^'"]+)['"]""".toRegex()
+        )
+        val icon = iconPatterns.firstNotNullOfOrNull { it.find(jsCode)?.groupValues?.get(1) } ?: ""
+        
+        return PluginMetadata(
+            id = id,
+            name = name,
+            site = site,
+            version = version,
+            lang = lang,
+            icon = icon
+        )
     }
     
     /**
@@ -415,12 +570,13 @@ class JSPluginLoader(
     
     /**
      * Load plugins asynchronously with priority support and parallel execution.
+     * Uses fast metadata extraction when JS engine is not available.
      * Priority plugins load first (sequentially for immediate availability),
      * then remaining plugins load in parallel for maximum throughput.
      * 
      * @param onPluginLoaded Callback when each plugin is loaded
      * @param maxConcurrency Maximum number of plugins to load in parallel (default: 4)
-     * @return List of all loaded catalogs
+     * @return List of all loaded catalogs (may include pending catalogs)
      */
     suspend fun loadPluginsAsync(
         onPluginLoaded: (JSPluginCatalog) -> Unit = {},
@@ -465,20 +621,27 @@ class JSPluginLoader(
         val catalogsMutex = Mutex()
         val semaphore = Semaphore(maxConcurrency)
         
-        // Load priority plugins first (sequentially for immediate availability)
-        priorityFiles.forEach { file ->
-            try {
-                val catalog = loadPlugin(file)
-                if (catalog != null) {
-                    allCatalogs.add(catalog)
-                    onPluginLoaded(catalog)
-                }
+        // Helper function to load or create pending catalog
+        suspend fun loadOrCreatePending(file: Path): JSPluginCatalog? {
+            return try {
+                loadPlugin(file)
             } catch (e: ireader.domain.js.engine.NoJSEngineException) {
                 jsEngineMissing = true
                 pendingPluginsCount++
-                Log.warn { "JSPluginLoader: JS engine not available for ${file.name}" }
+                Log.info { "JSPluginLoader: Creating pending catalog for ${file.name}" }
+                createPendingCatalog(file)
             } catch (e: Exception) {
-                Log.warn { "JSPluginLoader: Failed to load priority plugin ${file.name}: ${e.message}" }
+                Log.warn { "JSPluginLoader: Failed to load ${file.name}: ${e.message}" }
+                createPendingCatalog(file)
+            }
+        }
+        
+        // Load priority plugins first (sequentially for immediate availability)
+        priorityFiles.forEach { file ->
+            val catalog = loadOrCreatePending(file)
+            if (catalog != null) {
+                allCatalogs.add(catalog)
+                onPluginLoaded(catalog)
             }
         }
         
@@ -492,22 +655,12 @@ class JSPluginLoader(
             normalFiles.map { file ->
                 async(Dispatchers.Default) {
                     semaphore.withPermit {
-                        try {
-                            val catalog = loadPlugin(file)
-                            if (catalog != null) {
-                                catalogsMutex.withLock {
-                                    allCatalogs.add(catalog)
-                                }
-                                onPluginLoaded(catalog)
-                            }
-                        } catch (e: ireader.domain.js.engine.NoJSEngineException) {
+                        val catalog = loadOrCreatePending(file)
+                        if (catalog != null) {
                             catalogsMutex.withLock {
-                                jsEngineMissing = true
-                                pendingPluginsCount++
+                                allCatalogs.add(catalog)
                             }
-                            Log.warn { "JSPluginLoader: JS engine not available for ${file.name}" }
-                        } catch (e: Exception) {
-                            Log.warn { "JSPluginLoader: Failed to load plugin ${file.name}: ${e.message}" }
+                            onPluginLoaded(catalog)
                         }
                     }
                 }
@@ -515,17 +668,14 @@ class JSPluginLoader(
         }
         
         val totalLoadTime = currentTimeToLong() - startTime
-        Log.info { "JSPluginLoader: Loaded ${allCatalogs.size} plugins in ${totalLoadTime}ms (${priorityFiles.size} priority, ${normalFiles.size} normal)" }
-        
-        if (jsEngineMissing && pendingPluginsCount > 0) {
-            Log.info { "JSPluginLoader: $pendingPluginsCount JS plugins pending - JS engine plugin required" }
-        }
+        Log.info { "JSPluginLoader: Loaded ${allCatalogs.size} catalogs in ${totalLoadTime}ms (${pendingPluginsCount} pending)" }
         
         return allCatalogs.toList()
     }
     
     /**
      * Load plugins with streaming callback - plugins are delivered as they load.
+     * Uses fast metadata extraction when JS engine is not available.
      * This provides the fastest time-to-first-plugin for UI responsiveness.
      * 
      * @param onPluginLoaded Callback when each plugin is loaded (called from IO dispatcher)
@@ -561,20 +711,28 @@ class JSPluginLoader(
         jsEngineMissing = false
         pendingPluginsCount = 0
         
+        // Helper function to load or create pending catalog
+        suspend fun loadOrCreatePending(file: Path): JSPluginCatalog? {
+            return try {
+                loadPlugin(file)
+            } catch (e: ireader.domain.js.engine.NoJSEngineException) {
+                catalogsMutex.withLock {
+                    jsEngineMissing = true
+                    pendingPluginsCount++
+                }
+                Log.info { "JSPluginLoader: Creating pending catalog for ${file.name}" }
+                createPendingCatalog(file)
+            } catch (e: Exception) {
+                createPendingCatalog(file)
+            }
+        }
+        
         // Load priority plugins first
         priorityFiles.forEach { file ->
-            try {
-                val catalog = loadPlugin(file)
-                if (catalog != null) {
-                    loadedCount++
-                    onPluginLoaded(catalog)
-                }
-            } catch (e: ireader.domain.js.engine.NoJSEngineException) {
-                jsEngineMissing = true
-                pendingPluginsCount++
-                Log.warn { "JSPluginLoader: JS engine not available for ${file.name}" }
-            } catch (e: Exception) {
-                // Continue with next plugin
+            val catalog = loadOrCreatePending(file)
+            if (catalog != null) {
+                loadedCount++
+                onPluginLoaded(catalog)
             }
         }
         
@@ -583,20 +741,10 @@ class JSPluginLoader(
             normalFiles.map { file ->
                 async(Dispatchers.Default) {
                     semaphore.withPermit {
-                        try {
-                            val catalog = loadPlugin(file)
-                            if (catalog != null) {
-                                loadedCount++
-                                onPluginLoaded(catalog)
-                            }
-                        } catch (e: ireader.domain.js.engine.NoJSEngineException) {
-                            catalogsMutex.withLock {
-                                jsEngineMissing = true
-                                pendingPluginsCount++
-                            }
-                            Log.warn { "JSPluginLoader: JS engine not available for ${file.name}" }
-                        } catch (e: Exception) {
-                            // Continue with next plugin
+                        val catalog = loadOrCreatePending(file)
+                        if (catalog != null) {
+                            loadedCount++
+                            onPluginLoaded(catalog)
                         }
                     }
                 }
@@ -604,11 +752,7 @@ class JSPluginLoader(
         }
         
         val totalTime = currentTimeToLong() - startTime
-        Log.debug { "JSPluginLoader: Streaming load completed - $loadedCount plugins in ${totalTime}ms" }
-        
-        if (jsEngineMissing && pendingPluginsCount > 0) {
-            Log.info { "JSPluginLoader: $pendingPluginsCount JS plugins pending - JS engine plugin required" }
-        }
+        Log.debug { "JSPluginLoader: Streaming load completed - $loadedCount catalogs in ${totalTime}ms (${pendingPluginsCount} pending)" }
     }
     
     /**

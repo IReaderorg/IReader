@@ -268,7 +268,8 @@ val PresentationModules = module {
             pluginManager = get(),
             repositoryRepository = get(),
             indexFetcher = get(),
-            catalogStore = get()
+            catalogStore = get(),
+            downloadService = get()
         )
     }
 
