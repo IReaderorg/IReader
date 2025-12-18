@@ -32,23 +32,33 @@ class PluginLoader(
     suspend fun loadAll(): List<Plugin> {
         return withContext(Dispatchers.Default) {
             val pluginsDir = fileSystem.getDataDirectory().resolve("plugins")
+            println("[PluginLoader] Loading plugins from: ${pluginsDir.path}")
             
             if (!pluginsDir.exists()) {
+                println("[PluginLoader] Plugins directory does not exist, creating it")
                 pluginsDir.mkdirs()
                 return@withContext emptyList()
             }
             
-            pluginsDir.listFiles()
-                .filter { it.isFile() && it.extension == "iplugin" }
-                .mapNotNull { file ->
-                    try {
-                        loadPlugin(file)
-                    } catch (e: Exception) {
-                        // Log error but continue loading other plugins
-                        println("Failed to load plugin from ${file.name}: ${e.message}")
-                        null
-                    }
+            val allFiles = pluginsDir.listFiles()
+            println("[PluginLoader] Found ${allFiles.size} files in plugins directory")
+            
+            val ipluginFiles = allFiles.filter { it.isFile() && it.extension == "iplugin" }
+            println("[PluginLoader] Found ${ipluginFiles.size} .iplugin files: ${ipluginFiles.map { it.name }}")
+            
+            ipluginFiles.mapNotNull { file ->
+                try {
+                    println("[PluginLoader] Loading plugin: ${file.name}")
+                    val plugin = loadPlugin(file)
+                    println("[PluginLoader] Loaded plugin: ${plugin?.manifest?.id} (type: ${plugin?.manifest?.type})")
+                    plugin
+                } catch (e: Exception) {
+                    // Log error but continue loading other plugins
+                    println("[PluginLoader] Failed to load plugin from ${file.name}: ${e.message}")
+                    e.printStackTrace()
+                    null
                 }
+            }
         }
     }
     

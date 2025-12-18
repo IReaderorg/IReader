@@ -61,9 +61,13 @@ private fun getAndroidAbi(): String {
  * and placed in a directory where System.load() can access them.
  */
 actual fun extractNativeLibrariesImpl(pluginId: String, libraryPaths: List<String>): String {
+    Log.info { "extractNativeLibrariesImpl: pluginId=$pluginId, libraryPaths=$libraryPaths" }
+    Log.info { "extractNativeLibrariesImpl: registered paths=${pluginPackagePaths.keys}" }
+    
     val packagePath = pluginPackagePaths[pluginId]
     if (packagePath == null) {
         Log.error { "Plugin package path not registered for $pluginId" }
+        Log.error { "Available plugin paths: ${pluginPackagePaths.keys}" }
         throw IllegalStateException("Plugin package path not registered for $pluginId")
     }
     

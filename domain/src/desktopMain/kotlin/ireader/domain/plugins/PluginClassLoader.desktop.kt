@@ -10,6 +10,16 @@ import java.net.URLClassLoader
  * Requirements: 1.1, 1.2, 1.3, 1.4
  */
 actual class PluginClassLoader {
+    companion object {
+        private val pluginClassLoaders = mutableMapOf<String, ClassLoader>()
+        
+        fun getClassLoader(pluginId: String): ClassLoader? = pluginClassLoaders[pluginId]
+        
+        fun getRegisteredPluginIds(): Set<String> = pluginClassLoaders.keys.toSet()
+        
+        fun clearAll() = pluginClassLoaders.clear()
+    }
+    
     /**
      * Load a plugin class from a package file
      * On Desktop, .iplugin files are JAR files that can be loaded with URLClassLoader
@@ -25,6 +35,9 @@ actual class PluginClassLoader {
                 arrayOf(javaFile.toURI().toURL()),
                 this::class.java.classLoader
             )
+            
+            // Store the classloader for later access
+            pluginClassLoaders[manifest.id] = classLoader
             
             // Load the main plugin class
             // Convention: plugin class name is {manifest.id}.Plugin

@@ -66,16 +66,35 @@ class PluginManager(
      * Load all plugins from the plugins directory
      */
     suspend fun loadPlugins() {
+        println("[PluginManager] loadPlugins() called")
         try {
             // Initialize security manager
             securityManager.initialize()
             
             val plugins = loader.loadAll()
+            println("[PluginManager] Loaded ${plugins.size} plugins: ${plugins.map { "${it.manifest.id} (${it.manifest.type})" }}")
             registry.registerAll(plugins)
             
-            // Initialize enabled plugins
-            val enabledIds = preferences.enabledPlugins().get()
+            // Initialize enabled plugins and auto-enable engine plugins
+            val enabledIds = preferences.enabledPlugins().get().toMutableSet()
+            println("[PluginManager] Currently enabled plugins: $enabledIds")
+            var enabledIdsChanged = false
+            
             plugins.forEach { plugin ->
+                // Auto-enable engine plugins (JS_ENGINE, TTS, GRADIO_TTS) if not already enabled
+                // These are infrastructure plugins that should be enabled automatically
+                val isEnginePlugin = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
+                                     plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
+                                     plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS
+                
+                println("[PluginManager] Plugin ${plugin.manifest.id}: type=${plugin.manifest.type}, isEnginePlugin=$isEnginePlugin, alreadyEnabled=${enabledIds.contains(plugin.manifest.id)}")
+                
+                if (isEnginePlugin && !enabledIds.contains(plugin.manifest.id)) {
+                    enabledIds.add(plugin.manifest.id)
+                    enabledIdsChanged = true
+                    println("[PluginManager] Auto-enabling engine plugin: ${plugin.manifest.id}")
+                }
+                
                 if (enabledIds.contains(plugin.manifest.id)) {
                     try {
                         // Track plugin load performance
@@ -100,9 +119,18 @@ class PluginManager(
                 }
             }
             
+            // Save updated enabled plugins if changed
+            if (enabledIdsChanged) {
+                println("[PluginManager] Saving updated enabled plugins: $enabledIds")
+                preferences.enabledPlugins().set(enabledIds)
+            }
+            
             _pluginsFlow.value = registry.getAll()
+            println("[PluginManager] loadPlugins() completed successfully")
         } catch (e: Exception) {
             // Log error but don't crash
+            println("[PluginManager] loadPlugins() failed: ${e.message}")
+            e.printStackTrace()
             _pluginsFlow.value = emptyList()
         }
     }
@@ -125,7 +153,34 @@ class PluginManager(
             }
             
             registry.register(plugin)
-            database.insertOrUpdate(plugin.manifest, PluginStatus.DISABLED)
+            
+            // Auto-enable engine plugins (JS_ENGINE, TTS, GRADIO_TTS) since they're required dependencies
+            val shouldAutoEnable = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
+                                   plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
+                                   plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS
+            
+            val initialStatus = if (shouldAutoEnable) PluginStatus.ENABLED else PluginStatus.DISABLED
+            database.insertOrUpdate(plugin.manifest, initialStatus)
+            
+            if (shouldAutoEnable) {
+                // Add to enabled plugins preference
+                val enabledIds = preferences.enabledPlugins().get().toMutableSet()
+                enabledIds.add(plugin.manifest.id)
+                preferences.enabledPlugins().set(enabledIds)
+                
+                // Initialize the plugin
+                try {
+                    val context = securityManager.createPluginContext(
+                        pluginId = plugin.manifest.id,
+                        manifest = plugin.manifest,
+                        preferencesStore = createPluginPreferencesStore(plugin.manifest.id)
+                    )
+                    plugin.initialize(context)
+                } catch (e: Exception) {
+                    // Log but don't fail installation
+                    println("Failed to auto-initialize plugin ${plugin.manifest.id}: ${e.message}")
+                }
+            }
             
             _pluginsFlow.value = registry.getAll()
             
@@ -146,11 +201,14 @@ class PluginManager(
             val plugin = registry.get(pluginId)
                 ?: return Result.failure(Exception("Plugin not found"))
             
+            println("[PluginManager] Uninstalling plugin: $pluginId")
+            
             // Cleanup plugin resources
             try {
                 plugin.cleanup()
             } catch (e: Exception) {
                 // Log but continue with uninstall
+                println("[PluginManager] Cleanup error (continuing): ${e.message}")
             }
             
             // Remove from enabled plugins
@@ -161,10 +219,34 @@ class PluginManager(
             // Remove from registry and database
             registry.remove(pluginId)
             
+            // Delete the plugin file from disk
+            try {
+                val pluginsDir = getPluginsDirectory()
+                val pluginFiles = fileSystem.getFile(pluginsDir.toString()).listFiles()
+                    .filter { it.name.startsWith(pluginId) && it.extension == "iplugin" }
+                
+                pluginFiles.forEach { file ->
+                    println("[PluginManager] Deleting plugin file: ${file.name}")
+                    file.delete()
+                }
+                
+                // Also delete native library directory if exists
+                val nativeDir = fileSystem.getFile("${pluginsDir}/${pluginId}-native")
+                if (nativeDir.exists()) {
+                    println("[PluginManager] Deleting native library directory: ${nativeDir.path}")
+                    nativeDir.delete()
+                }
+            } catch (e: Exception) {
+                println("[PluginManager] Failed to delete plugin files: ${e.message}")
+                // Continue even if file deletion fails
+            }
+            
             _pluginsFlow.value = registry.getAll()
+            println("[PluginManager] Plugin uninstalled: $pluginId")
             
             Result.success(Unit)
         } catch (e: Exception) {
+            println("[PluginManager] Uninstall failed: ${e.message}")
             Result.failure(e)
         }
     }

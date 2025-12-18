@@ -523,6 +523,32 @@ class FeatureStoreViewModel(
     }
     
     /**
+     * Uninstall a plugin
+     */
+    fun uninstallPlugin(pluginId: String) {
+        val plugin = _state.value.plugins.find { it.id == pluginId } ?: return
+        
+        scope.launch {
+            try {
+                pluginManager.uninstallPlugin(pluginId)
+                    .onSuccess {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("${plugin.manifest.name} uninstalled"))
+                        updatePluginStatus(pluginId, PluginStatus.NOT_INSTALLED)
+                    }
+                    .onFailure { error ->
+                        _state.value = _state.value.copy(
+                            error = "Failed to uninstall ${plugin.manifest.name}: ${error.message}"
+                        )
+                    }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    error = "Failed to uninstall ${plugin.manifest.name}: ${e.message}"
+                )
+            }
+        }
+    }
+    
+    /**
      * Update a single plugin's status in the state
      */
     private fun updatePluginStatus(pluginId: String, status: PluginStatus) {

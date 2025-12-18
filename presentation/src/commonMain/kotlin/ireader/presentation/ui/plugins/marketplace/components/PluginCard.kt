@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -36,6 +37,7 @@ fun PluginCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onInstall: ((String) -> Unit)? = null,
+    onUninstall: ((String) -> Unit)? = null,
     onCancelDownload: ((String) -> Unit)? = null,
     downloadProgress: DownloadProgress? = null
 ) {
@@ -148,7 +150,8 @@ fun PluginCard(
                 } else {
                     InstallStatusButton(
                         plugin = plugin,
-                        onInstall = onInstall
+                        onInstall = onInstall,
+                        onUninstall = onUninstall
                     )
                 }
                 
@@ -237,7 +240,8 @@ private fun formatBytes(downloaded: Long, total: Long): String {
 @Composable
 private fun InstallStatusButton(
     plugin: PluginInfo,
-    onInstall: ((String) -> Unit)?
+    onInstall: ((String) -> Unit)?,
+    onUninstall: ((String) -> Unit)? = null
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     
@@ -269,26 +273,50 @@ private fun InstallStatusButton(
             )
         }
         PluginStatus.ENABLED, PluginStatus.DISABLED -> {
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            if (onUninstall != null) {
+                // Show uninstall button for installed plugins
+                OutlinedButton(
+                    onClick = { onUninstall(plugin.id) },
+                    modifier = Modifier.widthIn(min = 80.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Check,
+                        imageVector = Icons.Default.Delete,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = localizeHelper.localize(Res.string.installed),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        text = localizeHelper.localize(Res.string.uninstall),
+                        style = MaterialTheme.typography.labelMedium
                     )
+                }
+            } else {
+                // Fallback to showing "Installed" badge if no uninstall handler
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = localizeHelper.localize(Res.string.installed),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
         }

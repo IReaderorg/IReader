@@ -7,6 +7,7 @@ import ireader.core.io.VirtualFile
 import ireader.core.log.Log
 import java.io.File
 import java.nio.ByteBuffer
+import java.util.zip.ZipFile
 
 /**
  * Android implementation of PluginClassLoader using DexClassLoader/InMemoryDexClassLoader
@@ -36,6 +37,13 @@ actual class PluginClassLoader(
         }
         
         /**
+         * Get all registered plugin IDs.
+         */
+        fun getRegisteredPluginIds(): Set<String> {
+            return pluginClassLoaders.keys.toSet()
+        }
+        
+        /**
          * Clear all stored classloaders.
          */
         fun clearAll() {
@@ -59,8 +67,12 @@ actual class PluginClassLoader(
             // Extract DEX file from the ZIP package
             val dexFile = extractDexFromPackage(javaFile, manifest.id)
             
+            // Check if plugin has native libraries and extract them BEFORE creating ClassLoader
+            val nativeLibraryDir = extractNativeLibrariesIfNeeded(javaFile, manifest)
+            
             // Create appropriate ClassLoader based on Android version
-            val classLoader = createClassLoader(dexFile, manifest.id)
+            // Pass native library directory so System.loadLibrary() can find native libs
+            val classLoader = createClassLoader(dexFile, manifest.id, nativeLibraryDir)
             
             // Store the classloader for later access
             pluginClassLoaders[manifest.id] = classLoader
@@ -141,6 +153,81 @@ actual class PluginClassLoader(
     }
     
     /**
+     * Extract native libraries from the plugin package if it has any.
+     * This MUST be done BEFORE creating the DexClassLoader so we can pass
+     * the native library directory to the ClassLoader constructor.
+     * 
+     * @return The native library directory path, or null if no native libraries
+     */
+    private fun extractNativeLibrariesIfNeeded(packageFile: File, manifest: PluginManifest): String? {
+        // Get the current device ABI
+        val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: return null
+        val nativePrefix = "native/android/$abi/"
+        
+        Log.info("Checking for native libraries in ${manifest.id} for ABI: $abi")
+        
+        // Check if the package contains native libraries for this ABI
+        val hasNativeLibs = try {
+            ZipFile(packageFile).use { zip ->
+                zip.entries().asSequence().any { entry ->
+                    entry.name.startsWith(nativePrefix) && 
+                    entry.name.endsWith(".so") &&
+                    !entry.isDirectory
+                }
+            }
+        } catch (e: Exception) {
+            Log.warn("Failed to check for native libraries: ${e.message}")
+            false
+        }
+        
+        if (!hasNativeLibs) {
+            Log.info("No native libraries found for ${manifest.id}")
+            return null
+        }
+        
+        // Create native library output directory
+        val nativeDir = File(packageFile.parentFile, "${manifest.id}-native")
+        nativeDir.mkdirs()
+        
+        Log.info("Extracting native libraries for ${manifest.id} to ${nativeDir.absolutePath}")
+        
+        // Extract native libraries
+        ZipFile(packageFile).use { zip ->
+            zip.entries().asSequence()
+                .filter { entry -> 
+                    entry.name.startsWith(nativePrefix) && 
+                    entry.name.endsWith(".so") &&
+                    !entry.isDirectory
+                }
+                .forEach { entry ->
+                    val fileName = entry.name.substringAfterLast("/")
+                    val outputFile = File(nativeDir, fileName)
+                    
+                    // Delete existing file if present
+                    if (outputFile.exists()) {
+                        outputFile.setWritable(true)
+                        outputFile.delete()
+                    }
+                    
+                    Log.info("Extracting: ${entry.name} -> ${outputFile.absolutePath}")
+                    
+                    zip.getInputStream(entry).use { input ->
+                        outputFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                    
+                    // Make executable
+                    outputFile.setExecutable(true)
+                    
+                    Log.info("Extracted: $fileName (${outputFile.length()} bytes)")
+                }
+        }
+        
+        return nativeDir.absolutePath
+    }
+    
+    /**
      * Extract the DEX file from the .iplugin ZIP package
      */
     private fun extractDexFromPackage(packageFile: File, pluginId: String): File {
@@ -182,20 +269,26 @@ actual class PluginClassLoader(
     
     /**
      * Creates the appropriate ClassLoader based on Android version.
+     * 
+     * @param file The DEX file to load
+     * @param pluginId The plugin ID
+     * @param nativeLibraryDir Optional path to native library directory for System.loadLibrary()
      */
-    private fun createClassLoader(file: File, pluginId: String): ClassLoader {
+    private fun createClassLoader(file: File, pluginId: String, nativeLibraryDir: String?): ClassLoader {
         // Android 15+ (API 35): Use InMemoryDexClassLoader for enhanced security
-        if (Build.VERSION.SDK_INT >= 35) {
+        // Note: InMemoryDexClassLoader doesn't support native library paths, so fall back to DexClassLoader
+        // if we have native libraries
+        if (Build.VERSION.SDK_INT >= 35 && nativeLibraryDir == null) {
             return try {
                 createInMemoryClassLoader(file)
             } catch (e: Exception) {
                 Log.warn("InMemoryDexClassLoader failed for $pluginId, falling back to DexClassLoader", e)
-                createSecureDexClassLoader(file, pluginId)
+                createSecureDexClassLoader(file, pluginId, nativeLibraryDir)
             }
         }
         
-        // Android 14+ (API 34): Use secure DexClassLoader
-        return createSecureDexClassLoader(file, pluginId)
+        // Use DexClassLoader (supports native library path)
+        return createSecureDexClassLoader(file, pluginId, nativeLibraryDir)
     }
     
     /**
@@ -216,8 +309,14 @@ actual class PluginClassLoader(
     /**
      * Creates a secure DexClassLoader for Android 14+.
      * The file parameter is already the extracted DEX file.
+     * 
+     * @param file The DEX file to load
+     * @param pluginId The plugin ID
+     * @param nativeLibraryDir Optional path to native library directory. When provided,
+     *                         System.loadLibrary() calls from within the plugin will search
+     *                         this directory for native libraries.
      */
-    private fun createSecureDexClassLoader(file: File, pluginId: String): ClassLoader {
+    private fun createSecureDexClassLoader(file: File, pluginId: String, nativeLibraryDir: String?): ClassLoader {
         // The DEX file is already extracted to securePluginDir
         // Just ensure it's read-only for Android 14+ security requirements
         file.setReadOnly()
@@ -235,6 +334,7 @@ actual class PluginClassLoader(
         Log.info("Creating DexClassLoader for $pluginId from ${file.absolutePath}")
         Log.info("Parent classloader: $parentClassLoader")
         Log.info("Parent classloader class: ${parentClassLoader?.javaClass?.name}")
+        Log.info("Native library directory: ${nativeLibraryDir ?: "none"}")
         
         // Verify plugin-api classes are available in parent classloader
         try {
@@ -245,10 +345,12 @@ actual class PluginClassLoader(
             Log.error("Plugin interface NOT found in parent classloader!", e)
         }
         
+        // Pass native library directory as 3rd parameter (librarySearchPath)
+        // This allows System.loadLibrary() to find native libraries in the plugin
         return DexClassLoader(
             file.absolutePath,
             dexOutputDir.absolutePath,
-            null,
+            nativeLibraryDir,  // This is the key fix!
             parentClassLoader
         )
     }

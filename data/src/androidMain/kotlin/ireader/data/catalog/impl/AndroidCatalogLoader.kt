@@ -505,6 +505,18 @@ class AndroidCatalogLoader(
         try {
             Log.info("AndroidCatalogLoader: Loading engine plugins...")
             pluginManager.loadPlugins()
+            
+            // Check if J2V8 ClassLoader is now available
+            val j2v8ClassLoader = ireader.domain.plugins.PluginClassLoader.getClassLoader("io.github.ireaderorg.plugins.j2v8-engine")
+            Log.info("AndroidCatalogLoader: J2V8 ClassLoader available: ${j2v8ClassLoader != null}")
+            
+            // Try to initialize J2V8 now that the plugin is loaded
+            if (j2v8ClassLoader != null) {
+                Log.info("AndroidCatalogLoader: Attempting to initialize J2V8...")
+                val initialized = ireader.domain.js.loader.J2V8EngineHelper.tryInitializeJ2V8()
+                Log.info("AndroidCatalogLoader: J2V8 initialized: $initialized")
+            }
+            
             Log.info("AndroidCatalogLoader: Engine plugins loaded")
         } catch (e: Exception) {
             Log.error("AndroidCatalogLoader: Failed to load engine plugins", e)
