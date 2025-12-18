@@ -11,6 +11,36 @@ import kotlinx.coroutines.launch
 import okio.Path.Companion.toPath
 
 /**
+ * Progress callback for plugin installation
+ */
+typealias PluginInstallProgressCallback = (PluginInstallProgress) -> Unit
+
+/**
+ * Plugin installation progress data
+ */
+data class PluginInstallProgress(
+    val pluginId: String,
+    val pluginName: String,
+    val stage: InstallStage,
+    val progress: Float = 0f,  // 0.0 to 1.0
+    val bytesDownloaded: Long = 0,
+    val totalBytes: Long = 0,
+    val error: String? = null
+)
+
+/**
+ * Installation stage enum
+ */
+enum class InstallStage {
+    PENDING,
+    DOWNLOADING,
+    VALIDATING,
+    INSTALLING,
+    COMPLETED,
+    FAILED
+}
+
+/**
  * Central service for managing plugin lifecycle
  * Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 14.1, 14.2, 14.3, 14.4, 14.5
  */
@@ -417,7 +447,7 @@ class PluginManager(
         return try {
             // Get plugins directory
             val pluginsDir = getPluginsDirectory()
-            val fileName = "${pluginInfo.id}-${pluginInfo.manifest.version}.zip"
+            val fileName = "${pluginInfo.id}-${pluginInfo.manifest.version}.iplugin"
             val destination = pluginsDir.resolve(fileName)
             
             println("[PluginManager] Destination: $destination")
@@ -482,6 +512,135 @@ class PluginManager(
         } catch (e: Exception) {
             println("[PluginManager] Installation error: ${e.message}")
             e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Install a plugin from PluginInfo with progress callback
+     * This is used by the PluginDownloadService to track download progress
+     */
+    suspend fun installPluginWithProgress(
+        pluginInfo: PluginInfo,
+        onProgress: (PluginInstallProgress) -> Unit
+    ): Result<PluginInfo> {
+        val downloadUrl = pluginInfo.downloadUrl
+            ?: return Result.failure(Exception("Plugin has no download URL"))
+        
+        val pluginId = pluginInfo.id
+        val pluginName = pluginInfo.manifest.name
+        
+        onProgress(PluginInstallProgress(
+            pluginId = pluginId,
+            pluginName = pluginName,
+            stage = InstallStage.PENDING
+        ))
+        
+        return try {
+            // Get plugins directory
+            val pluginsDir = getPluginsDirectory()
+            val fileName = "${pluginInfo.id}-${pluginInfo.manifest.version}.iplugin"
+            val destination = pluginsDir.resolve(fileName)
+            
+            // Update to downloading stage
+            onProgress(PluginInstallProgress(
+                pluginId = pluginId,
+                pluginName = pluginName,
+                stage = InstallStage.DOWNLOADING,
+                totalBytes = pluginInfo.fileSize ?: 0
+            ))
+            
+            // Download the plugin with progress
+            downloadPluginWithProgress(downloadUrl, destination) { bytesDownloaded, totalBytes ->
+                val progress = if (totalBytes > 0) bytesDownloaded.toFloat() / totalBytes else 0f
+                onProgress(PluginInstallProgress(
+                    pluginId = pluginId,
+                    pluginName = pluginName,
+                    stage = InstallStage.DOWNLOADING,
+                    progress = progress,
+                    bytesDownloaded = bytesDownloaded,
+                    totalBytes = totalBytes
+                ))
+            }.onFailure { 
+                onProgress(PluginInstallProgress(
+                    pluginId = pluginId,
+                    pluginName = pluginName,
+                    stage = InstallStage.FAILED,
+                    error = "Download failed: ${it.message}"
+                ))
+                return Result.failure(Exception("Download failed: ${it.message}")) 
+            }
+            
+            // Validating stage
+            onProgress(PluginInstallProgress(
+                pluginId = pluginId,
+                pluginName = pluginName,
+                stage = InstallStage.VALIDATING,
+                progress = 0.9f
+            ))
+            
+            // Validate the package
+            validatePluginPackage(destination).onFailure { 
+                onProgress(PluginInstallProgress(
+                    pluginId = pluginId,
+                    pluginName = pluginName,
+                    stage = InstallStage.FAILED,
+                    error = "Validation failed: ${it.message}"
+                ))
+                return Result.failure(it) 
+            }
+            
+            // Installing stage
+            onProgress(PluginInstallProgress(
+                pluginId = pluginId,
+                pluginName = pluginName,
+                stage = InstallStage.INSTALLING,
+                progress = 0.95f
+            ))
+            
+            // Install the plugin
+            val result = installPlugin(destination)
+            
+            result.onSuccess {
+                onProgress(PluginInstallProgress(
+                    pluginId = pluginId,
+                    pluginName = pluginName,
+                    stage = InstallStage.COMPLETED,
+                    progress = 1f
+                ))
+            }.onFailure {
+                onProgress(PluginInstallProgress(
+                    pluginId = pluginId,
+                    pluginName = pluginName,
+                    stage = InstallStage.FAILED,
+                    error = "Installation failed: ${it.message}"
+                ))
+            }
+            
+            result
+        } catch (e: Exception) {
+            onProgress(PluginInstallProgress(
+                pluginId = pluginId,
+                pluginName = pluginName,
+                stage = InstallStage.FAILED,
+                error = e.message
+            ))
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Download a plugin with progress callback
+     */
+    private suspend fun downloadPluginWithProgress(
+        url: String,
+        destination: okio.Path,
+        onProgress: (bytesDownloaded: Long, totalBytes: Long) -> Unit
+    ): Result<Unit> {
+        return try {
+            loader.downloadToFileWithProgress(url, destination, onProgress)
+            Result.success(Unit)
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

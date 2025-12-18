@@ -263,6 +263,14 @@ val PresentationModules = module {
             indexFetcher = get()
         )
     }
+    factory {
+        ireader.presentation.ui.plugins.required.RequiredPluginViewModel(
+            pluginManager = get(),
+            repositoryRepository = get(),
+            indexFetcher = get(),
+            catalogStore = get()
+        )
+    }
 
 
     // Reader sub-viewmodels

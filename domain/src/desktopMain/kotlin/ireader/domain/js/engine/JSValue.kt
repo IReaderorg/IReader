@@ -1,175 +1,74 @@
 package ireader.domain.js.engine
 
-import org.graalvm.polyglot.Value
-
 /**
- * Desktop implementation of JSValue using GraalVM.
+ * Desktop implementation of JSValue.
+ * 
+ * NOTE: GraalVM JavaScript engine has been moved to an optional plugin.
+ * This is a pure Kotlin implementation that works with any value type.
  */
-actual class JSValue private constructor(
-    private val value: Value?,
-    private val kotlinValue: Any? = null
-) {
+actual class JSValue private constructor(private val value: Any?) {
     
     actual fun asString(): String {
-        // Handle Kotlin values
-        if (value == null && kotlinValue != null) {
-            return kotlinValue.toString()
+        return when (value) {
+            is String -> value
+            null -> throw JSException("Cannot convert null to String")
+            else -> value.toString()
         }
-        
-        if (value == null || value.isNull) {
-            throw JSException("Cannot convert null to String")
-        }
-        return value.asString()
     }
     
     actual fun asInt(): Int {
-        // Handle Kotlin values
-        if (value == null && kotlinValue != null) {
-            return when (kotlinValue) {
-                is Number -> kotlinValue.toInt()
-                is String -> kotlinValue.toIntOrNull() ?: throw JSException("Cannot convert '$kotlinValue' to Int")
-                else -> throw JSException("Cannot convert ${kotlinValue.javaClass.simpleName} to Int")
-            }
-        }
-        
-        if (value == null || value.isNull) {
-            throw JSException("Cannot convert null to Int")
-        }
-        return when {
-            value.fitsInInt() -> value.asInt()
-            value.fitsInLong() -> value.asLong().toInt()
-            value.fitsInDouble() -> value.asDouble().toInt()
-            value.isString -> value.asString().toIntOrNull() 
-                ?: throw JSException("Cannot convert '${value.asString()}' to Int")
-            else -> throw JSException("Cannot convert value to Int")
+        return when (value) {
+            is Number -> value.toInt()
+            is String -> value.toIntOrNull() ?: throw JSException("Cannot convert '$value' to Int")
+            null -> throw JSException("Cannot convert null to Int")
+            else -> throw JSException("Cannot convert ${value::class.simpleName} to Int")
         }
     }
     
     actual fun asBoolean(): Boolean {
-        // Handle Kotlin values
-        if (value == null && kotlinValue != null) {
-            return when (kotlinValue) {
-                is Boolean -> kotlinValue
-                is Number -> kotlinValue.toInt() != 0
-                is String -> kotlinValue.toBoolean()
-                else -> true
-            }
-        }
-        
-        if (value == null || value.isNull) {
-            return false
-        }
-        return when {
-            value.isBoolean -> value.asBoolean()
-            value.isString -> value.asString().toBoolean()
-            value.isNumber -> value.asInt() != 0
-            else -> throw JSException("Cannot convert value to Boolean")
+        return when (value) {
+            is Boolean -> value
+            is String -> value.toBoolean()
+            is Number -> value.toInt() != 0
+            null -> false
+            else -> throw JSException("Cannot convert ${value::class.simpleName} to Boolean")
         }
     }
     
+    @Suppress("UNCHECKED_CAST")
     actual fun asMap(): Map<String, Any?> {
-        // Handle Kotlin values
-        if (value == null && kotlinValue != null) {
-            return when (kotlinValue) {
-                is Map<*, *> -> kotlinValue as? Map<String, Any?> 
-                    ?: kotlinValue.mapKeys { it.key.toString() }.mapValues { it.value }
-                else -> throw JSException("Cannot convert ${kotlinValue.javaClass.simpleName} to Map")
-            }
+        return when (value) {
+            is Map<*, *> -> value as Map<String, Any?>
+            null -> throw JSException("Cannot convert null to Map")
+            else -> throw JSException("Cannot convert ${value::class.simpleName} to Map")
         }
-        
-        if (value == null || value.isNull) {
-            throw JSException("Cannot convert null to Map")
-        }
-        
-        if (!value.hasMembers()) {
-            throw JSException("Value is not an object")
-        }
-        
-        val map = mutableMapOf<String, Any?>()
-        value.memberKeys.forEach { key ->
-            map[key] = convertValue(value.getMember(key))
-        }
-        return map
     }
     
+    @Suppress("UNCHECKED_CAST")
     actual fun asList(): List<Any?> {
-        // Handle Kotlin values
-        if (value == null && kotlinValue != null) {
-            return when (kotlinValue) {
-                is List<*> -> kotlinValue
-                is Array<*> -> kotlinValue.toList()
-                else -> throw JSException("Cannot convert ${kotlinValue.javaClass.simpleName} to List")
-            }
+        return when (value) {
+            is List<*> -> value as List<Any?>
+            is Array<*> -> value.toList()
+            null -> throw JSException("Cannot convert null to List")
+            else -> throw JSException("Cannot convert ${value::class.simpleName} to List")
         }
-        
-        if (value == null || value.isNull) {
-            throw JSException("Cannot convert null to List")
-        }
-        
-        if (!value.hasArrayElements()) {
-            throw JSException("Value is not an array")
-        }
-        
-        val list = mutableListOf<Any?>()
-        for (i in 0 until value.arraySize) {
-            list.add(convertValue(value.getArrayElement(i)))
-        }
-        return list
     }
     
     actual fun isNull(): Boolean {
-        if (value == null && kotlinValue != null) {
-            return kotlinValue == null
-        }
-        return value == null || value.isNull
+        return value == null
     }
     
     actual fun isUndefined(): Boolean {
-        if (value == null && kotlinValue != null) {
-            return kotlinValue == null
-        }
-        return value == null || (value.isNull && !value.isHostObject)
+        return value == null
     }
     
     actual fun getRaw(): Any? {
-        return kotlinValue ?: value
-    }
-    
-    private fun convertValue(v: Value?): Any? {
-        if (v == null || v.isNull) return null
-        
-        return when {
-            v.isBoolean -> v.asBoolean()
-            v.isString -> v.asString()
-            v.fitsInInt() -> v.asInt()
-            v.fitsInLong() -> v.asLong()
-            v.fitsInDouble() -> v.asDouble()
-            v.hasArrayElements() -> {
-                val list = mutableListOf<Any?>()
-                for (i in 0 until v.arraySize) {
-                    list.add(convertValue(v.getArrayElement(i)))
-                }
-                list
-            }
-            v.hasMembers() -> {
-                val map = mutableMapOf<String, Any?>()
-                v.memberKeys.forEach { key ->
-                    map[key] = convertValue(v.getMember(key))
-                }
-                map
-            }
-            else -> v.toString()
-        }
+        return value
     }
     
     actual companion object {
         actual fun from(value: Any?): JSValue {
-            return when (value) {
-                is Value -> JSValue(value, null)
-                is JSValue -> value
-                // For Kotlin types (Map, List, etc.), store them in kotlinValue
-                else -> JSValue(null, value)
-            }
+            return JSValue(value)
         }
     }
 }

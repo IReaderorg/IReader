@@ -462,3 +462,92 @@ private class DeflateInflater(private val input: ByteArray) {
     
     private class HuffmanTree(val codes: Map<Int, Pair<Int, Int>>)
 }
+
+// Cache for plugin package paths (for native library extraction)
+private val pluginPackagePaths = mutableMapOf<String, String>()
+
+/**
+ * Register plugin package path for native library extraction.
+ * On iOS, native plugins are not supported, but we keep the registration
+ * for consistency with the expect/actual pattern.
+ */
+actual fun registerPluginPackage(pluginId: String, packagePath: String) {
+    pluginPackagePaths[pluginId] = packagePath
+    println("[PluginLoader] Registered plugin package path: $pluginId -> $packagePath")
+}
+
+/**
+ * iOS implementation of file download with progress callback
+ * Uses NSURLSession for downloading plugin files with progress tracking
+ */
+@OptIn(ExperimentalForeignApi::class)
+actual suspend fun downloadFileWithProgress(
+    url: String,
+    destination: okio.Path,
+    onProgress: (bytesDownloaded: Long, totalBytes: Long) -> Unit
+) {
+    println("[PluginLoader] Starting download with progress from: $url")
+    println("[PluginLoader] Destination: $destination")
+    
+    val nsUrl = NSURL.URLWithString(url) 
+        ?: throw Exception("Invalid URL: $url")
+    
+    val request = NSMutableURLRequest.requestWithURL(nsUrl)
+    request.setHTTPMethod("GET")
+    request.setTimeoutInterval(300.0) // 5 minute timeout for large files
+    request.setValue("IReader-Plugin-Downloader/1.0", forHTTPHeaderField = "User-Agent")
+    
+    // Create a session configuration that follows redirects
+    val config = NSURLSessionConfiguration.defaultSessionConfiguration
+    val session = NSURLSession.sessionWithConfiguration(config)
+    
+    var downloadError: NSError? = null
+    var responseData: NSData? = null
+    var httpResponse: NSHTTPURLResponse? = null
+    
+    val semaphore = platform.darwin.dispatch_semaphore_create(0)
+    
+    // For iOS, we use a simple approach - download all at once and report progress at end
+    // A more sophisticated implementation would use NSURLSessionDownloadTask with delegate
+    session.dataTaskWithRequest(request) { data, response, error ->
+        responseData = data
+        downloadError = error
+        httpResponse = response as? NSHTTPURLResponse
+        platform.darwin.dispatch_semaphore_signal(semaphore)
+    }.resume()
+    
+    platform.darwin.dispatch_semaphore_wait(semaphore, platform.darwin.DISPATCH_TIME_FOREVER)
+    
+    downloadError?.let { 
+        println("[PluginLoader] Download error: ${it.localizedDescription}")
+        throw Exception("Download failed: ${it.localizedDescription}") 
+    }
+    
+    val statusCode = httpResponse?.statusCode ?: 0
+    println("[PluginLoader] Response status code: $statusCode")
+    
+    if (statusCode !in 200..299) {
+        throw Exception("HTTP error: $statusCode")
+    }
+    
+    val data = responseData ?: throw Exception("No data received")
+    val bytesReceived = data.length.toLong()
+    println("[PluginLoader] Bytes received: $bytesReceived")
+    
+    if (bytesReceived == 0L) {
+        throw Exception("Downloaded 0 bytes from $url - server may have returned empty response")
+    }
+    
+    // Report progress (all at once for iOS simple implementation)
+    onProgress(bytesReceived, bytesReceived)
+    
+    // Write to file
+    val destUrl = NSURL.fileURLWithPath(destination.toString())
+    val success = data.writeToURL(destUrl, true)
+    
+    if (!success) {
+        throw Exception("Failed to write file to $destination")
+    }
+    
+    println("[PluginLoader] Download complete. Bytes written: $bytesReceived")
+}

@@ -63,6 +63,25 @@ class DesktopCatalogLoader(
      * Get the JS plugin loader for advanced operations.
      */
     fun getJSPluginLoader(): JSPluginLoader = jsPluginLoader
+    
+    /**
+     * Check if JS engine is missing (plugins installed but can't be loaded).
+     */
+    override fun isJSEngineMissing(): Boolean = jsPluginLoader.jsEngineMissing
+    
+    /**
+     * Get the number of JS plugins pending due to missing engine.
+     */
+    override fun getPendingJSPluginsCount(): Int = jsPluginLoader.pendingPluginsCount
+    
+    /**
+     * Load engine plugins before JS plugins.
+     * On Desktop, GraalVM is used instead of J2V8, so this is a no-op.
+     */
+    override suspend fun loadEnginePlugins() {
+        // No-op on Desktop - GraalVM is bundled with the app
+    }
+    
     override suspend fun loadAll(): List<CatalogLocal> {
         val bundled = mutableListOf<CatalogLocal>()
         

@@ -158,22 +158,11 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                 supabasePreferences = supabasePreferences,
                                 localeHelper = localeHelper,
                                 onFolderUriSelected = { uriString ->
-                                    // Take persistent SAF permissions for the selected folder
-                                    try {
-                                        android.util.Log.d("MainActivity", "Folder selected: $uriString")
-                                        if (uriString.startsWith("content://")) {
-                                            val uri = android.net.Uri.parse(uriString)
-                                            ireader.domain.storage.SecureStorageHelper.takePersistentPermissions(
-                                                this@MainActivity,
-                                                uri
-                                            )
-                                        }
-                                        // Clear cached directory so new path is used
-                                        ireader.domain.storage.SecureStorageHelper.clearCache()
-                                        android.util.Log.d("MainActivity", "SecureStorageHelper cache cleared")
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                    }
+                                    // Permissions are now taken in the platform-specific directory picker
+                                    // Just clear the cache so new path is used
+                                    android.util.Log.d("MainActivity", "Folder selected: $uriString")
+                                    ireader.domain.storage.SecureStorageHelper.clearCache()
+                                    android.util.Log.d("MainActivity", "SecureStorageHelper cache cleared")
                                 },
                                 onComplete = {
                                     hasCompletedOnboarding = true
@@ -193,6 +182,8 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                                     CommonNavHost(navController)
                                     // Legacy permission handler for users who skipped initial permission
                                     GetPermissions(uiPreferences, context = this@MainActivity)
+                                    // Required plugin handler - shows dialog when JS engine or Piper TTS is needed
+                                    ireader.presentation.ui.plugins.required.RequiredPluginHandler()
                                 }
                                 
                                 // Handle initial intent after navigation is set up (like Mihon)

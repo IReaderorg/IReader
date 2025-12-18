@@ -319,8 +319,8 @@ val DomainServices = module {
     // Plugin Registry
     factory { PluginRegistry(get()) }
     
-    // Plugin Manager
-    factory {
+    // Plugin Manager - MUST be singleton to share loaded plugins across the app
+    single {
         PluginManager(
             fileSystem = get(),
             loader = get(),
@@ -330,6 +330,21 @@ val DomainServices = module {
             database = get(),
             securityManager = get(),
             performanceMetricsManager = get()
+        )
+    }
+    
+    // Required Plugin Checker - for checking if JS engine or Piper TTS is available
+    single {
+        ireader.domain.plugins.RequiredPluginChecker(
+            pluginManager = get()
+        )
+    }
+    
+    // Plugin Download Service - handles plugin downloads with progress and notifications
+    single<ireader.domain.services.common.PluginDownloadService> {
+        ireader.domain.services.plugin.PluginDownloadServiceImpl(
+            pluginManager = get(),
+            notificationService = getOrNull()
         )
     }
     

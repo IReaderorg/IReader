@@ -30,3 +30,11 @@ expect fun extractNativeLibrariesImpl(pluginId: String, libraryPaths: List<Strin
  * @throws UnsatisfiedLinkError if the library cannot be loaded
  */
 expect fun loadNativeLibraryImpl(nativeDir: String, libraryName: String)
+
+/**
+ * Get the path to a plugin's package file (.iplugin).
+ * 
+ * @param pluginId The plugin's unique identifier
+ * @return Absolute path to the plugin package file, or null if not registered
+ */
+expect fun getPluginPackagePathImpl(pluginId: String): String?

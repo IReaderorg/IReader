@@ -103,10 +103,12 @@ actual suspend fun downloadFile(url: String, destination: okio.Path) {
     while (redirectCount < maxRedirects) {
         val connection = java.net.URL(currentUrl).openConnection() as java.net.HttpURLConnection
         connection.requestMethod = "GET"
-        connection.connectTimeout = 30000
-        connection.readTimeout = 30000
+        connection.connectTimeout = 60000  // 60 seconds connect timeout
+        connection.readTimeout = 300000    // 5 minutes read timeout for large files
         connection.instanceFollowRedirects = true // Enable automatic redirects
         connection.setRequestProperty("User-Agent", "IReader-Plugin-Downloader/1.0")
+        connection.setRequestProperty("Accept", "*/*")
+        connection.setRequestProperty("Connection", "keep-alive")
         
         try {
             connection.connect()
@@ -142,30 +144,73 @@ actual suspend fun downloadFile(url: String, destination: okio.Path) {
                 throw Exception("HTTP error: $responseCode - $errorBody")
             }
             
-            val contentLength = connection.contentLength
+            val contentLength = connection.contentLengthLong  // Use Long for large files
             println("[PluginLoader] Content-Length: $contentLength")
             
             val file = destination.toFile()
             println("[PluginLoader] Java File path: ${file.absolutePath}")
             file.parentFile?.mkdirs()
             
+            // Delete existing file if present
+            if (file.exists()) {
+                file.delete()
+            }
+            
             var bytesWritten = 0L
-            connection.inputStream.use { input ->
-                file.outputStream().use { output ->
-                    val buffer = ByteArray(8192)
+            val startTime = System.currentTimeMillis()
+            
+            java.io.BufferedInputStream(connection.inputStream, 65536).use { input ->
+                java.io.BufferedOutputStream(java.io.FileOutputStream(file), 65536).use { output ->
+                    val buffer = ByteArray(65536)  // 64KB buffer for better performance
                     var bytesRead: Int
+                    var lastLogTime = startTime
+                    
                     while (input.read(buffer).also { bytesRead = it } != -1) {
                         output.write(buffer, 0, bytesRead)
                         bytesWritten += bytesRead
+                        
+                        // Log progress every 5 seconds
+                        val now = System.currentTimeMillis()
+                        if (now - lastLogTime > 5000) {
+                            val progress = if (contentLength > 0) {
+                                (bytesWritten * 100 / contentLength)
+                            } else {
+                                -1
+                            }
+                            println("[PluginLoader] Download progress: $bytesWritten bytes ($progress%)")
+                            lastLogTime = now
+                        }
                     }
+                    output.flush()
                 }
             }
             
-            println("[PluginLoader] Download complete. Bytes written: $bytesWritten")
+            val duration = System.currentTimeMillis() - startTime
+            println("[PluginLoader] Download complete in ${duration}ms. Bytes written: $bytesWritten")
             println("[PluginLoader] File exists after write: ${file.exists()}, size: ${file.length()}")
             
             if (bytesWritten == 0L) {
                 throw Exception("Downloaded 0 bytes from $url - server may have returned empty response")
+            }
+            
+            // Verify file size matches Content-Length if provided
+            if (contentLength > 0 && bytesWritten != contentLength) {
+                println("[PluginLoader] ERROR: Size mismatch! Expected $contentLength, got $bytesWritten")
+                // Delete incomplete file
+                file.delete()
+                throw Exception("Download incomplete: expected $contentLength bytes, got $bytesWritten bytes. Please try again.")
+            }
+            
+            // Verify the file is a valid ZIP
+            try {
+                java.util.zip.ZipFile(file).use { zip ->
+                    val entryCount = zip.entries().toList().size
+                    println("[PluginLoader] ZIP verification passed: $entryCount entries")
+                }
+            } catch (e: Exception) {
+                println("[PluginLoader] ERROR: Downloaded file is not a valid ZIP: ${e.message}")
+                file.delete()
+                throw Exception("Downloaded file is corrupted (not a valid ZIP). Please try again.")
             }
             
             return // Success
@@ -175,4 +220,113 @@ actual suspend fun downloadFile(url: String, destination: okio.Path) {
     }
     
     throw Exception("Too many redirects ($maxRedirects) while downloading from $url")
+}
+
+/**
+ * Android implementation of file download with progress callback
+ */
+actual suspend fun downloadFileWithProgress(
+    url: String,
+    destination: okio.Path,
+    onProgress: (bytesDownloaded: Long, totalBytes: Long) -> Unit
+) {
+    println("[PluginLoader] Starting download with progress from: $url")
+    
+    var currentUrl = url
+    var redirectCount = 0
+    val maxRedirects = 5
+    
+    while (redirectCount < maxRedirects) {
+        val connection = java.net.URL(currentUrl).openConnection() as java.net.HttpURLConnection
+        connection.requestMethod = "GET"
+        connection.connectTimeout = 60000
+        connection.readTimeout = 300000
+        connection.instanceFollowRedirects = true
+        connection.setRequestProperty("User-Agent", "IReader-Plugin-Downloader/1.0")
+        connection.setRequestProperty("Accept", "*/*")
+        connection.setRequestProperty("Connection", "keep-alive")
+        
+        try {
+            connection.connect()
+            val responseCode = connection.responseCode
+            
+            if (responseCode in 300..399) {
+                val newUrl = connection.getHeaderField("Location")
+                if (newUrl.isNullOrBlank()) {
+                    throw Exception("Redirect response $responseCode but no Location header")
+                }
+                currentUrl = if (newUrl.startsWith("/")) {
+                    val originalUrl = java.net.URL(currentUrl)
+                    "${originalUrl.protocol}://${originalUrl.host}$newUrl"
+                } else {
+                    newUrl
+                }
+                redirectCount++
+                connection.disconnect()
+                continue
+            }
+            
+            if (responseCode != java.net.HttpURLConnection.HTTP_OK) {
+                throw Exception("HTTP error: $responseCode")
+            }
+            
+            val contentLength = connection.contentLengthLong
+            val file = destination.toFile()
+            file.parentFile?.mkdirs()
+            
+            if (file.exists()) {
+                file.delete()
+            }
+            
+            var bytesWritten = 0L
+            
+            java.io.BufferedInputStream(connection.inputStream, 65536).use { input ->
+                java.io.BufferedOutputStream(java.io.FileOutputStream(file), 65536).use { output ->
+                    val buffer = ByteArray(65536)
+                    var bytesRead: Int
+                    
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        output.write(buffer, 0, bytesRead)
+                        bytesWritten += bytesRead
+                        
+                        // Report progress
+                        onProgress(bytesWritten, contentLength)
+                    }
+                    output.flush()
+                }
+            }
+            
+            if (bytesWritten == 0L) {
+                throw Exception("Downloaded 0 bytes")
+            }
+            
+            if (contentLength > 0 && bytesWritten != contentLength) {
+                file.delete()
+                throw Exception("Download incomplete: expected $contentLength bytes, got $bytesWritten bytes")
+            }
+            
+            // Verify ZIP
+            try {
+                java.util.zip.ZipFile(file).use { zip ->
+                    zip.entries().toList().size
+                }
+            } catch (e: Exception) {
+                file.delete()
+                throw Exception("Downloaded file is corrupted")
+            }
+            
+            return
+        } finally {
+            connection.disconnect()
+        }
+    }
+    
+    throw Exception("Too many redirects")
+}
+
+/**
+ * Register plugin package path for native library extraction.
+ */
+actual fun registerPluginPackage(pluginId: String, packagePath: String) {
+    registerPluginPackagePath(pluginId, packagePath)
 }

@@ -216,7 +216,8 @@ val screenModelModule = module {
         ireader.presentation.ui.featurestore.FeatureStoreViewModel(
             pluginManager = get(),
             repositoryRepository = get(),
-            indexFetcher = get()
+            indexFetcher = get(),
+            downloadService = get()
         )
     }
     

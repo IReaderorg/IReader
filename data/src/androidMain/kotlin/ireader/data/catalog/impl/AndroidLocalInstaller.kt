@@ -139,6 +139,18 @@ class AndroidLocalInstaller(
                 
                 if (jsWritten && metaWritten) {
                     Log.info("AndroidLocalInstaller: Successfully installed JS plugin ${catalog.name}")
+                    
+                    // Sync from SAF to fallback so JSPluginLoader can find the plugin
+                    // JSPluginLoader uses FileSystem.SYSTEM which requires regular file paths
+                    try {
+                        val synced = ireader.domain.storage.SecureStorageHelper.syncJsPluginsFromSaf(context)
+                        if (synced > 0) {
+                            Log.info("AndroidLocalInstaller: Synced $synced JS plugins from SAF to fallback")
+                        }
+                    } catch (e: Exception) {
+                        Log.warn("AndroidLocalInstaller: Failed to sync JS plugins from SAF: ${e.message}")
+                    }
+                    
                     installationChanges.notifyAppInstall(catalog.pkgName)
                     send(InstallStep.Success)
                 } else {

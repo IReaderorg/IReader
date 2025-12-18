@@ -181,9 +181,13 @@ class SandboxedPluginContext(
     
     override fun loadNativeLibrary(libraryName: String) {
         val nativeDir = extractNativeLibraries()
-            ?: throw UnsatisfiedLinkError("No native libraries available for platform ${getNativePlatformId()}")
+            ?: throw IllegalStateException("No native libraries available for platform ${getNativePlatformId()}")
         
         loadNativeLibraryImpl(nativeDir, libraryName)
+    }
+    
+    override fun getPluginPackagePath(): String? {
+        return getPluginPackagePathImpl(pluginId)
     }
     
     // Store manifest reference for native library extraction

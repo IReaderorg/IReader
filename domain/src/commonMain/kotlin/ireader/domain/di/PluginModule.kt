@@ -71,8 +71,9 @@ val PluginModule = module {
         )
     }
     
-    // Plugin Manager
-    factory {
+    // Plugin Manager - MUST be singleton to share loaded plugins across the app
+    // Note: This may be overridden by DomainModules.kt if both modules are loaded
+    single {
         PluginManager(
             fileSystem = get(),
             loader = get(),
@@ -91,10 +92,10 @@ val PluginModule = module {
     factory { TTSErrorHandler() }
     
     // JS Engine Provider - manages JS engine plugins for LNReader sources
-    factory { JSEngineProvider(get()) }
+    factory { JSEngineProvider(get(), getOrNull()) }
     
     // JS Engine Requirement - handles prompts when JS engine is needed
-    factory { ireader.domain.js.engine.JSEngineRequirement(get()) }
+    factory { ireader.domain.js.engine.JSEngineRequirement(get(), getOrNull()) }
     
     // Performance Monitoring
     factory { PerformanceMetricsManager(get()) }

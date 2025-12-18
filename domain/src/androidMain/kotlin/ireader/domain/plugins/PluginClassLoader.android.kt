@@ -22,6 +22,27 @@ import java.nio.ByteBuffer
 actual class PluginClassLoader(
     private val cacheDir: File
 ) {
+    companion object {
+        // Store classloaders for each plugin so they can be accessed later
+        // This is needed for plugins that bundle additional classes (like J2V8)
+        private val pluginClassLoaders = mutableMapOf<String, ClassLoader>()
+        
+        /**
+         * Get the ClassLoader for a specific plugin.
+         * Returns null if the plugin hasn't been loaded yet.
+         */
+        fun getClassLoader(pluginId: String): ClassLoader? {
+            return pluginClassLoaders[pluginId]
+        }
+        
+        /**
+         * Clear all stored classloaders.
+         */
+        fun clearAll() {
+            pluginClassLoaders.clear()
+        }
+    }
+    
     // Secure directories for DEX loading (Android 14+ requirement)
     private val securePluginDir = File(cacheDir, "secure_plugins").apply { mkdirs() }
     private val secureDexCacheDir = File(cacheDir, "plugin_dex").apply { mkdirs() }
@@ -41,8 +62,15 @@ actual class PluginClassLoader(
             // Create appropriate ClassLoader based on Android version
             val classLoader = createClassLoader(dexFile, manifest.id)
             
+            // Store the classloader for later access
+            pluginClassLoaders[manifest.id] = classLoader
+            Log.info("Stored ClassLoader for plugin: ${manifest.id}")
+            
             // Determine the class name to load
+            Log.info("Manifest mainClass: ${manifest.mainClass}")
+            Log.info("Manifest id: ${manifest.id}")
             val className = manifest.mainClass ?: deriveClassName(manifest.id)
+            Log.info("Derived className would be: ${deriveClassName(manifest.id)}")
             
             Log.info("Loading plugin class: $className from ${dexFile.absolutePath}")
             

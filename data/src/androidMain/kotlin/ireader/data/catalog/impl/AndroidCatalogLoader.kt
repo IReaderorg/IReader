@@ -49,7 +49,8 @@ class AndroidCatalogLoader(
     val simpleStorage: GetSimpleStorage,
     val localizeHelper: LocalizeHelper,
     private val preferenceStore: PreferenceStoreFactory,
-    private val communitySource: ireader.domain.community.CommunitySource
+    private val communitySource: ireader.domain.community.CommunitySource,
+    private val pluginManager: ireader.domain.plugins.PluginManager
 ) : CatalogLoader, ireader.domain.catalogs.service.AsyncPluginLoader {
 
     private val pkgManager = context.packageManager
@@ -484,6 +485,31 @@ class AndroidCatalogLoader(
      * Get the JS plugin loader for advanced operations.
      */
     fun getJSPluginLoader(): JSPluginLoader = jsPluginLoader
+    
+    /**
+     * Check if JS engine is missing (plugins installed but can't be loaded).
+     * Returns true if there are JS plugin files but no JS engine to run them.
+     */
+    override fun isJSEngineMissing(): Boolean = jsPluginLoader.jsEngineMissing
+    
+    /**
+     * Get the number of JS plugins pending due to missing engine.
+     */
+    override fun getPendingJSPluginsCount(): Int = jsPluginLoader.pendingPluginsCount
+    
+    /**
+     * Load engine plugins (.iplugin files like J2V8) before JS plugins.
+     * This ensures the JS engine is available when JS plugins are loaded.
+     */
+    override suspend fun loadEnginePlugins() {
+        try {
+            Log.info("AndroidCatalogLoader: Loading engine plugins...")
+            pluginManager.loadPlugins()
+            Log.info("AndroidCatalogLoader: Engine plugins loaded")
+        } catch (e: Exception) {
+            Log.error("AndroidCatalogLoader: Failed to load engine plugins", e)
+        }
+    }
 
     private companion object {
         const val EXTENSION_FEATURE = "ireader"

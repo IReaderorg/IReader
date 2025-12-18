@@ -10,6 +10,9 @@ import ireader.domain.plugins.PluginRepositoryIndexFetcher
 import ireader.domain.plugins.PluginRepositoryRepository
 import ireader.domain.plugins.PluginStatus
 import ireader.domain.plugins.PluginType
+import ireader.domain.services.common.PluginDownloadProgress
+import ireader.domain.services.common.PluginDownloadService
+import ireader.domain.services.common.PluginDownloadStatus
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.plugin.api.PluginAuthor
 import ireader.plugin.api.PluginManifest
@@ -31,7 +34,8 @@ import kotlinx.coroutines.launch
 class FeatureStoreViewModel(
     private val pluginManager: PluginManager,
     private val repositoryRepository: PluginRepositoryRepository,
-    private val indexFetcher: PluginRepositoryIndexFetcher
+    private val indexFetcher: PluginRepositoryIndexFetcher,
+    private val downloadService: PluginDownloadService
 ) : BaseViewModel() {
     
     private val _state = mutableStateOf(FeatureStoreState())
@@ -43,7 +47,60 @@ class FeatureStoreViewModel(
     init {
         observeInstalledPlugins()
         observeRepositories()
+        observeDownloads()
         loadPlugins()
+    }
+    
+    /**
+     * Observe download progress from PluginDownloadService
+     */
+    private fun observeDownloads() {
+        downloadService.downloads
+            .onEach { downloads ->
+                // Convert PluginDownloadProgress to DownloadProgress for UI
+                val uiDownloads = downloads.mapValues { (_, progress) ->
+                    DownloadProgress(
+                        pluginId = progress.pluginId,
+                        pluginName = progress.pluginName,
+                        progress = progress.progress,
+                        bytesDownloaded = progress.bytesDownloaded,
+                        totalBytes = progress.totalBytes,
+                        status = progress.status.toUiStatus(),
+                        error = progress.errorMessage
+                    )
+                }
+                _state.value = _state.value.copy(downloadProgress = uiDownloads)
+                
+                // Update plugin status based on download status
+                downloads.forEach { (pluginId, progress) ->
+                    val pluginStatus = when (progress.status) {
+                        PluginDownloadStatus.QUEUED,
+                        PluginDownloadStatus.DOWNLOADING,
+                        PluginDownloadStatus.VALIDATING,
+                        PluginDownloadStatus.INSTALLING -> PluginStatus.UPDATING
+                        PluginDownloadStatus.COMPLETED -> PluginStatus.ENABLED
+                        PluginDownloadStatus.FAILED -> PluginStatus.ERROR
+                        PluginDownloadStatus.CANCELLED -> PluginStatus.NOT_INSTALLED
+                    }
+                    updatePluginStatus(pluginId, pluginStatus)
+                }
+            }
+            .launchIn(scope)
+    }
+    
+    /**
+     * Convert service download status to UI download status
+     */
+    private fun PluginDownloadStatus.toUiStatus(): DownloadStatus {
+        return when (this) {
+            PluginDownloadStatus.QUEUED -> DownloadStatus.PENDING
+            PluginDownloadStatus.DOWNLOADING -> DownloadStatus.DOWNLOADING
+            PluginDownloadStatus.VALIDATING,
+            PluginDownloadStatus.INSTALLING -> DownloadStatus.INSTALLING
+            PluginDownloadStatus.COMPLETED -> DownloadStatus.COMPLETED
+            PluginDownloadStatus.FAILED -> DownloadStatus.FAILED
+            PluginDownloadStatus.CANCELLED -> DownloadStatus.FAILED
+        }
     }
     
     /**
@@ -404,10 +461,16 @@ class FeatureStoreViewModel(
     }
     
     /**
-     * Install a plugin from the store
+     * Install a plugin from the store using the download service
      */
     fun installPlugin(pluginId: String) {
         val plugin = _state.value.plugins.find { it.id == pluginId } ?: return
+        
+        // Check if already downloading
+        if (downloadService.isDownloading(pluginId)) {
+            showSnackBar(ireader.i18n.UiText.DynamicString("${plugin.manifest.name} is already downloading"))
+            return
+        }
         
         // Check if plugin has a download URL
         if (plugin.downloadUrl.isNullOrBlank()) {
@@ -417,29 +480,46 @@ class FeatureStoreViewModel(
             return
         }
         
-        // Update state to show installing
-        updatePluginStatus(pluginId, PluginStatus.UPDATING)
-        
         scope.launch {
             try {
-                pluginManager.installPlugin(plugin)
-                    .onSuccess {
-                        updatePluginStatus(pluginId, PluginStatus.ENABLED)
-                        showSnackBar(ireader.i18n.UiText.DynamicString("${plugin.manifest.name} installed successfully"))
+                // Use download service for progress tracking and notifications
+                when (val result = downloadService.downloadPlugin(plugin)) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("${plugin.manifest.name} download started"))
                     }
-                    .onFailure { error ->
-                        updatePluginStatus(pluginId, PluginStatus.ERROR)
+                    is ireader.domain.services.common.ServiceResult.Error -> {
                         _state.value = _state.value.copy(
-                            error = "Failed to install ${plugin.manifest.name}: ${error.message}"
+                            error = "Failed to start download for ${plugin.manifest.name}: ${result.message}"
                         )
                     }
+                    is ireader.domain.services.common.ServiceResult.Loading -> {
+                        // Ignore loading state
+                    }
+                }
             } catch (e: Exception) {
-                updatePluginStatus(pluginId, PluginStatus.ERROR)
                 _state.value = _state.value.copy(
                     error = "Failed to install ${plugin.manifest.name}: ${e.message}"
                 )
             }
         }
+    }
+    
+    /**
+     * Cancel a plugin download
+     */
+    fun cancelDownload(pluginId: String) {
+        scope.launch {
+            downloadService.cancelDownload(pluginId)
+        }
+    }
+    
+    /**
+     * Retry a failed download
+     */
+    fun retryDownload(pluginId: String) {
+        // Find the plugin and restart download
+        val plugin = _state.value.plugins.find { it.id == pluginId } ?: return
+        installPlugin(pluginId)
     }
     
     /**

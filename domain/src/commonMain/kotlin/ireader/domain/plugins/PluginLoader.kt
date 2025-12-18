@@ -57,8 +57,9 @@ class PluginLoader(
      * Steps:
      * 1. Extract and parse manifest from plugin.json
      * 2. Validate manifest
-     * 3. Load plugin class using platform-specific class loader
-     * 4. Instantiate plugin
+     * 3. Register plugin package path for native library extraction
+     * 4. Load plugin class using platform-specific class loader
+     * 5. Instantiate plugin
      */
     suspend fun loadPlugin(file: VirtualFile): Plugin? {
         return withContext(Dispatchers.Default) {
@@ -71,10 +72,13 @@ class PluginLoader(
                     throw IllegalStateException("Plugin validation failed: ${error.message}", error)
                 }
                 
-                // Step 3: Load plugin class
+                // Step 3: Register plugin package path for native library extraction
+                registerPluginPackage(manifest.id, file.path)
+                
+                // Step 4: Load plugin class
                 val pluginClass = classLoader.loadPluginClass(file, manifest)
                 
-                // Step 4: Instantiate plugin
+                // Step 5: Instantiate plugin
                 val plugin = instantiatePlugin(pluginClass)
                 
                 plugin
@@ -123,7 +127,10 @@ class PluginLoader(
             }
             
             println("[PluginLoader] Manifest content length: ${manifestContent.length}")
-            return json.decodeFromString(PluginManifest.serializer(), manifestContent)
+            println("[PluginLoader] Manifest content: $manifestContent")
+            val parsedManifest = json.decodeFromString(PluginManifest.serializer(), manifestContent)
+            println("[PluginLoader] Parsed manifest mainClass: ${parsedManifest.mainClass}")
+            return parsedManifest
         } catch (e: IllegalArgumentException) {
             throw e
         } catch (e: Exception) {
@@ -158,6 +165,19 @@ class PluginLoader(
             }
         }
     }
+    
+    /**
+     * Download a plugin file from URL to destination with progress callback
+     */
+    suspend fun downloadToFileWithProgress(
+        url: String,
+        destination: okio.Path,
+        onProgress: (bytesDownloaded: Long, totalBytes: Long) -> Unit
+    ) {
+        withContext(Dispatchers.Default) {
+            downloadFileWithProgress(url, destination, onProgress)
+        }
+    }
 }
 
 /**
@@ -179,3 +199,18 @@ expect fun instantiatePlugin(pluginClass: Any): Plugin
  * Platform-specific file download
  */
 expect suspend fun downloadFile(url: String, destination: okio.Path)
+
+/**
+ * Platform-specific file download with progress callback
+ */
+expect suspend fun downloadFileWithProgress(
+    url: String,
+    destination: okio.Path,
+    onProgress: (bytesDownloaded: Long, totalBytes: Long) -> Unit
+)
+
+/**
+ * Register plugin package path for native library extraction.
+ * Called when loading a plugin to enable native library extraction later.
+ */
+expect fun registerPluginPackage(pluginId: String, packagePath: String)

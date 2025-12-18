@@ -211,10 +211,11 @@ kotlin {
                 api(libs.koin.workManager)
 
                 // J2V8 - V8 JavaScript engine for Android (full Promise/async support)
-                // Provides native ES6+, Promises, async/await without polyfills
-                // TODO: Move to optional plugin (io.github.ireaderorg.plugins.j2v8-engine)
-                // See docs/PIPER_TTS_PLUGIN_DESIGN.md for migration plan
-                implementation(libs.j2v8)
+                // REMOVED: Now available as optional plugin (io.github.ireaderorg.plugins.j2v8-engine)
+                // The plugin bundles both Java API classes and native libraries
+                // Users who need JS sources can install the plugin from Feature Store
+                // This reduces APK size by ~50-90MB
+                // implementation(libs.j2v8)
 
             }
         }
@@ -226,16 +227,18 @@ kotlin {
 
                 implementation(compose.desktop.currentOs)
                 
-                // Piper JNI for text-to-speech - Testing version 1.2.0-a0f09cd
-                // TODO: Move to optional plugin (io.github.ireaderorg.plugins.piper-tts)
-                // See docs/PIPER_TTS_PLUGIN_DESIGN.md for migration plan
-                implementation("io.github.givimad:piper-jni:1.2.0-a0f09cd")
+                // Piper JNI for text-to-speech
+                // REMOVED: Now available as optional plugin (io.github.ireaderorg.plugins.piper-tts)
+                // Users who need neural TTS can install the plugin from Feature Store
+                // This reduces app size by ~20-25MB per platform
+                // implementation("io.github.givimad:piper-jni:1.2.0-a0f09cd")
 
                 // GraalVM JavaScript for JavaScript engine
-                // TODO: Move to optional plugin (io.github.ireaderorg.plugins.graalvm-engine)
-                // See docs/PIPER_TTS_PLUGIN_DESIGN.md for migration plan
-                implementation(libs.polyglot)
-                implementation(libs.js)
+                // REMOVED: Now available as optional plugin (io.github.ireaderorg.plugins.graalvm-engine)
+                // Users who need JS sources can install the plugin from Feature Store
+                // This reduces app size by ~40-60MB per platform
+                // implementation(libs.polyglot)
+                // implementation(libs.js)
             }
         }
 

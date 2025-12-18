@@ -134,3 +134,100 @@ actual suspend fun downloadFile(url: String, destination: okio.Path) {
     
     throw Exception("Too many redirects ($maxRedirects) while downloading from $url")
 }
+
+/**
+ * Desktop implementation of file download with progress callback
+ */
+actual suspend fun downloadFileWithProgress(
+    url: String,
+    destination: okio.Path,
+    onProgress: (bytesDownloaded: Long, totalBytes: Long) -> Unit
+) {
+    var currentUrl = url
+    var redirectCount = 0
+    val maxRedirects = 5
+    
+    while (redirectCount < maxRedirects) {
+        val connection = java.net.URL(currentUrl).openConnection() as java.net.HttpURLConnection
+        connection.requestMethod = "GET"
+        connection.connectTimeout = 60000
+        connection.readTimeout = 300000
+        connection.instanceFollowRedirects = true
+        connection.setRequestProperty("User-Agent", "IReader-Plugin-Downloader/1.0")
+        
+        try {
+            connection.connect()
+            val responseCode = connection.responseCode
+            
+            if (responseCode in 300..399) {
+                val newUrl = connection.getHeaderField("Location")
+                if (newUrl.isNullOrBlank()) {
+                    throw Exception("Redirect response $responseCode but no Location header")
+                }
+                currentUrl = if (newUrl.startsWith("/")) {
+                    val originalUrl = java.net.URL(currentUrl)
+                    "${originalUrl.protocol}://${originalUrl.host}$newUrl"
+                } else {
+                    newUrl
+                }
+                redirectCount++
+                connection.disconnect()
+                continue
+            }
+            
+            if (responseCode != java.net.HttpURLConnection.HTTP_OK) {
+                throw Exception("HTTP error: $responseCode")
+            }
+            
+            val contentLength = connection.contentLengthLong
+            val file = destination.toFile()
+            file.parentFile?.mkdirs()
+            
+            var bytesWritten = 0L
+            java.io.BufferedInputStream(connection.inputStream, 65536).use { input ->
+                java.io.BufferedOutputStream(java.io.FileOutputStream(file), 65536).use { output ->
+                    val buffer = ByteArray(65536)
+                    var bytesRead: Int
+                    
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        output.write(buffer, 0, bytesRead)
+                        bytesWritten += bytesRead
+                        onProgress(bytesWritten, contentLength)
+                    }
+                    output.flush()
+                }
+            }
+            
+            if (bytesWritten == 0L) {
+                throw Exception("Downloaded 0 bytes")
+            }
+            
+            if (contentLength > 0 && bytesWritten != contentLength) {
+                file.delete()
+                throw Exception("Download incomplete")
+            }
+            
+            return
+        } finally {
+            connection.disconnect()
+        }
+    }
+    
+    throw Exception("Too many redirects")
+}
+
+// Cache for plugin package paths (for native library extraction)
+private val pluginPackagePaths = mutableMapOf<String, String>()
+
+/**
+ * Register plugin package path for native library extraction.
+ */
+actual fun registerPluginPackage(pluginId: String, packagePath: String) {
+    pluginPackagePaths[pluginId] = packagePath
+    println("[PluginLoader] Registered plugin package path: $pluginId -> $packagePath")
+}
+
+/**
+ * Get registered plugin package path.
+ */
+fun getPluginPackagePath(pluginId: String): String? = pluginPackagePaths[pluginId]

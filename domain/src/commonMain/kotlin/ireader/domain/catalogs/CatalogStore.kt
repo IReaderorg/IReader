@@ -128,6 +128,46 @@ class CatalogStore(
     }
     
     /**
+     * Retry loading JS plugins.
+     * Call this after the J2V8 plugin becomes available.
+     */
+    fun retryJSPluginLoading() {
+        val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader ?: return
+        
+        scope.launch {
+            try {
+                Log.info("CatalogStore: Retrying JS plugin loading...")
+                
+                // Reset the JS engine (platform-specific)
+                onJ2V8PluginAvailable()
+                
+                // Reset the JS engine missing state
+                _jsEngineMissing.value = false
+                _pendingJSPluginsCount.value = 0
+                
+                // Reload JS plugins
+                asyncLoader.loadJSPluginsAsync { catalog ->
+                    scope.launch {
+                        val isPinned = catalog.sourceId.toString() in cachedPinnedIds
+                        val updated = catalog.copy(isPinned = isPinned)
+                        catalogUpdateChannel.trySend(CatalogUpdate.Add(updated))
+                    }
+                }
+                
+                // Update state after loading
+                _jsEngineMissing.value = asyncLoader.isJSEngineMissing()
+                _pendingJSPluginsCount.value = asyncLoader.getPendingJSPluginsCount()
+                
+                if (!_jsEngineMissing.value) {
+                    Log.info("CatalogStore: JS plugins loaded successfully!")
+                }
+            } catch (e: Exception) {
+                Log.error("CatalogStore: Failed to retry JS plugin loading", e)
+            }
+        }
+    }
+    
+    /**
      * Trigger lazy initialization - call this when catalogs are first needed.
      * This is safe to call multiple times - only the first call will initialize.
      * Uses double-checked locking pattern with coroutine mutex.
@@ -177,6 +217,14 @@ class CatalogStore(
     private suspend fun initializeCatalogs() {
         withContext(Dispatchers.Default) {
             val startTime = currentTimeToLong()
+            
+            // Load engine plugins FIRST (J2V8, etc.) before loading JS plugins
+            // This ensures the JS engine is available when JS plugins are scanned
+            val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader
+            if (asyncLoader != null) {
+                Log.info("CatalogStore: Loading engine plugins before catalogs...")
+                asyncLoader.loadEnginePlugins()
+            }
             
             // Load all catalogs
             val loadedCatalogs = loader.loadAll()
@@ -615,10 +663,42 @@ class CatalogStore(
                         }
                     }
                 }
+                
+                // Check if JS engine is missing after loading attempt
+                _jsEngineMissing.value = asyncLoader.isJSEngineMissing()
+                _pendingJSPluginsCount.value = asyncLoader.getPendingJSPluginsCount()
+                
+                if (_jsEngineMissing.value && _pendingJSPluginsCount.value > 0) {
+                    Log.info("CatalogStore: ${_pendingJSPluginsCount.value} JS plugins require JS engine installation")
+                }
             } catch (e: Exception) {
                 Log.error("CatalogStore: Failed to load plugins in background", e)
             }
         }
+    }
+    
+    // Flow to track if JS engine is missing
+    private val _jsEngineMissing = MutableStateFlow(false)
+    val jsEngineMissing: kotlinx.coroutines.flow.StateFlow<Boolean> = _jsEngineMissing
+    
+    // Flow to track pending JS plugins count
+    private val _pendingJSPluginsCount = MutableStateFlow(0)
+    val pendingJSPluginsCount: kotlinx.coroutines.flow.StateFlow<Int> = _pendingJSPluginsCount
+    
+    /**
+     * Check if JS engine is missing (plugins installed but can't be loaded).
+     */
+    fun isJSEngineMissing(): Boolean {
+        val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader
+        return asyncLoader?.isJSEngineMissing() == true
+    }
+    
+    /**
+     * Get the number of JS plugins pending due to missing engine.
+     */
+    fun getPendingJSPluginsCount(): Int {
+        val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader
+        return asyncLoader?.getPendingJSPluginsCount() ?: 0
     }
 }
 
@@ -630,3 +710,11 @@ private sealed class CatalogUpdate {
     data class Remove(val sourceId: Long) : CatalogUpdate()
     data class Replace(val catalog: CatalogLocal) : CatalogUpdate()
 }
+
+
+/**
+ * Platform-specific notification that J2V8 plugin is available.
+ * On Android, this resets the J2V8EngineHelper to allow retry.
+ * On Desktop, this is a no-op (GraalVM is used instead).
+ */
+expect fun onJ2V8PluginAvailable()

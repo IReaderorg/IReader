@@ -1,6 +1,7 @@
 package ireader.domain.js.engine
 
 import ireader.domain.plugins.PluginManager
+import ireader.domain.plugins.RequiredPluginChecker
 import ireader.plugin.api.JSEngineCapabilities
 import ireader.plugin.api.JSEngineInstance
 import ireader.plugin.api.JSEnginePlugin
@@ -19,17 +20,19 @@ import kotlinx.coroutines.sync.withLock
  * 
  * The provider supports:
  * - Plugin-based engines (J2V8, GraalVM, QuickJS)
- * - Fallback to built-in engine (if available)
  * - Engine pooling for performance
  * 
  * Architecture:
  * - JSEnginePlugin: Low-level JS execution (from plugin-api)
  * - JSEngineProvider: Manages plugin-based engines
- * - GraalVMJSEngine/AndroidJSEngine: High-level LNReader plugin loaders
- *   (these use either bundled engines or plugin-based engines via this provider)
+ * 
+ * NOTE: JS engines are now optional plugins. Users need to install
+ * the appropriate engine plugin from the Feature Store to use
+ * JavaScript-based sources (LNReader plugins).
  */
 class JSEngineProvider(
-    private val pluginManager: PluginManager
+    private val pluginManager: PluginManager,
+    private val requiredPluginChecker: RequiredPluginChecker? = null
 ) {
     private val mutex = Mutex()
     
@@ -47,11 +50,33 @@ class JSEngineProvider(
     private var usePluginEngines = false
     
     /**
-     * Check if a JS engine is available (either plugin-based or bundled).
-     * This always returns true since bundled engines are available as fallback.
+     * Check if a JS engine is available (plugin-based only).
+     * Returns true only if a JS engine plugin is installed.
      */
     fun isEngineAvailable(): Boolean {
-        return true // Bundled engines are always available as fallback
+        return isPluginEngineAvailable()
+    }
+    
+    /**
+     * Request the JS engine to be installed.
+     * This triggers the RequiredPluginChecker to show the installation dialog.
+     * Call this when a JS source is selected but no engine is available.
+     */
+    fun requestEngine() {
+        requiredPluginChecker?.requestJSEngine()
+    }
+    
+    /**
+     * Check if engine is available, and if not, request installation.
+     * Returns true if engine is available, false if installation was requested.
+     */
+    fun ensureEngineOrRequest(): Boolean {
+        return if (isEngineAvailable()) {
+            true
+        } else {
+            requestEngine()
+            false
+        }
     }
     
     /**
@@ -194,7 +219,7 @@ class JSEngineProvider(
         val active = getActiveEngine()
         
         _engineState.value = JSEngineState(
-            isAvailable = true, // Bundled engines always available
+            isAvailable = engines.isNotEmpty(),
             isPluginEngineAvailable = engines.isNotEmpty(),
             usingPluginEngine = usePluginEngines && active != null,
             installedEngines = engines.map { 
@@ -206,15 +231,8 @@ class JSEngineProvider(
                 )
             },
             activeEngineId = active?.manifest?.id,
-            activeEngineName = active?.manifest?.name ?: getBundledEngineName()
+            activeEngineName = active?.manifest?.name ?: "No Engine Installed"
         )
-    }
-    
-    /**
-     * Get the name of the bundled engine for the current platform.
-     */
-    private fun getBundledEngineName(): String {
-        return "Bundled Engine" // Platform-specific name set by actual implementations
     }
     
     /**
@@ -229,8 +247,8 @@ class JSEngineProvider(
  * State of the JS engine provider.
  */
 data class JSEngineState(
-    /** Whether any JS engine is available (always true due to bundled engines) */
-    val isAvailable: Boolean = true,
+    /** Whether any JS engine is available (requires plugin installation) */
+    val isAvailable: Boolean = false,
     /** Whether plugin-based engines are installed */
     val isPluginEngineAvailable: Boolean = false,
     /** Whether currently using a plugin-based engine */

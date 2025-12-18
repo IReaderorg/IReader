@@ -178,6 +178,8 @@ fun main() {
                                 }
                             ) {
                                 CommonNavHost(navController)
+                                // Required plugin handler - shows dialog when JS engine or Piper TTS is needed
+                                ireader.presentation.ui.plugins.required.RequiredPluginHandler()
                             }
                         }
                     }

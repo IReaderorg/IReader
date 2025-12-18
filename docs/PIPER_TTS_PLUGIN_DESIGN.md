@@ -216,9 +216,10 @@ class PiperTTSPlugin : TTSPlugin {
 ### Pending ⏳
 
 1. ⏳ Package native libraries per platform (requires build pipeline)
-2. ⏳ Remove bundled Piper from `domain/build.gradle.kts`
-3. ⏳ Add Piper TTS plugin to Feature Store repository
-4. ⏳ Test voice download and synthesis
+2. ✅ Remove bundled Piper from `domain/build.gradle.kts` - commented out `piper-jni`
+3. ✅ Created stub `PiperJNISynthesizer.kt` that returns empty results
+4. ⏳ Add Piper TTS plugin to Feature Store repository
+5. ⏳ Test voice download and synthesis
 
 **Files Created:**
 - `IReader-plugins/plugins/tts/piper-tts/build.gradle.kts`
@@ -405,19 +406,35 @@ data class JSEngineCapabilities(
    - Implements `JSEnginePlugin`, `JSEngineInstance`, `JSValue`
 3. ⏳ Package native libraries per platform (requires build pipeline setup)
 
-### Phase 4: App Integration (Pending)
+### Phase 4: App Integration (Done ✅)
 
-1. ⏳ Remove bundled JS engine dependencies from `domain/build.gradle.kts`:
-   - `libs.j2v8` (Android)
-   - `libs.polyglot` and `libs.js` (Desktop)
-2. ⏳ Show prompt to install JS engine when needed
-3. ⏳ Add JS engine plugins to Feature Store repository
+1. ✅ Remove bundled JS engine dependencies from `domain/build.gradle.kts`:
+   - ✅ `libs.j2v8` (Android) - commented out
+   - ✅ `libs.polyglot` and `libs.js` (Desktop) - commented out
+2. ✅ Created stub implementations that throw `NoJSEngineException`:
+   - ✅ `JSEngine.kt` (Android/Desktop) - stub actual classes
+   - ✅ `JSEngineFactory.kt` (Android/Desktop) - stub factory
+   - ✅ Deleted `GraalVMJSEngine.kt` and `AndroidJSEngine.kt`
+   - ✅ Updated `JSValue.kt` (Desktop) - removed GraalVM imports
+3. ✅ Updated `JSEngineProvider` to reflect plugin-only engines
+4. ✅ Plugins use reflection to access runtime classes (no compile-time dependencies)
+5. ⏳ Add JS engine plugins to Feature Store repository
+6. ⏳ Add UI prompt component when JS engine is needed
 
 ### Current Status
 
-The plugin infrastructure is complete. The bundled JS engines (J2V8 for Android, GraalVM for Desktop) 
-continue to work as before. The plugin-based engines are ready but optional - users can install them
-from the Feature Store when the bundled engines are removed in a future version.
+**JS engines are now fully optional plugins.** The bundled dependencies have been removed and 
+stub implementations throw `NoJSEngineException` with a message directing users to install 
+the appropriate plugin from the Feature Store.
+
+**Platform-specific plugins:**
+- **J2V8 Engine** (Android only) - Uses reflection to access J2V8 classes at runtime
+- **GraalVM Engine** (Desktop only) - Uses reflection to access GraalVM classes at runtime
+- **Piper TTS** (Desktop only) - Uses reflection to access Piper JNI classes at runtime
+
+Each plugin declares its target platform in the manifest (`platforms = listOf(Platform.ANDROID)` 
+or `platforms = listOf(Platform.DESKTOP)`), so the Feature Store will only show relevant plugins 
+for each platform.
 
 **Files Created/Modified:**
 - `plugin-api/src/commonMain/kotlin/ireader/plugin/api/JSEnginePlugin.kt` - Plugin interface
@@ -427,8 +444,25 @@ from the Feature Store when the bundled engines are removed in a future version.
 - `domain/src/commonMain/kotlin/ireader/domain/js/engine/JSEngineProvider.kt` - Engine provider service
 - `domain/src/commonMain/kotlin/ireader/domain/plugins/NativeLibrarySupport.kt` - Native library support
 - `domain/src/commonMain/kotlin/ireader/domain/plugins/SandboxedPluginContext.kt` - Updated context
-- `IReader-plugins/plugins/engines/j2v8-engine/` - J2V8 plugin implementation
-- `IReader-plugins/plugins/engines/graalvm-engine/` - GraalVM plugin implementation
+- `domain/build.gradle.kts` - Removed bundled JS engine and Piper dependencies
+- `domain/src/androidMain/kotlin/ireader/domain/js/engine/JSEngine.kt` - Stub implementation
+- `domain/src/desktopMain/kotlin/ireader/domain/js/engine/JSEngine.kt` - Stub implementation
+- `domain/src/androidMain/kotlin/ireader/domain/js/loader/JSEngineFactory.kt` - Stub factory
+- `domain/src/desktopMain/kotlin/ireader/domain/js/loader/JSEngineFactory.kt` - Stub factory
+- `domain/src/desktopMain/kotlin/ireader/domain/js/engine/JSValue.kt` - Pure Kotlin implementation
+- `domain/src/desktopMain/kotlin/ireader/domain/services/tts_service/piper/PiperJNISynthesizer.kt` - Stub
+- `IReader-plugins/plugins/engines/j2v8-engine/build.gradle.kts` - Android-only plugin config
+- `IReader-plugins/plugins/engines/j2v8-engine/src/main/kotlin/J2V8EnginePlugin.kt` - Reflection-based J2V8 plugin
+- `IReader-plugins/plugins/engines/graalvm-engine/build.gradle.kts` - Desktop-only plugin config
+- `IReader-plugins/plugins/engines/graalvm-engine/src/main/kotlin/GraalVMEnginePlugin.kt` - Reflection-based GraalVM plugin
+- `IReader-plugins/plugins/tts/piper-tts/build.gradle.kts` - Desktop-only plugin config
+- `IReader-plugins/plugins/tts/piper-tts/src/main/kotlin/PiperTTSPlugin.kt` - Reflection-based Piper TTS plugin
+
+**Files Deleted:**
+- `domain/src/desktopMain/kotlin/ireader/domain/js/engine/GraalVMJSEngine.kt`
+- `domain/src/androidMain/kotlin/ireader/domain/js/engine/AndroidJSEngine.kt`
+- `IReader-plugins/plugins/tts/piper-tts/src/main/kotlin/PiperAudioStream.kt` (merged into main plugin)
+- `IReader-plugins/plugins/tts/piper-tts/src/main/kotlin/PiperVoiceDownloader.kt` (voice download handled by host)
 
 ## Size Comparison
 

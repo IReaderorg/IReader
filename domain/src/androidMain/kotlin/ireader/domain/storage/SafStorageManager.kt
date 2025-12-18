@@ -31,6 +31,8 @@ class SafStorageManager(
     /**
      * Get the root DocumentFile for the user-selected SAF folder.
      * Returns null if no folder is selected or permission is lost.
+     * 
+     * If permission is lost or URI is invalid, clears the stored URI so user can select again.
      */
     fun getRootDocumentFile(): DocumentFile? {
         val uriString = uiPreferences.selectedStorageFolderUri().get()
@@ -41,17 +43,99 @@ class SafStorageManager(
         
         return try {
             val uri = Uri.parse(uriString)
-            val docFile = DocumentFile.fromTreeUri(context, uri)
+            
+            // Extract the tree URI from the stored URI (it might contain /document/ suffix)
+            val treeUri = extractTreeUri(uri)
+            android.util.Log.d(TAG, "Checking permission for tree URI: $treeUri (original: $uri)")
+            
+            // Check if we still have permission for this URI
+            // Compare using string representation to handle URI encoding differences
+            val persistedPermissions = context.contentResolver.persistedUriPermissions
+            val hasPermission = persistedPermissions.any { perm ->
+                val permTreeUri = extractTreeUri(perm.uri)
+                val matches = permTreeUri.toString() == treeUri.toString() && 
+                              perm.isReadPermission && perm.isWritePermission
+                if (matches) {
+                    android.util.Log.d(TAG, "Found matching permission: ${perm.uri}")
+                }
+                matches
+            }
+            
+            if (!hasPermission) {
+                android.util.Log.w(TAG, "SAF permission lost for URI: $uri")
+                android.util.Log.d(TAG, "Available permissions: ${persistedPermissions.map { it.uri }}")
+                clearStoredUri()
+                return null
+            }
+            
+            val docFile = DocumentFile.fromTreeUri(context, treeUri)
             if (docFile?.exists() == true && docFile.canWrite()) {
                 android.util.Log.d(TAG, "Root DocumentFile: ${docFile.uri}, canWrite=${docFile.canWrite()}")
                 docFile
             } else {
-                android.util.Log.w(TAG, "SAF folder not accessible: exists=${docFile?.exists()}, canWrite=${docFile?.canWrite()}")
+                android.util.Log.w(TAG, "SAF folder not accessible: exists=${docFile?.exists()}, canWrite=${docFile?.canWrite()} - clearing stored URI")
+                clearStoredUri()
                 null
             }
-        } catch (e: Exception) {
-            android.util.Log.e(TAG, "Failed to get root DocumentFile", e)
+        } catch (e: SecurityException) {
+            android.util.Log.e(TAG, "SecurityException accessing SAF folder - permission revoked, clearing stored URI", e)
+            clearStoredUri()
             null
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "Failed to get root DocumentFile - clearing stored URI", e)
+            clearStoredUri()
+            null
+        }
+    }
+    
+    /**
+     * Extract the tree URI from a document URI.
+     * OpenDocumentTree can return URIs like:
+     * - content://com.android.externalstorage.documents/tree/primary%3AIReader/document/primary%3AIReader
+     * We need to extract just the tree part:
+     * - content://com.android.externalstorage.documents/tree/primary%3AIReader
+     */
+    private fun extractTreeUri(uri: Uri): Uri {
+        val uriString = uri.toString()
+        val treeIndex = uriString.indexOf("/tree/")
+        if (treeIndex == -1) return uri
+        
+        val documentIndex = uriString.indexOf("/document/", treeIndex)
+        return if (documentIndex != -1) {
+            Uri.parse(uriString.substring(0, documentIndex))
+        } else {
+            uri
+        }
+    }
+    
+    /**
+     * Clear the stored SAF URI when permission is lost or invalid.
+     * This allows the user to select a new folder.
+     */
+    fun clearStoredUri() {
+        try {
+            val uriString = uiPreferences.selectedStorageFolderUri().get()
+            if (!uriString.isNullOrEmpty()) {
+                // Try to release the persisted permission
+                try {
+                    val uri = Uri.parse(uriString)
+                    val treeUri = extractTreeUri(uri)
+                    context.contentResolver.releasePersistableUriPermission(
+                        treeUri,
+                        android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                } catch (e: Exception) {
+                    // Ignore - permission may already be released
+                    android.util.Log.d(TAG, "Could not release permission (may already be released): ${e.message}")
+                }
+            }
+            
+            // Clear the stored URI
+            uiPreferences.selectedStorageFolderUri().set("")
+            android.util.Log.i(TAG, "Cleared stored SAF URI - user needs to select folder again")
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "Failed to clear stored URI", e)
         }
     }
     
@@ -60,6 +144,14 @@ class SafStorageManager(
      */
     fun isSafStorageAvailable(): Boolean {
         return getRootDocumentFile() != null
+    }
+    
+    /**
+     * Check if SAF permission needs to be requested (URI was cleared due to lost permission).
+     */
+    fun needsPermissionRequest(): Boolean {
+        val uriString = uiPreferences.selectedStorageFolderUri().get()
+        return uriString.isNullOrEmpty()
     }
 
     

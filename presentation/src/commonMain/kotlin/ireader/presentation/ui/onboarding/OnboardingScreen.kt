@@ -28,12 +28,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.vinceglb.filekit.dialogs.compose.rememberDirectoryPickerLauncher
 import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.core.theme.AppLocales
 import ireader.presentation.core.theme.LocaleHelper
-import ireader.presentation.ui.core.file.toPathString
+import ireader.presentation.ui.core.file.rememberPlatformDirectoryPickerLauncher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -414,12 +413,11 @@ private fun StorageSetupPage(
         showContent = true
     }
     
-    val directoryPicker = rememberDirectoryPickerLauncher(
+    val directoryPicker = rememberPlatformDirectoryPickerLauncher(
         title = "Select IReader Storage Folder"
-    ) { directory ->
+    ) { folderPath ->
         isSelectingFolder = false
-        if (directory != null) {
-            val folderPath = directory.toPathString()
+        if (folderPath != null) {
             uiPreferences.selectedStorageFolderUri().set(folderPath)
             uiPreferences.hasRequestedStoragePermission().set(true)
             onFolderSelected(folderPath)

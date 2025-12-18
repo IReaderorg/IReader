@@ -83,7 +83,26 @@ actual fun loadNativeLibraryImpl(nativeDir: String, libraryName: String) {
         System.load(libraryFile.absolutePath)
         Log.info { "Successfully loaded native library: $libraryName" }
     } catch (e: UnsatisfiedLinkError) {
-        Log.error(e) { "Failed to load native library: ${libraryFile.absolutePath}" }
+        Log.error("Failed to load native library: ${libraryFile.absolutePath}", e)
         throw e
     }
+}
+
+
+// Cache for plugin package paths
+private val pluginPackagePaths = mutableMapOf<String, String>()
+
+/**
+ * Register a plugin's package path for native library extraction.
+ */
+fun registerPluginPackagePath(pluginId: String, packagePath: String) {
+    pluginPackagePaths[pluginId] = packagePath
+    Log.info { "Registered plugin package path: $pluginId -> $packagePath" }
+}
+
+/**
+ * Get the path to a plugin's package file (.iplugin).
+ */
+actual fun getPluginPackagePathImpl(pluginId: String): String? {
+    return pluginPackagePaths[pluginId]
 }

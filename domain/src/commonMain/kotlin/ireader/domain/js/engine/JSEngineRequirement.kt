@@ -1,5 +1,6 @@
 package ireader.domain.js.engine
 
+import ireader.domain.plugins.RequiredPluginChecker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -8,10 +9,11 @@ import kotlinx.coroutines.flow.asStateFlow
  * Service for managing JS engine requirements and prompts.
  * 
  * When a user tries to use a JS-based source without a JS engine installed,
- * this service can be used to show a prompt to install one.
+ * this service triggers the RequiredPluginChecker to show the installation dialog.
  */
 class JSEngineRequirement(
-    private val jsEngineProvider: JSEngineProvider
+    private val jsEngineProvider: JSEngineProvider,
+    private val requiredPluginChecker: RequiredPluginChecker? = null
 ) {
     private val _requirementState = MutableStateFlow<JSEngineRequirementState>(
         JSEngineRequirementState.NotRequired
@@ -26,13 +28,15 @@ class JSEngineRequirement(
      * @return true if JS engine is available, false if prompt was shown
      */
     fun checkAndPrompt(sourceId: String, sourceName: String): Boolean {
-        // Check if bundled engine is available (always true for now)
         if (jsEngineProvider.isEngineAvailable()) {
             _requirementState.value = JSEngineRequirementState.NotRequired
             return true
         }
         
-        // Show prompt to install JS engine
+        // Use RequiredPluginChecker to show the modern installation dialog
+        requiredPluginChecker?.requestJSEngine()
+        
+        // Also update local state for backward compatibility
         _requirementState.value = JSEngineRequirementState.Required(
             sourceId = sourceId,
             sourceName = sourceName,
@@ -42,21 +46,37 @@ class JSEngineRequirement(
     }
     
     /**
+     * Check if JS engine is available without showing a prompt.
+     */
+    fun isEngineAvailable(): Boolean {
+        return jsEngineProvider.isEngineAvailable()
+    }
+    
+    /**
+     * Request JS engine installation (shows the RequiredPluginDialog).
+     */
+    fun requestEngine() {
+        requiredPluginChecker?.requestJSEngine()
+    }
+    
+    /**
      * Dismiss the current requirement prompt.
      */
     fun dismissPrompt() {
         _requirementState.value = JSEngineRequirementState.NotRequired
+        requiredPluginChecker?.clearJSEngineRequest()
     }
     
     /**
      * Get recommended JS engine plugin for the current platform.
      */
     fun getRecommendedEngine(): RecommendedJSEngine {
+        // On Android, recommend J2V8; on Desktop, recommend GraalVM
         return RecommendedJSEngine(
-            pluginId = "io.github.ireaderorg.plugins.graalvm-engine",
-            name = "GraalVM JavaScript Engine",
-            description = "High-performance JavaScript engine for Desktop",
-            size = "~50MB"
+            pluginId = RequiredPluginChecker.JS_ENGINE_PLUGIN_ID,
+            name = "J2V8 JavaScript Engine",
+            description = "V8 JavaScript engine for Android",
+            size = "~33MB"
         )
     }
 }

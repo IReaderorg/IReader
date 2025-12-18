@@ -2,28 +2,35 @@ package ireader.domain.js.loader
 
 import ireader.domain.js.bridge.JSBridgeService
 import ireader.domain.js.bridge.LNReaderPlugin
-import ireader.domain.js.engine.GraalVMJSEngine
+import ireader.domain.js.engine.NoJSEngineException
 
 /**
- * Desktop implementation using GraalVM.
+ * Desktop implementation.
+ * 
+ * NOTE: GraalVM JavaScript engine has been moved to an optional plugin
+ * (io.github.ireaderorg.plugins.graalvm-engine) to reduce app size.
+ * 
+ * This stub throws NoJSEngineException to prompt users to install the plugin.
  */
 actual fun createEngine(bridgeService: JSBridgeService): JSEngine {
-    return GraalVMEngineWrapper(GraalVMJSEngine(bridgeService))
+    return StubJSEngine()
 }
 
 /**
- * Wrapper to adapt GraalVMJSEngine to JSEngine interface.
+ * Stub engine that throws NoJSEngineException.
+ * Users need to install the GraalVM Engine plugin from Feature Store.
  */
-private class GraalVMEngineWrapper(private val engine: GraalVMJSEngine) : JSEngine {
+private class StubJSEngine : JSEngine {
     override suspend fun loadPlugin(jsCode: String, pluginId: String): LNReaderPlugin {
-        return engine.loadPlugin(jsCode, pluginId)
+        throw NoJSEngineException(
+            "JavaScript engine not available. Please install the 'GraalVM JavaScript Engine' " +
+            "plugin from the Feature Store to use JavaScript-based sources."
+        )
     }
     
     override fun close() {
-        engine.close()
+        // No-op
     }
     
-    override fun isLoaded(): Boolean {
-        return engine.isLoaded()
-    }
+    override fun isLoaded(): Boolean = false
 }

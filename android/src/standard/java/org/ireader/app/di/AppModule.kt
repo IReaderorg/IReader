@@ -42,7 +42,7 @@ import java.io.File
             provider = get()
         )
     }
-    factory<CatalogStoreInitializer>  { CatalogStoreInitializer(get(),get()) }
+    factory<CatalogStoreInitializer>  { CatalogStoreInitializer(get(), get(), get()) }
     factory<CrashHandler>  { org.ireader.app.initiators.CrashHandler(androidApplication()) }
     factory<EmojiCompatInitializer>  { org.ireader.app.initiators.EmojiCompatInitializer(androidApplication()) }
     factory<FirebaseInitializer>  { org.ireader.app.initiators.FirebaseInitializer(androidApplication()) }

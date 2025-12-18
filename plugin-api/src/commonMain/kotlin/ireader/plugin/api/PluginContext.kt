@@ -131,6 +131,14 @@ interface PluginContext {
      * @throws UnsatisfiedLinkError if the library cannot be loaded
      */
     fun loadNativeLibrary(libraryName: String)
+    
+    /**
+     * Get the path to the plugin's package file (.iplugin).
+     * This can be used by plugins that need to extract additional resources.
+     * 
+     * @return Absolute path to the plugin package file, or null if not available
+     */
+    fun getPluginPackagePath(): String?
 }
 
 /**

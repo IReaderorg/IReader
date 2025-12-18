@@ -52,8 +52,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.vinceglb.filekit.dialogs.compose.rememberDirectoryPickerLauncher
-import ireader.presentation.ui.core.file.toPathString
+import ireader.presentation.ui.core.file.rememberPlatformDirectoryPickerLauncher
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
@@ -91,14 +90,13 @@ fun StorageFolderPickerScreen(
         showContent = true
     }
     
-    // FileKit directory picker - clean KMP API with wrapper
-    val directoryPicker = rememberDirectoryPickerLauncher(
+    // Platform-specific directory picker - uses OpenDocumentTree on Android for proper SAF permissions
+    val directoryPicker = rememberPlatformDirectoryPickerLauncher(
         title = "Select IReader Storage Folder"
-    ) { directory ->
+    ) { folderPath ->
         isSelectingFolder = false
-        if (directory != null) {
-            // Save the selected folder path using our wrapper extension
-            val folderPath = directory.toPathString()
+        if (folderPath != null) {
+            // Save the selected folder path
             uiPreferences.selectedStorageFolderUri().set(folderPath)
             uiPreferences.hasRequestedStoragePermission().set(true)
             onFolderSelected(folderPath)

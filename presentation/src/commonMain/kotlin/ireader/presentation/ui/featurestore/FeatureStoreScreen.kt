@@ -122,6 +122,7 @@ fun FeatureStoreScreen(
                         onCategorySelected = viewModel::selectCategory,
                         onPluginClick = onPluginClick,
                         onInstall = viewModel::installPlugin,
+                        onCancelDownload = viewModel::cancelDownload,
                         onRefresh = viewModel::refreshPlugins
                     )
                 }
@@ -148,6 +149,7 @@ private fun FeatureStoreContent(
     onCategorySelected: (PluginType?) -> Unit,
     onPluginClick: (String) -> Unit,
     onInstall: (String) -> Unit,
+    onCancelDownload: (String) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -214,7 +216,9 @@ private fun FeatureStoreContent(
                     PluginCard(
                         plugin = plugin,
                         onClick = { onPluginClick(plugin.id) },
-                        onInstall = onInstall
+                        onInstall = onInstall,
+                        onCancelDownload = onCancelDownload,
+                        downloadProgress = state.downloadProgress[plugin.id]
                     )
                 }
             }

@@ -19,5 +19,31 @@ data class FeatureStoreState(
     val minRating: Float = 0f,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isRefreshing: Boolean = false
+    val isRefreshing: Boolean = false,
+    /** Map of plugin ID to download progress (0.0 to 1.0) */
+    val downloadProgress: Map<String, DownloadProgress> = emptyMap()
 )
+
+/**
+ * Download progress state for a plugin
+ */
+data class DownloadProgress(
+    val pluginId: String,
+    val pluginName: String,
+    val progress: Float = 0f,  // 0.0 to 1.0
+    val bytesDownloaded: Long = 0,
+    val totalBytes: Long = 0,
+    val status: DownloadStatus = DownloadStatus.PENDING,
+    val error: String? = null
+)
+
+/**
+ * Download status enum
+ */
+enum class DownloadStatus {
+    PENDING,
+    DOWNLOADING,
+    INSTALLING,
+    COMPLETED,
+    FAILED
+}

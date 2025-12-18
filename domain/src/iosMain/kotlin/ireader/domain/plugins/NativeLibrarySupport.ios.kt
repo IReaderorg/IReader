@@ -36,3 +36,12 @@ actual fun loadNativeLibraryImpl(nativeDir: String, libraryName: String) {
         "iOS requires native code to be compiled into the app bundle."
     )
 }
+
+
+/**
+ * Get the path to a plugin's package file (.iplugin).
+ * Not supported on iOS.
+ */
+actual fun getPluginPackagePathImpl(pluginId: String): String? {
+    return null
+}

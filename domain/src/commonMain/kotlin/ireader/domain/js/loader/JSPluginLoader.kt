@@ -68,29 +68,62 @@ class JSPluginLoader(
     private val stubManager = JSPluginStubManager(preferenceStoreFactory.create("js_plugin_stubs"))
     
     /**
+     * Tracks if JS engine is missing (NoJSEngineException was thrown during loading)
+     */
+    var jsEngineMissing: Boolean = false
+        private set
+    
+    /**
+     * Number of JS plugin files found but not loaded due to missing engine
+     */
+    var pendingPluginsCount: Int = 0
+        private set
+    
+    /**
      * Loads all JavaScript plugins from the plugins directory.
      * @return List of loaded catalogs
      */
     suspend fun loadAllPlugins(): List<JSPluginCatalog> {
         val startTime = currentTimeToLong()
+        jsEngineMissing = false
+        pendingPluginsCount = 0
+        
+        // Debug: Log the directory being scanned
+        ireader.core.log.Log.info("JSPluginLoader: Scanning directory: $pluginsDirectory")
         
         // Ensure plugins directory exists
         if (!fileSystem.exists(pluginsDirectory)) {
             fileSystem.createDirectories(pluginsDirectory)
+            ireader.core.log.Log.info("JSPluginLoader: Created plugins directory: $pluginsDirectory")
         }
         
         // Scan for plugin files
-        val pluginFiles = fileSystem.list(pluginsDirectory).filter { path ->
+        val allFiles = fileSystem.list(pluginsDirectory)
+        ireader.core.log.Log.info("JSPluginLoader: Found ${allFiles.size} files in directory: ${allFiles.map { it.name }}")
+        
+        val pluginFiles = allFiles.filter { path ->
             path.name.endsWith(".js")
         }
+        ireader.core.log.Log.info("JSPluginLoader: Found ${pluginFiles.size} .js files: ${pluginFiles.map { it.name }}")
         
         // Load each plugin
         val catalogs = pluginFiles.mapNotNull { file ->
             try {
                 loadPlugin(file)
+            } catch (e: ireader.domain.js.engine.NoJSEngineException) {
+                // Track that JS engine is missing
+                jsEngineMissing = true
+                pendingPluginsCount++
+                ireader.core.log.Log.warn("JSPluginLoader: JS engine not available for ${file.name}. Install J2V8/GraalVM plugin from Feature Store.")
+                null
             } catch (e: Exception) {
+                ireader.core.log.Log.error("JSPluginLoader: Failed to load plugin ${file.name}", e)
                 null
             }
+        }
+        
+        if (jsEngineMissing && pendingPluginsCount > 0) {
+            ireader.core.log.Log.info("JSPluginLoader: $pendingPluginsCount JS plugins pending - JS engine plugin required")
         }
         
         return catalogs
@@ -309,9 +342,15 @@ class JSPluginLoader(
             
             return catalog
             
+        } catch (e: ireader.domain.js.engine.NoJSEngineException) {
+            // Re-throw NoJSEngineException so caller can track missing engine
+            Log.warn { "JSPluginLoader: No JS engine available for plugin ${file.name}" }
+            throw e
         } catch (e: PluginLoadException) {
+            Log.warn { "JSPluginLoader: Plugin load error for ${file.name}: ${e.message}" }
             return null
         } catch (e: Exception) {
+            Log.warn { "JSPluginLoader: Unexpected error loading ${file.name}: ${e.message}" }
             return null
         }
     }
@@ -388,16 +427,26 @@ class JSPluginLoader(
         maxConcurrency: Int = 4
     ): List<JSPluginCatalog> {
         val startTime = currentTimeToLong()
+        jsEngineMissing = false
+        pendingPluginsCount = 0
+        
+        // Debug: Log the directory being scanned
+        Log.info { "JSPluginLoader.loadPluginsAsync: Scanning directory: $pluginsDirectory" }
         
         // Ensure plugins directory exists
         if (!fileSystem.exists(pluginsDirectory)) {
             fileSystem.createDirectories(pluginsDirectory)
+            Log.info { "JSPluginLoader.loadPluginsAsync: Created plugins directory" }
         }
         
         // Scan for plugin files
-        val pluginFiles = fileSystem.list(pluginsDirectory).filter { path ->
+        val allFiles = fileSystem.list(pluginsDirectory)
+        Log.info { "JSPluginLoader.loadPluginsAsync: Found ${allFiles.size} files: ${allFiles.map { it.name }}" }
+        
+        val pluginFiles = allFiles.filter { path ->
             path.name.endsWith(".js")
         }
+        Log.info { "JSPluginLoader.loadPluginsAsync: Found ${pluginFiles.size} .js files" }
         
         if (pluginFiles.isEmpty()) {
             Log.debug { "JSPluginLoader: No plugin files found" }
@@ -424,6 +473,10 @@ class JSPluginLoader(
                     allCatalogs.add(catalog)
                     onPluginLoaded(catalog)
                 }
+            } catch (e: ireader.domain.js.engine.NoJSEngineException) {
+                jsEngineMissing = true
+                pendingPluginsCount++
+                Log.warn { "JSPluginLoader: JS engine not available for ${file.name}" }
             } catch (e: Exception) {
                 Log.warn { "JSPluginLoader: Failed to load priority plugin ${file.name}: ${e.message}" }
             }
@@ -447,6 +500,12 @@ class JSPluginLoader(
                                 }
                                 onPluginLoaded(catalog)
                             }
+                        } catch (e: ireader.domain.js.engine.NoJSEngineException) {
+                            catalogsMutex.withLock {
+                                jsEngineMissing = true
+                                pendingPluginsCount++
+                            }
+                            Log.warn { "JSPluginLoader: JS engine not available for ${file.name}" }
                         } catch (e: Exception) {
                             Log.warn { "JSPluginLoader: Failed to load plugin ${file.name}: ${e.message}" }
                         }
@@ -457,6 +516,10 @@ class JSPluginLoader(
         
         val totalLoadTime = currentTimeToLong() - startTime
         Log.info { "JSPluginLoader: Loaded ${allCatalogs.size} plugins in ${totalLoadTime}ms (${priorityFiles.size} priority, ${normalFiles.size} normal)" }
+        
+        if (jsEngineMissing && pendingPluginsCount > 0) {
+            Log.info { "JSPluginLoader: $pendingPluginsCount JS plugins pending - JS engine plugin required" }
+        }
         
         return allCatalogs.toList()
     }
@@ -492,6 +555,11 @@ class JSPluginLoader(
         
         val semaphore = Semaphore(maxConcurrency)
         var loadedCount = 0
+        val catalogsMutex = Mutex()
+        
+        // Reset engine status
+        jsEngineMissing = false
+        pendingPluginsCount = 0
         
         // Load priority plugins first
         priorityFiles.forEach { file ->
@@ -501,6 +569,10 @@ class JSPluginLoader(
                     loadedCount++
                     onPluginLoaded(catalog)
                 }
+            } catch (e: ireader.domain.js.engine.NoJSEngineException) {
+                jsEngineMissing = true
+                pendingPluginsCount++
+                Log.warn { "JSPluginLoader: JS engine not available for ${file.name}" }
             } catch (e: Exception) {
                 // Continue with next plugin
             }
@@ -517,6 +589,12 @@ class JSPluginLoader(
                                 loadedCount++
                                 onPluginLoaded(catalog)
                             }
+                        } catch (e: ireader.domain.js.engine.NoJSEngineException) {
+                            catalogsMutex.withLock {
+                                jsEngineMissing = true
+                                pendingPluginsCount++
+                            }
+                            Log.warn { "JSPluginLoader: JS engine not available for ${file.name}" }
                         } catch (e: Exception) {
                             // Continue with next plugin
                         }
@@ -527,6 +605,10 @@ class JSPluginLoader(
         
         val totalTime = currentTimeToLong() - startTime
         Log.debug { "JSPluginLoader: Streaming load completed - $loadedCount plugins in ${totalTime}ms" }
+        
+        if (jsEngineMissing && pendingPluginsCount > 0) {
+            Log.info { "JSPluginLoader: $pendingPluginsCount JS plugins pending - JS engine plugin required" }
+        }
     }
     
     /**

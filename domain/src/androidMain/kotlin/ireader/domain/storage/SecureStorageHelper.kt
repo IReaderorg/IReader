@@ -78,6 +78,22 @@ object SecureStorageHelper {
     }
     
     /**
+     * Check if SAF permission needs to be requested.
+     * Returns true if user previously had a folder selected but permission was lost.
+     */
+    fun needsSafPermissionRequest(): Boolean {
+        return safStorageManager?.needsPermissionRequest() == true
+    }
+    
+    /**
+     * Clear the stored SAF URI (e.g., when permission is lost).
+     */
+    fun clearSafUri() {
+        safStorageManager?.clearStoredUri()
+        clearCache()
+    }
+    
+    /**
      * Get the SafStorageManager instance.
      */
     fun getSafStorageManager(): SafStorageManager? = safStorageManager
@@ -264,13 +280,21 @@ object SecureStorageHelper {
      * @return true if successful
      */
     fun writeJsPlugin(context: Context, fileName: String, content: String): Boolean {
-        // Try SAF first
-        val safDir = getJsPluginsDocumentFile()
-        if (safDir != null) {
-            val file = safStorageManager?.createFile(safDir, fileName, "application/javascript")
-            if (file != null) {
-                return safStorageManager?.writeToFile(file, content) == true
+        // Try SAF first, but catch any permission errors
+        try {
+            val safDir = getJsPluginsDocumentFile()
+            if (safDir != null) {
+                val file = safStorageManager?.createFile(safDir, fileName, "application/javascript")
+                if (file != null) {
+                    val result = safStorageManager?.writeToFile(file, content) == true
+                    if (result) return true
+                }
             }
+        } catch (e: SecurityException) {
+            android.util.Log.w(TAG, "SAF permission denied for writeJsPlugin, falling back", e)
+            safStorageManager?.clearStoredUri()
+        } catch (e: Exception) {
+            android.util.Log.w(TAG, "SAF access failed for writeJsPlugin, falling back", e)
         }
         
         // Fallback to File
@@ -290,18 +314,29 @@ object SecureStorageHelper {
      * Write a JS plugin metadata file.
      */
     fun writeJsPluginMetadata(context: Context, fileName: String, content: String): Boolean {
-        val safDir = getJsPluginsDocumentFile()
-        if (safDir != null) {
-            val file = safStorageManager?.createFile(safDir, fileName, "application/json")
-            if (file != null) {
-                return safStorageManager?.writeToFile(file, content) == true
+        // Try SAF first, but catch any permission errors
+        try {
+            val safDir = getJsPluginsDocumentFile()
+            if (safDir != null) {
+                val file = safStorageManager?.createFile(safDir, fileName, "application/json")
+                if (file != null) {
+                    val result = safStorageManager?.writeToFile(file, content) == true
+                    if (result) return true
+                }
             }
+        } catch (e: SecurityException) {
+            android.util.Log.w(TAG, "SAF permission denied for writeJsPluginMetadata, falling back", e)
+            safStorageManager?.clearStoredUri()
+        } catch (e: Exception) {
+            android.util.Log.w(TAG, "SAF access failed for writeJsPluginMetadata, falling back", e)
         }
         
+        // Fallback to File
         return try {
             val dir = getJsPluginsFallbackDir(context)
             val file = File(dir, fileName)
             file.writeText(content)
+            android.util.Log.d(TAG, "Wrote JS plugin metadata to fallback: ${file.absolutePath}")
             true
         } catch (e: Exception) {
             android.util.Log.e(TAG, "Failed to write JS plugin metadata", e)
@@ -431,21 +466,33 @@ object SecureStorageHelper {
      * Write bytes to a JS plugin file (for downloading).
      */
     fun writeJsPluginBytes(context: Context, fileName: String, bytes: ByteArray): Boolean {
-        val safDir = getJsPluginsDocumentFile()
-        if (safDir != null) {
-            val file = safStorageManager?.createFile(safDir, fileName, "application/javascript")
-            if (file != null) {
-                return safStorageManager?.writeToFile(file, bytes) == true
+        // Try SAF first, but catch any permission errors
+        try {
+            val safDir = getJsPluginsDocumentFile()
+            if (safDir != null) {
+                val file = safStorageManager?.createFile(safDir, fileName, "application/javascript")
+                if (file != null) {
+                    val result = safStorageManager?.writeToFile(file, bytes) == true
+                    if (result) return true
+                }
             }
+        } catch (e: SecurityException) {
+            android.util.Log.w(TAG, "SAF permission denied, falling back to internal storage", e)
+            // Clear the invalid SAF URI so user can select again
+            safStorageManager?.clearStoredUri()
+        } catch (e: Exception) {
+            android.util.Log.w(TAG, "SAF access failed, falling back to internal storage", e)
         }
         
+        // Fallback to internal storage
         return try {
             val dir = getJsPluginsFallbackDir(context)
             val file = File(dir, fileName)
             file.writeBytes(bytes)
+            android.util.Log.d(TAG, "Wrote JS plugin to fallback dir: ${file.absolutePath}")
             true
         } catch (e: Exception) {
-            android.util.Log.e(TAG, "Failed to write JS plugin bytes", e)
+            android.util.Log.e(TAG, "Failed to write JS plugin bytes to fallback", e)
             false
         }
     }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Star
@@ -20,6 +21,8 @@ import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginStatus
 import ireader.plugin.api.PluginMonetization
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.featurestore.DownloadProgress
+import ireader.presentation.ui.featurestore.DownloadStatus
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 
@@ -32,7 +35,9 @@ fun PluginCard(
     plugin: PluginInfo,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onInstall: ((String) -> Unit)? = null
+    onInstall: ((String) -> Unit)? = null,
+    onCancelDownload: ((String) -> Unit)? = null,
+    downloadProgress: DownloadProgress? = null
 ) {
     Card(
         modifier = modifier
@@ -130,21 +135,100 @@ fun PluginCard(
             
             Spacer(modifier = Modifier.width(8.dp))
             
-            // Install button or status
+            // Install button or status with download progress
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                InstallStatusButton(
-                    plugin = plugin,
-                    onInstall = onInstall
-                )
+                if (downloadProgress != null && downloadProgress.status != DownloadStatus.COMPLETED) {
+                    DownloadProgressIndicator(
+                        progress = downloadProgress,
+                        onCancel = { onCancelDownload?.invoke(plugin.id) }
+                    )
+                } else {
+                    InstallStatusButton(
+                        plugin = plugin,
+                        onInstall = onInstall
+                    )
+                }
                 
                 // Price badge below button
                 PriceBadge(monetization = plugin.manifest.monetization)
             }
         }
     }
+}
+
+/**
+ * Download progress indicator with cancel button
+ */
+@Composable
+private fun DownloadProgressIndicator(
+    progress: DownloadProgress,
+    onCancel: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.widthIn(min = 80.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(
+                progress = { if (progress.progress > 0f) progress.progress else 0f },
+                modifier = Modifier.size(40.dp),
+                strokeWidth = 3.dp,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+            
+            // Cancel button in center
+            IconButton(
+                onClick = onCancel,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Cancel,
+                    contentDescription = "Cancel download",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // Status text
+        Text(
+            text = when (progress.status) {
+                DownloadStatus.PENDING -> "Queued"
+                DownloadStatus.DOWNLOADING -> "${(progress.progress * 100).toInt()}%"
+                DownloadStatus.INSTALLING -> "Installing..."
+                DownloadStatus.COMPLETED -> "Done"
+                DownloadStatus.FAILED -> "Failed"
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = if (progress.status == DownloadStatus.FAILED) 
+                MaterialTheme.colorScheme.error 
+            else 
+                MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        // Size info if available
+        if (progress.totalBytes > 0 && progress.status == DownloadStatus.DOWNLOADING) {
+            Text(
+                text = formatBytes(progress.bytesDownloaded, progress.totalBytes),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * Format bytes for display
+ */
+private fun formatBytes(downloaded: Long, total: Long): String {
+    val downloadedMB = downloaded / (1024.0 * 1024.0)
+    val totalMB = total / (1024.0 * 1024.0)
+    return "${ireader.presentation.ui.core.utils.toDecimalString(downloadedMB, 1)}/${ireader.presentation.ui.core.utils.toDecimalString(totalMB, 1)} MB"
 }
 
 /**

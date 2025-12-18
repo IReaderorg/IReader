@@ -58,7 +58,8 @@ actual val dataPlatformModule = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get() // PluginManager for loading engine plugins
         )
     }
     single<CatalogRemoteApi>(createdAtStart = false) { CatalogGithubApi(get(), get(), get()) }
