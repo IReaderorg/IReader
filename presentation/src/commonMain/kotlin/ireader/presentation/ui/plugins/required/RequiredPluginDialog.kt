@@ -206,9 +206,5 @@ fun RequiredPluginCard(
 }
 
 private fun formatSize(bytes: Long): String {
-    return when {
-        bytes >= 1024 * 1024 -> "%.1f MB".format(bytes / (1024.0 * 1024.0))
-        bytes >= 1024 -> "%.1f KB".format(bytes / 1024.0)
-        else -> "$bytes B"
-    }
+    return ireader.presentation.ui.core.utils.formatBytesKmp(bytes)
 }
