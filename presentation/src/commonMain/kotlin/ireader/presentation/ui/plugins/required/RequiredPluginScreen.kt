@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
  * Required plugin types that can be requested
  */
 enum class RequiredPluginType {
+    /** No plugin required (e.g., iOS which doesn't support plugins) */
+    NONE,
     /** J2V8 JavaScript Engine for Android */
     JS_ENGINE,
     /** GraalVM JavaScript Engine for Desktop */
@@ -533,6 +535,14 @@ data class PluginConfig(
 
 private fun getPluginConfig(type: RequiredPluginType): PluginConfig {
     return when (type) {
+        RequiredPluginType.NONE -> PluginConfig(
+            name = "Not Available",
+            description = "Plugins are not supported on this platform",
+            version = "",
+            estimatedSize = 0L,
+            whyNeeded = "This feature is not available on this platform.",
+            pluginId = ""
+        )
         RequiredPluginType.JS_ENGINE -> PluginConfig(
             name = "J2V8 JavaScript Engine",
             description = "V8 JavaScript engine for running LNReader-compatible sources",

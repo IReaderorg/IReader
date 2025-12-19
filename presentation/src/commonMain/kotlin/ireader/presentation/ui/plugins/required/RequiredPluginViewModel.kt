@@ -336,6 +336,7 @@ class RequiredPluginViewModel(
      */
     private fun getPluginId(pluginType: RequiredPluginType): String {
         return when (pluginType) {
+            RequiredPluginType.NONE -> "" // No plugin needed
             RequiredPluginType.JS_ENGINE -> "io.github.ireaderorg.plugins.j2v8-engine"
             RequiredPluginType.GRAALVM_ENGINE -> "io.github.ireaderorg.plugins.graalvm-engine"
             RequiredPluginType.PIPER_TTS -> "io.github.ireaderorg.plugins.piper-tts"

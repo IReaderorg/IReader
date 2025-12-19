@@ -1,7 +1,7 @@
 package ireader.presentation.ui.plugins.required
 
 /**
- * iOS uses J2V8 JavaScript engine (same as Android for now).
- * TODO: May need a different engine for iOS in the future.
+ * iOS does not support plugins.
+ * JS sources are not available on iOS.
  */
-actual fun getPlatformJSEngineType(): RequiredPluginType = RequiredPluginType.JS_ENGINE
+actual fun getPlatformJSEngineType(): RequiredPluginType = RequiredPluginType.NONE

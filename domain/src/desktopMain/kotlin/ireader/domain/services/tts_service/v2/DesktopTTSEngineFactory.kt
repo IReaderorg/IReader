@@ -1,11 +1,18 @@
 package ireader.domain.services.tts_service.v2
 
 import ireader.core.log.Log
+import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.*
 import ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer
+import ireader.domain.services.tts_service.piper.PiperModelManager
 import ireader.domain.services.tts_service.piper.AudioPlaybackEngine
+import kotlin.concurrent.Volatile
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -19,6 +26,8 @@ import org.koin.core.component.inject
  */
 actual object TTSEngineFactory : KoinComponent {
     private val piperSynthesizer: PiperSpeechSynthesizer by inject()
+    private val piperModelManager: PiperModelManager by inject()
+    private val appPreferences: AppPreferences by inject()
     
     // Shared audio cache instance (500MB limit by default)
     private val audioCache: TTSAudioCache by lazy {
@@ -32,7 +41,7 @@ actual object TTSEngineFactory : KoinComponent {
     }
     
     actual fun createNativeEngine(): TTSEngine {
-        return DesktopPiperTTSEngineV2(piperSynthesizer)
+        return DesktopPiperTTSEngineV2(piperSynthesizer, piperModelManager, appPreferences)
     }
     
     actual fun createGradioEngine(config: GradioConfig): TTSEngine? {
@@ -60,9 +69,15 @@ actual object TTSEngineFactory : KoinComponent {
 
 /**
  * Desktop Piper TTS Engine wrapper for v2 architecture
+ * 
+ * This engine automatically loads the selected voice model on initialization.
+ * The speak() method is non-blocking - it starts playback in a background coroutine
+ * and returns immediately, allowing other commands to be processed.
  */
 class DesktopPiperTTSEngineV2(
-    private val synthesizer: PiperSpeechSynthesizer
+    private val synthesizer: PiperSpeechSynthesizer,
+    private val modelManager: PiperModelManager,
+    private val appPreferences: AppPreferences
 ) : TTSEngine {
     companion object {
         private const val TAG = "DesktopPiperTTSV2"
@@ -70,30 +85,148 @@ class DesktopPiperTTSEngineV2(
     
     private val _events = MutableSharedFlow<EngineEvent>(extraBufferCapacity = 10)
     private val audioEngine: AudioPlaybackEngine by lazy { AudioPlaybackEngine() }
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var isInitializing = false
+    
+    // Current playback job - can be cancelled when stop() is called
+    private var playbackJob: kotlinx.coroutines.Job? = null
+    
+    // Track the current utterance to prevent stale completions
+    @Volatile
+    private var currentUtteranceId: String? = null
+    
+    // Track if playback was stopped to prevent emitting Completed after stop
+    @Volatile
+    private var wasStopped = false
     
     override val events: Flow<EngineEvent> = _events
     override val name: String = "Piper TTS"
     
+    init {
+        // Auto-load the selected voice model on engine creation
+        if (!synthesizer.isInitialized()) {
+            loadSelectedVoiceModel()
+        } else {
+            // Already initialized, emit ready event
+            _events.tryEmit(EngineEvent.Ready)
+        }
+    }
+    
+    /**
+     * Load the selected voice model from preferences
+     */
+    private fun loadSelectedVoiceModel() {
+        if (isInitializing) return
+        isInitializing = true
+        
+        scope.launch {
+            try {
+                val selectedModelId = appPreferences.selectedPiperModel().get()
+                Log.warn { "$TAG: Loading voice model: $selectedModelId" }
+                
+                if (selectedModelId.isEmpty()) {
+                    Log.warn { "$TAG: No voice model selected" }
+                    isInitializing = false
+                    return@launch
+                }
+                
+                val paths = modelManager.getModelPaths(selectedModelId)
+                if (paths == null) {
+                    Log.warn { "$TAG: Voice model paths not found for: $selectedModelId" }
+                    isInitializing = false
+                    return@launch
+                }
+                
+                val result = synthesizer.initialize(paths.modelPath, paths.configPath)
+                
+                result.onSuccess {
+                    Log.warn { "$TAG: Voice model loaded successfully" }
+                    _events.tryEmit(EngineEvent.Ready)
+                }.onFailure { error ->
+                    Log.error { "$TAG: Failed to load voice model: ${error.message}" }
+                }
+                
+                isInitializing = false
+            } catch (e: Exception) {
+                Log.error { "$TAG: Error loading voice model: ${e.message}" }
+                isInitializing = false
+            }
+        }
+    }
+    
+    /**
+     * Speak text - NON-BLOCKING.
+     * Starts playback in a background coroutine and returns immediately.
+     * Completion/error events are emitted via the events flow.
+     */
     override suspend fun speak(text: String, utteranceId: String) {
         Log.warn { "$TAG: speak($utteranceId)" }
-        _events.tryEmit(EngineEvent.Started(utteranceId))
         
-        try {
-            val result = synthesizer.synthesize(text)
-            
-            result.onSuccess { audioData ->
-                audioEngine.play(audioData)
-                _events.tryEmit(EngineEvent.Completed(utteranceId))
-            }.onFailure { error ->
-                _events.tryEmit(EngineEvent.Error(utteranceId, error.message ?: "Piper synthesis failed"))
+        // Cancel any existing playback
+        playbackJob?.cancel()
+        audioEngine.stop()
+        
+        // Track this utterance and reset stopped flag
+        currentUtteranceId = utteranceId
+        wasStopped = false
+        
+        // Check if synthesizer is ready
+        if (!synthesizer.isInitialized()) {
+            Log.warn { "$TAG: Synthesizer not initialized, attempting to load voice model..." }
+            loadSelectedVoiceModel()
+            // Wait a bit for initialization
+            delay(500)
+            if (!synthesizer.isInitialized()) {
+                _events.tryEmit(EngineEvent.Error(utteranceId, "Piper TTS not initialized. Please select a voice model."))
+                return
             }
-        } catch (e: Exception) {
-            _events.tryEmit(EngineEvent.Error(utteranceId, e.message ?: "Piper TTS error"))
+        }
+        
+        // Start playback in background coroutine (non-blocking)
+        playbackJob = scope.launch {
+            try {
+                _events.tryEmit(EngineEvent.Started(utteranceId))
+                
+                val result = synthesizer.synthesize(text)
+                
+                result.onSuccess { audioData ->
+                    // Check if we were stopped before playing
+                    if (wasStopped || currentUtteranceId != utteranceId) {
+                        Log.warn { "$TAG: speak($utteranceId) cancelled before playback" }
+                        return@launch
+                    }
+                    
+                    audioEngine.play(audioData)
+                    
+                    // Only emit Completed if this utterance is still current and wasn't stopped
+                    if (currentUtteranceId == utteranceId && !wasStopped) {
+                        Log.warn { "$TAG: speak($utteranceId) completed normally" }
+                        _events.tryEmit(EngineEvent.Completed(utteranceId))
+                    } else {
+                        Log.warn { "$TAG: speak($utteranceId) skipping Completed (stopped=$wasStopped, current=$currentUtteranceId)" }
+                    }
+                }.onFailure { error ->
+                    if (currentUtteranceId == utteranceId && !wasStopped) {
+                        _events.tryEmit(EngineEvent.Error(utteranceId, error.message ?: "Piper synthesis failed"))
+                    }
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                Log.warn { "$TAG: speak($utteranceId) cancelled" }
+                // Don't emit any event on cancellation
+            } catch (e: Exception) {
+                if (currentUtteranceId == utteranceId && !wasStopped) {
+                    _events.tryEmit(EngineEvent.Error(utteranceId, e.message ?: "Piper TTS error"))
+                }
+            }
         }
     }
     
     override fun stop() {
         Log.warn { "$TAG: stop()" }
+        wasStopped = true
+        currentUtteranceId = null
+        playbackJob?.cancel()
+        playbackJob = null
         audioEngine.stop()
     }
     
@@ -114,6 +247,7 @@ class DesktopPiperTTSEngineV2(
     override fun release() {
         Log.warn { "$TAG: release()" }
         stop()
+        scope.cancel()
     }
 }
 
@@ -137,6 +271,14 @@ class DesktopGradioTTSEngineV2(
     private val httpClient = io.ktor.client.HttpClient()
     private val audioPlayer = DesktopGradioAudioPlayer()
     
+    // Track the current utterance to prevent stale completions
+    @Volatile
+    private var currentUtteranceId: String? = null
+    
+    // Track if playback was stopped to prevent emitting Completed after stop
+    @Volatile
+    private var wasStopped = false
+    
     // Use original config if available, otherwise create a basic one
     private val legacyConfig: GradioTTSConfig = config.originalConfig ?: GradioTTSConfig(
         id = config.id,
@@ -159,17 +301,25 @@ class DesktopGradioTTSEngineV2(
         engine.setCallback(object : TTSEngineCallback {
             override fun onStart(utteranceId: String) {
                 Log.warn { "$TAG: onStart($utteranceId)" }
-                _events.tryEmit(EngineEvent.Started(utteranceId))
+                if (currentUtteranceId == utteranceId && !wasStopped) {
+                    _events.tryEmit(EngineEvent.Started(utteranceId))
+                }
             }
             
             override fun onDone(utteranceId: String) {
                 Log.warn { "$TAG: onDone($utteranceId)" }
-                _events.tryEmit(EngineEvent.Completed(utteranceId))
+                if (currentUtteranceId == utteranceId && !wasStopped) {
+                    _events.tryEmit(EngineEvent.Completed(utteranceId))
+                } else {
+                    Log.warn { "$TAG: onDone($utteranceId) skipped (stopped=$wasStopped, current=$currentUtteranceId)" }
+                }
             }
             
             override fun onError(utteranceId: String, error: String) {
                 Log.warn { "$TAG: onError($utteranceId, $error)" }
-                _events.tryEmit(EngineEvent.Error(utteranceId, error))
+                if (currentUtteranceId == utteranceId && !wasStopped) {
+                    _events.tryEmit(EngineEvent.Error(utteranceId, error))
+                }
             }
             
             override fun onReady() {
@@ -182,6 +332,10 @@ class DesktopGradioTTSEngineV2(
     override suspend fun speak(text: String, utteranceId: String) {
         Log.warn { "$TAG: speak($utteranceId) - text length=${text.length}" }
         
+        // Track this utterance and reset stopped flag
+        currentUtteranceId = utteranceId
+        wasStopped = false
+        
         // Check disk cache first
         if (audioCache != null) {
             val cachedAudio = audioCache.get(text, config.id)
@@ -189,7 +343,9 @@ class DesktopGradioTTSEngineV2(
                 Log.warn { "$TAG: Playing from CACHE (${cachedAudio.size} bytes)" }
                 _events.tryEmit(EngineEvent.Started(utteranceId))
                 audioPlayer.play(cachedAudio) {
-                    _events.tryEmit(EngineEvent.Completed(utteranceId))
+                    if (currentUtteranceId == utteranceId && !wasStopped) {
+                        _events.tryEmit(EngineEvent.Completed(utteranceId))
+                    }
                 }
                 return
             }
@@ -205,11 +361,15 @@ class DesktopGradioTTSEngineV2(
                 
                 _events.tryEmit(EngineEvent.Started(utteranceId))
                 audioPlayer.play(audioData) {
-                    _events.tryEmit(EngineEvent.Completed(utteranceId))
+                    if (currentUtteranceId == utteranceId && !wasStopped) {
+                        _events.tryEmit(EngineEvent.Completed(utteranceId))
+                    }
                 }
             } else {
                 Log.error { "$TAG: Failed to generate audio from Gradio" }
-                _events.tryEmit(EngineEvent.Error(utteranceId, "Failed to generate audio"))
+                if (!wasStopped) {
+                    _events.tryEmit(EngineEvent.Error(utteranceId, "Failed to generate audio"))
+                }
             }
         } else {
             // No cache, use engine directly
@@ -219,6 +379,8 @@ class DesktopGradioTTSEngineV2(
     
     override fun stop() {
         Log.warn { "$TAG: stop()" }
+        wasStopped = true
+        currentUtteranceId = null
         engine.stop()
     }
     
@@ -238,6 +400,8 @@ class DesktopGradioTTSEngineV2(
     
     override fun release() {
         Log.warn { "$TAG: release()" }
+        wasStopped = true
+        currentUtteranceId = null
         engine.cleanup()
         httpClient.close()
     }
