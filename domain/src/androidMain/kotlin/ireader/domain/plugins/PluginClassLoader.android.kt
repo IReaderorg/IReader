@@ -157,12 +157,31 @@ actual class PluginClassLoader(
      * This MUST be done BEFORE creating the DexClassLoader so we can pass
      * the native library directory to the ClassLoader constructor.
      * 
+     * OPTIMIZATION: Skip extraction if native libraries already exist and are valid.
+     * This prevents re-extracting 32MB+ native libraries on every plugin load.
+     * 
      * @return The native library directory path, or null if no native libraries
      */
     private fun extractNativeLibrariesIfNeeded(packageFile: File, manifest: PluginManifest): String? {
         // Get the current device ABI
         val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: return null
         val nativePrefix = "native/android/$abi/"
+        
+        // Create native library output directory path
+        val nativeDir = File(packageFile.parentFile, "${manifest.id}-native")
+        
+        // OPTIMIZATION: Check if native libraries are already extracted and valid
+        if (nativeDir.exists() && nativeDir.isDirectory) {
+            val existingLibs = nativeDir.listFiles()?.filter { it.extension == "so" } ?: emptyList()
+            if (existingLibs.isNotEmpty()) {
+                // Verify at least one .so file exists and has content
+                val hasValidLib = existingLibs.any { it.length() > 0 }
+                if (hasValidLib) {
+                    Log.info("Native libraries already extracted for ${manifest.id}, skipping extraction")
+                    return nativeDir.absolutePath
+                }
+            }
+        }
         
         Log.info("Checking for native libraries in ${manifest.id} for ABI: $abi")
         
@@ -186,7 +205,6 @@ actual class PluginClassLoader(
         }
         
         // Create native library output directory
-        val nativeDir = File(packageFile.parentFile, "${manifest.id}-native")
         nativeDir.mkdirs()
         
         Log.info("Extracting native libraries for ${manifest.id} to ${nativeDir.absolutePath}")

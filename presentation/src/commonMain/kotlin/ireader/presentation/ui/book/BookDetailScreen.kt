@@ -55,6 +55,7 @@ import ireader.presentation.ui.book.viewmodel.BookDetailViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.produceState
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.component.list.scrollbars.IVerticalFastScroller
@@ -154,6 +155,14 @@ fun BookDetailScreen(
     
     // Pre-compute selection set for O(1) lookup instead of O(n) list contains
     val selectionSet by remember { derivedStateOf { vm.selection.toSet() } }
+    
+    // OPTIMIZATION: Defer chapter list rendering by one frame to improve initial navigation speed
+    // This allows the book header and action buttons to render first, making the screen feel responsive
+    val showChapterList by produceState(initialValue = false) {
+        // Wait for the next frame before showing chapters
+        kotlinx.coroutines.delay(16) // ~1 frame at 60fps
+        value = true
+    }
 
     // All dialogs
     if (vm.showDialog) {
@@ -383,32 +392,36 @@ fun BookDetailScreen(
                     }
                 }
                 
-                    items(
-                        items = displayChapters,
-                        key = { chapter -> chapter.id },
-                        contentType = { "chapter_item" }
-                    ) { chapter ->
-                        // Use stable click handlers with chapter reference
-                        val itemClickHandler = remember(chapter.id) { { chapterClickHandlers.onItemClick(chapter) } }
-                        val longClickHandler = remember(chapter.id) { { chapterClickHandlers.onLongItemClick(chapter) } }
-                        
-                        // Use pre-computed selection set for O(1) lookup
-                        val isSelected = chapter.id in selectionSet
-                        
-                        ChapterRow(
-                            modifier = Modifier.animateItem(),
-                            chapter = chapter,
-                            onItemClick = itemClickHandler,
-                            isLastRead = chapter.id == displayConfig.lastReadId,
-                            isSelected = isSelected,
-                            onLongClick = longClickHandler,
-                            showNumber = displayConfig.showNumber
-                        )
-                        HorizontalDivider(
-                            modifier = dividerModifier,
-                            color = displayConfig.dividerColor,
-                            thickness = 0.5.dp
-                        )
+                    // OPTIMIZATION: Only render chapter list after initial frame
+                    // This makes the screen appear faster by showing header first
+                    if (showChapterList) {
+                        items(
+                            items = displayChapters,
+                            key = { chapter -> chapter.id },
+                            contentType = { "chapter_item" }
+                        ) { chapter ->
+                            // Use stable click handlers with chapter reference
+                            val itemClickHandler = remember(chapter.id) { { chapterClickHandlers.onItemClick(chapter) } }
+                            val longClickHandler = remember(chapter.id) { { chapterClickHandlers.onLongItemClick(chapter) } }
+                            
+                            // Use pre-computed selection set for O(1) lookup
+                            val isSelected = chapter.id in selectionSet
+                            
+                            ChapterRow(
+                                modifier = Modifier.animateItem(),
+                                chapter = chapter,
+                                onItemClick = itemClickHandler,
+                                isLastRead = chapter.id == displayConfig.lastReadId,
+                                isSelected = isSelected,
+                                onLongClick = longClickHandler,
+                                showNumber = displayConfig.showNumber
+                            )
+                            HorizontalDivider(
+                                modifier = dividerModifier,
+                                color = displayConfig.dividerColor,
+                                thickness = 0.5.dp
+                            )
+                        }
                     }
                 }
             }
@@ -604,6 +617,12 @@ private fun ChapterListPanel(
     val onMigrateCallback = remember { { vm.migrateToSource() } }
     val onDismissBannerCallback = remember { { vm.dismissSourceSwitchingBanner() } }
     
+    // OPTIMIZATION: Defer chapter list rendering by one frame to improve initial navigation speed
+    val showChapterList by produceState(initialValue = false) {
+        kotlinx.coroutines.delay(16) // ~1 frame at 60fps
+        value = true
+    }
+    
     IVerticalFastScroller(listState = scrollState) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -654,32 +673,35 @@ private fun ChapterListPanel(
                 }
             }
             
-            items(
-                items = displayChapters,
-                key = { chapter -> chapter.id },
-                contentType = { "chapter_item" }
-            ) { chapter ->
-                // Use stable click handlers with chapter id as key
-                val itemClickHandler = remember(chapter.id) { { chapterClickHandlers.onItemClick(chapter) } }
-                val longClickHandler = remember(chapter.id) { { chapterClickHandlers.onLongItemClick(chapter) } }
-                
-                // Use pre-computed selection set for O(1) lookup
-                val isSelected = chapter.id in selectionSet
-                
-                ChapterRow(
-                    modifier = Modifier.animateItem(),
-                    chapter = chapter,
-                    onItemClick = itemClickHandler,
-                    isLastRead = chapter.id == displayConfig.lastReadId,
-                    isSelected = isSelected,
-                    onLongClick = longClickHandler,
-                    showNumber = displayConfig.showNumber
-                )
-                HorizontalDivider(
-                    modifier = dividerModifier,
-                    color = displayConfig.dividerColor,
-                    thickness = 0.5.dp
-                )
+            // OPTIMIZATION: Only render chapter list after initial frame
+            if (showChapterList) {
+                items(
+                    items = displayChapters,
+                    key = { chapter -> chapter.id },
+                    contentType = { "chapter_item" }
+                ) { chapter ->
+                    // Use stable click handlers with chapter id as key
+                    val itemClickHandler = remember(chapter.id) { { chapterClickHandlers.onItemClick(chapter) } }
+                    val longClickHandler = remember(chapter.id) { { chapterClickHandlers.onLongItemClick(chapter) } }
+                    
+                    // Use pre-computed selection set for O(1) lookup
+                    val isSelected = chapter.id in selectionSet
+                    
+                    ChapterRow(
+                        modifier = Modifier.animateItem(),
+                        chapter = chapter,
+                        onItemClick = itemClickHandler,
+                        isLastRead = chapter.id == displayConfig.lastReadId,
+                        isSelected = isSelected,
+                        onLongClick = longClickHandler,
+                        showNumber = displayConfig.showNumber
+                    )
+                    HorizontalDivider(
+                        modifier = dividerModifier,
+                        color = displayConfig.dividerColor,
+                        thickness = 0.5.dp
+                    )
+                }
             }
         }
     }

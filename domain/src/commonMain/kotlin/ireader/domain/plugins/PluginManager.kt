@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import okio.Path.Companion.toPath
 
 /**
@@ -57,16 +58,46 @@ class PluginManager(
     private val scope = createICoroutineScope()
     private val _pluginsFlow = MutableStateFlow<List<PluginInfo>>(emptyList())
     
+    // OPTIMIZATION: Track if plugins have been loaded to prevent redundant loading
+    @kotlin.concurrent.Volatile
+    private var pluginsLoaded = false
+    private val loadLock = kotlinx.coroutines.sync.Mutex()
+    
     /**
      * Observable flow of all plugins
      */
     val pluginsFlow: StateFlow<List<PluginInfo>> = _pluginsFlow.asStateFlow()
     
     /**
-     * Load all plugins from the plugins directory
+     * Load all plugins from the plugins directory.
+     * OPTIMIZATION: This is now idempotent - calling it multiple times will only
+     * load plugins once. Use forceReload=true to force a reload.
      */
-    suspend fun loadPlugins() {
-        println("[PluginManager] loadPlugins() called")
+    suspend fun loadPlugins(forceReload: Boolean = false) {
+        // Fast path: if already loaded and not forcing reload, skip
+        if (pluginsLoaded && !forceReload) {
+            println("[PluginManager] loadPlugins() skipped - already loaded")
+            return
+        }
+        
+        // Use mutex to prevent concurrent loading
+        loadLock.withLock {
+            // Double-check after acquiring lock
+            if (pluginsLoaded && !forceReload) {
+                println("[PluginManager] loadPlugins() skipped (after lock) - already loaded")
+                return
+            }
+            
+            println("[PluginManager] loadPlugins() called${if (forceReload) " (force reload)" else ""}")
+            loadPluginsInternal()
+            pluginsLoaded = true
+        }
+    }
+    
+    /**
+     * Internal plugin loading logic
+     */
+    private suspend fun loadPluginsInternal() {
         try {
             // Initialize security manager
             securityManager.initialize()

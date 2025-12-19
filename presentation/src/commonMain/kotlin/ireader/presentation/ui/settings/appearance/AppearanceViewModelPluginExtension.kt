@@ -131,7 +131,7 @@ class AppearanceViewModelPluginExtension(
      * Requirements: 3.5
      */
     suspend fun reloadPluginThemes() {
-        pluginManager.loadPlugins()
+        pluginManager.loadPlugins(forceReload = true)
         hotReloadManager.triggerReload()
     }
     

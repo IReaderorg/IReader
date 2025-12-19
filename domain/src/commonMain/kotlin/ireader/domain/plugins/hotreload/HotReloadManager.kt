@@ -122,7 +122,7 @@ class HotReloadManager(
             
             // Step 5: Reload the plugin
             _events.emit(HotReloadEvent.ReloadProgress(pluginId, "Loading new version", 0.5f))
-            pluginManager.loadPlugins()
+            pluginManager.loadPlugins(forceReload = true)
             
             // Step 6: Enable the plugin
             _events.emit(HotReloadEvent.ReloadProgress(pluginId, "Enabling plugin", 0.7f))

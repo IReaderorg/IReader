@@ -55,7 +55,7 @@ class ThemeHotReloadManager(
     private suspend fun checkForChanges() {
         try {
             // Reload plugins from disk
-            pluginManager.loadPlugins()
+            pluginManager.loadPlugins(forceReload = true)
             
             // Trigger UI update
             _reloadTrigger.value++

@@ -300,7 +300,7 @@ class PluginSyncManager(
             }
             
             // Reload plugins
-            pluginManager.loadPlugins()
+            pluginManager.loadPlugins(forceReload = true)
             
             Result.success(Unit)
         } catch (e: Exception) {
