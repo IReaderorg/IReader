@@ -9,6 +9,7 @@ import ireader.domain.data.repository.ChapterRepository
 import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.local.LocalGetChapterUseCase
+import ireader.domain.usecases.reader.ContentFilterUseCase
 import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -24,13 +25,15 @@ import kotlin.coroutines.resume
  * - Loads book and chapter from repositories
  * - Parses chapter content (List<Page>) into paragraphs
  * - Fetches content from remote if not available locally
+ * - Applies content filter to remove unwanted text patterns
  */
 class TTSContentLoaderImpl(
     private val bookRepository: BookRepository,
     private val chapterRepository: ChapterRepository,
     private val chapterUseCase: LocalGetChapterUseCase,
     private val remoteUseCases: RemoteUseCases,
-    private val catalogStore: CatalogStore
+    private val catalogStore: CatalogStore,
+    private val contentFilterUseCase: ContentFilterUseCase? = null
 ) : TTSContentLoader {
     
     companion object {
@@ -136,7 +139,8 @@ class TTSContentLoaderImpl(
     /**
      * Parse chapter content (List<Page>) into paragraphs
      * 
-     * Extracts text from Text pages and cleans HTML if present
+     * Extracts text from Text pages and cleans HTML if present.
+     * Also applies content filter to remove unwanted text patterns.
      */
     private fun parseContent(content: List<Page>): List<String> {
         if (content.isEmpty()) {
@@ -151,9 +155,12 @@ class TTSContentLoaderImpl(
         
         // If we have text pages, process them
         if (textContent.isNotEmpty()) {
-            return textContent.flatMap { text ->
+            val paragraphs = textContent.flatMap { text ->
                 cleanAndSplitText(text)
             }
+            
+            // Apply content filter to remove unwanted text patterns
+            return contentFilterUseCase?.filterStrings(paragraphs) ?: paragraphs
         }
         
         return emptyList()

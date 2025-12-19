@@ -50,13 +50,122 @@ class JSASTParser {
     
     /**
      * Remove single-line and multi-line comments from JavaScript code.
-     * This is a simplified version that may not handle all edge cases.
+     * Properly handles strings and template literals to avoid removing
+     * comment-like content inside strings.
      */
     private fun removeComments(code: String): String {
-        // For now, don't remove comments as it's causing issues
-        // The metadata object is at the end and comment removal is breaking it
-        // TODO: Implement proper comment removal that respects strings
-        return code
+        val result = StringBuilder()
+        var i = 0
+        val len = code.length
+        
+        while (i < len) {
+            val c = code[i]
+            
+            // Handle strings (single quote, double quote, backtick)
+            if (c == '"' || c == '\'' || c == '`') {
+                val quote = c
+                result.append(c)
+                i++
+                
+                // Copy string content until closing quote
+                while (i < len) {
+                    val sc = code[i]
+                    result.append(sc)
+                    
+                    if (sc == '\\' && i + 1 < len) {
+                        // Escape sequence - copy next char too
+                        i++
+                        result.append(code[i])
+                    } else if (sc == quote) {
+                        // End of string (for backticks, handle ${} separately if needed)
+                        break
+                    }
+                    i++
+                }
+                i++
+                continue
+            }
+            
+            // Handle single-line comment //
+            if (c == '/' && i + 1 < len && code[i + 1] == '/') {
+                // Skip until end of line
+                while (i < len && code[i] != '\n') {
+                    i++
+                }
+                // Keep the newline to preserve line numbers
+                if (i < len) {
+                    result.append('\n')
+                    i++
+                }
+                continue
+            }
+            
+            // Handle multi-line comment /* */
+            if (c == '/' && i + 1 < len && code[i + 1] == '*') {
+                i += 2 // Skip /*
+                // Find closing */
+                while (i + 1 < len) {
+                    if (code[i] == '*' && code[i + 1] == '/') {
+                        i += 2 // Skip */
+                        break
+                    }
+                    // Preserve newlines to maintain line numbers
+                    if (code[i] == '\n') {
+                        result.append('\n')
+                    }
+                    i++
+                }
+                continue
+            }
+            
+            // Handle regex literals (to avoid treating /.../ as division or comment)
+            if (c == '/') {
+                // Check if this could be a regex (simplified heuristic)
+                // Regex typically follows: (, [, {, =, :, ;, ,, !, &, |, ^, ~, return, etc.
+                val prevNonSpace = result.toString().trimEnd().lastOrNull()
+                val isRegexContext = prevNonSpace == null || 
+                    prevNonSpace in "([{=:;,!&|^~?" ||
+                    result.toString().trimEnd().endsWith("return")
+                
+                if (isRegexContext && i + 1 < len && code[i + 1] != '/' && code[i + 1] != '*') {
+                    // Likely a regex - copy until closing /
+                    result.append(c)
+                    i++
+                    var inCharClass = false
+                    while (i < len) {
+                        val rc = code[i]
+                        result.append(rc)
+                        
+                        if (rc == '\\' && i + 1 < len) {
+                            // Escape - copy next char
+                            i++
+                            result.append(code[i])
+                        } else if (rc == '[') {
+                            inCharClass = true
+                        } else if (rc == ']') {
+                            inCharClass = false
+                        } else if (rc == '/' && !inCharClass) {
+                            // End of regex
+                            break
+                        }
+                        i++
+                    }
+                    i++
+                    // Copy regex flags
+                    while (i < len && code[i].isLetter()) {
+                        result.append(code[i])
+                        i++
+                    }
+                    continue
+                }
+            }
+            
+            // Regular character
+            result.append(c)
+            i++
+        }
+        
+        return result.toString()
     }
     
     /**

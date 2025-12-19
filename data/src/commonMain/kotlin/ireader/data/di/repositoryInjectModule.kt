@@ -216,6 +216,11 @@ val repositoryInjectModule = module {
         ireader.data.glossary.GlossaryRepositoryImpl(get())
     }
     
+    // Content filter repository - for regex-based content filtering
+    single<ireader.domain.data.repository.ContentFilterRepository> {
+        ireader.data.contentfilter.ContentFilterRepositoryImpl(get())
+    }
+    
     // User Source repository - for user-defined sources
     single<ireader.domain.usersource.repository.UserSourceRepository> {
         ireader.data.usersource.UserSourceRepositoryImpl(get())

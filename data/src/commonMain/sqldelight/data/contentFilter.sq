@@ -1,0 +1,102 @@
+import kotlin.Long;
+import kotlin.String;
+import kotlin.Boolean;
+
+-- Content filter patterns table
+-- Stores regex patterns to remove unwanted text from chapter content
+-- Can be global (bookId = null) or book-specific
+CREATE TABLE IF NOT EXISTS content_filter(
+    _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    book_id INTEGER, -- NULL for global patterns, book ID for book-specific
+    name TEXT NOT NULL, -- User-friendly name for the pattern
+    pattern TEXT NOT NULL, -- Regex pattern
+    description TEXT, -- Optional description of what this pattern removes
+    enabled INTEGER AS Boolean NOT NULL DEFAULT 1, -- Whether this pattern is active
+    is_preset INTEGER AS Boolean NOT NULL DEFAULT 0, -- Whether this is a built-in preset
+    created_at INTEGER AS Long NOT NULL,
+    updated_at INTEGER AS Long NOT NULL,
+    FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS content_filter_book_id_index ON content_filter(book_id);
+CREATE INDEX IF NOT EXISTS content_filter_enabled_index ON content_filter(enabled);
+
+-- Get all global patterns (not book-specific)
+getGlobalPatterns:
+SELECT * FROM content_filter WHERE book_id IS NULL ORDER BY name ASC;
+
+-- Get all enabled global patterns
+getEnabledGlobalPatterns:
+SELECT * FROM content_filter WHERE book_id IS NULL AND enabled = 1 ORDER BY name ASC;
+
+-- Get patterns for a specific book (includes global patterns)
+-- Global patterns (book_id IS NULL) come first, then book-specific
+getPatternsForBook:
+SELECT * FROM content_filter 
+WHERE book_id IS NULL OR book_id = :bookId 
+ORDER BY CASE WHEN book_id IS NULL THEN 0 ELSE 1 END, name ASC;
+
+-- Get enabled patterns for a specific book (includes global patterns)
+getEnabledPatternsForBook:
+SELECT * FROM content_filter 
+WHERE (book_id IS NULL OR book_id = :bookId) AND enabled = 1 
+ORDER BY CASE WHEN book_id IS NULL THEN 0 ELSE 1 END, name ASC;
+
+-- Get book-specific patterns only
+getBookSpecificPatterns:
+SELECT * FROM content_filter WHERE book_id = :bookId ORDER BY name ASC;
+
+-- Get pattern by ID
+getPatternById:
+SELECT * FROM content_filter WHERE _id = :id;
+
+-- Get preset patterns
+getPresetPatterns:
+SELECT * FROM content_filter WHERE is_preset = 1 ORDER BY name ASC;
+
+-- Insert a new pattern
+insert:
+INSERT INTO content_filter(
+    book_id, name, pattern, description, enabled, is_preset, created_at, updated_at
+)
+VALUES (
+    :bookId, :name, :pattern, :description, :enabled, :isPreset, :createdAt, :updatedAt
+);
+
+-- Update a pattern
+update:
+UPDATE content_filter
+SET name = :name,
+    pattern = :pattern,
+    description = :description,
+    enabled = :enabled,
+    updated_at = :updatedAt
+WHERE _id = :id;
+
+-- Toggle pattern enabled state
+toggleEnabled:
+UPDATE content_filter SET enabled = CASE WHEN enabled = 1 THEN 0 ELSE 1 END, updated_at = :updatedAt WHERE _id = :id;
+
+-- Delete a pattern
+deletePattern:
+DELETE FROM content_filter WHERE _id = :id;
+
+-- Delete all patterns for a book
+deleteBookPatterns:
+DELETE FROM content_filter WHERE book_id = :bookId;
+
+-- Delete all non-preset global patterns
+deleteNonPresetGlobalPatterns:
+DELETE FROM content_filter WHERE book_id IS NULL AND is_preset = 0;
+
+-- Get last inserted row ID
+selectLastInsertedRowId:
+SELECT LAST_INSERT_ROWID() AS Long;
+
+-- Count patterns
+countPatterns:
+SELECT COUNT(*) FROM content_filter;
+
+-- Count enabled patterns
+countEnabledPatterns:
+SELECT COUNT(*) FROM content_filter WHERE enabled = 1;

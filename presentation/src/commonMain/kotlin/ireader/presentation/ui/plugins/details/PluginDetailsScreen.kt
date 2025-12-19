@@ -67,6 +67,7 @@ fun PluginDetailsScreen(
     viewModel: PluginDetailsViewModel,
     onNavigateBack: () -> Unit,
     onPluginClick: (String) -> Unit,
+    onNavigateToSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -162,7 +163,7 @@ fun PluginDetailsScreen(
             onEnableAndContinue = viewModel::enableJSPluginsFeature,
             onGoToSettings = {
                 viewModel.dismissEnablePluginPrompt()
-                // TODO: Navigate to general settings screen
+                onNavigateToSettings()
             },
             onDismiss = viewModel::dismissEnablePluginPrompt
         )

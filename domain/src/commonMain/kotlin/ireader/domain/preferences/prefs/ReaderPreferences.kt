@@ -648,6 +648,28 @@ class ReaderPreferences constructor(
         return preferenceStore.getBoolean("reduced_animations", false)
     }
     
+    // ========== Content Regex Filter ==========
+    // Allows users to remove unwanted text patterns from chapter content
+    // Applied to both Reader and TTS screens
+    
+    /**
+     * Enable regex-based content filtering
+     */
+    fun contentFilterEnabled(): Preference<Boolean> {
+        return preferenceStore.getBoolean("content_filter_enabled", false)
+    }
+    
+    /**
+     * Regex patterns to remove from content (one per line)
+     * Example patterns:
+     * - "Use arrow keys.*chapter" - removes navigation hints
+     * - "Read more at.*" - removes website promotions
+     * - "\\[.*?\\]" - removes text in brackets
+     */
+    fun contentFilterPatterns(): Preference<String> {
+        return preferenceStore.getString("content_filter_patterns", "")
+    }
+    
     // TTS Screen Display Preferences
     fun ttsUseCustomColors(): Preference<Boolean> {
         return preferenceStore.getBoolean("tts_use_custom_colors", false)

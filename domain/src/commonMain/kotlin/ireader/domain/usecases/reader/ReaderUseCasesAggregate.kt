@@ -80,5 +80,8 @@ data class ReaderUseCasesAggregate(
     val exportGlossary: ExportGlossaryUseCase,
     
     /** Use case for importing glossary */
-    val importGlossary: ImportGlossaryUseCase
+    val importGlossary: ImportGlossaryUseCase,
+    
+    /** Use case for filtering content with regex patterns */
+    val contentFilter: ContentFilterUseCase
 )

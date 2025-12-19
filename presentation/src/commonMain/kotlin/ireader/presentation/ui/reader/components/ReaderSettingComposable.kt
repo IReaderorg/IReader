@@ -33,8 +33,11 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -722,6 +725,27 @@ fun GeneralScreenTab(
         }
         item {
             Components.Header(
+                "Content Filter"
+            ).Build()
+        }
+        item {
+            SwitchPreference(
+                preference = vm.contentFilterEnabled,
+                title = "Enable Content Filter",
+                subtitle = "Remove unwanted text patterns from chapters using regex"
+            )
+        }
+        if (vm.contentFilterEnabled.value) {
+            item {
+                ContentFilterPatternsEditor(
+                    patterns = vm.contentFilterPatterns.value,
+                    onPatternsChange = { vm.contentFilterPatterns.value = it },
+                    contentFilterUseCase = vm.contentFilterUseCase
+                )
+            }
+        }
+        item {
+            Components.Header(
                 "Text-to-Speech Settings"
             ).Build()
         }
@@ -1062,4 +1086,157 @@ fun FontPickerTab(
         isLoading = vm.fontsLoading,
         modifier = Modifier.fillMaxSize()
     )
+}
+
+
+/**
+ * Content Filter Patterns Editor
+ * Allows users to add/edit regex patterns to remove unwanted text from chapters.
+ */
+@Composable
+fun ContentFilterPatternsEditor(
+    patterns: String,
+    onPatternsChange: (String) -> Unit,
+    contentFilterUseCase: ireader.domain.usecases.reader.ContentFilterUseCase,
+    modifier: Modifier = Modifier
+) {
+    var editedPatterns by remember { mutableStateOf(patterns) }
+    var testText by remember { mutableStateOf("") }
+    var testResult by remember { mutableStateOf<String?>(null) }
+    var validationError by remember { mutableStateOf<String?>(null) }
+    
+    androidx.compose.runtime.LaunchedEffect(patterns) {
+        editedPatterns = patterns
+    }
+    
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        val hasValidationError = validationError != null
+        val errorText = validationError ?: ""
+        androidx.compose.material3.OutlinedTextField(
+            value = editedPatterns,
+            onValueChange = { newValue: String ->
+                editedPatterns = newValue
+                val lines = newValue.split("\n").filter { line -> line.isNotBlank() }
+                val errors = lines.mapNotNull { pattern ->
+                    contentFilterUseCase.validatePattern(pattern.trim())?.let { err -> "$pattern: $err" }
+                }
+                validationError = if (errors.isNotEmpty()) errors.joinToString("\n") else null
+            },
+            label = { Text("Regex Patterns (one per line)") },
+            placeholder = { Text("Use arrow keys.*chapter\nRead more at.*") },
+            modifier = Modifier.fillMaxWidth().height(120.dp),
+            isError = hasValidationError,
+            supportingText = if (hasValidationError) {
+                { Text(errorText, color = MaterialTheme.colorScheme.error) }
+            } else null,
+            maxLines = 6
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                onClick = {
+                    if (validationError == null) {
+                        onPatternsChange(editedPatterns)
+                    }
+                },
+                enabled = validationError == null && editedPatterns != patterns
+            ) {
+                Text("Save Patterns")
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = "Test Filter",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        androidx.compose.material3.OutlinedTextField(
+            value = testText,
+            onValueChange = { newValue: String -> testText = newValue },
+            label = { Text("Sample Text") },
+            placeholder = { Text("Paste text to test the filter...") },
+            modifier = Modifier.fillMaxWidth().height(80.dp),
+            maxLines = 3
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = {
+                    testResult = contentFilterUseCase.testPatterns(testText, editedPatterns)
+                },
+                enabled = testText.isNotBlank() && editedPatterns.isNotBlank()
+            ) {
+                Text("Test")
+            }
+            
+            val hasTestResult = testResult != null
+            if (hasTestResult) {
+                TextButton(onClick = { testResult = null }) {
+                    Text("Clear")
+                }
+            }
+        }
+        
+        val currentTestResult: String? = testResult
+        if (currentTestResult != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "Result:",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            val isEmpty = currentTestResult.isEmpty()
+            val resultText: String = if (isEmpty) "(empty - all text removed)" else currentTestResult
+            val resultColor = if (isEmpty) 
+                MaterialTheme.colorScheme.error 
+            else 
+                MaterialTheme.colorScheme.onSurfaceVariant
+            
+            androidx.compose.material3.Surface(
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = resultText,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = resultColor
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Tip: Use regex patterns to remove unwanted text. Common patterns:\n" +
+                   "• \"Use arrow keys.*\" - removes navigation hints\n" +
+                   "• \"Read more at.*\" - removes promotions\n" +
+                   "• \"\\\\[.*?\\\\]\" - removes text in brackets",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
+    }
 }

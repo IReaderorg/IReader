@@ -400,13 +400,128 @@ class JSPluginSource(
     }
     
     /**
-     * Parse date string to timestamp
+     * Parse date string to timestamp.
+     * Supports common date formats used by novel sources.
      */
     private fun parseDate(dateText: String?): Long {
-        if (dateText == null) return 0L
+        if (dateText.isNullOrBlank()) return 0L
         
-        // TODO: Implement proper date parsing
-        // For now, return current time
-        return currentTimeToLong()
+        val text = dateText.trim().lowercase()
+        
+        // Handle relative dates like "2 hours ago", "3 days ago"
+        val relativeMatch = """(\d+)\s*(second|minute|hour|day|week|month|year)s?\s*ago""".toRegex().find(text)
+        if (relativeMatch != null) {
+            val amount = relativeMatch.groupValues[1].toLongOrNull() ?: return 0L
+            val unit = relativeMatch.groupValues[2]
+            val now = currentTimeToLong()
+            val msPerUnit = when (unit) {
+                "second" -> 1000L
+                "minute" -> 60 * 1000L
+                "hour" -> 60 * 60 * 1000L
+                "day" -> 24 * 60 * 60 * 1000L
+                "week" -> 7 * 24 * 60 * 60 * 1000L
+                "month" -> 30 * 24 * 60 * 60 * 1000L
+                "year" -> 365 * 24 * 60 * 60 * 1000L
+                else -> return 0L
+            }
+            return now - (amount * msPerUnit)
+        }
+        
+        // Handle "just now", "today", "yesterday"
+        when {
+            text.contains("just now") || text.contains("now") -> return currentTimeToLong()
+            text.contains("today") -> return currentTimeToLong()
+            text.contains("yesterday") -> return currentTimeToLong() - (24 * 60 * 60 * 1000L)
+        }
+        
+        // Try parsing common date formats
+        // Format: YYYY-MM-DD or YYYY/MM/DD
+        val isoMatch = """(\d{4})[-/](\d{1,2})[-/](\d{1,2})""".toRegex().find(text)
+        if (isoMatch != null) {
+            return try {
+                val year = isoMatch.groupValues[1].toInt()
+                val month = isoMatch.groupValues[2].toInt()
+                val day = isoMatch.groupValues[3].toInt()
+                dateToTimestamp(year, month, day)
+            } catch (e: Exception) { 0L }
+        }
+        
+        // Format: DD-MM-YYYY or DD/MM/YYYY or DD.MM.YYYY
+        val dmyMatch = """(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})""".toRegex().find(text)
+        if (dmyMatch != null) {
+            return try {
+                val day = dmyMatch.groupValues[1].toInt()
+                val month = dmyMatch.groupValues[2].toInt()
+                val year = dmyMatch.groupValues[3].toInt()
+                dateToTimestamp(year, month, day)
+            } catch (e: Exception) { 0L }
+        }
+        
+        // Format: Month DD, YYYY (e.g., "January 15, 2024")
+        val monthNames = mapOf(
+            "jan" to 1, "feb" to 2, "mar" to 3, "apr" to 4, "may" to 5, "jun" to 6,
+            "jul" to 7, "aug" to 8, "sep" to 9, "oct" to 10, "nov" to 11, "dec" to 12
+        )
+        val monthMatch = """([a-z]+)\s+(\d{1,2}),?\s*(\d{4})""".toRegex().find(text)
+        if (monthMatch != null) {
+            val monthStr = monthMatch.groupValues[1].take(3)
+            val month = monthNames[monthStr]
+            if (month != null) {
+                return try {
+                    val day = monthMatch.groupValues[2].toInt()
+                    val year = monthMatch.groupValues[3].toInt()
+                    dateToTimestamp(year, month, day)
+                } catch (e: Exception) { 0L }
+            }
+        }
+        
+        // Format: DD Month YYYY (e.g., "15 January 2024")
+        val dayMonthMatch = """(\d{1,2})\s+([a-z]+)\s+(\d{4})""".toRegex().find(text)
+        if (dayMonthMatch != null) {
+            val monthStr = dayMonthMatch.groupValues[2].take(3)
+            val month = monthNames[monthStr]
+            if (month != null) {
+                return try {
+                    val day = dayMonthMatch.groupValues[1].toInt()
+                    val year = dayMonthMatch.groupValues[3].toInt()
+                    dateToTimestamp(year, month, day)
+                } catch (e: Exception) { 0L }
+            }
+        }
+        
+        return 0L
+    }
+    
+    /**
+     * Convert year, month, day to Unix timestamp (milliseconds).
+     * Uses a simple calculation without external date libraries.
+     */
+    private fun dateToTimestamp(year: Int, month: Int, day: Int): Long {
+        // Days in each month (non-leap year)
+        val daysInMonth = intArrayOf(0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        
+        // Calculate days since Unix epoch (1970-01-01)
+        var days = 0L
+        
+        // Add days for complete years
+        for (y in 1970 until year) {
+            days += if (isLeapYear(y)) 366 else 365
+        }
+        
+        // Add days for complete months in current year
+        for (m in 1 until month) {
+            days += daysInMonth[m]
+            if (m == 2 && isLeapYear(year)) days += 1
+        }
+        
+        // Add remaining days
+        days += day - 1
+        
+        // Convert to milliseconds
+        return days * 24 * 60 * 60 * 1000L
+    }
+    
+    private fun isLeapYear(year: Int): Boolean {
+        return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
     }
 }

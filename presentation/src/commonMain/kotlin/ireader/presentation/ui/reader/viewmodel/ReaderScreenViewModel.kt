@@ -121,6 +121,7 @@ class ReaderScreenViewModel(
     val deleteGlossaryEntryUseCase get() = readerUseCasesAggregate.deleteGlossaryEntry
     val exportGlossaryUseCase get() = readerUseCasesAggregate.exportGlossary
     val importGlossaryUseCase get() = readerUseCasesAggregate.importGlossary
+    val contentFilterUseCase get() = readerUseCasesAggregate.contentFilter
 
     data class Param(val chapterId: Long?, val bookId: Long?)
 
@@ -174,6 +175,10 @@ class ReaderScreenViewModel(
     val autoTranslateNextChapter = readerPreferences.autoTranslateNextChapter().asState()
     val openAIApiKey = readerPreferences.openAIApiKey().asState()
     val deepSeekApiKey = readerPreferences.deepSeekApiKey().asState()
+    
+    // Content filter preferences
+    val contentFilterEnabled = readerPreferences.contentFilterEnabled().asState()
+    val contentFilterPatterns = readerPreferences.contentFilterPatterns().asState()
 
     // Compose color wrappers
     val backgroundColorCompose = object : androidx.compose.runtime.MutableState<Color> {
@@ -1623,7 +1628,8 @@ class ReaderScreenViewModel(
     
     fun getCurrentContent(): List<Page> {
         val successState = _state.value as? ReaderState.Success ?: return emptyList()
-        return successState.currentContent
+        // Apply content filter to remove unwanted text patterns
+        return contentFilterUseCase.filterPages(successState.currentContent)
     }
     
     fun getTranslationForParagraph(index: Int): String? {

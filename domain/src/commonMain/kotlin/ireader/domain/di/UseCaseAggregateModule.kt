@@ -120,7 +120,16 @@ val useCaseAggregateModule = module {
             saveGlossaryEntry = get(),
             deleteGlossaryEntry = get(),
             exportGlossary = get(),
-            importGlossary = get()
+            importGlossary = get(),
+            contentFilter = get()
+        )
+    }
+    
+    // Content filter use case - used by Reader and TTS screens
+    factory {
+        ireader.domain.usecases.reader.ContentFilterUseCase(
+            readerPreferences = get(),
+            repository = getOrNull() // Optional - uses preferences fallback if not available
         )
     }
     

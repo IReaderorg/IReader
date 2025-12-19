@@ -19,7 +19,8 @@ val ttsV2Module = module {
             chapterRepository = get(),
             chapterUseCase = get(),
             remoteUseCases = get(),
-            catalogStore = get()
+            catalogStore = get(),
+            contentFilterUseCase = getOrNull() // Optional - applies regex content filtering
         )
     }
     

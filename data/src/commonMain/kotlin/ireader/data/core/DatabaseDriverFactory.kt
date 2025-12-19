@@ -11,6 +11,7 @@ import data.Character_group
 import data.Character_note
 import data.Character_relationship
 import data.Character_timeline_event
+import data.Content_filter
 import data.Daily_reading_stats
 import data.Download
 import data.Global_glossary
@@ -223,6 +224,11 @@ fun createDatabase(driver: SqlDriver): Database {
         user_sourceAdapter = User_source.Adapter(
             source_typeAdapter = intLongColumnAdapter,
             custom_orderAdapter = intLongColumnAdapter
+        ),
+        // Content filter table
+        content_filterAdapter = Content_filter.Adapter(
+            created_atAdapter = longConverter,
+            updated_atAdapter = longConverter
         ),
     )
 

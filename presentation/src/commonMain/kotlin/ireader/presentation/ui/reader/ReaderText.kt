@@ -480,7 +480,9 @@ private fun OptimizedPagedReaderText(
     val content = remember(
         vm.stateChapter?.id, 
         vm.translationViewModel.translationState.hasTranslation,
-        vm.showTranslatedContent.value
+        vm.showTranslatedContent.value,
+        vm.contentFilterEnabled.value,
+        vm.contentFilterPatterns.value
     ) {
         vm.getCurrentContent()
     }
@@ -615,11 +617,13 @@ private fun LegacyPagedReaderText(
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right
         ) {
             // Memoize content to prevent unnecessary recomposition
-            // Include showTranslatedContent in key so content updates when translation is toggled
+            // Include showTranslatedContent and content filter in key so content updates when settings change
             val content = remember(
                 vm.stateChapter?.id, 
                 vm.translationViewModel.translationState.hasTranslation,
-                vm.showTranslatedContent.value
+                vm.showTranslatedContent.value,
+                vm.contentFilterEnabled.value,
+                vm.contentFilterPatterns.value
             ) {
                 vm.getCurrentContent()
             }
@@ -748,11 +752,13 @@ private fun StyleText(
     enableBioReading: Boolean
 ) {
     // Cache the content to avoid race conditions from multiple getCurrentContent() calls
-    // Include showTranslatedContent in key so content updates when translation is toggled
+    // Include showTranslatedContent and content filter in key so content updates when settings change
     val currentContent = remember(
         vm.stateChapter?.id, 
         vm.translationViewModel.translationState.hasTranslation,
-        vm.showTranslatedContent.value
+        vm.showTranslatedContent.value,
+        vm.contentFilterEnabled.value,
+        vm.contentFilterPatterns.value
     ) {
         vm.getCurrentContent()
     }
@@ -882,11 +888,13 @@ private fun StyleTextOptimized(
     styleParams: TextStyleParams
 ) {
     // Cache the content to avoid race conditions from multiple getCurrentContent() calls
-    // Include showTranslatedContent in key so content updates when translation is toggled
+    // Include showTranslatedContent and content filter in key so content updates when settings change
     val currentContent = remember(
         vm.stateChapter?.id, 
         vm.translationViewModel.translationState.hasTranslation,
-        vm.showTranslatedContent.value
+        vm.showTranslatedContent.value,
+        vm.contentFilterEnabled.value,
+        vm.contentFilterPatterns.value
     ) {
         vm.getCurrentContent()
     }
