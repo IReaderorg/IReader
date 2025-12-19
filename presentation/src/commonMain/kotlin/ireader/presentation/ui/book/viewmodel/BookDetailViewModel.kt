@@ -199,6 +199,9 @@ class BookDetailViewModel(
     val chapterIsLoading: Boolean get() = (_state.value as? BookDetailState.Success)?.isRefreshingChapters == true
     val expandedSummary: Boolean get() = (_state.value as? BookDetailState.Success)?.isSummaryExpanded == true
     val modifiedCommands: List<Command<*>> get() = (_state.value as? BookDetailState.Success)?.modifiedCommands ?: emptyList()
+    
+    // Track if ViewModel has been initialized
+    private var isInitialized = false
 
     init {
         val bookId = param.bookId
@@ -226,11 +229,49 @@ class BookDetailViewModel(
             
             // Also load via BookDetailController for SSOT pattern (Requirements: 3.1)
             bookDetailController.dispatch(BookDetailCommand.LoadBook(bookId))
+            
+            isInitialized = true
         } else {
             _state.value = BookDetailState.Error("Invalid book ID")
             scope.launch {
                 _events.emit(BookDetailEvent.ShowSnackbar("Something is wrong with this book"))
             }
+        }
+    }
+    
+    /**
+     * Called when the screen becomes visible again (e.g., navigating back to it).
+     * Ensures the subscription is active and data is fresh.
+     * This is needed because the ViewModel is cached and reused across navigation.
+     */
+    fun onScreenResumed() {
+        val bookId = param.bookId ?: return
+        
+        Log.info { "BookDetailViewModel: onScreenResumed called for book $bookId, subscriptionJob.isActive=${subscriptionJob?.isActive}, state=${_state.value::class.simpleName}" }
+        
+        // Check if subscription is still active by checking if subscriptionJob is active
+        val needsResubscription = subscriptionJob?.isActive != true
+        val isInErrorState = _state.value is BookDetailState.Error
+        val isEmptySuccessState = (_state.value as? BookDetailState.Success)?.let { 
+            it.book.title == "Untitled" && it.chapters.isEmpty() 
+        } ?: false
+        
+        if (needsResubscription || isInErrorState || isEmptySuccessState) {
+            Log.info { "BookDetailViewModel: Reinitializing for book $bookId (needsResubscription=$needsResubscription, isInErrorState=$isInErrorState, isEmptySuccessState=$isEmptySuccessState)" }
+            
+            // Reset to loading state if in error or empty
+            if (isInErrorState || isEmptySuccessState) {
+                _state.value = BookDetailState.Success.empty(bookId = bookId)
+            }
+            
+            // Re-initialize the book data
+            initializeBook(bookId)
+            
+            // Reload via controllers
+            bookController.dispatch(BookCommand.LoadBook(bookId))
+            bookDetailController.dispatch(BookDetailCommand.LoadBook(bookId))
+        } else {
+            Log.info { "BookDetailViewModel: Subscription active for book $bookId, state is valid" }
         }
     }
     

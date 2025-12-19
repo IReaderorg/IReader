@@ -306,8 +306,9 @@ fun CommonNavHost(
                 type = NavType.StringType 
             })
         ) { backStackEntry ->
+            // Use arguments instead of savedStateHandle for navigation arguments
             val bookId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+                backStackEntry.arguments?.getString("bookId")?.toLongOrNull()
             }
             if (bookId != null) {
                 BookDetailScreenSpec(bookId).Content()
