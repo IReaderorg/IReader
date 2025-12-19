@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ireader.presentation.ui.plugins.details.PluginReview
+import ireader.domain.models.remote.PluginReview
 import ireader.domain.utils.extensions.formatRelativeTime
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
@@ -104,13 +104,13 @@ fun ReviewItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = review.userName,
+                    text = review.username,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
                 
                 RatingStars(
-                    rating = review.rating,
+                    rating = review.rating.toFloat(),
                     size = 16.dp
                 )
             }
@@ -130,7 +130,7 @@ fun ReviewItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = formatTimestamp(review.timestamp),
+                    text = formatTimestamp(review.createdAt),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

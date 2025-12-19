@@ -106,7 +106,8 @@ fun FeatureStoreScreen(
                         onPluginClick = onPluginClick,
                         onInstall = viewModel::installPlugin,
                         onUninstall = viewModel::uninstallPlugin,
-                        onCancelDownload = viewModel::cancelDownload
+                        onCancelDownload = viewModel::cancelDownload,
+                        onUpdate = viewModel::updatePlugin
                     )
                 }
             }
@@ -216,6 +217,7 @@ private fun ModernFeatureStoreContent(
     onInstall: (String) -> Unit,
     onUninstall: (String) -> Unit,
     onCancelDownload: (String) -> Unit,
+    onUpdate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -285,7 +287,9 @@ private fun ModernFeatureStoreContent(
                     onInstall = { onInstall(plugin.id) },
                     onUninstall = { onUninstall(plugin.id) },
                     onCancelDownload = { onCancelDownload(plugin.id) },
+                    onUpdate = { onUpdate(plugin.id) },
                     downloadProgress = state.downloadProgress[plugin.id],
+                    updateInfo = state.availableUpdates[plugin.id],
                     modifier = Modifier.animateItem()
                 )
             }
@@ -558,10 +562,13 @@ private fun ModernPluginCard(
     onInstall: () -> Unit,
     onUninstall: () -> Unit,
     onCancelDownload: () -> Unit,
+    onUpdate: () -> Unit,
     downloadProgress: DownloadProgress?,
+    updateInfo: PluginUpdateInfo?,
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val hasUpdate = updateInfo != null
     
     Card(
         modifier = modifier
@@ -697,6 +704,8 @@ private fun ModernPluginCard(
             // Action button
             if (downloadProgress != null && downloadProgress.status != DownloadStatus.COMPLETED) {
                 DownloadProgressButton(progress = downloadProgress, onCancel = onCancelDownload)
+            } else if (hasUpdate) {
+                UpdateButton(updateInfo = updateInfo!!, onUpdate = onUpdate)
             } else {
                 PluginActionButton(
                     status = plugin.status,
@@ -728,6 +737,33 @@ private fun DownloadProgressButton(
                 tint = MaterialTheme.colorScheme.error
             )
         }
+    }
+}
+
+@Composable
+private fun UpdateButton(
+    updateInfo: PluginUpdateInfo,
+    onUpdate: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        FilledTonalButton(
+            onClick = onUpdate,
+            modifier = Modifier.widthIn(min = 72.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Icon(Icons.Default.Update, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Update", style = MaterialTheme.typography.labelMedium)
+        }
+        Text(
+            text = "v${updateInfo.newVersion}",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 

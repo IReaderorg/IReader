@@ -29,6 +29,8 @@ val repositoryInjectModule = module {
     includes(remoteModule)
     // Include review module for badge functionality
     includes(reviewModule)
+    // Include plugin review module for plugin marketplace reviews
+    includes(pluginReviewModule)
     // Include backup module for Google Drive backup functionality
     includes(backupModule)
     // Include platform-specific module for platform implementations

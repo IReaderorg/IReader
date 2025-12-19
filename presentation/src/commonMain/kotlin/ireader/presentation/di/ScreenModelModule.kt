@@ -218,7 +218,8 @@ val screenModelModule = module {
             repositoryRepository = get(),
             indexFetcher = get(),
             downloadService = get(),
-            uiPreferences = get()
+            uiPreferences = get(),
+            platformCapabilities = get()
         )
     }
     

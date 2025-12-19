@@ -16,6 +16,7 @@ import ireader.plugin.api.PluginManifest
 import ireader.plugin.api.PluginMonetization
 import ireader.i18n.resources.Res
 import ireader.presentation.ui.core.viewmodel.BaseViewModel
+import ireader.presentation.ui.featurestore.PluginUpdateInfo
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.first
@@ -37,7 +38,8 @@ class PluginDetailsViewModel(
     private val uiPreferences: ireader.domain.preferences.prefs.UiPreferences,
     private val repositoryRepository: PluginRepositoryRepository? = null,
     private val indexFetcher: PluginRepositoryIndexFetcher? = null,
-    private val downloadService: ireader.domain.services.common.PluginDownloadService? = null
+    private val downloadService: ireader.domain.services.common.PluginDownloadService? = null,
+    private val pluginReviewRepository: ireader.domain.data.repository.PluginReviewRepository? = null
 ) : BaseViewModel() {
     
     private val _state = mutableStateOf(PluginDetailsState())
@@ -76,9 +78,15 @@ class PluginDetailsViewModel(
                             InstallationState.NotInstalled
                         }
                     }
+                    
+                    // Clear update state if download completed successfully
+                    val clearUpdate = progress.status == ireader.domain.services.common.PluginDownloadStatus.COMPLETED
+                    
                     _state.value = _state.value.copy(
                         installationState = newState,
-                        downloadProgress = progress.progress
+                        downloadProgress = progress.progress,
+                        updateAvailable = if (clearUpdate) false else _state.value.updateAvailable,
+                        updateInfo = if (clearUpdate) null else _state.value.updateInfo
                     )
                 }
             }
@@ -101,9 +109,44 @@ class PluginDetailsViewModel(
                         }
                     )
                     loadOtherPluginsByDeveloper(plugin)
+                    // Check for updates when plugin info changes
+                    checkForUpdate(plugin)
                 }
             }
             .launchIn(scope)
+    }
+    
+    /**
+     * Check if an update is available for the installed plugin
+     */
+    private fun checkForUpdate(installedPlugin: PluginInfo) {
+        if (repositoryRepository == null || indexFetcher == null) return
+        
+        scope.launch {
+            try {
+                val remoteInfo = fetchRemotePluginInfo(installedPlugin.id)
+                if (remoteInfo != null && remoteInfo.manifest.versionCode > installedPlugin.manifest.versionCode) {
+                    val updateInfo = PluginUpdateInfo(
+                        pluginId = installedPlugin.id,
+                        pluginName = installedPlugin.manifest.name,
+                        currentVersion = installedPlugin.manifest.version,
+                        currentVersionCode = installedPlugin.manifest.versionCode,
+                        newVersion = remoteInfo.manifest.version,
+                        newVersionCode = remoteInfo.manifest.versionCode,
+                        downloadUrl = remoteInfo.downloadUrl,
+                        changeLog = null
+                    )
+                    _state.value = _state.value.copy(
+                        updateAvailable = true,
+                        updateInfo = updateInfo
+                    )
+                    println("[PluginDetails] Update available: ${installedPlugin.manifest.version} -> ${remoteInfo.manifest.version}")
+                }
+            } catch (e: Exception) {
+                // Silently fail - update check is not critical
+                println("[PluginDetails] Failed to check for updates: ${e.message}")
+            }
+        }
     }
     
     fun loadPluginDetails() {
@@ -116,8 +159,24 @@ class PluginDetailsViewModel(
                 val installedPlugin = installedPlugins.find { it.id == pluginId }
                 
                 if (installedPlugin != null) {
+                    // Try to get remote info for iconUrl and other metadata
+                    val remoteInfo = fetchRemotePluginInfo(pluginId)
+                    
+                    // Merge installed plugin with remote info (for iconUrl, etc.)
+                    val mergedPlugin = if (remoteInfo != null && installedPlugin.manifest.iconUrl.isNullOrEmpty()) {
+                        installedPlugin.copy(
+                            manifest = installedPlugin.manifest.copy(
+                                iconUrl = remoteInfo.manifest.iconUrl
+                            ),
+                            rating = remoteInfo.rating ?: installedPlugin.rating,
+                            downloadCount = remoteInfo.downloadCount.takeIf { it > 0 } ?: installedPlugin.downloadCount
+                        )
+                    } else {
+                        installedPlugin
+                    }
+                    
                     _state.value = _state.value.copy(
-                        plugin = installedPlugin,
+                        plugin = mergedPlugin,
                         installationState = when (installedPlugin.status) {
                             PluginStatus.NOT_INSTALLED -> InstallationState.NotInstalled
                             PluginStatus.ENABLED, PluginStatus.DISABLED -> InstallationState.Installed
@@ -126,7 +185,7 @@ class PluginDetailsViewModel(
                         },
                         isLoading = false
                     )
-                    loadOtherPluginsByDeveloper(installedPlugin)
+                    loadOtherPluginsByDeveloper(mergedPlugin)
                 } else {
                     // Not installed - try to fetch from remote repositories
                     loadFromRemoteRepositories()
@@ -139,6 +198,32 @@ class PluginDetailsViewModel(
                     error = e.message ?: "Failed to load plugin details"
                 )
             }
+        }
+    }
+    
+    /**
+     * Fetch plugin info from remote repositories (for getting iconUrl, etc.)
+     */
+    private suspend fun fetchRemotePluginInfo(pluginId: String): PluginInfo? {
+        if (repositoryRepository == null || indexFetcher == null) return null
+        
+        return try {
+            val repositories = repositoryRepository.getEnabled().first()
+            
+            for (repo in repositories) {
+                try {
+                    val index = indexFetcher.fetchIndex(repo.url).getOrNull()
+                    val entry = index?.plugins?.find { it.id == pluginId }
+                    if (entry != null) {
+                        return entry.toPluginInfo(repo.url)
+                    }
+                } catch (e: Exception) {
+                    // Continue to next repository
+                }
+            }
+            null
+        } catch (e: Exception) {
+            null
         }
     }
     
@@ -295,8 +380,49 @@ class PluginDetailsViewModel(
     }
     
     private fun loadReviews() {
-        // Simplified - no reviews for now
-        _state.value = _state.value.copy(reviews = emptyList())
+        if (pluginReviewRepository == null) {
+            _state.value = _state.value.copy(reviews = emptyList())
+            return
+        }
+        
+        _state.value = _state.value.copy(isLoadingReviews = true)
+        
+        scope.launch {
+            // Load reviews
+            pluginReviewRepository.getPluginReviews(pluginId)
+                .onSuccess { reviews ->
+                    _state.value = _state.value.copy(
+                        reviews = reviews,
+                        isLoadingReviews = false
+                    )
+                }
+                .onFailure { error ->
+                    println("[PluginDetails] Failed to load reviews: ${error.message}")
+                    _state.value = _state.value.copy(
+                        reviews = emptyList(),
+                        isLoadingReviews = false
+                    )
+                }
+            
+            // Load rating stats
+            pluginReviewRepository.getRatingStats(pluginId)
+                .onSuccess { stats ->
+                    _state.value = _state.value.copy(ratingStats = stats)
+                }
+            
+            // Load user's own review
+            pluginReviewRepository.getUserReview(pluginId)
+                .onSuccess { review ->
+                    _state.value = _state.value.copy(userReview = review)
+                }
+        }
+    }
+    
+    /**
+     * Refresh reviews from the server
+     */
+    fun refreshReviews() {
+        loadReviews()
     }
     
     fun installPlugin() {
@@ -390,6 +516,69 @@ class PluginDetailsViewModel(
         }
     }
     
+    /**
+     * Update the plugin to the latest version
+     */
+    fun updatePlugin() {
+        val updateInfo = _state.value.updateInfo ?: return
+        val plugin = _state.value.plugin ?: return
+        
+        // Create a PluginInfo with the remote download URL for the update
+        val remotePlugin = plugin.copy(
+            downloadUrl = updateInfo.downloadUrl,
+            manifest = plugin.manifest.copy(
+                version = updateInfo.newVersion,
+                versionCode = updateInfo.newVersionCode
+            )
+        )
+        
+        _state.value = _state.value.copy(
+            installationState = InstallationState.Downloading(0f),
+            downloadProgress = 0f
+        )
+        
+        scope.launch {
+            try {
+                if (downloadService != null) {
+                    when (val result = downloadService.downloadPlugin(remotePlugin)) {
+                        is ireader.domain.services.common.ServiceResult.Success -> {
+                            showSnackBar(UiText.DynamicString("Updating to v${updateInfo.newVersion}"))
+                        }
+                        is ireader.domain.services.common.ServiceResult.Error -> {
+                            _state.value = _state.value.copy(
+                                installationState = InstallationState.Error(result.message)
+                            )
+                        }
+                        is ireader.domain.services.common.ServiceResult.Loading -> {
+                            // Progress tracked via observeDownloads()
+                        }
+                    }
+                } else {
+                    // Fallback without progress tracking
+                    _state.value = _state.value.copy(installationState = InstallationState.Installing)
+                    pluginManager.installPlugin(remotePlugin)
+                        .onSuccess {
+                            _state.value = _state.value.copy(
+                                installationState = InstallationState.Installed,
+                                updateAvailable = false,
+                                updateInfo = null,
+                                showSuccessMessage = true
+                            )
+                        }
+                        .onFailure { error ->
+                            _state.value = _state.value.copy(
+                                installationState = InstallationState.Error(error.message ?: "Update failed")
+                            )
+                        }
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    installationState = InstallationState.Error(e.message ?: "Update failed")
+                )
+            }
+        }
+    }
+    
     fun enablePlugin() {
         val plugin = _state.value.plugin ?: return
         
@@ -474,8 +663,51 @@ class PluginDetailsViewModel(
     }
     
     fun submitReview(rating: Float, reviewText: String) {
-        // Simplified - no review submission for now
-        showSnackBar(UiText.DynamicString("Review submitted"))
+        if (pluginReviewRepository == null) {
+            showSnackBar(UiText.DynamicString("Reviews are not available"))
+            return
+        }
+        
+        _state.value = _state.value.copy(isSubmittingReview = true)
+        
+        scope.launch {
+            pluginReviewRepository.submitReview(
+                pluginId = pluginId,
+                rating = rating.toInt().coerceIn(1, 5),
+                reviewText = reviewText.takeIf { it.isNotBlank() }
+            ).onSuccess { review ->
+                _state.value = _state.value.copy(
+                    userReview = review,
+                    showReviewDialog = false,
+                    isSubmittingReview = false
+                )
+                showSnackBar(UiText.DynamicString("Review submitted successfully"))
+                // Refresh reviews to show the new one
+                loadReviews()
+            }.onFailure { error ->
+                _state.value = _state.value.copy(isSubmittingReview = false)
+                showSnackBar(UiText.DynamicString("Failed to submit review: ${error.message}"))
+            }
+        }
+    }
+    
+    /**
+     * Delete the user's review
+     */
+    fun deleteReview() {
+        if (pluginReviewRepository == null) return
+        
+        scope.launch {
+            pluginReviewRepository.deleteReview(pluginId)
+                .onSuccess {
+                    _state.value = _state.value.copy(userReview = null)
+                    showSnackBar(UiText.DynamicString("Review deleted"))
+                    loadReviews()
+                }
+                .onFailure { error ->
+                    showSnackBar(UiText.DynamicString("Failed to delete review: ${error.message}"))
+                }
+        }
     }
     
     fun showEnablePluginPrompt() {
@@ -507,7 +739,44 @@ class PluginDetailsViewModel(
     }
     
     fun markReviewHelpful(reviewId: String) {
-        // Simplified - no implementation for now
+        if (pluginReviewRepository == null) return
+        
+        // Find the review to check if it's already marked as helpful
+        val review = _state.value.reviews.find { it.id == reviewId } ?: return
+        
+        scope.launch {
+            if (review.isHelpful) {
+                // Unmark as helpful
+                pluginReviewRepository.unmarkReviewHelpful(reviewId)
+                    .onSuccess {
+                        // Update local state
+                        val updatedReviews = _state.value.reviews.map { r ->
+                            if (r.id == reviewId) {
+                                r.copy(
+                                    isHelpful = false,
+                                    helpfulCount = (r.helpfulCount - 1).coerceAtLeast(0)
+                                )
+                            } else r
+                        }
+                        _state.value = _state.value.copy(reviews = updatedReviews)
+                    }
+            } else {
+                // Mark as helpful
+                pluginReviewRepository.markReviewHelpful(reviewId)
+                    .onSuccess {
+                        // Update local state
+                        val updatedReviews = _state.value.reviews.map { r ->
+                            if (r.id == reviewId) {
+                                r.copy(
+                                    isHelpful = true,
+                                    helpfulCount = r.helpfulCount + 1
+                                )
+                            } else r
+                        }
+                        _state.value = _state.value.copy(reviews = updatedReviews)
+                    }
+            }
+        }
     }
     
     fun dismissSuccessMessage() {

@@ -34,6 +34,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.plugin.api.PluginMonetization
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.presentation.ui.featurestore.PluginUpdateInfo
 import ireader.presentation.ui.plugins.details.components.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,10 +65,13 @@ fun PluginDetailsScreen(
                     plugin = state.plugin!!,
                     installationState = state.installationState,
                     installProgress = state.installProgress,
+                    updateAvailable = state.updateAvailable,
+                    updateInfo = state.updateInfo,
                     onInstall = viewModel::installPlugin,
                     onEnable = viewModel::enablePlugin,
                     onDisable = viewModel::disablePlugin,
                     onUninstall = viewModel::uninstallPlugin,
+                    onUpdate = viewModel::updatePlugin,
                     onRetry = viewModel::retryInstallation
                 )
             }
@@ -168,10 +172,13 @@ private fun ModernInstallBar(
     plugin: PluginInfo,
     installationState: InstallationState,
     installProgress: Float,
+    updateAvailable: Boolean,
+    updateInfo: PluginUpdateInfo?,
     onInstall: () -> Unit,
     onEnable: () -> Unit,
     onDisable: () -> Unit,
     onUninstall: () -> Unit,
+    onUpdate: () -> Unit,
     onRetry: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
@@ -241,6 +248,30 @@ private fun ModernInstallBar(
                     }
                 }
                 is InstallationState.Installed -> {
+                    // Show update button if update is available
+                    if (updateAvailable && updateInfo != null) {
+                        Button(
+                            onClick = onUpdate,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(Icons.Default.Update, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Update to v${updateInfo.newVersion}", style = MaterialTheme.typography.titleMedium)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Current: v${updateInfo.currentVersion}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    
                     when (plugin.status) {
                         PluginStatus.ENABLED -> {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -264,15 +295,17 @@ private fun ModernInstallBar(
                                     Text(localizeHelper.localize(Res.string.uninstall))
                                 }
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(localizeHelper.localize(Res.string.enabled), style = MaterialTheme.typography.bodySmall, color = Color(0xFF4CAF50))
+                            if (!updateAvailable) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(localizeHelper.localize(Res.string.enabled), style = MaterialTheme.typography.bodySmall, color = Color(0xFF4CAF50))
+                                }
                             }
                         }
                         PluginStatus.DISABLED -> {
@@ -297,13 +330,15 @@ private fun ModernInstallBar(
                                     Text(localizeHelper.localize(Res.string.uninstall))
                                 }
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = localizeHelper.localize(Res.string.disabled),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
+                            if (!updateAvailable) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = localizeHelper.localize(Res.string.disabled),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                )
+                            }
                         }
                         else -> {
                             Button(onClick = onEnable, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {

@@ -25,7 +25,25 @@ data class FeatureStoreState(
     /** Timestamp of last successful fetch from remote */
     val lastFetchTime: Long = 0L,
     /** Whether current data is from cache */
-    val isFromCache: Boolean = false
+    val isFromCache: Boolean = false,
+    /** Map of plugin ID to available update info */
+    val availableUpdates: Map<String, PluginUpdateInfo> = emptyMap(),
+    /** Plugins that have updates available */
+    val pluginsWithUpdates: List<PluginInfo> = emptyList()
+)
+
+/**
+ * Information about an available plugin update
+ */
+data class PluginUpdateInfo(
+    val pluginId: String,
+    val pluginName: String,
+    val currentVersion: String,
+    val currentVersionCode: Int,
+    val newVersion: String,
+    val newVersionCode: Int,
+    val downloadUrl: String?,
+    val changeLog: String? = null
 )
 
 /**

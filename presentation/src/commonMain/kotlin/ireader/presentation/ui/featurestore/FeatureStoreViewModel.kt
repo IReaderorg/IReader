@@ -43,7 +43,8 @@ class FeatureStoreViewModel(
     private val repositoryRepository: PluginRepositoryRepository,
     private val indexFetcher: PluginRepositoryIndexFetcher,
     private val downloadService: PluginDownloadService,
-    private val uiPreferences: UiPreferences
+    private val uiPreferences: UiPreferences,
+    private val platformCapabilities: ireader.domain.services.platform.PlatformCapabilities
 ) : BaseViewModel() {
     
     private val _state = mutableStateOf(FeatureStoreState())
@@ -51,6 +52,9 @@ class FeatureStoreViewModel(
     
     // Cache of installed plugin IDs for quick lookup
     private var installedPluginIds: Set<String> = emptySet()
+    
+    // Cache of installed plugin versions (id -> versionCode)
+    private var installedPluginVersions: Map<String, Int> = emptyMap()
     
     // In-memory cache of plugins (survives configuration changes)
     private var cachedPlugins: List<PluginInfo>? = null
@@ -115,9 +119,29 @@ class FeatureStoreViewModel(
                         PluginDownloadStatus.CANCELLED -> PluginStatus.NOT_INSTALLED
                     }
                     updatePluginStatus(pluginId, pluginStatus)
+                    
+                    // Clear update info after successful update
+                    if (progress.status == PluginDownloadStatus.COMPLETED) {
+                        clearUpdateInfo(pluginId)
+                    }
                 }
             }
             .launchIn(scope)
+    }
+    
+    /**
+     * Clear update info for a plugin after successful update
+     */
+    private fun clearUpdateInfo(pluginId: String) {
+        val updatedAvailableUpdates = _state.value.availableUpdates.toMutableMap()
+        updatedAvailableUpdates.remove(pluginId)
+        
+        val updatedPluginsWithUpdates = _state.value.pluginsWithUpdates.filter { it.id != pluginId }
+        
+        _state.value = _state.value.copy(
+            availableUpdates = updatedAvailableUpdates,
+            pluginsWithUpdates = updatedPluginsWithUpdates
+        )
     }
     
     /**
@@ -142,8 +166,11 @@ class FeatureStoreViewModel(
         pluginManager.pluginsFlow
             .onEach { plugins ->
                 installedPluginIds = plugins.map { it.id }.toSet()
+                installedPluginVersions = plugins.associate { it.id to it.manifest.versionCode }
                 // Update installed status in current plugins
                 updateInstalledStatus()
+                // Check for updates
+                checkForUpdates()
             }
             .launchIn(scope)
     }
@@ -466,8 +493,24 @@ class FeatureStoreViewModel(
         _state.value = _state.value.copy(error = null)
     }
     
+    /**
+     * Check if a plugin supports the current platform
+     */
+    private fun pluginSupportsCurrentPlatform(plugin: PluginInfo): Boolean {
+        val currentPlatform = when (platformCapabilities.platformType) {
+            ireader.domain.services.platform.PlatformType.ANDROID -> ireader.plugin.api.Platform.ANDROID
+            ireader.domain.services.platform.PlatformType.DESKTOP -> ireader.plugin.api.Platform.DESKTOP
+            ireader.domain.services.platform.PlatformType.IOS -> ireader.plugin.api.Platform.IOS
+            ireader.domain.services.platform.PlatformType.WEB -> ireader.plugin.api.Platform.DESKTOP // Fallback
+        }
+        return plugin.manifest.platforms.contains(currentPlatform)
+    }
+    
     private fun applyFilters() {
         var filtered = _state.value.plugins
+        
+        // Platform filter - only show plugins that support current platform
+        filtered = filtered.filter { pluginSupportsCurrentPlatform(it) }
         
         // Category filter
         _state.value.selectedCategory?.let { category ->
@@ -519,14 +562,17 @@ class FeatureStoreViewModel(
     }
     
     private fun getFeaturedPlugins(plugins: List<PluginInfo>): List<PluginInfo> {
+        // Filter by current platform first
+        val platformPlugins = plugins.filter { pluginSupportsCurrentPlatform(it) }
+        
         // First, get plugins marked as featured
-        val featuredPlugins = plugins.filter { it.featured }
+        val featuredPlugins = platformPlugins.filter { it.featured }
         
         // If we have featured plugins, use them; otherwise fall back to rating/downloads
         return if (featuredPlugins.isNotEmpty()) {
             featuredPlugins.sortedByDescending { it.downloadCount }.take(10)
         } else {
-            plugins
+            platformPlugins
                 .filter { (it.rating ?: 0f) >= 4.0f || it.downloadCount > 1000 }
                 .sortedByDescending { it.downloadCount }
                 .take(10)
@@ -661,5 +707,104 @@ class FeatureStoreViewModel(
             filteredPlugins = updatedFiltered,
             featuredPlugins = updatedFeatured
         )
+    }
+    
+    /**
+     * Check for available updates by comparing installed versions with remote versions
+     */
+    private fun checkForUpdates() {
+        val plugins = _state.value.plugins
+        if (plugins.isEmpty() || installedPluginVersions.isEmpty()) return
+        
+        val updates = mutableMapOf<String, PluginUpdateInfo>()
+        val pluginsWithUpdates = mutableListOf<PluginInfo>()
+        
+        plugins.forEach { remotePlugin ->
+            val installedVersionCode = installedPluginVersions[remotePlugin.id]
+            if (installedVersionCode != null && remotePlugin.manifest.versionCode > installedVersionCode) {
+                // Get installed version string from pluginManager
+                val installedPlugin = pluginManager.pluginsFlow.value.find { it.id == remotePlugin.id }
+                val installedVersion = installedPlugin?.manifest?.version ?: "Unknown"
+                
+                updates[remotePlugin.id] = PluginUpdateInfo(
+                    pluginId = remotePlugin.id,
+                    pluginName = remotePlugin.manifest.name,
+                    currentVersion = installedVersion,
+                    currentVersionCode = installedVersionCode,
+                    newVersion = remotePlugin.manifest.version,
+                    newVersionCode = remotePlugin.manifest.versionCode,
+                    downloadUrl = remotePlugin.downloadUrl,
+                    changeLog = null // Could be added if available in index
+                )
+                pluginsWithUpdates.add(remotePlugin)
+                
+                println("[FeatureStore] Update available for ${remotePlugin.manifest.name}: $installedVersion -> ${remotePlugin.manifest.version}")
+            }
+        }
+        
+        _state.value = _state.value.copy(
+            availableUpdates = updates,
+            pluginsWithUpdates = pluginsWithUpdates
+        )
+        
+        if (updates.isNotEmpty()) {
+            println("[FeatureStore] Found ${updates.size} plugin updates available")
+        }
+    }
+    
+    /**
+     * Update a plugin to the latest version
+     */
+    fun updatePlugin(pluginId: String) {
+        val updateInfo = _state.value.availableUpdates[pluginId]
+        val plugin = _state.value.plugins.find { it.id == pluginId }
+        
+        if (updateInfo == null || plugin == null) {
+            showSnackBar(ireader.i18n.UiText.DynamicString("No update available for this plugin"))
+            return
+        }
+        
+        // Check if already downloading
+        if (downloadService.isDownloading(pluginId)) {
+            showSnackBar(ireader.i18n.UiText.DynamicString("${plugin.manifest.name} is already downloading"))
+            return
+        }
+        
+        scope.launch {
+            try {
+                // Use download service for progress tracking
+                when (val result = downloadService.downloadPlugin(plugin)) {
+                    is ireader.domain.services.common.ServiceResult.Success -> {
+                        showSnackBar(ireader.i18n.UiText.DynamicString("Updating ${plugin.manifest.name} to v${updateInfo.newVersion}"))
+                    }
+                    is ireader.domain.services.common.ServiceResult.Error -> {
+                        _state.value = _state.value.copy(
+                            error = "Failed to update ${plugin.manifest.name}: ${result.message}"
+                        )
+                    }
+                    is ireader.domain.services.common.ServiceResult.Loading -> {
+                        // Ignore loading state
+                    }
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    error = "Failed to update ${plugin.manifest.name}: ${e.message}"
+                )
+            }
+        }
+    }
+    
+    /**
+     * Check if a plugin has an update available
+     */
+    fun hasUpdate(pluginId: String): Boolean {
+        return _state.value.availableUpdates.containsKey(pluginId)
+    }
+    
+    /**
+     * Get update info for a plugin
+     */
+    fun getUpdateInfo(pluginId: String): PluginUpdateInfo? {
+        return _state.value.availableUpdates[pluginId]
     }
 }

@@ -1,8 +1,11 @@
 package ireader.presentation.ui.plugins.details
 
+import ireader.domain.models.remote.PluginRatingStats
+import ireader.domain.models.remote.PluginReview
 import ireader.domain.plugins.PluginInfo
 import ireader.domain.plugins.PluginResourceUsage
 import ireader.domain.plugins.ResourceUsagePercentages
+import ireader.presentation.ui.featurestore.PluginUpdateInfo
 
 /**
  * State for the Plugin Details screen
@@ -11,7 +14,9 @@ import ireader.domain.plugins.ResourceUsagePercentages
 data class PluginDetailsState(
     val plugin: PluginInfo? = null,
     val reviews: List<PluginReview> = emptyList(),
+    val ratingStats: PluginRatingStats? = null,
     val isLoading: Boolean = false,
+    val isLoadingReviews: Boolean = false,
     val error: String? = null,
     val installationState: InstallationState = InstallationState.NotInstalled,
     val installProgress: Float = 0f,
@@ -24,7 +29,12 @@ data class PluginDetailsState(
     val resourceUsage: PluginResourceUsage? = null,
     val resourcePercentages: ResourceUsagePercentages? = null,
     val resourceHistory: List<PluginResourceUsage> = emptyList(),
-    val showEnablePluginPrompt: Boolean = false // Show prompt to enable JS plugins in settings
+    val showEnablePluginPrompt: Boolean = false, // Show prompt to enable JS plugins in settings
+    // Update-related state
+    val updateAvailable: Boolean = false,
+    val updateInfo: PluginUpdateInfo? = null,
+    // Review submission state
+    val isSubmittingReview: Boolean = false
 )
 
 /**
@@ -37,18 +47,3 @@ sealed class InstallationState {
     data object Installed : InstallationState()
     data class Error(val message: String) : InstallationState()
 }
-
-/**
- * Plugin review data
- */
-data class PluginReview(
-    val id: String,
-    val pluginId: String,
-    val userId: String,
-    val userName: String,
-    val rating: Float,
-    val reviewText: String?,
-    val timestamp: Long,
-    val helpfulCount: Int,
-    val isHelpful: Boolean = false
-)

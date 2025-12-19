@@ -254,7 +254,8 @@ val PresentationModules = module {
             uiPreferences = get(),
             repositoryRepository = get(),
             indexFetcher = get(),
-            downloadService = get()
+            downloadService = get(),
+            pluginReviewRepository = getOrNull()
         )
     }
     factory {
