@@ -253,7 +253,8 @@ val PresentationModules = module {
             remoteRepository = get(),
             uiPreferences = get(),
             repositoryRepository = get(),
-            indexFetcher = get()
+            indexFetcher = get(),
+            downloadService = get()
         )
     }
     factory {

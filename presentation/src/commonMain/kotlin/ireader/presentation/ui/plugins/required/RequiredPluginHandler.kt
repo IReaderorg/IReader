@@ -17,6 +17,12 @@ import org.koin.compose.koinInject
  * Place this at the root of your app to automatically show the full screen when
  * a required plugin is requested.
  */
+/**
+ * Get the appropriate JS engine plugin type for the current platform.
+ * Android uses J2V8, Desktop uses GraalVM.
+ */
+expect fun getPlatformJSEngineType(): RequiredPluginType
+
 @Composable
 fun RequiredPluginHandler(
     requiredPluginChecker: RequiredPluginChecker = koinInject(),
@@ -25,6 +31,9 @@ fun RequiredPluginHandler(
     val jsEngineRequired by requiredPluginChecker.jsEngineRequired.collectAsState()
     val piperTTSRequired by requiredPluginChecker.piperTTSRequired.collectAsState()
     
+    // Get platform-specific JS engine type
+    val jsEngineType = getPlatformJSEngineType()
+    
     // Show JS Engine full screen
     AnimatedVisibility(
         visible = jsEngineRequired,
@@ -32,7 +41,7 @@ fun RequiredPluginHandler(
         exit = fadeOut() + slideOutVertically { it }
     ) {
         RequiredPluginFullScreen(
-            pluginType = RequiredPluginType.JS_ENGINE,
+            pluginType = jsEngineType,
             featureName = "JavaScript Sources",
             onDismiss = { requiredPluginChecker.clearJSEngineRequest() },
             onPluginReady = { requiredPluginChecker.clearJSEngineRequest() },

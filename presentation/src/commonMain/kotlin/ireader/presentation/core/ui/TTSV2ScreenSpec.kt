@@ -248,6 +248,11 @@ class TTSV2ScreenSpec(
         val activeGradioConfigId by appPreferences.activeGradioConfigId().changes().collectAsState(
             initial = appPreferences.activeGradioConfigId().get()
         )
+        
+        // Selected Piper voice model - observe changes to display in UI
+        val selectedPiperModel by appPreferences.selectedPiperModel().changes().collectAsState(
+            initial = appPreferences.selectedPiperModel().get()
+        )
         val isGradioConfigured = remember(activeGradioConfigId) { activeGradioConfigId.isNotEmpty() }
         
         // Chunk mode settings - observe changes to re-chunk when user changes word count
@@ -656,7 +661,8 @@ class TTSV2ScreenSpec(
         // Create CommonTTSScreenState from v2 state
         val screenState by remember(
             state, currentParagraph, previousParagraph, isPlaying, isLoading,
-            sleepTimerState, calibratedWPM, isCalibrated, paragraphStartTime, sentenceHighlightEnabled
+            sleepTimerState, calibratedWPM, isCalibrated, paragraphStartTime, sentenceHighlightEnabled,
+            selectedPiperModel
         ) {
             derivedStateOf {
                 CommonTTSScreenState(
@@ -678,6 +684,7 @@ class TTSV2ScreenSpec(
                     showCacheIndicators = false, // Don't show cache indicators (green checkmarks) in v2
                     sleepTimeRemaining = sleepTimerState?.remainingTimeMs ?: 0L,
                     sleepModeEnabled = sleepTimerState?.isEnabled == true,
+                    selectedVoiceModel = selectedPiperModel.takeIf { it.isNotEmpty() },
                     currentEngine = when (state.engineType) {
                         EngineType.NATIVE -> "Native TTS"
                         EngineType.GRADIO -> "Gradio TTS"

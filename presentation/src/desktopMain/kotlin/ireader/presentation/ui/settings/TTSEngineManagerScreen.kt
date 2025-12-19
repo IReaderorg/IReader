@@ -108,7 +108,9 @@ import org.koin.compose.koinInject
 @Composable
 fun TTSEngineManagerScreen(
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRequestPiperPlugin: () -> Unit = {},
+    isPiperPluginAvailable: Boolean = true
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val ttsService: DesktopTTSService = koinInject()
@@ -137,14 +139,17 @@ fun TTSEngineManagerScreen(
     var isTestingGradio by remember { mutableStateOf(false) }
 
     // Check engine status on mount - only when screen opens
-    LaunchedEffect(Unit) {
+    LaunchedEffect(Unit, isPiperPluginAvailable) {
         // Check Piper
         piperStatus = try {
-            if (ttsService.synthesizer.isInitialized()) {
+            if (!isPiperPluginAvailable) {
+                piperMessage = "Piper plugin not installed - tap to install"
+                EngineStatus.NOT_INSTALLED
+            } else if (ttsService.synthesizer.isInitialized()) {
                 piperMessage = "Piper TTS initialized"
                 EngineStatus.INSTALLED
             } else {
-                piperMessage = "Piper not initialized"
+                piperMessage = "Piper plugin installed - download a voice model"
                 EngineStatus.NOT_INSTALLED
             }
         } catch (e: Exception) {
@@ -280,6 +285,13 @@ fun TTSEngineManagerScreen(
                     "Requires JNI libraries"
                 ),
                 onInstall = {
+                    // First check if Piper plugin is available
+                    if (!isPiperPluginAvailable) {
+                        // Show RequiredPluginHandler to install the plugin
+                        onRequestPiperPlugin()
+                        return@EngineCard
+                    }
+                    
                     isInstallingPiper = true
                     scope.launch {
                         try {

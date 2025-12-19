@@ -15,6 +15,7 @@ data class PluginDetailsState(
     val error: String? = null,
     val installationState: InstallationState = InstallationState.NotInstalled,
     val installProgress: Float = 0f,
+    val downloadProgress: Float = 0f, // Download progress from service (0.0 to 1.0)
     val showPurchaseDialog: Boolean = false,
     val showReviewDialog: Boolean = false,
     val showSuccessMessage: Boolean = false,
@@ -30,10 +31,10 @@ data class PluginDetailsState(
  * Installation state for a plugin
  */
 sealed class InstallationState {
-    object NotInstalled : InstallationState()
-    object Downloading : InstallationState()
-    object Installing : InstallationState()
-    object Installed : InstallationState()
+    data object NotInstalled : InstallationState()
+    data class Downloading(val progress: Float = 0f) : InstallationState()
+    data object Installing : InstallationState()
+    data object Installed : InstallationState()
     data class Error(val message: String) : InstallationState()
 }
 

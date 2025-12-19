@@ -36,7 +36,8 @@ class PluginDetailsViewModel(
     private val remoteRepository: ireader.domain.data.repository.RemoteRepository,
     private val uiPreferences: ireader.domain.preferences.prefs.UiPreferences,
     private val repositoryRepository: PluginRepositoryRepository? = null,
-    private val indexFetcher: PluginRepositoryIndexFetcher? = null
+    private val indexFetcher: PluginRepositoryIndexFetcher? = null,
+    private val downloadService: ireader.domain.services.common.PluginDownloadService? = null
 ) : BaseViewModel() {
     
     private val _state = mutableStateOf(PluginDetailsState())
@@ -44,7 +45,44 @@ class PluginDetailsViewModel(
     
     init {
         observePlugins()
+        observeDownloads()
         loadPluginDetails()
+    }
+    
+    /**
+     * Observe download progress from PluginDownloadService
+     */
+    private fun observeDownloads() {
+        downloadService?.downloads
+            ?.onEach { downloads ->
+                val progress = downloads[pluginId]
+                if (progress != null) {
+                    val newState = when (progress.status) {
+                        ireader.domain.services.common.PluginDownloadStatus.QUEUED,
+                        ireader.domain.services.common.PluginDownloadStatus.DOWNLOADING -> {
+                            InstallationState.Downloading(progress.progress)
+                        }
+                        ireader.domain.services.common.PluginDownloadStatus.VALIDATING,
+                        ireader.domain.services.common.PluginDownloadStatus.INSTALLING -> {
+                            InstallationState.Installing
+                        }
+                        ireader.domain.services.common.PluginDownloadStatus.COMPLETED -> {
+                            InstallationState.Installed
+                        }
+                        ireader.domain.services.common.PluginDownloadStatus.FAILED -> {
+                            InstallationState.Error(progress.errorMessage ?: "Installation failed")
+                        }
+                        ireader.domain.services.common.PluginDownloadStatus.CANCELLED -> {
+                            InstallationState.NotInstalled
+                        }
+                    }
+                    _state.value = _state.value.copy(
+                        installationState = newState,
+                        downloadProgress = progress.progress
+                    )
+                }
+            }
+            ?.launchIn(scope)
     }
     
     private fun observePlugins() {
@@ -271,7 +309,10 @@ class PluginDetailsViewModel(
             return
         }
         
-        _state.value = _state.value.copy(installationState = InstallationState.Installing)
+        _state.value = _state.value.copy(
+            installationState = InstallationState.Downloading(0f),
+            downloadProgress = 0f
+        )
         
         scope.launch {
             try {
@@ -293,19 +334,37 @@ class PluginDetailsViewModel(
                             )
                         }
                 } else {
-                    // Download and install from remote
-                    pluginManager.installPlugin(plugin)
-                        .onSuccess {
-                            _state.value = _state.value.copy(
-                                installationState = InstallationState.Installed,
-                                showSuccessMessage = true
-                            )
+                    // Use download service if available for progress tracking
+                    if (downloadService != null) {
+                        when (val result = downloadService.downloadPlugin(plugin)) {
+                            is ireader.domain.services.common.ServiceResult.Success -> {
+                                // Progress will be tracked via observeDownloads()
+                            }
+                            is ireader.domain.services.common.ServiceResult.Error -> {
+                                _state.value = _state.value.copy(
+                                    installationState = InstallationState.Error(result.message)
+                                )
+                            }
+                            is ireader.domain.services.common.ServiceResult.Loading -> {
+                                // Still loading
+                            }
                         }
-                        .onFailure { error ->
-                            _state.value = _state.value.copy(
-                                installationState = InstallationState.Error(error.message ?: "Installation failed")
-                            )
-                        }
+                    } else {
+                        // Fallback to direct installation without progress
+                        _state.value = _state.value.copy(installationState = InstallationState.Installing)
+                        pluginManager.installPlugin(plugin)
+                            .onSuccess {
+                                _state.value = _state.value.copy(
+                                    installationState = InstallationState.Installed,
+                                    showSuccessMessage = true
+                                )
+                            }
+                            .onFailure { error ->
+                                _state.value = _state.value.copy(
+                                    installationState = InstallationState.Error(error.message ?: "Installation failed")
+                                )
+                            }
+                    }
                 }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(

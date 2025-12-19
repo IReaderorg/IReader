@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import ireader.domain.plugins.RequiredPluginChecker
 import ireader.domain.services.tts_service.DesktopTTSService
 import ireader.domain.services.tts_service.PiperVoiceService
 import ireader.domain.services.tts_service.PiperVoiceDownloader
@@ -38,19 +39,28 @@ actual fun TTSEngineSettingsScreen(
     onNavigateToTTSManager: () -> Unit
 ) {
     val ttsService: DesktopTTSService = koinInject()
+    val requiredPluginChecker: RequiredPluginChecker = koinInject()
     val scope = rememberCoroutineScope()
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
-    // Engine status - Piper is always available on desktop (bundled with app)
-    var piperAvailable by remember { mutableStateOf(true) } // Piper is always available on desktop
+    
+    // Observe Piper plugin availability as a Flow (reacts to plugin loading)
+    val isPiperPluginAvailable by requiredPluginChecker.observePiperTTSAvailability()
+        .collectAsState(initial = requiredPluginChecker.isPiperTTSAvailable())
+    
+    // Engine status - Piper requires plugin on desktop
+    var piperAvailable by remember { mutableStateOf(false) }
+    var piperNativeLibraryFailed by remember { mutableStateOf(false) }
     var kokoroAvailable by remember { mutableStateOf(false) }
     var mayaAvailable by remember { mutableStateOf(false) }
     var currentEngine by remember { mutableStateOf("") }
     
-    // Check engine status
-    LaunchedEffect(Unit) {
-        // Piper is always available on desktop - it's bundled with the app
-        // The synthesizer might not be initialized yet, but it will be when selected
-        piperAvailable = true
+    // Check engine status when plugin availability changes
+    LaunchedEffect(isPiperPluginAvailable) {
+        // Piper requires the plugin to be installed AND native library to load
+        val synthInitialized = ttsService.synthesizer.isInitialized()
+        piperAvailable = isPiperPluginAvailable && synthInitialized
+        // Check if plugin is installed but native library failed
+        piperNativeLibraryFailed = isPiperPluginAvailable && !ireader.domain.services.tts_service.piper.PiperJNISynthesizer.isPiperReady()
         kokoroAvailable = ttsService.kokoroAvailable
         mayaAvailable = ttsService.mayaAvailable
         currentEngine = ttsService.getCurrentEngine().name
@@ -136,14 +146,45 @@ actual fun TTSEngineSettingsScreen(
                     // Piper TTS with voice management
                     PiperEngineCard(
                         isAvailable = piperAvailable,
+                        isPiperPluginInstalled = isPiperPluginAvailable,
+                        isNativeLibraryFailed = piperNativeLibraryFailed,
                         isCurrentEngine = currentEngine == "PIPER",
                         onSelect = {
+                            // Check if plugin is installed first
+                            if (!isPiperPluginAvailable) {
+                                // Request plugin installation and dismiss dialog so RequiredPluginHandler shows
+                                requiredPluginChecker.requestPiperTTS()
+                                onDismiss()
+                                return@PiperEngineCard
+                            }
+                            // Don't allow selection if native library failed
+                            if (piperNativeLibraryFailed) {
+                                return@PiperEngineCard
+                            }
                             scope.launch {
                                 ttsService.setEngine(ireader.domain.services.tts_service.DesktopTTSService.TTSEngine.PIPER)
                                 currentEngine = "PIPER"
                             }
                         },
-                        onManageVoices = { showVoiceSelection = true }
+                        onManageVoices = {
+                            // Check if plugin is installed first
+                            if (!isPiperPluginAvailable) {
+                                // Request plugin installation and dismiss dialog so RequiredPluginHandler shows
+                                requiredPluginChecker.requestPiperTTS()
+                                onDismiss()
+                                return@PiperEngineCard
+                            }
+                            // Don't allow voice management if native library failed
+                            if (piperNativeLibraryFailed) {
+                                return@PiperEngineCard
+                            }
+                            showVoiceSelection = true
+                        },
+                        onInstallPlugin = {
+                            // Dismiss dialog so RequiredPluginHandler shows
+                            requiredPluginChecker.requestPiperTTS()
+                            onDismiss()
+                        }
                     )
                     
                     // Voice Selection Dialog
@@ -320,27 +361,31 @@ private fun EngineCard(
 
 /**
  * Special Engine Card for Piper TTS with voice management button
- * Piper is always available on desktop - bundled with the app
+ * Piper requires the plugin to be installed on desktop
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PiperEngineCard(
     isAvailable: Boolean,
+    isPiperPluginInstalled: Boolean,
+    isNativeLibraryFailed: Boolean,
     isCurrentEngine: Boolean,
     onSelect: () -> Unit,
-    onManageVoices: () -> Unit
+    onManageVoices: () -> Unit,
+    onInstallPlugin: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    // Piper is always available on desktop - bundled with the app
+    
     OutlinedCard(
         onClick = onSelect,
         modifier = Modifier.fillMaxWidth(),
-        enabled = true, // Always enabled - Piper is bundled
+        enabled = !isNativeLibraryFailed, // Disable if native library failed
         colors = CardDefaults.outlinedCardColors(
-            containerColor = if (isCurrentEngine) 
-                MaterialTheme.colorScheme.secondaryContainer 
-            else 
-                MaterialTheme.colorScheme.surface
+            containerColor = when {
+                isCurrentEngine -> MaterialTheme.colorScheme.secondaryContainer
+                isNativeLibraryFailed -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                else -> MaterialTheme.colorScheme.surface
+            }
         )
     ) {
         Column(
@@ -357,15 +402,17 @@ private fun PiperEngineCard(
                 // Status icon
                 Icon(
                     imageVector = when {
+                        isNativeLibraryFailed -> Icons.Default.Error
                         isCurrentEngine -> Icons.Default.CheckCircle
-                        isAvailable -> Icons.Default.RadioButtonUnchecked
-                        else -> Icons.Default.Cancel
+                        isPiperPluginInstalled -> Icons.Default.RadioButtonUnchecked
+                        else -> Icons.Default.Download
                     },
                     contentDescription = null,
                     tint = when {
+                        isNativeLibraryFailed -> MaterialTheme.colorScheme.error
                         isCurrentEngine -> MaterialTheme.colorScheme.primary
-                        isAvailable -> MaterialTheme.colorScheme.onSurfaceVariant
-                        else -> MaterialTheme.colorScheme.error
+                        isPiperPluginInstalled -> MaterialTheme.colorScheme.onSurfaceVariant
+                        else -> MaterialTheme.colorScheme.tertiary
                     }
                 )
                 
@@ -379,11 +426,20 @@ private fun PiperEngineCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    // Piper is always available on desktop - bundled with the app
+                    // Show status based on plugin installation and native library
                     Text(
-                        text = localizeHelper.localize(Res.string.pre_installed),
+                        text = when {
+                            isNativeLibraryFailed -> "Native library failed - missing VC++ Runtime"
+                            isPiperPluginInstalled && isAvailable -> localizeHelper.localize(Res.string.pre_installed)
+                            isPiperPluginInstalled -> "Plugin installed - download a voice"
+                            else -> "Plugin required - tap to install"
+                        },
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = when {
+                            isNativeLibraryFailed -> MaterialTheme.colorScheme.error
+                            isPiperPluginInstalled -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.tertiary
+                        }
                     )
                 }
                 
@@ -399,18 +455,44 @@ private fun PiperEngineCard(
                 }
             }
             
-            // Manage Voices button - always show since Piper is bundled
-            OutlinedButton(
-                onClick = onManageVoices,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    Icons.Default.RecordVoiceOver,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(localizeHelper.localize(Res.string.manage_piper_voices))
+            // Show appropriate button based on state
+            when {
+                isNativeLibraryFailed -> {
+                    // Show error message and help link
+                    Text(
+                        text = "Piper requires Visual C++ Redistributable. Please install it from Microsoft and restart the app.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                !isPiperPluginInstalled -> {
+                    Button(
+                        onClick = onInstallPlugin,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Default.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Install Piper Plugin")
+                    }
+                }
+                else -> {
+                    OutlinedButton(
+                        onClick = onManageVoices,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Default.RecordVoiceOver,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(localizeHelper.localize(Res.string.manage_piper_voices))
+                    }
+                }
             }
         }
     }
@@ -433,6 +515,7 @@ actual fun TTSVoiceSelectionScreen(
     val ttsService: DesktopTTSService = koinInject()
     val voiceService: ireader.domain.services.tts_service.PiperVoiceService = koinInject()
     val voiceDownloader: PiperVoiceDownloader = koinInject()
+    val appPrefs: ireader.domain.preferences.prefs.AppPreferences = koinInject()
     val scope = rememberCoroutineScope()
     
     // Collect state from unified service
@@ -440,8 +523,8 @@ actual fun TTSVoiceSelectionScreen(
     val isRefreshing by voiceService.isRefreshing.collectAsState()
     val refreshError by voiceService.refreshError.collectAsState()
     
-    // Local state
-    var selectedVoice by remember { mutableStateOf<String?>(null) }
+    // Local state - load from preferences directly for persistence
+    var selectedVoice by remember { mutableStateOf<String?>(appPrefs.selectedPiperModel().get().takeIf { it.isNotEmpty() }) }
     var currentEngine by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var downloadingVoiceId by remember { mutableStateOf<String?>(null) }
@@ -449,12 +532,21 @@ actual fun TTSVoiceSelectionScreen(
     var downloadError by remember { mutableStateOf<String?>(null) }
     var filterLanguage by remember { mutableStateOf<String?>(null) }
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    
     // Initialize voice service and load current engine
     LaunchedEffect(Unit) {
         currentEngine = ttsService.getCurrentEngine().name
-        selectedVoice = ttsService.state.selectedVoiceModel?.id
+        // Load selected voice from preferences (more reliable than state)
+        val savedVoiceId = appPrefs.selectedPiperModel().get()
+        if (savedVoiceId.isNotEmpty()) {
+            selectedVoice = savedVoiceId
+            ireader.core.log.Log.info { "TTSVoiceSelectionScreen: Loaded saved voice from prefs: $savedVoiceId" }
+        } else {
+            // Fallback to state if prefs empty
+            selectedVoice = ttsService.state.selectedVoiceModel?.id
+        }
         
-        ireader.core.log.Log.info { "TTSVoiceSelectionScreen: Loading voices for engine $currentEngine" }
+        ireader.core.log.Log.info { "TTSVoiceSelectionScreen: Loading voices for engine $currentEngine, selected: $selectedVoice" }
         
         // Initialize voice service (fetches from remote if needed)
         voiceService.initialize()

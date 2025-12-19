@@ -1,8 +1,11 @@
 package ireader.domain.catalogs
 
+import ireader.domain.js.loader.GraalVMEngineHelper
+
 /**
- * Desktop implementation - no-op since Desktop uses GraalVM instead of J2V8.
+ * Desktop implementation - resets GraalVMEngineHelper to allow retry.
  */
 actual fun onJ2V8PluginAvailable() {
-    // No-op on Desktop - GraalVM is used instead of J2V8
+    // On Desktop, we use GraalVM instead of J2V8
+    GraalVMEngineHelper.onGraalVMPluginAvailable()
 }

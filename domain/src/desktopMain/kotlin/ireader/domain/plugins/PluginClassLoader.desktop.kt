@@ -27,21 +27,62 @@ actual class PluginClassLoader {
     actual suspend fun loadPluginClass(file: VirtualFile, manifest: PluginManifest): Any {
         try {
             // Convert VirtualFile to java.io.File for URLClassLoader
-            // This is a temporary bridge until we have a full VirtualFile implementation
             val javaFile = File(file.path)
             
-            // Create URLClassLoader to load the plugin JAR
+            // Extract classes.jar from the .iplugin ZIP if it exists
+            val tempDir = File(System.getProperty("java.io.tmpdir"), "ireader_plugins/${manifest.id}")
+            tempDir.mkdirs()
+            
+            val urls = mutableListOf<java.net.URL>()
+            
+            // Extract JAR files from the plugin package
+            java.util.zip.ZipFile(javaFile).use { zip ->
+                // Look for classes.jar or libs/*.jar
+                zip.entries().asSequence().forEach { entry ->
+                    when {
+                        entry.name == "classes.jar" -> {
+                            val classesJar = File(tempDir, "classes.jar")
+                            zip.getInputStream(entry).use { input ->
+                                classesJar.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                            urls.add(classesJar.toURI().toURL())
+                            println("[PluginClassLoader] Extracted classes.jar")
+                        }
+                        entry.name.startsWith("libs/") && entry.name.endsWith(".jar") -> {
+                            val libJar = File(tempDir, entry.name.substringAfterLast("/"))
+                            zip.getInputStream(entry).use { input ->
+                                libJar.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                            urls.add(libJar.toURI().toURL())
+                            println("[PluginClassLoader] Extracted lib: ${entry.name}")
+                        }
+                    }
+                }
+            }
+            
+            // If no JARs found inside, treat the .iplugin itself as a JAR
+            if (urls.isEmpty()) {
+                urls.add(javaFile.toURI().toURL())
+                println("[PluginClassLoader] Using .iplugin directly as JAR")
+            }
+            
+            // Create URLClassLoader with all JARs
             val classLoader = URLClassLoader(
-                arrayOf(javaFile.toURI().toURL()),
+                urls.toTypedArray(),
                 this::class.java.classLoader
             )
             
             // Store the classloader for later access
             pluginClassLoaders[manifest.id] = classLoader
             
-            // Load the main plugin class
-            // Convention: plugin class name is {manifest.id}.Plugin
-            val className = "${manifest.id}.Plugin"
+            // Load the main plugin class from manifest.mainClass
+            // Fallback to convention: {manifest.id}.Plugin if mainClass is not specified
+            val className = manifest.mainClass ?: "${manifest.id}.Plugin"
+            println("[PluginClassLoader] Loading class: $className")
             
             @Suppress("UNCHECKED_CAST")
             return classLoader.loadClass(className) as Class<out Plugin>

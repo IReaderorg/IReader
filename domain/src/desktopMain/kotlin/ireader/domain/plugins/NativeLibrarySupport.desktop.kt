@@ -89,20 +89,10 @@ actual fun loadNativeLibraryImpl(nativeDir: String, libraryName: String) {
 }
 
 
-// Cache for plugin package paths
-private val pluginPackagePaths = mutableMapOf<String, String>()
-
-/**
- * Register a plugin's package path for native library extraction.
- */
-fun registerPluginPackagePath(pluginId: String, packagePath: String) {
-    pluginPackagePaths[pluginId] = packagePath
-    Log.info { "Registered plugin package path: $pluginId -> $packagePath" }
-}
-
 /**
  * Get the path to a plugin's package file (.iplugin).
+ * Uses the map from PluginLoader.desktop.kt
  */
 actual fun getPluginPackagePathImpl(pluginId: String): String? {
-    return pluginPackagePaths[pluginId]
+    return getPluginPackagePath(pluginId)
 }
