@@ -150,15 +150,24 @@ private class StubJSEngine : JSEngine {
 }
 
 /**
- * Shared V8 thread pool for all engines.
- * V8 runtimes are single-threaded but we can have multiple runtimes on different threads.
+ * Factory for creating single-thread executors for V8 engines.
+ * Each V8 runtime MUST be accessed from the same thread that created it.
+ * Using a shared pool causes "Invalid V8 thread access" errors.
  */
-private object V8ThreadPool {
-    // Use a small pool of threads for V8 operations
-    private val executor = Executors.newFixedThreadPool(2) { r ->
-        Thread(r, "V8-Pool-${System.nanoTime()}").apply { isDaemon = true }
+private object V8ThreadFactory {
+    private var threadCounter = 0L
+    
+    /**
+     * Create a new single-thread dispatcher for a V8 engine.
+     * Each engine gets its own dedicated thread to ensure thread safety.
+     */
+    fun createDispatcher(): kotlinx.coroutines.CoroutineDispatcher {
+        val threadId = threadCounter++
+        val executor = Executors.newSingleThreadExecutor { r ->
+            Thread(r, "V8-Engine-$threadId").apply { isDaemon = true }
+        }
+        return executor.asCoroutineDispatcher()
     }
-    val dispatcher = executor.asCoroutineDispatcher()
 }
 
 /**
@@ -414,13 +423,16 @@ private class J2V8ReflectionEngine(
     private var isEngineLoaded = false
     private val mutex = Mutex()
     
+    // Each engine gets its own dedicated thread - V8 requires single-thread access
+    private val v8Dispatcher = V8ThreadFactory.createDispatcher()
+    
     // Use cached method references from helper
     private val executeVoidScriptMethod = J2V8EngineHelper.getExecuteVoidScriptMethod()
     private val executeStringScriptMethod = J2V8EngineHelper.getExecuteStringScriptMethod()
     private val createRuntimeMethod = J2V8EngineHelper.getCreateRuntimeMethod()
     private val releaseMethod = J2V8EngineHelper.getReleaseMethod()
     
-    override suspend fun loadPlugin(jsCode: String, pluginId: String): LNReaderPlugin = withContext(V8ThreadPool.dispatcher) {
+    override suspend fun loadPlugin(jsCode: String, pluginId: String): LNReaderPlugin = withContext(v8Dispatcher) {
         mutex.withLock {
             try {
                 // Close existing engine if any
@@ -462,8 +474,8 @@ private class J2V8ReflectionEngine(
                 
                 isEngineLoaded = true
                 
-                // Create wrapper with pre-extracted metadata
-                J2V8PluginWrapper(this@J2V8ReflectionEngine, pluginId, bridgeService, metadataJson)
+                // Create wrapper with pre-extracted metadata and same dispatcher
+                J2V8PluginWrapper(this@J2V8ReflectionEngine, pluginId, bridgeService, metadataJson, v8Dispatcher)
                 
             } catch (e: Exception) {
                 Log.error { "J2V8ReflectionEngine: Failed to load plugin: ${e.message}" }
@@ -527,7 +539,8 @@ private class J2V8PluginWrapper(
     private val engine: J2V8ReflectionEngine,
     private val pluginId: String,
     private val bridgeService: JSBridgeService,
-    metadataJson: String?
+    metadataJson: String?,
+    private val v8Dispatcher: kotlinx.coroutines.CoroutineDispatcher
 ) : LNReaderPlugin {
 
     private val mutex = Mutex()
@@ -565,7 +578,7 @@ private class J2V8PluginWrapper(
     override suspend fun getLang(): String = cachedLang
     override suspend fun getIcon(): String = cachedIcon
 
-    override suspend fun searchNovels(query: String, page: Int): List<PluginNovel> = withContext(V8ThreadPool.dispatcher) {
+    override suspend fun searchNovels(query: String, page: Int): List<PluginNovel> = withContext(v8Dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.searchNovels('${query.replace("'", "\\'")}', $page)")
@@ -577,7 +590,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(V8ThreadPool.dispatcher) {
+    override suspend fun popularNovels(page: Int, filters: Map<String, Any>): List<PluginNovel> = withContext(v8Dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.popularNovels($page)")
@@ -589,7 +602,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun latestNovels(page: Int): List<PluginNovel> = withContext(V8ThreadPool.dispatcher) {
+    override suspend fun latestNovels(page: Int): List<PluginNovel> = withContext(v8Dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.latestNovels($page)")
@@ -601,7 +614,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun getNovelDetails(url: String): PluginNovelDetails = withContext(V8ThreadPool.dispatcher) {
+    override suspend fun getNovelDetails(url: String): PluginNovelDetails = withContext(v8Dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.getNovelDetails('${url.replace("'", "\\'")}')")
@@ -613,7 +626,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun getChapters(url: String): List<PluginChapter> = withContext(V8ThreadPool.dispatcher) {
+    override suspend fun getChapters(url: String): List<PluginChapter> = withContext(v8Dispatcher) {
         mutex.withLock {
             try {
                 val resultJson = awaitPromise("__wrappedPlugin.getChapters('${url.replace("'", "\\'")}')")
@@ -625,7 +638,7 @@ private class J2V8PluginWrapper(
         }
     }
 
-    override suspend fun getChapterContent(url: String): String = withContext(V8ThreadPool.dispatcher) {
+    override suspend fun getChapterContent(url: String): String = withContext(v8Dispatcher) {
         mutex.withLock {
             try {
                 awaitPromise("__wrappedPlugin.getChapterContent('${url.replace("'", "\\'")}')")

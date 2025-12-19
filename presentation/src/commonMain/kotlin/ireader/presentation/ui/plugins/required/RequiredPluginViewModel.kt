@@ -297,7 +297,32 @@ class RequiredPluginViewModel(
                         // If this is a JS engine plugin, trigger retry of JS plugin loading
                         if (_state.value.pluginType == RequiredPluginType.JS_ENGINE ||
                             _state.value.pluginType == RequiredPluginType.GRAALVM_ENGINE) {
+                            // Give the plugin system time to register the classloader
+                            kotlinx.coroutines.delay(500)
+                            
+                            // Try to reload JS plugins
                             catalogStore.retryJSPluginLoading()
+                            
+                            // Wait a bit and check if JS engine is now available
+                            kotlinx.coroutines.delay(1000)
+                            
+                            // Check if JS sources were loaded successfully
+                            val jsEngineMissing = catalogStore.jsEngineMissing.value
+                            val pendingCount = catalogStore.pendingJSPluginsCount.value
+                            
+                            if (jsEngineMissing || pendingCount > 0) {
+                                // JS engine still not working, recommend restart
+                                _state.value = _state.value.copy(
+                                    restartRecommended = true,
+                                    jsSourcesReloaded = false
+                                )
+                            } else {
+                                // JS sources loaded successfully!
+                                _state.value = _state.value.copy(
+                                    jsSourcesReloaded = true,
+                                    restartRecommended = false
+                                )
+                            }
                         }
                     }
                     .onFailure { error ->

@@ -53,7 +53,11 @@ data class RequiredPluginState(
     val isDownloading: Boolean = false,
     val downloadProgress: Float = 0f,
     val error: String? = null,
-    val pluginInfo: PluginDisplayInfo? = null
+    val pluginInfo: PluginDisplayInfo? = null,
+    /** True if JS sources were successfully reloaded after enabling JS engine plugin */
+    val jsSourcesReloaded: Boolean = false,
+    /** True if app restart is recommended (JS engine couldn't initialize without restart) */
+    val restartRecommended: Boolean = false
 )
 
 /**
@@ -144,15 +148,19 @@ fun RequiredPluginScreen(
             
             // Subtitle
             Text(
-                text = if (state.isInstalled && state.isEnabled) {
-                    "You can now use $featureName"
-                } else if (state.isInstalled) {
-                    "Enable the plugin to use $featureName"
-                } else {
-                    "$featureName requires ${pluginConfig.name}"
+                text = when {
+                    state.restartRecommended -> "Please restart the app to use $featureName"
+                    state.isInstalled && state.isEnabled && state.jsSourcesReloaded -> "You can now use $featureName"
+                    state.isInstalled && state.isEnabled -> "Sources are being loaded..."
+                    state.isInstalled -> "Enable the plugin to use $featureName"
+                    else -> "$featureName requires ${pluginConfig.name}"
                 },
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (state.restartRecommended) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 textAlign = TextAlign.Center
             )
             
@@ -435,6 +443,54 @@ private fun ActionButton(
     onDismiss: () -> Unit
 ) {
     when {
+        state.restartRecommended -> {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Restart info card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "The plugin was installed successfully. Please restart the app to load JavaScript sources.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        text = "OK, I'll Restart Later",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+        }
         state.isInstalled && state.isEnabled -> {
             Button(
                 onClick = onDismiss,

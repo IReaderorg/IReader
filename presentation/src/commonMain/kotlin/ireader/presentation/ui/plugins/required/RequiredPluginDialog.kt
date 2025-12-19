@@ -27,10 +27,23 @@ fun RequiredPluginDialog(
     
     val state by viewModel.state
     
-    // Auto-dismiss when plugin is ready
-    LaunchedEffect(state.isInstalled, state.isEnabled) {
+    // Auto-dismiss when plugin is ready and sources are loaded (or restart not needed)
+    LaunchedEffect(state.isInstalled, state.isEnabled, state.jsSourcesReloaded, state.restartRecommended) {
+        // For JS engine plugins, wait until sources are reloaded or restart is recommended
+        val isJSEngine = state.pluginType == RequiredPluginType.JS_ENGINE || 
+                         state.pluginType == RequiredPluginType.GRAALVM_ENGINE
+        
         if (state.isInstalled && state.isEnabled) {
-            onPluginReady()
+            if (isJSEngine) {
+                // Only auto-dismiss if sources were successfully reloaded
+                if (state.jsSourcesReloaded) {
+                    onPluginReady()
+                }
+                // Don't auto-dismiss if restart is recommended - let user see the message
+            } else {
+                // For non-JS plugins (like Piper TTS), dismiss immediately
+                onPluginReady()
+            }
         }
     }
     
@@ -82,10 +95,23 @@ fun RequiredPluginBottomSheet(
     
     val state by viewModel.state
     
-    // Auto-dismiss when plugin is ready
-    LaunchedEffect(state.isInstalled, state.isEnabled) {
+    // Auto-dismiss when plugin is ready and sources are loaded (or restart not needed)
+    LaunchedEffect(state.isInstalled, state.isEnabled, state.jsSourcesReloaded, state.restartRecommended) {
+        // For JS engine plugins, wait until sources are reloaded or restart is recommended
+        val isJSEngine = state.pluginType == RequiredPluginType.JS_ENGINE || 
+                         state.pluginType == RequiredPluginType.GRAALVM_ENGINE
+        
         if (state.isInstalled && state.isEnabled) {
-            onPluginReady()
+            if (isJSEngine) {
+                // Only auto-dismiss if sources were successfully reloaded
+                if (state.jsSourcesReloaded) {
+                    onPluginReady()
+                }
+                // Don't auto-dismiss if restart is recommended - let user see the message
+            } else {
+                // For non-JS plugins (like Piper TTS), dismiss immediately
+                onPluginReady()
+            }
         }
     }
     
