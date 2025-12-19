@@ -10,12 +10,14 @@ import kotlinx.serialization.json.Json
 /**
  * Manager for Gradio TTS configurations and engines.
  * Handles preset and custom TTS configurations, persistence, and engine creation.
+ * Also loads configurations from installed GRADIO_TTS plugins.
  */
 class GradioTTSManager(
     private val httpClient: HttpClient,
     private val audioPlayerFactory: () -> GradioAudioPlayer,
     private val saveConfigs: (String) -> Unit,
-    private val loadConfigs: () -> String?
+    private val loadConfigs: () -> String?,
+    private val pluginManager: ireader.domain.plugins.PluginManager? = null
 ) {
     private val json = Json { 
         ignoreUnknownKeys = true 
@@ -40,34 +42,47 @@ class GradioTTSManager(
     
     /**
      * Load saved configurations from storage
-     * Merges current presets with saved custom configs to ensure new presets are always available
+     * Merges current presets with saved custom configs and plugin configs
      */
     private fun loadSavedConfigs() {
         try {
             val savedJson = loadConfigs()
+            
+            // Get all current presets (includes any newly added ones)
+            val currentPresets = GradioTTSPresets.getAllPresets()
+            
+            // Load configs from installed GRADIO_TTS plugins
+            val pluginConfigs = pluginManager?.let { 
+                GradioTTSPluginLoader.loadFromPlugins(it) 
+            } ?: emptyList()
+            
             if (savedJson != null) {
                 val saved = json.decodeFromString<GradioTTSManagerState>(savedJson)
-                
-                // Get all current presets (includes any newly added ones)
-                val currentPresets = GradioTTSPresets.getAllPresets()
                 
                 // Extract only custom configs from saved state
                 val customConfigs = saved.configs.filter { it.isCustom }
                 
-                // Merge: current presets + saved custom configs
-                _configs.value = currentPresets + customConfigs
+                // Merge: current presets + plugin configs + saved custom configs
+                _configs.value = currentPresets + pluginConfigs + customConfigs
                 _activeConfigId.value = saved.activeConfigId
                 
-                Log.info { "$TAG: Merged ${currentPresets.size} presets + ${customConfigs.size} custom configs" }
+                Log.info { "$TAG: Merged ${currentPresets.size} presets + ${pluginConfigs.size} plugin configs + ${customConfigs.size} custom configs" }
             } else {
-                // Initialize with presets
-                _configs.value = GradioTTSPresets.getAllPresets()
-                Log.info { "$TAG: Initialized with ${_configs.value.size} presets" }
+                // Initialize with presets + plugin configs
+                _configs.value = currentPresets + pluginConfigs
+                Log.info { "$TAG: Initialized with ${currentPresets.size} presets + ${pluginConfigs.size} plugin configs" }
             }
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to load configs: ${e.message}" }
             _configs.value = GradioTTSPresets.getAllPresets()
         }
+    }
+    
+    /**
+     * Reload plugin configs (call after installing/uninstalling plugins)
+     */
+    fun reloadPluginConfigs() {
+        loadSavedConfigs()
     }
     
     /**
@@ -209,10 +224,18 @@ class GradioTTSManager(
      */
     fun resetPresets() {
         val customConfigs = getCustomConfigs()
-        _configs.value = GradioTTSPresets.getAllPresets() + customConfigs
+        val pluginConfigs = pluginManager?.let { 
+            GradioTTSPluginLoader.loadFromPlugins(it) 
+        } ?: emptyList()
+        _configs.value = GradioTTSPresets.getAllPresets() + pluginConfigs + customConfigs
         saveCurrentConfigs()
         Log.info { "$TAG: Reset presets to defaults" }
     }
+    
+    /**
+     * Get only plugin-based configurations
+     */
+    fun getPluginConfigs(): List<GradioTTSConfig> = _configs.value.filter { it.id.startsWith("plugin_") }
     
     /**
      * Get or create the TTS engine for the active configuration

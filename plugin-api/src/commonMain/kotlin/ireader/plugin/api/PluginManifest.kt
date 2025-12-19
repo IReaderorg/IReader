@@ -50,7 +50,33 @@ data class PluginManifest(
      * }
      * ```
      */
-    val nativeLibraries: Map<String, List<String>>? = null
+    val nativeLibraries: Map<String, List<String>>? = null,
+    /**
+     * Custom metadata for plugin-specific configuration.
+     * A flexible key-value store for plugin-type-specific data.
+     * 
+     * For GRADIO_TTS plugins, use these keys:
+     * - "gradio.spaceUrl": Hugging Face Space URL (required)
+     * - "gradio.apiName": API endpoint name (e.g., "/predict")
+     * - "gradio.apiType": API type (AUTO, GRADIO_API_CALL, CALL, API_PREDICT, RUN, QUEUE)
+     * - "gradio.audioOutputIndex": Output index for audio (default: "0")
+     * - "gradio.params": JSON array of parameter definitions
+     * - "gradio.languages": Comma-separated language codes (e.g., "en,es,fr")
+     * - "gradio.supportsVoiceCloning": "true" if voice cloning is supported
+     * 
+     * Example for Gradio TTS:
+     * ```kotlin
+     * metadata = mapOf(
+     *     "gradio.spaceUrl" to "https://example.hf.space",
+     *     "gradio.apiName" to "/predict",
+     *     "gradio.apiType" to "GRADIO_API",
+     *     "gradio.params" to """[{"type":"text","name":"text"}]"""
+     * )
+     * ```
+     * 
+     * @since 1.1.0
+     */
+    val metadata: Map<String, String> = emptyMap()
 )
 
 /**

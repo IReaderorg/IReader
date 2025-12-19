@@ -263,7 +263,8 @@ actual val DomainModule: Module = module {
             httpClient = get<HttpClients>().default,
             audioPlayerFactory = { ireader.domain.services.tts_service.DesktopGradioAudioPlayer() },
             saveConfigs = { json -> appPrefs.gradioTTSConfigs().set(json) },
-            loadConfigs = { appPrefs.gradioTTSConfigs().get().ifEmpty { null } }
+            loadConfigs = { appPrefs.gradioTTSConfigs().get().ifEmpty { null } },
+            pluginManager = getOrNull()  // Load TTS configs from installed GRADIO_TTS plugins
         )
     }
 }

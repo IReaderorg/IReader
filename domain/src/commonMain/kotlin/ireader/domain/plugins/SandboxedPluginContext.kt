@@ -26,7 +26,7 @@ class SandboxedPluginContext(
     override val permissions: List<PluginPermission>,
     private val sandbox: PluginSandbox,
     private val preferencesStore: PluginPreferencesStore,
-    private val httpClient: HttpClient? = null,
+    private val httpClientInstance: HttpClient? = null,
     private val libraryServiceProvider: LibraryServiceProvider? = null,
     private val readerContextProvider: ReaderContextProvider? = null,
     private val notificationHandler: ((String, String, String) -> Unit)? = null,
@@ -36,7 +36,7 @@ class SandboxedPluginContext(
     
     // Lazy-initialized service providers
     private val httpClientProvider: PluginHttpClientProvider? by lazy {
-        httpClient?.let { PluginHttpClientProviderImpl(it) }
+        httpClientInstance?.let { PluginHttpClientProviderImpl(it) }
     }
     
     private val glossaryServiceProvider: GlossaryServiceProvider by lazy {
@@ -50,6 +50,14 @@ class SandboxedPluginContext(
     private val syncServiceProvider: SyncServiceProvider by lazy {
         SyncServiceProviderImpl()
     }
+    
+    // ==================== Properties from PluginContext ====================
+    
+    override val httpClient: PluginHttpClientProvider?
+        get() = if (hasPermission(PluginPermission.NETWORK)) httpClientProvider else null
+    
+    override val preferences: PluginPreferencesStore
+        get() = if (hasPermission(PluginPermission.PREFERENCES)) preferencesStore else RestrictedPluginPreferencesStore()
     
     /**
      * Get the plugin's data directory for storing files
@@ -84,24 +92,6 @@ class SandboxedPluginContext(
      */
     override fun hasPermission(permission: PluginPermission): Boolean {
         return sandbox.checkPermission(permission)
-    }
-    
-    /**
-     * Get plugin-specific preferences storage
-     * Requirements: 10.2
-     */
-    override fun getPreferences(): PluginPreferencesStore {
-        // Verify preferences permission
-        if (!hasPermission(PluginPermission.PREFERENCES)) {
-            return RestrictedPluginPreferencesStore()
-        }
-        
-        return preferencesStore
-    }
-    
-    override fun getHttpClient(): PluginHttpClientProvider? {
-        if (!hasPermission(PluginPermission.NETWORK)) return null
-        return httpClientProvider
     }
     
     override fun getGlossaryService(): GlossaryServiceProvider? {
@@ -294,7 +284,7 @@ class PluginContextFactory(
             permissions = manifest.permissions,
             sandbox = sandbox,
             preferencesStore = preferencesStore,
-            httpClient = httpClient,
+            httpClientInstance = httpClient,
             libraryServiceProvider = libraryServiceProvider,
             readerContextProvider = readerContextProvider,
             notificationHandler = notificationHandler,

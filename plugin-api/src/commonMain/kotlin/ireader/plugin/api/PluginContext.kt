@@ -16,6 +16,17 @@ interface PluginContext {
     val permissions: List<PluginPermission>
     
     /**
+     * HTTP client for network requests.
+     * Returns null if NETWORK permission is not granted.
+     */
+    val httpClient: PluginHttpClientProvider?
+    
+    /**
+     * Plugin-specific preferences storage.
+     */
+    val preferences: PluginPreferencesStore
+    
+    /**
      * Get the plugin's data directory for storing files.
      * Only available if STORAGE permission is granted.
      * 
@@ -32,24 +43,10 @@ interface PluginContext {
     fun hasPermission(permission: PluginPermission): Boolean
     
     /**
-     * Get plugin-specific preferences storage.
-     * Only available if PREFERENCES permission is granted.
-     * 
-     * @return Preferences store for this plugin
-     */
-    fun getPreferences(): PluginPreferencesStore
-    
-    /**
      * Get the cache directory for temporary files.
      * Only available if STORAGE permission is granted.
      */
     fun getCacheDir(): String
-    
-    /**
-     * Get the HTTP client for network requests.
-     * Only available if NETWORK permission is granted.
-     */
-    fun getHttpClient(): PluginHttpClientProvider?
     
     /**
      * Get the glossary service.

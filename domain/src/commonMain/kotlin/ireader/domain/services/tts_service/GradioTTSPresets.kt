@@ -3,8 +3,20 @@
 import ireader.domain.utils.extensions.currentTimeToLong
 
 /**
- * Predefined configurations for popular Gradio TTS spaces.
- * Users can select from these presets or create custom configurations.
+ * Predefined configurations for Gradio TTS spaces.
+ * 
+ * Note: Most TTS engines have been moved to plugins in IReader-plugins.
+ * Install plugins from the Feature Store for additional TTS options:
+ * - Edge TTS (Gradio)
+ * - Persian TTS (Edge, Chatterbox, Piper, XTTS)
+ * - XTTS v2
+ * - Bark TTS
+ * - Parler TTS
+ * - StyleTTS 2
+ * - Tortoise TTS
+ * - Silero TTS
+ * - OpenVoice
+ * - Fish Speech
  */
 object GradioTTSPresets {
     
@@ -18,352 +30,23 @@ object GradioTTSPresets {
         id = "coqui_ireader",
         name = "Coqui TTS (IReader)",
         spaceUrl = "https://kazemcodes-ireader.hf.space",
-        apiName = "/text_to_speech",  // Function name for /gradio_api/call/{fn_name}
+        apiName = "/text_to_speech",
         parameters = listOf(
             GradioParam.textParam("text"),
             GradioParam.speedParam("speed", 1.0f, 0.5f, 2.0f)
         ),
         audioOutputIndex = 0,
-        description = "High-quality English TTS powered by Coqui (fast_pitch model)",
-        apiType = GradioApiType.GRADIO_API_CALL  // Use /gradio_api/call/ endpoint
+        description = "High-quality English TTS powered by Coqui (fast_pitch model). Default IReader TTS engine.",
+        apiType = GradioApiType.GRADIO_API_CALL
     )
     
     /**
-     * Persian TTS using Piper (Legacy - basic quality)
-     * Example: gyroing/persian-tts-piper
-     * API: /gradio_api/call/synthesize_speech (Gradio 4.x with SSE)
-     */
-    val PERSIAN_PIPER = GradioTTSConfig(
-        id = "persian_piper",
-        name = "Persian TTS (Piper - Basic)",
-        spaceUrl = "https://gyroing-persian-tts-piper.hf.space",
-        apiName = "/synthesize_speech",
-        parameters = listOf(
-            GradioParam.textParam("text")
-        ),
-        audioOutputIndex = 0,
-        description = "Persian language TTS using Piper voices (basic quality)",
-        apiType = GradioApiType.GRADIO_API_CALL  // Use /gradio_api/call/ endpoint
-    )
-    
-    /**
-     * Persian Chatterbox TTS - High quality neural TTS for Persian
-     * Uses Chatterbox model for natural-sounding Persian speech
-     * API: /gradio_api/call/generate_audio (Gradio 4.x with SSE)
-     */
-    val PERSIAN_CHATTERBOX = GradioTTSConfig(
-        id = "persian_chatterbox",
-        name = "Persian TTS (Chatterbox - Natural)",
-        spaceUrl = "https://gyroing-chatterbox-tts-persian-farsi.hf.space",
-        apiName = "/generate_audio",
-        parameters = listOf(
-            GradioParam.textParam("text")
-        ),
-        audioOutputIndex = 0,
-        description = "High-quality Persian TTS using Chatterbox neural model - natural and expressive",
-        apiType = GradioApiType.GRADIO_API_CALL  // Use /gradio_api/call/ endpoint
-    )
-    
-    /**
-     * Persian Edge TTS - Microsoft's neural TTS with Persian voices
-     * Very natural sounding with multiple voice options
-     */
-    val PERSIAN_EDGE_TTS = GradioTTSConfig(
-        id = "persian_edge_tts",
-        name = "Persian TTS (Edge - Premium)",
-        spaceUrl = "https://innoai-edge-tts-text-to-speech.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "voice",
-                choices = listOf(
-                    "fa-IR-DilaraNeural",   // Female - natural, warm
-                    "fa-IR-FaridNeural"     // Male - clear, professional
-                ),
-                defaultValue = "fa-IR-DilaraNeural"
-            ),
-            GradioParam.speedParam("rate", 1.0f, 0.5f, 2.0f)
-        ),
-        audioOutputIndex = 0,
-        description = "Premium Persian TTS using Microsoft Edge neural voices - most natural and realistic"
-    )
-    
-    /**
-     * Persian Coqui XTTS - Voice cloning capable TTS with Persian support
-     * Can clone voices and supports Persian language
-     */
-    val PERSIAN_XTTS = GradioTTSConfig(
-        id = "persian_xtts",
-        name = "Persian TTS (XTTS v2 - Voice Clone)",
-        spaceUrl = "https://coqui-xtts.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "language",
-                choices = listOf("fa"),
-                defaultValue = "fa"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "Persian TTS with XTTS v2 - supports voice cloning for personalized voices"
-    )
-    
-    /**
-     * Edge TTS - Microsoft Edge's TTS service
-     * Many spaces provide Edge TTS wrappers
-     */
-    val EDGE_TTS = GradioTTSConfig(
-        id = "edge_tts",
-        name = "Edge TTS",
-        spaceUrl = "https://innoai-edge-tts-text-to-speech.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "voice",
-                choices = listOf(
-                    "en-US-AriaNeural",
-                    "en-US-GuyNeural",
-                    "en-GB-SoniaNeural",
-                    "en-AU-NatashaNeural"
-                ),
-                defaultValue = "en-US-AriaNeural"
-            ),
-            GradioParam.speedParam("rate", 1.0f, 0.5f, 2.0f)
-        ),
-        audioOutputIndex = 0,
-        description = "Microsoft Edge TTS with multiple voices"
-    )
-    
-    /**
-     * Bark TTS - Suno's text-to-audio model
-     */
-    val BARK_TTS = GradioTTSConfig(
-        id = "bark_tts",
-        name = "Bark TTS",
-        spaceUrl = "https://suno-bark.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "voice_preset",
-                choices = listOf(
-                    "v2/en_speaker_0",
-                    "v2/en_speaker_1",
-                    "v2/en_speaker_2",
-                    "v2/en_speaker_3"
-                ),
-                defaultValue = "v2/en_speaker_0"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "High-quality generative TTS by Suno"
-    )
-    
-    /**
-     * XTTS v2 - Coqui's latest multilingual model
-     */
-    val XTTS_V2 = GradioTTSConfig(
-        id = "xtts_v2",
-        name = "XTTS v2",
-        spaceUrl = "https://coqui-xtts.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "language",
-                choices = listOf("en", "es", "fr", "de", "it", "pt", "pl", "tr", "ru", "nl", "cs", "ar", "zh-cn", "ja", "ko"),
-                defaultValue = "en"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "Coqui's latest multilingual TTS with voice cloning"
-    )
-    
-    /**
-     * Parler TTS - Describe the voice you want
-     */
-    val PARLER_TTS = GradioTTSConfig(
-        id = "parler_tts",
-        name = "Parler TTS",
-        spaceUrl = "https://parler-tts-parler-tts-mini.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.stringParam(
-                name = "description",
-                defaultValue = "A female speaker with a clear and pleasant voice"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "Describe the voice style you want"
-    )
-    
-    /**
-     * StyleTTS 2 - High-quality expressive TTS
-     */
-    val STYLE_TTS_2 = GradioTTSConfig(
-        id = "style_tts_2",
-        name = "StyleTTS 2",
-        spaceUrl = "https://styletts2-styletts2.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.floatParam(
-                name = "alpha",
-                defaultValue = 0.3f,
-                min = 0.0f,
-                max = 1.0f
-            ),
-            GradioParam.floatParam(
-                name = "beta",
-                defaultValue = 0.7f,
-                min = 0.0f,
-                max = 1.0f
-            ),
-            GradioParam.floatParam(
-                name = "diffusion_steps",
-                defaultValue = 5f,
-                min = 1f,
-                max = 20f
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "High-quality expressive TTS with style control"
-    )
-    
-    /**
-     * Tortoise TTS - Slow but high quality
-     */
-    val TORTOISE_TTS = GradioTTSConfig(
-        id = "tortoise_tts",
-        name = "Tortoise TTS",
-        spaceUrl = "https://jbetker-tortoise-tts.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "voice",
-                choices = listOf("random", "angie", "deniro", "freeman", "halle", "lj", "myself", "pat", "snakes", "tom", "train_atkins", "train_daws", "train_dotrice", "train_dreams", "train_empire", "train_grace", "train_kennard", "train_lescault", "train_mouse", "weaver", "william"),
-                defaultValue = "random"
-            ),
-            GradioParam.choiceParam(
-                name = "preset",
-                choices = listOf("ultra_fast", "fast", "standard", "high_quality"),
-                defaultValue = "fast"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "High-quality TTS with many voice options (slower)"
-    )
-    
-    /**
-     * Silero TTS - Fast and lightweight
-     */
-    val SILERO_TTS = GradioTTSConfig(
-        id = "silero_tts",
-        name = "Silero TTS",
-        spaceUrl = "https://silero-silero-tts.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "language",
-                choices = listOf("en", "de", "es", "fr", "ru", "ua", "uz", "xal", "indic"),
-                defaultValue = "en"
-            ),
-            GradioParam.choiceParam(
-                name = "speaker",
-                choices = listOf("en_0", "en_1", "en_2", "en_3", "en_4"),
-                defaultValue = "en_0"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "Fast and lightweight TTS with multiple languages"
-    )
-    
-    /**
-     * OpenVoice - Voice cloning TTS
-     */
-    val OPEN_VOICE = GradioTTSConfig(
-        id = "open_voice",
-        name = "OpenVoice",
-        spaceUrl = "https://myshell-ai-openvoice.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "style",
-                choices = listOf("default", "whispering", "shouting", "excited", "cheerful", "terrified", "angry", "sad", "friendly"),
-                defaultValue = "default"
-            ),
-            GradioParam.choiceParam(
-                name = "language",
-                choices = listOf("EN", "ES", "FR", "ZH", "JP", "KR"),
-                defaultValue = "EN"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "Voice cloning TTS with emotion control"
-    )
-    
-    /**
-     * Fish Speech - Fast multilingual TTS
-     */
-    val FISH_SPEECH = GradioTTSConfig(
-        id = "fish_speech",
-        name = "Fish Speech",
-        spaceUrl = "https://fishaudio-fish-speech-1.hf.space",
-        apiName = "/predict",
-        parameters = listOf(
-            GradioParam.textParam("text"),
-            GradioParam.choiceParam(
-                name = "language",
-                choices = listOf("en", "zh", "ja", "ko"),
-                defaultValue = "en"
-            )
-        ),
-        audioOutputIndex = 0,
-        description = "Fast multilingual TTS with natural prosody"
-    )
-    
-    /**
-     * Get all available presets
+     * Get all available built-in presets.
+     * Additional TTS engines are available as plugins.
      */
     fun getAllPresets(): List<GradioTTSConfig> = listOf(
-        COQUI_IREADER,
-        EDGE_TTS,
-        XTTS_V2,
-        STYLE_TTS_2,
-        SILERO_TTS,
-        OPEN_VOICE,
-        FISH_SPEECH,
-        PARLER_TTS,
-        TORTOISE_TTS,
-        BARK_TTS,
-        // Persian TTS options - ordered by quality (best first)
-        PERSIAN_EDGE_TTS,       // Premium - Microsoft neural voices
-        PERSIAN_CHATTERBOX,     // Natural - Chatterbox neural model
-        PERSIAN_XTTS,           // Voice cloning capable
-        PERSIAN_PIPER           // Basic - Piper (legacy)
+        COQUI_IREADER
     )
-    
-    /**
-     * Get all Persian TTS presets
-     */
-    fun getPersianPresets(): List<GradioTTSConfig> = listOf(
-        PERSIAN_EDGE_TTS,
-        PERSIAN_CHATTERBOX,
-        PERSIAN_XTTS,
-        PERSIAN_PIPER
-    )
-    
-    /**
-     * Get recommended Persian TTS preset (best quality)
-     */
-    fun getRecommendedPersianPreset(): GradioTTSConfig = PERSIAN_EDGE_TTS
     
     /**
      * Get preset by ID

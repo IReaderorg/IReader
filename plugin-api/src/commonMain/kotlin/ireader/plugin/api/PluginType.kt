@@ -88,5 +88,34 @@ enum class PluginType {
      * These plugins enable running LNReader-compatible source plugins
      * without bundling the JS engine with the base app.
      */
-    JS_ENGINE
+    JS_ENGINE,
+    
+    /**
+     * Tachiyomi/Mihon source loader plugins.
+     * Implement [TachiSourceLoaderPlugin] interface.
+     * 
+     * These plugins load Tachiyomi/Mihon extension APKs and provide
+     * manga sources to IReader. Uses dex2jar on Desktop and DexClassLoader on Android.
+     */
+    TACHI_SOURCE_LOADER,
+    
+    /**
+     * Custom reader/viewer screen plugins.
+     * Implement [ReaderScreenPlugin] interface.
+     * 
+     * These plugins provide alternative reading experiences:
+     * - Custom text readers (different layouts, fonts, themes)
+     * - Custom image viewers (webtoon mode, page modes)
+     * - Custom video players (streaming, casting)
+     */
+    READER_SCREEN,
+    
+    /**
+     * Source loader plugins (generic).
+     * Implement [SourceLoaderPlugin] interface.
+     * 
+     * Base type for plugins that load content sources.
+     * Use more specific types (TACHI_SOURCE_LOADER) when applicable.
+     */
+    SOURCE_LOADER
 }
