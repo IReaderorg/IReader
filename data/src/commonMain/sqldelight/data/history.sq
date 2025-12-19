@@ -124,8 +124,12 @@ removeResettedHistory:
 DELETE FROM history
 WHERE last_read = 0;
 
+-- Legacy upsert replaced for SQLite 3.22 compatibility (Android 9)
+-- Note: For history, we need special handling since time_read should accumulate
+-- Using INSERT OR REPLACE - caller must handle time_read accumulation
 upsert:
-INSERT INTO history(chapter_id, last_read, time_read, progress) VALUES (:chapterId, :readAt, :time_read, :reading_progress) ON CONFLICT(chapter_id) DO UPDATE SET last_read = :readAt, time_read = time_read + :time_read, progress = :reading_progress WHERE chapter_id = :chapterId;
+INSERT OR REPLACE INTO history(chapter_id, last_read, time_read, progress) 
+VALUES (:chapterId, :readAt, :time_read, :reading_progress);
 
 deleteByBookId:
 DELETE FROM history WHERE chapter_id IN (SELECT chapter._id FROM chapter WHERE chapter.book_id = :bookId);

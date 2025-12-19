@@ -35,8 +35,10 @@ SET is_broken = :isBroken,
     replacement_source_id = :replacementSourceId
 WHERE chapter_id = :chapterId;
 
+-- Legacy upsert replaced for SQLite 3.22 compatibility (Android 9)
 upsert:
-INSERT INTO chapterHealth(chapter_id, is_broken, break_reason, checked_at, repair_attempted_at, repair_successful, replacement_source_id) VALUES (:chapterId, :isBroken, :breakReason, :checkedAt, :repairAttemptedAt, :repairSuccessful, :replacementSourceId) ON CONFLICT(chapter_id) DO UPDATE SET is_broken = :isBroken, break_reason = :breakReason, checked_at = :checkedAt, repair_attempted_at = :repairAttemptedAt, repair_successful = :repairSuccessful, replacement_source_id = :replacementSourceId WHERE chapter_id = :chapterId;
+INSERT OR REPLACE INTO chapterHealth(chapter_id, is_broken, break_reason, checked_at, repair_attempted_at, repair_successful, replacement_source_id) 
+VALUES (:chapterId, :isBroken, :breakReason, :checkedAt, :repairAttemptedAt, :repairSuccessful, :replacementSourceId);
 
 delete:
 DELETE FROM chapterHealth WHERE chapter_id = :chapterId;

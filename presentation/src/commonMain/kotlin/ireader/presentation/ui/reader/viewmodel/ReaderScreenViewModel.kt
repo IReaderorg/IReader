@@ -204,7 +204,10 @@ class ReaderScreenViewModel(
     private var chapterControllerEventJob: Job? = null
     private val preloadedChapters = mutableMapOf<Long, Chapter>()
     
-
+    // Custom fonts - must be declared before init block to ensure proper initialization
+    var customFonts by mutableStateOf<List<ireader.domain.models.fonts.CustomFont>>(emptyList())
+        private set
+    val selectedFontId = mutableStateOf("")
 
     // ==================== Initialization ====================
 
@@ -230,14 +233,27 @@ class ReaderScreenViewModel(
             }
         }
         
-        // Load custom fonts
-        scope.launch {
-            customFonts = fontManagementUseCase.getCustomFonts()
-        }
-        
         // Set up next chapter provider for auto-translate feature
         translationViewModel.setNextChapterProvider {
             getNextChapter()
+        }
+        
+        // Load custom fonts (deferred to ensure property is initialized)
+        loadCustomFonts()
+    }
+    
+    /**
+     * Load custom fonts asynchronously.
+     * Separated from init to ensure customFonts property delegate is fully initialized.
+     */
+    private fun loadCustomFonts() {
+        scope.launch {
+            try {
+                customFonts = fontManagementUseCase.getCustomFonts()
+            } catch (e: Exception) {
+                // Log but don't crash - fonts are optional
+                ireader.core.log.Log.warn { "Failed to load custom fonts: ${e.message}" }
+            }
         }
     }
     
@@ -1526,10 +1542,7 @@ class ReaderScreenViewModel(
     // TTS with translated text preference
     val useTTSWithTranslatedText = readerPreferences.useTTSWithTranslatedText().asState()
     
-    // Custom fonts
-    var customFonts by mutableStateOf<List<ireader.domain.models.fonts.CustomFont>>(emptyList())
-        private set
-    val selectedFontId = mutableStateOf("")
+    // Note: customFonts and selectedFontId are declared before init block
     
     // ==================== UI Action Methods ====================
     

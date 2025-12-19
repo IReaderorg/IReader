@@ -130,7 +130,7 @@ class ReaderThemeRepositoryImpl(
     override suspend fun insert(theme: ReaderTheme): Long {
         return handler.awaitOneAsync(inTransaction = true) {
             theme.let { theme ->
-                readerThemesQueries.upsert(theme.backgroundColor, theme.onTextColor, theme.id)
+                readerThemesQueries.upsert(theme.id, theme.backgroundColor, theme.onTextColor)
             }
        readerThemesQueries.selectLastInsertedRowId()
         }
@@ -139,7 +139,7 @@ class ReaderThemeRepositoryImpl(
     override suspend fun insert(theme: List<ReaderTheme>) {
         handler.await(true) {
             theme.forEach { theme ->
-                readerThemesQueries.upsert(theme.backgroundColor, theme.onTextColor, theme.id)
+                readerThemesQueries.upsert(theme.id, theme.backgroundColor, theme.onTextColor)
             }
 
         }

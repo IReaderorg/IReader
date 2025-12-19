@@ -65,8 +65,11 @@ SET translated_content = :translatedContent,
     updated_at = :updatedAt
 WHERE _id = :id;
 
+-- Legacy upsert replaced for SQLite 3.22 compatibility (Android 9)
+-- Note: Uses UNIQUE(chapter_id, target_language, translator_engine_id) constraint
 upsert:
-INSERT INTO translated_chapter(chapter_id, book_id, source_language, target_language, translator_engine_id, translated_content, created_at, updated_at) VALUES (:chapterId, :bookId, :sourceLanguage, :targetLanguage, :translatorEngineId, :translatedContent, :createdAt, :updatedAt) ON CONFLICT(chapter_id, target_language, translator_engine_id) DO UPDATE SET translated_content = :translatedContent, updated_at = :updatedAt;
+INSERT OR REPLACE INTO translated_chapter(chapter_id, book_id, source_language, target_language, translator_engine_id, translated_content, created_at, updated_at) 
+VALUES (:chapterId, :bookId, :sourceLanguage, :targetLanguage, :translatorEngineId, :translatedContent, :createdAt, :updatedAt);
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID() AS Long;

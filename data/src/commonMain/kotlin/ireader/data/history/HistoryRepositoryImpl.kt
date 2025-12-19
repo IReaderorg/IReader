@@ -106,11 +106,17 @@ class HistoryRepositoryImpl constructor(
         readDuration: Long,
         progress: Float
     ) {
+        // Fetch existing history to accumulate time_read (needed for SQLite 3.22 compatibility)
+        val existingHistory = handler.awaitOneOrNull { 
+            historyQueries.findHistoryByChapterId(chapterId, historyMapper) 
+        }
+        val accumulatedTime = (existingHistory?.readDuration ?: 0L) + readDuration
+        
         return handler.await {
             historyQueries.upsert(
                 chapterId = chapterId,
                 readAt = readAt,
-                time_read = readDuration,
+                time_read = accumulatedTime,
                 reading_progress = progress.toDouble()
             )
         }

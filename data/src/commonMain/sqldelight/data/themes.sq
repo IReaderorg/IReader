@@ -50,8 +50,10 @@ DELETE FROM theme WHERE theme._id = :id;
 deleteAll:
 DELETE FROM theme;
 
+-- Legacy upsert replaced for SQLite 3.22 compatibility (Android 9)
 upsert:
-INSERT INTO theme(_id, isDark, `primary`, onPrimary, primaryContainer, onPrimaryContainer, inversePrimary, secondary, onSecondary, secondaryContainer, onSecondaryContainer, tertiary, `onTertiary`, tertiaryContainer, background, onBackground, surface, onSurface, surfaceTint, inverseSurface, inverseOnSurface, error, onError, errorContainer, onErrorContainer, outline, outlineVariant, scrim, bars, onBars, isBarLight, surfaceVariant, onSurfaceVariant, onTertiaryContainer) VALUES (:id, :isDark, :primary, :onPrimary, :primaryContainer, :onPrimaryContainer, :inversePrimary, :secondary, :onSecondary, :secondaryContainer, :onSecondaryContainer, :tertiary, :setOnTertiary, :tertiaryContainer, :background, :onBackground, :surface, :onSurface, :surfaceTint, :inverseSurface, :inverseOnSurface, :error, :onError, :errorContainer, :onErrorContainer, :outline, :outlineVariant, :scrim, :bars, :onBars, :isBarLight, :surfaceVariant, :onSurfaceVariant, :onTertiaryContainer) ON CONFLICT(_id) DO UPDATE SET `primary` = :primary, secondary = :secondary, bars = :bars WHERE _id = :id;
+INSERT OR REPLACE INTO theme(_id, isDark, `primary`, onPrimary, primaryContainer, onPrimaryContainer, inversePrimary, secondary, onSecondary, secondaryContainer, onSecondaryContainer, tertiary, `onTertiary`, tertiaryContainer, background, onBackground, surface, onSurface, surfaceTint, inverseSurface, inverseOnSurface, error, onError, errorContainer, onErrorContainer, outline, outlineVariant, scrim, bars, onBars, isBarLight, surfaceVariant, onSurfaceVariant, onTertiaryContainer) 
+VALUES (:id, :isDark, :primary, :onPrimary, :primaryContainer, :onPrimaryContainer, :inversePrimary, :secondary, :onSecondary, :secondaryContainer, :onSecondaryContainer, :tertiary, :setOnTertiary, :tertiaryContainer, :background, :onBackground, :surface, :onSurface, :surfaceTint, :inverseSurface, :inverseOnSurface, :error, :onError, :errorContainer, :onErrorContainer, :outline, :outlineVariant, :scrim, :bars, :onBars, :isBarLight, :surfaceVariant, :onSurfaceVariant, :onTertiaryContainer);
 
 
 selectLastInsertedRowId:

@@ -21,8 +21,10 @@ DELETE FROM reader_theme WHERE _id =:id;
 deleteAll:
 DELETE FROM reader_theme;
 
+-- Legacy upsert replaced for SQLite 3.22 compatibility (Android 9)
 upsert:
-INSERT INTO reader_theme(background_color, on_textcolor) VALUES (:backgroundColor, :onTextColor) ON CONFLICT(_id) DO UPDATE SET background_color = :backgroundColor, on_textcolor = :onTextColor WHERE _id = :id;
+INSERT OR REPLACE INTO reader_theme(_id, background_color, on_textcolor) 
+VALUES (:id, :backgroundColor, :onTextColor);
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID();

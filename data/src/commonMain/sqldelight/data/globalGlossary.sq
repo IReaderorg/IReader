@@ -83,8 +83,11 @@ SET synced_at = :syncedAt,
     remote_id = :remoteId
 WHERE _id = :id;
 
+-- Legacy upsert replaced for SQLite 3.22 compatibility (Android 9)
+-- Note: Uses UNIQUE(book_key, source_term) constraint for conflict resolution
 upsert:
-INSERT INTO global_glossary(book_key, book_title, source_term, target_term, term_type, notes, source_language, target_language, created_at, updated_at, synced_at, remote_id) VALUES (:bookKey, :bookTitle, :sourceTerm, :targetTerm, :termType, :notes, :sourceLanguage, :targetLanguage, :createdAt, :updatedAt, :syncedAt, :remoteId) ON CONFLICT(book_key, source_term) DO UPDATE SET target_term = :targetTerm, term_type = :termType, notes = :notes, updated_at = :updatedAt, synced_at = :syncedAt, remote_id = :remoteId;
+INSERT OR REPLACE INTO global_glossary(book_key, book_title, source_term, target_term, term_type, notes, source_language, target_language, created_at, updated_at, synced_at, remote_id) 
+VALUES (:bookKey, :bookTitle, :sourceTerm, :targetTerm, :termType, :notes, :sourceLanguage, :targetLanguage, :createdAt, :updatedAt, :syncedAt, :remoteId);
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID() AS Long;
