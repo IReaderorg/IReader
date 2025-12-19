@@ -217,7 +217,8 @@ val screenModelModule = module {
             pluginManager = get(),
             repositoryRepository = get(),
             indexFetcher = get(),
-            downloadService = get()
+            downloadService = get(),
+            uiPreferences = get()
         )
     }
     

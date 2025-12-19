@@ -112,18 +112,19 @@ class PluginManager(
             var enabledIdsChanged = false
             
             plugins.forEach { plugin ->
-                // Auto-enable engine plugins (JS_ENGINE, TTS, GRADIO_TTS) if not already enabled
-                // These are infrastructure plugins that should be enabled automatically
-                val isEnginePlugin = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
-                                     plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
-                                     plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS
+                // Auto-enable infrastructure plugins if not already enabled
+                // These include: JS_ENGINE, TTS, GRADIO_TTS, and THEME plugins
+                val isAutoEnablePlugin = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
+                                         plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
+                                         plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS ||
+                                         plugin.manifest.type == ireader.plugin.api.PluginType.THEME
                 
-                println("[PluginManager] Plugin ${plugin.manifest.id}: type=${plugin.manifest.type}, isEnginePlugin=$isEnginePlugin, alreadyEnabled=${enabledIds.contains(plugin.manifest.id)}")
+                println("[PluginManager] Plugin ${plugin.manifest.id}: type=${plugin.manifest.type}, isAutoEnablePlugin=$isAutoEnablePlugin, alreadyEnabled=${enabledIds.contains(plugin.manifest.id)}")
                 
-                if (isEnginePlugin && !enabledIds.contains(plugin.manifest.id)) {
+                if (isAutoEnablePlugin && !enabledIds.contains(plugin.manifest.id)) {
                     enabledIds.add(plugin.manifest.id)
                     enabledIdsChanged = true
-                    println("[PluginManager] Auto-enabling engine plugin: ${plugin.manifest.id}")
+                    println("[PluginManager] Auto-enabling plugin: ${plugin.manifest.id} (type: ${plugin.manifest.type})")
                 }
                 
                 if (enabledIds.contains(plugin.manifest.id)) {
@@ -185,10 +186,11 @@ class PluginManager(
             
             registry.register(plugin)
             
-            // Auto-enable engine plugins (JS_ENGINE, TTS, GRADIO_TTS) since they're required dependencies
+            // Auto-enable infrastructure plugins (JS_ENGINE, TTS, GRADIO_TTS, THEME)
             val shouldAutoEnable = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
                                    plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
-                                   plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS
+                                   plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS ||
+                                   plugin.manifest.type == ireader.plugin.api.PluginType.THEME
             
             val initialStatus = if (shouldAutoEnable) PluginStatus.ENABLED else PluginStatus.DISABLED
             database.insertOrUpdate(plugin.manifest, initialStatus)

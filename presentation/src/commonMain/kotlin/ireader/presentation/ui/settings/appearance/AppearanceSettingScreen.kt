@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -67,9 +68,11 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.isLight
 import ireader.presentation.ui.settings.components.ThemePreviewCard
 import ireader.presentation.core.toComposeColor
+import ireader.presentation.ui.core.modifier.supportDesktopHorizontalLazyListScroll
 import ireader.presentation.core.toDomainColor
 import ireader.presentation.ui.core.ui.PreferenceMutableState
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun AppearanceSettingScreen(
@@ -133,6 +136,19 @@ fun AppearanceSettingScreen(
     val darkThemes = remember(vm.vmThemes.size) {
         vm.vmThemes.filter { it.isDark }
     }
+    
+    // Plugin themes integration
+    val pluginExtension = rememberPluginThemeIntegration(vm.pluginManager, vm)
+    val pluginThemeOptions by pluginExtension.getAllThemesFlow().collectAsState(initial = pluginExtension.getAllThemes())
+    val lightPluginThemes = remember(pluginThemeOptions) {
+        pluginThemeOptions.filterIsInstance<ireader.presentation.ui.core.theme.ThemeOption.Plugin>().filter { !it.isDark }
+    }
+    val darkPluginThemes = remember(pluginThemeOptions) {
+        pluginThemeOptions.filterIsInstance<ireader.presentation.ui.core.theme.ThemeOption.Plugin>().filter { it.isDark }
+    }
+    
+    // Track selected plugin theme
+    var selectedPluginThemeId by remember { mutableStateOf(vm.uiPreferences.selectedPluginTheme().get()) }
 
     LazyColumnWithInsets(scaffoldPaddingValues) {
         // Dynamic Colors Section
@@ -189,7 +205,7 @@ fun AppearanceSettingScreen(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                     Text(
-                        text = "${lightThemes.size} themes available",
+                        text = "${lightThemes.size + lightPluginThemes.size} themes available",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -199,24 +215,53 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
+                val lightThemesScrollState = rememberLazyListState()
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 8.dp)
+                        .supportDesktopHorizontalLazyListScroll(lightThemesScrollState, scope),
+                    state = lightThemesScrollState,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
+                    // Built-in light themes
                     items(items = lightThemes, key = { it.id }) { theme ->
                         ThemePreviewCard(
                             theme = theme,
                             themeName = getThemeName(theme.id),
-                            isSelected = vm.colorTheme.value == theme.id,
+                            isSelected = vm.colorTheme.value == theme.id && selectedPluginThemeId.isEmpty(),
                             onClick = {
                                 vm.colorTheme.value = theme.id
+                                selectedPluginThemeId = ""
+                                vm.uiPreferences.selectedPluginTheme().set("")
                                 // Set colors on the LIGHT color state since this is a light theme
                                 lightCustomColors.primaryState.value = theme.materialColors.primary
                                 lightCustomColors.secondaryState.value = theme.materialColors.secondary
                                 lightCustomColors.barsState.value = theme.extraColors.bars
+                                vm.isSavable = false
+                                // Auto-switch to light mode
+                                vm.saveNightModePreferences(PreferenceValues.ThemeMode.Light)
+                            }
+                        )
+                    }
+                    // Plugin light themes
+                    items(items = lightPluginThemes, key = { "plugin_${it.id}" }) { pluginTheme ->
+                        val appliedTheme = remember(pluginTheme) {
+                            pluginExtension.applyTheme(pluginTheme)
+                        }
+                        ThemePreviewCard(
+                            theme = appliedTheme,
+                            themeName = pluginTheme.name,
+                            isSelected = selectedPluginThemeId == pluginTheme.id,
+                            onClick = {
+                                vm.colorTheme.value = appliedTheme.id
+                                selectedPluginThemeId = pluginTheme.id
+                                vm.uiPreferences.selectedPluginTheme().set(pluginTheme.id)
+                                // Set colors
+                                lightCustomColors.primaryState.value = appliedTheme.materialColors.primary
+                                lightCustomColors.secondaryState.value = appliedTheme.materialColors.secondary
+                                lightCustomColors.barsState.value = appliedTheme.extraColors.bars
                                 vm.isSavable = false
                                 // Auto-switch to light mode
                                 vm.saveNightModePreferences(PreferenceValues.ThemeMode.Light)
@@ -243,7 +288,7 @@ fun AppearanceSettingScreen(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                     Text(
-                        text = "${darkThemes.size} themes available",
+                        text = "${darkThemes.size + darkPluginThemes.size} themes available",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -253,24 +298,53 @@ fun AppearanceSettingScreen(
         }
         item {
             Components.Dynamic {
+                val darkThemesScrollState = rememberLazyListState()
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 8.dp)
+                        .supportDesktopHorizontalLazyListScroll(darkThemesScrollState, scope),
+                    state = darkThemesScrollState,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
+                    // Built-in dark themes
                     items(items = darkThemes, key = { it.id }) { theme ->
                         ThemePreviewCard(
                             theme = theme,
                             themeName = getThemeName(theme.id),
-                            isSelected = vm.colorTheme.value == theme.id,
+                            isSelected = vm.colorTheme.value == theme.id && selectedPluginThemeId.isEmpty(),
                             onClick = {
                                 vm.colorTheme.value = theme.id
+                                selectedPluginThemeId = ""
+                                vm.uiPreferences.selectedPluginTheme().set("")
                                 // Set colors on the DARK color state since this is a dark theme
                                 darkCustomColors.primaryState.value = theme.materialColors.primary
                                 darkCustomColors.secondaryState.value = theme.materialColors.secondary
                                 darkCustomColors.barsState.value = theme.extraColors.bars
+                                vm.isSavable = false
+                                // Auto-switch to dark mode
+                                vm.saveNightModePreferences(PreferenceValues.ThemeMode.Dark)
+                            }
+                        )
+                    }
+                    // Plugin dark themes
+                    items(items = darkPluginThemes, key = { "plugin_${it.id}" }) { pluginTheme ->
+                        val appliedTheme = remember(pluginTheme) {
+                            pluginExtension.applyTheme(pluginTheme)
+                        }
+                        ThemePreviewCard(
+                            theme = appliedTheme,
+                            themeName = pluginTheme.name,
+                            isSelected = selectedPluginThemeId == pluginTheme.id,
+                            onClick = {
+                                vm.colorTheme.value = appliedTheme.id
+                                selectedPluginThemeId = pluginTheme.id
+                                vm.uiPreferences.selectedPluginTheme().set(pluginTheme.id)
+                                // Set colors
+                                darkCustomColors.primaryState.value = appliedTheme.materialColors.primary
+                                darkCustomColors.secondaryState.value = appliedTheme.materialColors.secondary
+                                darkCustomColors.barsState.value = appliedTheme.extraColors.bars
                                 vm.isSavable = false
                                 // Auto-switch to dark mode
                                 vm.saveNightModePreferences(PreferenceValues.ThemeMode.Dark)

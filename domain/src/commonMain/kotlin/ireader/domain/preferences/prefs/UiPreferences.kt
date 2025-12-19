@@ -466,4 +466,26 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun showCharacterArtInDetails(): Preference<Boolean> {
         return preferenceStore.getBoolean("show_character_art_in_details", false)
     }
+    
+    // ============================================================================
+    // Feature Store Cache Settings
+    // ============================================================================
+    
+    /**
+     * Timestamp of the last Feature Store plugin index fetch.
+     * Used to determine if cached data is still valid.
+     * Default: 0 (never fetched)
+     */
+    fun featureStoreLastFetchTime(): Preference<Long> {
+        return preferenceStore.getLong("feature_store_last_fetch_time", 0L)
+    }
+    
+    /**
+     * Cache duration for Feature Store plugin index in hours.
+     * Plugin index will be refreshed from remote only after this duration.
+     * Default: 24 hours
+     */
+    fun featureStoreCacheDurationHours(): Preference<Int> {
+        return preferenceStore.getInt("feature_store_cache_duration_hours", 24)
+    }
 }

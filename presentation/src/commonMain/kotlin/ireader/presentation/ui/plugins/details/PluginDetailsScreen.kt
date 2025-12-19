@@ -1,66 +1,41 @@
 package ireader.presentation.ui.plugins.details
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import ireader.domain.plugins.PluginInfo
+import ireader.domain.plugins.PluginStatus
+import ireader.domain.plugins.PluginType
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.back
-import ireader.i18n.resources.cancel
-import ireader.i18n.resources.download_notifier_title_error
-import ireader.i18n.resources.enable_continue
-import ireader.i18n.resources.enable_plugin_feature
-import ireader.i18n.resources.javascript_plugins_are_currently_disabled
-import ireader.i18n.resources.loading_plugin_details
-import ireader.i18n.resources.retry
-import ireader.i18n.resources.to_use_lnreader_compatible_plugins
-import ireader.i18n.resources.would_you_like_to_enable_it_now
+import ireader.i18n.resources.*
+import ireader.plugin.api.PluginMonetization
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.ui.plugins.details.components.DescriptionSection
-import ireader.presentation.ui.plugins.details.components.DeveloperInfoSection
-import ireader.presentation.ui.plugins.details.components.EmptyReviewsState
-import ireader.presentation.ui.plugins.details.components.InstallButton
-import ireader.presentation.ui.plugins.details.components.PermissionsSection
-import ireader.presentation.ui.plugins.details.components.PluginHeader
-import ireader.presentation.ui.plugins.details.components.PluginScreenshots
-import ireader.presentation.ui.plugins.details.components.PurchaseDialog
-import ireader.presentation.ui.plugins.details.components.ResourceUsageHistoryGraph
-import ireader.presentation.ui.plugins.details.components.ResourceUsageSection
-import ireader.presentation.ui.plugins.details.components.ReviewItem
-import ireader.presentation.ui.plugins.details.components.ReviewsSectionHeader
-import ireader.presentation.ui.plugins.details.components.SuccessMessageDialog
-import ireader.presentation.ui.plugins.details.components.WriteReviewDialog
+import ireader.presentation.ui.plugins.details.components.*
 
-/**
- * Plugin Details screen showing comprehensive plugin information
- * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 7.1, 7.2, 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 13.1, 13.2, 13.3
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PluginDetailsScreen(
@@ -72,52 +47,40 @@ fun PluginDetailsScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     
     Scaffold(
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(state.plugin?.manifest?.name ?: "Plugin Details") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = localizeHelper.localize(Res.string.back)
-                        )
-                    }
-                }
+            ModernDetailsTopBar(
+                plugin = state.plugin,
+                scrollBehavior = scrollBehavior,
+                onNavigateBack = onNavigateBack
             )
         },
         bottomBar = {
             if (state.plugin != null) {
-                InstallButton(
+                ModernInstallBar(
                     plugin = state.plugin!!,
                     installationState = state.installationState,
                     installProgress = state.installProgress,
                     onInstall = viewModel::installPlugin,
-                    onPurchase = viewModel::installPlugin,
-                    onOpen = viewModel::openPlugin,
-                    onRetry = viewModel::retryInstallation,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+                    onEnable = viewModel::enablePlugin,
+                    onDisable = viewModel::disablePlugin,
+                    onUninstall = viewModel::uninstallPlugin,
+                    onRetry = viewModel::retryInstallation
                 )
             }
-        },
-        modifier = modifier
+        }
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             when {
-                state.isLoading && state.plugin == null -> {
-                    LoadingState()
-                }
+                state.isLoading && state.plugin == null -> ModernLoadingState()
                 state.error != null && state.plugin == null -> {
-                    ErrorState(
-                        error = state.error ?: "Unknown error",
-                        onRetry = viewModel::loadPluginDetails
-                    )
+                    ModernErrorState(error = state.error ?: "Unknown error", onRetry = viewModel::loadPluginDetails)
                 }
                 state.plugin != null -> {
-                    PluginDetailsContent(
+                    ModernPluginDetailsContent(
                         state = state,
                         onWriteReview = viewModel::showWriteReviewDialog,
                         onMarkReviewHelpful = viewModel::markReviewHelpful,
@@ -128,7 +91,6 @@ fun PluginDetailsScreen(
         }
     }
     
-    // Purchase dialog
     if (state.showPurchaseDialog && state.plugin != null) {
         PurchaseDialog(
             plugin = state.plugin!!,
@@ -138,43 +100,246 @@ fun PluginDetailsScreen(
         )
     }
     
-    // Review dialog
     if (state.showReviewDialog) {
-        WriteReviewDialog(
-            onSubmit = viewModel::submitReview,
-            onDismiss = viewModel::dismissReviewDialog
-        )
+        WriteReviewDialog(onSubmit = viewModel::submitReview, onDismiss = viewModel::dismissReviewDialog)
     }
     
-    // Success message
     if (state.showSuccessMessage) {
         SuccessMessageDialog(
-            onOpen = {
-                viewModel.dismissSuccessMessage()
-                viewModel.openPlugin()
-            },
+            onOpen = { viewModel.dismissSuccessMessage(); viewModel.openPlugin() },
             onDismiss = viewModel::dismissSuccessMessage
         )
     }
     
-    // Enable JS plugins prompt dialog
     if (state.showEnablePluginPrompt) {
         EnablePluginFeatureDialog(
             onEnableAndContinue = viewModel::enableJSPluginsFeature,
-            onGoToSettings = {
-                viewModel.dismissEnablePluginPrompt()
-                onNavigateToSettings()
-            },
+            onGoToSettings = { viewModel.dismissEnablePluginPrompt(); onNavigateToSettings() },
             onDismiss = viewModel::dismissEnablePluginPrompt
         )
     }
 }
 
-/**
- * Main content with plugin details
- */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PluginDetailsContent(
+private fun ModernDetailsTopBar(
+    plugin: PluginInfo?,
+    scrollBehavior: TopAppBarScrollBehavior,
+    onNavigateBack: () -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    LargeTopAppBar(
+        title = {
+            Column {
+                Text(
+                    text = plugin?.manifest?.name ?: "Plugin Details",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (plugin != null) {
+                    Text(
+                        text = plugin.manifest.author.name,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onNavigateBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
+            }
+        },
+        actions = {
+            if (plugin != null) {
+                IconButton(onClick = { }) { Icon(Icons.Default.Share, contentDescription = "Share") }
+            }
+        },
+        scrollBehavior = scrollBehavior,
+        colors = TopAppBarDefaults.largeTopAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
+    )
+}
+
+
+@Composable
+private fun ModernInstallBar(
+    plugin: PluginInfo,
+    installationState: InstallationState,
+    installProgress: Float,
+    onInstall: () -> Unit,
+    onEnable: () -> Unit,
+    onDisable: () -> Unit,
+    onUninstall: () -> Unit,
+    onRetry: () -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        tonalElevation = 3.dp,
+        shadowElevation = 8.dp
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Price and type info
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PriceBadge(monetization = plugin.manifest.monetization)
+                    TypeBadge(type = plugin.manifest.type)
+                }
+                
+                Text(
+                    text = "v${plugin.manifest.version}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Action buttons based on state
+            when (installationState) {
+                is InstallationState.NotInstalled -> {
+                    Button(
+                        onClick = onInstall,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(localizeHelper.localize(Res.string.install), style = MaterialTheme.typography.titleMedium)
+                    }
+                }
+                is InstallationState.Downloading -> {
+                    Column {
+                        LinearProgressIndicator(
+                            progress = { installProgress },
+                            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(4.dp))
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Downloading... ${(installProgress * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
+                }
+                is InstallationState.Installing -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(localizeHelper.localize(Res.string.installing_1), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+                is InstallationState.Installed -> {
+                    when (plugin.status) {
+                        PluginStatus.ENABLED -> {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedButton(
+                                    onClick = onDisable,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Icon(Icons.Default.PauseCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(localizeHelper.localize(Res.string.disable))
+                                }
+                                OutlinedButton(
+                                    onClick = onUninstall,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                ) {
+                                    Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(localizeHelper.localize(Res.string.uninstall))
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(localizeHelper.localize(Res.string.enabled), style = MaterialTheme.typography.bodySmall, color = Color(0xFF4CAF50))
+                            }
+                        }
+                        PluginStatus.DISABLED -> {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(
+                                    onClick = onEnable,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Icon(Icons.Default.PlayCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(localizeHelper.localize(Res.string.enable))
+                                }
+                                OutlinedButton(
+                                    onClick = onUninstall,
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                ) {
+                                    Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(localizeHelper.localize(Res.string.uninstall))
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = localizeHelper.localize(Res.string.disabled),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                        }
+                        else -> {
+                            Button(onClick = onEnable, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+                                Text(localizeHelper.localize(Res.string.enable))
+                            }
+                        }
+                    }
+                }
+                is InstallationState.Error -> {
+                    Column {
+                        Text(
+                            text = installationState.message,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Button(
+                            onClick = onRetry,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(localizeHelper.localize(Res.string.retry))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun ModernPluginDetailsContent(
     state: PluginDetailsState,
     onWriteReview: () -> Unit,
     onMarkReviewHelpful: (String) -> Unit,
@@ -183,227 +348,445 @@ private fun PluginDetailsContent(
 ) {
     val plugin = state.plugin ?: return
     
-    LazyColumn(
-        modifier = modifier.fillMaxSize()
-    ) {
-        // Plugin header
+    LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 100.dp)) {
+        // Hero section with icon and stats
         item {
-            PluginHeader(
-                plugin = plugin,
-                modifier = Modifier.padding(16.dp)
-            )
+            ModernHeroSection(plugin = plugin)
+        }
+        
+        // Quick stats cards
+        item {
+            QuickStatsRow(plugin = plugin, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
         }
         
         // Screenshots
         if (plugin.manifest.screenshotUrls.isNotEmpty()) {
             item {
-                PluginScreenshots(
-                    screenshots = plugin.manifest.screenshotUrls,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
+                PluginScreenshots(screenshots = plugin.manifest.screenshotUrls, modifier = Modifier.padding(vertical = 16.dp))
             }
         }
         
-        // Description
+        // About section
         item {
-            DescriptionSection(
-                description = plugin.manifest.description,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-        
-        // Developer info
-        item {
-            DeveloperInfoSection(
-                author = plugin.manifest.author,
-                otherPlugins = state.otherPluginsByDeveloper,
-                onPluginClick = onPluginClick,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-        
-        // Permissions
-        if (plugin.manifest.permissions.isNotEmpty()) {
-            item {
-                PermissionsSection(
-                    permissions = plugin.manifest.permissions,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-        
-        // Resource Usage (if plugin is installed and running)
-        if (state.resourceUsage != null && state.resourcePercentages != null) {
-            item {
-                ResourceUsageSection(
-                    usage = state.resourceUsage!!,
-                    percentages = state.resourcePercentages!!,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-        
-        // Resource Usage History
-        if (state.resourceHistory.isNotEmpty()) {
-            item {
-                ResourceUsageHistoryGraph(
-                    history = state.resourceHistory,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-        
-        // Reviews section header
-        item {
-            ReviewsSectionHeader(
-                reviewCount = state.reviews.size,
-                averageRating = state.reviews.map { it.rating }.average().toFloat(),
-                onWriteReview = onWriteReview,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-        
-        // Reviews list
-        items(state.reviews) { review ->
-            ReviewItem(
-                review = review,
-                onMarkHelpful = { onMarkReviewHelpful(review.id) },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        }
-        
-        // Empty reviews state
-        if (state.reviews.isEmpty()) {
-            item {
-                EmptyReviewsState(
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-        
-        // Bottom spacing for button
-        item {
-            Spacer(modifier = Modifier.height(80.dp))
-        }
-    }
-}
-
-/**
- * Loading state
- */
-@Composable
-private fun LoadingState(modifier: Modifier = Modifier) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CircularProgressIndicator()
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = localizeHelper.localize(Res.string.loading_plugin_details),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-/**
- * Error state
- */
-@Composable
-private fun ErrorState(
-    error: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(32.dp)
-        ) {
-            Text(
-                text = localizeHelper.localize(Res.string.download_notifier_title_error),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.error
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = error,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onRetry) {
-                Text(localizeHelper.localize(Res.string.retry))
-            }
-        }
-    }
-}
-
-/**
- * Dialog prompting user to enable JS plugins feature in settings
- */
-@Composable
-private fun EnablePluginFeatureDialog(
-    onEnableAndContinue: () -> Unit,
-    onGoToSettings: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        },
-        title = {
-            Text(
-                text = localizeHelper.localize(Res.string.enable_plugin_feature),
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            ModernSection(title = "About", icon = Icons.Outlined.Info) {
                 Text(
-                    text = localizeHelper.localize(Res.string.javascript_plugins_are_currently_disabled),
-                    style = MaterialTheme.typography.bodyMedium
+                    text = plugin.manifest.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        }
+        
+        // What's New section (if available)
+        item {
+            ModernSection(title = "What's New", icon = Icons.Outlined.NewReleases) {
                 Text(
-                    text = localizeHelper.localize(Res.string.to_use_lnreader_compatible_plugins),
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Version ${plugin.manifest.version}",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = localizeHelper.localize(Res.string.would_you_like_to_enable_it_now),
+                    text = "Bug fixes and performance improvements",
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        },
-        confirmButton = {
-            Button(onClick = onEnableAndContinue) {
-                Text(localizeHelper.localize(Res.string.enable_continue))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(localizeHelper.localize(Res.string.cancel))
+        }
+        
+        // Developer section
+        item {
+            ModernSection(title = "Developer", icon = Icons.Outlined.Person) {
+                DeveloperCard(
+                    author = plugin.manifest.author,
+                    otherPlugins = state.otherPluginsByDeveloper,
+                    onPluginClick = onPluginClick
+                )
             }
         }
+        
+        // Permissions section
+        if (plugin.manifest.permissions.isNotEmpty()) {
+            item {
+                ModernSection(title = "Permissions", icon = Icons.Outlined.Security) {
+                    plugin.manifest.permissions.forEach { permission ->
+                        PermissionItem(permission = permission)
+                    }
+                }
+            }
+        }
+        
+        // Resource usage (if installed)
+        if (state.resourceUsage != null && state.resourcePercentages != null) {
+            item {
+                ModernSection(title = "Resource Usage", icon = Icons.Outlined.Memory) {
+                    ResourceUsageSection(usage = state.resourceUsage!!, percentages = state.resourcePercentages!!)
+                }
+            }
+        }
+        
+        // Reviews section
+        item {
+            ModernSection(title = "Reviews", icon = Icons.Outlined.RateReview, action = {
+                TextButton(onClick = onWriteReview) {
+                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Write Review")
+                }
+            }) {
+                if (state.reviews.isEmpty()) {
+                    EmptyReviewsState()
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        state.reviews.take(3).forEach { review ->
+                            ReviewItem(review = review, onMarkHelpful = { onMarkReviewHelpful(review.id) })
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Additional info
+        item {
+            ModernSection(title = "Additional Information", icon = Icons.Outlined.Info) {
+                InfoGrid(plugin = plugin)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernHeroSection(plugin: PluginInfo) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        MaterialTheme.colorScheme.surface
+                    )
+                )
+            )
+            .padding(24.dp)
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+            // Plugin icon
+            Card(
+                modifier = Modifier.size(100.dp),
+                shape = RoundedCornerShape(24.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                AsyncImage(
+                    model = plugin.manifest.iconUrl,
+                    contentDescription = plugin.manifest.name,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Rating stars
+            plugin.rating?.let { rating ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    repeat(5) { index ->
+                        Icon(
+                            imageVector = if (index < rating.toInt()) Icons.Default.Star else Icons.Outlined.StarBorder,
+                            contentDescription = null,
+                            tint = if (index < rating.toInt()) Color(0xFFFFB800) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = ireader.presentation.ui.core.utils.toDecimalString(rating.toDouble(), 1),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuickStatsRow(plugin: PluginInfo, modifier: Modifier = Modifier) {
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        StatCard(
+            icon = Icons.Default.Download,
+            value = formatDownloadCount(plugin.downloadCount),
+            label = "Downloads",
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            icon = Icons.Default.Star,
+            value = plugin.rating?.let { ireader.presentation.ui.core.utils.toDecimalString(it.toDouble(), 1) } ?: "N/A",
+            label = "Rating",
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            icon = Icons.Default.Update,
+            value = plugin.manifest.version,
+            label = "Version",
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun StatCard(icon: ImageVector, value: String, label: String, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun ModernSection(
+    title: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    action: @Composable (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            }
+            action?.invoke()
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        content()
+    }
+}
+
+
+@Composable
+private fun DeveloperCard(
+    author: ireader.plugin.api.PluginAuthor,
+    otherPlugins: List<PluginInfo>,
+    onPluginClick: (String) -> Unit
+) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = author.name.take(2).uppercase(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(text = author.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Medium)
+                author.email?.let {
+                    Text(text = it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+        
+        if (otherPlugins.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "More by this developer", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(otherPlugins.take(5)) { plugin ->
+                    Card(
+                        modifier = Modifier.size(60.dp).clickable { onPluginClick(plugin.id) },
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        AsyncImage(model = plugin.manifest.iconUrl, contentDescription = plugin.manifest.name, modifier = Modifier.fillMaxSize())
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PermissionItem(permission: ireader.plugin.api.PluginPermission) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = getPermissionIcon(permission),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(text = permission.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+            Text(
+                text = getPermissionDescription(permission),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun InfoGrid(plugin: PluginInfo) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        InfoRow(label = "Type", value = getCategoryDisplayName(plugin.manifest.type))
+        InfoRow(label = "Version", value = plugin.manifest.version)
+        InfoRow(label = "Min IReader Version", value = plugin.manifest.minIReaderVersion)
+        InfoRow(label = "Platforms", value = plugin.manifest.platforms.joinToString(", ") { it.name })
+        plugin.fileSize?.let { InfoRow(label = "Size", value = formatFileSize(it)) }
+    }
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+    }
+}
+
+@Composable
+private fun PriceBadge(monetization: PluginMonetization?, modifier: Modifier = Modifier) {
+    val (text, containerColor, contentColor) = when (monetization) {
+        is PluginMonetization.Premium -> Triple(
+            formatPrice(monetization.price, monetization.currency),
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        is PluginMonetization.Freemium -> Triple("Freemium", MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer)
+        else -> Triple("Free", MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer)
+    }
+    Surface(modifier = modifier, shape = RoundedCornerShape(8.dp), color = containerColor) {
+        Text(text = text, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium, color = contentColor, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+    }
+}
+
+@Composable
+private fun TypeBadge(type: PluginType, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier, shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+        Text(text = getCategoryDisplayName(type), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+    }
+}
+
+@Composable
+private fun ModernLoadingState() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            CircularProgressIndicator(modifier = Modifier.size(48.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Loading plugin details...", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun ModernErrorState(error: String, onRetry: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
+            Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.error)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Something went wrong", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = error, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(onClick = onRetry) {
+                Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Try Again")
+            }
+        }
+    }
+}
+
+@Composable
+private fun EnablePluginFeatureDialog(onEnableAndContinue: () -> Unit, onGoToSettings: () -> Unit, onDismiss: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Default.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+        title = { Text(text = localizeHelper.localize(Res.string.enable_plugin_feature), style = MaterialTheme.typography.titleLarge) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = localizeHelper.localize(Res.string.javascript_plugins_are_currently_disabled), style = MaterialTheme.typography.bodyMedium)
+                Text(text = localizeHelper.localize(Res.string.to_use_lnreader_compatible_plugins), style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = localizeHelper.localize(Res.string.would_you_like_to_enable_it_now), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+            }
+        },
+        confirmButton = { Button(onClick = onEnableAndContinue) { Text(localizeHelper.localize(Res.string.enable_continue)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(localizeHelper.localize(Res.string.cancel)) } }
     )
+}
+
+// Helper functions
+private fun getCategoryDisplayName(type: PluginType): String = when (type) {
+    PluginType.JS_ENGINE -> "JS Engine"
+    PluginType.TTS -> "Text-to-Speech"
+    PluginType.THEME -> "Theme"
+    PluginType.FEATURE -> "Feature"
+    PluginType.GRADIO_TTS -> "Gradio TTS"
+    PluginType.TRANSLATION -> "Translation"
+    PluginType.AI -> "AI"
+    PluginType.CATALOG -> "Catalog"
+    PluginType.IMAGE_PROCESSING -> "Image Processing"
+    PluginType.SYNC -> "Sync"
+    PluginType.COMMUNITY_SCREEN -> "Community"
+    PluginType.GLOSSARY -> "Glossary"
+}
+
+private fun getPermissionIcon(permission: ireader.plugin.api.PluginPermission): ImageVector = when (permission) {
+    ireader.plugin.api.PluginPermission.NETWORK -> Icons.Default.Wifi
+    ireader.plugin.api.PluginPermission.STORAGE -> Icons.Default.Storage
+    ireader.plugin.api.PluginPermission.NOTIFICATIONS -> Icons.Default.Notifications
+    else -> Icons.Default.Security
+}
+
+private fun getPermissionDescription(permission: ireader.plugin.api.PluginPermission): String = when (permission) {
+    ireader.plugin.api.PluginPermission.NETWORK -> "Access to network for fetching content"
+    ireader.plugin.api.PluginPermission.STORAGE -> "Access to device storage"
+    ireader.plugin.api.PluginPermission.NOTIFICATIONS -> "Show notifications"
+    else -> "Additional permission required"
+}
+
+private fun formatDownloadCount(count: Int): String = when {
+    count >= 1_000_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000_000.0, 1)}M"
+    count >= 1_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000.0, 1)}K"
+    else -> count.toString()
+}
+
+private fun formatPrice(price: Double, currency: String): String {
+    val symbol = when (currency.uppercase()) { "USD" -> "$"; "EUR" -> "€"; "GBP" -> "£"; "JPY" -> "¥"; else -> currency }
+    return "$symbol${ireader.presentation.ui.core.utils.toDecimalString(price, 2)}"
+}
+
+private fun formatFileSize(bytes: Long): String = when {
+    bytes >= 1_000_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(bytes / 1_000_000.0, 1)} MB"
+    bytes >= 1_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(bytes / 1_000.0, 1)} KB"
+    else -> "$bytes B"
 }

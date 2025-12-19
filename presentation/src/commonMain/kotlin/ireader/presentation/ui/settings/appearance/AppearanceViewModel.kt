@@ -18,7 +18,8 @@ import ireader.presentation.core.toDomainColor
 
 class AppearanceViewModel(
     val uiPreferences: UiPreferences,
-    val themeRepository: ThemeRepository
+    val themeRepository: ThemeRepository,
+    val pluginManager: ireader.domain.plugins.PluginManager
 ) : BaseViewModel() {
 
     private val _state = mutableStateOf(MainScreenState())

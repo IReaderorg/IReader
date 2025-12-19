@@ -40,7 +40,9 @@ data class PluginIndexEntry(
     val monetization: PluginMonetizationInfo? = null,
     val downloadUrl: String,
     val fileSize: Long = 0,
-    val checksum: String? = null
+    val checksum: String? = null,
+    val featured: Boolean = false,
+    val tags: List<String>? = null
 )
 
 @Serializable

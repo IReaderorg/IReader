@@ -34,9 +34,12 @@ fun PluginThemeSection(
     currentThemeId: Long,
     modifier: Modifier = Modifier
 ) {
+    println("[PluginThemeSection] Composable called")
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val pluginExtension = rememberPluginThemeIntegration(pluginManager, viewModel)
-    val allThemes by pluginExtension.getAllThemesFlow().collectAsState()
+    println("[PluginThemeSection] Getting all themes...")
+    val allThemes by pluginExtension.getAllThemesFlow().collectAsState(initial = pluginExtension.getAllThemes())
+    println("[PluginThemeSection] All themes count: ${allThemes.size}")
     val errors by rememberThemeErrors(pluginExtension.getErrorHandler())
     val scope = rememberCoroutineScope()
     
@@ -56,140 +59,141 @@ fun PluginThemeSection(
         pluginThemes.filter { it.isDark }
     }
     
-    // Show section only if there are plugin themes
-    if (pluginThemes.isNotEmpty()) {
-        Column(modifier = modifier) {
-            // Section header with refresh button
-            Row(
+    // Always show section - show message if no plugin themes installed
+    Column(modifier = modifier) {
+        // Section header with refresh button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = localizeHelper.localize(Res.string.plugin_themes),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = if (pluginThemes.isNotEmpty()) 
+                        "${pluginThemes.size} plugin themes available"
+                    else 
+                        "No plugin themes installed. Install theme plugins from Feature Store.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        pluginExtension.reloadPluginThemes()
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = localizeHelper.localize(Res.string.reload_plugin_themes),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        
+        // Error display
+        AnimatedVisibility(visible = errors.isNotEmpty()) {
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = localizeHelper.localize(Res.string.plugin_themes),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "${pluginThemes.size} plugin themes available",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                
-                IconButton(
-                    onClick = {
-                        scope.launch {
-                            pluginExtension.reloadPluginThemes()
-                        }
-                    }
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = localizeHelper.localize(Res.string.reload_plugin_themes),
-                        tint = MaterialTheme.colorScheme.primary
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer
                     )
-                }
-            }
-            
-            // Error display
-            AnimatedVisibility(visible = errors.isNotEmpty()) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onErrorContainer
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = localizeHelper.localize(Res.string.theme_plugin_errors),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
                         )
-                        Column(modifier = Modifier.weight(1f)) {
+                        errors.take(3).forEach { error ->
                             Text(
-                                text = localizeHelper.localize(Res.string.theme_plugin_errors),
-                                style = MaterialTheme.typography.titleSmall,
+                                text = error.toUserMessage(),
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
-                            errors.take(3).forEach { error ->
-                                Text(
-                                    text = error.toUserMessage(),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                            }
                         }
-                        TextButton(
-                            onClick = { pluginExtension.getErrorHandler().clearErrors() }
-                        ) {
-                            Text(localizeHelper.localize(Res.string.dismiss))
-                        }
+                    }
+                    TextButton(
+                        onClick = { pluginExtension.getErrorHandler().clearErrors() }
+                    ) {
+                        Text(localizeHelper.localize(Res.string.dismiss))
                     }
                 }
             }
-            
-            // Light plugin themes
-            if (lightPluginThemes.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = localizeHelper.localize(Res.string.light_plugin_themes),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-                
-                PluginThemeGrid(
-                    themes = lightPluginThemes,
-                    currentThemeId = currentThemeId,
-                    selectedPluginThemeId = selectedPluginThemeId,
-                    onThemeSelected = { theme ->
-                        val appliedTheme = pluginExtension.applyTheme(theme)
-                        viewModel.colorTheme.value = appliedTheme.id
-                        viewModel.uiPreferences.selectedPluginTheme().set(theme.id)
-                        selectedPluginThemeId = theme.id
-                        viewModel.saveNightModePreferences(PreferenceValues.ThemeMode.Light)
-                        onThemeSelected(theme)
-                    }
-                )
-            }
-            
-            // Dark plugin themes
-            if (darkPluginThemes.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = localizeHelper.localize(Res.string.dark_plugin_themes),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-                
-                PluginThemeGrid(
-                    themes = darkPluginThemes,
-                    currentThemeId = currentThemeId,
-                    selectedPluginThemeId = selectedPluginThemeId,
-                    onThemeSelected = { theme ->
-                        val appliedTheme = pluginExtension.applyTheme(theme)
-                        viewModel.colorTheme.value = appliedTheme.id
-                        viewModel.uiPreferences.selectedPluginTheme().set(theme.id)
-                        selectedPluginThemeId = theme.id
-                        viewModel.saveNightModePreferences(PreferenceValues.ThemeMode.Dark)
-                        onThemeSelected(theme)
-                    }
-                )
-            }
-            
-            Divider(modifier = Modifier.padding(vertical = 16.dp))
         }
+        
+        // Light plugin themes
+        if (lightPluginThemes.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = localizeHelper.localize(Res.string.light_plugin_themes),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            
+            PluginThemeGrid(
+                themes = lightPluginThemes,
+                currentThemeId = currentThemeId,
+                selectedPluginThemeId = selectedPluginThemeId,
+                onThemeSelected = { theme ->
+                    val appliedTheme = pluginExtension.applyTheme(theme)
+                    viewModel.colorTheme.value = appliedTheme.id
+                    viewModel.uiPreferences.selectedPluginTheme().set(theme.id)
+                    selectedPluginThemeId = theme.id
+                    viewModel.saveNightModePreferences(PreferenceValues.ThemeMode.Light)
+                    onThemeSelected(theme)
+                }
+            )
+        }
+        
+        // Dark plugin themes
+        if (darkPluginThemes.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = localizeHelper.localize(Res.string.dark_plugin_themes),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            
+            PluginThemeGrid(
+                themes = darkPluginThemes,
+                currentThemeId = currentThemeId,
+                selectedPluginThemeId = selectedPluginThemeId,
+                onThemeSelected = { theme ->
+                    val appliedTheme = pluginExtension.applyTheme(theme)
+                    viewModel.colorTheme.value = appliedTheme.id
+                    viewModel.uiPreferences.selectedPluginTheme().set(theme.id)
+                    selectedPluginThemeId = theme.id
+                    viewModel.saveNightModePreferences(PreferenceValues.ThemeMode.Dark)
+                    onThemeSelected(theme)
+                }
+            )
+        }
+        
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
     }
 }
 

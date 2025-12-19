@@ -160,7 +160,7 @@ val PresentationModules = module {
             }
         )
     }
-    factory  { AppearanceViewModel(get(), get()) }
+    factory  { AppearanceViewModel(get(), get(), get()) }
 
     factory  { CategoryScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { DownloaderViewModel(get(), get(), get(), get(),get()) }

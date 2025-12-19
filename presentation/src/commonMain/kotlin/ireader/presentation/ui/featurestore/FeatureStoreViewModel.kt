@@ -10,6 +10,7 @@ import ireader.domain.plugins.PluginRepositoryIndexFetcher
 import ireader.domain.plugins.PluginRepositoryRepository
 import ireader.domain.plugins.PluginStatus
 import ireader.domain.plugins.PluginType
+import ireader.domain.preferences.prefs.UiPreferences
 import ireader.domain.services.common.PluginDownloadProgress
 import ireader.domain.services.common.PluginDownloadService
 import ireader.domain.services.common.PluginDownloadStatus
@@ -30,12 +31,19 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel for Feature Store screen
  * Manages plugin discovery, filtering, and monetization display
+ * 
+ * Caching behavior:
+ * - Plugin index is cached in memory and only refreshed when:
+ *   1. Cache duration has expired (default: 24 hours)
+ *   2. User explicitly taps refresh button
+ * - Cache timestamp is persisted in preferences
  */
 class FeatureStoreViewModel(
     private val pluginManager: PluginManager,
     private val repositoryRepository: PluginRepositoryRepository,
     private val indexFetcher: PluginRepositoryIndexFetcher,
-    private val downloadService: PluginDownloadService
+    private val downloadService: PluginDownloadService,
+    private val uiPreferences: UiPreferences
 ) : BaseViewModel() {
     
     private val _state = mutableStateOf(FeatureStoreState())
@@ -44,11 +52,35 @@ class FeatureStoreViewModel(
     // Cache of installed plugin IDs for quick lookup
     private var installedPluginIds: Set<String> = emptySet()
     
+    // In-memory cache of plugins (survives configuration changes)
+    private var cachedPlugins: List<PluginInfo>? = null
+    
     init {
         observeInstalledPlugins()
         observeRepositories()
         observeDownloads()
         loadPlugins()
+    }
+    
+    /**
+     * Check if the cache is still valid based on last fetch time and cache duration
+     */
+    private fun isCacheValid(): Boolean {
+        val lastFetchTime = uiPreferences.featureStoreLastFetchTime().get()
+        if (lastFetchTime == 0L) return false
+        
+        val cacheDurationHours = uiPreferences.featureStoreCacheDurationHours().get()
+        val cacheDurationMillis = cacheDurationHours * 60 * 60 * 1000L
+        val currentTime = currentTimeToLong()
+        
+        return (currentTime - lastFetchTime) < cacheDurationMillis
+    }
+    
+    /**
+     * Update the cache timestamp to current time
+     */
+    private fun updateCacheTimestamp() {
+        uiPreferences.featureStoreLastFetchTime().set(currentTimeToLong())
     }
     
     /**
@@ -128,9 +160,28 @@ class FeatureStoreViewModel(
     }
     
     /**
-     * Load plugins from all enabled repositories
+     * Load plugins from all enabled repositories.
+     * Uses cached data if available and not expired.
+     * 
+     * @param forceRefresh If true, bypasses cache and fetches from remote
      */
-    fun loadPlugins() {
+    fun loadPlugins(forceRefresh: Boolean = false) {
+        // Check if we have valid cached data
+        if (!forceRefresh && cachedPlugins != null && isCacheValid()) {
+            val lastFetch = uiPreferences.featureStoreLastFetchTime().get()
+            println("[FeatureStore] Using cached plugin data (${cachedPlugins?.size} plugins)")
+            _state.value = _state.value.copy(
+                plugins = cachedPlugins!!,
+                featuredPlugins = getFeaturedPlugins(cachedPlugins!!),
+                isLoading = false,
+                error = null,
+                lastFetchTime = lastFetch,
+                isFromCache = true
+            )
+            applyFilters()
+            return
+        }
+        
         _state.value = _state.value.copy(isLoading = true, error = null)
         scope.launch {
             try {
@@ -151,6 +202,7 @@ class FeatureStoreViewModel(
                 val errors = mutableListOf<String>()
 
                 // Fetch plugins from all enabled repositories in parallel
+                println("[FeatureStore] Fetching plugins from ${repositories.size} repositories...")
                 val results = repositories.map { repo ->
                     async {
                         repo to fetchPluginsFromRepository(repo)
@@ -168,6 +220,12 @@ class FeatureStoreViewModel(
 
                 // Remove duplicates (prefer first occurrence)
                 val uniquePlugins = allPlugins.distinctBy { it.id }
+                
+                // Update cache
+                cachedPlugins = uniquePlugins
+                updateCacheTimestamp()
+                val fetchTime = currentTimeToLong()
+                println("[FeatureStore] Cached ${uniquePlugins.size} plugins")
 
                 _state.value = _state.value.copy(
                     plugins = uniquePlugins,
@@ -175,7 +233,9 @@ class FeatureStoreViewModel(
                     isLoading = false,
                     error = if (uniquePlugins.isEmpty() && errors.isNotEmpty()) {
                         "Failed to load features: ${errors.joinToString("; ")}"
-                    } else null
+                    } else null,
+                    lastFetchTime = fetchTime,
+                    isFromCache = false
                 )
                 applyFilters()
             } catch (e: Exception) {
@@ -218,6 +278,10 @@ class FeatureStoreViewModel(
         }
     }
     
+    /**
+     * Force refresh plugins from remote repositories.
+     * This bypasses the cache and always fetches fresh data.
+     */
     fun refreshPlugins() {
         _state.value = _state.value.copy(isRefreshing = true, error = null)
         scope.launch {
@@ -225,6 +289,7 @@ class FeatureStoreViewModel(
                 val repositories = repositoryRepository.getEnabled().first()
                 val allPlugins = mutableListOf<PluginInfo>()
 
+                println("[FeatureStore] Force refreshing plugins from ${repositories.size} repositories...")
                 val results = repositories.map { repo ->
                     async { fetchPluginsFromRepository(repo) }
                 }.awaitAll()
@@ -236,11 +301,19 @@ class FeatureStoreViewModel(
                 }
 
                 val uniquePlugins = allPlugins.distinctBy { it.id }
+                
+                // Update cache with fresh data
+                cachedPlugins = uniquePlugins
+                updateCacheTimestamp()
+                val fetchTime = currentTimeToLong()
+                println("[FeatureStore] Refreshed and cached ${uniquePlugins.size} plugins")
 
                 _state.value = _state.value.copy(
                     plugins = uniquePlugins,
                     featuredPlugins = getFeaturedPlugins(uniquePlugins),
-                    isRefreshing = false
+                    isRefreshing = false,
+                    lastFetchTime = fetchTime,
+                    isFromCache = false
                 )
                 applyFilters()
             } catch (e: Exception) {
@@ -334,7 +407,9 @@ class FeatureStoreViewModel(
             repositoryUrl = repository.url,
             downloadUrl = resolvedDownloadUrl,
             fileSize = fileSize,
-            checksum = checksum
+            checksum = checksum,
+            featured = featured,
+            tags = tags
         )
     }
     
@@ -444,10 +519,18 @@ class FeatureStoreViewModel(
     }
     
     private fun getFeaturedPlugins(plugins: List<PluginInfo>): List<PluginInfo> {
-        return plugins
-            .filter { (it.rating ?: 0f) >= 4.0f || it.downloadCount > 1000 }
-            .sortedByDescending { it.downloadCount }
-            .take(10)
+        // First, get plugins marked as featured
+        val featuredPlugins = plugins.filter { it.featured }
+        
+        // If we have featured plugins, use them; otherwise fall back to rating/downloads
+        return if (featuredPlugins.isNotEmpty()) {
+            featuredPlugins.sortedByDescending { it.downloadCount }.take(10)
+        } else {
+            plugins
+                .filter { (it.rating ?: 0f) >= 4.0f || it.downloadCount > 1000 }
+                .sortedByDescending { it.downloadCount }
+                .take(10)
+        }
     }
     
     private fun getPluginPrice(plugin: PluginInfo): Double {

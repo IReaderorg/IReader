@@ -20,5 +20,9 @@ data class PluginInfo(
     /** File size in bytes */
     val fileSize: Long = 0,
     /** Checksum for verification */
-    val checksum: String? = null
+    val checksum: String? = null,
+    /** Whether this plugin is featured in the store */
+    val featured: Boolean = false,
+    /** Tags for categorization and search */
+    val tags: List<String>? = null
 )

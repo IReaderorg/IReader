@@ -47,17 +47,35 @@ class PluginThemeManager(
     
     /**
      * Get only plugin-provided themes
+     * Note: We filter by manifest type instead of filterIsInstance because plugins
+     * are loaded via separate classloaders, making instanceof checks unreliable.
      */
     private fun getPluginThemes(): List<ThemeOption.Plugin> {
-        val themePlugins = pluginManager.getEnabledPlugins()
-            .filterIsInstance<ThemePlugin>()
-        
-        return themePlugins.flatMap { plugin ->
-            listOf(
-                ThemeOption.Plugin(plugin, isDark = false),
-                ThemeOption.Plugin(plugin, isDark = true)
-            )
+        val enabledPlugins = pluginManager.getEnabledPlugins()
+        println("[PluginThemeManager] Enabled plugins: ${enabledPlugins.size}")
+        enabledPlugins.forEach { plugin ->
+            println("[PluginThemeManager] Plugin: ${plugin.manifest.id}, type: ${plugin.manifest.type}, class: ${plugin::class.simpleName}")
         }
+        
+        // Filter by manifest type since filterIsInstance won't work across classloaders
+        val themePlugins = enabledPlugins.filter { 
+            it.manifest.type == ireader.plugin.api.PluginType.THEME 
+        }
+        println("[PluginThemeManager] Theme plugins found by type: ${themePlugins.size}")
+        
+        return themePlugins.mapNotNull { plugin ->
+            // Cast to ThemePlugin - this should work since we verified the type
+            try {
+                val themePlugin = plugin as ThemePlugin
+                listOf(
+                    ThemeOption.Plugin(themePlugin, isDark = false),
+                    ThemeOption.Plugin(themePlugin, isDark = true)
+                )
+            } catch (e: ClassCastException) {
+                println("[PluginThemeManager] Failed to cast ${plugin.manifest.id} to ThemePlugin: ${e.message}")
+                null
+            }
+        }.flatten()
     }
     
     /**

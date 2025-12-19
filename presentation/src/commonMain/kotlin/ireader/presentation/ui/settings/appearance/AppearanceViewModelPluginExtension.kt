@@ -34,15 +34,18 @@ class AppearanceViewModelPluginExtension(
      * Requirements: 3.1
      */
     fun getAllThemes(): List<ThemeOption> {
-        return pluginThemeManager.getAvailableThemes()
+        println("[AppearanceViewModelPluginExtension] getAllThemes() called")
+        val themes = pluginThemeManager.getAvailableThemes()
+        println("[AppearanceViewModelPluginExtension] Returning ${themes.size} themes")
+        return themes
     }
     
     /**
      * Get available themes as a flow
      * Requirements: 3.1, 3.5
      */
-    fun getAllThemesFlow(): StateFlow<List<ThemeOption>> {
-        return pluginThemeManager.getAvailableThemesFlow() as StateFlow<List<ThemeOption>>
+    fun getAllThemesFlow(): kotlinx.coroutines.flow.Flow<List<ThemeOption>> {
+        return pluginThemeManager.getAvailableThemesFlow()
     }
     
     /**

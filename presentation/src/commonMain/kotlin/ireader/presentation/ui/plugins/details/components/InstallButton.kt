@@ -28,6 +28,9 @@ fun InstallButton(
     onPurchase: () -> Unit,
     onOpen: () -> Unit,
     onRetry: () -> Unit,
+    onEnable: () -> Unit = {},
+    onDisable: () -> Unit = {},
+    onUninstall: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -52,7 +55,10 @@ fun InstallButton(
             is InstallationState.Installed -> {
                 InstalledButton(
                     plugin = plugin,
-                    onOpen = onOpen
+                    onOpen = onOpen,
+                    onEnable = onEnable,
+                    onDisable = onDisable,
+                    onUninstall = onUninstall
                 )
             }
             is InstallationState.Error -> {
@@ -173,58 +179,110 @@ private fun InstallingButton() {
 }
 
 /**
- * Button for installed plugins
+ * Button for installed plugins with enable/disable/uninstall options
  */
 @Composable
 private fun InstalledButton(
     plugin: PluginInfo,
-    onOpen: () -> Unit
+    onOpen: () -> Unit,
+    onEnable: () -> Unit,
+    onDisable: () -> Unit,
+    onUninstall: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    when (plugin.status) {
-        PluginStatus.ENABLED -> {
-            OutlinedButton(
-                onClick = onOpen,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(localizeHelper.localize(Res.string.enabled))
-            }
-        }
-        PluginStatus.DISABLED -> {
-            Button(
-                onClick = onOpen,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(localizeHelper.localize(Res.string.enable))
-            }
-        }
-        PluginStatus.ERROR -> {
-            Button(
-                onClick = onOpen,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+    
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        when (plugin.status) {
+            PluginStatus.ENABLED -> {
+                // Primary action: Disable
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDisable,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(localizeHelper.localize(Res.string.disable))
+                    }
+                    OutlinedButton(
+                        onClick = onUninstall,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text(localizeHelper.localize(Res.string.uninstall))
+                    }
+                }
+                // Status indicator
+                Text(
+                    text = "✓ ${localizeHelper.localize(Res.string.enabled)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
-            ) {
-                Text(localizeHelper.localize(Res.string.error_tap_to_retry))
             }
-        }
-        PluginStatus.UPDATING -> {
-            OutlinedButton(
-                onClick = {},
-                enabled = false,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(localizeHelper.localize(Res.string.updating))
+            PluginStatus.DISABLED -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = onEnable,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(localizeHelper.localize(Res.string.enable))
+                    }
+                    OutlinedButton(
+                        onClick = onUninstall,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text(localizeHelper.localize(Res.string.uninstall))
+                    }
+                }
+                // Status indicator
+                Text(
+                    text = localizeHelper.localize(Res.string.disabled),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
-        }
-        PluginStatus.NOT_INSTALLED -> {
-            // This shouldn't happen for InstalledButton, but handle it gracefully
-            Button(
-                onClick = onOpen,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(localizeHelper.localize(Res.string.install))
+            PluginStatus.ERROR -> {
+                Button(
+                    onClick = onOpen,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(localizeHelper.localize(Res.string.error_tap_to_retry))
+                }
+            }
+            PluginStatus.UPDATING -> {
+                OutlinedButton(
+                    onClick = {},
+                    enabled = false,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(localizeHelper.localize(Res.string.updating))
+                }
+            }
+            PluginStatus.NOT_INSTALLED -> {
+                // This shouldn't happen for InstalledButton, but handle it gracefully
+                Button(
+                    onClick = onOpen,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(localizeHelper.localize(Res.string.install))
+                }
             }
         }
     }

@@ -21,7 +21,11 @@ data class FeatureStoreState(
     val error: String? = null,
     val isRefreshing: Boolean = false,
     /** Map of plugin ID to download progress (0.0 to 1.0) */
-    val downloadProgress: Map<String, DownloadProgress> = emptyMap()
+    val downloadProgress: Map<String, DownloadProgress> = emptyMap(),
+    /** Timestamp of last successful fetch from remote */
+    val lastFetchTime: Long = 0L,
+    /** Whether current data is from cache */
+    val isFromCache: Boolean = false
 )
 
 /**
