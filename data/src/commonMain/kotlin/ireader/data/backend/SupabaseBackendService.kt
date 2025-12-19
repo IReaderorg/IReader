@@ -348,9 +348,17 @@ class SupabaseBackendService(
                 }
             }.trimEnd('/')
             
-            Log.debug("Supabase upsert to $table: $jsonBody")
+            // Build URL with on_conflict parameter if specified
+            val url = buildString {
+                append("$baseUrl/rest/v1/$table")
+                if (onConflict != null) {
+                    append("?on_conflict=$onConflict")
+                }
+            }
             
-            val response = client.httpClient.post("$baseUrl/rest/v1/$table") {
+            Log.debug("Supabase upsert to $url: $jsonBody")
+            
+            val response = client.httpClient.post(url) {
                 header("Content-Type", "application/json")
                 header("apikey", client.supabaseKey)
                 if (accessToken != null) {

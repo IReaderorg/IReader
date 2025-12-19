@@ -45,6 +45,7 @@ class PluginReviewRepositoryImpl(
         @SerialName("created_at") val createdAt: String? = null,
         @SerialName("updated_at") val updatedAt: String? = null,
         @SerialName("users") val users: UserInfo? = null,
+        @SerialName("username") val username: String? = null,  // Direct from RPC function
         @SerialName("is_helpful") val isHelpful: Boolean = false
     )
 
@@ -82,7 +83,7 @@ class PluginReviewRepositoryImpl(
             id = id ?: "",
             pluginId = pluginId,
             userId = userId,
-            username = users?.username ?: "Anonymous",
+            username = username ?: users?.username ?: "Anonymous",  // Try direct field first, then nested
             rating = rating,
             reviewText = reviewText,
             helpfulCount = helpfulCount,
@@ -98,7 +99,7 @@ class PluginReviewRepositoryImpl(
         offset: Int,
         orderBy: String
     ): Result<List<PluginReview>> = RemoteErrorMapper.withErrorMapping {
-        // Try to use the RPC function first for better performance
+        // Try to use the RPC function first - it handles the user join properly
         try {
             val result = backendService.rpc(
                 function = "get_plugin_reviews",
@@ -118,11 +119,11 @@ class PluginReviewRepositoryImpl(
                 else -> emptyList()
             }
         } catch (e: Exception) {
-            // Fallback to direct query if RPC fails
+            // Fallback to direct query if RPC fails (without user join - no FK relationship)
             val queryResult = backendService.query(
                 table = "plugin_reviews",
                 filters = mapOf("plugin_id" to pluginId),
-                columns = "*, users(username)",
+                columns = "*",  // No user join - FK is to auth.users, not public.users
                 orderBy = when (orderBy) {
                     "helpful" -> "helpful_count"
                     "rating" -> "rating"
@@ -150,13 +151,33 @@ class PluginReviewRepositoryImpl(
                     "plugin_id" to pluginId,
                     "user_id" to userId
                 ),
-                columns = "*, users(username)"
+                columns = "*"  // No user join - FK is to auth.users, not public.users
             ).getOrThrow()
 
             queryResult.firstOrNull()?.let { element ->
                 json.decodeFromJsonElement(PluginReviewDto.serializer(), element).toDomain()
             }
         }
+
+    /**
+     * Internal function to check if user has an existing review (simpler query, no exceptions)
+     */
+    private suspend fun hasExistingReview(pluginId: String, userId: String): Boolean {
+        return try {
+            val queryResult = backendService.query(
+                table = "plugin_reviews",
+                filters = mapOf(
+                    "plugin_id" to pluginId,
+                    "user_id" to userId
+                ),
+                columns = "id",  // Only need to check existence
+                limit = 1
+            ).getOrNull()
+            !queryResult.isNullOrEmpty()
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     override suspend fun submitReview(
         pluginId: String,
@@ -166,7 +187,7 @@ class PluginReviewRepositoryImpl(
         val userId = supabaseClient.auth.currentUserOrNull()?.id
             ?: throw Exception("User not authenticated")
 
-        // Try RPC function first
+        // Try RPC function first (handles upsert properly in SQL)
         try {
             val result = backendService.rpc(
                 function = "submit_plugin_review",
@@ -186,20 +207,40 @@ class PluginReviewRepositoryImpl(
             getUserReview(pluginId).getOrThrow()
                 ?: throw Exception("Review not found after submission")
         } catch (e: Exception) {
-            // Fallback to direct upsert
-            val data = buildJsonObject {
-                put("plugin_id", pluginId)
-                put("user_id", userId)
-                put("rating", rating)
-                if (reviewText != null) put("review_text", reviewText)
+            // Fallback: check if review exists, then update or insert
+            val reviewExists = hasExistingReview(pluginId, userId)
+            
+            if (reviewExists) {
+                // Update existing review
+                val updateData = buildJsonObject {
+                    put("rating", rating)
+                    if (reviewText != null) put("review_text", reviewText)
+                }
+                
+                backendService.update(
+                    table = "plugin_reviews",
+                    filters = mapOf(
+                        "plugin_id" to pluginId,
+                        "user_id" to userId
+                    ),
+                    data = updateData,
+                    returning = true
+                ).getOrThrow()
+            } else {
+                // Insert new review
+                val insertData = buildJsonObject {
+                    put("plugin_id", pluginId)
+                    put("user_id", userId)
+                    put("rating", rating)
+                    if (reviewText != null) put("review_text", reviewText)
+                }
+                
+                backendService.insert(
+                    table = "plugin_reviews",
+                    data = insertData,
+                    returning = true
+                ).getOrThrow()
             }
-
-            backendService.upsert(
-                table = "plugin_reviews",
-                data = data,
-                onConflict = "user_id,plugin_id",
-                returning = true
-            ).getOrThrow()
 
             getUserReview(pluginId).getOrThrow()
                 ?: throw Exception("Review not found after submission")
