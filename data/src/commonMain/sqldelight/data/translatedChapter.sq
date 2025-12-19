@@ -66,18 +66,7 @@ SET translated_content = :translatedContent,
 WHERE _id = :id;
 
 upsert:
-INSERT INTO translated_chapter(
-    chapter_id, book_id, source_language, target_language,
-    translator_engine_id, translated_content, created_at, updated_at
-)
-VALUES (
-    :chapterId, :bookId, :sourceLanguage, :targetLanguage,
-    :translatorEngineId, :translatedContent, :createdAt, :updatedAt
-)
-ON CONFLICT(chapter_id, target_language, translator_engine_id)
-DO UPDATE SET
-    translated_content = :translatedContent,
-    updated_at = :updatedAt;
+INSERT INTO translated_chapter(chapter_id, book_id, source_language, target_language, translator_engine_id, translated_content, created_at, updated_at) VALUES (:chapterId, :bookId, :sourceLanguage, :targetLanguage, :translatorEngineId, :translatedContent, :createdAt, :updatedAt) ON CONFLICT(chapter_id, target_language, translator_engine_id) DO UPDATE SET translated_content = :translatedContent, updated_at = :updatedAt;
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID() AS Long;

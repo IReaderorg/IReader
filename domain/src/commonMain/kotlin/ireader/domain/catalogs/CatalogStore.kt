@@ -213,25 +213,23 @@ class CatalogStore(
     
     /**
      * Initialize catalogs with optimized loading strategy.
+     * 
+     * Loading order for fast startup:
+     * 1. Load stub sources IMMEDIATELY (shows sources in UI right away)
+     * 2. Load engine plugins in background
+     * 3. Replace stubs with actual sources as they load
      */
     private suspend fun initializeCatalogs() {
         withContext(Dispatchers.Default) {
             val startTime = currentTimeToLong()
             
-            // Load engine plugins FIRST (J2V8, etc.) before loading JS plugins
-            // This ensures the JS engine is available when JS plugins are scanned
-            val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader
-            if (asyncLoader != null) {
-                Log.info("CatalogStore: Loading engine plugins before catalogs...")
-                asyncLoader.loadEnginePlugins()
-            }
-            
-            // Load all catalogs
-            val loadedCatalogs = loader.loadAll()
-                .distinctBy { it.sourceId }
-            
             // Cache pinned IDs once
             cachedPinnedIds = pinnedCatalogsPreference.get()
+            
+            // STEP 1: Load all catalogs INCLUDING stub sources IMMEDIATELY
+            // This shows sources in UI right away (stubs are not clickable but visible)
+            val loadedCatalogs = loader.loadAll()
+                .distinctBy { it.sourceId }
             
             // Process catalogs efficiently
             val processedCatalogs = loadedCatalogs.map { catalog ->
@@ -247,13 +245,29 @@ class CatalogStore(
                 Log.error("CatalogStore: Failed to load user sources", e)
             }
             
+            // Update UI immediately with stubs
             catalogs = processedCatalogs
             _isInitialized.value = true
             
-            val loadTime = currentTimeToLong() - startTime
-            Log.debug { "CatalogStore: Initial load completed in ${loadTime}ms (${processedCatalogs.size} catalogs)" }
+            // Mark stub sources as loading
+            val stubIds = stubSourceIds.toSet()
+            if (stubIds.isNotEmpty()) {
+                loadingSourceIds.addAll(stubIds)
+                loadingSourcesFlow.value = loadingSourceIds.toSet()
+                Log.info("CatalogStore: Showing ${stubIds.size} stub sources while loading actual plugins...")
+            }
             
-            // Start background plugin loading after initial load
+            val loadTime = currentTimeToLong() - startTime
+            Log.debug { "CatalogStore: Initial load completed in ${loadTime}ms (${processedCatalogs.size} catalogs, ${stubIds.size} stubs)" }
+            
+            // STEP 2: Load engine plugins in background AFTER showing stubs
+            val asyncLoader = loader as? ireader.domain.catalogs.service.AsyncPluginLoader
+            if (asyncLoader != null && stubIds.isNotEmpty()) {
+                Log.info("CatalogStore: Loading engine plugins in background...")
+                asyncLoader.loadEnginePlugins()
+            }
+            
+            // STEP 3: Start background plugin loading to replace stubs
             startBackgroundPluginLoading()
         }
     }

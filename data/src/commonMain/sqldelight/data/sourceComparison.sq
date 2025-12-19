@@ -34,16 +34,7 @@ SET current_source_id = :currentSourceId,
 WHERE book_id = :bookId;
 
 upsert:
-INSERT INTO sourceComparison(book_id, current_source_id, better_source_id, chapter_difference, cached_at, dismissed_until)
-VALUES (:bookId, :currentSourceId, :betterSourceId, :chapterDifference, :cachedAt, :dismissedUntil)
-ON CONFLICT(book_id)
-DO UPDATE
-SET current_source_id = :currentSourceId,
-    better_source_id = :betterSourceId,
-    chapter_difference = :chapterDifference,
-    cached_at = :cachedAt,
-    dismissed_until = :dismissedUntil
-WHERE book_id = :bookId;
+INSERT INTO sourceComparison(book_id, current_source_id, better_source_id, chapter_difference, cached_at, dismissed_until) VALUES (:bookId, :currentSourceId, :betterSourceId, :chapterDifference, :cachedAt, :dismissedUntil) ON CONFLICT(book_id) DO UPDATE SET current_source_id = :currentSourceId, better_source_id = :betterSourceId, chapter_difference = :chapterDifference, cached_at = :cachedAt, dismissed_until = :dismissedUntil WHERE book_id = :bookId;
 
 delete:
 DELETE FROM sourceComparison WHERE book_id = :bookId;

@@ -125,15 +125,7 @@ DELETE FROM history
 WHERE last_read = 0;
 
 upsert:
-INSERT INTO history(chapter_id, last_read, time_read, progress)
-VALUES (:chapterId, :readAt, :time_read, :reading_progress)
-ON CONFLICT(chapter_id)
-DO UPDATE
-SET
-    last_read = :readAt,
-    time_read = time_read + :time_read,
-    progress = :reading_progress
-WHERE chapter_id = :chapterId;
+INSERT INTO history(chapter_id, last_read, time_read, progress) VALUES (:chapterId, :readAt, :time_read, :reading_progress) ON CONFLICT(chapter_id) DO UPDATE SET last_read = :readAt, time_read = time_read + :time_read, progress = :reading_progress WHERE chapter_id = :chapterId;
 
 deleteByBookId:
 DELETE FROM history WHERE chapter_id IN (SELECT chapter._id FROM chapter WHERE chapter.book_id = :bookId);

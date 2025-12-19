@@ -22,14 +22,7 @@ deleteAll:
 DELETE FROM reader_theme;
 
 upsert:
-INSERT INTO reader_theme(background_color,on_textcolor)
-VALUES (:backgroundColor, :onTextColor)
-ON CONFLICT(_id)
-DO UPDATE
-SET
-    background_color = :backgroundColor,
-    on_textcolor = :onTextColor
-WHERE _id = :id;
+INSERT INTO reader_theme(background_color, on_textcolor) VALUES (:backgroundColor, :onTextColor) ON CONFLICT(_id) DO UPDATE SET background_color = :backgroundColor, on_textcolor = :onTextColor WHERE _id = :id;
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID();

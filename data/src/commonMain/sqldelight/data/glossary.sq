@@ -57,18 +57,7 @@ SET target_term = :targetTerm,
 WHERE _id = :id;
 
 upsert:
-INSERT INTO glossary(
-    book_id, source_term, target_term, term_type, notes, created_at, updated_at
-)
-VALUES (
-    :bookId, :sourceTerm, :targetTerm, :termType, :notes, :createdAt, :updatedAt
-)
-ON CONFLICT(book_id, source_term)
-DO UPDATE SET
-    target_term = :targetTerm,
-    term_type = :termType,
-    notes = :notes,
-    updated_at = :updatedAt;
+INSERT INTO glossary(book_id, source_term, target_term, term_type, notes, created_at, updated_at) VALUES (:bookId, :sourceTerm, :targetTerm, :termType, :notes, :createdAt, :updatedAt) ON CONFLICT(book_id, source_term) DO UPDATE SET target_term = :targetTerm, term_type = :termType, notes = :notes, updated_at = :updatedAt;
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID() AS Long;

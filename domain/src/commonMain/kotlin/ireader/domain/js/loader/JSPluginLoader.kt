@@ -314,6 +314,7 @@ class JSPluginLoader(
     /**
      * Loads stub sources instantly for fast startup.
      * Returns lightweight placeholder sources based on previously loaded plugins.
+     * If no stubs are saved (first run), creates stubs from metadata files or JS code.
      * @return List of stub catalogs
      */
     fun loadStubPlugins(): List<JSPluginCatalog> {
@@ -322,7 +323,7 @@ class JSPluginLoader(
         // Get saved stubs
         val stubs = stubManager.getPluginStubs()
         
-        // Scan for actual plugin files to verify they still exist
+        // Scan for actual plugin files
         val pluginFiles = if (fileSystem.exists(pluginsDirectory)) {
             fileSystem.list(pluginsDirectory)
                 .filter { it.name.endsWith(".js") }
@@ -331,18 +332,65 @@ class JSPluginLoader(
             emptyMap()
         }
         
-        // Create stub catalogs for plugins that still exist
-        val stubCatalogs = stubs.mapNotNull { (pluginId, stubData) ->
-            val file = pluginFiles[stubData.fileName]
-            if (file != null) {
-                createStubCatalog(stubData.metadata, file)
-            } else {
-                // Plugin file no longer exists, remove stub
-                stubManager.removePluginStub(pluginId)
+        // If we have saved stubs, use them
+        if (stubs.isNotEmpty()) {
+            val stubCatalogs = stubs.mapNotNull { (pluginId, stubData) ->
+                val file = pluginFiles[stubData.fileName]
+                if (file != null) {
+                    createStubCatalog(stubData.metadata, file)
+                } else {
+                    // Plugin file no longer exists, remove stub
+                    stubManager.removePluginStub(pluginId)
+                    null
+                }
+            }
+            
+            val loadTime = currentTimeToLong() - startTime
+            Log.info { "JSPluginLoader: Loaded ${stubCatalogs.size} stubs from cache in ${loadTime}ms" }
+            return stubCatalogs
+        }
+        
+        // No saved stubs - first run or cache cleared
+        // Create stubs from metadata files or extract from JS code
+        Log.info { "JSPluginLoader: No saved stubs, creating from ${pluginFiles.size} plugin files..." }
+        
+        val stubCatalogs = pluginFiles.mapNotNull { (pluginId, file) ->
+            try {
+                // Try to load metadata from .meta.json file first (fastest)
+                val metadataFile = file.parent!! / "${pluginId}.meta.json"
+                val metadata = if (fileSystem.exists(metadataFile)) {
+                    try {
+                        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                        val content = fileSystem.source(metadataFile).buffer().use { it.readUtf8() }
+                        json.decodeFromString<PluginMetadata>(content)
+                    } catch (e: Exception) {
+                        null
+                    }
+                } else {
+                    null
+                }
+                
+                // If no metadata file, extract from JS code
+                val finalMetadata = metadata ?: run {
+                    val jsCode = fileSystem.source(file).buffer().use { it.readUtf8() }
+                    extractMetadataFromCode(jsCode, pluginId)
+                }
+                
+                if (finalMetadata != null) {
+                    // Save stub for future fast loading
+                    stubManager.savePluginStub(finalMetadata, pluginId)
+                    createStubCatalog(finalMetadata, file)
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                Log.warn { "JSPluginLoader: Failed to create stub for ${file.name}: ${e.message}" }
                 null
             }
         }
         
+        val loadTime = currentTimeToLong() - startTime
+        Log.info { "JSPluginLoader: Created ${stubCatalogs.size} stubs from files in ${loadTime}ms" }
         return stubCatalogs
     }
     
