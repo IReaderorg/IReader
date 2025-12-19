@@ -46,6 +46,14 @@ class ReaderPreferences constructor(
         const val TEXT_READER_SPEECH_LANGUAGE = "text_reader_speech_language"
         const val TEXT_READER_SPEECH_VOICE = "text_reader_speech_selected_voice"
         const val TEXT_READER_AUTO_NEXT = "text_reader_auto_next"
+        
+        // Default content filter patterns for common navigation hints and website promotions
+        // Users can add more patterns or modify these in settings
+        const val DEFAULT_CONTENT_FILTER_PATTERNS = """Use arrow keys.*chapter
+(?:A|D|←|→).*(?:PREV|NEXT).*chapter
+(?:Previous|Next).*Chapter.*(?:←|→|A|D)
+Read more at.*
+Visit.*for more chapters"""
     }
 
     fun brightness(): Preference<Float> {
@@ -661,13 +669,17 @@ class ReaderPreferences constructor(
     
     /**
      * Regex patterns to remove from content (one per line)
-     * Example patterns:
-     * - "Use arrow keys.*chapter" - removes navigation hints
-     * - "Read more at.*" - removes website promotions
-     * - "\\[.*?\\]" - removes text in brackets
+     * 
+     * Default patterns include common navigation hints and website promotions.
+     * Users can add their own patterns or modify existing ones.
+     * 
+     * Pattern syntax:
+     * - Use .* for "any characters"
+     * - Use \\[ and \\] for literal brackets
+     * - Patterns are case-insensitive
      */
     fun contentFilterPatterns(): Preference<String> {
-        return preferenceStore.getString("content_filter_patterns", "")
+        return preferenceStore.getString("content_filter_patterns", DEFAULT_CONTENT_FILTER_PATTERNS)
     }
     
     // TTS Screen Display Preferences

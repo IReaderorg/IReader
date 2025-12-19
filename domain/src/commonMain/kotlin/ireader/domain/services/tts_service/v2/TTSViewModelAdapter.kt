@@ -329,4 +329,13 @@ class TTSViewModelAdapter(
         Log.warn { "$TAG: destroy()" }
         controller.destroy()
     }
+    
+    /**
+     * Refresh current chapter content (e.g., when content filter settings change).
+     * Reloads the chapter from the content loader to apply new filter settings.
+     */
+    fun refreshContent() {
+        Log.warn { "$TAG: refreshContent()" }
+        controller.dispatch(TTSCommand.RefreshContent)
+    }
 }

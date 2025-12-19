@@ -107,6 +107,7 @@ class TTSController(
             
             is TTSCommand.LoadChapter -> loadChapter(command.bookId, command.chapterId, command.startParagraph)
             is TTSCommand.SetContent -> setContent(command.paragraphs)
+            is TTSCommand.RefreshContent -> refreshContent()
             
             is TTSCommand.SetTranslatedContent -> setTranslatedContent(command.paragraphs)
             is TTSCommand.ToggleTranslation -> toggleTranslation(command.show)
@@ -690,6 +691,30 @@ class TTSController(
                 currentParagraphIndex = 0
             )
         }
+    }
+    
+    /**
+     * Refresh current chapter content (e.g., when content filter settings change).
+     * Reloads the chapter from the content loader to apply new filter settings.
+     */
+    private suspend fun refreshContent() {
+        val currentState = _state.value
+        val bookId = currentState.book?.id
+        val chapterId = currentState.chapter?.id
+        val currentParagraph = currentState.currentParagraphIndex
+        
+        if (bookId == null || chapterId == null) {
+            Log.warn { "$TAG: refreshContent - no chapter loaded, skipping" }
+            return
+        }
+        
+        Log.warn { "$TAG: refreshContent - reloading chapter $chapterId" }
+        
+        // Force reload by clearing the current state first
+        _state.update { it.copy(paragraphs = emptyList()) }
+        
+        // Reload the chapter (content filter will be applied by contentLoader)
+        loadChapter(bookId, chapterId, currentParagraph)
     }
     
     // ========== Translation ==========

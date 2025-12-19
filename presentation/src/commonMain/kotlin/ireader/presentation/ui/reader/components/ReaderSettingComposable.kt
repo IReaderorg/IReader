@@ -1127,13 +1127,13 @@ fun ContentFilterPatternsEditor(
                 validationError = if (errors.isNotEmpty()) errors.joinToString("\n") else null
             },
             label = { Text("Regex Patterns (one per line)") },
-            placeholder = { Text("Use arrow keys.*chapter\nRead more at.*") },
-            modifier = Modifier.fillMaxWidth().height(120.dp),
+            placeholder = { Text("Use arrow keys.*chapter\n(?:A|D|←|→).*chapter\nRead more at.*") },
+            modifier = Modifier.fillMaxWidth().height(150.dp),
             isError = hasValidationError,
             supportingText = if (hasValidationError) {
                 { Text(errorText, color = MaterialTheme.colorScheme.error) }
             } else null,
-            maxLines = 6
+            maxLines = 8
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -1231,10 +1231,15 @@ fun ContentFilterPatternsEditor(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Tip: Use regex patterns to remove unwanted text. Common patterns:\n" +
-                   "• \"Use arrow keys.*\" - removes navigation hints\n" +
-                   "• \"Read more at.*\" - removes promotions\n" +
-                   "• \"\\\\[.*?\\\\]\" - removes text in brackets",
+            text = "Tip: Use regex patterns to remove unwanted text.\n" +
+                   "• .* = any characters\n" +
+                   "• (?:A|B) = A or B\n" +
+                   "• \\\\[ and \\\\] = literal brackets\n\n" +
+                   "Examples:\n" +
+                   "• \"Use arrow keys.*chapter\" - navigation hints\n" +
+                   "• \"(?:A|D|←|→).*chapter\" - keyboard shortcuts\n" +
+                   "• \"Read more at.*\" - promotions\n" +
+                   "• \"\\\\[TL:.*?\\\\]\" - translator notes",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
         )

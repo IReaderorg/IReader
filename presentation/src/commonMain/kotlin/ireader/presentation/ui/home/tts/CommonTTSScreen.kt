@@ -1728,6 +1728,11 @@ fun TTSSettingsPanelCommon(
     readTranslatedText: Boolean = false,
     hasTranslation: Boolean = false,
     sentenceHighlightEnabled: Boolean = true,
+    // Content filter parameters
+    contentFilterEnabled: Boolean = false,
+    contentFilterPatterns: String = "",
+    onContentFilterEnabledChange: (Boolean) -> Unit = {},
+    onContentFilterPatternsChange: (String) -> Unit = {},
     onUseCustomColorsChange: (Boolean) -> Unit,
     onBackgroundColorChange: (Color) -> Unit,
     onTextColorChange: (Color) -> Unit,
@@ -1955,6 +1960,71 @@ fun TTSSettingsPanelCommon(
                                 )
                             }
 
+                    }
+                }
+                
+                // Content Filter Section
+                SettingSectionCommon(title = "Content Filter") {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Enable Content Filter",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "Remove unwanted text patterns using regex",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = contentFilterEnabled,
+                                onCheckedChange = onContentFilterEnabledChange
+                            )
+                        }
+                        
+                        if (contentFilterEnabled) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                            
+                            // Pattern input
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "Filter Patterns (one regex per line)",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "Syntax: .* = any chars, (?:A|B) = A or B\n\n" +
+                                           "Examples:\n" +
+                                           "• Use arrow keys.*chapter - nav hints\n" +
+                                           "• (?:A|D|←|→).*chapter - keyboard shortcuts\n" +
+                                           "• Read more at.* - promotions\n" +
+                                           "• \\[TL:.*?\\] - translator notes",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                
+                                androidx.compose.material3.OutlinedTextField(
+                                    value = contentFilterPatterns,
+                                    onValueChange = onContentFilterPatternsChange,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(150.dp),
+                                    placeholder = { Text("Use arrow keys.*chapter\n(?:A|D|←|→).*chapter\nRead more at.*") },
+                                    textStyle = MaterialTheme.typography.bodySmall,
+                                    minLines = 4,
+                                    maxLines = 8
+                                )
+                            }
+                        }
                     }
                 }
                 

@@ -14,7 +14,6 @@ import ireader.domain.usecases.remote.RemoteUseCases
 import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -50,8 +49,8 @@ class TTSContentLoaderImpl(
             throw IllegalStateException("Book not found: $bookId")
         }
         
-        // Load chapter
-        var chapter = chapterRepository.findChapterById(chapterId)
+        // Load chapter using use case (applies content filtering)
+        var chapter = chapterUseCase.findChapterById(chapterId)
         if (chapter == null) {
             Log.warn { "$TAG: Chapter not found: $chapterId" }
             throw IllegalStateException("Chapter not found: $chapterId")
@@ -61,15 +60,22 @@ class TTSContentLoaderImpl(
         var content = chapter.content
         if (content.isEmpty()) {
             Log.warn { "$TAG: Chapter content empty, attempting to fetch from remote" }
-            content = fetchChapterContent(book, chapter) ?: emptyList()
-            
-            // Update chapter with fetched content
-            if (content.isNotEmpty()) {
-                chapter = chapter.copy(content = content)
+            val fetchedContent = fetchChapterContent(book, chapter)
+            if (fetchedContent != null && fetchedContent.isNotEmpty()) {
+                // Re-read from DB to get filtered content
+                val refreshedChapter = chapterUseCase.findChapterById(chapterId)
+                if (refreshedChapter != null) {
+                    chapter = refreshedChapter
+                    content = refreshedChapter.content
+                } else {
+                    content = fetchedContent
+                    chapter = chapter.copy(content = content)
+                }
             }
         }
         
         // Parse content into paragraphs (extract text from Page objects)
+        // Note: content is already filtered by the use case
         val paragraphs = parseContent(content)
         
         Log.warn { "$TAG: Loaded chapter with ${paragraphs.size} paragraphs" }
@@ -82,7 +88,8 @@ class TTSContentLoaderImpl(
     }
     
     /**
-     * Fetch chapter content from remote source
+     * Fetch chapter content from remote source using FetchAndSaveChapterContentUseCase.
+     * Returns the filtered content after saving to DB.
      */
     private suspend fun fetchChapterContent(book: Book, chapter: Chapter): List<Page>? {
         Log.warn { "$TAG: fetchChapterContent - sourceId=${book.sourceId}" }
@@ -99,9 +106,8 @@ class TTSContentLoaderImpl(
             suspendCancellableCoroutine { continuation ->
                 var resumed = false
                 
-                // The getRemoteReadingContent is already a suspend function that handles its own dispatching
                 CoroutineScope(ioDispatcher).launch {
-                    remoteUseCases.getRemoteReadingContent(
+                    remoteUseCases.fetchAndSaveChapterContent(
                         chapter = chapter,
                         catalog = catalog,
                         onError = { error ->
@@ -111,20 +117,11 @@ class TTSContentLoaderImpl(
                                 continuation.resume(null)
                             }
                         },
-                        onSuccess = { updatedChapter ->
-                            Log.warn { "$TAG: Successfully fetched ${updatedChapter.content.size} pages from remote" }
-                            // Save the fetched content to database using insertChapter (upsert)
-                            try {
-                                runBlocking {
-                                    chapterRepository.insertChapter(updatedChapter)
-                                }
-                                Log.warn { "$TAG: Saved fetched content to database" }
-                            } catch (e: Exception) {
-                                Log.warn { "$TAG: Failed to save fetched content: ${e.message}" }
-                            }
+                        onSuccess = { filteredChapter ->
+                            Log.warn { "$TAG: Successfully fetched and filtered ${filteredChapter.content.size} pages" }
                             if (!resumed) {
                                 resumed = true
-                                continuation.resume(updatedChapter.content)
+                                continuation.resume(filteredChapter.content)
                             }
                         }
                     )
@@ -140,14 +137,15 @@ class TTSContentLoaderImpl(
      * Parse chapter content (List<Page>) into paragraphs
      * 
      * Extracts text from Text pages and cleans HTML if present.
-     * Also applies content filter to remove unwanted text patterns.
+     * Note: Content is already filtered at the Page level by FindChapterById use case.
+     * This method applies additional string-level filtering after HTML cleaning/splitting.
      */
     private fun parseContent(content: List<Page>): List<String> {
         if (content.isEmpty()) {
             return emptyList()
         }
         
-        // Extract text from Text pages
+        // Extract text from Text pages (already filtered at Page level)
         val textContent = content
             .filterIsInstance<Text>()
             .map { it.text }
@@ -159,7 +157,7 @@ class TTSContentLoaderImpl(
                 cleanAndSplitText(text)
             }
             
-            // Apply content filter to remove unwanted text patterns
+            // Apply content filter again after HTML cleaning (catches any remaining patterns)
             return contentFilterUseCase?.filterStrings(paragraphs) ?: paragraphs
         }
         

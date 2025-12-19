@@ -6,4 +6,5 @@ data class RemoteUseCases(
     val getRemoteChapters: GetRemoteChapters,
     val getRemoteBooks: GetRemoteBooksUseCase,
     val globalSearch: GlobalSearchUseCase,
+    val fetchAndSaveChapterContent: FetchAndSaveChapterContentUseCase,
 )

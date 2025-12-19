@@ -78,6 +78,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.image
 import ireader.presentation.core.toComposeColor
@@ -94,7 +95,6 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.MultiSwipeRefresh
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.coroutines.launch
-import ireader.domain.utils.extensions.currentTimeToLong
 
 @Composable
 fun ReaderText(
@@ -474,18 +474,8 @@ private fun OptimizedPagedReaderText(
             }
         }
     }
-    
-    // Memoize content to prevent unnecessary recomposition
-    // Include showTranslatedContent in key so content updates when translation is toggled
-    val content = remember(
-        vm.stateChapter?.id, 
-        vm.translationViewModel.translationState.hasTranslation,
-        vm.showTranslatedContent.value,
-        vm.contentFilterEnabled.value,
-        vm.contentFilterPatterns.value
-    ) {
-        vm.getCurrentContent()
-    }
+    // Content is already filtered at the data layer
+    val content = successState?.currentContent ?: emptyList()
     
     // Check chapter navigation availability
     val currentIndex = vm.currentChapterIndex
@@ -617,16 +607,10 @@ private fun LegacyPagedReaderText(
             rightSide = vm.scrollIndicatorAlignment.value == PreferenceValues.PreferenceTextAlignment.Right
         ) {
             // Memoize content to prevent unnecessary recomposition
-            // Include showTranslatedContent and content filter in key so content updates when settings change
-            val content = remember(
-                vm.stateChapter?.id, 
-                vm.translationViewModel.translationState.hasTranslation,
-                vm.showTranslatedContent.value,
-                vm.contentFilterEnabled.value,
-                vm.contentFilterPatterns.value
-            ) {
-                vm.getCurrentContent()
-            }
+            // Observe state directly to get content updates when filter changes
+            val readerState by vm.state.collectAsState()
+            val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
+            val content = successState?.currentContent ?: emptyList()
             
             Column(
                 modifier = Modifier
@@ -751,17 +735,10 @@ private fun StyleText(
     page: Text,
     enableBioReading: Boolean
 ) {
-    // Cache the content to avoid race conditions from multiple getCurrentContent() calls
-    // Include showTranslatedContent and content filter in key so content updates when settings change
-    val currentContent = remember(
-        vm.stateChapter?.id, 
-        vm.translationViewModel.translationState.hasTranslation,
-        vm.showTranslatedContent.value,
-        vm.contentFilterEnabled.value,
-        vm.contentFilterPatterns.value
-    ) {
-        vm.getCurrentContent()
-    }
+    // Observe state directly to get content updates when filter changes
+    val readerState by vm.state.collectAsState()
+    val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
+    val currentContent = successState?.currentContent ?: emptyList()
     val isLastIndex = index == currentContent.lastIndex
     
     val originalText = setText(
@@ -887,17 +864,10 @@ private fun StyleTextOptimized(
     enableBioReading: Boolean,
     styleParams: TextStyleParams
 ) {
-    // Cache the content to avoid race conditions from multiple getCurrentContent() calls
-    // Include showTranslatedContent and content filter in key so content updates when settings change
-    val currentContent = remember(
-        vm.stateChapter?.id, 
-        vm.translationViewModel.translationState.hasTranslation,
-        vm.showTranslatedContent.value,
-        vm.contentFilterEnabled.value,
-        vm.contentFilterPatterns.value
-    ) {
-        vm.getCurrentContent()
-    }
+    // Observe state directly to get content updates when filter changes
+    val readerState by vm.state.collectAsState()
+    val successState = readerState as? ireader.presentation.ui.reader.viewmodel.ReaderState.Success
+    val currentContent = successState?.currentContent ?: emptyList()
     val isLastIndex = index == currentContent.lastIndex
     
     // Use lazyValue for immediate UI updates during slider drag

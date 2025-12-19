@@ -241,6 +241,10 @@ class TTSV2ScreenSpec(
         var sleepTimeMinutes by remember { mutableStateOf(readerPreferences.sleepTime().get().toInt()) }
         var sentenceHighlightEnabled by remember { mutableStateOf(readerPreferences.ttsSentenceHighlight().get()) }
         
+        // Content filter state
+        var contentFilterEnabled by remember { mutableStateOf(readerPreferences.contentFilterEnabled().get()) }
+        var contentFilterPatterns by remember { mutableStateOf(readerPreferences.contentFilterPatterns().get()) }
+        
         // Gradio TTS state - observe changes to react when user changes config in settings
         val useGradioTTS by appPreferences.useGradioTTS().changes().collectAsState(
             initial = appPreferences.useGradioTTS().get()
@@ -643,6 +647,31 @@ class TTSV2ScreenSpec(
                 sleepModeEnabled = timerState.isEnabled
                 if (timerState.remainingTimeMs > 0) {
                     sleepTimeMinutes = (timerState.remainingTimeMs / 60000).toInt().coerceAtLeast(1)
+                }
+            }
+        }
+        
+        // Watch for content filter changes and refresh content
+        LaunchedEffect(Unit) {
+            // Watch for filter enabled/disabled changes
+            readerPreferences.contentFilterEnabled().changes().collect { enabled ->
+                Log.warn { "TTSV2ScreenSpec: Content filter enabled changed to $enabled" }
+                contentFilterEnabled = enabled
+                // Refresh content to apply new filter settings
+                if (state.hasContent) {
+                    viewModel.adapter.refreshContent()
+                }
+            }
+        }
+        
+        LaunchedEffect(Unit) {
+            // Watch for filter patterns changes
+            readerPreferences.contentFilterPatterns().changes().collect { patterns ->
+                Log.warn { "TTSV2ScreenSpec: Content filter patterns changed" }
+                contentFilterPatterns = patterns
+                // Refresh content to apply new filter settings
+                if (state.hasContent) {
+                    viewModel.adapter.refreshContent()
                 }
             }
         }
@@ -1219,6 +1248,17 @@ class TTSV2ScreenSpec(
                                 sentenceHighlightEnabled = enabled
                                 viewModel.adapter.setSentenceHighlight(enabled)
                                 scope.launch { readerPreferences.ttsSentenceHighlight().set(enabled) }
+                            },
+                            // Content filter settings
+                            contentFilterEnabled = contentFilterEnabled,
+                            contentFilterPatterns = contentFilterPatterns,
+                            onContentFilterEnabledChange = { enabled ->
+                                contentFilterEnabled = enabled
+                                scope.launch { readerPreferences.contentFilterEnabled().set(enabled) }
+                            },
+                            onContentFilterPatternsChange = { patterns ->
+                                contentFilterPatterns = patterns
+                                scope.launch { readerPreferences.contentFilterPatterns().set(patterns) }
                             },
                             onOpenEngineSettings = {
                                 showEngineSettings = true

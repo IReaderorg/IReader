@@ -27,6 +27,8 @@ sealed class TTSCommand {
         val startParagraph: Int = 0
     ) : TTSCommand()
     data class SetContent(val paragraphs: List<String>) : TTSCommand()
+    /** Refresh current chapter content (e.g., when content filter settings change) */
+    object RefreshContent : TTSCommand()
     
     // Translation commands
     data class SetTranslatedContent(val paragraphs: List<String>?) : TTSCommand()

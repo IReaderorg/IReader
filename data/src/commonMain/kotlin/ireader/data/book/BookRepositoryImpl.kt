@@ -244,31 +244,64 @@ class BookRepositoryImpl(
         
         return if (existingBook != null) {
             // Book exists - update it and return existing ID
-            // Preserve customCover if not explicitly set in the new book
+            // Preserve existing data when new book has empty/default values
+            // This prevents data loss when navigating from explore screen to detail screen
             val customCoverToUse = if (book.customCover.isNotBlank()) {
                 book.customCover
             } else {
                 existingBook.customCover
             }
+            val descriptionToUse = if (book.description.isNotBlank()) {
+                book.description
+            } else {
+                existingBook.description
+            }
+            val authorToUse = if (book.author.isNotBlank()) {
+                book.author
+            } else {
+                existingBook.author
+            }
+            val statusToUse = if (book.status != 0L) {
+                book.status
+            } else {
+                existingBook.status
+            }
+            val genresToUse = if (book.genres.isNotEmpty()) {
+                book.genres
+            } else {
+                existingBook.genres
+            }
+            val coverToUse = if (book.cover.isNotBlank()) {
+                book.cover
+            } else {
+                existingBook.cover
+            }
+            val lastUpdateToUse = if (book.lastUpdate > 0L) {
+                book.lastUpdate
+            } else {
+                existingBook.lastUpdate
+            }
+            val initializedToUse = book.initialized || existingBook.initialized
+            
             handler.await(inTransaction = true) {
                 bookQueries.update(
                     source = book.sourceId,
-                    dateAdded = book.dateAdded,
-                    lastUpdate = book.lastUpdate,
+                    dateAdded = if (book.dateAdded > 0L) book.dateAdded else existingBook.dateAdded,
+                    lastUpdate = lastUpdateToUse,
                     title = book.title,
-                    status = book.status,
-                    description = book.description,
-                    author = book.author,
+                    status = statusToUse,
+                    description = descriptionToUse,
+                    author = authorToUse,
                     url = book.key,
                     chapterFlags = book.flags,
                     coverLastModified = 0,
-                    thumbnailUrl = book.cover,
+                    thumbnailUrl = coverToUse,
                     customCover = customCoverToUse,
                     viewer = book.viewer,
                     id = existingBook.id,
-                    initialized = book.initialized,
+                    initialized = initializedToUse,
                     favorite = existingBook.favorite, // Preserve favorite status
-                    genre = book.genres.let(bookGenresConverter::encode),
+                    genre = genresToUse.let(bookGenresConverter::encode),
                     isPinned = existingBook.isPinned, // Preserve pin status
                     pinnedOrder = existingBook.pinnedOrder.toLong(),
                     isArchived = existingBook.isArchived, // Preserve archive status

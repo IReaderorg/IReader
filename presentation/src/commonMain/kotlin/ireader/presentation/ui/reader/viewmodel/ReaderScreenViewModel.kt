@@ -240,6 +240,58 @@ class ReaderScreenViewModel(
         
         // Load custom fonts (deferred to ensure property is initialized)
         loadCustomFonts()
+        
+        // Subscribe to content filter changes to re-filter content
+        subscribeToContentFilterChanges()
+    }
+    
+    /**
+     * Subscribe to content filter preference changes and re-filter content when they change.
+     */
+    private fun subscribeToContentFilterChanges() {
+        // Watch for filter enabled/disabled changes
+        readerPreferences.contentFilterEnabled().changes()
+            .onEach { 
+                Log.debug { "Content filter enabled changed: $it" }
+                contentFilterUseCase.invalidateCache()
+                refilterCurrentContent()
+            }
+            .launchIn(scope)
+        
+        // Watch for filter patterns changes
+        readerPreferences.contentFilterPatterns().changes()
+            .onEach { 
+                Log.debug { "Content filter patterns changed" }
+                contentFilterUseCase.invalidateCache()
+                refilterCurrentContent()
+            }
+            .launchIn(scope)
+    }
+    
+    /**
+     * Re-apply content filter to current chapter content.
+     * Called when filter settings change.
+     * Reloads the chapter from the use case to get freshly filtered content.
+     */
+    private fun refilterCurrentContent() {
+        val currentState = _state.value as? ReaderState.Success ?: return
+        val chapter = currentState.currentChapter
+        val book = currentState.book
+        val catalog = currentState.catalog
+        
+        // Invalidate the filter cache so new settings are applied
+        contentFilterUseCase.invalidateCache()
+        
+        // Reload the chapter to get freshly filtered content
+        scope.launch {
+            val freshChapter = getChapterUseCase.findChapterById(chapter.id)
+            if (freshChapter != null) {
+                updateSuccessState { state ->
+                    state.copy(content = freshChapter.content)
+                }
+                Log.debug { "Re-filtered content by reloading chapter: ${freshChapter.content.size} pages" }
+            }
+        }
     }
     
     /**
@@ -611,6 +663,7 @@ class ReaderScreenViewModel(
         val previousSuccessState = currentState as? ReaderState.Success
         
         // Calculate total words for reading time estimation
+        // Note: chapter.content is already filtered at the use case level (FindChapterById)
         val totalWords = calculateTotalWords(chapter.content)
         
         _state.value = ReaderState.Success(
@@ -677,30 +730,25 @@ class ReaderScreenViewModel(
     }
 
     private suspend fun fetchRemoteChapter(book: Book, catalog: CatalogLocal?, chapter: Chapter) {
-        remoteUseCases.getRemoteReadingContent(
-            chapter,
-            catalog,
-            onSuccess = { result ->
-                // Calculate total words for reading time estimation
-                val totalWords = calculateTotalWords(result.content)
+        remoteUseCases.fetchAndSaveChapterContent(
+            chapter = chapter,
+            catalog = catalog,
+            onSuccess = { filteredChapter ->
+                // Chapter is already saved to DB and filtered
+                val totalWords = calculateTotalWords(filteredChapter.content)
                 
                 updateSuccessState { state ->
                     state.copy(
-                        currentChapter = result,
-                        content = result.content,
+                        currentChapter = filteredChapter,
+                        content = filteredChapter.content,
                         isLoadingContent = false,
                         totalWords = totalWords
                     )
                 }
-
-                // Save to database
-                scope.launch {
-                    insertUseCases.insertChapter(result)
-
-                    // Check chapter health after content loads
-                    if (result.content.isNotEmpty()) {
-                        checkChapterHealth(result)
-                    }
+                
+                // Check chapter health after content loads
+                if (filteredChapter.content.isNotEmpty()) {
+                    checkChapterHealth(filteredChapter)
                 }
             },
             onError = { message ->
@@ -1641,8 +1689,8 @@ class ReaderScreenViewModel(
     
     fun getCurrentContent(): List<Page> {
         val successState = _state.value as? ReaderState.Success ?: return emptyList()
-        // Apply content filter to remove unwanted text patterns
-        return contentFilterUseCase.filterPages(successState.currentContent)
+        // Content is already filtered when loaded into state
+        return successState.currentContent
     }
     
     fun getTranslationForParagraph(index: Int): String? {

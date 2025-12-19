@@ -55,6 +55,7 @@ import ireader.domain.usecases.preferences.reader_preferences.SortersUseCase
 import ireader.domain.usecases.preferences.reader_preferences.TextAlignmentUseCase
 import ireader.domain.usecases.preferences.reader_preferences.TextColorUseCase
 import ireader.domain.usecases.preferences.reader_preferences.screens.LibraryScreenPrefUseCases
+import ireader.domain.usecases.remote.FetchAndSaveChapterContentUseCase
 import ireader.domain.usecases.remote.GetBookDetail
 import ireader.domain.usecases.remote.GetRemoteBooksUseCase
 import ireader.domain.usecases.remote.GetRemoteChapters
@@ -79,13 +80,18 @@ import org.koin.dsl.module
 val UseCasesInject = module {
 
     // Remote use cases - factory for on-demand creation
-    factory<RemoteUseCases> { RemoteUseCases(
-        getBookDetail = GetBookDetail(),
-        getRemoteBooks = GetRemoteBooksUseCase(),
-        getRemoteChapters = GetRemoteChapters(),
-        getRemoteReadingContent = GetRemoteReadingContent(),
-        globalSearch = get(),
-    ) }
+    factory<RemoteUseCases> {
+        val contentFilterUseCase: ireader.domain.usecases.reader.ContentFilterUseCase? = getOrNull()
+        val findChapterById = FindChapterById(get(), contentFilterUseCase)
+        RemoteUseCases(
+            getBookDetail = GetBookDetail(),
+            getRemoteBooks = GetRemoteBooksUseCase(),
+            getRemoteChapters = GetRemoteChapters(),
+            getRemoteReadingContent = GetRemoteReadingContent(),
+            globalSearch = get(),
+            fetchAndSaveChapterContent = FetchAndSaveChapterContentUseCase(get(), findChapterById),
+        )
+    }
     factory<ireader.domain.usecases.reader.PreloadChapterUseCase> { ireader.domain.usecases.reader.PreloadChapterUseCase() }
     factory<ireader.domain.usecases.reader.ApplyDefaultReadingModeUseCase> { ireader.domain.usecases.reader.ApplyDefaultReadingModeUseCase(get(), get()) }
     
@@ -112,9 +118,10 @@ val UseCasesInject = module {
         )
     }
     factory<ireader.domain.usecases.local.LocalGetChapterUseCase> {
+        val contentFilterUseCase: ireader.domain.usecases.reader.ContentFilterUseCase? = getOrNull()
         ireader.domain.usecases.local.LocalGetChapterUseCase(
             findAllInLibraryChapters = FindAllInLibraryChapters(get()),
-            findChapterById = FindChapterById(get()),
+            findChapterById = FindChapterById(get(), contentFilterUseCase),
             findChaptersByBookId = FindChaptersByBookId(get()),
             subscribeChaptersByBookId = SubscribeChaptersByBookId(get()),
             updateLastReadTime = UpdateLastReadTime(
@@ -122,7 +129,7 @@ val UseCasesInject = module {
                 historyUseCase = get(),
                 uiPreferences = get()
             ),
-            subscribeChapterById = SubscribeChapterById(get())
+            subscribeChapterById = SubscribeChapterById(get(), contentFilterUseCase)
         )
     }
     factory<ireader.domain.usecases.local.DeleteUseCase> {
