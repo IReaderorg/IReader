@@ -519,11 +519,22 @@ fun CommonNavHost(
             }
             if (sourceId != null) {
                 val catalogStore: CatalogStore = koinInject()
+                val catalogRemoteRepository: ireader.domain.catalogs.service.CatalogRemoteRepository = koinInject()
+                
+                // First check local catalogs, then remote catalogs
                 val catalog = remember(sourceId) {
                     catalogStore.catalogs.find { it.sourceId == sourceId }
                 }
-                if (catalog != null) {
-                        SourceDetailScreen(catalog).Content()
+                
+                val remoteCatalog = androidx.compose.runtime.produceState<ireader.domain.models.entities.CatalogRemote?>(null, sourceId) {
+                    if (catalog == null) {
+                        value = catalogRemoteRepository.getRemoteCatalogs().find { it.sourceId == sourceId }
+                    }
+                }
+                
+                val finalCatalog = catalog ?: remoteCatalog.value
+                if (finalCatalog != null) {
+                    SourceDetailScreen(finalCatalog).Content()
                 }
             }
         }

@@ -187,6 +187,7 @@ fun UnifiedSourceScreen(
                     onCancelInstaller = onCancelInstaller,
                     onNavigateToAddRepository = onNavigateToAddRepository,
                     onDeleteUserSource = { sourceUrl -> vm.deleteUserSourceByUrl(sourceUrl) },
+                    onShowDetails = onShowDetails,
                 )
             }
         }
@@ -454,6 +455,7 @@ private fun AvailableSourcesContent(
     onCancelInstaller: ((Catalog) -> Unit)? = null,
     onNavigateToAddRepository: (() -> Unit)? = null,
     onDeleteUserSource: ((String) -> Unit)? = null,
+    onShowDetails: ((Catalog) -> Unit)? = null,
 ) {
     var showLoginDialog by remember { mutableStateOf(false) }
     var loginSourceId by remember { mutableStateOf<Long?>(null) }
@@ -577,12 +579,14 @@ private fun AvailableSourcesContent(
                                     catalog = catalogItem.source,
                                     installStep = if (catalogItem.source is CatalogInstalled) 
                                         state.installSteps[catalogItem.source.pkgName] else null,
+                                    onClick = { onShowDetails?.invoke(catalogItem.source) },
                                     onInstall = { onClickInstall(catalogItem.source) }
                                         .takeIf { catalogItem.source.hasUpdate },
                                     onUninstall = { onClickUninstall(catalogItem.source) }
                                         .takeIf { catalogItem.source is CatalogInstalled },
                                     onCancelInstaller = onCancelInstaller?.let { cancel -> { cancel(catalogItem.source) } },
                                     sourceStatus = vm.getSourceStatus(catalogItem.source.sourceId),
+                                    onShowDetails = onShowDetails?.let { { it(catalogItem.source) } },
                                     onLogin = {
                                         loginSourceId = catalogItem.source.sourceId
                                         loginSourceName = catalogItem.source.name
@@ -603,8 +607,9 @@ private fun AvailableSourcesContent(
                                     catalog = catalogItem.source,
                                     installStep = state.installSteps[catalogItem.source.pkgName],
                                     onInstall = { onClickInstall(catalogItem.source) },
-                                    onClick = { onClickInstall(catalogItem.source) },
+                                    onClick = { onShowDetails?.invoke(catalogItem.source) },
                                     onCancelInstaller = onCancelInstaller?.let { cancel -> { cancel(catalogItem.source) } },
+                                    onShowDetails = onShowDetails?.let { { it(catalogItem.source) } },
                                 )
                             }
                         }

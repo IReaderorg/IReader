@@ -4,26 +4,29 @@ import ireader.presentation.core.LocalNavigator
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Catalog
 import ireader.domain.models.entities.CatalogInstalled
 import ireader.domain.models.entities.CatalogLocal
+import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.usecases.source.ReportBrokenSourceUseCase
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
-import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
 import ireader.presentation.imageloader.IImageLoader
 import kotlinx.coroutines.launch
@@ -43,7 +46,7 @@ data class SourceDetailScreen(
         IScaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(localize(Res.string.source)) },
+                    title = { Text(catalog.name) },
                     navigationIcon = {
                         AppIconButton(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -85,132 +88,35 @@ private fun SourceDetailContent(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-        // Source Icon and Name
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            when (catalog) {
-                is CatalogLocal -> {
-                    IImageLoader(
-                        model = catalog,
-                        contentDescription = null,
-                        modifier = Modifier.size(72.dp)
-                    )
-                }
-                else -> {
-                    LetterIcon(
-                        text = catalog.name,
-                        modifier = Modifier.size(72.dp)
-                    )
-                }
+            // Header Card with Icon and Name
+            SourceHeaderCard(catalog = catalog)
+            
+            // Source Information Card
+            SourceInfoCard(catalog = catalog)
+            
+            // Description Card (if available)
+            if (catalog.description.isNotBlank()) {
+                DescriptionCard(description = catalog.description)
             }
-
-            Column {
-                Text(
-                    text = catalog.name,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                if (catalog is CatalogInstalled) {
-                    Text(
-                        text = "v${catalog.versionName}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-
-        HorizontalDivider()
-
-        // Language
-        DetailItem(
-            label = localize(Res.string.language),
-            value = when (catalog) {
-                is CatalogInstalled -> catalog.source?.lang?.uppercase() ?: localize(Res.string.unknown)
-                else -> localize(Res.string.unknown)
-            }
-        )
-
-        // Description
-        val description = when (catalog) {
-            is CatalogInstalled -> catalog.source?.let { "Source: ${it.name}" } ?: "No description available"
-            else -> "No description available"
-        }
-        DetailItem(
-            label = localizeHelper.localize(Res.string.description),
-            value = description
-        )
-
-        // Status
-        DetailItem(
-            label = localize(Res.string.status),
-            value = when (catalog) {
-                is CatalogInstalled -> localize(Res.string.installed)
-                else -> localize(Res.string.available)
-            }
-        )
-
-        // Package Name (for installed sources)
-        if (catalog is CatalogInstalled) {
-            DetailItem(
-                label = localizeHelper.localize(Res.string.package_name),
-                value = catalog.pkgName
-            )
-        }
-
-        HorizontalDivider()
-
-        // Report as Broken Button
-        Button(
-            onClick = { showReportDialog = true },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isReporting && catalog is CatalogInstalled,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
-        ) {
-            if (isReporting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.BugReport,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+            
+            // Technical Details Card
+            TechnicalDetailsCard(catalog = catalog)
+            
+            // Actions Card (only for installed sources)
+            if (catalog is CatalogInstalled) {
+                ActionsCard(
+                    catalog = catalog,
+                    isReporting = isReporting,
+                    onReportClick = { showReportDialog = true }
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(localizeHelper.localize(Res.string.report_as_broken))
         }
-
-        // Statistics Section (if available)
-        if (catalog is CatalogInstalled) {
-            HorizontalDivider()
-            Text(
-                text = localizeHelper.localize(Res.string.statistics),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            // You can add more statistics here as needed
-            DetailItem(
-                label = localizeHelper.localize(Res.string.version_code),
-                value = catalog.versionCode.toString()
-            )
-        }
-    }
-    
-    // Snackbar host
-    SnackbarHost(
-        hostState = snackbarHostState,
-        modifier = Modifier.align(Alignment.BottomCenter)
-    )
+        
+        // Snackbar host
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
     
     // Report confirmation dialog
@@ -250,27 +156,426 @@ private fun SourceDetailContent(
 }
 
 @Composable
-private fun DetailItem(
-    label: String,
-    value: String,
+private fun SourceHeaderCard(catalog: Catalog) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Source Icon
+            SourceIcon(
+                catalog = catalog,
+                modifier = Modifier.size(72.dp)
+            )
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = catalog.name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Version badge
+                    val version = when (catalog) {
+                        is CatalogInstalled -> catalog.versionName
+                        is CatalogRemote -> catalog.versionName
+                        else -> null
+                    }
+                    if (version != null) {
+                        VersionBadge(version = version)
+                    }
+                    
+                    // Language pill
+                    val language = when (catalog) {
+                        is CatalogInstalled -> catalog.source?.lang?.uppercase()
+                        is CatalogRemote -> catalog.lang.uppercase()
+                        else -> null
+                    }
+                    if (language != null) {
+                        LanguagePill(language = language)
+                    }
+                    
+                    // NSFW badge
+                    val isNsfw = when (catalog) {
+                        is CatalogLocal -> catalog.nsfw
+                        is CatalogRemote -> catalog.nsfw
+                        else -> false
+                    }
+                    if (isNsfw) {
+                        NsfwBadge()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SourceInfoCard(catalog: Catalog) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = localize(Res.string.info),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            // Status
+            InfoRow(
+                icon = Icons.Default.Info,
+                label = localize(Res.string.status),
+                value = when (catalog) {
+                    is CatalogInstalled -> localize(Res.string.installed)
+                    is CatalogRemote -> localize(Res.string.available)
+                    else -> localize(Res.string.unknown)
+                },
+                valueColor = when (catalog) {
+                    is CatalogInstalled -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+            
+            // Language
+            val language = when (catalog) {
+                is CatalogInstalled -> catalog.source?.lang?.uppercase() ?: localize(Res.string.unknown)
+                is CatalogRemote -> catalog.lang.uppercase()
+                else -> localize(Res.string.unknown)
+            }
+            InfoRow(
+                icon = Icons.Default.Language,
+                label = localize(Res.string.language),
+                value = language
+            )
+            
+            // Repository type (for remote sources)
+            if (catalog is CatalogRemote) {
+                InfoRow(
+                    icon = Icons.Default.Storage,
+                    label = localizeHelper.localize(Res.string.repository),
+                    value = catalog.repositoryType
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DescriptionCard(description: String) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Description,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = localizeHelper.localize(Res.string.description),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun TechnicalDetailsCard(catalog: Catalog) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = localizeHelper.localize(Res.string.technical_details),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            // Package Name
+            val pkgName = when (catalog) {
+                is CatalogInstalled -> catalog.pkgName
+                is CatalogRemote -> catalog.pkgName
+                else -> null
+            }
+            if (pkgName != null) {
+                InfoRow(
+                    icon = Icons.Default.Apps,
+                    label = localizeHelper.localize(Res.string.package_name),
+                    value = pkgName
+                )
+            }
+            
+            // Version Code
+            val versionCode = when (catalog) {
+                is CatalogInstalled -> catalog.versionCode.toString()
+                is CatalogRemote -> catalog.versionCode.toString()
+                else -> null
+            }
+            if (versionCode != null) {
+                InfoRow(
+                    icon = Icons.Default.Numbers,
+                    label = localizeHelper.localize(Res.string.version_code),
+                    value = versionCode
+                )
+            }
+            
+            // Version Name
+            val versionName = when (catalog) {
+                is CatalogInstalled -> catalog.versionName
+                is CatalogRemote -> catalog.versionName
+                else -> null
+            }
+            if (versionName != null) {
+                InfoRow(
+                    icon = Icons.Default.Update,
+                    label = localizeHelper.localize(Res.string.version_name),
+                    value = versionName
+                )
+            }
+            
+            // Source ID
+            InfoRow(
+                icon = Icons.Default.Source,
+                label = localizeHelper.localize(Res.string.source_id),
+                value = catalog.sourceId.toString()
+            )
+            
+            // Download URLs (for remote sources)
+            if (catalog is CatalogRemote) {
+                if (catalog.pkgUrl.isNotBlank()) {
+                    InfoRow(
+                        icon = Icons.Default.Download,
+                        label = localizeHelper.localize(Res.string.package_url),
+                        value = catalog.pkgUrl
+                    )
+                }
+                if (catalog.iconUrl.isNotBlank()) {
+                    InfoRow(
+                        icon = Icons.Default.Image,
+                        label = localizeHelper.localize(Res.string.icon_url),
+                        value = catalog.iconUrl
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActionsCard(
+    catalog: CatalogInstalled,
+    isReporting: Boolean,
+    onReportClick: () -> Unit
+) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = localizeHelper.localize(Res.string.actions),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Button(
+                onClick = onReportClick,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isReporting,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            ) {
+                if (isReporting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.BugReport,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(localizeHelper.localize(Res.string.report_as_broken))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SourceIcon(
+    catalog: Catalog,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    Box(
+        modifier = modifier.clip(RoundedCornerShape(12.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        when (catalog) {
+            is CatalogLocal -> {
+                IImageLoader(
+                    model = catalog,
+                    contentDescription = catalog.name,
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))
+                )
+            }
+            is CatalogRemote -> {
+                IImageLoader(
+                    model = catalog,
+                    contentDescription = catalog.name,
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))
+                )
+            }
+            else -> {
+                LetterIcon(
+                    text = catalog.name,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VersionBadge(version: String) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.primaryContainer
+    ) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            text = "v$version",
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            fontWeight = FontWeight.Medium
         )
     }
 }
 
+@Composable
+private fun LanguagePill(language: String) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Text(
+            text = language,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun NsfwBadge() {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.errorContainer
+    ) {
+        Text(
+            text = "18+",
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun InfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    valueColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = valueColor
+            )
+        }
+    }
+}
 
 @Composable
 private fun ReportSourceDialog(
@@ -295,7 +600,7 @@ private fun ReportSourceDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "$localizeHelper.localize(Res.string.you_are_about_to_report)+ \"$sourceName\" as broken or not working properly.",
+                    text = "You are about to report \"$sourceName\" as broken or not working properly.",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 

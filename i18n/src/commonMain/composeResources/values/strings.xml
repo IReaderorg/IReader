@@ -2279,4 +2279,9 @@
     <string name="crypto_donation_preferred">💡 Tip: Crypto donations are preferred! Card payments via Reymit take ~40% fees on small amounts. Sending crypto directly means 100% goes to development.</string>
     <string name="donate_crypto">Donate Crypto</string>
 
+    <!-- Source Detail Screen -->
+    <string name="technical_details">Technical Details</string>
+    <string name="package_url">Package URL</string>
+    <string name="icon_url">Icon URL</string>
+
 </resources>
