@@ -162,14 +162,17 @@ class PluginDetailsViewModel(
                     // Try to get remote info for iconUrl and other metadata
                     val remoteInfo = fetchRemotePluginInfo(pluginId)
                     
-                    // Merge installed plugin with remote info (for iconUrl, etc.)
-                    val mergedPlugin = if (remoteInfo != null && installedPlugin.manifest.iconUrl.isNullOrEmpty()) {
+                    // Merge installed plugin with remote info (for iconUrl, downloadUrl, etc.)
+                    val mergedPlugin = if (remoteInfo != null) {
                         installedPlugin.copy(
                             manifest = installedPlugin.manifest.copy(
-                                iconUrl = remoteInfo.manifest.iconUrl
+                                iconUrl = remoteInfo.manifest.iconUrl.takeIf { !it.isNullOrEmpty() } 
+                                    ?: installedPlugin.manifest.iconUrl
                             ),
                             rating = remoteInfo.rating ?: installedPlugin.rating,
-                            downloadCount = remoteInfo.downloadCount.takeIf { it > 0 } ?: installedPlugin.downloadCount
+                            downloadCount = remoteInfo.downloadCount.takeIf { it > 0 } ?: installedPlugin.downloadCount,
+                            downloadUrl = remoteInfo.downloadUrl ?: installedPlugin.downloadUrl,
+                            repositoryUrl = remoteInfo.repositoryUrl ?: installedPlugin.repositoryUrl
                         )
                     } else {
                         installedPlugin
@@ -460,9 +463,26 @@ class PluginDetailsViewModel(
                             )
                         }
                 } else {
+                    // Check if plugin has download URL, if not try to fetch from remote
+                    var pluginToInstall = plugin
+                    if (plugin.downloadUrl.isNullOrBlank()) {
+                        // Try to fetch download URL from remote repository
+                        val remoteInfo = fetchRemotePluginInfo(plugin.id)
+                        if (remoteInfo?.downloadUrl.isNullOrBlank()) {
+                            _state.value = _state.value.copy(
+                                installationState = InstallationState.Error("Plugin has no download URL. Try refreshing the page.")
+                            )
+                            return@launch
+                        }
+                        pluginToInstall = plugin.copy(
+                            downloadUrl = remoteInfo?.downloadUrl,
+                            repositoryUrl = remoteInfo?.repositoryUrl
+                        )
+                    }
+                    
                     // Use download service if available for progress tracking
                     if (downloadService != null) {
-                        when (val result = downloadService.downloadPlugin(plugin)) {
+                        when (val result = downloadService.downloadPlugin(pluginToInstall)) {
                             is ireader.domain.services.common.ServiceResult.Success -> {
                                 // Progress will be tracked via observeDownloads()
                             }
@@ -478,7 +498,7 @@ class PluginDetailsViewModel(
                     } else {
                         // Fallback to direct installation without progress
                         _state.value = _state.value.copy(installationState = InstallationState.Installing)
-                        pluginManager.installPlugin(plugin)
+                        pluginManager.installPlugin(pluginToInstall)
                             .onSuccess {
                                 _state.value = _state.value.copy(
                                     installationState = InstallationState.Installed,

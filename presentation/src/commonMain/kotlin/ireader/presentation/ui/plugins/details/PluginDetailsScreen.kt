@@ -188,7 +188,11 @@ private fun ModernInstallBar(
         tonalElevation = 3.dp,
         shadowElevation = 8.dp
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .navigationBarsPadding()
+        ) {
             // Price and type info
             Row(
                 modifier = Modifier.fillMaxWidth(),
