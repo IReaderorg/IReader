@@ -1,7 +1,7 @@
 package ireader.domain.community
 
+import ireader.core.log.Log
 import ireader.core.source.CatalogSource
-import ireader.core.source.HttpSource
 import ireader.core.source.model.ChapterInfo
 import ireader.core.source.model.Command
 import ireader.core.source.model.CommandList
@@ -12,251 +12,346 @@ import ireader.core.source.model.MangaInfo
 import ireader.core.source.model.MangasPageInfo
 import ireader.core.source.model.Page
 import ireader.core.source.model.Text
+import ireader.domain.community.cloudflare.CommunityTranslationRepository
+import ireader.domain.community.cloudflare.TranslationMetadata
 
 /**
- * Community Source - A source for user-contributed translated content.
+ * Community Source - A source for browsing community-shared AI translations.
  * 
- * This source connects to a Supabase backend where users can share their
- * translated books and chapters with the community.
+ * This source connects to Cloudflare D1/R2 where users share their
+ * AI translations with the community.
  * 
  * Features:
- * - Browse community-translated books
- * - Search by title, author, language
- * - Filter by language, genre, status
+ * - Browse books with community translations
+ * - Search by title
+ * - Filter by target language
  * - Read chapters translated by community members
- * - Support for multiple languages
+ * - View translation ratings and download counts
  */
 class CommunitySource(
-    private val repository: CommunityRepository
+    private val translationRepository: CommunityTranslationRepository?,
+    private val communityPreferences: CommunityPreferences?
 ) : CatalogSource {
-    
-    companion object {
-        const val SOURCE_ID = -300L
-        const val SOURCE_NAME = "Community Source"
-        const val SOURCE_LANG = "multi"
-        const val ICON_URL = "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/app-icon.png"
-        
-        /** Message shown when source is not configured */
-        private const val NOT_CONFIGURED_MESSAGE = """
-Welcome to Community Source!
-
-This source allows you to browse and read novels translated by the community, 
-and share your own AI translations with others.
-
-To get started:
-1. Go to Settings → Community Source
-2. Configure your Supabase or Cloudflare backend
-3. Set your contributor name to share translations
-
-Once configured, you'll see community-translated novels here.
-        """
-    }
     
     override val id: Long = SOURCE_ID
     override val name: String = SOURCE_NAME
     override val lang: String = SOURCE_LANG
     
+    private fun isConfigured(): Boolean {
+        return communityPreferences?.isCloudflareConfigured() == true && translationRepository != null
+    }
+
     override suspend fun getMangaDetails(manga: MangaInfo, commands: List<Command<*>>): MangaInfo {
-        return try {
-            repository.getBookDetails(manga.key)
-        } catch (e: Exception) {
-            manga // Return original manga info if fetch fails
-        }
+        // Return the manga info as-is since metadata is stored with translations
+        return manga
     }
     
     override suspend fun getChapterList(manga: MangaInfo, commands: List<Command<*>>): List<ChapterInfo> {
+        if (!isConfigured() || translationRepository == null) {
+            return emptyList()
+        }
+        
         return try {
-            val language = commands.filterIsInstance<Command.Chapter.Select>()
-                .firstOrNull()?.value?.toString()
-            repository.getChapters(manga.key, language)
+            val languageIndex = commands.filterIsInstance<Command.Chapter.Select>()
+                .firstOrNull()?.value ?: 0
+            val language = if (languageIndex > 0) SUPPORTED_LANGUAGES[languageIndex].first else null
+            
+            // Parse book info from manga key (format: "bookTitle:::bookAuthor")
+            val parts = manga.key.split(":::")
+            val bookTitle = parts.getOrNull(0) ?: manga.title
+            val bookAuthor = parts.getOrNull(1) ?: manga.author
+            
+            val translations = translationRepository.getBookTranslations(
+                bookTitle = bookTitle,
+                bookAuthor = bookAuthor,
+                targetLanguage = language
+            )
+            
+            translations.map { metadata ->
+                ChapterInfo(
+                    key = metadata.id,
+                    name = buildChapterName(metadata),
+                    number = metadata.chapterNumber,
+                    dateUpload = metadata.createdAt,
+                    scanlator = metadata.contributorName.ifBlank { "Anonymous" }
+                )
+            }.sortedBy { it.number }
         } catch (e: Exception) {
-            emptyList() // Return empty list if not configured
+            Log.error("CommunitySource: Failed to get chapters", e)
+            emptyList()
         }
     }
     
+    private fun buildChapterName(metadata: TranslationMetadata): String {
+        val langSuffix = " [${metadata.targetLanguage.uppercase()}]"
+        val engineSuffix = " (${metadata.engineId})"
+        return "${metadata.chapterName}$langSuffix$engineSuffix"
+    }
+    
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
+        if (!isConfigured() || translationRepository == null) {
+            return listOf(Text(NOT_CONFIGURED_MESSAGE.trimIndent()))
+        }
+        
         return try {
-            val content = repository.getChapterContent(chapter.key)
-            listOf(Text(content))
+            val translationId = chapter.key
+            
+            // Search all translations to find this one
+            val allTranslations = translationRepository.searchTranslations("", null, 1000)
+            val metadata = allTranslations.find { it.id == translationId }
+            
+            if (metadata != null) {
+                val result = translationRepository.getTranslationContent(metadata)
+                if (result.isSuccess) {
+                    val content = result.getOrNull() ?: ""
+                    val paragraphs = content.split("\n\n").filter { it.isNotBlank() }
+                    paragraphs.map { Text(it) }
+                } else {
+                    listOf(Text("Failed to load translation content: ${result.exceptionOrNull()?.message}"))
+                }
+            } else {
+                listOf(Text("Translation not found. It may have been removed."))
+            }
         } catch (e: Exception) {
-            listOf(Text("Unable to load chapter content. Please check your Community Source configuration in Settings."))
+            Log.error("CommunitySource: Failed to get page list", e)
+            listOf(Text("Error loading chapter: ${e.message}"))
         }
     }
     
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
+        if (!isConfigured() || translationRepository == null) {
+            return MangasPageInfo(
+                mangas = listOf(createWelcomePlaceholder()),
+                hasNextPage = false
+            )
+        }
+        
         return try {
-            when (sort) {
-                is LatestListing -> repository.getLatestBooks(page)
-                is PopularListing -> repository.getPopularBooks(page)
-                is RecentlyTranslatedListing -> repository.getRecentlyTranslatedBooks(page)
-                else -> repository.getLatestBooks(page)
-            }
-        } catch (e: Exception) {
-            // Return a helpful placeholder when not configured
-            if (page == 1) {
-                MangasPageInfo(
-                    mangas = listOf(createWelcomePlaceholder()),
-                    hasNextPage = false
-                )
+            val languageIndex = (sort as? LanguageListing)?.languageIndex ?: 0
+            val language = if (languageIndex > 0) SUPPORTED_LANGUAGES[languageIndex].first else null
+            
+            val translations = if (language != null) {
+                translationRepository.getPopularTranslations(language, 100)
             } else {
-                MangasPageInfo.empty()
+                translationRepository.searchTranslations("", null, 100)
             }
+            
+            // Group by book to show unique books
+            val books = translations.groupBy { "${it.bookTitle}:::${it.bookAuthor}" }
+            
+            val mangas = books.map { (key, bookTranslations) ->
+                val first = bookTranslations.first()
+                val chapterCount = bookTranslations.size
+                val languages = bookTranslations.map { it.targetLanguage }.distinct().joinToString(", ")
+                
+                MangaInfo(
+                    key = key,
+                    title = first.bookTitle,
+                    author = first.bookAuthor,
+                    description = "Community translations: $chapterCount chapters\nLanguages: $languages\nContributors: ${bookTranslations.map { it.contributorName }.distinct().take(3).joinToString(", ")}",
+                    genres = listOf("Community", "AI Translation"),
+                    status = MangaInfo.UNKNOWN,
+                    cover = first.bookCover.ifBlank { ICON_URL }
+                )
+            }
+            
+            MangasPageInfo(
+                mangas = mangas.ifEmpty { listOf(createWelcomePlaceholder()) },
+                hasNextPage = false
+            )
+        } catch (e: Exception) {
+            Log.error("CommunitySource: Failed to get manga list", e)
+            MangasPageInfo(
+                mangas = listOf(createErrorPlaceholder(e.message ?: "Unknown error")),
+                hasNextPage = false
+            )
         }
     }
     
     override suspend fun getMangaList(filters: FilterList, page: Int): MangasPageInfo {
+        if (!isConfigured() || translationRepository == null) {
+            return MangasPageInfo(
+                mangas = listOf(createWelcomePlaceholder()),
+                hasNextPage = false
+            )
+        }
+        
         return try {
-            val query = filters.filterIsInstance<Filter.Title>().firstOrNull()?.value ?: ""
-            val language = filters.filterIsInstance<LanguageFilter>().firstOrNull()?.selected
-            val genre = filters.filterIsInstance<GenreFilter>().firstOrNull()?.selected
-            val status = filters.filterIsInstance<StatusFilter>().firstOrNull()?.selected
+            var query = ""
+            var language: String? = null
             
-            repository.searchBooks(
-                query = query,
-                language = language,
-                genre = genre,
-                status = status,
-                page = page
+            filters.forEach { filter ->
+                when (filter) {
+                    is Filter.Title -> query = filter.value
+                    is LanguageFilter -> {
+                        if (filter.value > 0) {
+                            language = SUPPORTED_LANGUAGES[filter.value].first
+                        }
+                    }
+                    else -> {}
+                }
+            }
+            
+            val translations = translationRepository.searchTranslations(query, language, 100)
+            
+            // Group by book
+            val books = translations.groupBy { "${it.bookTitle}:::${it.bookAuthor}" }
+            
+            val mangas = books.map { (key, bookTranslations) ->
+                val first = bookTranslations.first()
+                val chapterCount = bookTranslations.size
+                val languages = bookTranslations.map { it.targetLanguage }.distinct().joinToString(", ")
+                
+                MangaInfo(
+                    key = key,
+                    title = first.bookTitle,
+                    author = first.bookAuthor,
+                    description = "Community translations: $chapterCount chapters\nLanguages: $languages\nContributors: ${bookTranslations.map { it.contributorName }.distinct().take(3).joinToString(", ")}",
+                    genres = listOf("Community", "AI Translation"),
+                    status = MangaInfo.UNKNOWN,
+                    cover = first.bookCover.ifBlank { ICON_URL }
+                )
+            }
+            
+            MangasPageInfo(
+                mangas = mangas.ifEmpty { listOf(createNoResultsPlaceholder(query)) },
+                hasNextPage = false
             )
         } catch (e: Exception) {
-            // Return a helpful placeholder when not configured
-            if (page == 1) {
-                MangasPageInfo(
-                    mangas = listOf(createWelcomePlaceholder()),
-                    hasNextPage = false
-                )
-            } else {
-                MangasPageInfo.empty()
-            }
+            Log.error("CommunitySource: Failed to search manga", e)
+            MangasPageInfo(
+                mangas = listOf(createErrorPlaceholder(e.message ?: "Unknown error")),
+                hasNextPage = false
+            )
         }
     }
     
-    /**
-     * Create a welcome placeholder manga that explains how to configure the source.
-     */
     private fun createWelcomePlaceholder(): MangaInfo {
         return MangaInfo(
             key = "welcome",
-            title = "Welcome to Community Source",
-            author = "IReader Team",
+            title = "Welcome to Community Translations",
+            author = "IReader Community",
             description = NOT_CONFIGURED_MESSAGE.trimIndent(),
-            cover = ICON_URL,
-            genres = listOf("Guide", "Setup"),
-            status = MangaInfo.UNKNOWN
+            genres = listOf("Info"),
+            status = MangaInfo.UNKNOWN,
+            cover = ICON_URL
+        )
+    }
+    
+    private fun createNoResultsPlaceholder(query: String): MangaInfo {
+        return MangaInfo(
+            key = "no-results",
+            title = "No Results Found",
+            author = "",
+            description = "No community translations found for '$query'.\n\nBe the first to contribute! Enable 'Share AI Translations' in settings and translate some chapters.",
+            genres = listOf("Info"),
+            status = MangaInfo.UNKNOWN,
+            cover = ICON_URL
+        )
+    }
+    
+    private fun createErrorPlaceholder(error: String): MangaInfo {
+        return MangaInfo(
+            key = "error",
+            title = "Error Loading Translations",
+            author = "",
+            description = "Failed to load community translations:\n$error\n\nPlease check your internet connection and try again.",
+            genres = listOf("Error"),
+            status = MangaInfo.UNKNOWN,
+            cover = ICON_URL
         )
     }
     
     override fun getListings(): List<Listing> {
         return listOf(
-            LatestListing(),
-            PopularListing(),
-            RecentlyTranslatedListing()
+            LanguageListing("All Languages", 0),
+            LanguageListing("English", 1),
+            LanguageListing("Spanish", 2),
+            LanguageListing("French", 3),
+            LanguageListing("German", 4),
+            LanguageListing("Portuguese", 5),
+            LanguageListing("Russian", 6),
+            LanguageListing("Japanese", 7),
+            LanguageListing("Korean", 8),
+            LanguageListing("Chinese", 9)
         )
     }
     
     override fun getFilters(): FilterList {
         return listOf(
             Filter.Title(),
-            LanguageFilter(SUPPORTED_LANGUAGES),
-            GenreFilter(GENRES),
-            StatusFilter(STATUSES)
+            LanguageFilter()
         )
     }
     
     override fun getCommands(): CommandList {
         return listOf(
             Command.Chapter.Select(
-                name = "Language",
-                options = SUPPORTED_LANGUAGES.map { it.second }.toTypedArray()
+                name = "Target Language",
+                options = SUPPORTED_LANGUAGES.map { it.second }.toTypedArray(),
+                value = 0
             )
         )
     }
     
-    // Custom Listings
-    class LatestListing : Listing("Latest")
-    class PopularListing : Listing("Popular")
-    class RecentlyTranslatedListing : Listing("Recently Translated")
+    // Custom Listing for language selection
+    class LanguageListing(
+        name: String,
+        val languageIndex: Int
+    ) : Listing(name)
     
-    // Custom Filters
-    class LanguageFilter(languages: List<Pair<String, String>>) : Filter.Select(
-        name = "Language",
-        options = languages.map { it.second }.toTypedArray(),
+    // Custom Filter for language
+    class LanguageFilter : Filter.Select(
+        name = "Target Language",
+        options = SUPPORTED_LANGUAGES.map { it.second }.toTypedArray(),
         value = 0
-    ) {
-        val selected: String?
-            get() = if (value > 0) SUPPORTED_LANGUAGES[value].first else null
-    }
+    )
     
-    class GenreFilter(genres: List<String>) : Filter.Select(
-        name = "Genre",
-        options = (listOf("All") + genres).toTypedArray(),
-        value = 0
-    ) {
-        val selected: String?
-            get() = if (value > 0) GENRES[value - 1] else null
-    }
-    
-    class StatusFilter(statuses: List<String>) : Filter.Select(
-        name = "Status",
-        options = (listOf("All") + statuses).toTypedArray(),
-        value = 0
-    ) {
-        val selected: String?
-            get() = if (value > 0) STATUSES[value - 1] else null
+    companion object {
+        const val SOURCE_ID = -300L
+        const val SOURCE_NAME = "Community Translations"
+        const val SOURCE_LANG = "multi"
+        const val ICON_URL = "https://raw.githubusercontent.com/IReaderorg/badge-repo/main/app-icon.png"
+        
+        private const val NOT_CONFIGURED_MESSAGE = """
+Welcome to Community Translations!
+
+Browse and read AI translations shared by the community.
+Translations are stored in Cloudflare for fast, free access.
+
+To configure:
+1. Go to Settings → Community Hub → Community Source
+2. Cloudflare D1/R2 should be pre-configured
+3. Or set up your own Cloudflare backend
+
+To contribute:
+1. Enable "Share AI Translations" in settings
+2. Set your contributor name
+3. Translate chapters using AI (OpenAI, Gemini, DeepSeek)
+4. Translations are automatically shared!
+        """
+        
+        val SUPPORTED_LANGUAGES = listOf(
+            "" to "All Languages",
+            "en" to "English",
+            "es" to "Spanish",
+            "fr" to "French",
+            "de" to "German",
+            "pt" to "Portuguese",
+            "ru" to "Russian",
+            "ja" to "Japanese",
+            "ko" to "Korean",
+            "zh" to "Chinese",
+            "ar" to "Arabic",
+            "hi" to "Hindi",
+            "it" to "Italian",
+            "nl" to "Dutch",
+            "pl" to "Polish",
+            "tr" to "Turkish",
+            "vi" to "Vietnamese",
+            "th" to "Thai",
+            "id" to "Indonesian",
+            "fil" to "Filipino"
+        )
     }
 }
-
-// Supported languages for community translations
-val SUPPORTED_LANGUAGES = listOf(
-    "all" to "All Languages",
-    "en" to "English",
-    "es" to "Spanish",
-    "pt" to "Portuguese",
-    "fr" to "French",
-    "de" to "German",
-    "it" to "Italian",
-    "ru" to "Russian",
-    "ja" to "Japanese",
-    "ko" to "Korean",
-    "zh" to "Chinese",
-    "ar" to "Arabic",
-    "hi" to "Hindi",
-    "id" to "Indonesian",
-    "th" to "Thai",
-    "vi" to "Vietnamese",
-    "tr" to "Turkish",
-    "pl" to "Polish",
-    "nl" to "Dutch",
-    "fil" to "Filipino",
-    "fa" to "Persian",
-)
-
-val GENRES = listOf(
-    "Action",
-    "Adventure",
-    "Comedy",
-    "Drama",
-    "Fantasy",
-    "Horror",
-    "Mystery",
-    "Romance",
-    "Sci-Fi",
-    "Slice of Life",
-    "Supernatural",
-    "Thriller",
-    "Historical",
-    "Martial Arts",
-    "Mecha",
-    "Psychological",
-    "Sports",
-    "Tragedy",
-    "Wuxia",
-    "Xianxia"
-)
-
-val STATUSES = listOf(
-    "Ongoing",
-    "Completed",
-    "Hiatus",
-    "Dropped"
-)

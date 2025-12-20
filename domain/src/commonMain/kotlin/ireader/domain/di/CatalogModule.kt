@@ -28,7 +28,7 @@ val CatalogModule = module {
     // This depends on CommunityPreferences, so it must come after
     includes(communityTranslationModule)
     single<CommunityRepository> { CommunityRepositoryImpl(get(), get(),get()) }
-    single<CommunitySource> { CommunitySource(get()) }
+    single<CommunitySource> { CommunitySource(getOrNull(), get()) }
     single<CatalogPreferences> { CatalogPreferences(get()) }
 
     // CatalogStore - now lazy-initialized internally, safe as singleton

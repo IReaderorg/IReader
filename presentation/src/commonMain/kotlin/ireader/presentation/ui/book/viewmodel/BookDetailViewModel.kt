@@ -247,8 +247,6 @@ class BookDetailViewModel(
     fun onScreenResumed() {
         val bookId = param.bookId ?: return
         
-        Log.info { "BookDetailViewModel: onScreenResumed called for book $bookId, subscriptionJob.isActive=${subscriptionJob?.isActive}, state=${_state.value::class.simpleName}" }
-        
         // Check if subscription is still active by checking if subscriptionJob is active
         val needsResubscription = subscriptionJob?.isActive != true
         val isInErrorState = _state.value is BookDetailState.Error
@@ -257,8 +255,6 @@ class BookDetailViewModel(
         } ?: false
         
         if (needsResubscription || isInErrorState || isEmptySuccessState) {
-            Log.info { "BookDetailViewModel: Reinitializing for book $bookId (needsResubscription=$needsResubscription, isInErrorState=$isInErrorState, isEmptySuccessState=$isEmptySuccessState)" }
-            
             // Reset to loading state if in error or empty
             if (isInErrorState || isEmptySuccessState) {
                 _state.value = BookDetailState.Success.empty(bookId = bookId)
@@ -270,8 +266,6 @@ class BookDetailViewModel(
             // Reload via controllers
             bookController.dispatch(BookCommand.LoadBook(bookId))
             bookDetailController.dispatch(BookDetailCommand.LoadBook(bookId))
-        } else {
-            Log.info { "BookDetailViewModel: Subscription active for book $bookId, state is valid" }
         }
     }
     
@@ -305,7 +299,6 @@ class BookDetailViewModel(
                 // This provides additional book state like reading progress, categories, etc.
                 // The main book data is still loaded via the existing subscription mechanism
                 // but BookController provides the SSOT for book operations
-                Log.debug { "BookDetailViewModel: BookController state updated - book=${bookState.book?.title}, progress=${bookState.progressPercentage}" }
             }
             .launchIn(scope)
     }
@@ -319,13 +312,6 @@ class BookDetailViewModel(
         bookDetailController.state
             .onEach { controllerState ->
                 // Sync filter and sort state from BookDetailController
-                Log.debug { 
-                    "BookDetailViewModel: BookDetailController state updated - " +
-                    "book=${controllerState.book?.title}, " +
-                    "chapters=${controllerState.chapters.size}, " +
-                    "selection=${controllerState.selectedChapterIds.size}"
-                }
-                
                 // The BookDetailController provides additional state management
                 // for chapter filtering, sorting, and selection that complements
                 // the existing ChapterController
@@ -346,10 +332,10 @@ class BookDetailViewModel(
                         emitEvent(BookDetailEvent.ShowSnackbar(event.error.toUserMessage()))
                     }
                     is ControllerEvent.BookLoaded -> {
-                        Log.debug { "BookDetailController: Book loaded - ${event.book.title}" }
+                        // Book loaded event handled
                     }
                     is ControllerEvent.ChaptersLoaded -> {
-                        Log.debug { "BookDetailController: ${event.count} chapters loaded" }
+                        // Chapters loaded event handled
                     }
                     is ControllerEvent.NavigateToReader -> {
                         emitEvent(BookDetailEvent.NavigateToReader(event.bookId, event.chapterId))
@@ -361,13 +347,13 @@ class BookDetailViewModel(
                         emitEvent(BookDetailEvent.NavigateBack)
                     }
                     is ControllerEvent.BookRefreshed -> {
-                        Log.debug { "BookDetailController: Book refreshed" }
+                        // Book refreshed event handled
                     }
                     is ControllerEvent.ChaptersRefreshed -> {
-                        Log.debug { "BookDetailController: Chapters refreshed - ${event.newCount} new, ${event.totalCount} total" }
+                        // Chapters refreshed event handled
                     }
                     is ControllerEvent.SelectionChanged -> {
-                        Log.debug { "BookDetailController: Selection changed - ${event.selectedCount} selected" }
+                        // Selection changed event handled
                     }
                     is ControllerEvent.ShowSnackbar -> {
                         emitEvent(BookDetailEvent.ShowSnackbar(event.message))
@@ -393,7 +379,6 @@ class BookDetailViewModel(
                 if (prefetchedData != null) {
                     // Use prefetched data for instant display
                     ScreenProfiler.mark(screenTag, "prefetch_cache_hit")
-                    Log.info { "Using prefetched data for book $bookId" }
                     val book = prefetchedData.book
                     val chapters = prefetchedData.chapters
                     val lastReadChapterId = prefetchedData.lastReadChapterId
@@ -429,7 +414,6 @@ class BookDetailViewModel(
                     _state.value = initialState
                     ScreenProfiler.mark(screenTag, "state_set_from_prefetch")
                     ScreenProfiler.finishScreen(screenTag)
-                    Log.info { "BookDetailState.Success (prefetched): book=${book.title}, chapters=${chapters.size}" }
                     
                     // Subscribe for updates in background
                     subscribeToBookAndChapters(bookId, catalogSource)
@@ -524,7 +508,6 @@ class BookDetailViewModel(
                     _state.value = initialState
                     ScreenProfiler.mark(screenTag, "state_set_success")
                     ScreenProfiler.finishScreen(screenTag)
-                    Log.info { "BookDetailState.Success (immediate): book=${book.title}, chapters=${chapters.size}" }
                     
                     // Subscribe for updates AFTER initial state is set
                     // This runs in background and won't block UI
@@ -695,19 +678,6 @@ class BookDetailViewModel(
         }
         .onEach { newState ->
             _state.value = newState
-            
-            // Log state changes for debugging
-            when (newState) {
-                is BookDetailState.Success -> {
-                    Log.info { "BookDetailState.Success: book=${newState.book.title}, chapters=${newState.chapters.size}" }
-                }
-                is BookDetailState.Loading -> {
-                    Log.info { "BookDetailState.Loading" }
-                }
-                is BookDetailState.Error -> {
-                    Log.error { "BookDetailState.Error: ${newState.message}" }
-                }
-            }
         }
         .launchIn(scope)
     }
@@ -884,25 +854,21 @@ class BookDetailViewModel(
         
         // Only update if we're in Success state, otherwise the loading indicator won't show
         if (_state.value is BookDetailState.Success) {
-            Log.info { "getRemoteChapterDetail: Setting isRefreshingChapters = true" }
             updateSuccessState { it.copy(isRefreshingChapters = true) }
         }
         
         getChapterDetailJob?.cancel()
         getChapterDetailJob = scope.launch {
-            Log.info { "Fetching remote chapters for book: ${book.title}" }
             remoteUseCases.getRemoteChapters(
                 book = book,
                 catalog = catalog,
                 onError = { message ->
-                    Log.error { "Error fetching chapters: $message" }
                     message?.let { showSnackBar(it) }
                     withUIContext {
                         updateSuccessState { it.copy(isRefreshingChapters = false) }
                     }
                 },
                 onSuccess = { result ->
-                    Log.info { "Successfully fetched ${result.size} chapters" }
                     localInsertUseCases.insertChapters(result)
                     withUIContext {
                         updateSuccessState { it.copy(isRefreshingChapters = false) }
@@ -1453,7 +1419,6 @@ class BookDetailViewModel(
                 result.onSuccess { filePath ->
                     val exportType = if (options.useTranslatedContent) "translated " else ""
                     emitEvent(BookDetailEvent.ShowSnackbar("${exportType}EPUB exported successfully"))
-                    Log.info { "EPUB export successful: $filePath" }
                 }.onFailure { error ->
                     emitEvent(BookDetailEvent.ShowSnackbar("Export failed: ${error.message}"))
                     Log.error("EPUB export failed", error)
@@ -1552,7 +1517,6 @@ class BookDetailViewModel(
                     )
                     localInsertUseCases.updateBook.update(updatedBook)
                     
-                    Log.info { "Custom cover updated to: $localFileUri" }
                     emitEvent(BookDetailEvent.ShowSnackbar("Custom cover set successfully"))
                 } else {
                     emitEvent(BookDetailEvent.ShowSnackbar("Failed to copy image"))
@@ -1580,7 +1544,6 @@ class BookDetailViewModel(
                 val updatedBook = currentBook.copy(customCover = localFileUri)
                 localInsertUseCases.updateBook.update(updatedBook)
                 
-                Log.info { "Custom cover updated to: $localFileUri" }
                 emitEvent(BookDetailEvent.ShowSnackbar("Custom cover set successfully"))
             } catch (e: Exception) {
                 Log.error("Failed to update custom cover", e)
@@ -1645,7 +1608,5 @@ class BookDetailViewModel(
         
         // Release BookDetailController resources
         bookDetailController.release()
-        
-        Log.info { "BookDetailViewModel cleared - all jobs cancelled" }
     }
 }

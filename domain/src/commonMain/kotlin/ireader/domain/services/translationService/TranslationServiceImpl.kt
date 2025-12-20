@@ -48,7 +48,7 @@ class TranslationServiceImpl(
     private val remoteUseCases: RemoteUseCases,
     private val getLocalCatalog: GetLocalCatalog,
     private val stateHolder: TranslationStateHolder = TranslationStateHolder(),
-    private val submitTranslationUseCase: ireader.domain.community.SubmitTranslationUseCase? = null,
+    private val autoShareTranslationUseCase: ireader.domain.community.cloudflare.AutoShareTranslationUseCase? = null,
     private val communityPreferences: ireader.domain.community.CommunityPreferences? = null,
     private val localizeHelper: LocalizeHelper
 ) : TranslationService {
@@ -303,13 +303,10 @@ class TranslationServiceImpl(
             stateHolder.setCurrentBookId(null)
             
             // Clear progress map after a short delay to allow notification to show completion
-            // This prevents old entries from affecting future translations
             scope.launch {
-                delay(3000) // Wait 3 seconds for notification to be shown
-                // Only clear if no new translation has started
+                delay(3000)
                 if (!stateHolder.isRunning.value && translationQueue.isEmpty()) {
                     stateHolder.setTranslationProgress(emptyMap())
-                    Log.info { "TranslationServiceImpl: Cleared progress map after completion" }
                 }
             }
         }
@@ -438,8 +435,6 @@ class TranslationServiceImpl(
         val content = downloadedContent ?: throw Exception("Failed to download chapter content")
         
         // Save downloaded content to the chapter table before translation
-        // This ensures the original content is persisted even if translation fails
-        Log.info { "TranslationServiceImpl: Saving downloaded content for chapter ${task.chapterId}" }
         val updatedChapter = chapter.copy(content = content)
         chapterRepository.insertChapter(updatedChapter)
         
@@ -751,6 +746,7 @@ class TranslationServiceImpl(
     
     /**
      * Submit translation to community if auto-share is enabled.
+     * Uses Cloudflare D1/R2 for storage via AutoShareTranslationUseCase.
      * This is a fire-and-forget operation - failures are logged but don't affect the main translation flow.
      */
     private suspend fun submitToCommunityIfEnabled(
@@ -760,36 +756,31 @@ class TranslationServiceImpl(
         sourceLanguage: String,
         targetLanguage: String
     ) {
-        // Check if auto-share is enabled
-        val autoShare = communityPreferences?.autoShareTranslations()?.get() ?: false
-        if (!autoShare) {
-            return
-        }
-        
         // Check if we have the use case
-        val useCase = submitTranslationUseCase ?: return
+        val useCase = autoShareTranslationUseCase ?: return
+        
+        // Check if auto-share should be triggered
+        if (!useCase.shouldAutoShare(currentEngineId)) return
         
         try {
             val book = bookRepository.findBookById(bookId) ?: return
             
-            Log.info { "TranslationServiceImpl: Submitting translation to community for chapter ${chapter.name}" }
+            // Get original content for hash calculation
+            val originalContent = chapter.content
+                .filterIsInstance<Text>()
+                .joinToString("\n\n") { it.text }
             
-            val result = useCase.submitChapter(
+            useCase.shareTranslation(
                 book = book,
                 chapter = chapter,
+                originalContent = originalContent,
                 translatedContent = translatedContent,
+                sourceLanguage = sourceLanguage,
                 targetLanguage = targetLanguage,
-                sourceLanguage = sourceLanguage
+                engineId = currentEngineId
             )
-            
-            if (result.isSuccess) {
-                Log.info { "TranslationServiceImpl: Successfully submitted translation to community" }
-            } else {
-                Log.warn { "TranslationServiceImpl: Failed to submit translation to community: ${result.exceptionOrNull()?.message}" }
-            }
         } catch (e: Exception) {
             // Don't fail the main translation if community submission fails
-            Log.warn { "TranslationServiceImpl: Error submitting to community: ${e.message}" }
         }
     }
 }

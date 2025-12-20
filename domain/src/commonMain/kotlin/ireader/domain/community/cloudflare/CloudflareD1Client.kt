@@ -9,6 +9,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import ireader.core.log.Log
 import ireader.domain.utils.extensions.currentTimeToLong
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -44,6 +45,7 @@ class CloudflareD1Client(
                 book_hash TEXT NOT NULL,
                 book_title TEXT NOT NULL,
                 book_author TEXT DEFAULT '',
+                book_cover TEXT DEFAULT '',
                 chapter_name TEXT NOT NULL,
                 chapter_number REAL DEFAULT -1,
                 source_language TEXT NOT NULL,
@@ -133,12 +135,12 @@ class CloudflareD1Client(
     suspend fun insertTranslation(metadata: TranslationMetadata): Result<Unit> {
         val sql = """
             INSERT INTO translations (
-                id, content_hash, book_hash, book_title, book_author,
+                id, content_hash, book_hash, book_title, book_author, book_cover,
                 chapter_name, chapter_number, source_language, target_language,
                 engine_id, r2_object_key, original_size, compressed_size,
                 compression_ratio, contributor_id, contributor_name,
                 rating, rating_count, download_count, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """.trimIndent()
         
         val params = listOf(
@@ -147,6 +149,7 @@ class CloudflareD1Client(
             metadata.bookHash,
             metadata.bookTitle,
             metadata.bookAuthor,
+            metadata.bookCover,
             metadata.chapterName,
             metadata.chapterNumber.toString(),
             metadata.sourceLanguage,
@@ -245,8 +248,10 @@ class CloudflareD1Client(
     
     // Execute raw SQL query
     private suspend fun executeQuery(sql: String): Result<Unit> {
+        val url = "${config.d1ApiUrl}/query"
+        
         return try {
-            val response = httpClient.post("${config.d1ApiUrl}/query") {
+            val response = httpClient.post(url) {
                 header("Authorization", "Bearer ${config.apiToken}")
                 contentType(ContentType.Application.Json)
                 setBody(D1QueryRequest(sql = sql))
@@ -255,9 +260,12 @@ class CloudflareD1Client(
             if (response.status.isSuccess()) {
                 Result.success(Unit)
             } else {
+                val responseBody = response.bodyAsText()
+                Log.error { "D1 query failed: ${response.status} - $responseBody" }
                 Result.failure(Exception("D1 query failed: ${response.status}"))
             }
         } catch (e: Exception) {
+            Log.error("D1 query exception", e)
             Result.failure(e)
         }
     }
@@ -267,19 +275,29 @@ class CloudflareD1Client(
         sql: String,
         params: List<String>
     ): Result<List<TranslationMetadata>> {
+        val url = "${config.d1ApiUrl}/query"
+        
         return try {
-            val response = httpClient.post("${config.d1ApiUrl}/query") {
+            val requestBody = json.encodeToString(
+                D1QueryRequest.serializer(),
+                D1QueryRequest(sql = sql, params = params)
+            )
+            
+            val response = httpClient.post(url) {
                 header("Authorization", "Bearer ${config.apiToken}")
                 contentType(ContentType.Application.Json)
-                setBody(json.encodeToString(
-                    D1QueryRequest.serializer(),
-                    D1QueryRequest(sql = sql, params = params)
-                ))
+                setBody(requestBody)
             }
             
+            val responseBody = response.bodyAsText()
+            
             if (response.status.isSuccess()) {
-                val responseBody = response.bodyAsText()
                 val d1Response = json.decodeFromString<D1QueryResponse>(responseBody)
+                
+                if (d1Response.errors?.isNotEmpty() == true) {
+                    val errorMsg = d1Response.errors.joinToString { "${it.code}: ${it.message}" }
+                    return Result.failure(Exception("D1 errors: $errorMsg"))
+                }
                 
                 val results = d1Response.result?.firstOrNull()?.results?.map { row ->
                     row.toTranslationMetadata()
@@ -287,9 +305,11 @@ class CloudflareD1Client(
                 
                 Result.success(results)
             } else {
+                Log.error { "D1 query failed: ${response.status}" }
                 Result.failure(Exception("D1 query failed: ${response.status}"))
             }
         } catch (e: Exception) {
+            Log.error("D1 query exception", e)
             Result.failure(e)
         }
     }
@@ -333,6 +353,7 @@ private fun JsonObject.toTranslationMetadata(): TranslationMetadata {
         bookHash = getString("book_hash"),
         bookTitle = getString("book_title"),
         bookAuthor = getString("book_author"),
+        bookCover = getString("book_cover"),
         chapterName = getString("chapter_name"),
         chapterNumber = getFloat("chapter_number").let { if (it == 0f) -1f else it },
         sourceLanguage = getString("source_language"),

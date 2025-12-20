@@ -78,7 +78,7 @@ val ServiceModule = module {
             remoteUseCases = get(),
             getLocalCatalog = get(),
             stateHolder = get(),
-            submitTranslationUseCase = getOrNull(),
+            autoShareTranslationUseCase = getOrNull(),
             communityPreferences = getOrNull(),
             localizeHelper = get()
         )

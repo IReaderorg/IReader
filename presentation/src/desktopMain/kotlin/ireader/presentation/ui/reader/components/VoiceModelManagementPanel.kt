@@ -60,7 +60,6 @@ fun VoiceModelManagementPanel(
     
     // Apply filters
     LaunchedEffect(availableModels, searchQuery, selectedLanguageFilter, selectedQualityFilter, selectedGenderFilter, showDownloadedOnly) {
-        Log.info { "Filter LaunchedEffect triggered with ${availableModels.size} available models" }
         filteredModels = availableModels.filter { model ->
             val matchesSearch = searchQuery.isBlank() || 
                 model.name.contains(searchQuery, ignoreCase = true) ||

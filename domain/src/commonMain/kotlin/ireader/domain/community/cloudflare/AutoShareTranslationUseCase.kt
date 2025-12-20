@@ -44,27 +44,17 @@ class AutoShareTranslationUseCase(
      */
     fun shouldAutoShare(engineId: Long): Boolean {
         // Check if auto-share is enabled
-        if (!communityPreferences.autoShareTranslations().get()) {
-            return false
-        }
+        if (!communityPreferences.autoShareTranslations().get()) return false
         
         // Check if AI-only mode is enabled
-        if (communityPreferences.autoShareAiOnly().get() && !isAiEngine(engineId)) {
-            Log.debug { "AutoShare: Skipping non-AI engine $engineId" }
-            return false
-        }
+        val aiOnly = communityPreferences.autoShareAiOnly().get()
+        if (aiOnly && !isAiEngine(engineId)) return false
         
         // Check if Cloudflare is configured
-        if (!communityPreferences.isCloudflareConfigured()) {
-            Log.debug { "AutoShare: Cloudflare not configured" }
-            return false
-        }
+        if (!communityPreferences.isCloudflareConfigured()) return false
         
         // Check if contributor name is set
-        if (communityPreferences.contributorName().get().isBlank()) {
-            Log.debug { "AutoShare: Contributor name not set" }
-            return false
-        }
+        if (communityPreferences.contributorName().get().isBlank()) return false
         
         return true
     }
@@ -98,19 +88,25 @@ class AutoShareTranslationUseCase(
             return Result.failure(Exception("Auto-share conditions not met"))
         }
         
-        val contributorName = communityPreferences.contributorName().get()
+        // Get contributor info from Supabase if available
+        var contributorId = ""
+        var contributorName = communityPreferences.contributorName().get()
         
-        // Get contributor ID from auth if available (anonymous if not logged in)
-        val contributorId = try {
-            remoteRepository?.getCurrentUser()?.getOrNull()?.id ?: ""
+        try {
+            val user = remoteRepository?.getCurrentUser()?.getOrNull()
+            if (user != null) {
+                contributorId = user.id
+                // Use Supabase username if available, fallback to preference
+                val supabaseUsername = user.username ?: user.email.substringBefore("@")
+                if (supabaseUsername.isNotBlank()) {
+                    contributorName = supabaseUsername
+                }
+            }
         } catch (e: Exception) {
-            Log.debug { "AutoShare: Could not get user ID, contributing anonymously" }
-            ""
+            // Silently use preference name if Supabase user info unavailable
         }
         
         val engineName = TranslateEngine.valueOf(engineId).lowercase()
-        
-        Log.info { "AutoShare: Sharing translation for ${book.title} - ${chapter.name} ($engineName)" }
         
         return try {
             translationRepository.submitTranslation(
@@ -118,6 +114,7 @@ class AutoShareTranslationUseCase(
                 translatedContent = translatedContent,
                 bookTitle = book.title,
                 bookAuthor = book.author,
+                bookCover = book.cover,
                 chapterName = chapter.name,
                 chapterNumber = chapter.number,
                 sourceLanguage = sourceLanguage,

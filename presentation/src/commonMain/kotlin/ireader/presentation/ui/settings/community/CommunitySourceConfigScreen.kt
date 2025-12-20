@@ -53,7 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import ireader.domain.community.SUPPORTED_LANGUAGES
+import ireader.domain.community.CommunitySource
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -566,7 +566,7 @@ private fun ContentPreferencesCard(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Preferred Language: ${SUPPORTED_LANGUAGES.find { it.first == preferredLanguage }?.second ?: preferredLanguage}",
+                text = "Preferred Language: ${CommunitySource.SUPPORTED_LANGUAGES.find { it.first == preferredLanguage }?.second ?: preferredLanguage}",
                 style = MaterialTheme.typography.bodyMedium
             )
             

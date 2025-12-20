@@ -115,7 +115,6 @@ data class BookDetailScreenSpec constructor(
         // Ensure data is fresh when screen is revisited (ViewModel is cached)
         // This handles the case where user navigates back and re-enters the detail screen
         LaunchedEffect(Unit) {
-            ireader.core.log.Log.info { "BookDetailScreenSpec: LaunchedEffect(Unit) triggered for bookId=$bookId" }
             vm.onScreenResumed()
         }
         

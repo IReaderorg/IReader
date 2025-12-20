@@ -31,6 +31,7 @@ import ireader.presentation.ui.settings.font_screens.FontScreenStateImpl
 import ireader.presentation.ui.settings.font_screens.FontScreenViewModel
 import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
+import ireader.presentation.ui.settings.community.CommunitySourceConfigViewModel
 import ireader.presentation.ui.settings.library.SettingsLibraryViewModel
 import ireader.presentation.ui.settings.notifications.SettingsNotificationViewModel
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
@@ -167,6 +168,7 @@ val PresentationModules = module {
     factory  { FontScreenViewModel(get(), get(), get(), get(), get()) }
     factory  { GeneralSettingScreenViewModel(get(), get(), get(), get(), get(),get()) }
     factory  { TranslationSettingsViewModel(get(), get(), getOrNull(), get()) }
+    factory  { CommunitySourceConfigViewModel(get(), getOrNull(), getOrNull()) }
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
     factory  { SourceRepositoryViewModel(get(), get()) }
     factory  { SecuritySettingsViewModel(get(), get()) }

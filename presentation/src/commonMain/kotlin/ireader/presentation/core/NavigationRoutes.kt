@@ -68,6 +68,7 @@ object NavigationRoutes {
         return "characterArtUpload?bookTitle=${encodeSimple(bookTitle)}&chapterTitle=${encodeSimple(chapterTitle)}&prompt=$encodedPrompt"
     }
     const val glossary = "glossary"
+    const val communitySourceConfig = "communitySourceConfig"
     const val adminUserPanel = "adminUserPanel"
     const val featureStore = "featureStore"
     const val pluginRepository = "pluginRepository"

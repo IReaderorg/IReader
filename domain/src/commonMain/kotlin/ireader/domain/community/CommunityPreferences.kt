@@ -39,6 +39,9 @@ class CommunityPreferences(
         const val CLOUDFLARE_D1_DATABASE_ID = "cloudflare_d1_database_id"
         const val CLOUDFLARE_R2_BUCKET_NAME = "cloudflare_r2_bucket_name"
         const val CLOUDFLARE_R2_PUBLIC_URL = "cloudflare_r2_public_url"
+        const val CLOUDFLARE_R2_S3_ENDPOINT = "cloudflare_r2_s3_endpoint"
+        const val CLOUDFLARE_R2_ACCESS_KEY_ID = "cloudflare_r2_access_key_id"
+        const val CLOUDFLARE_R2_SECRET_ACCESS_KEY = "cloudflare_r2_secret_access_key"
         const val CLOUDFLARE_COMPRESSION_ENABLED = "cloudflare_compression_enabled"
         
         // Check community first before translating
@@ -70,9 +73,10 @@ class CommunityPreferences(
     
     /**
      * Whether to automatically share translations to the community.
+     * Enabled by default to help build the community translation database.
      */
     fun autoShareTranslations(): Preference<Boolean> {
-        return preferenceStore.getBoolean(AUTO_SHARE_TRANSLATIONS, false)
+        return preferenceStore.getBoolean(AUTO_SHARE_TRANSLATIONS, true)
     }
     
     /**
@@ -170,6 +174,27 @@ class CommunityPreferences(
     }
     
     /**
+     * Cloudflare R2 S3-compatible endpoint (optional, auto-generated if blank).
+     */
+    fun cloudflareR2S3Endpoint(): Preference<String> {
+        return preferenceStore.getString(CLOUDFLARE_R2_S3_ENDPOINT, "")
+    }
+    
+    /**
+     * Cloudflare R2 Access Key ID for S3 API.
+     */
+    fun cloudflareR2AccessKeyId(): Preference<String> {
+        return preferenceStore.getString(CLOUDFLARE_R2_ACCESS_KEY_ID, "")
+    }
+    
+    /**
+     * Cloudflare R2 Secret Access Key for S3 API.
+     */
+    fun cloudflareR2SecretAccessKey(): Preference<String> {
+        return preferenceStore.getString(CLOUDFLARE_R2_SECRET_ACCESS_KEY, "")
+    }
+    
+    /**
      * Whether to enable compression for translations.
      */
     fun cloudflareCompressionEnabled(): Preference<Boolean> {
@@ -234,5 +259,30 @@ class CommunityPreferences(
     fun getEffectiveR2PublicUrl(): String {
         val userValue = cloudflareR2PublicUrl().get()
         return userValue.ifBlank { PlatformConfig.getCommunityR2PublicUrl() }
+    }
+    
+    /**
+     * Get effective R2 S3 Endpoint (user override or auto-generated).
+     */
+    fun getEffectiveR2S3Endpoint(): String {
+        val userValue = cloudflareR2S3Endpoint().get()
+        if (userValue.isNotBlank()) return userValue
+        // Auto-generate from account ID
+        val accountId = getEffectiveCloudflareAccountId()
+        return if (accountId.isNotBlank()) "https://$accountId.r2.cloudflarestorage.com" else ""
+    }
+    
+    /**
+     * Get effective R2 Access Key ID (user override or platform default).
+     */
+    fun getEffectiveR2AccessKeyId(): String {
+        return cloudflareR2AccessKeyId().get()
+    }
+    
+    /**
+     * Get effective R2 Secret Access Key (user override or platform default).
+     */
+    fun getEffectiveR2SecretAccessKey(): String {
+        return cloudflareR2SecretAccessKey().get()
     }
 }

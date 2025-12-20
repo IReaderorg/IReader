@@ -10,11 +10,16 @@ import io.ktor.client.statement.bodyAsBytes
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import ireader.core.log.Log
 import ireader.core.util.randomUUID
 
 /**
  * Client for Cloudflare R2 object storage operations.
- * Handles compressed translation content storage.
+ * Uses Cloudflare API for uploads and public URL for downloads.
+ * 
+ * R2 requires either:
+ * 1. Public bucket URL for reads (recommended for downloads)
+ * 2. S3-compatible API with access keys for writes
  */
 class CloudflareR2Client(
     private val httpClient: HttpClient,
@@ -24,6 +29,8 @@ class CloudflareR2Client(
     /**
      * Upload compressed translation content to R2.
      * Returns the object key for retrieval.
+     * 
+     * Uses Cloudflare API with Bearer token authentication.
      */
     suspend fun uploadTranslation(
         compressedContent: ByteArray,
@@ -35,55 +42,73 @@ class CloudflareR2Client(
         // Generate unique object key with organized path
         val objectKey = generateObjectKey(bookHash, chapterNumber, targetLanguage, engineId)
         
+        // If R2 is not configured, we can't upload
+        if (!config.isR2Configured()) {
+            Log.warn { "R2 not configured - cannot upload translations" }
+            return Result.failure(Exception("R2 not configured. Please set API token and bucket name."))
+        }
+        
         return try {
-            val response = httpClient.put("${config.r2ApiUrl}/objects/$objectKey") {
-                header("Authorization", "Bearer ${config.apiToken}")
+            // Use Cloudflare R2 API endpoint
+            // Format: https://api.cloudflare.com/client/v4/accounts/{account_id}/r2/buckets/{bucket_name}/objects/{object_key}
+            val url = "https://api.cloudflare.com/client/v4/accounts/${config.accountId}/r2/buckets/${config.r2BucketName}/objects/$objectKey"
+            
+            val response = httpClient.put(url) {
                 contentType(ContentType.Application.OctetStream)
+                header("Authorization", "Bearer ${config.apiToken}")
                 header("Content-Length", compressedContent.size.toString())
-                // Add metadata headers
-                header("x-amz-meta-book-hash", bookHash)
-                header("x-amz-meta-chapter", chapterNumber.toString())
-                header("x-amz-meta-language", targetLanguage)
-                header("x-amz-meta-engine", engineId)
                 setBody(compressedContent)
             }
             
             if (response.status.isSuccess()) {
                 Result.success(objectKey)
             } else {
-                Result.failure(Exception("R2 upload failed: ${response.status}"))
+                val body = try { response.bodyAsBytes().decodeToString() } catch (e: Exception) { "N/A" }
+                Log.error { "R2 upload failed: ${response.status} - $body" }
+                Result.failure(Exception("R2 upload failed: ${response.status} - $body"))
             }
         } catch (e: Exception) {
+            Log.error("R2 upload error", e)
             Result.failure(e)
         }
     }
     
     /**
      * Download compressed translation content from R2.
+     * Uses S3-compatible endpoint for downloads since Cloudflare REST API doesn't support object downloads.
      */
     suspend fun downloadTranslation(objectKey: String): Result<ByteArray> {
         return try {
-            // Try public URL first if available (faster, no auth needed)
-            val url = if (config.r2PublicUrl.isNotBlank()) {
-                "${config.r2PublicUrl.trimEnd('/')}/$objectKey"
-            } else {
-                "${config.r2ApiUrl}/objects/$objectKey"
+            // Try public URL first if available (fastest, no auth needed)
+            if (config.r2PublicUrl.isNotBlank()) {
+                val publicUrl = "${config.r2PublicUrl.trimEnd('/')}/$objectKey"
+                val response = httpClient.get(publicUrl)
+                if (response.status.isSuccess()) {
+                    return Result.success(response.bodyAsBytes())
+                }
             }
             
-            val response = if (config.r2PublicUrl.isNotBlank()) {
-                httpClient.get(url)
-            } else {
-                httpClient.get(url) {
-                    header("Authorization", "Bearer ${config.apiToken}")
-                }
+            // Use S3-compatible endpoint for download
+            val s3Url = "https://${config.accountId}.r2.cloudflarestorage.com/${config.r2BucketName}/$objectKey"
+            
+            // Try with Bearer token first
+            val response = httpClient.get(s3Url) {
+                header("Authorization", "Bearer ${config.apiToken}")
             }
             
             if (response.status.isSuccess()) {
                 Result.success(response.bodyAsBytes())
             } else {
-                Result.failure(Exception("R2 download failed: ${response.status}"))
+                // Try without auth (public bucket)
+                val publicResponse = httpClient.get(s3Url)
+                if (publicResponse.status.isSuccess()) {
+                    Result.success(publicResponse.bodyAsBytes())
+                } else {
+                    Result.failure(Exception("R2 download failed: ${response.status}"))
+                }
             }
         } catch (e: Exception) {
+            Log.error("R2 download error", e)
             Result.failure(e)
         }
     }
@@ -92,8 +117,15 @@ class CloudflareR2Client(
      * Delete translation content from R2.
      */
     suspend fun deleteTranslation(objectKey: String): Result<Unit> {
+        if (!config.isR2Configured()) {
+            return Result.failure(Exception("R2 not configured"))
+        }
+        
         return try {
-            val response = httpClient.delete("${config.r2ApiUrl}/objects/$objectKey") {
+            // Use Cloudflare R2 API for delete
+            val url = "https://api.cloudflare.com/client/v4/accounts/${config.accountId}/r2/buckets/${config.r2BucketName}/objects/$objectKey"
+            
+            val response = httpClient.delete(url) {
                 header("Authorization", "Bearer ${config.apiToken}")
             }
             
@@ -114,8 +146,10 @@ class CloudflareR2Client(
         return try {
             val url = if (config.r2PublicUrl.isNotBlank()) {
                 "${config.r2PublicUrl.trimEnd('/')}/$objectKey"
+            } else if (config.isR2Configured()) {
+                "https://api.cloudflare.com/client/v4/accounts/${config.accountId}/r2/buckets/${config.r2BucketName}/objects/$objectKey"
             } else {
-                "${config.r2ApiUrl}/objects/$objectKey"
+                return false
             }
             
             val response = if (config.r2PublicUrl.isNotBlank()) {

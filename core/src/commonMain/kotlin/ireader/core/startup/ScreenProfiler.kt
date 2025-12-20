@@ -32,7 +32,7 @@ object ScreenProfiler {
     
     private val screenSessions = mutableMapOf<String, ScreenSession>()
     private val screenHistory = mutableListOf<ScreenReport>()
-    private var isEnabled = true
+    private var isEnabled = false // Disabled by default - enable for debugging only
     
     // Thresholds for warnings (in milliseconds)
     private const val SLOW_SCREEN_THRESHOLD = 500L

@@ -192,6 +192,11 @@ fun CommonNavHost(
             ireader.presentation.core.ui.GlossaryScreenSpec().Content()
         }
         
+        // Community Source Config - Configure community translation sharing
+        composable(NavigationRoutes.communitySourceConfig) {
+            ireader.presentation.ui.settings.community.CommunitySourceConfigScreen().Content()
+        }
+        
         // Admin User Panel - Admin feature for managing users, badges, and passwords
         composable(NavigationRoutes.adminUserPanel) {
             ireader.presentation.core.ui.AdminUserPanelScreenSpec().Content()

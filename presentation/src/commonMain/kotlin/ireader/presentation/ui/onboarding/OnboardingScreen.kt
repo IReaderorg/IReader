@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 fun OnboardingScreen(
     uiPreferences: UiPreferences,
     supabasePreferences: SupabasePreferences? = null,
+    communityPreferences: ireader.domain.community.CommunityPreferences? = null,
     localeHelper: LocaleHelper? = null,
     onFolderUriSelected: ((String) -> Unit)? = null, // Callback for platform to take SAF permissions
     onComplete: () -> Unit,
@@ -59,6 +60,7 @@ fun OnboardingScreen(
     var selectedFolderPath by remember { mutableStateOf<String?>(null) }
     var selectedLanguage by remember { mutableStateOf(uiPreferences.language().get().ifEmpty { "en" }) }
     var devServerEnabled by remember { mutableStateOf(supabasePreferences?.supabaseEnabled()?.get() ?: false) }
+    var shareTranslationsEnabled by remember { mutableStateOf(communityPreferences?.autoShareTranslations()?.get() ?: true) }
     
     Box(
         modifier = modifier
@@ -127,6 +129,11 @@ fun OnboardingScreen(
                         onDevServerToggle = { enabled ->
                             devServerEnabled = enabled
                             supabasePreferences?.supabaseEnabled()?.set(enabled)
+                        },
+                        shareTranslationsEnabled = shareTranslationsEnabled,
+                        onShareTranslationsToggle = { enabled ->
+                            shareTranslationsEnabled = enabled
+                            communityPreferences?.autoShareTranslations()?.set(enabled)
                         },
                         onComplete = {
                             // Mark first launch and onboarding as complete
@@ -735,6 +742,8 @@ private fun StorageFeatureCard(
 private fun DevServerPage(
     devServerEnabled: Boolean,
     onDevServerToggle: (Boolean) -> Unit,
+    shareTranslationsEnabled: Boolean,
+    onShareTranslationsToggle: (Boolean) -> Unit,
     onComplete: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -754,7 +763,7 @@ private fun DevServerPage(
             .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = max(24.dp, navigationBarPadding)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Icon
         AnimatedVisibility(
@@ -763,7 +772,7 @@ private fun DevServerPage(
         ) {
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(80.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
@@ -778,13 +787,13 @@ private fun DevServerPage(
                 Icon(
                     imageVector = Icons.Outlined.Cloud,
                     contentDescription = null,
-                    modifier = Modifier.size(48.dp),
+                    modifier = Modifier.size(40.dp),
                     tint = Color.White
                 )
             }
         }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Title
         AnimatedVisibility(
@@ -793,7 +802,7 @@ private fun DevServerPage(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Cloud Features",
+                    text = "Cloud & Community",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -816,27 +825,12 @@ private fun DevServerPage(
             }
         }
         
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
-        // Description
+        // Cloud sync toggle card
         AnimatedVisibility(
             visible = showContent,
             enter = fadeIn(tween(500, 200)) + slideInVertically(tween(500, 200)) { 30 }
-        ) {
-            Text(
-                text = "Enable cloud features to sync your reading progress, access community reviews, and more.",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Dev server toggle card
-        AnimatedVisibility(
-            visible = showContent,
-            enter = fadeIn(tween(500, 300)) + slideInVertically(tween(500, 300)) { 30 }
         ) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -855,18 +849,29 @@ private fun DevServerPage(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Enable Cloud Features",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CloudSync,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Sync, reviews, badges, leaderboard",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Cloud Sync",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "Sync progress, reviews, badges",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     Switch(
                         checked = devServerEnabled,
@@ -876,69 +881,106 @@ private fun DevServerPage(
             }
         }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         
-        // Feature cards
+        // Share translations toggle card
         AnimatedVisibility(
             visible = showContent,
-            enter = fadeIn(tween(500, 350)) + slideInVertically(tween(500, 350)) { 30 }
+            enter = fadeIn(tween(500, 250)) + slideInVertically(tween(500, 250)) { 30 }
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                DevFeatureCard(
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (shareTranslationsEnabled) 
+                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                    else 
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Share,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Share AI Translations",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "Help others by sharing your translations",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Switch(
+                        checked = shareTranslationsEnabled,
+                        onCheckedChange = onShareTranslationsToggle
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Compact feature list
+        AnimatedVisibility(
+            visible = showContent,
+            enter = fadeIn(tween(500, 300)) + slideInVertically(tween(500, 300)) { 30 }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                CompactFeatureRow(
                     icon = Icons.Outlined.Sync,
-                    title = "Reading Progress Sync",
-                    description = "Continue reading from where you left off on any device",
+                    text = "Reading progress sync across devices",
                     enabled = devServerEnabled
                 )
-                
-                DevFeatureCard(
+                CompactFeatureRow(
                     icon = Icons.Outlined.RateReview,
-                    title = "Community Reviews",
-                    description = "Read and write reviews for novels",
+                    text = "Community reviews and ratings",
                     enabled = devServerEnabled
                 )
-                
-                DevFeatureCard(
+                CompactFeatureRow(
                     icon = Icons.Outlined.EmojiEvents,
-                    title = "Leaderboard & Badges",
-                    description = "Earn achievements and compete with others",
+                    text = "Leaderboards and achievement badges",
                     enabled = devServerEnabled
+                )
+                CompactFeatureRow(
+                    icon = Icons.Outlined.Translate,
+                    text = "Download community translations",
+                    enabled = shareTranslationsEnabled
                 )
             }
         }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Info note
         AnimatedVisibility(
             visible = showContent,
-            enter = fadeIn(tween(500, 400))
+            enter = fadeIn(tween(500, 350))
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "You can change this setting later in Settings → Cloud Sync.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                }
-            }
+            Text(
+                text = "You can change these settings later in Settings.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
         }
         
         Spacer(modifier = Modifier.weight(1f))
@@ -946,7 +988,7 @@ private fun DevServerPage(
         // Buttons
         AnimatedVisibility(
             visible = showContent,
-            enter = fadeIn(tween(500, 500)) + slideInVertically(tween(500, 500)) { 30 }
+            enter = fadeIn(tween(500, 400)) + slideInVertically(tween(500, 400)) { 30 }
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -990,66 +1032,28 @@ private fun DevServerPage(
 }
 
 @Composable
-private fun DevFeatureCard(
+private fun CompactFeatureRow(
     icon: ImageVector,
-    title: String,
-    description: String,
+    text: String,
     enabled: Boolean
 ) {
-    val alpha = if (enabled) 1f else 0.5f
+    val alpha = if (enabled) 1f else 0.4f
     
-    Card(
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f * alpha)
-        )
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f * alpha)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary.copy(alpha = alpha),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
-                )
-            }
-            
-            if (enabled) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
+        Icon(
+            imageVector = if (enabled) Icons.Default.CheckCircle else Icons.Outlined.Circle,
+            contentDescription = null,
+            tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha),
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
+        )
     }
 }

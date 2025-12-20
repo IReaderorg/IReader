@@ -57,7 +57,6 @@ class CommunityTranslationRepository(
                 )
             } else {
                 // Metadata exists but content missing - return not found
-                Log.warn { "Translation metadata exists but R2 content missing: ${metadata.r2ObjectKey}" }
                 TranslationLookupResult(found = false)
             }
         }
@@ -109,6 +108,7 @@ class CommunityTranslationRepository(
      * @param translatedContent Translated text to store
      * @param bookTitle Book title
      * @param bookAuthor Book author
+     * @param bookCover Book cover URL
      * @param chapterName Chapter name
      * @param chapterNumber Chapter number
      * @param sourceLanguage Source language code
@@ -123,6 +123,7 @@ class CommunityTranslationRepository(
         translatedContent: String,
         bookTitle: String,
         bookAuthor: String,
+        bookCover: String = "",
         chapterName: String,
         chapterNumber: Float,
         sourceLanguage: String,
@@ -136,7 +137,6 @@ class CommunityTranslationRepository(
         val existing = d1Client.findByContentHash(contentHash, targetLanguage, engineId)
         
         if (existing != null) {
-            Log.info { "Translation already exists for content hash: $contentHash" }
             return Result.success(existing.id)
         }
         
@@ -165,6 +165,7 @@ class CommunityTranslationRepository(
         }
         
         val r2ObjectKey = uploadResult.getOrNull()!!
+        
         val translationId = randomUUID()
         val now = currentTimeToLong()
         
@@ -175,6 +176,7 @@ class CommunityTranslationRepository(
             bookHash = bookHash,
             bookTitle = bookTitle,
             bookAuthor = bookAuthor,
+            bookCover = bookCover,
             chapterName = chapterName,
             chapterNumber = chapterNumber,
             sourceLanguage = sourceLanguage,
@@ -198,8 +200,6 @@ class CommunityTranslationRepository(
             r2Client.deleteTranslation(r2ObjectKey)
             return Result.failure(insertResult.exceptionOrNull() ?: Exception("D1 insert failed"))
         }
-        
-        Log.info { "Translation submitted: $translationId (${originalBytes.size} -> ${compressedBytes.size} bytes, ratio: $compressionRatio)" }
         
         return Result.success(translationId)
     }

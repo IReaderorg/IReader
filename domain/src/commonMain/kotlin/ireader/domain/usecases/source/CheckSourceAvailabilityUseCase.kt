@@ -49,8 +49,6 @@ class CheckSourceAvailabilityUseCase(
             var betterSourceId: Long? = null
             var maxChapterDifference = 0
             
-            Log.info { "Checking ${pinnedCatalogs.size} pinned sources for better alternatives" }
-            
             for (catalog in pinnedCatalogs) {
                 if (catalog.sourceId == book.sourceId) continue // Skip current source
                 

@@ -102,8 +102,9 @@ r2.publicUrl=https://pub-your-bucket-id.r2.dev
 # R2 Bucket name for translation content
 # community.r2.bucketName=ireader-community-translations
 
-# R2 Public URL (optional, for CDN access)
-# community.r2.publicUrl=https://your-bucket.r2.dev
+# R2 Public URL (REQUIRED for downloads - enable public access in R2 bucket settings)
+# Get this from: R2 Dashboard → Your Bucket → Settings → Public access → r2.dev subdomain
+# community.r2.publicUrl=https://pub-your-bucket-id.r2.dev
 
 # ============================================
 # MULTI-PROJECT SETUP (3.5GB) - ADVANCED

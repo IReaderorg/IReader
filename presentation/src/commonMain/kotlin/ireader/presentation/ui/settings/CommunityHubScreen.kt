@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -39,6 +40,7 @@ fun CommunityHubScreen(
     onCharacterArtGallery: () -> Unit,
     onReadingBuddy: () -> Unit = {},
     onGlossary: () -> Unit = {},
+    onCommunitySource: () -> Unit = {},
     onUserSources: () -> Unit = {},
     onLegadoSources: () -> Unit = {},
     onFeatureStore: () -> Unit = {},
@@ -180,6 +182,15 @@ fun CommunityHubScreen(
                     description = "Manage translation glossaries for your books",
                     icon = Icons.Filled.Translate,
                     onClick = onGlossary
+                )
+            }
+            
+            item {
+                SettingsItem(
+                    title = "Community Source",
+                    description = "Share and download AI translations with the community",
+                    icon = Icons.Filled.CloudSync,
+                    onClick = onCommunitySource
                 )
             }
             

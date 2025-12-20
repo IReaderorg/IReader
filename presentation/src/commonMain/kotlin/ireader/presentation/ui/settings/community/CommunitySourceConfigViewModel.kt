@@ -1,7 +1,9 @@
 package ireader.presentation.ui.settings.community
 
+import ireader.core.log.Log
 import ireader.domain.community.CommunityPreferences
 import ireader.domain.community.CommunityRepository
+import ireader.domain.community.cloudflare.CommunityTranslationRepository
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
 
@@ -34,7 +36,8 @@ data class CommunitySourceConfigState(
 
 class CommunitySourceConfigViewModel(
     private val communityPreferences: CommunityPreferences,
-    private val communityRepository: CommunityRepository? = null
+    private val communityRepository: CommunityRepository? = null,
+    private val translationRepository: CommunityTranslationRepository? = null
 ) : StateViewModel<CommunitySourceConfigState>(CommunitySourceConfigState()) {
     
     init {
@@ -247,21 +250,46 @@ class CommunitySourceConfigViewModel(
         scope.launch {
             updateState { it.copy(isTestingCloudflare = true, cloudflareTestResult = null) }
             
-            // For now, just validate the configuration is complete
+            // First validate the configuration is complete
             val isConfigured = currentState.cloudflareAccountId.isNotBlank() &&
                 currentState.cloudflareApiToken.isNotBlank() &&
                 currentState.cloudflareD1DatabaseId.isNotBlank() &&
                 currentState.cloudflareR2BucketName.isNotBlank()
             
-            if (isConfigured) {
-                updateState { it.copy(
-                    isTestingCloudflare = false,
-                    cloudflareTestResult = "✓ Configuration looks valid! Save to apply."
-                )}
-            } else {
+            if (!isConfigured) {
                 updateState { it.copy(
                     isTestingCloudflare = false,
                     cloudflareTestResult = "✗ Please fill in all required fields"
+                )}
+                return@launch
+            }
+            
+            // Try to initialize the D1 schema (this tests the connection)
+            if (translationRepository != null) {
+                try {
+                    val result = translationRepository.initialize()
+                    if (result.isSuccess) {
+                        updateState { it.copy(
+                            isTestingCloudflare = false,
+                            cloudflareTestResult = "✓ Connection successful! D1 database ready."
+                        )}
+                    } else {
+                        updateState { it.copy(
+                            isTestingCloudflare = false,
+                            cloudflareTestResult = "✗ D1 connection failed: ${result.exceptionOrNull()?.message}"
+                        )}
+                    }
+                } catch (e: Exception) {
+                    Log.error("Cloudflare test failed", e)
+                    updateState { it.copy(
+                        isTestingCloudflare = false,
+                        cloudflareTestResult = "✗ Connection error: ${e.message}"
+                    )}
+                }
+            } else {
+                updateState { it.copy(
+                    isTestingCloudflare = false,
+                    cloudflareTestResult = "✓ Configuration looks valid! Save to apply and restart app to test."
                 )}
             }
         }

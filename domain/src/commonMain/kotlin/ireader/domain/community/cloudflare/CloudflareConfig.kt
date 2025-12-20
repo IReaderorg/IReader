@@ -17,21 +17,34 @@ data class CloudflareConfig(
     val r2BucketName: String,
     /** R2 Public URL for reading content (optional, for CDN) */
     val r2PublicUrl: String = "",
+    /** R2 S3-compatible endpoint (required for uploads) */
+    val r2S3Endpoint: String = "",
+    /** R2 Access Key ID for S3 API */
+    val r2AccessKeyId: String = "",
+    /** R2 Secret Access Key for S3 API */
+    val r2SecretAccessKey: String = "",
     /** Enable compression for translations */
     val enableCompression: Boolean = true,
     /** Minimum text length to compress (bytes) */
     val compressionThreshold: Int = 500
 ) {
+    /** D1 REST API base URL */
     val d1ApiUrl: String
         get() = "https://api.cloudflare.com/client/v4/accounts/$accountId/d1/database/$d1DatabaseId"
     
+    /** R2 S3-compatible API endpoint */
     val r2ApiUrl: String
-        get() = "https://api.cloudflare.com/client/v4/accounts/$accountId/r2/buckets/$r2BucketName"
+        get() = r2S3Endpoint.ifBlank { 
+            "https://$accountId.r2.cloudflarestorage.com"
+        }
     
     fun isValid(): Boolean = accountId.isNotBlank() && 
         apiToken.isNotBlank() && 
         d1DatabaseId.isNotBlank() && 
         r2BucketName.isNotBlank()
+    
+    /** Check if R2 S3 API is configured for uploads (either S3 keys or API token) */
+    fun isR2Configured(): Boolean = apiToken.isNotBlank() && r2BucketName.isNotBlank()
 }
 
 /**
@@ -45,6 +58,8 @@ data class TranslationMetadata(
     val bookHash: String,
     val bookTitle: String,
     val bookAuthor: String,
+    /** Book cover URL from original source */
+    val bookCover: String = "",
     val chapterName: String,
     val chapterNumber: Float,
     val sourceLanguage: String,

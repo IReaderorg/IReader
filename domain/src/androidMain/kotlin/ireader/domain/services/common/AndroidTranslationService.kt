@@ -63,11 +63,6 @@ class AndroidTranslationService(
     
     private var receiverRegistered = false
     
-    init {
-        Log.info { "AndroidTranslationService: Created - instance: ${this.hashCode()}" }
-        Log.info { "AndroidTranslationService: Will use TranslationServiceImpl: ${translationServiceImpl.hashCode()}" }
-    }
-    
     private fun registerCancelReceiver() {
         if (receiverRegistered) return
         try {
@@ -78,9 +73,8 @@ class AndroidTranslationService(
                 context.registerReceiver(cancelReceiver, filter)
             }
             receiverRegistered = true
-            Log.info { "AndroidTranslationService: Cancel receiver registered" }
         } catch (e: Exception) {
-            Log.error { "AndroidTranslationService: Failed to register cancel receiver: ${e.message}" }
+            Log.error { "Failed to register cancel receiver: ${e.message}" }
         }
     }
     
@@ -110,12 +104,9 @@ class AndroidTranslationService(
         if (observerStarted) return
         observerStarted = true
         
-        Log.info { "AndroidTranslationService: Starting notification observer" }
         // Start observing translation progress for notifications
         serviceScope.launch {
-            Log.info { "AndroidTranslationService: Started collecting translation progress" }
             translationServiceImpl.translationProgress.collectLatest { progressMap ->
-                Log.info { "AndroidTranslationService: Progress update received, ${progressMap.size} items" }
                 updateNotification(progressMap)
             }
         }

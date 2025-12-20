@@ -32,6 +32,7 @@ import ireader.core.http.toast
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.domain.preferences.prefs.UiPreferences
+import ireader.domain.community.CommunityPreferences
 import ireader.domain.usecases.backup.AutomaticBackup
 
 import ireader.domain.utils.extensions.launchIO
@@ -77,6 +78,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
 
     private val uiPreferences: UiPreferences by inject()
     private val supabasePreferences: SupabasePreferences by inject()
+    private val communityPreferences: CommunityPreferences by inject()
     val initializers: AppInitializers by inject()
     private val automaticBackup: AutomaticBackup by inject()
     private val localeHelper: LocaleHelper by inject()
@@ -156,6 +158,7 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             ireader.presentation.ui.onboarding.OnboardingScreen(
                                 uiPreferences = uiPreferences,
                                 supabasePreferences = supabasePreferences,
+                                communityPreferences = communityPreferences,
                                 localeHelper = localeHelper,
                                 onFolderUriSelected = { uriString ->
                                     // Permissions are now taken in the platform-specific directory picker
@@ -173,10 +176,18 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
                             // Show main app content
                             val navController = rememberNavController()
                             
-                            ProvideNavigator(navController) {
-                                if (navController.previousBackStackEntry == null) {
-                                    ConfirmExit()
+                            // Track if we're at root to enable/disable ConfirmExit
+                            // Use derivedStateOf to efficiently track back stack changes
+                            val isAtRoot by remember {
+                                androidx.compose.runtime.derivedStateOf {
+                                    navController.previousBackStackEntry == null
                                 }
+                            }
+                            
+                            ProvideNavigator(navController) {
+                                // Always show ConfirmExit when at root to prevent white screen on rapid back
+                                // The BackHandler inside ConfirmExit handles the actual exit logic
+                                ConfirmExit(isAtRoot = isAtRoot)
                                 
                                 IScaffold {
                                     CommonNavHost(navController)
@@ -405,17 +416,26 @@ class MainActivity : ComponentActivity(), SecureActivityDelegate by SecureActivi
         }
     }
     @Composable
-    private fun ConfirmExit() {
+    private fun ConfirmExit(isAtRoot: Boolean = true) {
         val scope = rememberCoroutineScope()
         val confirmExit by uiPreferences.confirmExit().asStateIn(scope)
         var waitingConfirmation by remember { mutableStateOf(false) }
-        BackHandler(enabled = !waitingConfirmation && confirmExit) {
-            scope.launch {
-                waitingConfirmation = true
-                val toast = toast("Press back again to exit", Toast.LENGTH_LONG)
-                delay(2.seconds)
-                toast.cancel()
-                waitingConfirmation = false
+        
+        // Always intercept back when at root to prevent white screen
+        // If confirmExit is enabled, show toast; otherwise just finish activity
+        BackHandler(enabled = isAtRoot) {
+            if (confirmExit && !waitingConfirmation) {
+                scope.launch {
+                    waitingConfirmation = true
+                    val toast = toast("Press back again to exit", Toast.LENGTH_LONG)
+                    delay(2.seconds)
+                    toast.cancel()
+                    waitingConfirmation = false
+                }
+            } else {
+                // Either confirmExit is disabled, or user pressed back twice
+                // Finish the activity properly instead of letting navigation handle it
+                finish()
             }
         }
     }
