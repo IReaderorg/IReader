@@ -47,6 +47,34 @@ import kotlinx.serialization.Serializable
  */
 interface TranslationPlugin : Plugin {
     
+    // ==================== Plugin Configuration ====================
+    
+    /**
+     * Get the configuration fields for this plugin.
+     * The app will automatically generate UI based on these fields.
+     * 
+     * @return List of configuration fields
+     */
+    fun getConfigFields(): List<PluginConfig<*>> = emptyList()
+    
+    /**
+     * Called when a configuration value changes.
+     * Override to handle config changes (e.g., reconnect to server).
+     * 
+     * @param key The config field key that changed
+     * @param value The new value
+     */
+    fun onConfigChanged(key: String, value: Any?) {}
+    
+    /**
+     * Get the current value of a configuration field.
+     * Override to return the actual saved/current value for a config key.
+     * 
+     * @param key The config field key
+     * @return The current value, or null if not set
+     */
+    fun getConfigValue(key: String): Any? = null
+    
     // ==================== Core Translation Methods ====================
     
     /**

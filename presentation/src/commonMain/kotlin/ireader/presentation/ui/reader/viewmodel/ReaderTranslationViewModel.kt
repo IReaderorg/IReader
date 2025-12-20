@@ -376,16 +376,17 @@ class ReaderTranslationViewModel(
     
     /**
      * Load saved translation for chapter from DB.
+     * Loads translation based on chapterId and target language only,
+     * regardless of which engine was used to create it.
      */
     suspend fun loadTranslationForChapter(chapterId: Long) {
         try {
-            val engineId = translationEnginesManager.get().id
             val targetLanguage = translatorTargetLanguage.value
             
-            val translated = getTranslatedChapterUseCase.execute(
+            // Load translation by chapterId and target language only (ignore engine)
+            val translated = getTranslatedChapterUseCase.getByChapterAndLanguage(
                 chapterId = chapterId,
-                targetLanguage = targetLanguage,
-                engineId = engineId
+                targetLanguage = targetLanguage
             )
             
             if (translated != null && translated.translatedContent.isNotEmpty()) {

@@ -2,6 +2,7 @@ package ireader.domain.plugins
 
 import ireader.core.io.FileSystem
 import ireader.core.io.VirtualFile
+import ireader.core.prefs.PreferenceStore
 import ireader.core.util.createICoroutineScope
 import ireader.plugin.api.PluginMonetization as ApiPluginMonetization
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,7 +54,8 @@ class PluginManager(
     private val monetization: MonetizationService,
     private val database: PluginDatabase,
     private val securityManager: PluginSecurityManager,
-    private val performanceMetricsManager: ireader.domain.monitoring.PerformanceMetricsManager
+    private val performanceMetricsManager: ireader.domain.monitoring.PerformanceMetricsManager,
+    private val preferenceStore: PreferenceStore
 ) {
     private val scope = createICoroutineScope()
     private val _pluginsFlow = MutableStateFlow<List<PluginInfo>>(emptyList())
@@ -62,6 +64,9 @@ class PluginManager(
     @kotlin.concurrent.Volatile
     private var pluginsLoaded = false
     private val loadLock = kotlinx.coroutines.sync.Mutex()
+    
+    // Cache of plugin preferences stores to ensure same instance is reused
+    private val pluginPreferencesStores = mutableMapOf<String, PluginPreferencesStore>()
     
     /**
      * Observable flow of all plugins
@@ -494,11 +499,13 @@ class PluginManager(
     
     /**
      * Create plugin-specific preferences store
+     * Uses a persistent store backed by the app's PreferenceStore
+     * Caches stores per plugin to ensure same instance is reused
      */
     private fun createPluginPreferencesStore(pluginId: String): PluginPreferencesStore {
-        // This would be implemented to use the actual preferences system
-        // For now, return a simple in-memory implementation
-        return InMemoryPluginPreferencesStore()
+        return pluginPreferencesStores.getOrPut(pluginId) {
+            PersistentPluginPreferencesStore(preferenceStore, pluginId)
+        }
     }
     
     /**
@@ -764,8 +771,89 @@ class PluginManager(
 }
 
 /**
+ * Persistent implementation of PluginPreferencesStore using the app's PreferenceStore
+ * Each plugin gets its own namespace to avoid key collisions
+ */
+private class PersistentPluginPreferencesStore(
+    private val preferenceStore: PreferenceStore,
+    private val pluginId: String
+) : PluginPreferencesStore {
+    
+    // Prefix all keys with plugin ID to namespace them
+    private fun prefixKey(key: String): String = "plugin_${pluginId}_$key"
+    
+    override fun getString(key: String, defaultValue: String): String {
+        return preferenceStore.getString(prefixKey(key), defaultValue).get()
+    }
+    
+    override fun putString(key: String, value: String) {
+        preferenceStore.getString(prefixKey(key), "").set(value)
+    }
+    
+    override fun getInt(key: String, defaultValue: Int): Int {
+        return preferenceStore.getInt(prefixKey(key), defaultValue).get()
+    }
+    
+    override fun putInt(key: String, value: Int) {
+        preferenceStore.getInt(prefixKey(key), 0).set(value)
+    }
+    
+    override fun getBoolean(key: String, defaultValue: Boolean): Boolean {
+        return preferenceStore.getBoolean(prefixKey(key), defaultValue).get()
+    }
+    
+    override fun putBoolean(key: String, value: Boolean) {
+        preferenceStore.getBoolean(prefixKey(key), false).set(value)
+    }
+    
+    override fun getLong(key: String, defaultValue: Long): Long {
+        return preferenceStore.getLong(prefixKey(key), defaultValue).get()
+    }
+    
+    override fun putLong(key: String, value: Long) {
+        preferenceStore.getLong(prefixKey(key), 0L).set(value)
+    }
+    
+    override fun getFloat(key: String, defaultValue: Float): Float {
+        return preferenceStore.getFloat(prefixKey(key), defaultValue).get()
+    }
+    
+    override fun putFloat(key: String, value: Float) {
+        preferenceStore.getFloat(prefixKey(key), 0f).set(value)
+    }
+    
+    override fun getStringSet(key: String, defaultValue: Set<String>): Set<String> {
+        return preferenceStore.getStringSet(prefixKey(key), defaultValue).get()
+    }
+    
+    override fun putStringSet(key: String, value: Set<String>) {
+        preferenceStore.getStringSet(prefixKey(key), emptySet()).set(value)
+    }
+    
+    override fun remove(key: String) {
+        // Set to default/empty value to "remove"
+        preferenceStore.getString(prefixKey(key), "").delete()
+    }
+    
+    override fun clear() {
+        // Note: This is a no-op since we can't enumerate all keys with a prefix
+        // In practice, plugins should manage their own keys
+    }
+    
+    override fun contains(key: String): Boolean {
+        return preferenceStore.getString(prefixKey(key), "").isSet()
+    }
+    
+    override fun getAllKeys(): Set<String> {
+        // Note: PreferenceStore doesn't support key enumeration
+        // Return empty set - plugins should track their own keys
+        return emptySet()
+    }
+}
+
+/**
  * Simple in-memory implementation of PluginPreferencesStore
- * In production, this would be backed by actual persistent storage
+ * Used as fallback when persistent storage is not available
  */
 private class InMemoryPluginPreferencesStore : PluginPreferencesStore {
     private val data = mutableMapOf<String, Any>()

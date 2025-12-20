@@ -33,6 +33,18 @@ internal class JvmDatabaseHandler constructor(
 ) : DatabaseHandler {
 
   val suspendingTransactionId = ThreadLocal<Int>()
+  
+  override suspend fun checkpoint() {
+    withContext(queryDispatcher) {
+      try {
+        driver.execute(null, "PRAGMA wal_checkpoint(TRUNCATE)", 0)
+        println("[JvmDatabaseHandler] WAL checkpoint completed successfully")
+      } catch (e: Exception) {
+        println("[JvmDatabaseHandler] WAL checkpoint failed: ${e.message}")
+      }
+    }
+  }
+  
   override fun initialize() {
     // Get current version from preferences
     val oldVersion = preferencesHelper.database_version().get()

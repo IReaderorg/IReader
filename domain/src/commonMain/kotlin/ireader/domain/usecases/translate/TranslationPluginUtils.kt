@@ -75,10 +75,14 @@ class PluginTranslateEngineAdapter(
     override val id: Long = plugin.manifest.id.hashCode().toLong()
     override val engineName: String = plugin.manifest.name
     override val requiresApiKey: Boolean = plugin.requiresApiKey()
-    override val supportsAI: Boolean = false
+    override val supportsAI: Boolean = plugin.supportsAI
+    override val supportsContextAwareTranslation: Boolean = plugin.supportsContextAwareTranslation
+    override val supportsStylePreservation: Boolean = plugin.supportsStylePreservation
+    override val maxCharsPerRequest: Int = plugin.maxCharsPerRequest
+    override val rateLimitDelayMs: Long = plugin.rateLimitDelayMs
+    override val isOffline: Boolean = plugin.isOffline
     
-    override val supportedLanguages: List<Pair<String, String>> = 
-        plugin.getSupportedLanguages().map { it.from to it.to }
+    override val supportedLanguages: List<Pair<String, String>> = plugin.getAvailableLanguages()
     
     override suspend fun translate(
         texts: List<String>,
@@ -89,15 +93,11 @@ class PluginTranslateEngineAdapter(
         onError: (ireader.i18n.UiText) -> Unit
     ) {
         try {
-            val result = manager.translateBatch(
-                texts = texts,
-                from = source,
-                to = target,
-                engine = TranslationEngineSource.Plugin(plugin)
-            )
+            val result = plugin.translateBatch(texts, source, target)
             
             result.fold(
                 onSuccess = { translations ->
+                    onProgress(100)
                     onSuccess(translations)
                 },
                 onFailure = { error ->

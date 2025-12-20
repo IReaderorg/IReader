@@ -36,6 +36,17 @@ internal class IosDatabaseHandler(
 
     // iOS doesn't have ThreadLocal, use AtomicInt for transaction tracking
     private val transactionCount = AtomicInt(0)
+    
+    override suspend fun checkpoint() {
+        withContext(queryDispatcher) {
+            try {
+                driver.execute(null, "PRAGMA wal_checkpoint(TRUNCATE)", 0)
+                println("[IosDatabaseHandler] WAL checkpoint completed successfully")
+            } catch (e: Exception) {
+                println("[IosDatabaseHandler] WAL checkpoint failed: ${e.message}")
+            }
+        }
+    }
 
     override fun initialize() {
         // Get current version from preferences

@@ -31,7 +31,14 @@ getTranslatedChapterByChapterId:
 SELECT * FROM translated_chapter 
 WHERE chapter_id = :chapterId 
 AND target_language = :targetLanguage
-AND translator_engine_id = :engineId
+ORDER BY updated_at DESC
+LIMIT 1;
+
+getTranslatedChapterByChapterIdAndLanguage:
+SELECT * FROM translated_chapter 
+WHERE chapter_id = :chapterId 
+AND target_language = :targetLanguage
+ORDER BY updated_at DESC
 LIMIT 1;
 
 getTranslatedChaptersByBookId:
@@ -48,6 +55,9 @@ DELETE FROM translated_chapter WHERE chapter_id = :chapterId;
 
 deleteTranslatedChaptersByBookId:
 DELETE FROM translated_chapter WHERE book_id = :bookId;
+
+deleteByChapterAndLanguage:
+DELETE FROM translated_chapter WHERE chapter_id = :chapterId AND target_language = :targetLanguage;
 
 insert:
 INSERT INTO translated_chapter(

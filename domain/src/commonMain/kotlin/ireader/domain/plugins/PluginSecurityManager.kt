@@ -53,6 +53,16 @@ class PluginSecurityManager(
             }
         }
         
+        // Auto-grant permissions declared in the manifest
+        // This ensures plugins can use their declared permissions without requiring
+        // additional user approval (the user already approved by installing the plugin)
+        manifest.permissions.forEach { permission ->
+            if (!permissionManager.isPermissionGranted(pluginId, permission)) {
+                println("[PluginSecurityManager] Auto-granting permission $permission to plugin $pluginId")
+                permissionManager.grantPermission(pluginId, permission)
+            }
+        }
+        
         return contextFactory.createContext(pluginId, manifest, preferencesStore)
     }
     

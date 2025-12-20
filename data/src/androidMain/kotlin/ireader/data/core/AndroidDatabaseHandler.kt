@@ -25,6 +25,19 @@ class AndroidDatabaseHandler(
 ) : DatabaseHandler {
 
     val suspendingTransactionId = ThreadLocal<Int>()
+    
+    override suspend fun checkpoint() {
+        withContext(queryDispatcher) {
+            try {
+                // Execute WAL checkpoint to flush data to main database file
+                driver.execute(null, "PRAGMA wal_checkpoint(TRUNCATE)", 0)
+                println("[AndroidDatabaseHandler] WAL checkpoint completed successfully")
+            } catch (e: Exception) {
+                println("[AndroidDatabaseHandler] WAL checkpoint failed: ${e.message}")
+            }
+        }
+    }
+    
     override fun initialize() {
         try {
             // Get current version from preferences

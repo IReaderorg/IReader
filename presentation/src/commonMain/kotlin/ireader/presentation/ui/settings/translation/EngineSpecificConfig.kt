@@ -120,15 +120,24 @@ private fun OllamaPluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val plugin = pluginEngine.getPlugin()
+    
+    // Load saved values from plugin
     var serverUrl by remember { mutableStateOf("http://localhost:11434") }
     var model by remember { mutableStateOf("mistral") }
     
-    // Load saved values from plugin preferences
+    // Load saved values from plugin on first composition
     LaunchedEffect(pluginEngine) {
-        // Get values from plugin metadata or defaults
-        val metadata = pluginEngine.manifest.metadata
-        serverUrl = metadata?.get("translation.apiUrl")?.removeSuffix("/api/chat") ?: "http://localhost:11434"
-        model = metadata?.get("translation.model") ?: "mistral"
+        // Get current values from plugin
+        val savedUrl = plugin.getConfigValue("server_url") as? String
+        val savedModel = plugin.getConfigValue("model") as? String
+        
+        if (!savedUrl.isNullOrBlank()) {
+            serverUrl = savedUrl
+        }
+        if (!savedModel.isNullOrBlank()) {
+            model = savedModel
+        }
     }
     
     Card(
@@ -164,7 +173,11 @@ private fun OllamaPluginConfig(
             // URL Input
             OutlinedTextField(
                 value = serverUrl,
-                onValueChange = { serverUrl = it },
+                onValueChange = { newUrl ->
+                    serverUrl = newUrl
+                    // Save to plugin config
+                    plugin.onConfigChanged("server_url", newUrl)
+                },
                 label = { Text("Server URL", maxLines = 1) },
                 placeholder = { Text("http://localhost:11434", maxLines = 1) },
                 modifier = Modifier.fillMaxWidth(),
@@ -176,7 +189,11 @@ private fun OllamaPluginConfig(
             // Model Input
             OutlinedTextField(
                 value = model,
-                onValueChange = { model = it },
+                onValueChange = { newModel ->
+                    model = newModel
+                    // Save to plugin config as custom model
+                    plugin.onConfigChanged("custom_model", newModel)
+                },
                 label = { Text("Model", maxLines = 1) },
                 placeholder = { Text("mistral, llama2, gemma", maxLines = 1) },
                 modifier = Modifier.fillMaxWidth(),
@@ -244,8 +261,17 @@ private fun HuggingFacePluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val plugin = pluginEngine.getPlugin()
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    
+    // Load saved values from plugin
+    LaunchedEffect(pluginEngine) {
+        val savedApiKey = plugin.getConfigValue("api_key") as? String
+        if (!savedApiKey.isNullOrBlank()) {
+            apiKey = savedApiKey
+        }
+    }
     
     Card(
         modifier = modifier
@@ -280,7 +306,11 @@ private fun HuggingFacePluginConfig(
             // API Key Input
             OutlinedTextField(
                 value = apiKey,
-                onValueChange = { apiKey = it },
+                onValueChange = { newKey ->
+                    apiKey = newKey
+                    plugin.onConfigChanged("api_key", newKey)
+                    plugin.configureApiKey(newKey)
+                },
                 label = { Text("API Key (optional)", maxLines = 1) },
                 placeholder = { Text("hf_...", maxLines = 1) },
                 modifier = Modifier.fillMaxWidth(),
@@ -315,8 +345,17 @@ private fun OpenAIPluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val plugin = pluginEngine.getPlugin()
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    
+    // Load saved values from plugin
+    LaunchedEffect(pluginEngine) {
+        val savedApiKey = plugin.getConfigValue("api_key") as? String
+        if (!savedApiKey.isNullOrBlank()) {
+            apiKey = savedApiKey
+        }
+    }
     
     Card(
         modifier = modifier
@@ -351,7 +390,11 @@ private fun OpenAIPluginConfig(
             // API Key Input
             OutlinedTextField(
                 value = apiKey,
-                onValueChange = { apiKey = it },
+                onValueChange = { newKey ->
+                    apiKey = newKey
+                    plugin.onConfigChanged("api_key", newKey)
+                    plugin.configureApiKey(newKey)
+                },
                 label = { Text("API Key", maxLines = 1) },
                 placeholder = { Text("sk-...", maxLines = 1) },
                 modifier = Modifier.fillMaxWidth(),
@@ -386,8 +429,17 @@ private fun DeepSeekPluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val plugin = pluginEngine.getPlugin()
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    
+    // Load saved values from plugin
+    LaunchedEffect(pluginEngine) {
+        val savedApiKey = plugin.getConfigValue("api_key") as? String
+        if (!savedApiKey.isNullOrBlank()) {
+            apiKey = savedApiKey
+        }
+    }
     
     Card(
         modifier = modifier
@@ -422,7 +474,11 @@ private fun DeepSeekPluginConfig(
             // API Key Input
             OutlinedTextField(
                 value = apiKey,
-                onValueChange = { apiKey = it },
+                onValueChange = { newKey ->
+                    apiKey = newKey
+                    plugin.onConfigChanged("api_key", newKey)
+                    plugin.configureApiKey(newKey)
+                },
                 label = { Text("API Key", maxLines = 1) },
                 placeholder = { Text("sk-...", maxLines = 1) },
                 modifier = Modifier.fillMaxWidth(),
@@ -457,9 +513,20 @@ private fun GenericPluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val plugin = pluginEngine.getPlugin()
     val requiresApiKey = pluginEngine.requiresApiKey
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
+    
+    // Load saved values from plugin
+    LaunchedEffect(pluginEngine) {
+        if (requiresApiKey) {
+            val savedApiKey = plugin.getConfigValue("api_key") as? String
+            if (!savedApiKey.isNullOrBlank()) {
+                apiKey = savedApiKey
+            }
+        }
+    }
     
     Card(
         modifier = modifier
@@ -502,7 +569,11 @@ private fun GenericPluginConfig(
             if (requiresApiKey) {
                 OutlinedTextField(
                     value = apiKey,
-                    onValueChange = { apiKey = it },
+                    onValueChange = { newKey ->
+                        apiKey = newKey
+                        plugin.onConfigChanged("api_key", newKey)
+                        plugin.configureApiKey(newKey)
+                    },
                     label = { Text("API Key", maxLines = 1) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,

@@ -509,8 +509,11 @@ fun GeneralScreenTab(
                 when (source) {
                     is ireader.domain.usecases.translate.TranslationEngineSource.BuiltIn -> 
                         source.engine.id to source.engine.engineName
-                    is ireader.domain.usecases.translate.TranslationEngineSource.Plugin -> 
-                        null // Plugin engines would need different handling
+                    is ireader.domain.usecases.translate.TranslationEngineSource.Plugin -> {
+                        // Include plugin engines with their manifest ID hash as the engine ID
+                        val pluginId = source.plugin.manifest.id.hashCode().toLong()
+                        pluginId to "${source.plugin.manifest.name} (Plugin)"
+                    }
                 }
             }.toMap()
             

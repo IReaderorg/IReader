@@ -10,6 +10,14 @@ interface TranslatedChapterRepository {
         engineId: Long
     ): TranslatedChapter?
     
+    /**
+     * Get translation by chapter ID and target language only (ignores engine)
+     */
+    suspend fun getTranslatedChapterByLanguage(
+        chapterId: Long,
+        targetLanguage: String
+    ): TranslatedChapter?
+    
     suspend fun getTranslatedChaptersByBookId(bookId: Long): List<TranslatedChapter>
     
     suspend fun getAllTranslationsForChapter(chapterId: Long): List<TranslatedChapter>

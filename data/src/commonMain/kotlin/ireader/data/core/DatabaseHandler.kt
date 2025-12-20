@@ -29,6 +29,12 @@ import kotlin.coroutines.CoroutineContext
      * This should be called when data loading problems are detected.
      */
     fun repairDatabase()
+    
+    /**
+     * Force a WAL checkpoint to ensure all data is written to the main database file.
+     * This is important for ensuring data survives app kill/restart.
+     */
+    suspend fun checkpoint()
 
     suspend fun <T> await(inTransaction: Boolean = false, block: suspend Database.() -> T): T
 

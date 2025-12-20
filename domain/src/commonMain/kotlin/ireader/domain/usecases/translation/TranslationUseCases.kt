@@ -66,7 +66,17 @@ class SaveTranslatedChapterUseCase(
             updatedAt = now
         )
         
-        repository.upsertTranslatedChapter(translatedChapter)
+        println("[SaveTranslatedChapterUseCase] Saving translation for chapter ${chapter.id}, book ${chapter.bookId}, engine $engineId, target $targetLanguage, content size: ${translatedContent.size}")
+        
+        try {
+            repository.upsertTranslatedChapter(translatedChapter)
+            println("[SaveTranslatedChapterUseCase] Translation saved successfully for chapter ${chapter.id}")
+        } catch (e: Exception) {
+            println("[SaveTranslatedChapterUseCase] ERROR saving translation: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
+        
         return translatedChapter.chapterId
     }
 }
@@ -79,7 +89,30 @@ class GetTranslatedChapterUseCase(
         targetLanguage: String,
         engineId: Long
     ): TranslatedChapter? {
-        return repository.getTranslatedChapter(chapterId, targetLanguage, engineId)
+        println("[GetTranslatedChapterUseCase] Getting translation for chapter $chapterId, target $targetLanguage (engineId $engineId ignored)")
+        val result = repository.getTranslatedChapter(chapterId, targetLanguage, engineId)
+        println("[GetTranslatedChapterUseCase] Result: ${if (result != null) "found with ${result.translatedContent.size} items" else "not found"}")
+        return result
+    }
+    
+    /**
+     * Get translation by chapter ID and target language only (ignores engine)
+     */
+    suspend fun getByChapterAndLanguage(
+        chapterId: Long,
+        targetLanguage: String
+    ): TranslatedChapter? {
+        println("[GetTranslatedChapterUseCase] getByChapterAndLanguage for chapter $chapterId, target $targetLanguage")
+        val result = repository.getTranslatedChapterByLanguage(chapterId, targetLanguage)
+        println("[GetTranslatedChapterUseCase] Result: ${if (result != null) "found with ${result.translatedContent.size} items" else "not found"}")
+        return result
+    }
+    
+    /**
+     * Get all translations for a chapter regardless of engine or language
+     */
+    suspend fun getAllForChapter(chapterId: Long): List<TranslatedChapter> {
+        return repository.getAllTranslationsForChapter(chapterId)
     }
 }
 

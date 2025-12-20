@@ -161,6 +161,9 @@ class TranslateChapterWithStorageUseCase(
         onError: (UiText) -> Unit
     ) {
         try {
+            Log.info { "TranslateChapterWithStorageUseCase: handleTranslationSuccess called for chapter ${chapter.id}" }
+            Log.info { "TranslateChapterWithStorageUseCase: translatedTexts size: ${translatedTexts.size}" }
+            
             // Glossary was already applied before translation
             // Reconstruct pages with translated text
             val translatedPages = mutableListOf<Page>()
@@ -180,6 +183,8 @@ class TranslateChapterWithStorageUseCase(
                 }
             }
             
+            Log.info { "TranslateChapterWithStorageUseCase: Saving ${translatedPages.size} translated pages to DB" }
+            
             // Save translated chapter locally
             saveTranslatedChapterUseCase.execute(
                 chapter = chapter,
@@ -188,6 +193,8 @@ class TranslateChapterWithStorageUseCase(
                 targetLanguage = targetLanguage,
                 engineId = engineId
             )
+            
+            Log.info { "TranslateChapterWithStorageUseCase: Save completed, now retrieving from DB" }
             
             // Auto-share to community if enabled (AI translations only)
             if (autoShareTranslationUseCase.shouldAutoShare(engineId)) {
@@ -225,12 +232,17 @@ class TranslateChapterWithStorageUseCase(
                 engineId
             )
             
+            Log.info { "TranslateChapterWithStorageUseCase: Retrieved from DB: ${savedTranslation != null}, content size: ${savedTranslation?.translatedContent?.size ?: 0}" }
+            
             if (savedTranslation != null) {
                 onSuccess(savedTranslation)
             } else {
+                Log.error { "TranslateChapterWithStorageUseCase: Failed to retrieve saved translation!" }
                 onError(UiText.MStringResource(Res.string.api_response_error))
             }
         } catch (e: Exception) {
+            Log.error { "TranslateChapterWithStorageUseCase: Error in handleTranslationSuccess: ${e.message}" }
+            e.printStackTrace()
             onError(UiText.ExceptionString(e))
         }
     }

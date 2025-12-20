@@ -270,11 +270,11 @@ data class ScreenAction(
     /** Action icon */
     val icon: String? = null,
     /** Action type */
-    val type: ActionType = ActionType.BUTTON
+    val type: CommunityActionType = CommunityActionType.BUTTON
 )
 
 @Serializable
-enum class ActionType {
+enum class CommunityActionType {
     BUTTON,
     FAB,
     MENU_ITEM,

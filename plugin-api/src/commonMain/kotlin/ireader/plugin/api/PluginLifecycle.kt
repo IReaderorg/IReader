@@ -257,14 +257,7 @@ data class SelectOption(
     val icon: String? = null
 )
 
-enum class TextInputType {
-    TEXT,
-    PASSWORD,
-    EMAIL,
-    URL,
-    NUMBER,
-    MULTILINE
-}
+// TextInputType is defined in PluginConfig.kt - use that one
 
 data class TextValidation(
     val pattern: String? = null,

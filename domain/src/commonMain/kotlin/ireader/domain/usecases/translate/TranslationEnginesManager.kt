@@ -57,7 +57,46 @@ class TranslationEnginesManager(
 
     fun get(): TranslateEngine {
         val engineId = readerPreferences.translatorEngine().get()
-        return builtInEngines.find { it.id == engineId } ?: builtInEngines.first()
+        
+        // First check built-in engines
+        val builtIn = builtInEngines.find { it.id == engineId }
+        if (builtIn != null) {
+            return builtIn
+        }
+        
+        // Check if it's a plugin engine (by hash ID)
+        val plugins = getTranslationPlugins()
+        val plugin = plugins.find { it.manifest.id.hashCode().toLong() == engineId }
+        if (plugin != null) {
+            // Return a wrapper that adapts the plugin to TranslateEngine interface
+            return PluginTranslateEngineAdapter(plugin, this)
+        }
+        
+        // Fall back to first built-in engine
+        return builtInEngines.first()
+    }
+    
+    /**
+     * Get the engine ID for the currently selected engine
+     * This handles both built-in and plugin engines
+     */
+    fun getSelectedEngineId(): Long {
+        val engineId = readerPreferences.translatorEngine().get()
+        
+        // Check if it's a built-in engine
+        if (builtInEngines.any { it.id == engineId }) {
+            return engineId
+        }
+        
+        // Check if it's a plugin engine
+        val plugins = getTranslationPlugins()
+        val plugin = plugins.find { it.manifest.id.hashCode().toLong() == engineId }
+        if (plugin != null) {
+            return engineId
+        }
+        
+        // Fall back to first built-in engine
+        return builtInEngines.first().id
     }
     
     /**

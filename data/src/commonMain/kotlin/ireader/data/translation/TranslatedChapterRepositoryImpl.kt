@@ -16,14 +16,40 @@ class TranslatedChapterRepositoryImpl(
         targetLanguage: String,
         engineId: Long
     ): TranslatedChapter? {
+        // Engine ID is ignored - we just get the most recent translation for this chapter/language
         return handler.awaitOneOrNull {
             translatedChapterQueries.getTranslatedChapterByChapterId(
                 chapterId,
                 targetLanguage,
-                engineId,
                 translatedChapterMapper
             )
         }
+    }
+    
+    override suspend fun getTranslatedChapterByLanguage(
+        chapterId: Long,
+        targetLanguage: String
+    ): TranslatedChapter? {
+        println("[TranslatedChapterRepositoryImpl] getTranslatedChapterByLanguage: chapterId=$chapterId, targetLanguage=$targetLanguage")
+        
+        // First, let's check if ANY translations exist for this chapter
+        val allForChapter = handler.awaitList {
+            translatedChapterQueries.getAllTranslatedChaptersForChapter(chapterId, translatedChapterMapper)
+        }
+        println("[TranslatedChapterRepositoryImpl] All translations for chapter $chapterId: ${allForChapter.size} found")
+        allForChapter.forEach { 
+            println("[TranslatedChapterRepositoryImpl]   - id=${it.id}, targetLang=${it.targetLanguage}, engineId=${it.translatorEngineId}, contentSize=${it.translatedContent.size}")
+        }
+        
+        val result = handler.awaitOneOrNull {
+            translatedChapterQueries.getTranslatedChapterByChapterIdAndLanguage(
+                chapterId,
+                targetLanguage,
+                translatedChapterMapper
+            )
+        }
+        println("[TranslatedChapterRepositoryImpl] Query result: ${if (result != null) "found" else "not found"}")
+        return result
     }
     
     override suspend fun getTranslatedChaptersByBookId(bookId: Long): List<TranslatedChapter> {
@@ -65,7 +91,18 @@ class TranslatedChapterRepositoryImpl(
     }
     
     override suspend fun upsertTranslatedChapter(translatedChapter: TranslatedChapter) {
+        println("[TranslatedChapterRepositoryImpl] upsertTranslatedChapter: chapterId=${translatedChapter.chapterId}, targetLang=${translatedChapter.targetLanguage}, engineId=${translatedChapter.translatorEngineId}, contentSize=${translatedChapter.translatedContent.size}")
+        
+        // First, delete any existing translation for this chapter+language combo
+        // This ensures INSERT OR REPLACE works correctly
         handler.await(inTransaction = true) {
+            // Delete existing translations for this chapter and target language
+            translatedChapterQueries.deleteByChapterAndLanguage(
+                translatedChapter.chapterId,
+                translatedChapter.targetLanguage
+            )
+            
+            // Now insert the new translation
             translatedChapterQueries.upsert(
                 chapterId = translatedChapter.chapterId,
                 bookId = translatedChapter.bookId,
@@ -76,6 +113,19 @@ class TranslatedChapterRepositoryImpl(
                 createdAt = translatedChapter.createdAt,
                 updatedAt = translatedChapter.updatedAt
             )
+        }
+        
+        // Force WAL checkpoint to ensure data is persisted to main database file
+        // This ensures data survives app kill/restart
+        handler.checkpoint()
+        
+        // Verify the save worked
+        val verification = handler.awaitList {
+            translatedChapterQueries.getAllTranslatedChaptersForChapter(translatedChapter.chapterId, translatedChapterMapper)
+        }
+        println("[TranslatedChapterRepositoryImpl] After upsert, translations for chapter ${translatedChapter.chapterId}: ${verification.size} found")
+        verification.forEach {
+            println("[TranslatedChapterRepositoryImpl]   - id=${it.id}, targetLang=${it.targetLanguage}, contentSize=${it.translatedContent.size}")
         }
     }
     

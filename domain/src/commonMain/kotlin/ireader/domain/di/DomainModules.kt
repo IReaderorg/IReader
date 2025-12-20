@@ -329,7 +329,8 @@ val DomainServices = module {
             monetization = get(),
             database = get(),
             securityManager = get(),
-            performanceMetricsManager = get()
+            performanceMetricsManager = get(),
+            preferenceStore = get()
         )
     }
     
