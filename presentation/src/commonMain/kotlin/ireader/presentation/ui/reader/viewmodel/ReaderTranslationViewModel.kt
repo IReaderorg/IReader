@@ -34,6 +34,9 @@ import kotlinx.coroutines.launch
  * - Glossary management
  * - Translation progress tracking
  * - Translation settings
+ * 
+ * Translations are saved to DB immediately when completed.
+ * TTS screen loads translations from DB directly.
  */
 class ReaderTranslationViewModel(
     private val translateChapterWithStorageUseCase: TranslateChapterWithStorageUseCase,
@@ -297,6 +300,7 @@ class ReaderTranslationViewModel(
     
     /**
      * Fallback: Translate chapter directly without service (no notifications)
+     * Translation is saved to DB immediately via TranslateChapterWithStorageUseCase
      */
     private suspend fun translateChapterDirect(
         chapter: Chapter,
@@ -330,8 +334,9 @@ class ReaderTranslationViewModel(
                 translationProgress = clampedProgress / 100f
             },
             onSuccess = { translatedChapter ->
+                // Translation is already saved to DB by TranslateChapterWithStorageUseCase
                 translationState.setTranslation(translatedChapter.translatedContent)
-                Log.debug("Translation saved successfully for chapter ${chapter.id}")
+                Log.debug("Translation saved to DB for chapter ${chapter.id}")
                 showSnackBar(UiText.DynamicString("Translation complete and saved"))
                 translationProgress = 1f
                 isTranslating = false
@@ -370,35 +375,34 @@ class ReaderTranslationViewModel(
     }
     
     /**
-     * Load saved translation for chapter
+     * Load saved translation for chapter from DB.
      */
     suspend fun loadTranslationForChapter(chapterId: Long) {
         try {
             val engineId = translationEnginesManager.get().id
+            val targetLanguage = translatorTargetLanguage.value
+            
             val translated = getTranslatedChapterUseCase.execute(
                 chapterId = chapterId,
-                targetLanguage = translatorTargetLanguage.value,
+                targetLanguage = targetLanguage,
                 engineId = engineId
             )
             
             if (translated != null && translated.translatedContent.isNotEmpty()) {
                 // Use atomic update to prevent race conditions
                 translationState.setTranslation(translated.translatedContent)
-                Log.debug("Loaded saved translation for chapter $chapterId with ${translated.translatedContent.size} paragraphs")
+                Log.debug("Loaded saved translation from DB for chapter $chapterId with ${translated.translatedContent.size} paragraphs")
             } else {
                 // Use atomic clear to prevent race conditions
                 translationState.clearTranslation()
                 Log.debug("No saved translation found for chapter $chapterId")
             }
-            
         } catch (e: Exception) {
             Log.error("Failed to load translation", e)
             // Use atomic clear with error message
             translationState.clearTranslation(e.message)
         }
     }
-    
-
     
     /**
      * Toggle translation display

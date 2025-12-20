@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -156,7 +157,14 @@ private fun getShortEngineName(engineId: Long, fullName: String): String {
         6L -> "ChatGPT"
         7L -> "DeepSeek WV"
         8L -> "Gemini"
-        else -> fullName.take(10)
+        else -> {
+            // For plugin engines, use a shortened version of the name
+            if (fullName.length > 10) {
+                fullName.take(8) + "..."
+            } else {
+                fullName
+            }
+        }
     }
 }
 
@@ -171,9 +179,9 @@ fun getEngineIcon(engineId: Long): ImageVector {
         3L -> Icons.Default.AutoAwesome
         4L -> Icons.Default.Public
         5L -> Icons.Default.Computer
-        6L -> Icons.Default.Chat
+        6L -> Icons.AutoMirrored.Filled.Chat
         7L -> Icons.Default.SmartToy
         8L -> Icons.Default.Stars
-        else -> Icons.Default.Translate
+        else -> Icons.Default.Extension // Plugin engines get extension icon
     }
 }

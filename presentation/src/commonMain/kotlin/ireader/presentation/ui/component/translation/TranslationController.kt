@@ -4,6 +4,8 @@ import androidx.compose.runtime.*
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.preferences.prefs.TranslationPreferences
 import ireader.domain.services.common.*
+import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.domain.usecases.translate.TranslationEngineSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -18,12 +20,41 @@ class TranslationController(
     private val readerPreferences: ReaderPreferences,
     private val translationPreferences: TranslationPreferences?,
     private val scope: CoroutineScope,
-    private val onShowSnackbar: (String) -> Unit
+    private val onShowSnackbar: (String) -> Unit,
+    private val translationEnginesManager: TranslationEnginesManager? = null
 ) {
     val dialogState = TranslationDialogState()
     
-    // Available engines
-    val availableEngines: List<TranslationEngine> = TranslationEngines.ALL
+    // Available engines - combines built-in and plugin engines
+    val availableEngines: List<TranslationEngine> by lazy {
+        val engines = mutableListOf<TranslationEngine>()
+        
+        // Add built-in engines
+        engines.addAll(TranslationEngines.BUILT_IN)
+        
+        // Add plugin engines from TranslationEnginesManager
+        translationEnginesManager?.getAvailableEngines()?.forEach { source ->
+            when (source) {
+                is TranslationEngineSource.Plugin -> {
+                    val plugin = source.plugin
+                    engines.add(TranslationEngine(
+                        id = plugin.manifest.id.hashCode().toLong(),
+                        name = plugin.manifest.name,
+                        isOffline = plugin.isOffline,
+                        requiresApiKey = plugin.requiresApiKey(),
+                        requiresRateLimiting = !plugin.isOffline,
+                        isPlugin = true,
+                        pluginId = plugin.manifest.id
+                    ))
+                }
+                is TranslationEngineSource.BuiltIn -> {
+                    // Already added from BUILT_IN
+                }
+            }
+        }
+        
+        engines
+    }
     
     // Check if service is available
     val isServiceAvailable: Boolean get() = translationService != null
@@ -355,15 +386,17 @@ fun rememberTranslationController(
     readerPreferences: ReaderPreferences,
     translationPreferences: TranslationPreferences? = null,
     scope: CoroutineScope,
-    onShowSnackbar: (String) -> Unit
+    onShowSnackbar: (String) -> Unit,
+    translationEnginesManager: TranslationEnginesManager? = null
 ): TranslationController {
-    return remember(translationService, readerPreferences, scope) {
+    return remember(translationService, readerPreferences, scope, translationEnginesManager) {
         TranslationController(
             translationService = translationService,
             readerPreferences = readerPreferences,
             translationPreferences = translationPreferences,
             scope = scope,
-            onShowSnackbar = onShowSnackbar
+            onShowSnackbar = onShowSnackbar,
+            translationEnginesManager = translationEnginesManager
         )
     }
 }

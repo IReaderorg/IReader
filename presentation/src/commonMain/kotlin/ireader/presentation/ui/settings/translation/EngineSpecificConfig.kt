@@ -9,10 +9,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.presentation.ui.settings.general.MlKitInitState
 import ireader.presentation.ui.settings.general.TestConnectionState
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
@@ -26,8 +29,21 @@ fun EngineSpecificConfig(
     engineId: Long,
     viewModel: TranslationSettingsViewModel,
     onNavigateToLogin: ((String) -> Unit)? = null,
+    currentPluginEngine: PluginTranslateEngineWrapper? = null,
+    translationEnginesManager: TranslationEnginesManager? = null,
     modifier: Modifier = Modifier
 ) {
+    // Check if this is a plugin engine
+    if (currentPluginEngine != null) {
+        PluginEngineConfig(
+            pluginEngine = currentPluginEngine,
+            translationEnginesManager = translationEnginesManager,
+            modifier = modifier
+        )
+        return
+    }
+    
+    // Built-in engine configurations
     when (engineId) {
         0L -> GoogleMlKitConfig(
             initState = viewModel.mlKitInitState,
@@ -56,6 +72,470 @@ fun EngineSpecificConfig(
             onLoginClick = { onNavigateToLogin?.invoke("deepseek") },
             modifier = modifier
         )
+    }
+}
+
+/**
+ * Configuration UI for plugin-based translation engines
+ */
+@Composable
+private fun PluginEngineConfig(
+    pluginEngine: PluginTranslateEngineWrapper,
+    translationEnginesManager: TranslationEnginesManager?,
+    modifier: Modifier = Modifier
+) {
+    val pluginId = pluginEngine.pluginId
+    
+    // Determine plugin type and show appropriate config
+    when {
+        pluginId.contains("ollama") -> OllamaPluginConfig(
+            pluginEngine = pluginEngine,
+            modifier = modifier
+        )
+        pluginId.contains("libretranslate") -> LibreTranslatePluginInfo(modifier = modifier)
+        pluginId.contains("huggingface") -> HuggingFacePluginConfig(
+            pluginEngine = pluginEngine,
+            modifier = modifier
+        )
+        pluginId.contains("openai") -> OpenAIPluginConfig(
+            pluginEngine = pluginEngine,
+            modifier = modifier
+        )
+        pluginId.contains("deepseek") -> DeepSeekPluginConfig(
+            pluginEngine = pluginEngine,
+            modifier = modifier
+        )
+        else -> GenericPluginConfig(
+            pluginEngine = pluginEngine,
+            modifier = modifier
+        )
+    }
+}
+
+/**
+ * Ollama plugin configuration
+ */
+@Composable
+private fun OllamaPluginConfig(
+    pluginEngine: PluginTranslateEngineWrapper,
+    modifier: Modifier = Modifier
+) {
+    var serverUrl by remember { mutableStateOf("http://localhost:11434") }
+    var model by remember { mutableStateOf("mistral") }
+    
+    // Load saved values from plugin preferences
+    LaunchedEffect(pluginEngine) {
+        // Get values from plugin metadata or defaults
+        val metadata = pluginEngine.manifest.metadata
+        serverUrl = metadata?.get("translation.apiUrl")?.removeSuffix("/api/chat") ?: "http://localhost:11434"
+        model = metadata?.get("translation.model") ?: "mistral"
+    }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Computer,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "Ollama Configuration",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // URL Input
+            OutlinedTextField(
+                value = serverUrl,
+                onValueChange = { serverUrl = it },
+                label = { Text("Server URL", maxLines = 1) },
+                placeholder = { Text("http://localhost:11434", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Model Input
+            OutlinedTextField(
+                value = model,
+                onValueChange = { model = it },
+                label = { Text("Model", maxLines = 1) },
+                placeholder = { Text("mistral, llama2, gemma", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Info
+            Text(
+                text = "Install Ollama from ollama.ai. Make sure the server is running.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+/**
+ * LibreTranslate plugin info
+ */
+@Composable
+private fun LibreTranslatePluginInfo(
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
+            Column {
+                Text(
+                    text = "LibreTranslate - Ready to use",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Free and open-source. No API key required.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+/**
+ * HuggingFace plugin configuration
+ */
+@Composable
+private fun HuggingFacePluginConfig(
+    pluginEngine: PluginTranslateEngineWrapper,
+    modifier: Modifier = Modifier
+) {
+    var apiKey by remember { mutableStateOf("") }
+    var showApiKey by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Key,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "HuggingFace Configuration",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // API Key Input
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = { apiKey = it },
+                label = { Text("API Key (optional)", maxLines = 1) },
+                placeholder = { Text("hf_...", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { showApiKey = !showApiKey }) {
+                        Icon(
+                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (showApiKey) "Hide" else "Show"
+                        )
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Info
+            Text(
+                text = "Get your API key from huggingface.co/settings/tokens",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+/**
+ * OpenAI plugin configuration
+ */
+@Composable
+private fun OpenAIPluginConfig(
+    pluginEngine: PluginTranslateEngineWrapper,
+    modifier: Modifier = Modifier
+) {
+    var apiKey by remember { mutableStateOf("") }
+    var showApiKey by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Key,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "OpenAI Configuration",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // API Key Input
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = { apiKey = it },
+                label = { Text("API Key", maxLines = 1) },
+                placeholder = { Text("sk-...", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { showApiKey = !showApiKey }) {
+                        Icon(
+                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (showApiKey) "Hide" else "Show"
+                        )
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Info
+            Text(
+                text = "Get your API key from platform.openai.com/api-keys",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+/**
+ * DeepSeek plugin configuration
+ */
+@Composable
+private fun DeepSeekPluginConfig(
+    pluginEngine: PluginTranslateEngineWrapper,
+    modifier: Modifier = Modifier
+) {
+    var apiKey by remember { mutableStateOf("") }
+    var showApiKey by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Key,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "DeepSeek Configuration",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // API Key Input
+            OutlinedTextField(
+                value = apiKey,
+                onValueChange = { apiKey = it },
+                label = { Text("API Key", maxLines = 1) },
+                placeholder = { Text("sk-...", maxLines = 1) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { showApiKey = !showApiKey }) {
+                        Icon(
+                            imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (showApiKey) "Hide" else "Show"
+                        )
+                    }
+                },
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            // Info
+            Text(
+                text = "Get your API key from platform.deepseek.com",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+/**
+ * Generic plugin configuration for unknown plugins
+ */
+@Composable
+private fun GenericPluginConfig(
+    pluginEngine: PluginTranslateEngineWrapper,
+    modifier: Modifier = Modifier
+) {
+    val requiresApiKey = pluginEngine.requiresApiKey
+    var apiKey by remember { mutableStateOf("") }
+    var showApiKey by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Extension,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = pluginEngine.engineName,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            // Description from manifest
+            Text(
+                text = pluginEngine.manifest.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            // API Key Input if required
+            if (requiresApiKey) {
+                OutlinedTextField(
+                    value = apiKey,
+                    onValueChange = { apiKey = it },
+                    label = { Text("API Key", maxLines = 1) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { showApiKey = !showApiKey }) {
+                            Icon(
+                                imageVector = if (showApiKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (showApiKey) "Hide" else "Show"
+                            )
+                        }
+                    },
+                    textStyle = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "No API key required",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
     }
 }
 

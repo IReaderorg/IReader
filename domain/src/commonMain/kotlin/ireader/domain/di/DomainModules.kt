@@ -199,7 +199,7 @@ val DomainServices = module {
         TranslationEnginesManager(
             readerPreferences = get(),
             httpClients = get(),
-            pluginManager = getOrNull() // Optional to avoid circular dependency
+            pluginManager = get() // PluginManager is a singleton, safe to use get()
         )
     }
     factory  { ireader.domain.catalogs.interactor.GetInstalledCatalog(get()) }
@@ -273,7 +273,7 @@ val DomainServices = module {
     factory { 
         ireader.domain.usecases.glossary.ApplyGlossaryToTranslationUseCase(
             glossaryRepository = get(),
-            globalGlossaryRepository = getOrNull()
+            globalGlossaryRepository = get()
         )
     }
     
@@ -344,7 +344,7 @@ val DomainServices = module {
     single<ireader.domain.services.common.PluginDownloadService> {
         ireader.domain.services.plugin.PluginDownloadServiceImpl(
             pluginManager = get(),
-            notificationService = getOrNull()
+            notificationService = get()
         )
     }
     

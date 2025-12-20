@@ -646,26 +646,27 @@ data class TranslationEngine(
     val name: String,
     val isOffline: Boolean = false,
     val requiresApiKey: Boolean = false,
-    val requiresRateLimiting: Boolean = false
+    val requiresRateLimiting: Boolean = false,
+    val isPlugin: Boolean = false,
+    val pluginId: String? = null
 )
 
 /**
- * Common translation engines
+ * Built-in translation engines
+ * Additional engines are available as plugins from the Feature Store
  */
 object TranslationEngines {
-    val ALL = listOf(
+    // Only built-in engines - plugins are loaded dynamically
+    val BUILT_IN = listOf(
         TranslationEngine(0L, "Google ML Kit", isOffline = true),
-        TranslationEngine(1L, "Google Translate", requiresRateLimiting = true),
-        TranslationEngine(2L, "OpenAI GPT", requiresApiKey = true, requiresRateLimiting = true),
-        TranslationEngine(3L, "DeepSeek API", requiresApiKey = true, requiresRateLimiting = true),
-        TranslationEngine(4L, "LibreTranslate", isOffline = true),
-        TranslationEngine(5L, "Ollama (Local)", isOffline = true),
-        TranslationEngine(6L, "ChatGPT WebView", requiresRateLimiting = true),
-        TranslationEngine(7L, "DeepSeek WebView", requiresRateLimiting = true),
         TranslationEngine(8L, "Gemini API", requiresApiKey = true, requiresRateLimiting = true)
     )
     
-    fun getById(id: Long): TranslationEngine? = ALL.find { it.id == id }
+    // For backward compatibility - returns only built-in engines
+    // Use TranslationEnginesManager.getAvailableEngines() for full list including plugins
+    val ALL: List<TranslationEngine> get() = BUILT_IN
+    
+    fun getById(id: Long): TranslationEngine? = BUILT_IN.find { it.id == id }
 }
 
 /**

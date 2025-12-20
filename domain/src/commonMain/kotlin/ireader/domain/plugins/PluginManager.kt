@@ -113,11 +113,12 @@ class PluginManager(
             
             plugins.forEach { plugin ->
                 // Auto-enable infrastructure plugins if not already enabled
-                // These include: JS_ENGINE, TTS, GRADIO_TTS, and THEME plugins
+                // These include: JS_ENGINE, TTS, GRADIO_TTS, THEME, and TRANSLATION plugins
                 val isAutoEnablePlugin = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
                                          plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
                                          plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS ||
-                                         plugin.manifest.type == ireader.plugin.api.PluginType.THEME
+                                         plugin.manifest.type == ireader.plugin.api.PluginType.THEME ||
+                                         plugin.manifest.type == ireader.plugin.api.PluginType.TRANSLATION
                 
                 println("[PluginManager] Plugin ${plugin.manifest.id}: type=${plugin.manifest.type}, isAutoEnablePlugin=$isAutoEnablePlugin, alreadyEnabled=${enabledIds.contains(plugin.manifest.id)}")
                 
@@ -186,11 +187,12 @@ class PluginManager(
             
             registry.register(plugin)
             
-            // Auto-enable infrastructure plugins (JS_ENGINE, TTS, GRADIO_TTS, THEME)
+            // Auto-enable infrastructure plugins (JS_ENGINE, TTS, GRADIO_TTS, THEME, TRANSLATION)
             val shouldAutoEnable = plugin.manifest.type == ireader.plugin.api.PluginType.JS_ENGINE ||
                                    plugin.manifest.type == ireader.plugin.api.PluginType.TTS ||
                                    plugin.manifest.type == ireader.plugin.api.PluginType.GRADIO_TTS ||
-                                   plugin.manifest.type == ireader.plugin.api.PluginType.THEME
+                                   plugin.manifest.type == ireader.plugin.api.PluginType.THEME ||
+                                   plugin.manifest.type == ireader.plugin.api.PluginType.TRANSLATION
             
             val initialStatus = if (shouldAutoEnable) PluginStatus.ENABLED else PluginStatus.DISABLED
             database.insertOrUpdate(plugin.manifest, initialStatus)

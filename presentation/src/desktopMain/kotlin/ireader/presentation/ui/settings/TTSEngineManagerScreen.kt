@@ -1562,7 +1562,7 @@ private fun GradioTTSSectionDesktop(
                 // Add custom button
                 OutlinedButton(
                     onClick = {
-                        editingConfig = GradioTTSPresets.createCustomTemplate()
+                        editingConfig = ireader.domain.services.tts_service.GradioTTSPresets.createCustomTemplate()
                         isEditDialogOpen = true
                     },
                     modifier = Modifier.fillMaxWidth()

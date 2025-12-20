@@ -13,10 +13,62 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import ireader.domain.data.engines.TranslateEngine
+import ireader.domain.plugins.TranslationPlugin
 import ireader.domain.usecases.translate.TranslationEngineSource
 import ireader.domain.usecases.translate.TranslationEnginesManager
+import ireader.i18n.UiText
 import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
+
+/**
+ * Wrapper class to adapt TranslationPlugin to TranslateEngine interface
+ * This allows plugin engines to be displayed alongside built-in engines
+ */
+class PluginTranslateEngineWrapper(
+    private val plugin: TranslationPlugin
+) : TranslateEngine() {
+    override val id: Long = plugin.manifest.id.hashCode().toLong()
+    override val engineName: String = plugin.manifest.name
+    override val supportsAI: Boolean = plugin.supportsAI
+    override val supportsContextAwareTranslation: Boolean = plugin.supportsContextAwareTranslation
+    override val supportsStylePreservation: Boolean = plugin.supportsStylePreservation
+    override val requiresApiKey: Boolean = plugin.requiresApiKey()
+    override val maxCharsPerRequest: Int = plugin.maxCharsPerRequest
+    override val rateLimitDelayMs: Long = plugin.rateLimitDelayMs
+    override val isOffline: Boolean = plugin.isOffline
+    
+    val pluginId: String = plugin.manifest.id
+    val manifest: ireader.plugin.api.PluginManifest = plugin.manifest
+    
+    /**
+     * Get the underlying plugin for configuration
+     */
+    fun getPlugin(): TranslationPlugin = plugin
+    
+    override val supportedLanguages: List<Pair<String, String>> = plugin.getAvailableLanguages()
+    
+    override suspend fun translate(
+        texts: List<String>,
+        source: String,
+        target: String,
+        onProgress: (Int) -> Unit,
+        onSuccess: (List<String>) -> Unit,
+        onError: (UiText) -> Unit
+    ) {
+        try {
+            val result = plugin.translateBatch(texts, source, target)
+            result.onSuccess { translations ->
+                onProgress(100)
+                onSuccess(translations)
+            }.onFailure { error ->
+                onError(UiText.ExceptionString(error as Exception))
+            }
+        } catch (e: Exception) {
+            onError(UiText.ExceptionString(e))
+        }
+    }
+}
 
 /**
  * Improved Translation Settings Screen with Gemini-first engine selection
@@ -34,12 +86,15 @@ fun TranslationSettingsScreenV2(
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
-    // Get engines
+    // Get all engines (built-in + plugins)
     val engineSources = translationEnginesManager.getAvailableEngines()
     val engines = engineSources.mapNotNull { source ->
         when (source) {
             is TranslationEngineSource.BuiltIn -> source.engine
-            else -> null
+            is TranslationEngineSource.Plugin -> {
+                // Create a wrapper engine for plugins
+                PluginTranslateEngineWrapper(source.plugin)
+            }
         }
     }
 
@@ -49,7 +104,10 @@ fun TranslationSettingsScreenV2(
     val isOpenAISelected = viewModel.translatorEngine.value == 2L
     val isDeepSeekSelected = viewModel.translatorEngine.value == 3L
     
-    // Show API key section for engines that need it (Gemini, OpenAI, DeepSeek)
+    // Check if current engine is a plugin
+    val isPluginEngine = currentEngine is PluginTranslateEngineWrapper
+    
+    // Show API key section for engines that need it (Gemini, OpenAI, DeepSeek, or plugin engines that require API key)
     val showApiKeySection = isGeminiSelected || isOpenAISelected || isDeepSeekSelected || 
                            (currentEngine?.requiresApiKey == true)
 
@@ -155,12 +213,14 @@ fun TranslationSettingsScreenV2(
                 }
             }
 
-            // Engine-Specific Configuration (Ollama, WebView logins)
+            // Engine-Specific Configuration (Ollama, WebView logins, Plugin configs)
             item(key = "engine_specific_config") {
                 EngineSpecificConfig(
                     engineId = viewModel.translatorEngine.value,
                     viewModel = viewModel,
-                    onNavigateToLogin = onNavigateToLogin
+                    onNavigateToLogin = onNavigateToLogin,
+                    currentPluginEngine = currentEngine as? PluginTranslateEngineWrapper,
+                    translationEnginesManager = translationEnginesManager
                 )
             }
 

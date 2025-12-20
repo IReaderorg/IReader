@@ -42,18 +42,13 @@ class TranslationEnginesManager(
     private val pluginManager: PluginManager? = null
 ) {
 
+    // Only keep essential built-in engines:
+    // - Google ML Kit (offline, default)
+    // - Gemini API (requires API key, for users who prefer Google's AI)
+    // Other engines are available as plugins from the Feature Store
     private val builtInEngines = listOf(
-        GoogleTranslateML(),
-        TranslateDictUseCase(httpClients),
-        OpenAITranslateEngine(httpClients, readerPreferences),
-        OllamaTranslateEngine(httpClients, readerPreferences),
-        DeepSeekTranslateEngine(httpClients, readerPreferences),
-        LibreTranslateEngine(httpClients),
-        FreeAITranslateEngine(httpClients),
-        WebscrapingTranslateEngine(httpClients, readerPreferences),
-        DeepSeekWebViewTranslateEngine(httpClients, readerPreferences),
-        // Create a WebscrapingTranslateEngine configured for Gemini
-        GeminiTranslateEngine(httpClients, readerPreferences)
+        GoogleTranslateML(),  // id=0, offline, default
+        GeminiTranslateEngine(httpClients, readerPreferences)  // id=8, requires API key
     )
     
     // Cache for translation results to improve performance
