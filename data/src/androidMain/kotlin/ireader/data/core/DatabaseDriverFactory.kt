@@ -31,7 +31,9 @@ actual class DatabaseDriverFactory constructor(
           super.onOpen(db)
           setPragma(db, "foreign_keys = ON")
           setPragma(db, "journal_mode = WAL")
-          setPragma(db, "synchronous = NORMAL")
+          // Use FULL synchronous mode to ensure data persists even if app is killed
+          // NORMAL mode can lose data in WAL mode if app crashes before checkpoint
+          setPragma(db, "synchronous = FULL")
         }
 
         private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {

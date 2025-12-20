@@ -17,20 +17,6 @@ import kotlin.time.ExperimentalTime
 /**
  * Aggregate for translation-related use cases.
  * Groups glossary and chapter translation operations.
- * 
- * Usage:
- * ```kotlin
- * class ReaderTranslationViewModel(
- *     private val translationUseCases: TranslationUseCases,
- *     // ... other deps
- * ) {
- *     fun translateChapter(chapter: Chapter) {
- *         translationUseCases.translateChapter.execute(...)
- *     }
- * }
- * ```
- * 
- * Requirements: 4.3 - TranslationUseCases aggregate groups translation operations
  */
 data class TranslationUseCases(
     val translateChapter: TranslateChapterWithStorageUseCase,
@@ -65,18 +51,7 @@ class SaveTranslatedChapterUseCase(
             createdAt = now,
             updatedAt = now
         )
-        
-        println("[SaveTranslatedChapterUseCase] Saving translation for chapter ${chapter.id}, book ${chapter.bookId}, engine $engineId, target $targetLanguage, content size: ${translatedContent.size}")
-        
-        try {
-            repository.upsertTranslatedChapter(translatedChapter)
-            println("[SaveTranslatedChapterUseCase] Translation saved successfully for chapter ${chapter.id}")
-        } catch (e: Exception) {
-            println("[SaveTranslatedChapterUseCase] ERROR saving translation: ${e.message}")
-            e.printStackTrace()
-            throw e
-        }
-        
+        repository.upsertTranslatedChapter(translatedChapter)
         return translatedChapter.chapterId
     }
 }
@@ -89,12 +64,9 @@ class GetTranslatedChapterUseCase(
         targetLanguage: String,
         engineId: Long
     ): TranslatedChapter? {
-        println("[GetTranslatedChapterUseCase] Getting translation for chapter $chapterId, target $targetLanguage (engineId $engineId ignored)")
-        val result = repository.getTranslatedChapter(chapterId, targetLanguage, engineId)
-        println("[GetTranslatedChapterUseCase] Result: ${if (result != null) "found with ${result.translatedContent.size} items" else "not found"}")
-        return result
+        return repository.getTranslatedChapter(chapterId, targetLanguage, engineId)
     }
-    
+
     /**
      * Get translation by chapter ID and target language only (ignores engine)
      */
@@ -102,12 +74,9 @@ class GetTranslatedChapterUseCase(
         chapterId: Long,
         targetLanguage: String
     ): TranslatedChapter? {
-        println("[GetTranslatedChapterUseCase] getByChapterAndLanguage for chapter $chapterId, target $targetLanguage")
-        val result = repository.getTranslatedChapterByLanguage(chapterId, targetLanguage)
-        println("[GetTranslatedChapterUseCase] Result: ${if (result != null) "found with ${result.translatedContent.size} items" else "not found"}")
-        return result
+        return repository.getTranslatedChapterByLanguage(chapterId, targetLanguage)
     }
-    
+
     /**
      * Get all translations for a chapter regardless of engine or language
      */
@@ -122,7 +91,7 @@ class DeleteTranslatedChapterUseCase(
     suspend fun execute(chapterId: Long) {
         repository.deleteTranslatedChaptersByChapterId(chapterId)
     }
-    
+
     suspend fun executeForBook(bookId: Long) {
         repository.deleteTranslatedChaptersByBookId(bookId)
     }
@@ -142,15 +111,15 @@ class ApplyGlossaryToTextUseCase {
         glossaryMap: Map<String, String>
     ): String {
         if (glossaryMap.isEmpty()) return text
-        
+
         var result = text
-        
+
         // Sort by length descending to replace longer terms first (prevents partial replacements)
         val sortedEntries = glossaryMap.entries.sortedByDescending { it.key.length }
-        
+
         for ((source, target) in sortedEntries) {
             if (source.isBlank()) continue
-            
+
             try {
                 // Try with word boundaries first (works for Latin scripts)
                 val withBoundaries = Regex("\\b${Regex.escape(source)}\\b", RegexOption.IGNORE_CASE)
@@ -158,7 +127,6 @@ class ApplyGlossaryToTextUseCase {
                     result = withBoundaries.replace(result, target)
                 } else {
                     // Fallback: simple case-insensitive replacement (works for all scripts)
-                    // This is useful for Asian languages where word boundaries don't work
                     result = result.replace(source, target, ignoreCase = true)
                 }
             } catch (e: Exception) {
@@ -166,16 +134,16 @@ class ApplyGlossaryToTextUseCase {
                 result = result.replace(source, target, ignoreCase = true)
             }
         }
-        
+
         return result
     }
-    
+
     fun applyToPages(
         pages: List<Page>,
         glossaryMap: Map<String, String>
     ): List<Page> {
         if (glossaryMap.isEmpty()) return pages
-        
+
         return pages.map { page ->
             when (page) {
                 is Text -> Text(execute(page.text, glossaryMap))

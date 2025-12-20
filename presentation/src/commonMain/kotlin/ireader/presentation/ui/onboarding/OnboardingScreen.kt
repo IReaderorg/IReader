@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.core.theme.AppLocales
@@ -189,10 +190,12 @@ private fun WelcomeLanguagePage(
         showContent = true
     }
     
+    val navigationBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = max(24.dp, navigationBarPadding)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -424,11 +427,13 @@ private fun StorageSetupPage(
         }
     }
     
+    val navigationBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = max(24.dp, navigationBarPadding)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(24.dp))
@@ -670,8 +675,6 @@ private fun StorageSetupPage(
                 }
             }
         }
-        
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -742,11 +745,13 @@ private fun DevServerPage(
         showContent = true
     }
     
+    val navigationBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = max(24.dp, navigationBarPadding)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(24.dp))
@@ -981,8 +986,6 @@ private fun DevServerPage(
                 }
             }
         }
-        
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

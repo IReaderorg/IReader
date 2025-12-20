@@ -145,11 +145,26 @@ SELECT chapter._id,book_id,url,name,scanlator,read,bookmark, last_page_read,chap
         ORDER BY last_read DESC
         LIMIT 1;
 
--- Legacy upsert replaced with INSERT OR REPLACE for SQLite 3.22 compatibility (Android 9)
--- Note: INSERT OR REPLACE will delete and re-insert, preserving the _id if provided
+-- Safe upsert that doesn't trigger ON DELETE CASCADE
+-- Uses INSERT ... ON CONFLICT DO UPDATE (SQLite 3.24+, Android 10+)
+-- For older devices, the repository implementation handles the fallback
 upsert:
-INSERT OR REPLACE INTO chapter(_id, book_id, url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order, date_fetch, date_upload, content, type) 
-VALUES (:id, :bookId, :key, :name, :translator, :read, :bookmark, :last_page_read, :chapter_number, :source_order, :date_fetch, :date_upload, :content, :type);
+INSERT INTO chapter(_id, book_id, url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order, date_fetch, date_upload, content, type) 
+VALUES (:id, :bookId, :key, :name, :translator, :read, :bookmark, :last_page_read, :chapter_number, :source_order, :date_fetch, :date_upload, :content, :type)
+ON CONFLICT(_id) DO UPDATE SET
+    book_id = excluded.book_id,
+    url = excluded.url,
+    name = excluded.name,
+    scanlator = excluded.scanlator,
+    read = excluded.read,
+    bookmark = excluded.bookmark,
+    last_page_read = excluded.last_page_read,
+    chapter_number = excluded.chapter_number,
+    source_order = excluded.source_order,
+    date_fetch = excluded.date_fetch,
+    date_upload = excluded.date_upload,
+    content = excluded.content,
+    type = excluded.type;
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID() AS Long;

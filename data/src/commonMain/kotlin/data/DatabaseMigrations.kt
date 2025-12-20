@@ -13,7 +13,7 @@ object DatabaseMigrations {
     /**
      * Current database schema version. Increment this when adding new migrations.
      */
-    const val CURRENT_VERSION = 27
+    const val CURRENT_VERSION = 28
     
     /**
      * Applies all necessary migrations to bring the database from [oldVersion] to [CURRENT_VERSION]
@@ -92,6 +92,7 @@ object DatabaseMigrations {
             24 -> migrateV24toV25(driver)
             25 -> migrateV25toV26(driver)
             26 -> migrateV26toV27(driver)
+            27 -> migrateV27toV28(driver)
             // Add more migration cases as the database evolves
         }
     }
@@ -1977,6 +1978,119 @@ object DatabaseMigrations {
             
         } catch (e: Exception) {
             Logger.logMigrationError(27, e)
+        }
+    }
+    
+    /**
+     * Migration from version 27 to version 28
+     * Fixes translated_chapter table UNIQUE constraint to be (chapter_id, target_language) only
+     * Previously was (chapter_id, target_language, translator_engine_id) which caused issues
+     * when loading translations regardless of which engine created them.
+     */
+    private fun migrateV27toV28(driver: SqlDriver) {
+        try {
+            Logger.logMigrationStart(27, 28)
+            
+            // Check if translated_chapter table exists
+            var tableExists = false
+            driver.executeQuery(
+                identifier = null,
+                sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='translated_chapter'",
+                mapper = { cursor ->
+                    val result = cursor.next()
+                    tableExists = result.value
+                    result
+                },
+                parameters = 0
+            )
+            
+            if (!tableExists) {
+                Logger.logDebug("translated_chapter table doesn't exist, creating fresh")
+                
+                // Create the table with correct schema
+                val createTableSql = """
+                    CREATE TABLE IF NOT EXISTS translated_chapter(
+                        _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        chapter_id INTEGER NOT NULL,
+                        book_id INTEGER NOT NULL,
+                        source_language TEXT NOT NULL,
+                        target_language TEXT NOT NULL,
+                        translator_engine_id INTEGER NOT NULL,
+                        translated_content TEXT NOT NULL,
+                        created_at INTEGER NOT NULL,
+                        updated_at INTEGER NOT NULL,
+                        FOREIGN KEY(chapter_id) REFERENCES chapter (_id) ON DELETE CASCADE,
+                        FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
+                        UNIQUE(chapter_id, target_language)
+                    );
+                """.trimIndent()
+                driver.execute(null, createTableSql, 0)
+                
+                // Create indexes
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_chapter_id_index ON translated_chapter(chapter_id);", 0)
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_book_id_index ON translated_chapter(book_id);", 0)
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_target_language_index ON translated_chapter(target_language);", 0)
+                
+                Logger.logTableCreated("translated_chapter")
+            } else {
+                Logger.logDebug("Migrating translated_chapter table to new schema")
+                
+                // SQLite doesn't support ALTER TABLE to change constraints
+                // We need to recreate the table
+                
+                // 1. Create new table with correct schema
+                val createNewTableSql = """
+                    CREATE TABLE translated_chapter_new(
+                        _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        chapter_id INTEGER NOT NULL,
+                        book_id INTEGER NOT NULL,
+                        source_language TEXT NOT NULL,
+                        target_language TEXT NOT NULL,
+                        translator_engine_id INTEGER NOT NULL,
+                        translated_content TEXT NOT NULL,
+                        created_at INTEGER NOT NULL,
+                        updated_at INTEGER NOT NULL,
+                        FOREIGN KEY(chapter_id) REFERENCES chapter (_id) ON DELETE CASCADE,
+                        FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
+                        UNIQUE(chapter_id, target_language)
+                    );
+                """.trimIndent()
+                driver.execute(null, createNewTableSql, 0)
+                
+                // 2. Copy data, keeping only the most recent translation per chapter+language
+                val copyDataSql = """
+                    INSERT INTO translated_chapter_new 
+                    SELECT t1._id, t1.chapter_id, t1.book_id, t1.source_language, t1.target_language,
+                           t1.translator_engine_id, t1.translated_content, t1.created_at, t1.updated_at
+                    FROM translated_chapter t1
+                    INNER JOIN (
+                        SELECT chapter_id, target_language, MAX(updated_at) as max_updated
+                        FROM translated_chapter
+                        GROUP BY chapter_id, target_language
+                    ) t2 ON t1.chapter_id = t2.chapter_id 
+                        AND t1.target_language = t2.target_language 
+                        AND t1.updated_at = t2.max_updated;
+                """.trimIndent()
+                driver.execute(null, copyDataSql, 0)
+                
+                // 3. Drop old table
+                driver.execute(null, "DROP TABLE translated_chapter;", 0)
+                
+                // 4. Rename new table
+                driver.execute(null, "ALTER TABLE translated_chapter_new RENAME TO translated_chapter;", 0)
+                
+                // 5. Recreate indexes
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_chapter_id_index ON translated_chapter(chapter_id);", 0)
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_book_id_index ON translated_chapter(book_id);", 0)
+                driver.execute(null, "CREATE INDEX IF NOT EXISTS translated_chapter_target_language_index ON translated_chapter(target_language);", 0)
+                
+                Logger.logDebug("Migrated translated_chapter table with new UNIQUE constraint")
+            }
+            
+            Logger.logMigrationSuccess(28)
+            
+        } catch (e: Exception) {
+            Logger.logMigrationError(28, e)
         }
     }
 

@@ -1,5 +1,14 @@
 package ireader.presentation.ui.settings.badges.nft
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -15,23 +24,35 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.Diamond
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -46,40 +67,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.remote.Badge
-import ireader.i18n.resources.Res
-import ireader.i18n.resources.badge_granted_immediately_upon_successful
-import ireader.i18n.resources.cache_expires
-import ireader.i18n.resources.contract_address
-import ireader.i18n.resources.dont_have_an_ireader_nft
-import ireader.i18n.resources.enter_your_ethereum_wallet_address_1
-import ireader.i18n.resources.last_verified
-import ireader.i18n.resources.navigate_back
-import ireader.i18n.resources.nft_badge
-import ireader.i18n.resources.nft_information
-import ireader.i18n.resources.no_nft_found
-import ireader.i18n.resources.purchase_from_our_official_marketplace
-import ireader.i18n.resources.this_wallet_does_not_own_an_ireader_nft
-import ireader.i18n.resources.verification_details
-import ireader.i18n.resources.verification_is_automatic_and_takes_a_few_seconds
-import ireader.i18n.resources.verification_is_cached_for_24
-import ireader.i18n.resources.verifying_nft_ownership
-import ireader.i18n.resources.visit_marketplace
-import ireader.i18n.resources.wallet_address
-import ireader.i18n.resources.wallet_placeholder
-import ireader.i18n.resources.you_own_an_ireader_nft
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.badges.BadgeIcon
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -89,6 +90,9 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import ireader.domain.utils.extensions.currentTimeToLong
 
+private const val NFT_MARKETPLACE_URL = "https://nftbaz.com/asset/matic/0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc/0"
+private const val NFT_CONTRACT_ADDRESS = "0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NFTBadgeScreen(
@@ -97,33 +101,26 @@ fun NFTBadgeScreen(
     onOpenUrl: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    
-    // Show error snackbar
+    val clipboardManager = LocalClipboardManager.current
+
     LaunchedEffect(state.error) {
         state.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
+            snackbarHostState.showSnackbar(message = error, duration = SnackbarDuration.Short)
             viewModel.clearError()
         }
     }
-    
+
     IScaffold(
         modifier = modifier,
         snackbarHostState = snackbarHostState,
         topBar = { scrollBehavior ->
             TopAppBar(
-                title = { Text(localizeHelper.localize(Res.string.nft_badge)) },
+                title = { Text("NFT Badge") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = localizeHelper.localize(Res.string.navigate_back)
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 scrollBehavior = scrollBehavior
@@ -136,323 +133,133 @@ fun NFTBadgeScreen(
                 .padding(paddingValues)
         ) {
             when {
-                state.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                state.isLoading -> LoadingState()
                 else -> {
-                    // Desktop optimization: Max content width and center
-                    val maxContentWidth = 800.dp
-                    
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.TopCenter
                     ) {
                         Column(
                             modifier = Modifier
-                                .widthIn(max = maxContentWidth)
+                                .widthIn(max = 600.dp)
                                 .fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
                                 .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            verticalArrangement = Arrangement.spacedBy(20.dp)
                         ) {
-                        // Show different UI based on verification status
-                        when {
-                            // No wallet saved - show input
-                            state.walletAddress == null -> {
-                                WalletAddressInput(
-                                    currentAddress = null,
-                                    onAddressSubmit = { viewModel.onSaveWalletAddress(it) },
-                                    isVerifying = state.isVerifying,
-                                    error = state.error
-                                )
-                            }
-                            // Wallet saved and NFT owned - show badge display
-                            state.verificationStatus?.ownsNFT == true && state.nftBadge != null -> {
-                                NFTBadgeOwnershipDisplay(
-                                    nftBadge = state.nftBadge!!,
-                                    lastVerified = state.lastVerified ?: 0L,
-                                    cacheExpiresAt = state.cacheExpiresAt ?: 0L,
-                                    onReVerify = { viewModel.onVerifyOwnership() },
-                                    isVerifying = state.isVerifying
-                                )
-                            }
-                            // Wallet saved but no NFT - show marketplace link
-                            else -> {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    // Show wallet address
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                                        )
-                                    ) {
-                                        Column(
-                                            modifier = Modifier.padding(16.dp)
-                                        ) {
-                                            Text(
-                                                text = localizeHelper.localize(Res.string.wallet_address),
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            Text(
-                                                text = state.walletAddress ?: "",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    }
-                                    
-                                    // Verification status
-                                    if (state.verificationStatus != null) {
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.errorContainer
-                                            )
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Warning,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onErrorContainer
-                                                )
-                                                Spacer(modifier = Modifier.width(12.dp))
-                                                Column {
-                                                    Text(
-                                                        text = localizeHelper.localize(Res.string.no_nft_found),
-                                                        style = MaterialTheme.typography.titleMedium,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.onErrorContainer
-                                                    )
-                                                    Text(
-                                                        text = localizeHelper.localize(Res.string.this_wallet_does_not_own_an_ireader_nft),
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        color = MaterialTheme.colorScheme.onErrorContainer
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    // Re-verify button
-                                    Button(
-                                        onClick = { viewModel.onVerifyOwnership() },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        enabled = !state.isVerifying
-                                    ) {
-                                        if (state.isVerifying) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(16.dp),
-                                                strokeWidth = 2.dp,
-                                                color = MaterialTheme.colorScheme.onPrimary
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                        }
-                                        Text(if (state.isVerifying) "Verifying..." else "Re-verify Ownership")
-                                    }
-                                    
-                                    // Marketplace link
-                                    NFTMarketplaceLink(
-                                        onOpenMarketplace = {
-                                            val url = viewModel.onOpenMarketplace()
-                                            onOpenUrl(url)
-                                        }
+                            // Hero Section
+                            NFTHeroSection()
+
+                            when {
+                                state.walletAddress == null -> {
+                                    WalletInputSection(
+                                        onAddressSubmit = viewModel::onSaveWalletAddress,
+                                        isVerifying = state.isVerifying,
+                                        error = state.error
+                                    )
+                                }
+                                state.verificationStatus?.ownsNFT == true && state.nftBadge != null -> {
+                                    NFTOwnerSection(
+                                        nftBadge = state.nftBadge!!,
+                                        walletAddress = state.walletAddress!!,
+                                        lastVerified = state.lastVerified ?: 0L,
+                                        cacheExpiresAt = state.cacheExpiresAt ?: 0L,
+                                        onReVerify = viewModel::onVerifyOwnership,
+                                        isVerifying = state.isVerifying,
+                                        onCopyAddress = { clipboardManager.setText(AnnotatedString(it)) }
+                                    )
+                                }
+                                else -> {
+                                    NoNFTSection(
+                                        walletAddress = state.walletAddress!!,
+                                        onReVerify = viewModel::onVerifyOwnership,
+                                        isVerifying = state.isVerifying,
+                                        onOpenMarketplace = { onOpenUrl(NFT_MARKETPLACE_URL) },
+                                        onCopyAddress = { clipboardManager.setText(AnnotatedString(it)) }
                                     )
                                 }
                             }
-                        }
+
+                            // Marketplace CTA (always visible)
+                            MarketplaceCTASection(onOpenMarketplace = { onOpenUrl(NFT_MARKETPLACE_URL) })
+
+                            // Info Section
+                            NFTInfoSection(onCopyContract = { clipboardManager.setText(AnnotatedString(NFT_CONTRACT_ADDRESS)) })
                         }
                     }
                 }
             }
-            
-            // Loading overlay when verifying
-            if (state.isVerifying && state.walletAddress != null) {
+
+            // Verification overlay
+            AnimatedVisibility(
+                visible = state.isVerifying && state.walletAddress != null,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                VerificationOverlay()
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun NFTHeroSection() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        ),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                        )
+                    )
+                )
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Card(
-                        modifier = Modifier.padding(32.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator()
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = localizeHelper.localize(Res.string.verifying_nft_ownership),
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun WalletAddressInput(
-    currentAddress: String?,
-    onAddressSubmit: (String) -> Unit,
-    isVerifying: Boolean,
-    error: String?,
-    modifier: Modifier = Modifier
-) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    var address by remember { mutableStateOf(currentAddress ?: "") }
-    var validationError by remember { mutableStateOf<String?>(null) }
-    
-    // Desktop optimization: Larger text field width
-    val textFieldMinWidth = 400.dp
-    
-    Column(
-        modifier = modifier.fillMaxWidth()
-            .onKeyEvent { keyEvent ->
-                // Desktop keyboard navigation: Enter to submit
-                if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyDown && 
-                    !isVerifying && address.isNotBlank()) {
-                    val ethereumAddressRegex = Regex("^0x[a-fA-F0-9]{40}$")
-                    if (ethereumAddressRegex.matches(address)) {
-                        onAddressSubmit(address)
-                        true
-                    } else {
-                        false
-                    }
-                } else {
-                    false
-                }
-            },
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Explanatory text
-        Text(
-            text = localizeHelper.localize(Res.string.enter_your_ethereum_wallet_address_1),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        
-        // Wallet address input
-        OutlinedTextField(
-            value = address,
-            onValueChange = {
-                address = it
-                validationError = null
-            },
-            label = { Text(localizeHelper.localize(Res.string.wallet_address)) },
-            placeholder = { Text(localizeHelper.localize(Res.string.wallet_placeholder)) },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.AccountBalanceWallet,
-                    contentDescription = null
-                )
-            },
-            isError = validationError != null || error != null,
-            supportingText = {
-                (validationError ?: error)?.let {
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colorScheme.error
+                    Icon(
+                        Icons.Outlined.Diamond,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .widthIn(min = textFieldMinWidth),
-            singleLine = true,
-            enabled = !isVerifying
-        )
-        
-        // Verify button with hover effect
-        val verifyButtonInteractionSource = remember { MutableInteractionSource() }
-        val isVerifyButtonHovered by verifyButtonInteractionSource.collectIsHoveredAsState()
-        
-        Button(
-            onClick = {
-                // Validate Ethereum address format
-                val ethereumAddressRegex = Regex("^0x[a-fA-F0-9]{40}$")
-                if (address.isBlank()) {
-                    validationError = "Please enter a wallet address"
-                } else if (!ethereumAddressRegex.matches(address)) {
-                    validationError = "Invalid Ethereum address format"
-                } else {
-                    onAddressSubmit(address)
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .hoverable(verifyButtonInteractionSource)
-                .pointerHoverIcon(PointerIcon.Hand),
-            enabled = !isVerifying && address.isNotBlank(),
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = if (isVerifyButtonHovered) 4.dp else 2.dp
-            )
-        ) {
-            if (isVerifying) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(16.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            Text(if (isVerifying) "Verifying..." else "Verify Ownership")
-        }
-        
-        // Info card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = localizeHelper.localize(Res.string.nft_information),
-                    style = MaterialTheme.typography.titleMedium,
+                    "IReader NFT Collection",
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                
-                Text(
-                    text = localizeHelper.localize(Res.string.contract_address),
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = localizeHelper.localize(Res.string.wallet_placeholder),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                )
-                
                 Spacer(modifier = Modifier.height(4.dp))
-                
                 Text(
-                    text = localizeHelper.localize(Res.string.verification_is_automatic_and_takes_a_few_seconds),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = localizeHelper.localize(Res.string.badge_granted_immediately_upon_successful),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    "Exclusive benefits for NFT holders",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -460,270 +267,549 @@ fun WalletAddressInput(
 }
 
 @Composable
-fun NFTBadgeOwnershipDisplay(
+private fun WalletInputSection(
+    onAddressSubmit: (String) -> Unit,
+    isVerifying: Boolean,
+    error: String?
+) {
+    var address by remember { mutableStateOf("") }
+    var validationError by remember { mutableStateOf<String?>(null) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Outlined.AccountBalanceWallet,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    "Connect Your Wallet",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Text(
+                "Enter your Ethereum wallet address to verify NFT ownership and unlock exclusive features.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            OutlinedTextField(
+                value = address,
+                onValueChange = {
+                    address = it
+                    validationError = null
+                },
+                label = { Text("Wallet Address") },
+                placeholder = { Text("0x...") },
+                leadingIcon = {
+                    Icon(Icons.Outlined.AccountBalanceWallet, contentDescription = null)
+                },
+                isError = validationError != null || error != null,
+                supportingText = {
+                    (validationError ?: error)?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                enabled = !isVerifying,
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            Button(
+                onClick = {
+                    val ethereumAddressRegex = Regex("^0x[a-fA-F0-9]{40}$")
+                    when {
+                        address.isBlank() -> validationError = "Please enter a wallet address"
+                        !ethereumAddressRegex.matches(address) -> validationError = "Invalid Ethereum address format"
+                        else -> onAddressSubmit(address)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isVerifying && address.isNotBlank(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (isVerifying) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text(if (isVerifying) "Verifying..." else "Verify Ownership")
+            }
+        }
+    }
+}
+
+@Composable
+private fun NFTOwnerSection(
     nftBadge: Badge,
+    walletAddress: String,
     lastVerified: Long,
     cacheExpiresAt: Long,
     onReVerify: () -> Unit,
     isVerifying: Boolean,
-    modifier: Modifier = Modifier
+    onCopyAddress: (String) -> Unit
 ) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val currentTime = currentTimeToLong()
-    val isExpiringSoon = (cacheExpiresAt - currentTime) < (6 * 60 * 60 * 1000L) // Less than 6 hours
-    
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    val isExpiringSoon = (cacheExpiresAt - currentTime) < (6 * 60 * 60 * 1000L)
+
+    // Success Card
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF1B5E20).copy(alpha = 0.1f)
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        // Success message
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF4CAF50).copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.CheckCircle,
+                    Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
+                    tint = Color(0xFF4CAF50),
+                    modifier = Modifier.size(28.dp)
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
                 Text(
-                    text = localizeHelper.localize(Res.string.you_own_an_ireader_nft),
-                    style = MaterialTheme.typography.titleLarge,
+                    "NFT Verified!",
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = Color(0xFF2E7D32)
+                )
+                Text(
+                    "You own an IReader NFT",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF388E3C)
                 )
             }
         }
-        
-        // Large NFT badge display
-        BadgeIcon(
-            badge = nftBadge,
-            size = 128.dp,
-            showAnimation = true
-        )
-        
-        // Badge name and description
-        Text(
-            text = nftBadge.name,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        
-        Text(
-            text = nftBadge.description,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-        
-        // Verification details card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isExpiringSoon) {
-                    MaterialTheme.colorScheme.tertiaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                }
-            )
+    }
+
+    // Badge Display
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            BadgeIcon(badge = nftBadge, size = 100.dp, showAnimation = true)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                nftBadge.name,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                nftBadge.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+
+    // Wallet Info
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Text("Connected Wallet", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                IconButton(onClick = { onCopyAddress(walletAddress) }, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(16.dp))
+                }
+            }
+            Text(
+                walletAddress,
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Last Verified", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(formatTimestamp(lastVerified), style = MaterialTheme.typography.bodySmall)
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Expires", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    formatTimestamp(cacheExpiresAt),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isExpiringSoon) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+
+    // Re-verify Button
+    OutlinedButton(
+        onClick = onReVerify,
+        modifier = Modifier.fillMaxWidth(),
+        enabled = !isVerifying,
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(if (isVerifying) "Verifying..." else "Re-verify Ownership")
+    }
+}
+
+@Composable
+private fun NoNFTSection(
+    walletAddress: String,
+    onReVerify: () -> Unit,
+    isVerifying: Boolean,
+    onOpenMarketplace: () -> Unit,
+    onCopyAddress: (String) -> Unit
+) {
+    // Warning Card
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    "No NFT Found",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+                Text(
+                    "This wallet doesn't own an IReader NFT",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+                )
+            }
+        }
+    }
+
+    // Wallet Info
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Connected Wallet", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                IconButton(onClick = { onCopyAddress(walletAddress) }, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(16.dp))
+                }
+            }
+            Text(
+                walletAddress,
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+
+    // Action Buttons
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        OutlinedButton(
+            onClick = onReVerify,
+            modifier = Modifier.weight(1f),
+            enabled = !isVerifying,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(if (isVerifying) "..." else "Re-verify")
+        }
+        Button(
+            onClick = onOpenMarketplace,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(Icons.Outlined.ShoppingCart, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Get NFT")
+        }
+    }
+}
+
+
+@Composable
+private fun MarketplaceCTASection(onOpenMarketplace: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isHovered) 1.02f else 1f,
+        animationSpec = tween(150)
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale)
+            .hoverable(interactionSource)
+            .pointerHoverIcon(PointerIcon.Hand),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        ),
+        shape = RoundedCornerShape(16.dp),
+        onClick = onOpenMarketplace
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Outlined.Diamond,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        "Get Your NFT",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Text(
+                        "Visit NFTBaz Marketplace",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    )
+                }
+            }
+            Icon(
+                Icons.Default.OpenInNew,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun NFTInfoSection(onCopyContract: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Outlined.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    "NFT Information",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+            // Contract Address
+            Column {
+                Text(
+                    "Contract Address (Polygon)",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = localizeHelper.localize(Res.string.verification_details),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        NFT_CONTRACT_ADDRESS.take(20) + "..." + NFT_CONTRACT_ADDRESS.takeLast(6),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium
                     )
-                    
-                    // Status indicator
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (isExpiringSoon) {
-                            MaterialTheme.colorScheme.tertiary
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        }
-                    ) {
-                        Text(
-                            text = if (isExpiringSoon) "Expiring Soon" else "Valid",
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isExpiringSoon) {
-                                MaterialTheme.colorScheme.onTertiary
-                            } else {
-                                MaterialTheme.colorScheme.onPrimary
-                            }
-                        )
+                    IconButton(onClick = onCopyContract, modifier = Modifier.size(28.dp)) {
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(14.dp))
                     }
                 }
-                
-                Divider()
-                
-                // Last verified
+            }
+
+            // Benefits
+            Column {
+                Text(
+                    "NFT Holder Benefits",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                BenefitItem("Exclusive NFT badge on your profile")
+                BenefitItem("Early access to new features")
+                BenefitItem("Priority support")
+                BenefitItem("Ad-free experience")
+            }
+
+            // Verification Info
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(8.dp)
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = localizeHelper.localize(Res.string.last_verified),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
+                    Icon(
+                        Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = formatTimestamp(lastVerified),
-                        style = MaterialTheme.typography.bodyMedium,
+                        "Verification is cached for 24 hours",
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
-                // Cache expires
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = localizeHelper.localize(Res.string.cache_expires),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = formatTimestamp(cacheExpiresAt),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = if (isExpiringSoon) {
-                            MaterialTheme.colorScheme.tertiary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                }
             }
-        }
-        
-        // Re-verify button
-        Button(
-            onClick = onReVerify,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isVerifying
-        ) {
-            if (isVerifying) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(16.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            Text(if (isVerifying) "Re-verifying..." else "Re-verify Ownership")
-        }
-        
-        // Info text
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
-        ) {
-            Text(
-                text = localizeHelper.localize(Res.string.verification_is_cached_for_24),
-                modifier = Modifier.padding(16.dp),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun NFTMarketplaceLink(
-    onOpenMarketplace: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
+private fun BenefitItem(text: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        Box(
+            modifier = Modifier
+                .size(6.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+private fun VerificationOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.ShoppingCart,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(32.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
+                CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = localizeHelper.localize(Res.string.dont_have_an_ireader_nft),
+                    "Verifying NFT Ownership",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    fontWeight = FontWeight.SemiBold
                 )
-            }
-            
-            Text(
-                text = localizeHelper.localize(Res.string.purchase_from_our_official_marketplace),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-            
-            // Desktop hover effect for marketplace button
-            val marketplaceButtonInteractionSource = remember { MutableInteractionSource() }
-            val isMarketplaceButtonHovered by marketplaceButtonInteractionSource.collectIsHoveredAsState()
-            
-            Button(
-                onClick = onOpenMarketplace,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .hoverable(marketplaceButtonInteractionSource)
-                    .pointerHoverIcon(PointerIcon.Hand),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = if (isMarketplaceButtonHovered) 4.dp else 2.dp
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    "Checking blockchain...",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ShoppingCart,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(localizeHelper.localize(Res.string.visit_marketplace))
             }
         }
     }
 }
 
-/**
- * Format timestamp to human-readable date/time string
- */
 @OptIn(ExperimentalTime::class)
 private fun formatTimestamp(timestamp: Long): String {
     return try {

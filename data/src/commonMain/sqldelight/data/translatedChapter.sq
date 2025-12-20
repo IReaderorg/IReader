@@ -6,6 +6,8 @@ import kotlin.Int;
 import ireader.core.source.model.Page;
 import kotlin.collections.List;
 
+-- Translation table: stores translated chapter content
+-- Key design: ONE translation per chapter+language (engine is just metadata)
 CREATE TABLE IF NOT EXISTS translated_chapter(
     _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     chapter_id INTEGER NOT NULL,
@@ -18,12 +20,66 @@ CREATE TABLE IF NOT EXISTS translated_chapter(
     updated_at INTEGER AS Long NOT NULL,
     FOREIGN KEY(chapter_id) REFERENCES chapter (_id) ON DELETE CASCADE,
     FOREIGN KEY(book_id) REFERENCES book (_id) ON DELETE CASCADE,
-    UNIQUE(chapter_id, target_language, translator_engine_id)
+    UNIQUE(chapter_id, target_language)
 );
 
 CREATE INDEX IF NOT EXISTS translated_chapter_chapter_id_index ON translated_chapter(chapter_id);
 CREATE INDEX IF NOT EXISTS translated_chapter_book_id_index ON translated_chapter(book_id);
+CREATE INDEX IF NOT EXISTS translated_chapter_target_language_index ON translated_chapter(target_language);
 
+-- Get translation by chapter and language (primary query - ignores engine)
+getByChapterAndLanguage:
+SELECT * FROM translated_chapter 
+WHERE chapter_id = :chapterId 
+AND target_language = :targetLanguage
+LIMIT 1;
+
+-- Get all translations for a chapter (any language)
+getAllForChapter:
+SELECT * FROM translated_chapter 
+WHERE chapter_id = :chapterId
+ORDER BY updated_at DESC;
+
+-- Get all translations for a book
+getByBookId:
+SELECT * FROM translated_chapter 
+WHERE book_id = :bookId
+ORDER BY chapter_id ASC;
+
+-- Check if translation exists (fast check without loading content)
+existsForChapter:
+SELECT COUNT(*) > 0 FROM translated_chapter 
+WHERE chapter_id = :chapterId 
+AND target_language = :targetLanguage;
+
+-- Insert or update translation (upsert)
+-- If translation exists for chapter+language, update it; otherwise insert
+upsert:
+INSERT OR REPLACE INTO translated_chapter(
+    chapter_id, book_id, source_language, target_language,
+    translator_engine_id, translated_content, created_at, updated_at
+) VALUES (
+    :chapterId, :bookId, :sourceLanguage, :targetLanguage,
+    :translatorEngineId, :translatedContent, :createdAt, :updatedAt
+);
+
+-- Delete translation for a chapter+language
+deleteByChapterAndLanguage:
+DELETE FROM translated_chapter 
+WHERE chapter_id = :chapterId 
+AND target_language = :targetLanguage;
+
+-- Delete all translations for a chapter
+deleteByChapterId:
+DELETE FROM translated_chapter 
+WHERE chapter_id = :chapterId;
+
+-- Delete all translations for a book
+deleteByBookId:
+DELETE FROM translated_chapter 
+WHERE book_id = :bookId;
+
+-- Legacy queries for backward compatibility
 getTranslatedChapterById:
 SELECT * FROM translated_chapter WHERE _id = :id;
 
@@ -31,14 +87,12 @@ getTranslatedChapterByChapterId:
 SELECT * FROM translated_chapter 
 WHERE chapter_id = :chapterId 
 AND target_language = :targetLanguage
-ORDER BY updated_at DESC
 LIMIT 1;
 
 getTranslatedChapterByChapterIdAndLanguage:
 SELECT * FROM translated_chapter 
 WHERE chapter_id = :chapterId 
 AND target_language = :targetLanguage
-ORDER BY updated_at DESC
 LIMIT 1;
 
 getTranslatedChaptersByBookId:
@@ -56,9 +110,6 @@ DELETE FROM translated_chapter WHERE chapter_id = :chapterId;
 deleteTranslatedChaptersByBookId:
 DELETE FROM translated_chapter WHERE book_id = :bookId;
 
-deleteByChapterAndLanguage:
-DELETE FROM translated_chapter WHERE chapter_id = :chapterId AND target_language = :targetLanguage;
-
 insert:
 INSERT INTO translated_chapter(
     chapter_id, book_id, source_language, target_language, 
@@ -74,12 +125,6 @@ UPDATE translated_chapter
 SET translated_content = :translatedContent,
     updated_at = :updatedAt
 WHERE _id = :id;
-
--- Legacy upsert replaced for SQLite 3.22 compatibility (Android 9)
--- Note: Uses UNIQUE(chapter_id, target_language, translator_engine_id) constraint
-upsert:
-INSERT OR REPLACE INTO translated_chapter(chapter_id, book_id, source_language, target_language, translator_engine_id, translated_content, created_at, updated_at) 
-VALUES (:chapterId, :bookId, :sourceLanguage, :targetLanguage, :translatorEngineId, :translatedContent, :createdAt, :updatedAt);
 
 selectLastInsertedRowId:
 SELECT LAST_INSERT_ROWID() AS Long;
