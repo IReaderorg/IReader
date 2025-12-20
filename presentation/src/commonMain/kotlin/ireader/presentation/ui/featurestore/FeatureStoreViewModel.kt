@@ -265,6 +265,8 @@ class FeatureStoreViewModel(
                     isFromCache = false
                 )
                 applyFilters()
+                // Check for updates after loading plugins
+                checkForUpdates()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isLoading = false,
@@ -343,6 +345,8 @@ class FeatureStoreViewModel(
                     isFromCache = false
                 )
                 applyFilters()
+                // Check for updates after refreshing plugins
+                checkForUpdates()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isRefreshing = false,

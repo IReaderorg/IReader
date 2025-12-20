@@ -5,7 +5,7 @@ import ireader.core.log.Log
 import ireader.domain.models.tts.AudioData
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.preferences.prefs.AppPreferences
-import ireader.domain.services.tts_service.GradioTTSPresets
+import ireader.domain.services.tts_service.GradioTTSManager
 
 /**
  * Manager for AI TTS services
@@ -13,7 +13,8 @@ import ireader.domain.services.tts_service.GradioTTSPresets
  */
 actual class AITTSManager(
     private val context: Context,
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val gradioTTSManager: GradioTTSManager
 ) {
     
     private val providers = mutableMapOf<AITTSProvider, AITTSService>()
@@ -26,7 +27,8 @@ actual class AITTSManager(
         if (appPreferences.useGradioTTS().get()) {
             val configId = appPreferences.activeGradioConfigId().get()
             if (configId.isNotEmpty()) {
-                val config = GradioTTSPresets.getPresetById(configId)
+                // Use GradioTTSManager to get config (supports both presets and plugin configs)
+                val config = gradioTTSManager.getConfigByIdOrPreset(configId)
                 if (config != null && config.spaceUrl.isNotEmpty()) {
                     configureGradio(config.spaceUrl, config.apiKey)
                     Log.info { "Auto-configured Gradio TTS: ${config.name}" }

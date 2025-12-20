@@ -75,6 +75,7 @@ import ireader.domain.services.common.TranslationStatus
 import ireader.domain.services.tts_service.TTSChapterCache
 import ireader.domain.services.tts_service.TTSChapterDownloadManager
 import ireader.domain.services.tts_service.TTSTextMerger
+import ireader.domain.services.tts_service.GradioTTSManager
 import ireader.domain.services.tts_service.createTTSDownloadIntentProvider
 import ireader.domain.services.tts_service.v2.EngineType
 import ireader.domain.services.tts_service.v2.GradioConfig
@@ -164,6 +165,7 @@ class TTSV2ScreenSpec(
         val downloadManager: TTSChapterDownloadManager = koinInject()
         val chapterCache: TTSChapterCache = koinInject()
         val serviceStarter: TTSV2ServiceStarter = koinInject()
+        val gradioTTSManager: GradioTTSManager = koinInject()
         
         // Set up platform-specific intents for notification actions
         LaunchedEffect(Unit) {
@@ -406,7 +408,7 @@ class TTSV2ScreenSpec(
             // Configure Gradio TTS if enabled (only if not already configured)
             if (useGradioTTS && activeGradioConfigId.isNotEmpty() && !alreadyLoaded) {
                 Log.warn { "TTSV2ScreenSpec: Configuring Gradio TTS with config: $activeGradioConfigId" }
-                val gradioTTSConfig = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(activeGradioConfigId)
+                val gradioTTSConfig = gradioTTSManager.getConfigByIdOrPreset(activeGradioConfigId)
                 if (gradioTTSConfig != null) {
                     // Convert to v2 GradioConfig with original config for full functionality
                     val v2Config = GradioConfig(
@@ -496,7 +498,7 @@ class TTSV2ScreenSpec(
             Log.warn { "TTSV2ScreenSpec: Gradio settings changed - config=$activeGradioConfigId, useGradio=$useGradioTTS" }
             
             if (useGradioTTS && activeGradioConfigId.isNotEmpty()) {
-                val gradioTTSConfig = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(activeGradioConfigId)
+                val gradioTTSConfig = gradioTTSManager.getConfigByIdOrPreset(activeGradioConfigId)
                 if (gradioTTSConfig != null) {
                     val v2Config = GradioConfig(
                         id = gradioTTSConfig.id,
@@ -1215,7 +1217,7 @@ class TTSV2ScreenSpec(
                                     scope.launch { appPreferences.useGradioTTS().set(enabled) }
                                     if (enabled) {
                                         // Set Gradio config before switching engine
-                                        val gradioTTSConfig = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(activeGradioConfigId)
+                                        val gradioTTSConfig = gradioTTSManager.getConfigByIdOrPreset(activeGradioConfigId)
                                         if (gradioTTSConfig != null) {
                                             val v2Config = GradioConfig(
                                                 id = gradioTTSConfig.id,

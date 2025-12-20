@@ -809,7 +809,9 @@ private fun GradioConfigDialog(
     onConfigured: () -> Unit
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
-    val presets = remember { ireader.domain.services.tts_service.GradioTTSPresets.getAllPresets() }
+    val gradioTTSManager: ireader.domain.services.tts_service.GradioTTSManager = koinInject()
+    // Get all configs including plugin configs
+    val presets = remember { gradioTTSManager.getAllConfigs() }
     var selectedPresetId by remember { mutableStateOf(appPrefs.activeGradioConfigId().get().ifEmpty { presets.firstOrNull()?.id ?: "" }) }
     var customSpaceUrl by remember { mutableStateOf("") }
     var customApiName by remember { mutableStateOf("/predict") }
@@ -992,7 +994,7 @@ private fun GradioConfigDialog(
                                             isCustom = true
                                         )
                                     } else {
-                                        ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(selectedPresetId)
+                                        gradioTTSManager.getConfigByIdOrPreset(selectedPresetId)
                                     }
                                     
                                     if (config != null) {
@@ -1037,7 +1039,7 @@ private fun GradioConfigDialog(
                                         isCustom = true
                                     )
                                 } else {
-                                    ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(selectedPresetId)
+                                    gradioTTSManager.getConfigByIdOrPreset(selectedPresetId)
                                 }
                                 
                                 if (config != null) {

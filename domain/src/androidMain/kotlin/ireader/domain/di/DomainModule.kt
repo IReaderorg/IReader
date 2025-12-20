@@ -253,7 +253,8 @@ actual val DomainModule = module {
     single<ireader.domain.services.tts.AITTSManager> {
         ireader.domain.services.tts.AITTSManager(
             context = androidContext(),
-            appPreferences = get()
+            appPreferences = get(),
+            gradioTTSManager = get()
         )
     }
     

@@ -38,6 +38,7 @@ class DesktopTTSService : KoinComponent {
     private val readerPreferences: ReaderPreferences by inject()
     val appPrefs: AppPreferences by inject()
     private val getTranslatedChapterUseCase: ireader.domain.usecases.translation.GetTranslatedChapterUseCase by inject()
+    private val gradioTTSManager: GradioTTSManager by inject()
     
     // Piper TTS components
     val synthesizer: ireader.domain.services.tts_service.piper.PiperSpeechSynthesizer by inject()
@@ -2142,17 +2143,14 @@ class DesktopTTSService : KoinComponent {
     }
     
     /**
-     * Load Gradio TTS configuration from preferences
+     * Load Gradio TTS configuration from preferences.
+     * Uses GradioTTSManager as the single source of truth for all configs
+     * (presets, plugins, and custom configs).
      */
     private fun loadGradioConfig(configId: String): GradioTTSConfig? {
         return try {
-            val configsJson = appPrefs.gradioTTSConfigs().get()
-            if (configsJson.isEmpty()) {
-                GradioTTSPresets.getPresetById(configId)
-            } else {
-                val state = kotlinx.serialization.json.Json.decodeFromString<GradioTTSManagerState>(configsJson)
-                state.configs.find { it.id == configId } ?: GradioTTSPresets.getPresetById(configId)
-            }
+            // Use GradioTTSManager as single source of truth
+            gradioTTSManager.getConfigByIdOrPreset(configId)
         } catch (e: Exception) {
             Log.error { "Failed to load Gradio config: ${e.message}" }
             GradioTTSPresets.getPresetById(configId)

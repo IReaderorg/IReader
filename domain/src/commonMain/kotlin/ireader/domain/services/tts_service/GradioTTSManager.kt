@@ -118,9 +118,19 @@ class GradioTTSManager(
     fun getCustomConfigs(): List<GradioTTSConfig> = _configs.value.filter { it.isCustom }
     
     /**
-     * Get configuration by ID
+     * Get configuration by ID.
+     * This is the SINGLE SOURCE OF TRUTH for looking up Gradio TTS configs.
+     * It searches in order: plugin configs, presets, custom configs.
      */
     fun getConfigById(id: String): GradioTTSConfig? = _configs.value.find { it.id == id }
+    
+    /**
+     * Get configuration by ID, with fallback to presets.
+     * Use this when you need to ensure a config is found even if manager hasn't loaded yet.
+     */
+    fun getConfigByIdOrPreset(id: String): GradioTTSConfig? {
+        return getConfigById(id) ?: GradioTTSPresets.getPresetById(id)
+    }
     
     /**
      * Get the currently active configuration

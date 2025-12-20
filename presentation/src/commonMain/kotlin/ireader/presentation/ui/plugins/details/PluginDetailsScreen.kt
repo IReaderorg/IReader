@@ -395,7 +395,11 @@ private fun ModernPluginDetailsContent(
         
         // Quick stats cards
         item {
-            QuickStatsRow(plugin = plugin, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+            QuickStatsRow(
+                plugin = plugin, 
+                reviewCount = state.ratingStats?.totalReviews ?: state.reviews.size,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
         }
         
         // Screenshots
@@ -549,12 +553,12 @@ private fun ModernHeroSection(plugin: PluginInfo) {
 }
 
 @Composable
-private fun QuickStatsRow(plugin: PluginInfo, modifier: Modifier = Modifier) {
+private fun QuickStatsRow(plugin: PluginInfo, reviewCount: Int, modifier: Modifier = Modifier) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         StatCard(
-            icon = Icons.Default.Download,
-            value = formatDownloadCount(plugin.downloadCount),
-            label = "Downloads",
+            icon = Icons.Default.RateReview,
+            value = reviewCount.toString(),
+            label = "Reviews",
             modifier = Modifier.weight(1f)
         )
         StatCard(
@@ -659,7 +663,28 @@ private fun DeveloperCard(
                         modifier = Modifier.size(60.dp).clickable { onPluginClick(plugin.id) },
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        AsyncImage(model = plugin.manifest.iconUrl, contentDescription = plugin.manifest.name, modifier = Modifier.fillMaxSize())
+                        if (!plugin.manifest.iconUrl.isNullOrEmpty()) {
+                            AsyncImage(
+                                model = plugin.manifest.iconUrl, 
+                                contentDescription = plugin.manifest.name, 
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            // Fallback: show plugin initials
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = plugin.manifest.name.take(2).uppercase(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -814,12 +839,6 @@ private fun getPermissionDescription(permission: ireader.plugin.api.PluginPermis
     ireader.plugin.api.PluginPermission.STORAGE -> "Access to device storage"
     ireader.plugin.api.PluginPermission.NOTIFICATIONS -> "Show notifications"
     else -> "Additional permission required"
-}
-
-private fun formatDownloadCount(count: Int): String = when {
-    count >= 1_000_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000_000.0, 1)}M"
-    count >= 1_000 -> "${ireader.presentation.ui.core.utils.toDecimalString(count / 1_000.0, 1)}K"
-    else -> count.toString()
 }
 
 private fun formatPrice(price: Double, currency: String): String {

@@ -67,7 +67,7 @@ import ireader.core.log.Log
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.DesktopTTSService
 import ireader.domain.services.tts_service.GradioTTSConfig
-import ireader.domain.services.tts_service.GradioTTSPresets
+import ireader.domain.services.tts_service.GradioTTSManager
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.add_custom_tts_engine
 import ireader.i18n.resources.available_engines
@@ -114,6 +114,7 @@ fun TTSEngineManagerScreen(
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val ttsService: DesktopTTSService = koinInject()
+    val gradioTTSManager: GradioTTSManager = koinInject()
     val scope = rememberCoroutineScope()
     
     // Engine status
@@ -691,8 +692,8 @@ fun TTSEngineManagerScreen(
                     activeGradioSpaceUrl = savedUrl
                     activeGradioApiKey = savedApiKey
                 } else {
-                    // Fallback to preset URL
-                    val preset = GradioTTSPresets.getPresetById(configId)
+                    // Fallback to preset URL (supports both presets and plugin configs)
+                    val preset = gradioTTSManager.getConfigByIdOrPreset(configId)
                     activeGradioSpaceUrl = preset?.spaceUrl ?: ""
                     activeGradioApiKey = preset?.apiKey ?: ""
                 }
@@ -1348,10 +1349,11 @@ private fun GradioTTSSectionDesktop(
     scope: CoroutineScope
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val gradioTTSManager: GradioTTSManager = koinInject()
     var useGradioTTS by remember { mutableStateOf(false) }
     var activeConfigId by remember { mutableStateOf<String?>(null) }
     var globalSpeed by remember { mutableStateOf(1.0f) }
-    var configs by remember { mutableStateOf(GradioTTSPresets.getAllPresets()) }
+    var configs by remember { mutableStateOf(gradioTTSManager.getAllConfigs()) }
     var isTesting by remember { mutableStateOf(false) }
     var testingConfigId by remember { mutableStateOf<String?>(null) }
     var editingConfig by remember { mutableStateOf<GradioTTSConfig?>(null) }
@@ -1370,22 +1372,22 @@ private fun GradioTTSSectionDesktop(
                 val state = kotlinx.serialization.json.Json.decodeFromString<ireader.domain.services.tts_service.GradioTTSManagerState>(savedConfigsJson)
                 val savedConfigs = state.configs
                 
-                // Get all current presets
-                val currentPresets = GradioTTSPresets.getAllPresets()
+                // Get all current configs (presets + plugin configs)
+                val currentConfigs = gradioTTSManager.getAllConfigs()
                 
                 // Merge: keep custom configs from saved, update presets from current
                 val customConfigs = savedConfigs.filter { it.isCustom }
                 
-                // Use current presets (which include any new ones) + saved custom configs
-                configs = currentPresets + customConfigs
+                // Use current configs (which include presets and plugin configs) + saved custom configs
+                configs = currentConfigs + customConfigs.filter { custom -> currentConfigs.none { it.id == custom.id } }
                 
-                Log.info { "Merged ${currentPresets.size} presets + ${customConfigs.size} custom configs" }
+                Log.info { "Merged ${currentConfigs.size} configs + ${customConfigs.size} custom configs" }
             } catch (e: Exception) {
                 Log.error { "Failed to load Gradio configs: ${e.message}" }
-                configs = GradioTTSPresets.getAllPresets()
+                configs = gradioTTSManager.getAllConfigs()
             }
         } else {
-            configs = GradioTTSPresets.getAllPresets()
+            configs = gradioTTSManager.getAllConfigs()
         }
         
         // Configure Gradio if enabled

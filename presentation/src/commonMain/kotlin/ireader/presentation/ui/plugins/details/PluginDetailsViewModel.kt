@@ -378,7 +378,27 @@ class PluginDetailsViewModel(
             val otherPlugins = allPlugins.filter { 
                 it.manifest.author.name == plugin.manifest.author.name && it.id != plugin.id 
             }
-            _state.value = _state.value.copy(otherPluginsByDeveloper = otherPlugins)
+            
+            // Try to enrich with remote info for icons
+            val enrichedPlugins = otherPlugins.map { installedPlugin ->
+                if (installedPlugin.manifest.iconUrl.isNullOrEmpty()) {
+                    // Try to get icon from remote
+                    val remoteInfo = fetchRemotePluginInfo(installedPlugin.id)
+                    if (remoteInfo?.manifest?.iconUrl != null) {
+                        installedPlugin.copy(
+                            manifest = installedPlugin.manifest.copy(
+                                iconUrl = remoteInfo.manifest.iconUrl
+                            )
+                        )
+                    } else {
+                        installedPlugin
+                    }
+                } else {
+                    installedPlugin
+                }
+            }
+            
+            _state.value = _state.value.copy(otherPluginsByDeveloper = enrichedPlugins)
         }
     }
     

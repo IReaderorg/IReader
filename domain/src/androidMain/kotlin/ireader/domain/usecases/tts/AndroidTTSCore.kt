@@ -72,7 +72,9 @@ class AndroidTTSCore(
             // Initialize Gradio player if enabled
             if (appPreferences.useGradioTTS().get()) {
                 val configId = appPreferences.activeGradioConfigId().get()
-                val config = ireader.domain.services.tts_service.GradioTTSPresets.getPresetById(configId)
+                // Use GradioTTSManager to get config (supports both presets and plugin configs)
+                val gradioTTSManager: ireader.domain.services.tts_service.GradioTTSManager = org.koin.core.context.GlobalContext.get().get()
+                val config = gradioTTSManager.getConfigByIdOrPreset(configId)
                 if (config != null && config.spaceUrl.isNotEmpty()) {
                     gradioPlayer = GradioTTSPlayerAdapter(
                         context = context,
