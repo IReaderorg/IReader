@@ -738,8 +738,15 @@ class ReaderScreenViewModel(
                 val totalWords = calculateTotalWords(filteredChapter.content)
                 
                 updateSuccessState { state ->
+                    // Update the chapters list to reflect the cached content
+                    // This ensures the drawer shows the cached icon for the fetched chapter
+                    val updatedChapters = state.chapters.map { ch ->
+                        if (ch.id == filteredChapter.id) filteredChapter else ch
+                    }
+                    
                     state.copy(
                         currentChapter = filteredChapter,
+                        chapters = updatedChapters,
                         content = filteredChapter.content,
                         isLoadingContent = false,
                         totalWords = totalWords
