@@ -1,7 +1,5 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
-
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -11,10 +9,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.domain.preferences.models.FontType
-import ireader.domain.preferences.models.getDefaultFont
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.font
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.SearchToolbar
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
@@ -42,7 +41,7 @@ class FontScreenSpec {
                         )
                     },
                     onPopBackStack = {
-                       navController.popBackStack()
+                       navController.safePopBackStack()
                     },
                     onValueChange = {
                         vm.searchQuery = it

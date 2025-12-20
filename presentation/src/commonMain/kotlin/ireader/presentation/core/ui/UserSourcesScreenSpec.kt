@@ -14,7 +14,7 @@ import ireader.presentation.ui.sourcecreator.SourceCreatorViewModel
 import ireader.presentation.ui.sourcecreator.UserSourcesListScreen
 import ireader.presentation.ui.sourcecreator.UserSourcesListViewModel
 import org.koin.compose.koinInject
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Screen spec for the User Sources list.
  */
@@ -38,7 +38,7 @@ class UserSourcesListScreenSpec {
         
         UserSourcesListScreen(
             state = state,
-            onBack = { navController?.popBackStack() },
+            onBack = { navController?.safePopBackStack() },
             onCreateNew = { navController?.navigate("userSourceCreator") },
             onCreateWithWizard = { navController?.navigate("userSourceCreator") },
             onOpenImportScreen = { vm.showImportDialog() },
@@ -101,7 +101,7 @@ class UserSourceCreatorScreenSpec(
         
         SourceCreatorScreen(
             state = state,
-            onBack = { navController?.popBackStack() },
+            onBack = { navController?.safePopBackStack() },
             onSave = { vm.save() },
             onShowJson = { vm.showJsonDialog() },
             onTabChange = { vm.setTab(it) },

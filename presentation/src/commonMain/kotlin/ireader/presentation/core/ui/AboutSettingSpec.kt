@@ -11,6 +11,7 @@ import ireader.i18n.resources.Res
 import ireader.i18n.resources.about
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.about.AboutSettingScreen
@@ -33,7 +34,7 @@ class AboutSettingSpec {
                     title = localize(Res.string.about),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     }
                 )
             }
@@ -41,7 +42,7 @@ class AboutSettingSpec {
             AboutSettingScreen(
                 modifier = Modifier.padding(padding),
                 onPopBackStack = {
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 },
                 getFormattedBuildTime = this::getFormattedBuildTime,
                 onNavigateToChangelog = {

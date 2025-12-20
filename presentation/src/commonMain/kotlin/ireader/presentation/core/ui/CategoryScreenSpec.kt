@@ -1,7 +1,5 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
-
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -10,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.edit_category
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.settings.category.CategoryScreen
@@ -35,7 +35,7 @@ class CategoryScreenSpec {
                     title = localize(Res.string.edit_category),
                     scrollBehavior = scrollBehavior,
                 popBackStack = {
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 }
                 )
             }

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.community.GlossaryScreen
 import ireader.presentation.ui.community.GlossaryViewModel
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Screen specification for the Community Glossary Screen.
  * This screen allows users to manage glossaries across all their books,
@@ -28,7 +28,7 @@ class GlossaryScreenSpec {
         
         GlossaryScreen(
             state = vm.state,
-            onBack = { navController.popBackStack() },
+            onBack = { navController.safePopBackStack() },
             onSelectBook = { bookId, bookTitle -> vm.selectBook(bookId, bookTitle) },
             onSelectGlobalBook = { bookKey, bookTitle -> vm.selectGlobalBook(bookKey, bookTitle) },
             onClearSelectedBook = { vm.clearSelectedBook() },

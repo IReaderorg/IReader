@@ -15,7 +15,7 @@ import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
-
+import ireader.presentation.core.safePopBackStack
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotImplementedScreen(title: String) {
@@ -25,7 +25,7 @@ fun NotImplementedScreen(title: String) {
         TitleToolbar(
                 title = title,
                 popBackStack = {
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 }
         )
     },) {

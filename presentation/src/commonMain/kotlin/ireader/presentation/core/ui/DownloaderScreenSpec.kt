@@ -23,6 +23,7 @@ import ireader.i18n.resources.resume
 import ireader.i18n.resources.start
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposable
 import ireader.presentation.ui.core.ui.SnackBarListener
@@ -51,7 +52,7 @@ object DownloaderScreenSpec {
             topBar = { scrollBehavior ->
             DownloaderTopAppBar(
                     onPopBackStack = {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     },
                     onCancelAll = {
                         vm.deleteSelectedDownloads(vm.downloads.map { it.toSavedDownload() })

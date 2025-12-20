@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
 import org.koin.compose.koinInject
 import ireader.core.util.randomUUID
+import ireader.presentation.core.safePopBackStack
 
 /**
  * Screen for logging into DeepSeek and handling translation
@@ -22,11 +23,11 @@ class DeepSeekLoginScreenSpec {
             engine = engine,
             onTranslationDone = {
                 // Return to previous screen when translation is done
-                navController.popBackStack()
+                navController.safePopBackStack()
             },
             onClose = {
                 // Return to previous screen when user clicks back
-                navController.popBackStack()
+                navController.safePopBackStack()
             }
         )
     }

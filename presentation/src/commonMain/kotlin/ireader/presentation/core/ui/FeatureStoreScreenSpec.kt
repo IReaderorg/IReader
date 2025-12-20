@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.navigateTo
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.featurestore.FeatureStoreScreen
 import ireader.presentation.ui.featurestore.FeatureStoreViewModel
@@ -26,7 +27,7 @@ class FeatureStoreScreenSpec {
                 viewModel = viewModel,
                 modifier = Modifier.padding(padding),
                 onNavigateBack = {
-                    navController?.popBackStack()
+                    navController?.safePopBackStack()
                 },
                 onPluginClick = { pluginId ->
                     navController?.navigateTo(PluginDetailsScreenSpec(pluginId))

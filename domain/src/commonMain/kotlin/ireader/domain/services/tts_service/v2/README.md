@@ -378,7 +378,7 @@ fun MyTTSScreen(viewModel: TTSV2ViewModel) {
         sleepTimerState = sleepTimerState,
         onSleepTimerStart = { viewModel.startSleepTimer(it) },
         onSleepTimerCancel = { viewModel.cancelSleepTimer() },
-        onBack = { navController.popBackStack() },
+        onBack = { navController.safePopBackStack() },
         onOpenSettings = { /* navigate to settings */ },
         // Customize display
         fontSize = 18,
@@ -421,7 +421,7 @@ TTSV2Screen(
     sleepTimerState = viewModel.sleepTimerState,
     onSleepTimerStart = { viewModel.startSleepTimer(it) },
     onSleepTimerCancel = { viewModel.cancelSleepTimer() },
-    onBack = { navController.popBackStack() }
+    onBack = { navController.safePopBackStack() }
 )
 ```
 

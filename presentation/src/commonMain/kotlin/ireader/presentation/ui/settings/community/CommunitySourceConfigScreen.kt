@@ -58,7 +58,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import org.koin.compose.koinInject
-
+import ireader.presentation.core.safePopBackStack
 class CommunitySourceConfigScreen {
     
     @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +74,7 @@ class CommunitySourceConfigScreen {
                 Toolbar(
                     title = { Text("Community Source") },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
+                        IconButton(onClick = { navController.safePopBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }

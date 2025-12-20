@@ -60,7 +60,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
-
+import ireader.presentation.core.safePopBackStack
 
 @OptIn( ExperimentalMaterial3Api::class)
 data class ReaderScreenSpec(
@@ -524,7 +524,7 @@ data class ReaderScreenSpec(
                                 vm.bookmarkChapter()
                             },
                             onPopBackStack = {
-                                navController.popBackStack()
+                                navController.safePopBackStack()
                             },
                             onChapterArt = {
                                 vm.showChapterArtDialog()

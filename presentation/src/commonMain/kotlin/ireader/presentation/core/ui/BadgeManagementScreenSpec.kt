@@ -4,6 +4,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.settings.badges.manage.BadgeManagementScreen
 import ireader.presentation.ui.settings.badges.manage.BadgeManagementViewModel
 
@@ -21,7 +22,7 @@ class BadgeManagementScreenSpec {
         BadgeManagementScreen(
             viewModel = viewModel,
             onNavigateBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             },
             onNavigateToBadgeStore = {
                 navController.navigate(NavigationRoutes.badgeStore)

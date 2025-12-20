@@ -8,7 +8,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.AndroidTTSMManagerSettingsScreen
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import ireader.presentation.ui.settings.viewmodels.GradioTTSSettingsViewModel
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Android implementation of TTS Engine Manager Screen
  * Provides information about native Android TTS, Sherpa TTS app recommendation,
@@ -26,7 +26,7 @@ actual class TTSEngineManagerScreenSpec {
         IScaffold { padding ->
             AndroidTTSMManagerSettingsScreen(
                 onBackPressed = {
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 },
                 viewModel = viewModel,
                 gradioViewModel = gradioViewModel

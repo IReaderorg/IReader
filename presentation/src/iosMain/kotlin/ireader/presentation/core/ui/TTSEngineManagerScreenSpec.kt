@@ -2,7 +2,7 @@ package ireader.presentation.core.ui
 
 import androidx.compose.runtime.Composable
 import ireader.presentation.core.LocalNavigator
-
+import ireader.presentation.core.safePopBackStack
 /**
  * iOS implementation of TTS Engine Manager Screen
  * iOS uses AVSpeechSynthesizer for TTS
@@ -15,6 +15,6 @@ actual class TTSEngineManagerScreenSpec {
         
         // iOS TTS is handled through AVSpeechSynthesizer
         // For now, just navigate back as iOS doesn't need engine management
-        navController.popBackStack()
+        navController.safePopBackStack()
     }
 }

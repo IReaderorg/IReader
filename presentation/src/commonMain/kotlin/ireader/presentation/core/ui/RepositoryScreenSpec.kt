@@ -34,7 +34,7 @@ import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.ui.SnackBarListener
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import kotlinx.coroutines.launch
-
+import ireader.presentation.core.safePopBackStack
 
 class RepositoryScreenSpec {
 
@@ -53,7 +53,7 @@ class RepositoryScreenSpec {
                         MidSizeTextComposable(text =  localize(Res.string.repository))
                     },
                     scrollBehavior = scrollBehavior,
-            navigationIcon = { TopAppBarBackButton(onClick = { navController.popBackStack() }) },
+            navigationIcon = { TopAppBarBackButton(onClick = { navController.safePopBackStack() }) },
                 )
             },
             snackbarHostState = host,

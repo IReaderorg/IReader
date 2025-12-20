@@ -24,7 +24,7 @@ import org.koin.core.component.inject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
-
+import ireader.presentation.core.safePopBackStack
 class StatisticsScreen : KoinComponent {
     
     private val viewModel: StatisticsViewModel by inject()
@@ -43,7 +43,7 @@ class StatisticsScreen : KoinComponent {
                 TopAppBar(
                     title = { Text(localizeHelper.localize(Res.string.reading_statistics)) },
                     navigationIcon = {
-                        TopAppBarBackButton(onClick = { navController.popBackStack() })
+                        TopAppBarBackButton(onClick = { navController.safePopBackStack() })
                     },
                     actions = {
                         IconButton(onClick = { viewModel.syncWithRemote() }) {

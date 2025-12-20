@@ -19,7 +19,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -234,6 +237,27 @@ fun AppIconButton(
                     contentDescription = contentDescription,
                     tint = tint
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Debounced back button click handler to prevent rapid navigation.
+ * Wraps the onClick callback with debounce logic.
+ */
+@OptIn(kotlin.time.ExperimentalTime::class)
+@Composable
+private fun rememberDebouncedClick(onClick: () -> Unit): () -> Unit {
+    var lastClickTime by remember { mutableStateOf(0L) }
+    val debounceMs = 300L
+    
+    return remember(onClick) {
+        {
+            val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+            if (now - lastClickTime >= debounceMs) {
+                lastClickTime = now
+                onClick()
             }
         }
     }

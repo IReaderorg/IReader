@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.ui.SnackBarListener
@@ -28,7 +29,7 @@ class AdvanceSettingSpec {
                     title = localize(Res.string.advance_setting),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     }
                 )
             }, snackbarHostState = host

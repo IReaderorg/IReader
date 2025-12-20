@@ -3,6 +3,7 @@ package ireader.presentation.core.ui
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.settings.admin.AdminUserPanelScreen
 import ireader.presentation.ui.settings.admin.AdminUserPanelViewModel
 
@@ -21,7 +22,7 @@ class AdminUserPanelScreenSpec {
         AdminUserPanelScreen(
             viewModel = vm,
             onNavigateBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             }
         )
     }

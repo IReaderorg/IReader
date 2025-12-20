@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.settings.CommunityHubScreen
 import kotlinx.coroutines.launch
 
@@ -27,7 +28,7 @@ class CommunityHubScreenSpec {
         
         CommunityHubScreen(
             onBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             },
             onLeaderboard = {
                 navController.navigate(NavigationRoutes.leaderboard)

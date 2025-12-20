@@ -10,7 +10,7 @@ import androidx.compose.runtime.remember
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
 import ireader.presentation.ui.settings.translation.TranslationSettingsScreenV2
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Modern Translation Screen Specification
  * 
@@ -53,7 +53,7 @@ class TranslationScreenSpec {
         TranslationSettingsScreenV2(
             viewModel = viewModel,
             translationEnginesManager = viewModel.translationEnginesManager,
-            onNavigateBack = { navController.popBackStack() },
+            onNavigateBack = { navController.safePopBackStack() },
             onNavigateToLogin = { loginType ->
                 // Handle navigation to login screens
                 when (loginType) {

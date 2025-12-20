@@ -6,7 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import ireader.presentation.ui.settings.badges.nft.NFTBadgeScreen
 import ireader.presentation.ui.settings.badges.nft.NFTBadgeViewModel
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Screen specification for the NFT Badge verification
  */
@@ -21,7 +21,7 @@ class NFTBadgeScreenSpec {
         NFTBadgeScreen(
             viewModel = viewModel,
             onNavigateBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             },
             onOpenUrl = { url ->
                 // Open URL in external browser - platform specific

@@ -96,7 +96,7 @@ class BadgeManagementScreenSpec : ScreenSpec {
         
         BadgeManagementScreen(
             viewModel = vm,
-            onNavigateBack = { navigator.popBackStack() },
+            onNavigateBack = { navigator.safePopBackStack() },
             onNavigateToBadgeStore = { 
                 navigator.navigate(NavigationRoutes.badgeStore) 
             }

@@ -1,9 +1,10 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalUriHandler
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.settings.badges.store.BadgeStoreScreen
 import ireader.presentation.ui.settings.badges.store.BadgeStoreViewModel
 
@@ -22,7 +23,7 @@ class BadgeStoreScreenSpec {
         BadgeStoreScreen(
             viewModel = viewModel,
             onNavigateBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             },
             onOpenDonationLink = { url ->
                 uriHandler.openUri(url)

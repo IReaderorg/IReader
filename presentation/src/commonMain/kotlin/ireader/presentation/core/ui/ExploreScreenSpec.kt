@@ -24,6 +24,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.imageloader.getHeadersMap
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.EmptyScreenComposable
@@ -145,7 +146,7 @@ data class ExploreScreenSpec(
                                 )
                             }
                         },
-                        onPop = { navController.popBackStack() },
+                        onPop = { navController.safePopBackStack() },
                         onLayoutTypeSelect = { layout -> vm.saveLayoutType(layout) },
                         currentLayout = state.layout,
                         onOpenLocalFolder = {
@@ -194,7 +195,7 @@ data class ExploreScreenSpec(
                                 )
                             )
                         },
-                        onPopBackStack = { navController.popBackStack() },
+                        onPopBackStack = { navController.safePopBackStack() },
                         snackBarHostState = snackBarHostState,
                         showmodalSheet = {
                             scope.launchIO { sheetState.partialExpand() }
@@ -230,7 +231,7 @@ data class ExploreScreenSpec(
                 } else {
                     EmptyScreenComposable(
                         UiText.MStringResource(Res.string.source_not_available),
-                        onPopBackStack = { navController.popBackStack() }
+                        onPopBackStack = { navController.safePopBackStack() }
                     )
                 }
             }

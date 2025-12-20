@@ -12,7 +12,7 @@ import ireader.presentation.ui.characterart.GeminiModelInfo
 import ireader.presentation.ui.characterart.UploadCharacterArtScreen
 import ireader.presentation.ui.characterart.rememberImagePicker
 import kotlinx.coroutines.launch
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Screen specification for Character Art Upload
  * @param prefilledBookTitle Optional book title from chapter art generation
@@ -74,7 +74,7 @@ class CharacterArtUploadScreenSpec(
         
         UploadCharacterArtScreen(
             onBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             },
             onPickImage = {
                 // Launch the picker and handle the result
@@ -106,7 +106,7 @@ class CharacterArtUploadScreenSpec(
                         ),
                         imageBytes = imageBytes
                     )
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 }
             },
             selectedImagePath = selectedImagePath,

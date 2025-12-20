@@ -62,7 +62,7 @@ import ireader.i18n.resources.*
 //                ireader.presentation.ui.component.ScrollableAppBar(
 //                    title = localizeHelper.localize(Res.string.gemini_api_key),
 //                    navigateBack = {
-//                        navController.popBackStack()
+//                        navController.safePopBackStack()
 //                    },
 //                    scrollBehavior = scrollBehavior,
 //                )

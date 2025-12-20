@@ -288,12 +288,62 @@ fun NavHostController.navigateDeepLink(vararg routes: String) {
 }
 
 /**
+ * Object to track navigation state and prevent rapid back navigation.
+ * This prevents the UI from becoming blank when user taps back button quickly.
+ */
+private object BackNavigationGuard {
+    @kotlin.concurrent.Volatile
+    private var lastBackNavigationTime: Long = 0L
+    
+    private const val DEBOUNCE_MS = 300L // Match animation duration
+    
+    /**
+     * Check if back navigation should be allowed.
+     * Returns true if enough time has passed since last navigation.
+     */
+    @OptIn(kotlin.time.ExperimentalTime::class)
+    fun canNavigateBack(): Boolean {
+        val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
+        val timeSinceLastNav = now - lastBackNavigationTime
+        
+        return if (timeSinceLastNav >= DEBOUNCE_MS) {
+            lastBackNavigationTime = now
+            true
+        } else {
+            false
+        }
+    }
+}
+
+/**
+ * Safe back navigation that prevents multiple rapid calls.
+ * When user taps back button quickly, only the first call is processed.
+ * Subsequent calls within a short window are ignored to prevent navigation corruption.
+ * 
+ * @return true if navigation was initiated, false if blocked due to debounce
+ */
+fun NavHostController.safePopBackStack(): Boolean {
+    // Prevent multiple rapid back navigations
+    if (!BackNavigationGuard.canNavigateBack()) {
+        return false
+    }
+    
+    return if (previousBackStackEntry != null) {
+        popBackStack()
+    } else {
+        false
+    }
+}
+
+/**
  * Navigate back with result - pops back stack and can trigger result handling.
  * Returns true if pop was successful.
+ * 
+ * Note: Consider using safesafePopBackStack() to prevent rapid navigation issues
  */
 fun NavHostController.navigateBack(): Boolean {
     return if (previousBackStackEntry != null) {
-        popBackStack()
+        safePopBackStack()
     } else {
         false
     }

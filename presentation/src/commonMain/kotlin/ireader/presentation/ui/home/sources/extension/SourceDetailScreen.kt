@@ -32,7 +32,7 @@ import ireader.presentation.imageloader.IImageLoader
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-
+import ireader.presentation.core.safePopBackStack
 data class SourceDetailScreen(
     val catalog: Catalog
 ) {
@@ -51,7 +51,7 @@ data class SourceDetailScreen(
                         AppIconButton(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = localize(Res.string.go_back),
-                            onClick = { navController.popBackStack() }
+                            onClick = { navController.safePopBackStack() }
                         )
                     },
                     scrollBehavior = scrollBehavior

@@ -11,7 +11,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 import ireader.presentation.ui.core.theme.currentOrThrow
-
+import ireader.presentation.core.safePopBackStack
 actual class SecuritySettingSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -26,7 +26,7 @@ actual class SecuritySettingSpec {
                     title = localizeHelper.localize(Res.string.security),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     }
                 )
             }

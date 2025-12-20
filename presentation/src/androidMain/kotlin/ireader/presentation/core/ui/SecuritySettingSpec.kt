@@ -20,7 +20,7 @@ import ireader.presentation.ui.settings.security.SecuritySettingsScreen
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 import org.koin.android.ext.android.get
 import kotlin.time.ExperimentalTime
-
+import ireader.presentation.core.safePopBackStack
 actual class SecuritySettingSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -35,7 +35,7 @@ actual class SecuritySettingSpec {
                     title = localize(Res.string.security),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     }
                 )
             }

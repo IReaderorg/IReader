@@ -12,7 +12,7 @@ import ireader.presentation.ui.home.sources.global_search.viewmodel.GlobalSearch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.core.parameter.parametersOf
-
+import ireader.presentation.core.safePopBackStack
 
 data class GlobalSearchScreenSpec(
     val query: String? = null
@@ -44,7 +44,7 @@ data class GlobalSearchScreenSpec(
         ) {
             GlobalSearchScreen(
                 onPopBackStack = {
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 },
                 onSearch = { query ->
                     vm.searchBooks(query = query)

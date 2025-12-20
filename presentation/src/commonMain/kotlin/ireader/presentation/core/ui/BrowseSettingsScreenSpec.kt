@@ -1,7 +1,9 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.home.sources.settings.BrowseSettingsScreen
 import ireader.presentation.ui.home.sources.settings.BrowseSettingsViewModel
 import org.koin.compose.koinInject
@@ -21,7 +23,7 @@ class BrowseSettingsScreenSpec {
         val snackbarHostState = remember { SnackbarHostState() }
         
         BrowseSettingsScreen(
-            onBackPressed = { navigator?.popBackStack() },
+            onBackPressed = { navigator?.safePopBackStack() },
             availableLanguages = vm.state.availableLanguages,
             selectedLanguages = vm.state.selectedLanguages,
             onLanguageToggled = { languageCode ->

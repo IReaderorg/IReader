@@ -67,7 +67,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 import ireader.domain.utils.extensions.currentTimeToLong
-
+import ireader.presentation.core.safePopBackStack
 class SupabaseConfigScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +83,7 @@ class SupabaseConfigScreen  {
                 Toolbar(
                     title = { Text(localizeHelper.localize(Res.string.supabase_configuration)) },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
+                        IconButton(onClick = { navController.safePopBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     }
@@ -569,7 +569,7 @@ private fun SchemaTable(tableName: String, columns: List<String>) {
             Spacer(modifier = Modifier.height(8.dp))
             columns.forEach { column ->
                 Text(
-                    text = "• $column",
+                    text = "ï¿½ $column",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(start = 8.dp, top = 2.dp)
                 )

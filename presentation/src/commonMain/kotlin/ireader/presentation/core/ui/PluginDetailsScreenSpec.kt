@@ -5,7 +5,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.plugins.details.PluginDetailsScreen
 import ireader.presentation.ui.plugins.details.PluginDetailsViewModel
 import org.koin.core.parameter.parametersOf
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Screen specification for Plugin Details - shows detailed plugin information
  */
@@ -24,7 +24,7 @@ data class PluginDetailsScreenSpec(
         PluginDetailsScreen(
             viewModel = viewModel,
             onNavigateBack = {
-                navController?.popBackStack()
+                navController?.safePopBackStack()
             },
             onPluginClick = { otherPluginId ->
                 // Navigate to another plugin's details

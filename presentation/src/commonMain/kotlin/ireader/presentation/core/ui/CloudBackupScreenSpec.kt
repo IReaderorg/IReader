@@ -1,7 +1,5 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
-
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,13 +7,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.asString
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.backups.CloudBackupScreen
 import ireader.presentation.ui.settings.backups.CloudBackupViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import ireader.domain.utils.extensions.currentTimeToLong
 
 class CloudBackupScreenSpec {
 
@@ -53,7 +53,7 @@ class CloudBackupScreenSpec {
         }
         
         CloudBackupScreen(
-            onPopBackStack = { navController.popBackStack() },
+            onPopBackStack = { navController.safePopBackStack() },
             selectedProvider = selectedProvider,
             isAuthenticated = isAuthenticated,
             cloudBackups = cloudBackups,

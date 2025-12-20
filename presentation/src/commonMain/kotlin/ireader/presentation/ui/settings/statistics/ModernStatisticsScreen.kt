@@ -37,7 +37,7 @@ import kotlin.math.sin
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Modern, gamified statistics screen with charts and engaging UI
  */
@@ -63,7 +63,7 @@ class ModernStatisticsScreen : KoinComponent {
                         ) 
                     },
                     navigationIcon = {
-                        TopAppBarBackButton(onClick = { navController.popBackStack() })
+                        TopAppBarBackButton(onClick = { navController.safePopBackStack() })
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface

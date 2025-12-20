@@ -11,7 +11,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.sourcecreator.legado.LegadoSourceImportScreen
 import ireader.presentation.ui.sourcecreator.legado.LegadoSourceImportViewModel
 import org.koin.compose.koinInject
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Screen spec for importing Legado/阅读 format sources.
  */
@@ -36,13 +36,13 @@ class LegadoSourceImportScreenSpec {
         // Navigate back on successful import
         LaunchedEffect(state.importSuccess) {
             if (state.importSuccess) {
-                navController?.popBackStack()
+                navController?.safePopBackStack()
             }
         }
         
         LegadoSourceImportScreen(
             state = state,
-            onBack = { navController?.popBackStack() },
+            onBack = { navController?.safePopBackStack() },
             onUrlChange = { vm.updateSourceUrl(it) },
             onJsonChange = { vm.updateJsonContent(it) },
             onFetchFromUrl = { vm.fetchFromUrl() },

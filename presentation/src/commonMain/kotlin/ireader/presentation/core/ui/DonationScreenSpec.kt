@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.settings.donation.DonationScreen
 import ireader.presentation.ui.settings.donation.DonationViewModel
@@ -26,7 +27,7 @@ class DonationScreenSpec {
                 viewModel = viewModel,
                 modifier = Modifier.padding(padding),
                 onPopBackStack = {
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 }
             )
         }

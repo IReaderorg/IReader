@@ -5,6 +5,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.characterart.CharacterArtGalleryScreen
 import ireader.presentation.ui.characterart.CharacterArtViewModel
 
@@ -22,7 +23,7 @@ class CharacterArtGalleryScreenSpec {
             CharacterArtGalleryScreen(
                 vm = vm,
                 onBack = {
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 },
                 onArtClick = { art ->
                     // Navigate to detail screen with art ID

@@ -1,7 +1,6 @@
 package ireader.presentation.core
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -18,11 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Animated NavHost with smooth transitions optimized for performance.
  * 

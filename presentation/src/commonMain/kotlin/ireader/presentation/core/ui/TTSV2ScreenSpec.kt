@@ -72,10 +72,10 @@ import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.common.TranslationService
 import ireader.domain.services.common.TranslationStatus
+import ireader.domain.services.tts_service.GradioTTSManager
 import ireader.domain.services.tts_service.TTSChapterCache
 import ireader.domain.services.tts_service.TTSChapterDownloadManager
 import ireader.domain.services.tts_service.TTSTextMerger
-import ireader.domain.services.tts_service.GradioTTSManager
 import ireader.domain.services.tts_service.createTTSDownloadIntentProvider
 import ireader.domain.services.tts_service.v2.EngineType
 import ireader.domain.services.tts_service.v2.GradioConfig
@@ -98,6 +98,7 @@ import ireader.i18n.resources.toggle_translation
 import ireader.presentation.core.IModalDrawer
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.ChapterRow
 import ireader.presentation.ui.component.isTableUi
@@ -890,7 +891,7 @@ class TTSV2ScreenSpec(
                             }
                         },
                         navigationIcon = {
-                            TopAppBarBackButton(onClick = { navController.popBackStack() })
+                            TopAppBarBackButton(onClick = { navController.safePopBackStack() })
                         },
                         actions = {
                             // Translate current chapter button

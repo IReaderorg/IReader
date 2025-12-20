@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import ireader.presentation.ui.leaderboard.CombinedLeaderboardScreen
 import ireader.presentation.ui.leaderboard.DonationLeaderboardViewModel
 import ireader.presentation.ui.leaderboard.LeaderboardViewModel
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Screen specification for the Leaderboard (Reading + Donations tabs)
  */
@@ -23,7 +23,7 @@ class LeaderboardScreenSpec {
             readingVm = readingViewModel,
             donationVm = donationViewModel,
             onBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             }
         )
     }

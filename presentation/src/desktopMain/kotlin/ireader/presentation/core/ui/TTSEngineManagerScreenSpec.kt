@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import ireader.domain.plugins.RequiredPluginChecker
 import ireader.presentation.ui.settings.TTSEngineManagerScreen
 import org.koin.compose.koinInject
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Desktop implementation of TTS Engine Manager Screen
  * Manages TTS engines (Piper, Kokoro, Maya)
@@ -24,7 +24,7 @@ actual class TTSEngineManagerScreenSpec {
         
         TTSEngineManagerScreen(
             onNavigateBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             },
             onRequestPiperPlugin = {
                 // Show RequiredPluginHandler when user tries to use Piper

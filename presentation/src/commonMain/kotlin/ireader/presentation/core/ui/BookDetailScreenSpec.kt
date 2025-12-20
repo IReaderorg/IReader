@@ -1,6 +1,7 @@
 package ireader.presentation.core.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,6 +51,7 @@ import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.ensureAbsoluteUrlForWebView
 import ireader.presentation.core.navigateTo
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.book.BookDetailScreen
 import ireader.presentation.ui.book.BookDetailTopAppBar
 import ireader.presentation.ui.book.components.ChapterCommandBottomSheet
@@ -68,7 +70,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Stable holder for navigation callbacks to prevent recomposition
  */
@@ -155,7 +157,7 @@ data class BookDetailScreenSpec constructor(
                         )
                     }
                     BookDetailEvent.NavigateBack -> {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     }
                 }
             }
@@ -189,7 +191,7 @@ data class BookDetailScreenSpec constructor(
                     // Start navigation profiling for back navigation
                     ScreenProfiler.startScreen("Navigation_DetailToLibrary")
                     ScreenProfiler.mark("Navigation_DetailToLibrary", "back_pressed")
-                    navController.popBackStack() 
+                    navController.safePopBackStack()
                 },
                 onNavigateToCharacterArtGallery = {
                     navController.navigate(ireader.presentation.core.NavigationRoutes.characterArtGallery)
@@ -206,6 +208,7 @@ data class BookDetailScreenSpec constructor(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
                     .graphicsLayer {
                         // Promote to separate layer for GPU-accelerated animation
                         // This prevents recomposition from affecting the animation
@@ -215,8 +218,12 @@ data class BookDetailScreenSpec constructor(
                 when (val s = state) {
                     BookDetailState.Loading -> {
                         // Brief loading state - ViewModel transitions to Success.empty() immediately
-                        // No shimmer, no placeholder - just empty box during brief transition
-                        Box(modifier = Modifier.fillMaxSize())
+                        // Keep background color to prevent white flash during navigation
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+                        )
                     }
                     
                     is BookDetailState.Success -> {
@@ -236,7 +243,7 @@ data class BookDetailScreenSpec constructor(
                     is BookDetailState.Error -> {
                         ErrorContent(
                             message = s.message,
-                            onBack = { navController.popBackStack() }
+                            onBack = { navController.safePopBackStack() }
                         )
                     }
                 }
@@ -682,7 +689,9 @@ data class BookDetailScreenSpec constructor(
         onBack: () -> Unit,
     ) {
         androidx.compose.foundation.layout.Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(androidx.compose.material3.MaterialTheme.colorScheme.background),
             contentAlignment = androidx.compose.ui.Alignment.Center
         ) {
             androidx.compose.foundation.layout.Column(

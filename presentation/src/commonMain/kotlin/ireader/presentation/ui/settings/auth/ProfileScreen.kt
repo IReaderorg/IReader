@@ -67,7 +67,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
 import ireader.domain.utils.extensions.currentTimeToLong
-
+import ireader.presentation.core.safePopBackStack
 class ProfileScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +83,7 @@ class ProfileScreen  {
                 Toolbar(
                     title = { Text(localizeHelper.localize(Res.string.profile)) },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
+                        IconButton(onClick = { navController.safePopBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     }

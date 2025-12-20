@@ -2,6 +2,7 @@ package ireader.presentation.core.ui
 
 import androidx.compose.runtime.Composable
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.developerportal.DeveloperPortalScreen
 import ireader.presentation.ui.developerportal.DeveloperPortalViewModel
 
@@ -18,7 +19,7 @@ class DeveloperPortalScreenSpec {
         DeveloperPortalScreen(
             viewModel = viewModel,
             onNavigateBack = {
-                navController?.popBackStack()
+                navController?.safePopBackStack()
             }
         )
     }

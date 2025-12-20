@@ -6,7 +6,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.navigateTo
 import ireader.presentation.ui.community.PopularBooksScreen
 import ireader.presentation.ui.community.PopularBooksViewModel
-
+import ireader.presentation.core.safePopBackStack
 class PopularBooksScreenSpec {
     
     @OptIn(ExperimentalMaterial3Api::class)
@@ -17,7 +17,7 @@ class PopularBooksScreenSpec {
         
         PopularBooksScreen(
             vm = viewModel,
-            onBackPressed = { navController.popBackStack() },
+            onBackPressed = { navController.safePopBackStack() },
             onNavigateToBook = { bookId ->
                 navController.navigate("bookDetail/$bookId")
             },

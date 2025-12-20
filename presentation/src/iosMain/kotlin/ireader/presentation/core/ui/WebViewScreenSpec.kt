@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import ireader.presentation.core.LocalNavigator
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
-
+import ireader.presentation.core.safePopBackStack
 actual class WebViewScreenSpec actual constructor(
     internal val url: String?,
     internal val sourceId: Long?,
@@ -47,7 +47,7 @@ actual class WebViewScreenSpec actual constructor(
                 }
             }
             // Pop back after attempting to open browser
-            navController.popBackStack()
+            navController.safePopBackStack()
         }
         
         // Show a brief loading screen while opening browser

@@ -21,7 +21,7 @@ import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.utils.formatPercentage
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Enhanced statistics screen with comprehensive analytics and discovery features
  * Implements Mihon's comprehensive statistics system with tabs and visualizations
@@ -42,7 +42,7 @@ class EnhancedStatisticsScreen : KoinComponent {
                 TopAppBar(
                     title = { Text(localizeHelper.localize(Res.string.statistics_and_analytics)) },
                     navigationIcon = {
-                        TopAppBarBackButton(onClick = { navigator?.popBackStack() })
+                        TopAppBarBackButton(onClick = { navigator?.safePopBackStack() })
                     },
                     actions = {
                         IconButton(onClick = { screenModel.refresh() }) {

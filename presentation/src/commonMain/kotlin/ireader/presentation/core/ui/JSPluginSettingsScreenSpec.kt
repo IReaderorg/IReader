@@ -13,7 +13,7 @@ import ireader.domain.preferences.prefs.UiPreferences
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
-
+import ireader.presentation.core.safePopBackStack
 @ExperimentalMaterial3Api
 class JSPluginSettingsScreenSpec {
 
@@ -29,7 +29,7 @@ class JSPluginSettingsScreenSpec {
                     title = localizeHelper.localize(Res.string.javascript_plugin_settings),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     }
                 )
             }

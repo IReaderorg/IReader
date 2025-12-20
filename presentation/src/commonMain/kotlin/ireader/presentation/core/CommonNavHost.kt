@@ -3,11 +3,13 @@ package ireader.presentation.core
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.savedstate.read
 import ireader.domain.catalogs.CatalogStore
 import ireader.presentation.core.ui.AboutSettingSpec
 import ireader.presentation.core.ui.AdminBadgeVerificationScreenSpec
@@ -46,6 +48,25 @@ import ireader.presentation.core.ui.TranslationScreenSpec
 import ireader.presentation.core.ui.WebViewScreenSpec
 import ireader.presentation.ui.home.sources.extension.SourceDetailScreen
 import org.koin.compose.koinInject
+
+/**
+ * Helper function to safely get a String argument from NavBackStackEntry.
+ * Uses arguments.read {} which is the correct KMP way to access navigation arguments.
+ * Falls back to savedStateHandle if arguments is null (for restored state).
+ */
+private fun NavBackStackEntry.getStringArg(key: String): String? {
+    return arguments?.read { getStringOrNull(key) }
+        ?: savedStateHandle.get<String>(key)
+}
+
+/**
+ * Helper function to safely get a Boolean argument from NavBackStackEntry.
+ */
+private fun NavBackStackEntry.getBooleanArg(key: String, default: Boolean = false): Boolean {
+    return arguments?.read { getBooleanOrNull(key) }
+        ?: savedStateHandle.get<Boolean>(key)
+        ?: default
+}
 
 @ExperimentalMaterial3Api
 @Composable
@@ -146,13 +167,13 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val bookTitle = remember(backStackEntry) {
-                (backStackEntry.savedStateHandle.get<String>("bookTitle") ?: "").decodeUrlParam()
+                (backStackEntry.getStringArg("bookTitle") ?: "").decodeUrlParam()
             }
             val chapterTitle = remember(backStackEntry) {
-                (backStackEntry.savedStateHandle.get<String>("chapterTitle") ?: "").decodeUrlParam()
+                (backStackEntry.getStringArg("chapterTitle") ?: "").decodeUrlParam()
             }
             val prompt = remember(backStackEntry) {
-                val encoded = backStackEntry.savedStateHandle.get<String>("prompt") ?: ""
+                val encoded = backStackEntry.getStringArg("prompt") ?: ""
                 try {
                     // Try to decode as Base64 first
                     if (encoded.isNotBlank()) {
@@ -182,7 +203,7 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val artId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("artId")
+                backStackEntry.getStringArg("artId")
             } ?: return@composable
             ireader.presentation.core.ui.CharacterArtDetailScreenSpec(artId).Content()
         }
@@ -239,7 +260,7 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val sourceUrl = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("sourceUrl")
+                backStackEntry.getStringArg("sourceUrl")
             }
             ireader.presentation.core.ui.UserSourceCreatorScreenSpec(sourceUrl).Content()
         }
@@ -251,7 +272,7 @@ fun CommonNavHost(
                 navArgument("pluginId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val pluginId =  backStackEntry.savedStateHandle.get<String>("pluginId") ?: return@composable
+            val pluginId = backStackEntry.getStringArg("pluginId") ?: return@composable
             ireader.presentation.core.ui.PluginDetailsScreenSpec(pluginId).Content()
         }
         
@@ -311,9 +332,9 @@ fun CommonNavHost(
                 type = NavType.StringType 
             })
         ) { backStackEntry ->
-            // Use arguments instead of savedStateHandle for navigation arguments
+            // Use arguments from NavBackStackEntry directly - more reliable than savedStateHandle
             val bookId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+                backStackEntry.getStringArg("bookId")?.toLongOrNull()
             }
             if (bookId != null) {
                 BookDetailScreenSpec(bookId).Content()
@@ -328,10 +349,10 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val bookId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+                backStackEntry.getStringArg("bookId")?.toLongOrNull()
             }
             val chapterId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
+                backStackEntry.getStringArg("chapterId")?.toLongOrNull()
             }
             if (bookId != null && chapterId != null) {
                 // Reader depends on background-loaded modules, show loading until ready
@@ -350,7 +371,7 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val sourceId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+                backStackEntry.getStringArg("sourceId")?.toLongOrNull()
             }
             if (sourceId != null) {
                     ExploreScreenSpec(sourceId, null).Content()
@@ -374,7 +395,7 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val query = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("query")
+                backStackEntry.getStringArg("query")
             }
             GlobalSearchScreenSpec(query).Content()
         }
@@ -386,12 +407,12 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val sourceId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+                backStackEntry.getStringArg("sourceId")?.toLongOrNull()
             }
             if (sourceId != null) {
                     SourceMigrationScreenSpec(
                         sourceId = sourceId,
-                        onBackPressed = { navController.popBackStack() }
+                        onBackPressed = { navController.safePopBackStack() }
                     ).Content()
             }
         }
@@ -434,25 +455,25 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val url = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("url")
+                backStackEntry.getStringArg("url")
             }
             val sourceId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+                backStackEntry.getStringArg("sourceId")?.toLongOrNull()
             }
             val bookId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+                backStackEntry.getStringArg("bookId")?.toLongOrNull()
             }
             val chapterId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
+                backStackEntry.getStringArg("chapterId")?.toLongOrNull()
             }
             val enableBookFetch = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<Boolean>("enableBookFetch") ?: false
+                backStackEntry.getBooleanArg("enableBookFetch", false)
             }
             val enableChapterFetch = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<Boolean>("enableChapterFetch") ?: false
+                backStackEntry.getBooleanArg("enableChapterFetch", false)
             }
             val enableChaptersFetch = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<Boolean>("enableChaptersFetch") ?: false
+                backStackEntry.getBooleanArg("enableChaptersFetch", false)
             }
             
             WebViewScreenSpec(
@@ -477,16 +498,16 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val bookId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("bookId")?.toLongOrNull()
+                backStackEntry.getStringArg("bookId")?.toLongOrNull()
             }
             val chapterId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("chapterId")?.toLongOrNull()
+                backStackEntry.getStringArg("chapterId")?.toLongOrNull()
             }
             val sourceId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+                backStackEntry.getStringArg("sourceId")?.toLongOrNull()
             }
             val readingParagraph = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("readingParagraph")?.toIntOrNull() ?: 0
+                backStackEntry.getStringArg("readingParagraph")?.toIntOrNull() ?: 0
             }
             if (bookId != null && chapterId != null && sourceId != null) {
                 TTSV2ScreenSpec(bookId, chapterId, sourceId, readingParagraph).Content()
@@ -520,7 +541,7 @@ fun CommonNavHost(
             )
         ) { backStackEntry ->
             val sourceId = remember(backStackEntry) {
-                backStackEntry.savedStateHandle.get<String>("sourceId")?.toLongOrNull()
+                backStackEntry.getStringArg("sourceId")?.toLongOrNull()
             }
             if (sourceId != null) {
                 val catalogStore: CatalogStore = koinInject()

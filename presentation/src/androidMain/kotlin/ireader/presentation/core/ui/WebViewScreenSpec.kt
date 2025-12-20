@@ -95,7 +95,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
-
+import ireader.presentation.core.safePopBackStack
 @OptIn(
     ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class
 )
@@ -159,7 +159,7 @@ actual data class WebViewScreenSpec actual constructor(
                             webView?.reload()
                         }
                     },
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.safePopBackStack() },
                     urlFocusRequester = urlFocusRequester,
                     canGoBack = webView?.canGoBack() == true,
                     canGoForward = webView?.canGoForward() == true,

@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
+import ireader.presentation.core.safePopBackStack
 class RepositoryAddScreenSpec {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +54,7 @@ class RepositoryAddScreenSpec {
                         MidSizeTextComposable(text = localize(Res.string.repository_adding_a_new))
                     },
                     scrollBehavior = scrollBehavior,
-                    navigationIcon = { TopAppBarBackButton(onClick = { navController.popBackStack() }) },
+                    navigationIcon = { TopAppBarBackButton(onClick = { navController.safePopBackStack() }) },
                     actions = {
                         AppIconButton(
                             imageVector = Icons.Default.ContentPasteSearch,
@@ -96,7 +97,7 @@ class RepositoryAddScreenSpec {
                         vm.default.value = insertedRepo.id
                     }
                 }
-                navController.popBackStack()
+                navController.safePopBackStack()
             }
             )
             if (showDialog.value) {

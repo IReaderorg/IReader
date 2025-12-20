@@ -1,8 +1,9 @@
 package ireader.presentation.core.ui
 
-import ireader.presentation.core.LocalNavigator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.settings.admin.AdminBadgeVerificationScreen
 import ireader.presentation.ui.settings.admin.AdminBadgeVerificationViewModel
 
@@ -20,7 +21,7 @@ class AdminBadgeVerificationScreenSpec {
         AdminBadgeVerificationScreen(
             viewModel = viewModel,
             onNavigateBack = {
-                navController.popBackStack()
+                navController.safePopBackStack()
             }
         )
     }

@@ -20,7 +20,7 @@ import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.component.components.setupUiComponent
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.reader.ReaderSettingScreenViewModel
-
+import ireader.presentation.core.safePopBackStack
 class ReaderSettingSpec {
 
 
@@ -137,7 +137,7 @@ class ReaderSettingSpec {
                 title = localize(Res.string.reader),
                 scrollBehavior = scrollBehavior,
                 popBackStack = {
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 }
             )
         }) { padding ->

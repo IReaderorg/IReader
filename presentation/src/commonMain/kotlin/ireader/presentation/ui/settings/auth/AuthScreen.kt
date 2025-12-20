@@ -59,7 +59,7 @@ import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import org.koin.compose.koinInject
-
+import ireader.presentation.core.safePopBackStack
 class AuthScreen  {
     
     @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +75,7 @@ class AuthScreen  {
                 Toolbar(
                     title = { Text(if (state.isSignUp) "Sign Up" else "Sign In") },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
+                        IconButton(onClick = { navController.safePopBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     }
@@ -239,7 +239,7 @@ class AuthScreen  {
                 
                 if (state.success) {
                     LaunchedEffect(Unit) {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     }
                 }
             }

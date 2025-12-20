@@ -54,7 +54,7 @@ import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.components.SettingsItem
 import ireader.presentation.ui.settings.components.SettingsSectionHeader
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Data class representing a searchable setting item
  */
@@ -311,7 +311,7 @@ class SettingScreenSpec {
                                 isSearchActive = false
                                 focusManager.clearFocus()
                             } else {
-                                navController.popBackStack()
+                                navController.safePopBackStack()
                             }
                         })
                     },

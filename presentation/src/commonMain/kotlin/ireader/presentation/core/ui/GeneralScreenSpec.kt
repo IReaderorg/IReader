@@ -12,7 +12,7 @@ import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.settings.general.GeneralSettingScreen
 import ireader.presentation.ui.settings.general.GeneralSettingScreenViewModel
-
+import ireader.presentation.core.safePopBackStack
 
 @ExperimentalMaterial3Api
 class GeneralScreenSpec {
@@ -28,7 +28,7 @@ class GeneralScreenSpec {
                     title = localizeHelper.localize(Res.string.general),
                     scrollBehavior = scrollBehavior,
                     popBackStack = {
-                        navController.popBackStack()
+                        navController.safePopBackStack()
                     }
                 )
             }

@@ -77,7 +77,7 @@ fun DesktopReaderScreenTopBar(
             elevation = 0.dp,
             navigationIcon = {
                 TopAppBarBackButton(
-                    onClick = { onPopBackStack() }
+                    onClick = { onsafePopBackStack() }
                 )
             },
             actions = {
@@ -156,7 +156,7 @@ fun DesktopReaderScreenTopBar(
             },
             navigationIcon = {
                 TopAppBarBackButton(onClick = {
-                    onPopBackStack()
+                    onsafePopBackStack()
                 }, tint = vm.textColor.value.toComposeColor())
             }
         )

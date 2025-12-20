@@ -13,9 +13,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Report
 import androidx.compose.material.icons.filled.Search

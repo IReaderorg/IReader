@@ -9,7 +9,7 @@ import ireader.presentation.ui.readingbuddy.ReadingBuddyScreen
 import ireader.presentation.ui.readingbuddy.ReadingBuddyViewModel
 import ireader.presentation.ui.readingbuddy.rememberQuoteCardSharer
 import kotlinx.coroutines.launch
-
+import ireader.presentation.core.safePopBackStack
 /**
  * Screen specification for the Reading Buddy & Daily Quotes screen
  */
@@ -25,7 +25,7 @@ class ReadingBuddyScreenSpec {
         Scaffold { paddingValues ->
             ReadingBuddyScreen(
                 vm = viewModel,
-                onBack = { navController.popBackStack() },
+                onBack = { navController.safePopBackStack() },
                 onShareQuote = { quote, style ->
                     scope.launch {
                         quoteSharer.shareQuoteCard(

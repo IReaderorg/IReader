@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.characterart.CharacterArtDetailScreen
 import ireader.presentation.ui.characterart.CharacterArtViewModel
 import kotlinx.coroutines.launch
@@ -47,7 +48,7 @@ class CharacterArtDetailScreenSpec(
         if (selectedArt != null && selectedArt.id == artId) {
             CharacterArtDetailScreen(
                 art = selectedArt,
-                onBack = { navController.popBackStack() },
+                onBack = { navController.safePopBackStack() },
                 onLikeClick = { vm.toggleLike(artId) },
                 onShareClick = {
                     // Create share text with art info
@@ -71,7 +72,7 @@ class CharacterArtDetailScreenSpec(
                 onReportClick = { vm.reportArt(artId, "Reported from detail screen") },
                 onDeleteClick = { 
                     vm.deleteArt(artId)
-                    navController.popBackStack()
+                    navController.safePopBackStack()
                 },
                 isOwner = state.isAdmin // Allow admins to delete any art
             )
