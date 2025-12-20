@@ -21,7 +21,6 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
@@ -34,10 +33,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import ireader.core.startup.ScreenProfiler
 import androidx.compose.ui.unit.dp
 import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
+import ireader.core.startup.ScreenProfiler
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
@@ -70,7 +69,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
-import ireader.presentation.core.safePopBackStack
+
 /**
  * Stable holder for navigation callbacks to prevent recomposition
  */
@@ -452,6 +451,7 @@ data class BookDetailScreenSpec constructor(
                         }
                     ) { scaffoldPadding ->
                         val appbarPadding = scaffoldPadding.calculateTopPadding()
+                        val bottomPadding = scaffoldPadding.calculateBottomPadding()
                         
                         // Apply filtering and sorting based on vm.query, vm.filters, vm.sorting, and read status
                         // Note: Use vm.sorting (State object) not vm.sorting.value to properly track changes
@@ -537,6 +537,7 @@ data class BookDetailScreenSpec constructor(
                             isSummaryExpanded = state.isSummaryExpanded,
                             source = state.source,
                             appbarPadding = appbarPadding,
+                            bottomPadding = bottomPadding,
                             onItemClick = { chapter ->
                                 if (vm.selection.isEmpty()) {
                                     navigationCallbacks.onNavigateToReader(state.book.id, chapter.id)

@@ -96,6 +96,7 @@ fun BookDetailScreen(
     source: Source?,
     isSummaryExpanded: Boolean,
     appbarPadding: Dp,
+    bottomPadding: Dp = 0.dp,
     onItemClick: (Chapter) -> Unit,
     onLongItemClick: (Chapter) -> Unit,
     onSortClick: () -> Unit,
@@ -263,7 +264,8 @@ fun BookDetailScreen(
                     onMap = onMap,
                     onSortClick = onSortClick,
                     focusManager = focusManager,
-                    keyboardController = keyboardController
+                    keyboardController = keyboardController,
+                    bottomPadding = bottomPadding
                 )
             }
         )
@@ -281,7 +283,8 @@ fun BookDetailScreen(
                 LazyColumn(
                     modifier = Modifier,
                     verticalArrangement = Arrangement.Top,
-                    state = scrollState
+                    state = scrollState,
+                    contentPadding = PaddingValues(bottom = bottomPadding + 80.dp) // Scaffold bottom padding + extra space for bottom bar
                 ) {
                     item(key = "spacer_top") {
                         Spacer(modifier = Modifier.height(appbarPadding + 16.dp))
@@ -570,7 +573,8 @@ private fun ChapterListPanel(
     onMap: () -> Unit,
     onSortClick: () -> Unit,
     focusManager: androidx.compose.ui.focus.FocusManager,
-    keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?
+    keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
+    bottomPadding: Dp = 0.dp
 ) {
     // Pre-compute static modifiers - created once
     val dividerModifier = remember { Modifier.padding(horizontal = 16.dp) }
@@ -628,7 +632,7 @@ private fun ChapterListPanel(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             state = scrollState,
-            contentPadding = PaddingValues(top = 72.dp)
+            contentPadding = PaddingValues(top = 72.dp, bottom = bottomPadding + 80.dp) // Scaffold bottom padding + extra space
         ) {
             item(key = "chapter_bar") {
                 ChapterBar(
