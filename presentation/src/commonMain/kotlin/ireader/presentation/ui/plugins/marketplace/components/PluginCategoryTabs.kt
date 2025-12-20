@@ -108,5 +108,8 @@ private fun getCategoryIndex(category: PluginType?): Int {
         PluginType.GLOSSARY -> 10
         PluginType.GRADIO_TTS -> 11
         PluginType.JS_ENGINE -> 12
+        PluginType.TACHI_SOURCE_LOADER -> 13
+        PluginType.READER_SCREEN -> 14
+        PluginType.SOURCE_LOADER -> 15
     }
 }

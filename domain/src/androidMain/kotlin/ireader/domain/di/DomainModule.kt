@@ -289,7 +289,7 @@ actual val DomainModule = module {
             audioPlayerFactory = { ireader.domain.services.tts_service.AndroidGradioAudioPlayer(androidContext()) },
             saveConfigs = { json -> appPrefs.gradioTTSConfigs().set(json) },
             loadConfigs = { appPrefs.gradioTTSConfigs().get().ifEmpty { null } },
-            pluginManager = getOrNull()  // Load TTS configs from installed GRADIO_TTS plugins
+            pluginManager = get()  // Load TTS configs from installed GRADIO_TTS plugins
         )
     }
 }

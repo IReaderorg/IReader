@@ -76,7 +76,7 @@ data class PluginManifest(
      * 
      * @since 1.1.0
      */
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String>? = null
 )
 
 /**

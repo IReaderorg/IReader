@@ -56,6 +56,8 @@ class GradioTTSManager(
                 GradioTTSPluginLoader.loadFromPlugins(it) 
             } ?: emptyList()
             
+            Log.info { "$TAG: Initialized with ${currentPresets.size} presets + ${pluginConfigs.size} plugin configs" }
+            
             if (savedJson != null) {
                 val saved = json.decodeFromString<GradioTTSManagerState>(savedJson)
                 
@@ -70,7 +72,6 @@ class GradioTTSManager(
             } else {
                 // Initialize with presets + plugin configs
                 _configs.value = currentPresets + pluginConfigs
-                Log.info { "$TAG: Initialized with ${currentPresets.size} presets + ${pluginConfigs.size} plugin configs" }
             }
         } catch (e: Exception) {
             Log.error { "$TAG: Failed to load configs: ${e.message}" }

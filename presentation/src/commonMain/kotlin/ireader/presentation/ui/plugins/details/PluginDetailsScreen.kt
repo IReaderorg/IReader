@@ -793,6 +793,9 @@ private fun getCategoryDisplayName(type: PluginType): String = when (type) {
     PluginType.SYNC -> "Sync"
     PluginType.COMMUNITY_SCREEN -> "Community"
     PluginType.GLOSSARY -> "Glossary"
+    PluginType.TACHI_SOURCE_LOADER -> "Tachi Sources"
+    PluginType.READER_SCREEN -> "Reader Screen"
+    PluginType.SOURCE_LOADER -> "Source Loader"
 }
 
 private fun getPermissionIcon(permission: ireader.plugin.api.PluginPermission): ImageVector = when (permission) {

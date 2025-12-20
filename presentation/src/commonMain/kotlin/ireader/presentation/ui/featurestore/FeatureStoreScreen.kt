@@ -944,6 +944,9 @@ private fun getCategoryDisplayName(type: PluginType?): String = when (type) {
     PluginType.SYNC -> "Sync"
     PluginType.COMMUNITY_SCREEN -> "Community"
     PluginType.GLOSSARY -> "Glossary"
+    PluginType.TACHI_SOURCE_LOADER -> "Tachi Sources"
+    PluginType.READER_SCREEN -> "Reader Screens"
+    PluginType.SOURCE_LOADER -> "Source Loaders"
     null -> "All"
 }
 
@@ -961,6 +964,9 @@ private fun getCategoryColor(type: PluginType): Color = when (type) {
     PluginType.SYNC -> Color(0xFF009688)
     PluginType.COMMUNITY_SCREEN -> Color(0xFFFF5722)
     PluginType.GLOSSARY -> Color(0xFF3F51B5)
+    PluginType.TACHI_SOURCE_LOADER -> Color(0xFFE65100)
+    PluginType.READER_SCREEN -> Color(0xFF1565C0)
+    PluginType.SOURCE_LOADER -> Color(0xFF558B2F)
 }
 
 private fun formatDownloadCount(count: Int): String = when {
