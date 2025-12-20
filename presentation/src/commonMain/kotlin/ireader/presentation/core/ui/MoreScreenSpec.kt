@@ -69,7 +69,7 @@ object MoreScreenSpec {
                     navController.navigate(NavigationRoutes.communityHub)
                 },
                 onReadingBuddy = {
-                    navController.navigate(NavigationRoutes.readingBuddy)
+                    navController.navigate(NavigationRoutes.readingHub)
                 },
             )
         }

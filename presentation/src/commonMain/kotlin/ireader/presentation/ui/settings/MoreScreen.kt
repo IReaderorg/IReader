@@ -229,18 +229,18 @@ fun MoreScreen(
             }
         }
         
-        // Reading Buddy Section
+        // Reading Hub Section
         item {
             SettingsSectionHeader(
-                title = "Reading Buddy",
+                title = "Reading Hub",
                 icon = Icons.Filled.Pets
             )
         }
         
         item {
             SettingsItem(
-                title = "Reading Buddy & Quotes",
-                description = "Your cute rabbit companion and daily quotes",
+                title = "Reading Hub",
+                description = "Statistics, achievements, quotes & your reading buddy",
                 icon = Icons.Filled.Pets,
                 onClick = onReadingBuddy
             )

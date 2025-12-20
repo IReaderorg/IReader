@@ -85,3 +85,18 @@ WHERE _id = 1;
 initializeIfNeeded:
 INSERT OR IGNORE INTO reading_statistics(_id, total_chapters_read, total_reading_time_minutes, reading_streak, last_read_date, total_words_read, books_completed, longest_streak, buddy_level, buddy_experience, unlocked_achievements, last_interaction_time)
 VALUES (1, 0, 0, 0, 0, 0, 0, 0, 1, 0, '', 0);
+
+resetStatistics:
+UPDATE reading_statistics SET
+    total_chapters_read = 0,
+    total_reading_time_minutes = 0,
+    reading_streak = 0,
+    last_read_date = 0,
+    total_words_read = 0,
+    books_completed = 0,
+    longest_streak = 0,
+    buddy_level = 1,
+    buddy_experience = 0,
+    unlocked_achievements = '',
+    last_interaction_time = 0
+WHERE _id = 1;

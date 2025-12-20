@@ -176,6 +176,21 @@ val screenModelModule = module {
         )
     }
     
+    // Reading Hub ViewModel - unified statistics, buddy, and quotes
+    factory {
+        ireader.presentation.ui.readinghub.ReadingHubViewModel(
+            statisticsRepository = get(),
+            getReadingStatistics = get(),
+            quoteRepository = get(),
+            readingBuddyUseCases = get(),
+            preferences = get(),
+            getCurrentUser = {
+                val getCurrentUserUseCase: ireader.domain.usecases.remote.GetCurrentUserUseCase = get()
+                getCurrentUserUseCase().getOrNull()
+            }
+        )
+    }
+    
     // Note: ReaderScreenViewModel is NOT registered in Koin to avoid circular dependencies
     // It should be created manually where needed with all its dependencies
     

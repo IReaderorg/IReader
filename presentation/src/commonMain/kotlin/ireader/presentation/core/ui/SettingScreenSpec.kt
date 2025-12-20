@@ -175,7 +175,7 @@ class SettingScreenSpec {
                     description = "View reading statistics and progress",
                     icon = Icons.Default.BarChart,
                     section = localizeHelper.localize(Res.string.reader),
-                    onClick = { navController.navigate(NavigationRoutes.statistics) }
+                    onClick = { navController.navigate(NavigationRoutes.readingHub) }
                 ),
                 SearchableSettingItem(
                     id = "font_size",
@@ -490,7 +490,7 @@ class SettingScreenSpec {
                             title = localizeHelper.localize(Res.string.statistics),
                             description = "View reading statistics and progress",
                             icon = Icons.Default.BarChart,
-                            onClick = { navController.navigate(NavigationRoutes.statistics) }
+                            onClick = { navController.navigate(NavigationRoutes.readingHub) }
                         )
                     }
                     

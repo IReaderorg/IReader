@@ -68,7 +68,11 @@ enum class BuddyAchievement(val title: String, val description: String, val xpRe
     NIGHT_OWL("Night Owl", "Read after midnight", 25),
     EARLY_BIRD("Early Bird", "Read before 6 AM", 25),
     MARATHON("Marathon Reader", "Read for 2+ hours", 75),
-    QUOTE_COLLECTOR("Quote Collector", "Save 10 quotes", 50)
+    QUOTE_COLLECTOR("Quote Collector", "Save 10 quotes", 50);
+    
+    companion object {
+        val ALL_ACHIEVEMENTS: List<BuddyAchievement> = entries.toList()
+    }
 }
 
 /**

@@ -103,9 +103,6 @@ fun CommonNavHost(
         composable(NavigationRoutes.appearance) {
             AppearanceScreenSpec().Content()
         }
-        composable(NavigationRoutes.statistics) {
-            StatisticsScreenSpec().Content()
-        }
         composable(NavigationRoutes.donation) {
             DonationScreenSpec().Content()
         }
@@ -142,9 +139,9 @@ fun CommonNavHost(
             ireader.presentation.core.ui.AllReviewsScreenSpec().Content()
         }
         
-        // Reading Buddy & Quotes
-        composable(NavigationRoutes.readingBuddy) {
-            ireader.presentation.core.ui.ReadingBuddyScreenSpec().Content()
+        // Reading Hub - unified statistics, buddy, and quotes screen
+        composable(NavigationRoutes.readingHub) {
+            ireader.presentation.core.ui.ReadingHubScreenSpec().Content()
         }
         
         // Community Hub - parent screen for all community features

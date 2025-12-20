@@ -307,4 +307,12 @@ class ReadingStatisticsRepositoryImpl(
             readingStatisticsQueries.updateLastInteractionTime(time)
         }
     }
+    
+    override suspend fun resetStatistics() {
+        handler.await {
+            readingStatisticsQueries.resetStatistics()
+        }
+        Log.info("Statistics reset to initial values")
+        triggerSync()
+    }
 }

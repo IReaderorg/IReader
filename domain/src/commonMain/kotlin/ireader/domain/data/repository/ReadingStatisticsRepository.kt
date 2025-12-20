@@ -26,4 +26,7 @@ interface ReadingStatisticsRepository {
     suspend fun updateUnlockedAchievements(achievements: String)
     suspend fun getLastInteractionTime(): Long
     suspend fun updateLastInteractionTime(time: Long)
+    
+    // Reset all statistics to initial values
+    suspend fun resetStatistics()
 }

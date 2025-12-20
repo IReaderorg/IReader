@@ -43,7 +43,7 @@ class CommunityHubScreenSpec {
                 navController.navigate(NavigationRoutes.characterArtGallery)
             },
             onReadingBuddy = {
-                navController.navigate(NavigationRoutes.readingBuddy)
+                navController.navigate(NavigationRoutes.readingHub)
             },
             onGlossary = {
                 navController.navigate(NavigationRoutes.glossary)
