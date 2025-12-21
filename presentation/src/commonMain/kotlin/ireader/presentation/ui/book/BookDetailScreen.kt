@@ -254,19 +254,37 @@ fun BookDetailScreen(
                 )
             },
             endContent = {
-                // Right panel: Chapters
-                ChapterListPanel(
-                    vm = vm,
-                    chapters = chapters.value,
-                    scrollState = scrollState,
-                    onItemClick = onItemClick,
-                    onLongItemClick = onLongItemClick,
-                    onMap = onMap,
-                    onSortClick = onSortClick,
-                    focusManager = focusManager,
-                    keyboardController = keyboardController,
-                    bottomPadding = bottomPadding
-                )
+                // Right panel: Chapters with bottom bar overlay
+                Box(modifier = Modifier.fillMaxSize()) {
+                    ChapterListPanel(
+                        vm = vm,
+                        chapters = chapters.value,
+                        scrollState = scrollState,
+                        onItemClick = onItemClick,
+                        onLongItemClick = onLongItemClick,
+                        onMap = onMap,
+                        onSortClick = onSortClick,
+                        focusManager = focusManager,
+                        keyboardController = keyboardController,
+                        bottomPadding = bottomPadding
+                    )
+                    
+                    // Bottom bar for chapter selection actions (desktop/tablet)
+                    ChapterDetailBottomBar(
+                        vm,
+                        onDownload = {},
+                        onBookmark = {},
+                        onMarkAsRead = {},
+                        onTranslate = { 
+                            vm.quickTranslateSelectedChapters()
+                        },
+                        onTranslateLongPress = {
+                            vm.showMassTranslationDialog()
+                        },
+                        visible = vm.hasSelection,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
+                }
             }
         )
     } else {

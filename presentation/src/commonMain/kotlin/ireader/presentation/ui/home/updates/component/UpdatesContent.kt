@@ -50,8 +50,8 @@ fun UpdatesContent(
                 }
             }
             
-            updates.forEach { (date, updatesList) ->
-                item(key = "date_${date.date}") {
+            updates.entries.forEachIndexed { groupIndex, (date, updatesList) ->
+                item(key = "date_${groupIndex}_${date.date}") {
                     TextSection(
                         text = date.date.asRelativeTimeString()
                     )
