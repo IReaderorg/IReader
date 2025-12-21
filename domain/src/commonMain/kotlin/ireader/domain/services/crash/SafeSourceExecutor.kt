@@ -182,14 +182,17 @@ class SafeSourceExecutor(
     
     /**
      * Check if an error is critical (source is broken).
+     * Note: JVM-specific exception types are checked by class name for multiplatform compatibility.
      */
     private fun isCriticalError(exception: Exception): Boolean {
+        val exceptionClassName = exception::class.simpleName ?: ""
         return when {
-            exception is ClassNotFoundException -> true
-            exception is NoClassDefFoundError -> true
-            exception is LinkageError -> true
-            exception is UnsatisfiedLinkError -> true
-            exception is ExceptionInInitializerError -> true
+            // Check JVM-specific exceptions by class name (not available in Kotlin/Native)
+            exceptionClassName == "ClassNotFoundException" -> true
+            exceptionClassName == "NoClassDefFoundError" -> true
+            exceptionClassName == "LinkageError" -> true
+            exceptionClassName == "UnsatisfiedLinkError" -> true
+            exceptionClassName == "ExceptionInInitializerError" -> true
             exception.message?.contains("class not found", ignoreCase = true) == true -> true
             exception.message?.contains("no class def found", ignoreCase = true) == true -> true
             exception.message?.contains("native library", ignoreCase = true) == true -> true

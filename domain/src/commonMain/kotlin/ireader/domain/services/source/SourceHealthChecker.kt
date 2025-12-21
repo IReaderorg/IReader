@@ -189,14 +189,17 @@ class SourceHealthChecker(
     
     /**
      * Determine if an error is critical (makes source unusable).
+     * Note: JVM-specific exception types are checked by class name for multiplatform compatibility.
      */
     private fun isCriticalError(error: Throwable): Boolean {
         val message = error.message?.lowercase() ?: ""
+        val errorClassName = error::class.simpleName ?: ""
         return when {
-            error is ClassNotFoundException -> true
-            error is NoClassDefFoundError -> true
-            error is LinkageError -> true
-            error is UnsatisfiedLinkError -> true
+            // Check JVM-specific exceptions by class name (not available in Kotlin/Native)
+            errorClassName == "ClassNotFoundException" -> true
+            errorClassName == "NoClassDefFoundError" -> true
+            errorClassName == "LinkageError" -> true
+            errorClassName == "UnsatisfiedLinkError" -> true
             message.contains("class not found") -> true
             message.contains("no class def found") -> true
             message.contains("unsatisfied link") -> true
