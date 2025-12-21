@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="0xf9abb7e6947d0427c60bb5cbf7aef713b2d37ecc">0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc</string>
     <string name="aa">Aa</string>
@@ -421,7 +422,7 @@
     <string name="create_backup">Napravi sigurnosnu kopiju</string>
     <string name="create_backup_1">Napravi sigurnosnu kopiju</string>
     <string name="create_your_first_backup_using_the_button_below">Napravite prvu sigurnosnu kopiju pomoću gumba u nastavku</string>
-    <string name="creating_backup">Stvaranje sigurnosne kopije...</string>
+    <string name="creating_backup">Stvaranje sigurnosne kopije …</string>
     <string name="creating_backup_1">Stvaranje sigurnosne kopije...</string>
     <string name="cross_device_sync">Sinkronizacija između uređaja</string>
     <string name="crypto_donation_preferred">💡 Savjet: Kripto donacije su poželjnije! Plaćanja karticama putem Reymita uzimaju ~40% naknade za male iznose. Slanje kriptovaluta izravno znači da 100% ide na razvoj.</string>
@@ -591,7 +592,7 @@
     <string name="downloading_chapters">Preuzimanje %1$s poglavlja</string>
     <string name="downloading_unread_chapters">Preuzimanje %1$s nepročitanih poglavlja</string>
     <string name="downloading_update">Preuzimanje ažuriranja</string>
-    <string name="downloading_voice">Preuzimanje glasa...</string>
+    <string name="downloading_voice">Preuzimanje glasa …</string>
     <string name="downloads">Preuzimanja</string>
     <string name="downloads_paused">Preuzimanja pauzirana</string>
     <string name="downloads_queue">Red čekanja preuzimanja</string>
@@ -1400,9 +1401,7 @@
     <string name="permission_feature_download_title">Preuzmite romane</string>
     <string name="permission_feature_extensions_desc">Dodajte nove izvore za otkrivanje više sadržaja</string>
     <string name="permission_feature_extensions_title">Instalirajte proširenja</string>
-    <string name="permission_not_given">Nije odobreno dovoljno dopuštenja. Provjerite svoja
-        dopuštenja.
-    </string>
+    <string name="permission_not_given">Nedovoljne dozvole. Provjeri svoje dozvole</string>
     <string name="permission_required">Potrebno dopuštenje</string>
     <string name="permissions">Dopuštenja</string>
     <string name="pick_image">Odaberite sliku</string>
@@ -1467,7 +1466,7 @@
     <string name="preload_settings">Predučitavanje poglavlja</string>
     <string name="preloading">Predučitavanje</string>
     <string name="preloading_next_chapter">Predučitavanje sljedećeg poglavlja...</string>
-    <string name="preparing_epub_export">Priprema se EPUB izvoz...</string>
+    <string name="preparing_epub_export">Priprema se EPUB izvoz …</string>
     <string name="presents">Predstavlja</string>
     <string name="preserve_style">Sačuvaj stil</string>
     <string name="presets">Postavke</string>
@@ -1634,7 +1633,7 @@
     <string name="restore_default_reader_settings">Vrati zadane postavke čitača</string>
     <string name="restore_error">Greška vraćanja: %1$s</string>
     <string name="restoredSuccessfully">Sigurnosna kopija je uspješno vraćena.</string>
-    <string name="restoring_backup">Vraćanje sigurnosne kopije...</string>
+    <string name="restoring_backup">Obnavljanje sigurnosne kopije …</string>
     <string name="restoring_backup_1">Vraćanje sigurnosne kopije...</string>
     <string name="results">rezultati</string>
     <string name="results_found">rezultata pronađeno</string>
@@ -1687,7 +1686,7 @@
     <string name="search_languages">Pretraži jezike...</string>
     <string name="search_performance">Performanse pretraživanja</string>
     <string name="search_plugins">Pretraži dodatke...</string>
-    <string name="search_settings">Postavke pretraživanja...</string>
+    <string name="search_settings">Postavke pretrage …</string>
     <string name="search_timeout">Vrijeme čekanja pretraživanja</string>
     <string name="search_voices">Pretraži glasove...</string>
     <string name="search_voices_by_name_language">Pretražite glasove po imenu, jeziku...</string>
@@ -2136,7 +2135,7 @@
     <string name="use_a_strong_pin_or">• Koristite snažan PIN ili lozinku\n• Omogućite biometrijsku autentifikaciju za praktičnost\n• Omogućite siguran zaslon na javnim mjestima\n• Koristite zaključavanje izvora 18+ za dodatnu privatnost</string>
     <string name="use_auth">Zahtijevaj otključavanje</string>
     <string name="use_biometric">Koristi biometriju</string>
-    <string name="use_coqui_tts">Koristi Coqui TTS</string>
+    <string name="use_coqui_tts">Koristi udaljeni TTS</string>
     <string name="use_custom_colors">Koristi prilagođene boje</string>
     <string name="use_custom_supabase">Koristi prilagođeni Supabase</string>
     <string name="use_default_image_loader">Koristi zadani učitavač slika</string>
@@ -2240,4 +2239,8 @@
     <string name="your_review_will_appear_as">Vaša recenzija će se pojaviti kao:</string>
     <string name="your_username">Vaše korisničko ime</string>
     <string name="youve_reached_the_end">Došli ste do kraja!</string>
+    <string name="technical_details">Tehnički detalji</string>
+    <string name="package_url">URL paketa</string>
+    <string name="icon_url">URL ikone</string>
+    <string name="hybrid_installer">Hibrid (lokalno + paket)</string>
 </resources>
