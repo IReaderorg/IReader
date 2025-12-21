@@ -13,6 +13,7 @@ import ireader.core.http.HttpClients
 import ireader.core.log.Log
 import ireader.domain.models.update_service_models.Release
 import ireader.domain.models.update_service_models.Version
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.i18n.BuildKonfig
 import ireader.i18n.github_api_url
@@ -44,7 +45,7 @@ class AndroidAppUpdateChecker(
         private const val TAG = "AndroidAppUpdateChecker"
     }
     
-    override suspend fun checkForUpdate(): Result<Release?> = withContext(Dispatchers.IO) {
+    override suspend fun checkForUpdate(): Result<Release?> = withContext(ioDispatcher) {
         try {
             val url = github_api_url + repo_url
             Log.info { "$TAG: Checking for updates at $url" }
@@ -89,7 +90,7 @@ class AndroidAppUpdateChecker(
         onComplete: (String) -> Unit,
         onError: (String) -> Unit,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             try {
                 Log.info { "$TAG: Starting download from $url" }
                 

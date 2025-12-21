@@ -132,18 +132,9 @@ class ExploreViewModel(
                 // Initialize filters from source - wrapped in try-catch for plugin compatibility
                 val filters = try {
                     source.getFilters()
-                } catch (e: IllegalAccessError) {
-                    // Plugin compiled with incompatible Kotlin version
+                } catch (e: Exception) {
+                    // Plugin compatibility error (IllegalAccessError, NoSuchMethodError, etc.)
                     Log.error { "[ExploreViewModel] Plugin compatibility error loading filters: ${e.message}" }
-                    handlePluginCompatibilityError(catalog.name, e)
-                    return
-                } catch (e: NoSuchMethodError) {
-                    Log.error { "[ExploreViewModel] Plugin method not found: ${e.message}" }
-                    handlePluginCompatibilityError(catalog.name, e)
-                    return
-                } catch (e: LinkageError) {
-                    // Covers ClassNotFoundException, NoClassDefFoundError, etc.
-                    Log.error { "[ExploreViewModel] Plugin linkage error: ${e.message}" }
                     handlePluginCompatibilityError(catalog.name, e)
                     return
                 }
@@ -163,7 +154,7 @@ class ExploreViewModel(
                     // Start with default listing - also wrapped for safety
                     val listings = try {
                         source.getListings()
-                    } catch (e: LinkageError) {
+                    } catch (e: Exception) {
                         Log.error { "[ExploreViewModel] Plugin error getting listings: ${e.message}" }
                         handlePluginCompatibilityError(catalog.name, e)
                         return

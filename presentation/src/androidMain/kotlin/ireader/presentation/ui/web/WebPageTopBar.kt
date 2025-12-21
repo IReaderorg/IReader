@@ -37,97 +37,146 @@ fun WebPageTopBar(
     onFetchBook: () -> Unit,
     onFetchChapter: () -> Unit,
     onFetchChapters: () -> Unit,
+    modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
-            CustomTextField(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                    .fillMaxHeight(.7f)
-                    .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                        shape = CircleShape
-                    ),
-                value = urlToRender,
-                onValueChange = {
-                    onValueChange(it)
-                },
-                onValueConfirm = {
-                    onGo()
-                }
+            WebPageUrlField(
+                urlToRender = urlToRender,
+                onValueChange = onValueChange,
+                onGo = onGo
             )
         },
         navigationIcon = {
             TopAppBarBackButton(onClick = onPopBackStack)
         },
         actions = {
-            val list =
-                mutableListOf<DropDownMenuItem>(
-                    DropDownMenuItem(
-                        localize(Res.string.go)
-                    ) {
-                        onGo()
-                    },
-                    DropDownMenuItem(
-                        localize(Res.string.refresh)
-                    ) {
-                        refresh()
-                    },
-                    DropDownMenuItem(
-                        localize(Res.string.go_back)
-                    ) {
-                        goBack()
-                    },
-                    DropDownMenuItem(
-                        localize(Res.string.go_forward)
-                    ) {
-                        goForward()
-                    },
-                )
-            // Fetch buttons are always enabled regardless of page load state
-            if (source != null && source.getCommands().findInstance<Command.Detail.Fetch>() != null && state.enableBookFetch) {
-                val fetchBookLabel = when (state.fetchBookState) {
-                    is FetchButtonState.Fetching -> "${localize(Res.string.fetch_book)} (Loading...)"
-                    is FetchButtonState.Success -> "${localize(Res.string.fetch_book)} ✓"
-                    is FetchButtonState.Error -> "${localize(Res.string.fetch_book)} ✗"
-                    else -> localize(Res.string.fetch_book)
-                }
-                list.add(
-                    DropDownMenuItem(fetchBookLabel) {
-                        onFetchBook()
-                    }
-                )
-            }
-            if (source != null && source.getCommands().findInstance<Command.Content.Fetch>() != null && state.stateChapter != null && state.enableChapterFetch) {
-                val fetchChapterLabel = when (state.fetchChapterState) {
-                    is FetchButtonState.Fetching -> "${localize(Res.string.fetch_chapter)} (Loading...)"
-                    is FetchButtonState.Success -> "${localize(Res.string.fetch_chapter)} ✓"
-                    is FetchButtonState.Error -> "${localize(Res.string.fetch_chapter)} ✗"
-                    else -> localize(Res.string.fetch_chapter)
-                }
-                list.add(
-                    DropDownMenuItem(fetchChapterLabel) {
-                        onFetchChapter()
-                    }
-                )
-            }
-            if (source != null && source.getCommands().findInstance<Command.Chapter.Fetch>() != null && state.stateBook != null && state.enableChaptersFetch) {
-                val fetchChaptersLabel = when (state.fetchChaptersState) {
-                    is FetchButtonState.Fetching -> "${localize(Res.string.fetch_chapters)} (Loading...)"
-                    is FetchButtonState.Success -> "${localize(Res.string.fetch_chapters)} ✓"
-                    is FetchButtonState.Error -> "${localize(Res.string.fetch_chapters)} ✗"
-                    else -> localize(Res.string.fetch_chapters)
-                }
-                list.add(
-                    DropDownMenuItem(fetchChaptersLabel) {
-                        onFetchChapters()
-                    }
-                )
-            }
-            BuildDropDownMenu(list)
+            val menuItems = buildWebPageMenuItems(
+                state = state,
+                source = source,
+                onGo = onGo,
+                refresh = refresh,
+                goBack = goBack,
+                goForward = goForward,
+                onFetchBook = onFetchBook,
+                onFetchChapter = onFetchChapter,
+                onFetchChapters = onFetchChapters
+            )
+            BuildDropDownMenu(menuItems)
         },
+        modifier = modifier
     )
+}
+
+@Composable
+private fun WebPageUrlField(
+    urlToRender: String,
+    onValueChange: (String) -> Unit,
+    onGo: () -> Unit
+) {
+    CustomTextField(
+        modifier = Modifier
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .fillMaxHeight(.7f)
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                shape = CircleShape
+            ),
+        value = urlToRender,
+        onValueChange = onValueChange,
+        onValueConfirm = { _ -> onGo() }
+    )
+}
+
+@Composable
+private fun buildWebPageMenuItems(
+    state: WebViewPageState,
+    source: ireader.core.source.CatalogSource?,
+    onGo: () -> Unit,
+    refresh: () -> Unit,
+    goBack: () -> Unit,
+    goForward: () -> Unit,
+    onFetchBook: () -> Unit,
+    onFetchChapter: () -> Unit,
+    onFetchChapters: () -> Unit
+): List<DropDownMenuItem> {
+    val baseMenuItems = listOf(
+        DropDownMenuItem(localize(Res.string.go)) { onGo() },
+        DropDownMenuItem(localize(Res.string.refresh)) { refresh() },
+        DropDownMenuItem(localize(Res.string.go_back)) { goBack() },
+        DropDownMenuItem(localize(Res.string.go_forward)) { goForward() }
+    )
+    
+    val fetchMenuItems = buildList {
+        if (canShowFetchBook(source, state)) {
+            val fetchBookLabel = getFetchButtonLabel(
+                baseLabel = localize(Res.string.fetch_book),
+                fetchState = state.fetchBookState
+            )
+            add(DropDownMenuItem(fetchBookLabel) { onFetchBook() })
+        }
+        
+        if (canShowFetchChapter(source, state)) {
+            val fetchChapterLabel = getFetchButtonLabel(
+                baseLabel = localize(Res.string.fetch_chapter),
+                fetchState = state.fetchChapterState
+            )
+            add(DropDownMenuItem(fetchChapterLabel) { onFetchChapter() })
+        }
+        
+        if (canShowFetchChapters(source, state)) {
+            val fetchChaptersLabel = getFetchButtonLabel(
+                baseLabel = localize(Res.string.fetch_chapters),
+                fetchState = state.fetchChaptersState
+            )
+            add(DropDownMenuItem(fetchChaptersLabel) { onFetchChapters() })
+        }
+    }
+    
+    return baseMenuItems + fetchMenuItems
+}
+
+private fun canShowFetchBook(
+    source: ireader.core.source.CatalogSource?,
+    state: WebViewPageState
+): Boolean {
+    return source != null && 
+           source.getCommands().findInstance<Command.Detail.Fetch>() != null && 
+           state.enableBookFetch
+}
+
+private fun canShowFetchChapter(
+    source: ireader.core.source.CatalogSource?,
+    state: WebViewPageState
+): Boolean {
+    return source != null && 
+           source.getCommands().findInstance<Command.Content.Fetch>() != null && 
+           state.stateChapter != null && 
+           state.enableChapterFetch
+}
+
+private fun canShowFetchChapters(
+    source: ireader.core.source.CatalogSource?,
+    state: WebViewPageState
+): Boolean {
+    return source != null && 
+           source.getCommands().findInstance<Command.Chapter.Fetch>() != null && 
+           state.stateBook != null && 
+           state.enableChaptersFetch
+}
+
+@Composable
+private fun getFetchButtonLabel(
+    baseLabel: String,
+    fetchState: FetchButtonState
+): String {
+    return when (fetchState) {
+        is FetchButtonState.Fetching -> "$baseLabel (Loading...)"
+        is FetchButtonState.Success -> "$baseLabel ✓"
+        is FetchButtonState.Error -> "$baseLabel ✗"
+        else -> baseLabel
+    }
 }

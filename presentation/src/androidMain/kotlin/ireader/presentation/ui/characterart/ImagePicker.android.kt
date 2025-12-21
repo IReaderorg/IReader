@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,7 +44,7 @@ actual class ImagePicker(
         // Process the image in background
         scope.launch {
             try {
-                withContext(Dispatchers.IO) {
+                withContext(ioDispatcher) {
                     val bytes = context.contentResolver.openInputStream(uri)?.use { 
                         it.readBytes() 
                     } ?: throw Exception("Failed to read image")

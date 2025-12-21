@@ -19,11 +19,11 @@ import ireader.core.http.okhttp
 import ireader.core.util.DevicePerformanceUtil
 import ireader.domain.catalogs.CatalogStore
 import ireader.domain.image.CoverCache
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.presentation.imageloader.coil.imageloader.BookCoverKeyer
 import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteKeyer
 import ireader.presentation.imageloader.coil.imageloader.CatalogRemoteMapper
 import ireader.presentation.imageloader.coil.imageloader.InstalledCatalogKeyer
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
@@ -114,15 +114,15 @@ class CoilLoaderFactory(
             
             // Increased parallelism for faster loading
             if (isLowEnd) {
-                fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(4))
-                decoderCoroutineContext(Dispatchers.IO.limitedParallelism(4))
+                fetcherCoroutineContext(ioDispatcher.limitedParallelism(4))
+                decoderCoroutineContext(ioDispatcher.limitedParallelism(4))
             } else if (performanceTier == DevicePerformanceUtil.PerformanceTier.MEDIUM) {
-                fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(6))
-                decoderCoroutineContext(Dispatchers.IO.limitedParallelism(6))
+                fetcherCoroutineContext(ioDispatcher.limitedParallelism(6))
+                decoderCoroutineContext(ioDispatcher.limitedParallelism(6))
             } else {
                 // High-end: maximum parallelism
-                fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(8))
-                decoderCoroutineContext(Dispatchers.IO.limitedParallelism(8))
+                fetcherCoroutineContext(ioDispatcher.limitedParallelism(8))
+                decoderCoroutineContext(ioDispatcher.limitedParallelism(8))
             }
 
         }.build()

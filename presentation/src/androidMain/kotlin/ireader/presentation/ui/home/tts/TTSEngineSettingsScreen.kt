@@ -1,5 +1,6 @@
 package ireader.presentation.ui.home.tts
 
+import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.layout.*
@@ -31,96 +32,19 @@ actual fun TTSEngineSettingsScreen(
 ) {
     val context = LocalContext.current
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(localizeHelper.localize(Res.string.tts_engine_settings))
         },
         text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = localizeHelper.localize(Res.string.choose_which_tts_settings_to_open),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                
-                // System TTS Settings
-                OutlinedCard(
-                    onClick = {
-                        openAndroidSystemTTSSettings(context)
-                        onDismiss()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.SettingsVoice,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = localizeHelper.localize(Res.string.system_tts_settings),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = localizeHelper.localize(Res.string.configure_androids_built_in_text_to_speech_engine),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Icon(
-                            Icons.Default.ChevronRight,
-                            contentDescription = null
-                        )
-                    }
-                }
-                
-                // Gradio TTS Settings (New - supports multiple online TTS engines)
-                OutlinedCard(
-                    onClick = {
-                        onNavigateToTTSManager()
-                        onDismiss()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Cloud,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = localizeHelper.localize(Res.string.online_tts_engines),
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            Text(
-                                text = localizeHelper.localize(Res.string.configure_gradio_based_tts_coqui),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Icon(
-                            Icons.Default.ChevronRight,
-                            contentDescription = null
-                        )
-                    }
-                }
-            }
+            TTSEngineSettingsContent(
+                context = context,
+                localizeHelper = localizeHelper,
+                onDismiss = onDismiss,
+                onNavigateToTTSManager = onNavigateToTTSManager
+            )
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
@@ -128,6 +52,123 @@ actual fun TTSEngineSettingsScreen(
             }
         }
     )
+}
+
+@Composable
+private fun TTSEngineSettingsContent(
+    context: Context,
+    localizeHelper: ireader.i18n.LocalizeHelper,
+    onDismiss: () -> Unit,
+    onNavigateToTTSManager: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = localizeHelper.localize(Res.string.choose_which_tts_settings_to_open),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        
+        SystemTTSSettingsCard(
+            context = context,
+            localizeHelper = localizeHelper,
+            onDismiss = onDismiss
+        )
+        
+        OnlineTTSEnginesCard(
+            localizeHelper = localizeHelper,
+            onNavigateToTTSManager = onNavigateToTTSManager,
+            onDismiss = onDismiss
+        )
+    }
+}
+
+@Composable
+private fun SystemTTSSettingsCard(
+    context: Context,
+    localizeHelper: ireader.i18n.LocalizeHelper,
+    onDismiss: () -> Unit
+) {
+    OutlinedCard(
+        onClick = {
+            openAndroidSystemTTSSettings(context)
+            onDismiss()
+        },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.SettingsVoice,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = localizeHelper.localize(Res.string.system_tts_settings),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = localizeHelper.localize(Res.string.configure_androids_built_in_text_to_speech_engine),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null
+            )
+        }
+    }
+}
+
+@Composable
+private fun OnlineTTSEnginesCard(
+    localizeHelper: ireader.i18n.LocalizeHelper,
+    onNavigateToTTSManager: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    OutlinedCard(
+        onClick = {
+            onNavigateToTTSManager()
+            onDismiss()
+        },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Cloud,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = localizeHelper.localize(Res.string.online_tts_engines),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = localizeHelper.localize(Res.string.configure_gradio_based_tts_coqui),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null
+            )
+        }
+    }
 }
 
 /**

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import ireader.domain.utils.extensions.ioDispatcher
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.JSPluginCatalog
@@ -42,7 +43,7 @@ fun JSPluginIcon(
             val iconData = iconLoader.loadIcon(catalog.metadata.icon, catalog.metadata.id)
             if (iconData != null) {
                 // Convert ByteArray to ImageBitmap using Android's BitmapFactory
-                val bitmap = withContext(Dispatchers.IO) {
+                val bitmap = withContext(ioDispatcher) {
                     try {
                         val androidBitmap = BitmapFactory.decodeByteArray(iconData, 0, iconData.size)
                         androidBitmap?.asImageBitmap()

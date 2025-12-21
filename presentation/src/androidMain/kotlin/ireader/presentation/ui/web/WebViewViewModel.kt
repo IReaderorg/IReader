@@ -15,12 +15,12 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.entities.Chapter
 import ireader.domain.usecases.remote.RemoteUseCases
+import ireader.domain.utils.extensions.ioDispatcher
 import ireader.i18n.LocalizeHelper
 import ireader.i18n.UiText
 import ireader.i18n.asString
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
@@ -247,7 +247,7 @@ class WebViewPageModel(
         }
     }
     
-    private suspend fun trySmartExtraction(chapter: Chapter, pageSource: String, url: String) {
+    private fun trySmartExtraction(chapter: Chapter, pageSource: String, url: String) {
         try {
             val extractor = SmartContentExtractor()
             val result = extractor.extractContent(pageSource)
@@ -353,25 +353,25 @@ class WebViewPageModel(
     }
 
     fun insertBookDetailToLocal(book: Book) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             insertUseCases.insertBook(book)
         }
     }
 
     fun insertBook(book: Book) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             insertUseCases.insertBook(book)
         }
     }
 
     fun insertChapter(chapter: Chapter) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             insertUseCases.insertChapter(chapter)
         }
     }
 
     fun insertChapters(chapter: List<Chapter>) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             insertUseCases.insertChapters(chapter)
         }
     }
@@ -454,7 +454,7 @@ interface WebViewPageState {
     var autoFetchEnabled: Boolean
 }
 
-open class WebViewPageStateImpl() : WebViewPageState {
+open class WebViewPageStateImpl : WebViewPageState {
     override var url: String by mutableStateOf("")
     override var webUrl: String by mutableStateOf("")
 

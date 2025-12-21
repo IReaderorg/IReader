@@ -46,13 +46,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -71,6 +74,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.back
 import ireader.i18n.resources.cancel
@@ -83,6 +89,7 @@ import ireader.i18n.resources.forward
 import ireader.i18n.resources.go
 import ireader.i18n.resources.refresh
 import ireader.i18n.resources.stop
+import androidx.navigation.NavHostController
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.theme.ToolbarDimensions
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -119,218 +126,117 @@ actual data class WebViewScreenSpec actual constructor(
         val host = SnackBarListener(vm)
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
         
-        // UI state
-        var showUrlBar by remember { mutableStateOf(false) }
-        var showActionMenu by remember { mutableStateOf(false) }
-        var showFetchFeedback by remember { mutableStateOf(false) }
-        var fetchFeedbackMessage by remember { mutableStateOf("") }
-        val urlFocusRequester = remember { FocusRequester() }
+        // Create state holder
+        val screenState = remember {
+            WebViewScreenState(
+                enableBookFetch = enableBookFetch,
+                enableChapterFetch = enableChapterFetch,
+                enableChaptersFetch = enableChaptersFetch
+            )
+        }
+        
         val focusManager = LocalFocusManager.current
         val webView = vm.webViewManager.webView
         val localizeHelper = LocalLocalizeHelper.currentOrThrow
-        // URL state
         val url by remember { derivedStateOf { vm.webUrl } }
-        val source = vm.source
         val isLoading = vm.isLoading
 
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentWindowInsets = WindowInsets.statusBars,
-            topBar = {
-                ModernWebViewTopBar(
-                    scrollBehavior = scrollBehavior,
-                    currentUrl = url ?: vm.url,
-                    isLoading = isLoading,
-                    showUrlBar = showUrlBar,
-                    onShowUrlBarChange = { showUrlBar = it },
-                    onUrlChange = { vm.webUrl = it },
-                    onGoToUrl = {
-                        vm.webViewState?.content = WebViewState.WebContent.Url(vm.webUrl)
-                        vm.updateWebUrl(vm.url)
-                        showUrlBar = false
-                        focusManager.clearFocus()
-                    },
-                    onRefresh = { 
-                        if (isLoading) {
-                            webView?.stopLoading()
-                        } else {
-                            webView?.reload()
-                        }
-                    },
-                    onBack = { navController.safePopBackStack() },
-                    urlFocusRequester = urlFocusRequester,
-                    canGoBack = webView?.canGoBack() == true,
-                    canGoForward = webView?.canGoForward() == true,
-                    onGoBack = { webView?.goBack() },
-                    onGoForward = { webView?.goForward() }
-                )
-            },
-            floatingActionButton = {
-                // Only show FAB if at least one of the fetch options is enabled
-                if (enableBookFetch || enableChapterFetch || enableChaptersFetch) {
-                    FloatingActionButton(
-                        onClick = { showActionMenu = !showActionMenu },
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                        shape = CircleShape,
-                        modifier = Modifier.padding(bottom = 16.dp, end = 16.dp).navigationBarsPadding()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.BookmarkAdd,
-                            contentDescription = localizeHelper.localize(Res.string.fetch_actions),
-                            modifier = Modifier.size(24.dp)
-                        )
+        WebViewScreenContent(
+            vm = vm,
+            navController = navController,
+            scope = scope,
+            host = host,
+            scrollBehavior = scrollBehavior,
+            screenState = screenState,
+            focusManager = focusManager,
+            webView = webView,
+            localizeHelper = localizeHelper,
+            url = url,
+            isLoading = isLoading
+        )
+    }
+}
+
+@Stable
+private class WebViewScreenState(
+    val enableBookFetch: Boolean,
+    val enableChapterFetch: Boolean,
+    val enableChaptersFetch: Boolean
+) {
+    var showUrlBar by mutableStateOf(false)
+    var showActionMenu by mutableStateOf(false)
+    var showFetchFeedback by mutableStateOf(false)
+    var fetchFeedbackMessage by mutableStateOf("")
+    val urlFocusRequester = FocusRequester()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WebViewScreenContent(
+    vm: WebViewPageModel,
+    navController: NavHostController?,
+    scope: CoroutineScope,
+    host: SnackbarHostState,
+    scrollBehavior: TopAppBarScrollBehavior,
+    screenState: WebViewScreenState,
+    focusManager: FocusManager,
+    webView: android.webkit.WebView?,
+    localizeHelper: ireader.i18n.LocalizeHelper,
+    url: String?,
+    isLoading: Boolean
+) {
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentWindowInsets = WindowInsets.statusBars,
+        topBar = {
+            ModernWebViewTopBar(
+                scrollBehavior = scrollBehavior,
+                currentUrl = url ?: vm.url,
+                isLoading = isLoading,
+                showUrlBar = screenState.showUrlBar,
+                onShowUrlBarChange = { screenState.showUrlBar = it },
+                onUrlChange = { vm.webUrl = it },
+                onGoToUrl = {
+                    vm.webViewState?.content = WebViewState.WebContent.Url(vm.webUrl)
+                    vm.updateWebUrl(vm.url)
+                    screenState.showUrlBar = false
+                    focusManager.clearFocus()
+                },
+                onRefresh = { 
+                    if (isLoading) {
+                        webView?.stopLoading()
+                    } else {
+                        webView?.reload()
                     }
-                }
-            },
-            snackbarHost = { 
-                SnackbarHost(hostState = host)
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.fillMaxSize()) {
-                // Main WebView content
-                WebPageScreen(
-                    viewModel = vm,
-                    source = vm.source,
-                    snackBarHostState = host,
-                    scaffoldPadding = paddingValues,
-                    modifier = Modifier.fillMaxSize()
-                )
-                
-                // Action Menu
-                AnimatedVisibility(
-                    visible = showActionMenu,
-                    enter = fadeIn() + slideInVertically { it / 2 },
-                    exit = fadeOut() + slideOutVertically { it / 2 },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 80.dp)
-                ) {
-                    ActionMenu(
-                        onFetchBook = {
-                            webView?.let {
-                                val book = vm.stateBook
-                                if (source != null) {
-                                    showFetchFeedback = true
-                                    fetchFeedbackMessage = "Fetching book details..."
-                                    scope.launch {
-                                        try {
-                                            vm.getDetails(book = book, webView = it)
-                                            delay(500)
-                                        } catch (e: Exception) {
-                                            host.showSnackbar("Error: ${e.message}. Tap to retry.")
-                                        } finally {
-                                            showFetchFeedback = false
-                                        }
-                                    }
-                                } else {
-                                    scope.launch {
-                                        host.showSnackbar("Source not available. Please select a source first.")
-                                    }
-                                }
-                            }
-                            showActionMenu = false
-                        },
-                        onFetchChapter = {
-                            webView?.let {
-                                val chapter = vm.stateChapter
-                                if (chapter != null && source != null) {
-                                    showFetchFeedback = true
-                                    fetchFeedbackMessage = "Fetching chapter content..."
-                                    scope.launch {
-                                        try {
-                                            vm.getContentFromWebView(chapter = chapter, webView = it)
-                                            delay(500)
-                                        } catch (e: Exception) {
-                                            host.showSnackbar("Error: ${e.message}. Tap to retry.")
-                                        } finally {
-                                            showFetchFeedback = false
-                                        }
-                                    }
-                                } else {
-                                    scope.launch {
-                                        host.showSnackbar("Chapter not available. Navigate to a chapter page first.")
-                                    }
-                                }
-                            }
-                            showActionMenu = false
-                        },
-                        onFetchChapters = {
-                            webView?.let {
-                                val book = vm.stateBook
-                                val source = vm.source
-                                if (book != null && source != null) {
-                                    showFetchFeedback = true
-                                    fetchFeedbackMessage = "Fetching all chapters..."
-                                    scope.launch {
-                                        try {
-                                            vm.getChapters(book = book, webView = it)
-                                            delay(500)
-                                        } catch (e: Exception) {
-                                            host.showSnackbar("Error: ${e.message}. Tap to retry.")
-                                        } finally {
-                                            showFetchFeedback = false
-                                        }
-                                    }
-                                } else {
-                                    scope.launch {
-                                        host.showSnackbar("Book not available. Navigate to the book's page first.")
-                                    }
-                                }
-                            }
-                            showActionMenu = false
-                        },
-                        enableBookFetch = enableBookFetch,
-                        enableChapterFetch = enableChapterFetch,
-                        enableChaptersFetch = enableChaptersFetch,
-                        onDismiss = { showActionMenu = false }
-                    )
-                }
-                
-                // Loading overlay for fetch operations
-                AnimatedVisibility(
-                    visible = showFetchFeedback,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
-                            .clickable(enabled = false) {},
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .padding(32.dp)
-                                .shadow(8.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                CircularProgressIndicator(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Text(
-                                    text = fetchFeedbackMessage,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+                },
+                onBack = { navController?.safePopBackStack() },
+                urlFocusRequester = screenState.urlFocusRequester,
+                canGoBack = webView?.canGoBack() == true,
+                canGoForward = webView?.canGoForward() == true,
+                onGoBack = { webView?.goBack() },
+                onGoForward = { webView?.goForward() }
+            )
+        },
+        floatingActionButton = {
+            WebViewFloatingActionButton(screenState, localizeHelper)
+        },
+        snackbarHost = { 
+            SnackbarHost(hostState = host)
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            WebPageScreen(
+                viewModel = vm,
+                source = vm.source,
+                snackBarHostState = host,
+                scaffoldPadding = paddingValues,
+                modifier = Modifier.fillMaxSize()
+            )
+            
+            WebViewActionMenu(vm, scope, host, screenState, webView, vm.source)
+            WebViewFetchFeedback(screenState)
         }
     }
 }
@@ -633,6 +539,245 @@ private fun ActionMenuItem(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WebViewTopBar(
+    vm: WebViewPageModel,
+    navController: NavHostController?,
+    screenState: WebViewScreenState,
+    scrollBehavior: TopAppBarScrollBehavior,
+    url: String?,
+    isLoading: Boolean,
+    focusManager: FocusManager,
+    webView: android.webkit.WebView?
+) {
+    ModernWebViewTopBar(
+        scrollBehavior = scrollBehavior,
+        currentUrl = url ?: vm.url,
+        isLoading = isLoading,
+        showUrlBar = screenState.showUrlBar,
+        onShowUrlBarChange = { screenState.showUrlBar = it },
+        onUrlChange = { vm.webUrl = it },
+        onGoToUrl = {
+            vm.webViewState?.content = WebViewState.WebContent.Url(vm.webUrl)
+            vm.updateWebUrl(vm.url)
+            screenState.showUrlBar = false
+            focusManager.clearFocus()
+        },
+        onRefresh = { 
+            if (isLoading) {
+                webView?.stopLoading()
+            } else {
+                webView?.reload()
+            }
+        },
+        onBack = { navController?.safePopBackStack() },
+        urlFocusRequester = screenState.urlFocusRequester,
+        canGoBack = webView?.canGoBack() == true,
+        canGoForward = webView?.canGoForward() == true,
+        onGoBack = { webView?.goBack() },
+        onGoForward = { webView?.goForward() }
+    )
+}
+
+@Composable
+private fun WebViewFloatingActionButton(
+    screenState: WebViewScreenState,
+    localizeHelper: ireader.i18n.LocalizeHelper
+) {
+    // Only show FAB if at least one of the fetch options is enabled
+    if (screenState.enableBookFetch || screenState.enableChapterFetch || screenState.enableChaptersFetch) {
+        FloatingActionButton(
+            onClick = { screenState.showActionMenu = !screenState.showActionMenu },
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondary,
+            shape = CircleShape,
+            modifier = Modifier.padding(bottom = 16.dp, end = 16.dp).navigationBarsPadding()
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.BookmarkAdd,
+                contentDescription = localizeHelper.localize(Res.string.fetch_actions),
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun WebViewActionMenu(
+    vm: WebViewPageModel,
+    scope: CoroutineScope,
+    host: SnackbarHostState,
+    screenState: WebViewScreenState,
+    webView: android.webkit.WebView?,
+    source: ireader.core.source.CatalogSource?
+) {
+    AnimatedVisibility(
+        visible = screenState.showActionMenu,
+        enter = fadeIn() + slideInVertically { it / 2 },
+        exit = fadeOut() + slideOutVertically { it / 2 },
+        modifier = Modifier
+            .padding(bottom = 80.dp)
+    ) {
+        ActionMenu(
+            onFetchBook = {
+                handleFetchBook(vm, webView, source, scope, host, screenState)
+                screenState.showActionMenu = false
+            },
+            onFetchChapter = {
+                handleFetchChapter(vm, webView, source, scope, host, screenState)
+                screenState.showActionMenu = false
+            },
+            onFetchChapters = {
+                handleFetchChapters(vm, webView, source, scope, host, screenState)
+                screenState.showActionMenu = false
+            },
+            enableBookFetch = screenState.enableBookFetch,
+            enableChapterFetch = screenState.enableChapterFetch,
+            enableChaptersFetch = screenState.enableChaptersFetch,
+            onDismiss = { screenState.showActionMenu = false }
+        )
+    }
+}
+
+@Composable
+private fun WebViewFetchFeedback(screenState: WebViewScreenState) {
+    AnimatedVisibility(
+        visible = screenState.showFetchFeedback,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f))
+                .clickable(enabled = false) {},
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                modifier = Modifier
+                    .padding(32.dp)
+                    .shadow(8.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Text(
+                        text = screenState.fetchFeedbackMessage,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun handleFetchBook(
+    vm: WebViewPageModel,
+    webView: android.webkit.WebView?,
+    source: ireader.core.source.CatalogSource?,
+    scope: CoroutineScope,
+    host: SnackbarHostState,
+    screenState: WebViewScreenState
+) {
+    webView?.let {
+        val book = vm.stateBook
+        if (source != null) {
+            screenState.showFetchFeedback = true
+            screenState.fetchFeedbackMessage = "Fetching book details..."
+            scope.launch {
+                try {
+                    vm.getDetails(book = book, webView = it)
+                    delay(500)
+                } catch (e: Exception) {
+                    host.showSnackbar("Error: ${e.message}. Tap to retry.")
+                } finally {
+                    screenState.showFetchFeedback = false
+                }
+            }
+        } else {
+            scope.launch {
+                host.showSnackbar("Source not available. Please select a source first.")
+            }
+        }
+    }
+}
+
+private fun handleFetchChapter(
+    vm: WebViewPageModel,
+    webView: android.webkit.WebView?,
+    source: ireader.core.source.CatalogSource?,
+    scope: CoroutineScope,
+    host: SnackbarHostState,
+    screenState: WebViewScreenState
+) {
+    webView?.let {
+        val chapter = vm.stateChapter
+        if (chapter != null && source != null) {
+            screenState.showFetchFeedback = true
+            screenState.fetchFeedbackMessage = "Fetching chapter content..."
+            scope.launch {
+                try {
+                    vm.getContentFromWebView(chapter = chapter, webView = it)
+                    delay(500)
+                } catch (e: Exception) {
+                    host.showSnackbar("Error: ${e.message}. Tap to retry.")
+                } finally {
+                    screenState.showFetchFeedback = false
+                }
+            }
+        } else {
+            scope.launch {
+                host.showSnackbar("Chapter not available. Navigate to a chapter page first.")
+            }
+        }
+    }
+}
+
+private fun handleFetchChapters(
+    vm: WebViewPageModel,
+    webView: android.webkit.WebView?,
+    source: ireader.core.source.CatalogSource?,
+    scope: CoroutineScope,
+    host: SnackbarHostState,
+    screenState: WebViewScreenState
+) {
+    webView?.let {
+        val book = vm.stateBook
+        val source = vm.source
+        if (book != null && source != null) {
+            screenState.showFetchFeedback = true
+            screenState.fetchFeedbackMessage = "Fetching all chapters..."
+            scope.launch {
+                try {
+                    vm.getChapters(book = book, webView = it)
+                    delay(500)
+                } catch (e: Exception) {
+                    host.showSnackbar("Error: ${e.message}. Tap to retry.")
+                } finally {
+                    screenState.showFetchFeedback = false
+                }
+            }
+        } else {
+            scope.launch {
+                host.showSnackbar("Book not available. Navigate to the book's page first.")
             }
         }
     }

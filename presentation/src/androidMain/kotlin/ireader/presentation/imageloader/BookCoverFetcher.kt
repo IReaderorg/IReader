@@ -82,7 +82,7 @@ class BookCoverFetcher(
         }
     }
     
-    private suspend fun filePathLoader(path: String): FetchResult {
+    private fun filePathLoader(path: String): FetchResult {
         val file = java.io.File(path)
         if (!file.exists()) {
             error("File not found: $path")
@@ -99,7 +99,7 @@ class BookCoverFetcher(
         )
     }
 
-    private suspend fun fileLoader(file: VirtualFile): FetchResult {
+    private fun fileLoader(file: VirtualFile): FetchResult {
         val okioPath = file.path.toPath()
         return SourceFetchResult(
             source = ImageSource(
@@ -112,7 +112,7 @@ class BookCoverFetcher(
         )
     }
 
-    private suspend fun fileUriLoader(uri: String): FetchResult {
+    private fun fileUriLoader(uri: String): FetchResult {
         throw NotImplementedError("URI loading must be implemented platform-specifically")
     }
 

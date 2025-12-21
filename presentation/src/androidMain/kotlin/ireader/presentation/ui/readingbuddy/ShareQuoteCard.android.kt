@@ -10,7 +10,7 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import ireader.domain.models.quote.Quote
 import ireader.domain.models.quote.QuoteCardStyle
-import kotlinx.coroutines.Dispatchers
+import ireader.domain.utils.extensions.ioDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -26,7 +26,7 @@ actual class QuoteCardSharer(
         onError: (String) -> Unit
     ) {
         try {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 val imageFile = createQuoteImage(quote, style)
                 
                 val uri = FileProvider.getUriForFile(
