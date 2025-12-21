@@ -780,7 +780,7 @@ private fun ModernMigrationProgressView(
                     )
                 }
                 
-                items(matches, key = { it.book.id }) { match ->
+                items(matches, key = { it.novel.id }) { match ->
                     ModernMatchCard(
                         match = match,
                         onSelect = { onMatchSelected(match) }

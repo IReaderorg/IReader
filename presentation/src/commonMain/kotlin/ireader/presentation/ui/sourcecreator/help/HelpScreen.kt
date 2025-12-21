@@ -241,7 +241,7 @@ private fun HelpTopicDetail(
                 )
             }
             
-            items(topic.examples, key = { it.title }) { example ->
+            items(topic.examples, key = { it.description }) { example ->
                 ExampleCard(example = example)
             }
         }

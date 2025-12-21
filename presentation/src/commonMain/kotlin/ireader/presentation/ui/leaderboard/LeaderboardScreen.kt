@@ -201,7 +201,7 @@ fun LeaderboardScreen(
                     }
                     
                     // Leaderboard list with enhanced cards
-                    itemsIndexed(state.leaderboard, key = { _, entry -> entry.odId }) { index, entry ->
+                    itemsIndexed(state.leaderboard, key = { _, entry -> entry.userId }) { index, entry ->
                         EnhancedLeaderboardEntryCard(
                             entry = entry,
                             isCurrentUser = entry.userId == state.userRank?.userId,

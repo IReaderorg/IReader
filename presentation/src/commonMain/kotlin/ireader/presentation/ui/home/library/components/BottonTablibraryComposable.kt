@@ -173,7 +173,7 @@ private fun LazyListScope.FiltersPage(
     filters: List<LibraryFilter>,
     onClick: (LibraryFilter.Type) -> Unit
 ) {
-    items(filters, key = { it.first.name }) { (filter, state) ->
+    items(filters, key = { it.type.name }) { (filter, state) ->
         val isActive = state == LibraryFilter.Value.Included
         ClickableRow(onClick = { onClick(filter) }) {
             TriStateCheckbox(

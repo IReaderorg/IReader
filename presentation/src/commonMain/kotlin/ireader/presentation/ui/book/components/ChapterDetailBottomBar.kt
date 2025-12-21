@@ -115,7 +115,7 @@ private fun LazyListScope.FiltersPage(
     filters: List<ChaptersFilters>,
     onClick: (ChaptersFilters.Type) -> Unit
 ) {
-    items(filters, key = { it.first.name }) { (filter, state) ->
+    items(filters, key = { it.type.name }) { (filter, state) ->
         ClickableRow(onClick = { onClick(filter) }) {
             TriStateCheckbox(
                 modifier = Modifier.padding(horizontal = 16.dp),

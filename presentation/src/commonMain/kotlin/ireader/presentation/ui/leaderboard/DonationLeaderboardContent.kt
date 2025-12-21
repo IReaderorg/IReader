@@ -129,7 +129,7 @@ fun DonationLeaderboardContent(
                 }
                 
                 // Donation leaderboard list
-                itemsIndexed(state.leaderboard, key = { _, entry -> entry.odId }) { index, entry ->
+                itemsIndexed(state.leaderboard, key = { _, entry -> entry.userId }) { index, entry ->
                     DonationLeaderboardEntryCard(
                         entry = entry,
                         isCurrentUser = entry.userId == state.userRank?.userId
