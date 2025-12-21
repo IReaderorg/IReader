@@ -25,6 +25,9 @@ class ScreenContentViewModel(
     private val _appUpdateState = MutableStateFlow(AppUpdateState())
     val appUpdateState: StateFlow<AppUpdateState> = _appUpdateState.asStateFlow()
     
+    // Platform-specific download event handler
+    private val downloadEventHandler = createDownloadEventHandler(_appUpdateState)
+    
     companion object {
         private const val TAG = "ScreenContentViewModel"
         private const val REMIND_LATER_DAYS = 7L
@@ -39,17 +42,7 @@ class ScreenContentViewModel(
      * Check for app updates on startup
      */
     private fun checkForAppUpdates() {
-        // Only check if app updater is enabled
-        if (!appPreferences.appUpdater().get()) {
-            Log.info { "$TAG: App updater disabled, skipping check" }
-            return
-        }
-        
-        // Skip in debug/preview builds
-        if (ireader.i18n.BuildKonfig.DEBUG || ireader.i18n.BuildKonfig.PREVIEW) {
-            Log.info { "$TAG: Debug/Preview build, skipping update check" }
-            return
-        }
+        if (!appPreferences.appUpdater().get()) return
         
         scope.launch {
             _appUpdateState.value = _appUpdateState.value.copy(
@@ -82,6 +75,7 @@ class ScreenContentViewModel(
                             isLoading = false,
                             shouldShowDialog = false,
                         )
+                        Log.info { "$TAG: No update needed or dialog conditions not met" }
                     }
                 }.onFailure { error ->
                     _appUpdateState.value = _appUpdateState.value.copy(
@@ -103,7 +97,7 @@ class ScreenContentViewModel(
     private fun shouldShowUpdateDialog(tagName: String?): Boolean {
         if (tagName == null) return false
         
-        val currentVersion = ireader.i18n.BuildKonfig.VERSION_NAME
+        val currentVersion = _appUpdateState.value.currentVersion
         
         // Check if this is actually a newer version
         if (!ireader.domain.models.update_service_models.Version.isNewVersion(tagName, currentVersion)) {
@@ -113,7 +107,6 @@ class ScreenContentViewModel(
         // Check if user skipped this version
         val skippedVersion = appPreferences.skippedUpdateVersion().get()
         if (skippedVersion == tagName) {
-            Log.info { "$TAG: User skipped version $tagName" }
             return false
         }
         
@@ -123,14 +116,8 @@ class ScreenContentViewModel(
             val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
             val daysSinceRemind = (now - remindLaterTime) / MILLIS_PER_DAY
             if (daysSinceRemind < REMIND_LATER_DAYS) {
-                Log.info { "$TAG: Remind later active, $daysSinceRemind days since last remind" }
                 return false
             }
-        }
-        
-        // Check if update dialog is enabled
-        if (!appPreferences.showUpdateDialog().get()) {
-            return false
         }
         
         return true
@@ -185,22 +172,34 @@ class ScreenContentViewModel(
     fun startDownload() {
         val asset = _appUpdateState.value.apkAsset ?: return
         
+        // Immediately set connecting state for instant UI feedback
+        _appUpdateState.value = _appUpdateState.value.copy(
+            isConnecting = true,
+            isDownloading = true,
+            downloadProgress = 0f,
+            error = null,
+        )
+        
         scope.launch {
-            _appUpdateState.value = _appUpdateState.value.copy(
-                isDownloading = true,
-                downloadProgress = 0f,
-                error = null,
-            )
-            
             try {
+                Log.info { "$TAG: Starting download for ${asset.name}" }
+                
                 appUpdateChecker.downloadApk(
                     url = asset.browserDownloadUrl,
                     fileName = asset.name,
                     onProgress = { progress ->
-                        _appUpdateState.value = _appUpdateState.value.copy(downloadProgress = progress)
+                        // This will be handled by broadcast receiver on Android
+                        // On other platforms, we handle it here
+                        _appUpdateState.value = _appUpdateState.value.copy(
+                            isConnecting = false,
+                            downloadProgress = progress
+                        )
                     },
                     onComplete = { filePath ->
+                        // Note: On Android, this will be handled by the broadcast receiver
+                        // On other platforms, we handle it here
                         _appUpdateState.value = _appUpdateState.value.copy(
+                            isConnecting = false,
                             isDownloading = false,
                             isDownloaded = true,
                             downloadedFilePath = filePath,
@@ -208,7 +207,10 @@ class ScreenContentViewModel(
                         Log.info { "$TAG: Download complete: $filePath" }
                     },
                     onError = { error ->
+                        // Note: On Android, this will be handled by the broadcast receiver
+                        // On other platforms, we handle it here
                         _appUpdateState.value = _appUpdateState.value.copy(
+                            isConnecting = false,
                             isDownloading = false,
                             error = error,
                         )
@@ -217,9 +219,11 @@ class ScreenContentViewModel(
                 )
             } catch (e: Exception) {
                 _appUpdateState.value = _appUpdateState.value.copy(
+                    isConnecting = false,
                     isDownloading = false,
                     error = e.message,
                 )
+                Log.error("$TAG: Failed to start download", e)
             }
         }
     }
@@ -243,8 +247,26 @@ class ScreenContentViewModel(
     fun cancelDownload() {
         appUpdateChecker.cancelDownload()
         _appUpdateState.value = _appUpdateState.value.copy(
+            isConnecting = false,
             isDownloading = false,
             downloadProgress = 0f,
         )
     }
+    
+    override fun onCleared() {
+        super.onCleared()
+        downloadEventHandler.cleanup()
+    }
 }
+
+/**
+ * Platform-specific interface for handling download events
+ */
+expect class DownloadEventHandler(updateState: MutableStateFlow<AppUpdateState>) {
+    fun cleanup()
+}
+
+/**
+ * Create platform-specific download event handler
+ */
+expect fun createDownloadEventHandler(updateState: MutableStateFlow<AppUpdateState>): DownloadEventHandler

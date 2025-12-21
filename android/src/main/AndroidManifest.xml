@@ -148,6 +148,13 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
+        <!-- App Update Download Service -->
+        <service
+            android:name="ireader.domain.services.update_service.AppUpdateDownloadService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
         <!-- WorkManager foreground service for long-running downloads -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"

@@ -2,7 +2,11 @@ package ireader.presentation.core
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.RowScope
@@ -14,8 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +51,7 @@ import ireader.presentation.ui.component.navigation.ModernBottomNavigationBar
 import ireader.presentation.ui.component.navigation.ModernNavigationItem
 import ireader.presentation.ui.component.navigation.ModernNavigationRailItem
 import ireader.presentation.ui.home.library.viewmodel.LibraryViewModel
-import ireader.presentation.ui.update.AppUpdateDialog
+import ireader.presentation.ui.update.AppUpdateFullScreen
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -335,17 +339,25 @@ object MainStarterScreen {
                 onBack = { currentTabIndex = 0 },
             )
             
-            // App Update Dialog
+            // App Update Full Screen
             val appUpdateState by vm.appUpdateState.collectAsState()
-            AppUpdateDialog(
-                state = appUpdateState,
-                onDownload = vm::startDownload,
-                onInstall = vm::installApk,
-                onRemindLater = vm::remindLater,
-                onSkipVersion = vm::skipVersion,
-                onDismiss = vm::dismissUpdateDialog,
-                onCancelDownload = vm::cancelDownload,
-            )
+            
+            AnimatedVisibility(
+                visible = appUpdateState.shouldShowDialog,
+                enter = fadeIn() + slideInVertically { it },
+                exit = fadeOut() + slideOutVertically { it }
+            ) {
+                AppUpdateFullScreen(
+                    state = appUpdateState,
+                    onDownload = vm::startDownload,
+                    onInstall = vm::installApk,
+                    onRemindLater = vm::remindLater,
+                    onSkipVersion = vm::skipVersion,
+                    onDismiss = vm::dismissUpdateDialog,
+                    onCancelDownload = vm::cancelDownload,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 

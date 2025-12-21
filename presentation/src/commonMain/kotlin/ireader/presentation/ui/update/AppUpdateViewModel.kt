@@ -26,6 +26,7 @@ data class AppUpdateState(
     val apkAsset: ReleaseAsset? = null,
     val downloadProgress: Float = 0f,
     val isDownloading: Boolean = false,
+    val isConnecting: Boolean = false, // True during HTTP connection phase before actual download starts
     val isDownloaded: Boolean = false,
     val downloadedFilePath: String? = null,
     val error: String? = null,
