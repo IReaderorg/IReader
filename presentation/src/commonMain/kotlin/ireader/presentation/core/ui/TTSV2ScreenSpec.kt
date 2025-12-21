@@ -123,6 +123,7 @@ import ireader.presentation.ui.home.tts.v2.TTSV2ViewModelFactory
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -659,9 +660,11 @@ class TTSV2ScreenSpec(
         }
         
         // Watch for content filter changes and refresh content
+        // Use drop(1) to skip the initial emission from .changes() flow
+        // This prevents double-loading when the screen first opens
         LaunchedEffect(Unit) {
-            // Watch for filter enabled/disabled changes
-            readerPreferences.contentFilterEnabled().changes().collect { enabled ->
+            // Watch for filter enabled/disabled changes (skip initial value)
+            readerPreferences.contentFilterEnabled().changes().drop(1).collect { enabled ->
                 Log.warn { "TTSV2ScreenSpec: Content filter enabled changed to $enabled" }
                 contentFilterEnabled = enabled
                 // Refresh content to apply new filter settings
@@ -672,8 +675,8 @@ class TTSV2ScreenSpec(
         }
         
         LaunchedEffect(Unit) {
-            // Watch for filter patterns changes
-            readerPreferences.contentFilterPatterns().changes().collect { patterns ->
+            // Watch for filter patterns changes (skip initial value)
+            readerPreferences.contentFilterPatterns().changes().drop(1).collect { patterns ->
                 Log.warn { "TTSV2ScreenSpec: Content filter patterns changed" }
                 contentFilterPatterns = patterns
                 // Refresh content to apply new filter settings
