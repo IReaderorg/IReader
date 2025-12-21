@@ -13,19 +13,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.BookCover
 import ireader.domain.models.entities.BookItem
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.PerformanceConfig
 import ireader.presentation.ui.component.components.IBookImageComposable
-import ireader.presentation.ui.component.optimizedForList
 import ireader.presentation.ui.component.rememberIsScrollingFast
 
+/**
+ * NATIVE-LIKE LINEAR BOOK ITEM
+ * Optimized for 60fps scroll with GPU layer promotion
+ */
 @Composable
 fun LinearBookItem(
     modifier: Modifier = Modifier,
@@ -36,92 +41,75 @@ fun LinearBookItem(
     isScrollingFast: Boolean = false,
     performanceConfig: PerformanceConfig = LocalPerformanceConfig.current,
 ) {
+    // Cache BookCover to prevent recreation
+    val bookCover = remember(book.id, book.cover) { BookCover.from(book) }
+    
+    // Pre-compute border color
+    val borderColor = remember(selected) {
+        if (selected) androidx.compose.ui.graphics.Color(0x806200EE) 
+        else androidx.compose.ui.graphics.Color(0x1A000000)
+    }
 
     Box(
         modifier = modifier
-            .padding(vertical = 8.dp, horizontal = 8.dp)
-            .optimizedForList(enableLayerPromotion = performanceConfig.enableComplexAnimations),
+            .padding(vertical = 4.dp, horizontal = 8.dp)
+            // GPU layer promotion for smooth scrolling
+            .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Auto },
         contentAlignment = Alignment.Center,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp),
+                .height(72.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Book cover thumbnail - show placeholder during fast scroll
-            if (!isScrollingFast) {
-                IBookImageComposable(
-                    image = BookCover.from(book),
-                    modifier = Modifier
-                        .width(48.dp)
-                        .height(64.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .border(
-                            .2.dp,
-                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .5f) else MaterialTheme.colorScheme.onBackground.copy(
-                                alpha = .1f
-                            )
-                        ),
-                    headers = headers,
-                    crossfadeDurationMs = performanceConfig.crossfadeDurationMs
-                )
-            } else {
-                // Simple placeholder during fast scroll
-                Box(
-                    modifier = Modifier
-                        .width(48.dp)
-                        .height(64.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(
-                            .2.dp,
-                            if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .5f) else MaterialTheme.colorScheme.onBackground.copy(
-                                alpha = .1f
-                            )
-                        )
-                )
-            }
+            // Book cover - always show (no placeholder during scroll for native feel)
+            IBookImageComposable(
+                image = bookCover,
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(64.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .border(1.dp, borderColor, RoundedCornerShape(4.dp)),
+                headers = headers,
+                crossfadeDurationMs = 0 // Instant display
+            )
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            // Book information column
+            // Book info
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center
             ) {
-                // Title
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 2,
-                    modifier = Modifier.fillMaxWidth()
+                    overflow = TextOverflow.Ellipsis
                 )
                 
-                // Author
                 if (book.author.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = book.author,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                         maxLines = 1,
-                        modifier = Modifier.fillMaxWidth()
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 
-                // Unread count
                 if (book.unread != null && book.unread!! > 0) {
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "${book.unread} unread",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        modifier = Modifier.fillMaxWidth()
+                        maxLines = 1
                     )
                 }
             }
@@ -129,6 +117,10 @@ fun LinearBookItem(
     }
 }
 
+/**
+ * NATIVE-LIKE LINEAR LIST
+ * Optimized for 60fps scroll
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LinearListDisplay(
@@ -147,31 +139,40 @@ fun LinearListDisplay(
     headers: ((url: String) -> Map<String, String>?)? = null,
     keys: ((item: BookItem) -> Any)
 ) {
-    // Performance optimization: track fast scrolling to defer expensive operations
     val performanceConfig = LocalPerformanceConfig.current
     val isScrollingFast = rememberIsScrollingFast(scrollState)
     
-    LazyColumn(modifier = Modifier.fillMaxSize(), state = scrollState) {
+    // O(1) selection lookup
+    val selectionSet = remember(selection) { selection.toHashSet() }
+    
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = scrollState
+    ) {
         items(
-            items = books, key = keys,
-            contentType = { "books" }
+            items = books,
+            key = keys,
+            contentType = { "book_list" }
         ) { book ->
+            val isSelected = book.id in selectionSet
+            
             LinearBookItem(
                 title = book.title,
                 book = book,
                 modifier = Modifier.combinedClickable(
                     onClick = { onClick(book) },
-                    onLongClick = { onClick(book) },
-                ).animateItem(),
-                selected = book.id in selection,
+                    onLongClick = { onLongClick(book) },
+                ),
+                selected = isSelected,
                 headers = headers,
                 isScrollingFast = isScrollingFast,
                 performanceConfig = performanceConfig
             )
         }
+        
+        // Bottom spacer for navigation bar
         item {
-            Spacer(modifier = Modifier.height(25.dp))
-            // No loading indicator - data loads seamlessly without visual interruption
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

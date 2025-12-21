@@ -23,12 +23,16 @@ plugins {
     alias(kotlinx.plugins.ksp) apply false
     alias(libs.plugins.sqldelight) apply false
     alias(libs.plugins.buildkonfig) apply false
+    alias(libs.plugins.detekt)
     // Maven Central Portal Publisher
     id("com.gradleup.nmcp") version "0.0.8" apply false
    // id("nl.littlerobots.version-catalog-update") version "0.6.1"
 }
 
 subprojects {
+    // Apply detekt to all subprojects
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+    
     afterEvaluate {
         // Remove log pollution until Android support in KMP improves.
         project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension>()
@@ -63,6 +67,18 @@ subprojects {
         }
     }
     
+    // Configure detekt for subprojects
+    configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
+        buildUponDefaultConfig = true
+        config.setFrom(files("$rootDir/config/detekt.yml"))
+        baseline = file("$rootDir/config/detekt-baseline.xml")
+        parallel = true
+    }
+    
+    dependencies {
+        "detektPlugins"(rootProject.libs.detekt.compose.rules)
+    }
+    
     // Optimize Kotlin compilation tasks
     tasks.withType<KotlinCompilationTask<*>>().configureEach {
         compilerOptions {
@@ -77,4 +93,28 @@ subprojects {
 
 tasks.register("delete", Delete::class) {
     delete(rootProject.layout.buildDirectory)
+}
+
+// Detekt configuration for static analysis with Compose rules
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom(files("$rootDir/config/detekt.yml"))
+    baseline = file("$rootDir/config/detekt-baseline.xml")
+    parallel = true
+    autoCorrect = false
+}
+
+dependencies {
+    // Compose Rules for detekt - static analysis for Compose best practices
+    detektPlugins(libs.detekt.compose.rules)
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        txt.required.set(false)
+        sarif.required.set(false)
+    }
 }

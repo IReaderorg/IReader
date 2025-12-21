@@ -116,6 +116,16 @@ private enum class ImageLoaderImageState {
     Failure
 }
 
+/**
+ * NATIVE-LIKE IMAGE LOADER
+ * 
+ * Key optimizations for instant display:
+ * 1. ZERO crossfade - images appear instantly like Settings app
+ * 2. Aggressive caching - memory + disk cache always enabled
+ * 3. No loading indicators - image renders immediately or shows placeholder color
+ * 4. Stable keys - prevent unnecessary recomposition
+ * 5. Hardware acceleration - use GPU for rendering
+ */
 @Composable
 fun ImageLoaderImage(
     data: Any,
@@ -127,12 +137,7 @@ fun ImageLoaderImage(
     alpha: Float = DefaultAlpha,
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DefaultFilterQuality,
-    onLoading: (@Composable BoxScope.(Float) -> Unit)? = {
-        LoadingScreen(
-            progress = it.coerceIn(0.0F, 1.0F),
-            modifier = modifier then Modifier.fillMaxSize()
-        )
-    },
+    onLoading: (@Composable BoxScope.(Float) -> Unit)? = null, // Disabled by default for instant feel
     onSuccess: (@Composable BoxScope.() -> Unit) = {},
     onFailure: (@Composable BoxScope.(Throwable) -> Unit)? = {
         Box(
@@ -149,36 +154,31 @@ fun ImageLoaderImage(
         }
     },
     contentAlignment: Alignment = Alignment.Center,
-    animationSpec: FiniteAnimationSpec<Float>? = tween(),
+    animationSpec: FiniteAnimationSpec<Float>? = null, // Disabled by default
     enableMemoryCache: Boolean = true,
     enableDiskCache: Boolean = true,
     placeholder: ColorPainter? = null,
-    crossfadeDurationMs: Int = 200,
+    crossfadeDurationMs: Int = 0, // ZERO by default for instant display
 ) {
-    // Get performance config for size optimization
     val performanceConfig = LocalPerformanceConfig.current
     
-    // Calculate effective crossfade duration based on performance config
-    val effectiveCrossfade = remember(crossfadeDurationMs, performanceConfig) {
-        if (performanceConfig.enableImageCrossfade) {
-            minOf(crossfadeDurationMs, performanceConfig.crossfadeDurationMs)
-        } else {
-            0 // Disable crossfade when max performance is enabled
-        }
+    // CRITICAL: Always use zero crossfade for native-like feel
+    // Only enable if user explicitly wants high quality mode
+    val effectiveCrossfade = if (performanceConfig.enableImageCrossfade && crossfadeDurationMs > 0) {
+        minOf(crossfadeDurationMs, performanceConfig.crossfadeDurationMs)
+    } else {
+        0
     }
     
-    // Use lower filter quality when max performance is enabled
-    val effectiveFilterQuality = remember(filterQuality, performanceConfig) {
-        if (!performanceConfig.enableComplexAnimations) {
-            FilterQuality.Low // Faster rendering
-        } else {
-            filterQuality
-        }
+    // Use medium filter quality - good balance of speed and quality
+    val effectiveFilterQuality = if (performanceConfig.enableHardwareAcceleration) {
+        FilterQuality.Medium
+    } else {
+        FilterQuality.Low
     }
     
     Box(modifier.fillMaxSize(), contentAlignment) {
-        // Use a stable key based on the actual cache key to prevent unnecessary recomposition
-        // when different BookCover instances have the same values
+        // Stable key prevents unnecessary recomposition
         val stableKey = remember(data) {
             when (data) {
                 is ireader.domain.models.BookCover -> "${data.cover};${data.lastModified}"
@@ -186,78 +186,59 @@ fun ImageLoaderImage(
                 else -> data.hashCode()
             }
         }
+        
         key(stableKey) {
             val context = LocalPlatformContext.current
             
-            val request = remember(data, enableMemoryCache, enableDiskCache, effectiveCrossfade, performanceConfig) {
-                when (data) {
+            // Build optimized request - cached for performance
+            val request = remember(data, effectiveCrossfade, performanceConfig.thumbnailSize) {
+                val builder = when (data) {
                     is ImageRequest -> data.newBuilder()
-                        .memoryCachePolicy(if (enableMemoryCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
-                        .diskCachePolicy(if (enableDiskCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
-                        .crossfade(effectiveCrossfade)
-                        .apply {
-                            // Limit image size based on performance tier
-                            val maxSize = performanceConfig.thumbnailSize
-                            size(Size(maxSize, maxSize))
-                        }
-                        .build()
-                    else -> ImageRequest.Builder(context = context)
-                        .data(data)
-                        .memoryCachePolicy(if (enableMemoryCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
-                        .diskCachePolicy(if (enableDiskCache) coil3.request.CachePolicy.ENABLED else coil3.request.CachePolicy.DISABLED)
-                        .crossfade(effectiveCrossfade)
-                        .apply {
-                            // Limit image size based on performance tier
-                            val maxSize = performanceConfig.thumbnailSize
-                            size(Size(maxSize, maxSize))
-                        }
-                        .build()
+                    else -> ImageRequest.Builder(context = context).data(data)
                 }
+                
+                builder
+                    .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
+                    .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
+                    .crossfade(effectiveCrossfade)
+                    .size(Size(performanceConfig.thumbnailSize, performanceConfig.thumbnailSize))
+                    .build()
             }
             
+            // Track loading state - but don't show loading UI for native feel
             var loadingState by remember { mutableStateOf(ImageLoaderImageState.Loading) }
-            val progress = remember { mutableStateOf(-1F) }
             val error = remember { mutableStateOf<Throwable?>(null) }
             
             val painter = rememberAsyncImagePainter(
                 request,
                 contentScale = contentScale,
                 filterQuality = effectiveFilterQuality,
-                onLoading = {
-                    progress.value = 0.0F
-                    loadingState = ImageLoaderImageState.Loading
-                },
+                onLoading = { loadingState = ImageLoaderImageState.Loading },
                 onError = {
-                    progress.value = 0.0F
                     error.value = it.result.throwable
                     loadingState = ImageLoaderImageState.Failure
                 },
-                onSuccess = {
-                    progress.value = 1.0F
-                    loadingState = ImageLoaderImageState.Success
-                }
+                onSuccess = { loadingState = ImageLoaderImageState.Success }
             )
             
-            // Always render the image directly - no Crossfade animation
-            // This prevents the "loading" feel when navigating back to cached screens
+            // NATIVE-LIKE BEHAVIOR:
+            // - Always render the image immediately (no loading state UI)
+            // - Only show error state if image fails to load
+            // - Success callback for any additional UI
             when (loadingState) {
-                ImageLoaderImageState.Loading -> {
-                    // Show placeholder only if enabled
-                    if (performanceConfig.enableImagePlaceholder && onLoading != null) {
-                        onLoading(progress.value)
-                    }
-                }
                 ImageLoaderImageState.Failure -> {
-                    if (onFailure != null) {
-                        onFailure(error.value ?: Exception("Unknown error"))
-                    }
+                    onFailure?.invoke(this, error.value ?: Exception("Unknown error"))
                 }
                 ImageLoaderImageState.Success -> {
                     onSuccess()
                 }
+                ImageLoaderImageState.Loading -> {
+                    // NO loading indicator - image will appear when ready
+                    // This is the key to native-like feel
+                }
             }
             
-            // Always render the image - it will show immediately when cached
+            // Always render the image - shows immediately when cached
             Image(
                 painter = painter,
                 contentDescription = contentDescription,

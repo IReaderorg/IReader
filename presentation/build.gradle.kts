@@ -11,6 +11,31 @@ plugins {
     alias(kotlinx.plugins.compose.compiler)
 }
 
+// Compose Compiler Reports - Enable for performance debugging
+// Run: ./gradlew :presentation:compileDebugKotlinAndroid -PcomposeCompilerReports=true
+// Reports will be in: build/compose_compiler/
+composeCompiler {
+    // Enable stability configuration file for marking external classes as stable
+    stabilityConfigurationFile = rootProject.layout.projectDirectory.file("compose_stability_config.conf")
+    
+    // Generate reports only when explicitly requested (to avoid slowing down normal builds)
+    if (project.findProperty("composeCompilerReports") == "true") {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
+        metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    }
+    
+    // Enable strong skipping mode for better performance (Compose 1.5.4+)
+    // This allows more composables to be skipped during recomposition
+    enableStrongSkippingMode = true
+    
+    // Enable intrinsic remember optimization
+    enableIntrinsicRemember = true
+    
+    // Enable non-skipping group optimization (default in newer versions)
+    // This reduces the overhead of non-skippable composables
+    enableNonSkippingGroupOptimization = true
+}
+
 kotlin {
     androidTarget {
         publishLibraryVariants("release")

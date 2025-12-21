@@ -48,11 +48,15 @@ actual fun ColumnScrollbar(
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)?,
     content: @Composable () -> Unit
 ) {
-    if (!enabled) content()
+    // Use movableContentOf to preserve content slot state across branches
+    val movableContent = remember(content) { movableContentOf { content() } }
+    
+    if (!enabled) movableContent()
     else BoxWithConstraints {
-        content()
+        movableContent()
         ColumnScrollbar(
             state = state,
+            visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
             rightSide = rightSide,
             thickness = thickness,
             padding = padding,
@@ -60,9 +64,8 @@ actual fun ColumnScrollbar(
             thumbColor = thumbColor,
             thumbSelectedColor = thumbSelectedColor,
             thumbShape = thumbShape,
-            visibleHeightDp = with(LocalDensity.current) { constraints.maxHeight.toDp() },
-            indicatorContent = indicatorContent,
             selectionMode = selectionMode,
+            indicatorContent = indicatorContent,
         )
     }
 }
@@ -79,6 +82,7 @@ actual fun ColumnScrollbar(
 @Composable
 private fun ColumnScrollbar(
     state: ScrollState,
+    visibleHeightDp: Dp,
     rightSide: Boolean = true,
     thickness: Dp = 6.dp,
     padding: Dp = 8.dp,
@@ -88,13 +92,12 @@ private fun ColumnScrollbar(
     thumbShape: Shape = CircleShape,
     selectionMode: PreferenceValues.ScrollbarSelectionMode = PreferenceValues.ScrollbarSelectionMode.Thumb,
     indicatorContent: (@Composable (normalizedOffset: Float, isThumbSelected: Boolean) -> Unit)? = null,
-    visibleHeightDp: Dp,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     var isSelected by remember { mutableStateOf(false) }
 
-    var dragOffset by remember { mutableStateOf(0f) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
 
     val fullHeightDp = with(LocalDensity.current) { state.maxValue.toDp() + visibleHeightDp }
 

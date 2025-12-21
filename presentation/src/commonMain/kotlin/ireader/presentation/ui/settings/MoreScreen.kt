@@ -379,10 +379,10 @@ class MainSettingScreenViewModel(
     private val _isAdmin = androidx.compose.runtime.mutableStateOf(false)
     val isAdmin: androidx.compose.runtime.State<Boolean> = _isAdmin
 
-    var savedScrollIndex by androidx.compose.runtime.mutableStateOf(0)
+    var savedScrollIndex by androidx.compose.runtime.mutableIntStateOf(0)
         private set
     
-    var savedScrollOffset by androidx.compose.runtime.mutableStateOf(0)
+    var savedScrollOffset by androidx.compose.runtime.mutableIntStateOf(0)
         private set
 
     init {

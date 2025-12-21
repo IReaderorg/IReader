@@ -25,104 +25,121 @@ import androidx.compose.ui.graphics.graphicsLayer
  */
 
 /**
- * Configuration for low-end device optimizations
+ * Configuration for device-specific performance optimizations.
+ * 
+ * NATIVE-LIKE PERFORMANCE STRATEGY:
+ * 1. Zero crossfade - images appear instantly like Settings app
+ * 2. Minimal animations - 50ms max for transitions
+ * 3. Aggressive prefetching - load ahead for smooth scrolling
+ * 4. Hardware acceleration - use GPU for compositing
+ * 5. Memory-efficient images - right-size for display
  */
 @Stable
 data class PerformanceConfig(
-    // Native-like defaults: minimal animations for instant response
-    val animationDurationMs: Int = 100, // Reduced from 300 - native apps use ~100ms
-    val crossfadeDurationMs: Int = 0, // Disabled - images appear instantly like native
-    val prefetchDistance: Int = 6, // Increased for smoother scrolling
-    val maxConcurrentImageLoads: Int = 8, // More concurrent loads for faster display
-    val enableComplexAnimations: Boolean = false, // Disabled by default for native feel
-    val enableBlurEffects: Boolean = false, // Disabled - expensive on most devices
-    val enableShadows: Boolean = true, // Keep shadows for visual hierarchy
-    // Image loading optimizations - aggressive caching
-    val maxImageSize: Int = 512, // Reduced from 1024 - faster loading
-    val thumbnailSize: Int = 256, // Good balance of quality and speed
-    val enableImageCrossfade: Boolean = false, // Disabled - instant display like native
-    val useRgb565: Boolean = false, // Keep quality for covers
-    val enableImagePlaceholder: Boolean = false, // Disabled - show cached images instantly
-    val deferImageLoadingOnScroll: Boolean = true // Defer during fast scroll for smoothness
+    // Animation settings - native apps use ~50-100ms
+    val animationDurationMs: Int = 50, // Ultra-fast transitions
+    val crossfadeDurationMs: Int = 0, // ZERO - instant image display
+    val prefetchDistance: Int = 8, // Aggressive prefetch for smooth scroll
+    val maxConcurrentImageLoads: Int = 12, // High parallelism for fast loading
+    val enableComplexAnimations: Boolean = false, // Disabled for native feel
+    val enableBlurEffects: Boolean = false, // Expensive - disabled
+    val enableShadows: Boolean = false, // Disabled for performance
+    // Image loading - optimized for instant display
+    val maxImageSize: Int = 384, // Balanced quality/speed
+    val thumbnailSize: Int = 192, // Smaller thumbnails load faster
+    val enableImageCrossfade: Boolean = false, // CRITICAL: disabled for instant display
+    val useRgb565: Boolean = false, // Keep quality
+    val enableImagePlaceholder: Boolean = false, // No placeholder - instant display
+    val deferImageLoadingOnScroll: Boolean = false, // Load immediately
+    // New: Layer promotion for scroll performance
+    val enableLayerPromotion: Boolean = true, // Promote list items to GPU layers
+    val enableHardwareAcceleration: Boolean = true // Use hardware bitmaps
 ) {
     companion object {
         /**
-         * Default config optimized for native-like performance.
-         * Prioritizes instant response over visual polish.
+         * Default config - NATIVE-LIKE PERFORMANCE.
+         * Optimized for instant response like Android Settings app.
          */
         val Default = PerformanceConfig()
         
         /**
-         * Maximum performance mode - disables all animations and effects
-         * for the fastest possible rendering. Use when user explicitly
-         * wants maximum performance over visual polish.
+         * Maximum performance mode - absolute fastest rendering.
+         * Use for users who want maximum speed.
          */
         val MaxPerformance = PerformanceConfig(
-            animationDurationMs = 0,
+            animationDurationMs = 0, // Zero animations
             crossfadeDurationMs = 0,
-            prefetchDistance = 8,
-            maxConcurrentImageLoads = 10,
+            prefetchDistance = 10,
+            maxConcurrentImageLoads = 16,
             enableComplexAnimations = false,
             enableBlurEffects = false,
             enableShadows = false,
-            maxImageSize = 384,
-            thumbnailSize = 192,
+            maxImageSize = 256, // Smaller for speed
+            thumbnailSize = 128,
             enableImageCrossfade = false,
-            useRgb565 = false,
+            useRgb565 = true, // Memory efficient
             enableImagePlaceholder = false,
-            deferImageLoadingOnScroll = true
+            deferImageLoadingOnScroll = false,
+            enableLayerPromotion = true,
+            enableHardwareAcceleration = true
         )
         
         val LowEnd = PerformanceConfig(
-            animationDurationMs = 0, // No animations for low-end
-            crossfadeDurationMs = 0, // Disable crossfade for instant display
-            prefetchDistance = 2,
-            maxConcurrentImageLoads = 3,
+            animationDurationMs = 0, // No animations
+            crossfadeDurationMs = 0,
+            prefetchDistance = 4,
+            maxConcurrentImageLoads = 4,
             enableComplexAnimations = false,
             enableBlurEffects = false,
             enableShadows = false,
-            maxImageSize = 256, // Smaller images for low-end
-            thumbnailSize = 128,
+            maxImageSize = 192, // Very small for low-end
+            thumbnailSize = 96,
             enableImageCrossfade = false,
-            useRgb565 = true,
+            useRgb565 = true, // Save memory
             enableImagePlaceholder = false,
-            deferImageLoadingOnScroll = true
+            deferImageLoadingOnScroll = true, // Defer on low-end
+            enableLayerPromotion = false, // May cause issues on low-end
+            enableHardwareAcceleration = false // May not be supported
         )
         
         val Medium = PerformanceConfig(
-            animationDurationMs = 50, // Very fast animations
-            crossfadeDurationMs = 0, // Disable crossfade for faster display
-            prefetchDistance = 4,
-            maxConcurrentImageLoads = 6,
+            animationDurationMs = 50,
+            crossfadeDurationMs = 0,
+            prefetchDistance = 6,
+            maxConcurrentImageLoads = 8,
             enableComplexAnimations = false,
             enableBlurEffects = false,
             enableShadows = false,
-            maxImageSize = 384,
-            thumbnailSize = 192,
+            maxImageSize = 320,
+            thumbnailSize = 160,
             enableImageCrossfade = false,
             useRgb565 = false,
             enableImagePlaceholder = false,
-            deferImageLoadingOnScroll = true
+            deferImageLoadingOnScroll = false,
+            enableLayerPromotion = true,
+            enableHardwareAcceleration = true
         )
         
         /**
-         * High quality mode for users who prefer visual polish over speed.
-         * Use this when user explicitly enables animations.
+         * High quality mode - for users who prefer visual polish.
+         * Still optimized but with some visual enhancements.
          */
         val HighQuality = PerformanceConfig(
-            animationDurationMs = 200,
-            crossfadeDurationMs = 150,
-            prefetchDistance = 4,
-            maxConcurrentImageLoads = 6,
+            animationDurationMs = 100,
+            crossfadeDurationMs = 100,
+            prefetchDistance = 6,
+            maxConcurrentImageLoads = 8,
             enableComplexAnimations = true,
-            enableBlurEffects = true,
+            enableBlurEffects = false, // Still disabled - too expensive
             enableShadows = true,
-            maxImageSize = 1024,
+            maxImageSize = 512,
             thumbnailSize = 256,
             enableImageCrossfade = true,
             useRgb565 = false,
             enableImagePlaceholder = true,
-            deferImageLoadingOnScroll = false
+            deferImageLoadingOnScroll = false,
+            enableLayerPromotion = true,
+            enableHardwareAcceleration = true
         )
     }
 }

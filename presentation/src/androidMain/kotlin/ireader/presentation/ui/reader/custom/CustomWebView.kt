@@ -49,11 +49,11 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun WebView(
-        preconfigureWebView: WebView? = null,
         modifier: Modifier = Modifier,
+        preconfigureWebView: WebView? = null,
         captureBackPresses: Boolean = true,
         navigator: WebViewNavigator = rememberWebViewNavigator(),
-        onCreated: (WebView) -> Unit = {},
+        onCreate: (WebView) -> Unit = {},
 //    client: ireader.ui.reader.custom.AccompanistWebViewClient = remember { ireader.ui.reader.custom.AccompanistWebViewClient() },
 //    chromeClient: ireader.ui.reader.custom.AccompanistWebChromeClient = remember { ireader.ui.reader.custom.AccompanistWebChromeClient() }
 ) {

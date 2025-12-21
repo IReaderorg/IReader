@@ -3,10 +3,7 @@ package ireader.presentation.ui.component.list.layouts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,7 +12,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
@@ -27,6 +23,10 @@ import ireader.i18n.resources.*
 import ireader.presentation.ui.component.LocalPerformanceConfig
 import ireader.presentation.ui.component.rememberIsGridScrollingFast
 
+/**
+ * NATIVE-LIKE COVER-ONLY GRID
+ * Optimized for 60fps scroll - shows only book covers without titles
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CoverOnlyGrid(
@@ -43,27 +43,27 @@ fun CoverOnlyGrid(
     showUnreadBadge: Boolean = false,
     showReadBadge: Boolean = false,
     showInLibraryBadge: Boolean = false,
-    columns: Int = 3, // Default 3 columns for better phone display, tablets use adaptive
+    columns: Int = 3,
     header: ((url: String) -> Map<String, String>?)? = null,
     keys: ((item: BookItem) -> Any)
 ) {
-    // Performance optimization: track fast scrolling to defer expensive operations
     val performanceConfig = LocalPerformanceConfig.current
     val isScrollingFast = rememberIsGridScrollingFast(scrollState)
     
-    // Pre-compute selection set for O(1) lookup instead of O(n) list contains
-    val selectionSet = remember(selection) { selection.toSet() }
+    // O(1) selection lookup
+    val selectionSet = remember(selection) { selection.toHashSet() }
     
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Cache cells calculation to avoid recreation
-        val cells = remember(columns) {
-            if (columns > 1) {
-                GridCells.Fixed(columns)
-            } else {
-                GridCells.Adaptive(160.dp)
-            }
-        }
+    // Pre-compute badge visibility
+    val showAnyBadge = remember(showUnreadBadge, showReadBadge) {
+        showUnreadBadge || showReadBadge
+    }
+    
+    // Stable cells reference
+    val cells = remember(columns) {
+        if (columns > 1) GridCells.Fixed(columns) else GridCells.Adaptive(160.dp)
+    }
 
+    Box(modifier = Modifier.fillMaxSize()) {
         LazyVerticalGrid(
             state = scrollState,
             modifier = modifier.fillMaxSize(),
@@ -73,20 +73,17 @@ fun CoverOnlyGrid(
                 items(
                     items = books,
                     key = keys,
-
-                    contentType = { "books" }
+                    contentType = { "book_cover" }
                 ) { book ->
-                    val height = remember {
-                        mutableStateOf(IntSize(0, 0))
-                    }
+                    val height = remember { mutableStateOf(IntSize(0, 0)) }
+                    val isSelected = book.id in selectionSet
+                    
                     BookImage(
-                        modifier = Modifier.animateItem().onGloballyPositioned {
-                            height.value = it.size
-                        },
+                        modifier = Modifier.onGloballyPositioned { height.value = it.size },
                         onClick = { onClick(book) },
                         book = book,
                         ratio = 2f / 3f,
-                        selected = book.id in selectionSet, // Use set for O(1) lookup
+                        selected = isSelected,
                         header = header,
                         onlyCover = true,
                         onLongClick = { onLongClick(book) },
@@ -94,17 +91,19 @@ fun CoverOnlyGrid(
                         performanceConfig = performanceConfig,
                     ) {
                         if (showGoToLastChapterBadge) {
-                            GoToLastReadComposable(onClick = { goToLatestChapter(book) }, size = (height.value.height / 20).dp)
+                            GoToLastReadComposable(
+                                onClick = { goToLatestChapter(book) },
+                                size = (height.value.height / 20).dp
+                            )
                         }
-                        if (showUnreadBadge || showReadBadge || book.isArchived) {
+                        if (showAnyBadge || book.isArchived) {
                             LibraryBadges(
                                 unread = if (showUnreadBadge) book.unread else null,
                                 downloaded = if (showReadBadge) book.downloaded else null,
-                                isPinned = false, // Will be implemented in task 5.2
+                                isPinned = false,
                                 isArchived = book.isArchived
                             )
                         }
-
                         if (showInLibraryBadge && book.favorite) {
                             TextBadge(text = UiText.MStringResource(Res.string.in_library))
                         }
@@ -112,6 +111,5 @@ fun CoverOnlyGrid(
                 }
             }
         )
-        // No loading indicator - data loads seamlessly without visual interruption
     }
 }

@@ -40,7 +40,7 @@ import ireader.i18n.resources.Res
 @Preview(name = "Row Preference - Light", showBackground = true)
 @Preview(name = "Row Preference - Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun RowPreferencePreviewAndroid() {
+private fun RowPreferencePreviewAndroid() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
@@ -88,7 +88,7 @@ fun RowPreferencePreviewAndroid() {
  */
 @Preview(name = "Row Preference - Long Text", showBackground = true)
 @Composable
-fun RowPreferenceLongTextPreview() {
+private fun RowPreferenceLongTextPreview() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
@@ -110,7 +110,7 @@ fun RowPreferenceLongTextPreview() {
 @Preview(name = "Navigation Row Preference", showBackground = true)
 @Preview(name = "Navigation Row Preference - Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun NavigationRowPreferencePreviewAndroid() {
+private fun NavigationRowPreferencePreviewAndroid() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
@@ -146,7 +146,7 @@ fun NavigationRowPreferencePreviewAndroid() {
 @Preview(name = "Section Header", showBackground = true)
 @Preview(name = "Section Header - Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun SectionHeaderPreviewAndroid() {
+private fun SectionHeaderPreviewAndroid() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
@@ -175,7 +175,7 @@ fun SectionHeaderPreviewAndroid() {
 @Preview(name = "Enhanced Card", showBackground = true)
 @Preview(name = "Enhanced Card - Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun EnhancedCardPreviewAndroid() {
+private fun EnhancedCardPreviewAndroid() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
@@ -219,7 +219,7 @@ fun EnhancedCardPreviewAndroid() {
 @Preview(name = "Preference Group", showBackground = true)
 @Preview(name = "Preference Group - Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun PreferenceGroupPreviewAndroid() {
+private fun PreferenceGroupPreviewAndroid() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
@@ -267,7 +267,7 @@ fun PreferenceGroupPreviewAndroid() {
  */
 @Preview(name = "Preference Divider", showBackground = true)
 @Composable
-fun PreferenceDividerPreviewAndroid() {
+private fun PreferenceDividerPreviewAndroid() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
@@ -288,7 +288,7 @@ fun PreferenceDividerPreviewAndroid() {
 @Preview(name = "Complete Settings Screen", showBackground = true, heightDp = 800)
 @Preview(name = "Complete Settings Screen - Dark", showBackground = true, heightDp = 800, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun CompleteSettingsScreenPreviewAndroid() {
+private fun CompleteSettingsScreenPreviewAndroid() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {
@@ -369,7 +369,7 @@ fun CompleteSettingsScreenPreviewAndroid() {
  */
 @Preview(name = "Component States", showBackground = true)
 @Composable
-fun ComponentStatesPreview() {
+private fun ComponentStatesPreview() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {
         Surface {

@@ -14,10 +14,11 @@ import androidx.compose.ui.platform.LocalContext
 import ireader.domain.models.entities.Glossary
 import ireader.domain.models.entities.GlossaryTermType
 import ireader.i18n.UiText
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 actual fun GlossaryDialogWithFilePickers(
-    glossaryEntries: List<Glossary>,
+    glossaryEntries: ImmutableList<Glossary>,
     bookTitle: String?,
     onDismiss: () -> Unit,
     onAddEntry: (String, String, GlossaryTermType, String?) -> Unit,

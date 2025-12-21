@@ -29,6 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,10 +56,10 @@ private const val TAG = "ChatGptWebView"
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun ChatGptWebView(
+    onClose: () -> Unit,
     modifier: Modifier = Modifier,
     engine: WebscrapingTranslateEngine = koinInject(),
-    onTranslationDone: (() -> Unit)? = null,
-    onClose: () -> Unit
+    onTranslationComplete: (() -> Unit)? = null,
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val context = LocalContext.current
@@ -66,12 +68,12 @@ fun ChatGptWebView(
     var isCaptchaRequired by remember { mutableStateOf(false) }
     var currentUrl by remember { mutableStateOf("https://chat.openai.com") }
     var messageToSend by remember { mutableStateOf<String?>(null) }
-    var progress by remember { mutableStateOf(0f) }
+    var progress by remember { mutableFloatStateOf(0f) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var webViewAvailable by remember { mutableStateOf(isWebViewAvailable(context)) }
     var loadTimeoutReached by remember { mutableStateOf(false) }
     var debugMessage by remember { mutableStateOf<String?>(null) }
-    var retryCount by remember { mutableStateOf(0) }
+    var retryCount by remember { mutableIntStateOf(0) }
     
     // Test URLs for debugging
     val fallbackUrls = listOf(
@@ -80,7 +82,7 @@ fun ChatGptWebView(
         "https://example.com"
     )
     
-    var currentFallbackUrlIndex by remember { mutableStateOf(0) }
+    var currentFallbackUrlIndex by remember { mutableIntStateOf(0) }
     var urlToLoad by remember { mutableStateOf(fallbackUrls[0]) }
     
     // Check if WebView is available
@@ -405,8 +407,8 @@ fun ChatGptWebView(
                         // Add JavaScript interface to capture ChatGPT responses
                         addJavascriptInterface(
                             createJavaScriptInterface(engine) {
-                                android.util.Log.d(TAG, "Translation response received, calling onTranslationDone")
-                                onTranslationDone?.invoke()
+                                android.util.Log.d(TAG, "Translation response received, calling onTranslationComplete")
+                                onTranslationComplete?.invoke()
                             },
                             "Android"
                         )

@@ -49,13 +49,14 @@ import ireader.i18n.UiText
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * Wrapper composable that handles file picking for glossary import/export
  */
 @Composable
 expect fun GlossaryDialogWithFilePickers(
-    glossaryEntries: List<Glossary>,
+    glossaryEntries: ImmutableList<Glossary>,
     bookTitle: String?,
     onDismiss: () -> Unit,
     onAddEntry: (String, String, GlossaryTermType, String?) -> Unit,

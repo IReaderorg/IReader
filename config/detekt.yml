@@ -1,5 +1,5 @@
 # Enhanced Detekt Configuration for Mihon-Inspired Improvements
-# Stricter rules for better code quality
+# Updated for detekt 1.23.8 - removed deprecated properties
 
 build:
   maxIssues: 0
@@ -37,15 +37,11 @@ comments:
   EndOfSentenceFormat:
     active: false
   UndocumentedPublicClass:
-    active: true
-    searchInNestedClass: true
-    searchInInnerClass: true
-    searchInInnerObject: true
-    searchInInnerInterface: true
+    active: false
   UndocumentedPublicFunction:
-    active: true
+    active: false
   UndocumentedPublicProperty:
-    active: true
+    active: false
 
 complexity:
   active: true
@@ -54,7 +50,7 @@ complexity:
     threshold: 4
   ComplexInterface:
     active: false
-  ComplexMethod:
+  CyclomaticComplexMethod:
     active: true
     threshold: 15
     ignoreSingleWhenExpression: false
@@ -145,7 +141,11 @@ exceptions:
   active: true
   ExceptionRaisedInUnexpectedLocation:
     active: true
-    methodNames: [toString, hashCode, equals, finalize]
+    methodNames:
+      - toString
+      - hashCode
+      - equals
+      - finalize
   InstanceOfCheckForException:
     active: false
   NotImplementedDeclaration:
@@ -193,11 +193,6 @@ exceptions:
       - Throwable
       - RuntimeException
 
-formatting:
-  active: true
-  android: true
-  autoCorrect: true
-
 naming:
   active: true
   ClassNaming:
@@ -221,12 +216,10 @@ naming:
     active: true
     functionPattern: '[a-z][a-zA-Z0-9]*'
     excludeClassPattern: '$^'
-    ignoreOverridden: true
   FunctionParameterNaming:
     active: true
     parameterPattern: '[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
-    ignoreOverridden: true
   InvalidPackageDeclaration:
     active: false
   MatchingDeclarationName:
@@ -257,7 +250,6 @@ naming:
     variablePattern: '[a-z][A-Za-z0-9]*'
     privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
-    ignoreOverridden: true
 
 performance:
   active: true
@@ -281,8 +273,6 @@ potential-bugs:
   DontDowncastCollectionTypes:
     active: false
   DoubleMutabilityForCollection:
-    active: true
-  DuplicateCaseInWhenExpression:
     active: true
   EqualsAlwaysReturnsTrueOrFalse:
     active: true
@@ -308,12 +298,8 @@ potential-bugs:
     active: false
   MapGetWithNotNullAssertionOperator:
     active: false
-  MissingWhenCase:
-    active: true
   NullableToStringCall:
     active: false
-  RedundantElseInWhen:
-    active: true
   UnconditionalJumpStatementInLoop:
     active: false
   UnnecessaryNotNullOperator:
@@ -333,6 +319,10 @@ potential-bugs:
 
 style:
   active: true
+  BracesOnIfStatements:
+    active: false
+  BracesOnWhenStatements:
+    active: false
   CollapsibleIfStatements:
     active: false
   DataClassContainsFunctions:
@@ -351,46 +341,24 @@ style:
     active: false
   ForbiddenComment:
     active: true
-    values: ['TODO:', 'FIXME:', 'STOPSHIP:']
+    comments:
+      - 'TODO:'
+      - 'FIXME:'
+      - 'STOPSHIP:'
     allowedPatterns: ''
   ForbiddenImport:
     active: true
     imports:
-      # JVM-only date/time APIs - use kotlinx-datetime instead
       - value: 'java.util.Date'
-        reason: 'Use kotlinx-datetime APIs instead. See domain/utils/extensions/DateExt.kt'
+        reason: 'Use kotlinx-datetime APIs instead'
       - value: 'java.util.Calendar'
-        reason: 'Use kotlinx-datetime APIs instead. See domain/utils/extensions/DateExt.kt'
+        reason: 'Use kotlinx-datetime APIs instead'
       - value: 'java.text.SimpleDateFormat'
-        reason: 'Use kotlinx-datetime formatting functions instead. See domain/utils/extensions/DateExt.kt'
+        reason: 'Use kotlinx-datetime formatting functions instead'
       - value: 'java.text.DateFormat'
-        reason: 'Use kotlinx-datetime formatting functions instead. See domain/utils/extensions/DateExt.kt'
-      - value: 'java.time.*'
-        reason: 'Use kotlinx-datetime APIs instead for KMP compatibility'
-      # JVM-only I/O - use okio or ktor instead
+        reason: 'Use kotlinx-datetime formatting functions instead'
       - value: 'java.io.File'
         reason: 'Use okio Path/FileSystem for KMP compatibility'
-      - value: 'java.io.InputStream'
-        reason: 'Use okio Source for KMP compatibility'
-      - value: 'java.io.OutputStream'
-        reason: 'Use okio Sink for KMP compatibility'
-      - value: 'java.io.Reader'
-        reason: 'Use okio BufferedSource for KMP compatibility'
-      - value: 'java.io.Writer'
-        reason: 'Use okio BufferedSink for KMP compatibility'
-      # JVM-only concurrency - use kotlinx.coroutines instead
-      - value: 'java.util.concurrent.*'
-        reason: 'Use kotlinx.coroutines for KMP compatibility'
-      - value: 'java.lang.Thread'
-        reason: 'Use kotlinx.coroutines for KMP compatibility'
-      # JVM-only collections that have KMP alternatives
-      - value: 'java.util.HashMap'
-        reason: 'Use kotlin.collections.HashMap or mutableMapOf()'
-      - value: 'java.util.ArrayList'
-        reason: 'Use kotlin.collections.ArrayList or mutableListOf()'
-      - value: 'java.util.HashSet'
-        reason: 'Use kotlin.collections.HashSet or mutableSetOf()'
-    # Only apply to commonMain source sets
     excludes:
       - '**/androidMain/**'
       - '**/desktopMain/**'
@@ -399,33 +367,17 @@ style:
       - '**/jsMain/**'
   ForbiddenMethodCall:
     active: false
-  ForbiddenPublicDataClass:
-    active: false
   ForbiddenVoid:
     active: false
   FunctionOnlyReturningConstant:
     active: true
     ignoreOverridableFunction: true
-    excludedFunctions: 'describeContents'
-  LibraryCodeMustSpecifyReturnType:
-    active: false
+    excludedFunctions:
+      - 'describeContents'
   LoopWithTooManyJumpStatements:
     active: true
     maxJumpCount: 1
   MagicNumber:
-    active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
-    ignoreNumbers: ['-1', '0', '1', '2']
-    ignoreHashCodeFunction: true
-    ignorePropertyDeclaration: true
-    ignoreLocalVariableDeclaration: false
-    ignoreConstantDeclaration: true
-    ignoreCompanionObjectPropertyDeclaration: true
-    ignoreAnnotation: false
-    ignoreNamedArgument: true
-    ignoreEnums: true
-    ignoreRanges: false
-  MandatoryBracesIfStatements:
     active: false
   MaxLineLength:
     active: true
@@ -447,8 +399,6 @@ style:
     active: true
   OptionalUnit:
     active: false
-  OptionalWhenBraces:
-    active: false
   PreferToOverPairSyntax:
     active: false
   ProtectedMemberInFinalClass:
@@ -462,7 +412,8 @@ style:
   ReturnCount:
     active: true
     max: 2
-    excludedFunctions: 'equals'
+    excludedFunctions:
+      - 'equals'
     excludeLabeled: false
     excludeReturnFromLambda: true
     excludeGuardClauses: false
@@ -524,30 +475,95 @@ style:
     active: true
   WildcardImport:
     active: true
-    excludes: ['java.util.*', 'kotlinx.android.synthetic.**']
+    excludes:
+      - 'java.util.*'
+      - 'kotlinx.android.synthetic.**'
 
-TwitterCompose:
-  ContentEmitterReturningValues:
-    active: true
-  ModifierComposable:
-    active: true
-  ModifierMissing:
-    active: true
-  ModifierReused:
-    active: true
-  ModifierWithoutDefault:
-    active: true
-  MultipleEmitters:
-    active: true
-  MutableParams:
+# Compose Rules - Static analysis for Jetpack Compose best practices
+# Using io.nlopez.compose.rules:detekt (actively maintained fork of Twitter Compose Rules)
+# Documentation: https://mrmans0n.github.io/compose-rules/
+Compose:
+  # Naming conventions
+  ComposableAnnotationNaming:
     active: true
   ComposableNaming:
     active: true
+  CompositionLocalNaming:
+    active: true
+  ParameterNaming:
+    active: true
+  PreviewAnnotationNaming:
+    active: true
+  PreviewNaming:
+    active: false
+  
+  # Parameter ordering and defaults
   ComposableParamOrder:
     active: true
+  ModifierWithoutDefault:
+    active: true
+  DefaultsVisibility:
+    active: true
+  
+  # Modifier best practices
+  ModifierClickableOrder:
+    active: true
+  ModifierComposed:
+    active: true
+  ModifierMissing:
+    active: true
+    checkModifiersForVisibility: only_public
+  ModifierNaming:
+    active: true
+  ModifierNotUsedAtRoot:
+    active: true
+  ModifierReused:
+    active: true
+  
+  # Content and emitters
+  ContentEmitterReturningValues:
+    active: true
+  ContentTrailingLambda:
+    active: true
+  ContentSlotReused:
+    active: true
+  MultipleEmitters:
+    active: true
+  LambdaParameterEventTrailing:
+    active: true
+  LambdaParameterInRestartableEffect:
+    active: true
+  
+  # State and remember
   RememberMissing:
     active: true
+  RememberContentMissing:
+    active: true
+  MutableParams:
+    active: true
+  MutableStateAutoboxing:
+    active: true
+  MutableStateParam:
+    active: true
+  
+  # ViewModel patterns
   ViewModelForwarding:
     active: true
   ViewModelInjection:
+    active: true
+  
+  # CompositionLocal
+  CompositionLocalAllowlist:
+    active: false
+  
+  # Performance - CRITICAL for native-like feel
+  UnstableCollections:
+    active: true
+  
+  # Material 2 migration
+  Material2:
+    active: false
+  
+  # Preview visibility
+  PreviewPublic:
     active: true

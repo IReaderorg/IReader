@@ -528,7 +528,7 @@ actual fun TTSVoiceSelectionScreen(
     var currentEngine by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
     var downloadingVoiceId by remember { mutableStateOf<String?>(null) }
-    var downloadProgress by remember { mutableStateOf(0f) }
+    var downloadProgress by remember { mutableFloatStateOf(0f) }
     var downloadError by remember { mutableStateOf<String?>(null) }
     var filterLanguage by remember { mutableStateOf<String?>(null) }
     val localizeHelper = LocalLocalizeHelper.currentOrThrow

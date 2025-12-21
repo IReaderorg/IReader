@@ -358,12 +358,21 @@ dependencies {
 }
 
 composeCompiler {
+    // Use stability configuration file for marking external classes as stable
+    stabilityConfigurationFile.set(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
+    
     // Strong skipping is enabled by default in newer versions
     enableStrongSkippingMode.set(true)
     
     // Enable live literals for hot reload
     enableIntrinsicRemember.set(true)
     enableNonSkippingGroupOptimization.set(true)
+    
+    // Generate reports only when explicitly requested
+    if (project.findProperty("composeCompilerReports") == "true") {
+        reportsDestination.set(layout.buildDirectory.dir("compose_compiler"))
+        metricsDestination.set(layout.buildDirectory.dir("compose_compiler"))
+    }
 }
 
 // Apply Google Services and Firebase Crashlytics plugins conditionally

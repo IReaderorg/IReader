@@ -30,6 +30,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -58,13 +59,13 @@ actual fun DeepSeekWebViewImpl(
 ) {
     val context = LocalContext.current
     val localizeHelper = LocalLocalizeHelper.currentOrThrow
-    // State
+    // State - using primitive state variants for better performance
     var isLoading by remember { mutableStateOf(true) }
     var isLoggedIn by remember { mutableStateOf(false) }
     var isCaptchaRequired = remember { mutableStateOf(false) }
     var currentUrl by remember { mutableStateOf(DEEPSEEK_URL) }
     var messageToSend by remember { mutableStateOf<String?>(null) }
-    var progress by remember { mutableStateOf(0f) }
+    var progress by remember { mutableFloatStateOf(0f) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
     var webView by remember { mutableStateOf<WebView?>(null) }

@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import ireader.core.log.Log
 
 /**
@@ -19,15 +20,19 @@ actual fun ImagePickerDialog(
     onImageSelected: (uri: String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    // Use rememberUpdatedState to safely reference lambdas in effects
+    val currentOnDismiss = rememberUpdatedState(onDismiss)
+    val currentOnImageSelected = rememberUpdatedState(onImageSelected)
+    
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
             Log.info { "Image selected: $uri" }
-            onImageSelected(uri.toString())
+            currentOnImageSelected.value(uri.toString())
         } else {
             Log.info { "Image picker dismissed without selection" }
-            onDismiss()
+            currentOnDismiss.value()
         }
     }
     
@@ -37,7 +42,7 @@ actual fun ImagePickerDialog(
                 launcher.launch("image/*")
             } catch (e: Exception) {
                 Log.error("Failed to launch image picker", e)
-                onDismiss()
+                currentOnDismiss.value()
             }
         }
     }

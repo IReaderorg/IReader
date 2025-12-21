@@ -11,10 +11,11 @@ import java.awt.Frame
 import java.io.File
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 actual fun GlossaryDialogWithFilePickers(
-    glossaryEntries: List<Glossary>,
+    glossaryEntries: ImmutableList<Glossary>,
     bookTitle: String?,
     onDismiss: () -> Unit,
     onAddEntry: (String, String, GlossaryTermType, String?) -> Unit,

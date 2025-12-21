@@ -2,6 +2,9 @@
 # Compose
 apkParser = "2.6.10"
 composeGradle = "1.9.3"
+# Static Analysis
+detekt = "1.23.8"
+composeRules = "0.4.23"
 # Immutable Collections for Compose stability
 j2v8 = "6.3.4"
 js = "25.0.1"
@@ -176,6 +179,9 @@ test-robolectric = "org.robolectric:robolectric:4.8"
 androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "workTesting" }
 
 
+# Static Analysis - Compose Rules for detekt
+detekt-compose-rules = { module = "io.nlopez.compose.rules:detekt", version.ref = "composeRules" }
+
 [bundles]
 filekit = ["filekit-core", "filekit-dialogs", "filekit-dialogs-compose"]
 # Removed unused serialization: gson, jackson (only kotlinx is used)
@@ -185,6 +191,8 @@ supabase = ["supabase-postgrest", "supabase-auth", "supabase-realtime", "supabas
 [plugins]
 # Compose
 jetbrainCompose = { id = "org.jetbrains.compose", version.ref = "composeGradle" }
+# Static Analysis
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 # BuildConfigs
 buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig"}
 # Utility

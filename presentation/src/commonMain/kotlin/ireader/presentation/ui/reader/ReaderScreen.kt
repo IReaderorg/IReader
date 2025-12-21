@@ -60,6 +60,7 @@ import ireader.presentation.ui.reader.components.TranslationProgressIndicator
 import ireader.presentation.ui.reader.components.TranslationToggleButton
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 /**
@@ -452,7 +453,7 @@ private fun ReadingScreenContent(
                         // Glossary dialog
                         if (vm.translationViewModel.translationState.showGlossaryDialog) {
                             GlossaryDialogWithFilePickers(
-                                glossaryEntries = vm.translationViewModel.glossaryEntries,
+                                glossaryEntries = vm.translationViewModel.glossaryEntries.toImmutableList(),
                                 bookTitle = vm.book?.title,
                                 onDismiss = { vm.translationViewModel.translationState.showGlossaryDialog = false },
                                 onAddEntry = { source, target, type, notes ->

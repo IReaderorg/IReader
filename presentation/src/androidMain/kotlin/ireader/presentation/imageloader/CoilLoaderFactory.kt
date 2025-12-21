@@ -35,23 +35,22 @@ class CoilLoaderFactory(
 ) : SingletonImageLoader.Factory {
     
     companion object {
-        // Default disk cache: 50MB for cover images
-        private const val DISK_CACHE_SIZE_DEFAULT = 50L * 1024 * 1024
+        // Increased disk cache for faster subsequent loads
+        private const val DISK_CACHE_SIZE_DEFAULT = 100L * 1024 * 1024 // 100MB
         
-        // Memory cache percentages based on device tier
-        private const val MEMORY_CACHE_PERCENT_LOW = 0.15
-        private const val MEMORY_CACHE_PERCENT_MEDIUM = 0.20
-        private const val MEMORY_CACHE_PERCENT_HIGH = 0.25
+        // Increased memory cache for instant display
+        private const val MEMORY_CACHE_PERCENT_LOW = 0.20
+        private const val MEMORY_CACHE_PERCENT_MEDIUM = 0.25
+        private const val MEMORY_CACHE_PERCENT_HIGH = 0.30
         
-        // Crossfade durations based on device tier
-        private const val CROSSFADE_LOW = 100
-        private const val CROSSFADE_MEDIUM = 200
-        private const val CROSSFADE_HIGH = 300
+        // ZERO crossfade for native-like instant display
+        private const val CROSSFADE_LOW = 0
+        private const val CROSSFADE_MEDIUM = 0
+        private const val CROSSFADE_HIGH = 0 // Even high-end gets instant display
     }
     
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun newImageLoader(context: PlatformContext): ImageLoader {
-        // Get device performance tier for optimizations
         val performanceTier = DevicePerformanceUtil.getPerformanceTier(context as Context)
         val isLowEnd = performanceTier == DevicePerformanceUtil.PerformanceTier.LOW
         val isHighEnd = performanceTier == DevicePerformanceUtil.PerformanceTier.HIGH
@@ -60,9 +59,6 @@ class CoilLoaderFactory(
             val diskCacheInit = { CoilDiskCache.get(context, performanceTier) }
             val memoryCacheInit = { CoilMemoryCache.get(context, performanceTier) }
             val callFactoryInit = { client.default.okhttp }
-            
-            // Note: Coil 3 uses default network fetcher for HTTP/HTTPS URLs
-            // The OkHttp client is used by BookCoverFetcher for custom fetching
             
             components {
                 add(CatalogRemoteMapper())
@@ -87,60 +83,54 @@ class CoilLoaderFactory(
                 )
             }
             
-            // Memory cache for fast in-memory access
+            // Aggressive memory caching for instant display
             memoryCache(memoryCacheInit)
             
-            // Disk cache for persistent storage
+            // Large disk cache for persistent storage
             diskCache(diskCacheInit)
             
-            // Performance-based crossfade animation duration
-            val crossfadeDuration = when (performanceTier) {
-                DevicePerformanceUtil.PerformanceTier.LOW -> CROSSFADE_LOW
-                DevicePerformanceUtil.PerformanceTier.MEDIUM -> CROSSFADE_MEDIUM
-                DevicePerformanceUtil.PerformanceTier.HIGH -> CROSSFADE_HIGH
-            }
-            crossfade(crossfadeDuration)
+            // ZERO crossfade - native-like instant display
+            crossfade(0)
             
-            // Bitmap configuration based on device tier
+            // Bitmap configuration optimized for speed
             when {
                 isLowEnd -> {
-                    // Use RGB_565 on low-end devices for better memory efficiency
-                    // RGB_565 uses 2 bytes per pixel vs 4 bytes for ARGB_8888
+                    // RGB_565 for memory efficiency on low-end
                     bitmapConfig(Bitmap.Config.RGB_565)
                     allowRgb565(true)
-                    // Disable hardware bitmaps on low-end to avoid GPU memory pressure
                     allowHardware(false)
                 }
                 isHighEnd && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                    // Use hardware bitmaps on high-end devices for better performance
-                    // Hardware bitmaps are stored in GPU memory and render faster
+                    // Hardware bitmaps for GPU acceleration on high-end
                     allowHardware(true)
                     bitmapConfig(Bitmap.Config.ARGB_8888)
                 }
                 else -> {
-                    // Medium tier: standard config with hardware bitmaps if supported
+                    // Medium tier: hardware bitmaps if supported
                     allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     bitmapConfig(Bitmap.Config.ARGB_8888)
                 }
             }
             
-            // Use a limited dispatcher for decoding on low-end devices
-            // This prevents too many concurrent decode operations
+            // Increased parallelism for faster loading
             if (isLowEnd) {
-                fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(2))
-                decoderCoroutineContext(Dispatchers.IO.limitedParallelism(2))
-            } else if (performanceTier == DevicePerformanceUtil.PerformanceTier.MEDIUM) {
                 fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(4))
                 decoderCoroutineContext(Dispatchers.IO.limitedParallelism(4))
+            } else if (performanceTier == DevicePerformanceUtil.PerformanceTier.MEDIUM) {
+                fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(6))
+                decoderCoroutineContext(Dispatchers.IO.limitedParallelism(6))
+            } else {
+                // High-end: maximum parallelism
+                fetcherCoroutineContext(Dispatchers.IO.limitedParallelism(8))
+                decoderCoroutineContext(Dispatchers.IO.limitedParallelism(8))
             }
-            // High-end devices use default parallelism
 
         }.build()
     }
 
     /**
-     * Memory cache for fast in-memory image access.
-     * Cache size and reference types are adjusted based on device performance tier.
+     * Memory cache optimized for instant display.
+     * Larger cache = more images ready instantly.
      */
     internal object CoilMemoryCache {
         private var instance: MemoryCache? = null
@@ -154,15 +144,6 @@ class CoilLoaderFactory(
                     DevicePerformanceUtil.PerformanceTier.HIGH -> MEMORY_CACHE_PERCENT_HIGH
                 }
                 
-                // Configure strong/weak reference ratio based on device tier
-                // Strong references are faster but use more memory
-                // Weak references can be GC'd under memory pressure
-                val (strongPercent, weakPercent) = when (performanceTier) {
-                    DevicePerformanceUtil.PerformanceTier.LOW -> 0.25 to 0.10  // More aggressive GC
-                    DevicePerformanceUtil.PerformanceTier.MEDIUM -> 0.50 to 0.25
-                    DevicePerformanceUtil.PerformanceTier.HIGH -> 0.75 to 0.25  // Keep more in memory
-                }
-                
                 MemoryCache.Builder()
                     .maxSizePercent(context, cachePercent)
                     .strongReferencesEnabled(true)
@@ -174,8 +155,8 @@ class CoilLoaderFactory(
     }
 
     /**
-     * Direct copy of Coil's internal SingletonDiskCache so that [BookCoverFetcher] can access it.
-     * Cache size is adjusted based on device performance tier.
+     * Disk cache for persistent image storage.
+     * Larger cache = faster cold starts.
      */
     internal object CoilDiskCache {
 
@@ -186,8 +167,12 @@ class CoilLoaderFactory(
         fun get(context: Context, performanceTier: DevicePerformanceUtil.PerformanceTier): DiskCache {
             return instance ?: run {
                 val safeCacheDir = context.cacheDir.apply { mkdirs() }
-                // Adjust disk cache size based on device tier
-                val diskCacheSize = DevicePerformanceUtil.getRecommendedImageCacheSize(context)
+                // Increased disk cache for better cold start performance
+                val diskCacheSize = when (performanceTier) {
+                    DevicePerformanceUtil.PerformanceTier.LOW -> 75L * 1024 * 1024   // 75MB
+                    DevicePerformanceUtil.PerformanceTier.MEDIUM -> 150L * 1024 * 1024 // 150MB
+                    DevicePerformanceUtil.PerformanceTier.HIGH -> 300L * 1024 * 1024   // 300MB
+                }
                 
                 DiskCache.Builder()
                     .fileSystem(FileSystem.SYSTEM)

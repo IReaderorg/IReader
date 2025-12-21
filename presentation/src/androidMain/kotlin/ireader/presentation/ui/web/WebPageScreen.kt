@@ -38,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -78,7 +79,7 @@ fun WebPageScreen(
     // Create a custom WebViewState
     val webViewState = remember { WebViewState(viewModel.url) }
     var progressVisible by remember { mutableStateOf(false) }
-    var progressValue by remember { mutableStateOf(0f) }
+    var progressValue by remember { mutableFloatStateOf(0f) }
     var webView by remember { mutableStateOf<WebView?>(null) }
     val context = LocalContext.current
     var canGoBack by remember { mutableStateOf(false) }
