@@ -25,7 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.prefs.PreferenceValues
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.colors
 import ireader.i18n.resources.fonts
 import ireader.i18n.resources.general

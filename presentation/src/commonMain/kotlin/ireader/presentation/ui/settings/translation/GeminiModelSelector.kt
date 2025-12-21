@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Compact Gemini model selection with refresh capability
@@ -28,6 +30,7 @@ fun GeminiModelSelector(
     apiKeySet: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -145,7 +148,7 @@ fun GeminiModelSelector(
 
             // Help text
             Text(
-                text = "Auto-fallback if quota exceeded",
+                text = localizeHelper.localize(Res.string.auto_fallback_if_quota_exceeded),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 maxLines = 1

@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.data.characterart.PromptFocus
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Button to generate character art from current chapter text.
@@ -21,13 +23,14 @@ fun ChapterArtGeneratorButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     IconButton(
         onClick = onClick,
         modifier = modifier
     ) {
         Icon(
             imageVector = Icons.Default.Brush,
-            contentDescription = "Generate Chapter Art",
+            contentDescription = localizeHelper.localize(Res.string.generate_chapter_art),
             tint = MaterialTheme.colorScheme.primary
         )
     }
@@ -43,17 +46,18 @@ fun ChapterArtFocusDialog(
     onDismiss: () -> Unit,
     onGenerate: (PromptFocus) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { 
-            Text("Generate Chapter Art") 
+            Text(localizeHelper.localize(Res.string.generate_chapter_art)) 
         },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Generate an AI image prompt from this chapter",
+                    text = localizeHelper.localize(Res.string.generate_an_ai_image_prompt_from_this_chapter),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 
@@ -72,7 +76,7 @@ fun ChapterArtFocusDialog(
                 Spacer(Modifier.height(8.dp))
                 
                 Text(
-                    text = "What should the AI focus on?",
+                    text = localizeHelper.localize(Res.string.what_should_the_ai_focus_on),
                     style = MaterialTheme.typography.titleSmall
                 )
             }
@@ -82,19 +86,19 @@ fun ChapterArtFocusDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TextButton(onClick = { onGenerate(PromptFocus.AUTO) }) {
-                    Text("Auto")
+                    Text(localizeHelper.localize(Res.string.auto))
                 }
                 TextButton(onClick = { onGenerate(PromptFocus.CHARACTER) }) {
-                    Text("Character")
+                    Text(localizeHelper.localize(Res.string.character))
                 }
                 TextButton(onClick = { onGenerate(PromptFocus.SCENE) }) {
-                    Text("Scene")
+                    Text(localizeHelper.localize(Res.string.scene))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -107,9 +111,10 @@ fun ChapterArtFocusDialog(
 fun ChapterArtGeneratingDialog(
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = { /* Don't dismiss while generating */ },
-        title = { Text("Generating Prompt...") },
+        title = { Text(localizeHelper.localize(Res.string.generating_prompt)) },
         text = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -118,14 +123,14 @@ fun ChapterArtGeneratingDialog(
                 CircularProgressIndicator()
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = "Analyzing chapter text with Gemini AI...",
+                    text = localizeHelper.localize(Res.string.analyzing_chapter_text_with_gemini_ai),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -143,6 +148,7 @@ fun ChapterArtPromptResultDialog(
     onProceedToUpload: () -> Unit,
     onCopyPrompt: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
     var copied by remember { mutableStateOf(false) }
     
@@ -158,7 +164,7 @@ fun ChapterArtPromptResultDialog(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
-                Text("Generated Prompt")
+                Text(localizeHelper.localize(Res.string.generated_prompt))
             }
         },
         text = {
@@ -178,7 +184,7 @@ fun ChapterArtPromptResultDialog(
                 }
                 
                 Text(
-                    text = "You can use this prompt to generate character art",
+                    text = localizeHelper.localize(Res.string.you_can_use_this_prompt_to_generate_character_art),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -186,7 +192,7 @@ fun ChapterArtPromptResultDialog(
         },
         confirmButton = {
             Button(onClick = onProceedToUpload) {
-                Text("Create Art")
+                Text(localizeHelper.localize(Res.string.create_art))
             }
         },
         dismissButton = {
@@ -201,7 +207,7 @@ fun ChapterArtPromptResultDialog(
                     Text(if (copied) "Copied!" else "Copy")
                 }
                 TextButton(onClick = onDismiss) {
-                    Text("Close")
+                    Text(localizeHelper.localize(Res.string.close))
                 }
             }
         }
@@ -217,9 +223,10 @@ fun ChapterArtErrorDialog(
     onDismiss: () -> Unit,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Generation Failed") },
+        title = { Text(localizeHelper.localize(Res.string.generation_failed)) },
         text = {
             Text(
                 text = error,
@@ -228,12 +235,12 @@ fun ChapterArtErrorDialog(
         },
         confirmButton = {
             TextButton(onClick = onRetry) {
-                Text("Retry")
+                Text(localizeHelper.localize(Res.string.notification_retry))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )

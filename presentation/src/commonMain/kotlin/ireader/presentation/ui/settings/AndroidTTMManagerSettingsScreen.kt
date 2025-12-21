@@ -33,7 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.preferences.prefs.ReaderPreferences
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.back
 import ireader.i18n.resources.for_more_powerful_and_natural
 import ireader.i18n.resources.high_quality_neural_voicesn_works

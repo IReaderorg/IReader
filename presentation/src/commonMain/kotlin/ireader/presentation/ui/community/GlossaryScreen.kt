@@ -32,6 +32,7 @@ import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.reader.components.AddGlossaryEntryDialog
 import ireader.presentation.ui.reader.components.EditGlossaryEntryDialog
 import ireader.presentation.ui.reader.components.GlossaryEntryItem
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Community Glossary Screen - A standalone screen for managing glossaries
@@ -72,6 +73,7 @@ fun GlossaryScreen(
     onClearSuccessMessage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showFilterMenu by remember { mutableStateOf(false) }
     var showMoreMenu by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
@@ -138,7 +140,7 @@ fun GlossaryScreen(
                                 IconButton(onClick = onSyncFromRemote) {
                                     Icon(
                                         imageVector = Icons.Default.CloudDownload,
-                                        contentDescription = "Sync from cloud"
+                                        contentDescription = localizeHelper.localize(Res.string.sync_from_cloud)
                                     )
                                 }
                             }
@@ -150,7 +152,7 @@ fun GlossaryScreen(
                                 Icon(
                                     imageVector = if (state.filterType != null) 
                                         Icons.Filled.FilterAlt else Icons.Outlined.FilterAlt,
-                                    contentDescription = "Filter"
+                                    contentDescription = localizeHelper.localize(Res.string.filter)
                                 )
                             }
                             FilterDropdownMenu(
@@ -174,7 +176,7 @@ fun GlossaryScreen(
                                 onDismissRequest = { showMoreMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Export") },
+                                    text = { Text(localizeHelper.localize(Res.string.export)) },
                                     onClick = {
                                         showMoreMenu = false
                                         if (state.viewMode == GlossaryViewMode.LOCAL) {
@@ -186,7 +188,7 @@ fun GlossaryScreen(
                                     leadingIcon = { Icon(Icons.Default.Upload, null) }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Import") },
+                                    text = { Text(localizeHelper.localize(Res.string.import_action)) },
                                     onClick = {
                                         showMoreMenu = false
                                         showImportDialog = true
@@ -196,7 +198,7 @@ fun GlossaryScreen(
                                 if (state.viewMode == GlossaryViewMode.GLOBAL) {
                                     HorizontalDivider()
                                     DropdownMenuItem(
-                                        text = { Text("Upload to Cloud") },
+                                        text = { Text(localizeHelper.localize(Res.string.upload_to_cloud)) },
                                         onClick = {
                                             showMoreMenu = false
                                             onSyncToRemote()
@@ -217,7 +219,7 @@ fun GlossaryScreen(
                             Icon(
                                 imageVector = if (state.viewMode == GlossaryViewMode.LOCAL)
                                     Icons.Default.Public else Icons.Default.LibraryBooks,
-                                contentDescription = "Toggle view mode"
+                                contentDescription = localizeHelper.localize(Res.string.toggle_view_mode)
                             )
                         }
                         
@@ -240,14 +242,14 @@ fun GlossaryScreen(
                     onClick = onShowAddDialog,
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Entry")
+                    Icon(Icons.Default.Add, contentDescription = localizeHelper.localize(Res.string.add_entry))
                 }
             } else if (state.viewMode == GlossaryViewMode.GLOBAL) {
                 FloatingActionButton(
                     onClick = onShowAddBookDialog,
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Book")
+                    Icon(Icons.Default.Add, contentDescription = localizeHelper.localize(Res.string.add_book))
                 }
             }
         }
@@ -366,9 +368,10 @@ private fun FilterDropdownMenu(
     currentFilter: GlossaryTermType?,
     onFilterChange: (GlossaryTermType?) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuItem(
-            text = { Text("All Types") },
+            text = { Text(localizeHelper.localize(Res.string.all_types)) },
             onClick = { onFilterChange(null) },
             leadingIcon = {
                 if (currentFilter == null) Icon(Icons.Default.Check, null)
@@ -393,10 +396,11 @@ private fun BookSelectionContent(
     isLoading: Boolean,
     onSelectBook: (Long, String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = Modifier.fillMaxSize()) {
         HeaderCard(
             title = localize(Res.string.glossary),
-            subtitle = "Manage translation glossaries for your books. Select a book to view and edit its glossary entries.",
+            subtitle = localizeHelper.localize(Res.string.manage_translation_glossaries_for_your),
             icon = Icons.Filled.MenuBook
         )
 
@@ -404,8 +408,8 @@ private fun BookSelectionContent(
             isLoading -> LoadingContent()
             books.isEmpty() -> EmptyContent(
                 icon = Icons.Outlined.Book,
-                title = "No books in library",
-                subtitle = "Add books to your library first to create glossaries"
+                title = localizeHelper.localize(Res.string.no_books_in_library),
+                subtitle = localizeHelper.localize(Res.string.add_books_to_your_library)
             )
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -430,10 +434,11 @@ private fun GlobalBookSelectionContent(
     isLoading: Boolean,
     onSelectBook: (String, String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = Modifier.fillMaxSize()) {
         HeaderCard(
-            title = "Global Glossaries",
-            subtitle = "Manage glossaries for any book, even those not in your library. These can be synced across devices.",
+            title = localizeHelper.localize(Res.string.global_glossaries),
+            subtitle = localizeHelper.localize(Res.string.manage_glossaries_for_any_book),
             icon = Icons.Filled.Public
         )
 
@@ -441,8 +446,8 @@ private fun GlobalBookSelectionContent(
             isLoading -> LoadingContent()
             books.isEmpty() -> EmptyContent(
                 icon = Icons.Outlined.Public,
-                title = "No global glossaries",
-                subtitle = "Tap + to add a new book glossary"
+                title = localizeHelper.localize(Res.string.no_global_glossaries),
+                subtitle = localizeHelper.localize(Res.string.tap_to_add_a_new_book_glossary)
             )
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -592,6 +597,7 @@ private fun GlobalBookGlossaryCard(
     book: GlobalBookInfo,
     onClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
@@ -626,7 +632,7 @@ private fun GlobalBookGlossaryCard(
                     )
                     if (book.lastSynced != null) {
                         Text(
-                            text = " • Synced",
+                            text = localizeHelper.localize(Res.string.synced),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -805,6 +811,7 @@ private fun GlobalGlossaryEntryItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     
     Card(
@@ -879,7 +886,7 @@ private fun GlobalGlossaryEntryItem(
                         color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Text(
-                            text = "synced",
+                            text = localizeHelper.localize(Res.string.synced_1),
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall
                         )
@@ -903,8 +910,8 @@ private fun GlobalGlossaryEntryItem(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete Entry") },
-            text = { Text("Are you sure you want to delete this glossary entry?") },
+            title = { Text(localizeHelper.localize(Res.string.delete_entry)) },
+            text = { Text(localizeHelper.localize(Res.string.are_you_sure_you_want_1)) },
             confirmButton = {
                 TextButton(onClick = {
                     onDelete()
@@ -915,7 +922,7 @@ private fun GlobalGlossaryEntryItem(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -928,6 +935,7 @@ private fun AddGlobalBookDialog(
     onDismiss: () -> Unit,
     onConfirm: (bookKey: String, bookTitle: String, sourceLanguage: String, targetLanguage: String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var bookKey by remember { mutableStateOf("") }
     var bookTitle by remember { mutableStateOf("") }
     var sourceLanguage by remember { mutableStateOf("auto") }
@@ -935,23 +943,23 @@ private fun AddGlobalBookDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add New Book Glossary") },
+        title = { Text(localizeHelper.localize(Res.string.add_new_book_glossary)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = bookTitle,
                     onValueChange = { bookTitle = it },
-                    label = { Text("Book Title") },
+                    label = { Text(localizeHelper.localize(Res.string.book_title)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = bookKey,
                     onValueChange = { bookKey = it },
-                    label = { Text("Book Key (unique identifier)") },
+                    label = { Text(localizeHelper.localize(Res.string.book_key_unique_identifier)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    supportingText = { Text("e.g., novel_name_source") }
+                    supportingText = { Text(localizeHelper.localize(Res.string.eg_novel_name_source)) }
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -960,14 +968,14 @@ private fun AddGlobalBookDialog(
                     OutlinedTextField(
                         value = sourceLanguage,
                         onValueChange = { sourceLanguage = it },
-                        label = { Text("Source") },
+                        label = { Text(localizeHelper.localize(Res.string.source)) },
                         modifier = Modifier.weight(1f),
                         singleLine = true
                     )
                     OutlinedTextField(
                         value = targetLanguage,
                         onValueChange = { targetLanguage = it },
-                        label = { Text("Target") },
+                        label = { Text(localizeHelper.localize(Res.string.target)) },
                         modifier = Modifier.weight(1f),
                         singleLine = true
                     )
@@ -979,12 +987,12 @@ private fun AddGlobalBookDialog(
                 onClick = { onConfirm(bookKey.ifBlank { bookTitle.lowercase().replace(" ", "_") }, bookTitle, sourceLanguage, targetLanguage) },
                 enabled = bookTitle.isNotBlank()
             ) {
-                Text("Add")
+                Text(localizeHelper.localize(Res.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -996,6 +1004,7 @@ private fun EditGlobalGlossaryEntryDialog(
     onDismiss: () -> Unit,
     onConfirm: (GlobalGlossary) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var sourceTerm by remember { mutableStateOf(entry.sourceTerm) }
     var targetTerm by remember { mutableStateOf(entry.targetTerm) }
     var termType by remember { mutableStateOf(entry.termType) }
@@ -1004,20 +1013,20 @@ private fun EditGlobalGlossaryEntryDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Glossary Entry") },
+        title = { Text(localizeHelper.localize(Res.string.edit_glossary_entry)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = sourceTerm,
                     onValueChange = { sourceTerm = it },
-                    label = { Text("Source Term") },
+                    label = { Text(localizeHelper.localize(Res.string.source_term)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = targetTerm,
                     onValueChange = { targetTerm = it },
-                    label = { Text("Target Term") },
+                    label = { Text(localizeHelper.localize(Res.string.target_term)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -1026,7 +1035,7 @@ private fun EditGlobalGlossaryEntryDialog(
                     OutlinedTextField(
                         value = termType.name.lowercase().replaceFirstChar { it.uppercase() },
                         onValueChange = { },
-                        label = { Text("Type") },
+                        label = { Text(localizeHelper.localize(Res.string.type)) },
                         modifier = Modifier.fillMaxWidth(),
                         readOnly = true,
                         trailingIcon = {
@@ -1054,7 +1063,7 @@ private fun EditGlobalGlossaryEntryDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Notes (optional)") },
+                    label = { Text(localizeHelper.localize(Res.string.notes_optional)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
                     maxLines = 4
@@ -1073,12 +1082,12 @@ private fun EditGlobalGlossaryEntryDialog(
                 },
                 enabled = sourceTerm.isNotBlank() && targetTerm.isNotBlank()
             ) {
-                Text("Save")
+                Text(localizeHelper.localize(Res.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -1091,13 +1100,14 @@ private fun ImportGlossaryDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Import Glossary") },
+        title = { Text(localizeHelper.localize(Res.string.import_glossary)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "Paste the JSON glossary data below:",
+                    text = localizeHelper.localize(Res.string.paste_the_json_glossary_data_below),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 OutlinedTextField(
@@ -1106,7 +1116,7 @@ private fun ImportGlossaryDialog(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp),
                     minLines = 6,
                     maxLines = 10,
-                    placeholder = { Text("Paste JSON here...") }
+                    placeholder = { Text(localizeHelper.localize(Res.string.paste_json_here)) }
                 )
             }
         },
@@ -1115,12 +1125,12 @@ private fun ImportGlossaryDialog(
                 onClick = onConfirm,
                 enabled = importText.isNotBlank()
             ) {
-                Text("Import")
+                Text(localizeHelper.localize(Res.string.import_action))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

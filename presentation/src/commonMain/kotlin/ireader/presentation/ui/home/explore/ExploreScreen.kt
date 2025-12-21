@@ -417,6 +417,7 @@ private fun FilterChipItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.primaryContainer
@@ -427,7 +428,7 @@ private fun FilterChipItem(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "ChipContainerColor"
+        label = localizeHelper.localize(Res.string.chipcontainercolor)
     )
     
     val contentColor by animateColorAsState(
@@ -440,7 +441,7 @@ private fun FilterChipItem(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "ChipContentColor"
+        label = localizeHelper.localize(Res.string.chipcontentcolor)
     )
     
     Surface(

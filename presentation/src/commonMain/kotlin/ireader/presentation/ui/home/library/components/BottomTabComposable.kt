@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.library.LibraryFilter
 import ireader.domain.models.library.LibrarySort
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.display
 import ireader.i18n.resources.filter
 import ireader.i18n.resources.sort

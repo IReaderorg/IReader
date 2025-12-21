@@ -36,6 +36,8 @@ import ireader.presentation.core.theme.LocaleHelper
 import ireader.presentation.ui.core.file.rememberPlatformDirectoryPickerLauncher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Unified onboarding screen with:
@@ -157,6 +159,7 @@ private fun OnboardingProgressIndicator(
     totalPages: Int,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -166,7 +169,7 @@ private fun OnboardingProgressIndicator(
             val width by animateDpAsState(
                 targetValue = if (index == currentPage) 32.dp else 12.dp,
                 animationSpec = spring(dampingRatio = 0.8f),
-                label = "indicator_width"
+                label = localizeHelper.localize(Res.string.indicator_width)
             )
             
             Box(
@@ -189,6 +192,7 @@ private fun WelcomeLanguagePage(
     onLanguageSelected: (String) -> Unit,
     onContinue: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showContent by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     
@@ -241,7 +245,7 @@ private fun WelcomeLanguagePage(
             enter = fadeIn(tween(500, 200)) + slideInVertically(tween(500, 200)) { 30 }
         ) {
             Text(
-                text = "Welcome to IReader",
+                text = localizeHelper.localize(Res.string.welcome_to_ireader_1),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -256,7 +260,7 @@ private fun WelcomeLanguagePage(
             enter = fadeIn(tween(500, 300)) + slideInVertically(tween(500, 300)) { 30 }
         ) {
             Text(
-                text = "Your personal reading companion.\nLet's set up a few things to get started.",
+                text = localizeHelper.localize(Res.string.your_personal_reading_companionnlets_set),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -294,7 +298,7 @@ private fun WelcomeLanguagePage(
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "App Language",
+                            text = localizeHelper.localize(Res.string.app_language),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -327,7 +331,7 @@ private fun WelcomeLanguagePage(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Get Started",
+                    text = localizeHelper.localize(Res.string.get_started),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -360,11 +364,12 @@ private fun LanguageSelectionDialog(
     onLanguageSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Select Language",
+                text = localizeHelper.localize(Res.string.select_language),
                 style = MaterialTheme.typography.headlineSmall
             )
         },
@@ -401,7 +406,7 @@ private fun LanguageSelectionDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -415,6 +420,7 @@ private fun StorageSetupPage(
     onFolderSelected: (String) -> Unit,
     onBack: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showContent by remember { mutableStateOf(false) }
     var isSelectingFolder by remember { mutableStateOf(false) }
     
@@ -424,7 +430,7 @@ private fun StorageSetupPage(
     }
     
     val directoryPicker = rememberPlatformDirectoryPickerLauncher(
-        title = "Select IReader Storage Folder"
+        title = localizeHelper.localize(Res.string.select_ireader_storage_folder)
     ) { folderPath ->
         isSelectingFolder = false
         if (folderPath != null) {
@@ -475,7 +481,7 @@ private fun StorageSetupPage(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Storage Setup",
+                    text = localizeHelper.localize(Res.string.storage_setup),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -488,7 +494,7 @@ private fun StorageSetupPage(
                     color = MaterialTheme.colorScheme.errorContainer
                 ) {
                     Text(
-                        text = "Required",
+                        text = localizeHelper.localize(Res.string.required),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onErrorContainer,
@@ -506,7 +512,7 @@ private fun StorageSetupPage(
             enter = fadeIn(tween(500, 200)) + slideInVertically(tween(500, 200)) { 30 }
         ) {
             Text(
-                text = "Select a folder where IReader will store your data. A dedicated folder is recommended.",
+                text = localizeHelper.localize(Res.string.select_a_folder_where_ireader),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -523,28 +529,28 @@ private fun StorageSetupPage(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 StorageFeatureCard(
                     icon = Icons.AutoMirrored.Outlined.MenuBook,
-                    title = "Downloaded Chapters",
+                    title = localizeHelper.localize(Res.string.downloaded_chapters_1),
                     description = "Save chapters for offline reading",
                     accentColor = MaterialTheme.colorScheme.primary
                 )
                 
                 StorageFeatureCard(
                     icon = Icons.Outlined.Extension,
-                    title = "Extensions & Sources",
+                    title = localizeHelper.localize(Res.string.extensions_sources),
                     description = "Store installed extensions and plugins",
                     accentColor = MaterialTheme.colorScheme.secondary
                 )
                 
                 StorageFeatureCard(
                     icon = Icons.Outlined.Backup,
-                    title = "Backups",
+                    title = localizeHelper.localize(Res.string.backups),
                     description = "Keep your library and settings safe",
                     accentColor = MaterialTheme.colorScheme.tertiary
                 )
                 
                 StorageFeatureCard(
                     icon = Icons.Outlined.Storage,
-                    title = "Persistent Storage",
+                    title = localizeHelper.localize(Res.string.persistent_storage),
                     description = "Data persists even if app is uninstalled",
                     accentColor = Color(0xFF4CAF50)
                 )
@@ -577,7 +583,7 @@ private fun StorageSetupPage(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "This folder will be used for all app data including downloads, extensions, and backups. Choose a location you can easily access.",
+                        text = localizeHelper.localize(Res.string.this_folder_will_be_used),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -609,7 +615,7 @@ private fun StorageSetupPage(
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Folder Selected",
+                            text = localizeHelper.localize(Res.string.folder_selected),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -678,7 +684,7 @@ private fun StorageSetupPage(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Back")
+                    Text(localizeHelper.localize(Res.string.back))
                 }
             }
         }
@@ -747,6 +753,7 @@ private fun DevServerPage(
     onComplete: () -> Unit,
     onBack: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showContent by remember { mutableStateOf(false) }
     
     LaunchedEffect(Unit) {
@@ -802,7 +809,7 @@ private fun DevServerPage(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Cloud & Community",
+                    text = localizeHelper.localize(Res.string.cloud_community),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -815,7 +822,7 @@ private fun DevServerPage(
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Text(
-                        text = "Optional",
+                        text = localizeHelper.localize(Res.string.optional),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -862,12 +869,12 @@ private fun DevServerPage(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Cloud Sync",
+                                text = localizeHelper.localize(Res.string.cloud_sync),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = "Sync progress, reviews, badges",
+                                text = localizeHelper.localize(Res.string.sync_progress_reviews_badges),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -918,12 +925,12 @@ private fun DevServerPage(
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "Share AI Translations",
+                                text = localizeHelper.localize(Res.string.share_ai_translations),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = "Help others by sharing your translations",
+                                text = localizeHelper.localize(Res.string.help_others_by_sharing_your_translations),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -947,22 +954,22 @@ private fun DevServerPage(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 CompactFeatureRow(
                     icon = Icons.Outlined.Sync,
-                    text = "Reading progress sync across devices",
+                    text = localizeHelper.localize(Res.string.reading_progress_sync_across_devices),
                     enabled = devServerEnabled
                 )
                 CompactFeatureRow(
                     icon = Icons.Outlined.RateReview,
-                    text = "Community reviews and ratings",
+                    text = localizeHelper.localize(Res.string.community_reviews_and_ratings),
                     enabled = devServerEnabled
                 )
                 CompactFeatureRow(
                     icon = Icons.Outlined.EmojiEvents,
-                    text = "Leaderboards and achievement badges",
+                    text = localizeHelper.localize(Res.string.leaderboards_and_achievement_badges),
                     enabled = devServerEnabled
                 )
                 CompactFeatureRow(
                     icon = Icons.Outlined.Translate,
-                    text = "Download community translations",
+                    text = localizeHelper.localize(Res.string.download_community_translations),
                     enabled = shareTranslationsEnabled
                 )
             }
@@ -976,7 +983,7 @@ private fun DevServerPage(
             enter = fadeIn(tween(500, 350))
         ) {
             Text(
-                text = "You can change these settings later in Settings.",
+                text = localizeHelper.localize(Res.string.you_can_change_these_settings_later_in_settings),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -1008,7 +1015,7 @@ private fun DevServerPage(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Complete Setup",
+                        text = localizeHelper.localize(Res.string.complete_setup),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -1024,7 +1031,7 @@ private fun DevServerPage(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Back")
+                    Text(localizeHelper.localize(Res.string.back))
                 }
             }
         }

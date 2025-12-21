@@ -44,7 +44,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.no_chapter_is_available
 import ireader.i18n.resources.resume
 import ireader.i18n.resources.source_not_available
@@ -73,6 +73,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Stable holder for navigation callbacks to prevent recomposition
@@ -714,6 +715,7 @@ data class BookDetailScreenSpec constructor(
         message: String,
         onBack: () -> Unit,
     ) {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         androidx.compose.foundation.layout.Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -729,7 +731,7 @@ data class BookDetailScreenSpec constructor(
                     style = androidx.compose.material3.MaterialTheme.typography.bodyLarge
                 )
                 androidx.compose.material3.OutlinedButton(onClick = onBack) {
-                    androidx.compose.material3.Text("Go Back")
+                    androidx.compose.material3.Text(localizeHelper.localize(Res.string.go_back))
                 }
             }
         }

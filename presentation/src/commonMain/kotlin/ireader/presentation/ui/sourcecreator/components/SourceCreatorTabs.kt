@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.sourcecreator.SourceCreatorState
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Basic info tab for source creator.
@@ -23,41 +25,42 @@ fun BasicInfoTab(
     onSearchUrlChange: (String) -> Unit,
     onExploreUrlChange: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle("Basic Information")
         
         RuleTextField(
             value = state.sourceName,
             onValueChange = onSourceNameChange,
-            label = "Source Name *",
+            label = localizeHelper.localize(Res.string.source_name),
             placeholder = "My Novel Source"
         )
         
         RuleTextField(
             value = state.sourceUrl,
             onValueChange = onSourceUrlChange,
-            label = "Source URL *",
+            label = localizeHelper.localize(Res.string.source_url),
             placeholder = "https://example.com"
         )
         
         RuleTextField(
             value = state.sourceGroup,
             onValueChange = onSourceGroupChange,
-            label = "Group",
+            label = localizeHelper.localize(Res.string.group),
             placeholder = "English, Chinese, etc."
         )
         
         RuleTextField(
             value = state.lang,
             onValueChange = onLangChange,
-            label = "Language Code",
+            label = localizeHelper.localize(Res.string.language_code),
             placeholder = "en, zh, ru, etc."
         )
         
         RuleTextField(
             value = state.comment,
             onValueChange = onCommentChange,
-            label = "Comment/Description",
+            label = localizeHelper.localize(Res.string.commentdescription),
             placeholder = "Description of this source",
             singleLine = false,
             maxLines = 3
@@ -80,7 +83,7 @@ fun BasicInfoTab(
         RuleTextField(
             value = state.searchUrl,
             onValueChange = onSearchUrlChange,
-            label = "Search URL",
+            label = localizeHelper.localize(Res.string.search_url),
             placeholder = "https://example.com/search?q={{key}}&page={{page}}",
             helperText = "Use {{key}} for search keyword, {{page}} for page number"
         )
@@ -88,7 +91,7 @@ fun BasicInfoTab(
         RuleTextField(
             value = state.exploreUrl,
             onValueChange = onExploreUrlChange,
-            label = "Explore URL",
+            label = localizeHelper.localize(Res.string.explore_url),
             placeholder = "https://example.com/latest?page={{page}}",
             helperText = "URL for browsing/discovery"
         )
@@ -99,7 +102,7 @@ fun BasicInfoTab(
         RuleTextField(
             value = state.header,
             onValueChange = onHeaderChange,
-            label = "Headers (JSON)",
+            label = localizeHelper.localize(Res.string.headers_json),
             placeholder = """{"User-Agent": "Mozilla/5.0"}""",
             singleLine = false,
             maxLines = 4
@@ -121,14 +124,15 @@ fun SearchRulesTab(
     onCoverUrlChange: (String) -> Unit,
     onKindChange: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle("Search Result Rules")
-        HelpText("CSS selectors for parsing search results. Use @attr for attributes (e.g., a@href)")
+        HelpText(localizeHelper.localize(Res.string.css_selectors_for_parsing_search))
         
         RuleTextField(
             value = state.searchBookList,
             onValueChange = onBookListChange,
-            label = "Book List Selector *",
+            label = localizeHelper.localize(Res.string.book_list_selector),
             placeholder = "div.search-result, ul.book-list li",
             helperText = "Selector for each book item in results"
         )
@@ -136,7 +140,7 @@ fun SearchRulesTab(
         RuleTextField(
             value = state.searchName,
             onValueChange = onNameChange,
-            label = "Name Selector *",
+            label = localizeHelper.localize(Res.string.name_selector),
             placeholder = "h3.title, a.book-name",
             helperText = "Selector for book title within each item"
         )
@@ -144,7 +148,7 @@ fun SearchRulesTab(
         RuleTextField(
             value = state.searchBookUrl,
             onValueChange = onBookUrlChange,
-            label = "Book URL Selector *",
+            label = localizeHelper.localize(Res.string.book_url_selector),
             placeholder = "a@href, a.book-link@href",
             helperText = "Selector for book detail page URL"
         )
@@ -152,28 +156,28 @@ fun SearchRulesTab(
         RuleTextField(
             value = state.searchAuthor,
             onValueChange = onAuthorChange,
-            label = "Author Selector",
+            label = localizeHelper.localize(Res.string.author_selector),
             placeholder = "span.author, div.info .author"
         )
         
         RuleTextField(
             value = state.searchCoverUrl,
             onValueChange = onCoverUrlChange,
-            label = "Cover URL Selector",
+            label = localizeHelper.localize(Res.string.cover_url_selector),
             placeholder = "img@src, img.cover@data-src"
         )
         
         RuleTextField(
             value = state.searchIntro,
             onValueChange = onIntroChange,
-            label = "Intro Selector",
+            label = localizeHelper.localize(Res.string.intro_selector),
             placeholder = "p.description, div.intro"
         )
         
         RuleTextField(
             value = state.searchKind,
             onValueChange = onKindChange,
-            label = "Genre/Kind Selector",
+            label = localizeHelper.localize(Res.string.genrekind_selector),
             placeholder = "span.genre, div.tags a"
         )
     }
@@ -192,49 +196,50 @@ fun BookInfoRulesTab(
     onKindChange: (String) -> Unit,
     onTocUrlChange: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle("Book Detail Page Rules")
-        HelpText("Selectors for the book detail/info page")
+        HelpText(localizeHelper.localize(Res.string.selectors_for_the_book_detailinfo_page))
         
         RuleTextField(
             value = state.bookInfoName,
             onValueChange = onNameChange,
-            label = "Name Selector",
+            label = localizeHelper.localize(Res.string.name_selector_1),
             placeholder = "h1.book-title"
         )
         
         RuleTextField(
             value = state.bookInfoAuthor,
             onValueChange = onAuthorChange,
-            label = "Author Selector",
+            label = localizeHelper.localize(Res.string.author_selector),
             placeholder = "span.author, div.info .author"
         )
         
         RuleTextField(
             value = state.bookInfoIntro,
             onValueChange = onIntroChange,
-            label = "Description Selector",
+            label = localizeHelper.localize(Res.string.description_selector),
             placeholder = "div.synopsis, div.description"
         )
         
         RuleTextField(
             value = state.bookInfoCoverUrl,
             onValueChange = onCoverUrlChange,
-            label = "Cover URL Selector",
+            label = localizeHelper.localize(Res.string.cover_url_selector),
             placeholder = "div.cover img@src"
         )
         
         RuleTextField(
             value = state.bookInfoKind,
             onValueChange = onKindChange,
-            label = "Genre Selector",
+            label = localizeHelper.localize(Res.string.genre_selector),
             placeholder = "div.genres a, span.category"
         )
         
         RuleTextField(
             value = state.bookInfoTocUrl,
             onValueChange = onTocUrlChange,
-            label = "TOC URL Selector",
+            label = localizeHelper.localize(Res.string.toc_url_selector),
             placeholder = "a.read-btn@href",
             helperText = "If chapter list is on a different page"
         )
@@ -253,14 +258,15 @@ fun TocRulesTab(
     onNextUrlChange: (String) -> Unit,
     onIsReverseChange: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle("Chapter List Rules")
-        HelpText("Selectors for parsing the table of contents")
+        HelpText(localizeHelper.localize(Res.string.selectors_for_parsing_the_table_of_contents))
         
         RuleTextField(
             value = state.tocChapterList,
             onValueChange = onChapterListChange,
-            label = "Chapter List Selector *",
+            label = localizeHelper.localize(Res.string.chapter_list_selector),
             placeholder = "ul.chapter-list li, div.chapters a",
             helperText = "Selector for each chapter item"
         )
@@ -268,7 +274,7 @@ fun TocRulesTab(
         RuleTextField(
             value = state.tocChapterName,
             onValueChange = onChapterNameChange,
-            label = "Chapter Name Selector *",
+            label = localizeHelper.localize(Res.string.chapter_name_selector),
             placeholder = "a, span.title",
             helperText = "Selector for chapter title within each item"
         )
@@ -276,7 +282,7 @@ fun TocRulesTab(
         RuleTextField(
             value = state.tocChapterUrl,
             onValueChange = onChapterUrlChange,
-            label = "Chapter URL Selector *",
+            label = localizeHelper.localize(Res.string.chapter_url_selector),
             placeholder = "a@href",
             helperText = "Selector for chapter page URL"
         )
@@ -284,7 +290,7 @@ fun TocRulesTab(
         RuleTextField(
             value = state.tocNextUrl,
             onValueChange = onNextUrlChange,
-            label = "Next Page Selector",
+            label = localizeHelper.localize(Res.string.next_page_selector),
             placeholder = "a.next-page@href",
             helperText = "For paginated chapter lists"
         )
@@ -313,14 +319,15 @@ fun ContentRulesTab(
     onPurifyChange: (String) -> Unit,
     onReplaceRegexChange: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle("Chapter Content Rules")
-        HelpText("Selectors for parsing chapter content")
+        HelpText(localizeHelper.localize(Res.string.selectors_for_parsing_chapter_content))
         
         RuleTextField(
             value = state.contentSelector,
             onValueChange = onContentSelectorChange,
-            label = "Content Selector *",
+            label = localizeHelper.localize(Res.string.content_selector),
             placeholder = "div.chapter-content, div#content",
             helperText = "Selector for the main text content"
         )
@@ -328,7 +335,7 @@ fun ContentRulesTab(
         RuleTextField(
             value = state.contentNextUrl,
             onValueChange = onNextUrlChange,
-            label = "Next Page Selector",
+            label = localizeHelper.localize(Res.string.next_page_selector),
             placeholder = "a.next-part@href",
             helperText = "For multi-page chapters"
         )
@@ -336,7 +343,7 @@ fun ContentRulesTab(
         RuleTextField(
             value = state.contentPurify,
             onValueChange = onPurifyChange,
-            label = "Remove Selectors",
+            label = localizeHelper.localize(Res.string.remove_selectors),
             placeholder = "div.ads, script, div.social",
             helperText = "Comma-separated selectors to remove"
         )
@@ -344,7 +351,7 @@ fun ContentRulesTab(
         RuleTextField(
             value = state.contentReplaceRegex,
             onValueChange = onReplaceRegexChange,
-            label = "Replace Regex",
+            label = localizeHelper.localize(Res.string.replace_regex),
             placeholder = "pattern##replacement",
             helperText = "Regex pattern to clean content"
         )
@@ -363,42 +370,43 @@ fun ExploreRulesTab(
     onBookUrlChange: (String) -> Unit,
     onCoverUrlChange: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionTitle("Explore/Browse Rules")
-        HelpText("Selectors for the explore/latest page (optional, uses search rules if empty)")
+        HelpText(localizeHelper.localize(Res.string.selectors_for_the_explorelatest_page))
         
         RuleTextField(
             value = state.exploreBookList,
             onValueChange = onBookListChange,
-            label = "Book List Selector",
+            label = localizeHelper.localize(Res.string.book_list_selector_1),
             placeholder = "div.novel-list article"
         )
         
         RuleTextField(
             value = state.exploreName,
             onValueChange = onNameChange,
-            label = "Name Selector",
+            label = localizeHelper.localize(Res.string.name_selector_1),
             placeholder = "h2.title"
         )
         
         RuleTextField(
             value = state.exploreBookUrl,
             onValueChange = onBookUrlChange,
-            label = "Book URL Selector",
+            label = localizeHelper.localize(Res.string.book_url_selector_1),
             placeholder = "a@href"
         )
         
         RuleTextField(
             value = state.exploreAuthor,
             onValueChange = onAuthorChange,
-            label = "Author Selector",
+            label = localizeHelper.localize(Res.string.author_selector),
             placeholder = "span.author"
         )
         
         RuleTextField(
             value = state.exploreCoverUrl,
             onValueChange = onCoverUrlChange,
-            label = "Cover URL Selector",
+            label = localizeHelper.localize(Res.string.cover_url_selector),
             placeholder = "img@src"
         )
     }

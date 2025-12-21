@@ -27,6 +27,8 @@ import androidx.compose.ui.window.DialogProperties
 import ireader.domain.services.common.TranslationProgress
 import ireader.domain.services.common.TranslationStatus
 import ireader.domain.services.common.ServiceState
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Translation mode - determines the context of translation
@@ -123,6 +125,7 @@ fun UnifiedTranslationDialog(
     onNavigateToSettings: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (!state.isVisible) return
     
     Dialog(
@@ -150,7 +153,7 @@ fun UnifiedTranslationDialog(
                 transitionSpec = {
                     fadeIn() + slideInHorizontally() togetherWith fadeOut() + slideOutHorizontally()
                 },
-                label = "dialog_content"
+                label = localizeHelper.localize(Res.string.dialog_content)
             ) { screen ->
                 when (screen) {
                     "warning" -> TranslationWarningContent(
@@ -187,6 +190,7 @@ private fun TranslationOptionsContent(
     onNavigateToSettings: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expandedEngine by remember { mutableStateOf(false) }
     var expandedSource by remember { mutableStateOf(false) }
     var expandedTarget by remember { mutableStateOf(false) }
@@ -229,7 +233,7 @@ private fun TranslationOptionsContent(
                 }
                 Column {
                     Text(
-                        text = "Translate",
+                        text = localizeHelper.localize(Res.string.translate_action),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -246,7 +250,7 @@ private fun TranslationOptionsContent(
             }
             
             IconButton(onClick = onDismiss) {
-                Icon(Icons.Default.Close, contentDescription = "Close")
+                Icon(Icons.Default.Close, contentDescription = localizeHelper.localize(Res.string.close))
             }
         }
         
@@ -254,7 +258,7 @@ private fun TranslationOptionsContent(
         
         // Engine Selection
         TranslationDropdown(
-            label = "Translation Engine",
+            label = localizeHelper.localize(Res.string.translation_engine),
             icon = Icons.Outlined.Memory,
             value = availableEngines.find { it.id == state.selectedEngineId }?.name ?: "Select Engine",
             expanded = expandedEngine,
@@ -283,7 +287,7 @@ private fun TranslationOptionsContent(
                     if (engine.requiresApiKey) {
                         Icon(
                             Icons.Outlined.Key,
-                            contentDescription = "Requires API Key",
+                            contentDescription = localizeHelper.localize(Res.string.requires_api_key),
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -302,7 +306,7 @@ private fun TranslationOptionsContent(
             // Source Language
             Box(modifier = Modifier.weight(1f)) {
                 LanguageDropdown(
-                    label = "From",
+                    label = localizeHelper.localize(Res.string.from),
                     value = getLanguageName(state.sourceLanguage),
                     expanded = expandedSource,
                     onExpandedChange = { expandedSource = it },
@@ -324,7 +328,7 @@ private fun TranslationOptionsContent(
             ) {
                 Icon(
                     Icons.Default.SwapHoriz,
-                    contentDescription = "Swap languages",
+                    contentDescription = localizeHelper.localize(Res.string.swap_languages),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -332,7 +336,7 @@ private fun TranslationOptionsContent(
             // Target Language
             Box(modifier = Modifier.weight(1f)) {
                 LanguageDropdown(
-                    label = "To",
+                    label = localizeHelper.localize(Res.string.to),
                     value = getLanguageName(state.targetLanguage),
                     expanded = expandedTarget,
                     onExpandedChange = { expandedTarget = it },
@@ -366,7 +370,7 @@ private fun TranslationOptionsContent(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "Large translations may take time and use API credits",
+                        text = localizeHelper.localize(Res.string.large_translations_may_take_time),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
@@ -392,7 +396,7 @@ private fun TranslationOptionsContent(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Settings")
+                Text(localizeHelper.localize(Res.string.settings))
             }
             
             // Translate button
@@ -408,7 +412,7 @@ private fun TranslationOptionsContent(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Translate")
+                Text(localizeHelper.localize(Res.string.translate_action))
             }
         }
     }
@@ -421,6 +425,7 @@ private fun TranslationWarningContent(
     onCancel: () -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -444,7 +449,7 @@ private fun TranslationWarningContent(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Rate Limit Warning",
+            text = localizeHelper.localize(Res.string.rate_limit_warning),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
@@ -489,7 +494,7 @@ private fun TranslationWarningContent(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "Enable 'Bypass Warning' in settings to skip this dialog",
+                    text = localizeHelper.localize(Res.string.enable_bypass_warning_in_settings),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -506,7 +511,7 @@ private fun TranslationWarningContent(
                 onClick = onCancel,
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
             
             Button(
@@ -516,7 +521,7 @@ private fun TranslationWarningContent(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Continue")
+                Text(localizeHelper.localize(Res.string.continues))
             }
         }
     }
@@ -529,6 +534,7 @@ private fun TranslationProgressContent(
     onResume: () -> Unit,
     onCancel: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val progress = if (state.totalChapters > 0) {
         state.completedChapters.toFloat() / state.totalChapters
     } else 0f
@@ -616,7 +622,7 @@ private fun TranslationProgressContent(
             ) {
                 Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
             
             Button(
@@ -871,11 +877,12 @@ fun TranslateIconButton(
     enabled: Boolean = true,
     tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     TooltipBox(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = {
             PlainTooltip {
-                Text("Long press for options")
+                Text(localizeHelper.localize(Res.string.long_press_for_options))
             }
         },
         state = rememberTooltipState()
@@ -887,7 +894,7 @@ fun TranslateIconButton(
         ) {
             Icon(
                 imageVector = Icons.Default.Translate,
-                contentDescription = "Translate",
+                contentDescription = localizeHelper.localize(Res.string.translate_action),
                 tint = if (enabled) tint else tint.copy(alpha = 0.38f)
             )
         }

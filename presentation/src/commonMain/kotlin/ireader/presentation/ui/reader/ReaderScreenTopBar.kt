@@ -31,7 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.Chapter
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.bookmark
 import ireader.i18n.resources.expand_menu
 import ireader.i18n.resources.find_in_chapter
@@ -141,7 +141,7 @@ fun ReaderScreenTopBar(
                         )
                         AppIconButton(
                             imageVector = Icons.Default.Brush,
-                            contentDescription = "Generate Chapter Art",
+                            contentDescription = localizeHelper.localize(Res.string.generate_chapter_art),
                             onClick = { onChapterArt() }
                         )
                         if (!vm.webViewIntegration.value) {

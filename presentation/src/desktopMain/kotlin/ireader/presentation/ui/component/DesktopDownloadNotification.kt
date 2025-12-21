@@ -33,6 +33,8 @@ import ireader.domain.services.common.ServiceState
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableIntStateOf
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Desktop Download Notification Panel
@@ -206,6 +208,7 @@ private fun DownloadNotificationHeader(
     onDismiss: () -> Unit,
     onNavigateToDownloads: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -231,13 +234,13 @@ private fun DownloadNotificationHeader(
             if (isPaused) {
                 Icon(
                     imageVector = Icons.Filled.Pause,
-                    contentDescription = "Paused",
+                    contentDescription = localizeHelper.localize(Res.string.paused),
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
             } else {
                 // Animated download icon
-                val infiniteTransition = rememberInfiniteTransition(label = "download")
+                val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.download_1))
                 val animatedOffset by infiniteTransition.animateFloat(
                     initialValue = -8f,
                     targetValue = 8f,
@@ -245,12 +248,12 @@ private fun DownloadNotificationHeader(
                         animation = tween(800, easing = LinearEasing),
                         repeatMode = RepeatMode.Reverse
                     ),
-                    label = "downloadArrow"
+                    label = localizeHelper.localize(Res.string.downloadarrow)
                 )
                 
                 Icon(
                     imageVector = Icons.Filled.Download,
-                    contentDescription = "Downloading",
+                    contentDescription = localizeHelper.localize(Res.string.downloading),
                     tint = Color.White,
                     modifier = Modifier
                         .size(24.dp)
@@ -327,7 +330,7 @@ private fun DownloadNotificationHeader(
         IconButton(onClick = onDismiss) {
             Icon(
                 imageVector = Icons.Filled.Close,
-                contentDescription = "Dismiss",
+                contentDescription = localizeHelper.localize(Res.string.notification_dismiss),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -440,6 +443,7 @@ private fun DownloadListItem(
     download: DownloadProgress,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -473,7 +477,7 @@ private fun DownloadListItem(
                 DownloadStatus.QUEUED -> {
                     Icon(
                         imageVector = Icons.Outlined.Schedule,
-                        contentDescription = "Queued",
+                        contentDescription = localizeHelper.localize(Res.string.queued),
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -481,7 +485,7 @@ private fun DownloadListItem(
                 DownloadStatus.COMPLETED -> {
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = "Completed",
+                        contentDescription = localizeHelper.localize(Res.string.completed),
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.tertiary
                     )
@@ -489,7 +493,7 @@ private fun DownloadListItem(
                 DownloadStatus.FAILED -> {
                     Icon(
                         imageVector = Icons.Filled.Error,
-                        contentDescription = "Failed",
+                        contentDescription = localizeHelper.localize(Res.string.failed),
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.error
                     )
@@ -568,6 +572,7 @@ private fun DownloadActions(
     onResumeAll: () -> Unit,
     onViewAll: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -597,11 +602,11 @@ private fun DownloadActions(
         ) {
             Icon(
                 imageVector = Icons.Outlined.OpenInNew,
-                contentDescription = "View All",
+                contentDescription = localizeHelper.localize(Res.string.view_all),
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("View All")
+            Text(localizeHelper.localize(Res.string.view_all))
         }
     }
 }

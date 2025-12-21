@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Required plugin types that can be requested
@@ -88,6 +90,7 @@ fun RequiredPluginScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val pluginConfig = remember(state.pluginType) {
         getPluginConfig(state.pluginType)
     }
@@ -97,12 +100,12 @@ fun RequiredPluginScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Required Plugin") },
+                title = { Text(localizeHelper.localize(Res.string.required_plugin)) },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 },
@@ -219,9 +222,10 @@ private fun PluginIcon(
     isDownloading: Boolean,
     progress: Float
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
-        label = "download_progress"
+        label = localizeHelper.localize(Res.string.download_progress_1)
     )
     
     Box(
@@ -270,6 +274,7 @@ private fun PluginInfoCard(
     pluginInfo: PluginDisplayInfo?,
     isInstalled: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -297,7 +302,7 @@ private fun PluginInfoCard(
                         color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Text(
-                            text = "Installed",
+                            text = localizeHelper.localize(Res.string.installed),
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -321,11 +326,11 @@ private fun PluginInfoCard(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 InfoChip(
-                    label = "Version",
+                    label = localizeHelper.localize(Res.string.version),
                     value = pluginInfo?.version ?: config.version
                 )
                 InfoChip(
-                    label = "Size",
+                    label = localizeHelper.localize(Res.string.size),
                     value = formatFileSize(pluginInfo?.fileSize ?: config.estimatedSize)
                 )
             }
@@ -357,6 +362,7 @@ private fun WhyNeededSection(
     featureName: String,
     pluginConfig: PluginConfig
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -379,7 +385,7 @@ private fun WhyNeededSection(
             
             Column {
                 Text(
-                    text = "Why is this needed?",
+                    text = localizeHelper.localize(Res.string.why_is_this_needed),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -402,6 +408,7 @@ private fun ErrorMessage(
     message: String,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -430,7 +437,7 @@ private fun ErrorMessage(
             )
             
             TextButton(onClick = onRetry) {
-                Text("Retry")
+                Text(localizeHelper.localize(Res.string.notification_retry))
             }
         }
     }
@@ -443,6 +450,7 @@ private fun ActionButton(
     onEnable: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     when {
         state.restartRecommended -> {
             Column(
@@ -469,7 +477,7 @@ private fun ActionButton(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "The plugin was installed successfully. Please restart the app to load JavaScript sources.",
+                            text = localizeHelper.localize(Res.string.the_plugin_was_installed_successfully),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -486,7 +494,7 @@ private fun ActionButton(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "OK, I'll Restart Later",
+                        text = localizeHelper.localize(Res.string.ok_ill_restart_later),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -501,7 +509,7 @@ private fun ActionButton(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Continue",
+                    text = localizeHelper.localize(Res.string.continues),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -515,7 +523,7 @@ private fun ActionButton(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Enable Plugin",
+                    text = localizeHelper.localize(Res.string.enable_plugin),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -557,7 +565,7 @@ private fun ActionButton(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Installing...",
+                    text = localizeHelper.localize(Res.string.installing_1),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -577,7 +585,7 @@ private fun ActionButton(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Download & Install",
+                    text = localizeHelper.localize(Res.string.download_install),
                     style = MaterialTheme.typography.titleMedium
                 )
             }

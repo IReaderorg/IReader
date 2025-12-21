@@ -16,7 +16,7 @@ import ireader.core.source.HttpSource
 import ireader.domain.models.entities.toBookItem
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.query_must_not_be_empty
 import ireader.i18n.resources.source_not_available
 import ireader.presentation.core.IModalSheets

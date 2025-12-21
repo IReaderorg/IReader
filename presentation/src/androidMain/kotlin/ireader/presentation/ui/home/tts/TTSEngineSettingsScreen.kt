@@ -61,6 +61,7 @@ private fun TTSEngineSettingsContent(
     onDismiss: () -> Unit,
     onNavigateToTTSManager: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -89,6 +90,7 @@ private fun SystemTTSSettingsCard(
     localizeHelper: ireader.i18n.LocalizeHelper,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     OutlinedCard(
         onClick = {
             openAndroidSystemTTSSettings(context)
@@ -133,6 +135,7 @@ private fun OnlineTTSEnginesCard(
     onNavigateToTTSManager: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     OutlinedCard(
         onClick = {
             onNavigateToTTSManager()

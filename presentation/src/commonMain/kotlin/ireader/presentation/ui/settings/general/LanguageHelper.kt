@@ -2,6 +2,7 @@ package ireader.presentation.ui.settings.general
 
 
 import ireader.core.log.Log
+import ireader.i18n.resources.*
 
 
 object LanguageHelper {

@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.usecases.translate.WebscrapingTranslateEngine
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.go_back
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 

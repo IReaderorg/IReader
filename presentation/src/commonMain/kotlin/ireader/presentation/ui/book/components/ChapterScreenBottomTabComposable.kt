@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ireader.domain.preferences.prefs.ChapterDisplayMode
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.display
 import ireader.i18n.resources.filter
 import ireader.i18n.resources.sort

@@ -65,7 +65,7 @@ import ireader.domain.models.entities.Book
 import ireader.domain.models.entities.CatalogLocal
 import ireader.domain.models.migration.MigrationMatch
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.back
 import ireader.i18n.resources.cancel
 import ireader.i18n.resources.choose_where_to_migrate_your_books

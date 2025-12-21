@@ -6,6 +6,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.style.TextAlign
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog shown when user tries to translate more than 10 chapters at once.
@@ -18,11 +20,12 @@ fun TranslationWarningDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Translation Warning",
+                text = localizeHelper.localize(Res.string.translation_warning),
                 style = MaterialTheme.typography.headlineSmall
             )
         },
@@ -43,12 +46,12 @@ fun TranslationWarningDialog(
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Continue")
+                Text(localizeHelper.localize(Res.string.continues))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import ireader.domain.preferences.models.FontType
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.font
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.safePopBackStack

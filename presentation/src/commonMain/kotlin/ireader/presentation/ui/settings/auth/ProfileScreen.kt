@@ -421,7 +421,7 @@ private fun UserProfileCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "••••••••",
+                        text = localizeHelper.localize(Res.string._2),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onPrimary
                     )

@@ -90,7 +90,7 @@ import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.content
 import ireader.i18n.resources.exit_fullscreen
 import ireader.i18n.resources.find_current_chapter
@@ -946,7 +946,7 @@ class TTSV2ScreenSpec(
                                 } else {
                                     Icon(
                                         Icons.Default.Translate,
-                                        contentDescription = "Translate Chapter",
+                                        contentDescription = localizeHelper.localize(Res.string.translate_chapter),
                                         tint = if (state.hasTranslation) 
                                             MaterialTheme.colorScheme.primary 
                                         else 
@@ -1037,7 +1037,7 @@ class TTSV2ScreenSpec(
                                             if (downloadState == TTSChapterDownloadManager.DownloadState.PAUSED) {
                                                 Icon(
                                                     Icons.Default.PlayArrow,
-                                                    contentDescription = "Resume Download",
+                                                    contentDescription = localizeHelper.localize(Res.string.resume_download),
                                                     tint = MaterialTheme.colorScheme.primary
                                                 )
                                             } else {
@@ -1064,7 +1064,7 @@ class TTSV2ScreenSpec(
                                         else -> {
                                             Icon(
                                                 Icons.Default.Download,
-                                                contentDescription = "Download Chapter Audio",
+                                                contentDescription = localizeHelper.localize(Res.string.download_chapter_audio),
                                                 tint = LocalContentColor.current
                                             )
                                         }
@@ -1083,7 +1083,7 @@ class TTSV2ScreenSpec(
                                 ) {
                                     Icon(
                                         Icons.Default.Timer,
-                                        contentDescription = "Sleep Timer",
+                                        contentDescription = localizeHelper.localize(Res.string.sleep_timer),
                                         tint = if (sleepTimerState?.isEnabled == true)
                                             MaterialTheme.colorScheme.primary
                                         else

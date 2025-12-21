@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.toBookItem
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.back
 import ireader.i18n.resources.clear_1
 import ireader.i18n.resources.enter_query_and_tap_search

@@ -41,7 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.description_placeholder
 import ireader.presentation.ui.core.modifier.clickableNoIndication
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper

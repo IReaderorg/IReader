@@ -93,7 +93,7 @@ import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.BadgeRarity
 import ireader.domain.models.remote.PaymentProof
 import ireader.domain.models.remote.PaymentProofStatus
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.back
 import ireader.i18n.resources.badge_store
 import ireader.i18n.resources.check_back_later_for_new_badges

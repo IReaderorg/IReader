@@ -49,7 +49,7 @@ import ireader.domain.models.entities.toSavedDownload
 import ireader.i18n.UiEvent
 import ireader.i18n.asString
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.cancel
 import ireader.i18n.resources.cancel_all_for_this_series
 import ireader.i18n.resources.downloaded

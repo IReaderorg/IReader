@@ -34,7 +34,7 @@ import ireader.domain.models.entities.Chapter
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.utils.extensions.asRelativeTimeString
 import ireader.domain.utils.extensions.toLocalDate
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.bookmarked
 import ireader.i18n.resources.cached
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper

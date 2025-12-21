@@ -89,6 +89,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import ireader.domain.utils.extensions.currentTimeToLong
+import ireader.i18n.resources.*
 
 private const val NFT_MARKETPLACE_URL = "https://nftbaz.com/asset/matic/0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc/0"
 private const val NFT_CONTRACT_ADDRESS = "0xF9Abb7e6947d0427C60Bb5cBF7AeF713B2d37eCc"
@@ -101,6 +102,7 @@ fun NFTBadgeScreen(
     onOpenUrl: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
@@ -117,10 +119,10 @@ fun NFTBadgeScreen(
         snackbarHostState = snackbarHostState,
         topBar = { scrollBehavior ->
             TopAppBar(
-                title = { Text("NFT Badge") },
+                title = { Text(localizeHelper.localize(Res.string.nft_badge)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 scrollBehavior = scrollBehavior
@@ -272,6 +274,7 @@ private fun WalletInputSection(
     isVerifying: Boolean,
     error: String?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var address by remember { mutableStateOf("") }
     var validationError by remember { mutableStateOf<String?>(null) }
 
@@ -309,8 +312,8 @@ private fun WalletInputSection(
                     address = it
                     validationError = null
                 },
-                label = { Text("Wallet Address") },
-                placeholder = { Text("0x...") },
+                label = { Text(localizeHelper.localize(Res.string.wallet_address)) },
+                placeholder = { Text(localizeHelper.localize(Res.string.wallet_placeholder)) },
                 leadingIcon = {
                     Icon(Icons.Outlined.AccountBalanceWallet, contentDescription = null)
                 },
@@ -363,6 +366,7 @@ private fun NFTOwnerSection(
     isVerifying: Boolean,
     onCopyAddress: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val currentTime = currentTimeToLong()
     val isExpiringSoon = (cacheExpiresAt - currentTime) < (6 * 60 * 60 * 1000L)
 
@@ -447,7 +451,7 @@ private fun NFTOwnerSection(
             ) {
                 Text("Connected Wallet", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 IconButton(onClick = { onCopyAddress(walletAddress) }, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.ContentCopy, contentDescription = localizeHelper.localize(Res.string.copy), modifier = Modifier.size(16.dp))
                 }
             }
             Text(
@@ -496,6 +500,7 @@ private fun NoNFTSection(
     onOpenMarketplace: () -> Unit,
     onCopyAddress: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Warning Card
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -552,7 +557,7 @@ private fun NoNFTSection(
             ) {
                 Text("Connected Wallet", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 IconButton(onClick = { onCopyAddress(walletAddress) }, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.ContentCopy, contentDescription = localizeHelper.localize(Res.string.copy), modifier = Modifier.size(16.dp))
                 }
             }
             Text(
@@ -586,7 +591,7 @@ private fun NoNFTSection(
         ) {
             Icon(Icons.Outlined.ShoppingCart, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Get NFT")
+            Text(localizeHelper.localize(Res.string.get_nft))
         }
     }
 }
@@ -662,6 +667,7 @@ private fun MarketplaceCTASection(onOpenMarketplace: () -> Unit) {
 
 @Composable
 private fun NFTInfoSection(onCopyContract: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -708,7 +714,7 @@ private fun NFTInfoSection(onCopyContract: () -> Unit) {
                         fontWeight = FontWeight.Medium
                     )
                     IconButton(onClick = onCopyContract, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy", modifier = Modifier.size(14.dp))
+                        Icon(Icons.Default.ContentCopy, contentDescription = localizeHelper.localize(Res.string.copy), modifier = Modifier.size(14.dp))
                     }
                 }
             }

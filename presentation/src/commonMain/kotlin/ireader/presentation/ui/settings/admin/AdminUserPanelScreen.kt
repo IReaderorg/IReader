@@ -25,6 +25,7 @@ import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.components.TitleToolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
+import ireader.i18n.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +72,7 @@ fun AdminUserPanelScreen(
         snackbarHostState = snackbarHostState,
         topBar = { scrollBehavior ->
             TitleToolbar(
-                title = "Admin User Panel",
+                title = localizeHelper.localize(Res.string.admin_user_panel),
                 popBackStack = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -180,18 +181,19 @@ private fun SearchBar(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
         modifier = modifier,
-        placeholder = { Text("Search users by email or username...") },
+        placeholder = { Text(localizeHelper.localize(Res.string.search_users_by_email_or_username)) },
         leadingIcon = {
             Icon(Icons.Default.Search, contentDescription = null)
         },
         trailingIcon = {
             if (query.isNotBlank()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                    Icon(Icons.Default.Clear, contentDescription = localizeHelper.localize(Res.string.clear_1))
                 }
             }
         },
@@ -205,6 +207,7 @@ private fun UserCard(
     user: AdminUser,
     onClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -255,7 +258,7 @@ private fun UserCard(
                             color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
                         ) {
                             Text(
-                                text = "Admin",
+                                text = localizeHelper.localize(Res.string.admin),
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.error
@@ -266,7 +269,7 @@ private fun UserCard(
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Supporter",
+                            contentDescription = localizeHelper.localize(Res.string.supporter_1),
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.tertiary
                         )
@@ -302,6 +305,7 @@ private fun UserDetailBottomSheet(
     onRemoveBadge: (String) -> Unit,
     onResetPassword: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -352,9 +356,9 @@ private fun UserDetailBottomSheet(
             Spacer(modifier = Modifier.height(24.dp))
             
             // User Info
-            InfoRow(label = "User ID", value = user.id)
-            InfoRow(label = "Created", value = user.createdAt.take(10))
-            InfoRow(label = "Status", value = buildString {
+            InfoRow(label = localizeHelper.localize(Res.string.user_id), value = user.id)
+            InfoRow(label = localizeHelper.localize(Res.string.created), value = user.createdAt.take(10))
+            InfoRow(label = localizeHelper.localize(Res.string.status), value = buildString {
                 if (user.isAdmin) append("Admin ")
                 if (user.isSupporter) append("Supporter ")
                 if (!user.isAdmin && !user.isSupporter) append("Regular User")
@@ -375,7 +379,7 @@ private fun UserDetailBottomSheet(
             
             if (userBadges.isEmpty()) {
                 Text(
-                    text = "No badges assigned",
+                    text = localizeHelper.localize(Res.string.no_badges_assigned),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -407,7 +411,7 @@ private fun UserDetailBottomSheet(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Reset Password")
+                    Text(localizeHelper.localize(Res.string.reset_password))
                 }
                 
                 Button(
@@ -421,7 +425,7 @@ private fun UserDetailBottomSheet(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Assign Badge")
+                    Text(localizeHelper.localize(Res.string.assign_badge))
                 }
             }
         }
@@ -455,6 +459,7 @@ private fun BadgeChip(
     onRemove: () -> Unit,
     isProcessing: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -493,7 +498,7 @@ private fun BadgeChip(
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Remove badge",
+                    contentDescription = localizeHelper.localize(Res.string.remove_badge),
                     tint = MaterialTheme.colorScheme.error
                 )
             }
@@ -508,15 +513,16 @@ private fun AssignBadgeDialog(
     onDismiss: () -> Unit,
     onAssign: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val userBadgeIds = remember(userBadges) { userBadges.map { it.id }.toSet() }
     val unassignedBadges = remember(availableBadges, userBadgeIds) { availableBadges.filter { it.id !in userBadgeIds } }
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Assign Badge") },
+        title = { Text(localizeHelper.localize(Res.string.assign_badge)) },
         text = {
             if (unassignedBadges.isEmpty()) {
-                Text("All available badges have been assigned to this user.")
+                Text(localizeHelper.localize(Res.string.all_available_badges_have_been))
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -560,7 +566,7 @@ private fun AssignBadgeDialog(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -572,6 +578,7 @@ private fun ResetPasswordDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -581,18 +588,18 @@ private fun ResetPasswordDialog(
                 tint = MaterialTheme.colorScheme.primary
             )
         },
-        title = { Text("Reset Password") },
+        title = { Text(localizeHelper.localize(Res.string.reset_password)) },
         text = {
             Text("Send a password reset email to $email?")
         },
         confirmButton = {
             Button(onClick = onConfirm) {
-                Text("Send Reset Email")
+                Text(localizeHelper.localize(Res.string.send_reset_email))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

@@ -75,7 +75,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.remote.PopularBook
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.back
 import ireader.i18n.resources.book_cover_1
 import ireader.i18n.resources.error_occurred

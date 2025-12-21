@@ -184,6 +184,7 @@ private fun WebPageErrorContent(
     localizeHelper: ireader.i18n.LocalizeHelper,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier
             .fillMaxSize()

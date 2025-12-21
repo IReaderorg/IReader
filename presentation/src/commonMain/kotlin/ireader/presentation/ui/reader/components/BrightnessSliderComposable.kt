@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import ireader.i18n.DEFAULT
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.less_brightness
 import ireader.i18n.resources.more_brightness
 import ireader.presentation.ui.component.reusable_composable.AppIconButton

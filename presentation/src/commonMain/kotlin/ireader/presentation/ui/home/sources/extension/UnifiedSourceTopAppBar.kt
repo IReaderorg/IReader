@@ -22,7 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.add_repository
 import ireader.i18n.resources.browse_settings
 import ireader.i18n.resources.close
@@ -98,7 +98,7 @@ fun UnifiedSourceTopAppBar(
                 // Overflow menu for less common actions
                 AppIconButton(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options",
+                    contentDescription = localizeHelper.localize(Res.string.more_options_1),
                     onClick = { showOverflowMenu = true },
                 )
                 
@@ -108,7 +108,7 @@ fun UnifiedSourceTopAppBar(
                 ) {
                     // Global Search
                     DropdownMenuItem(
-                        text = { Text("Global Search") },
+                        text = { Text(localizeHelper.localize(Res.string.global_search)) },
                         onClick = {
                             showOverflowMenu = false
                             onSearchNavigate()

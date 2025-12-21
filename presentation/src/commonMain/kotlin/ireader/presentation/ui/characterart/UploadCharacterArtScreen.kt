@@ -85,6 +85,8 @@ import coil3.request.ImageRequest
 import androidx.compose.ui.layout.ContentScale
 import ireader.domain.models.characterart.ArtStyleFilter
 import ireader.presentation.ui.component.isTableUi
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Image source mode for upload
@@ -151,6 +153,7 @@ fun UploadCharacterArtScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val isWideScreen = isTableUi()
     val scrollState = rememberScrollState()
     
@@ -316,12 +319,12 @@ fun UploadCharacterArtScreen(
                     }
 
                     // Character info section
-                    SectionCard(title = "Character Info", icon = "👤") {
+                    SectionCard(title = localizeHelper.localize(Res.string.character_info), icon = "👤") {
                         OutlinedTextField(
                             value = characterName,
                             onValueChange = { characterName = it },
-                            label = { Text("Character Name *") },
-                            placeholder = { Text("e.g., Harry Potter") },
+                            label = { Text(localizeHelper.localize(Res.string.character_name)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.eg_harry_potter)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
@@ -332,8 +335,8 @@ fun UploadCharacterArtScreen(
                         OutlinedTextField(
                             value = description,
                             onValueChange = { description = it },
-                            label = { Text("Description") },
-                            placeholder = { Text("Brief description of the character...") },
+                            label = { Text(localizeHelper.localize(Res.string.description)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.brief_description_of_the_character)) },
                             modifier = Modifier.fillMaxWidth(),
                             minLines = 2,
                             maxLines = 4,
@@ -342,12 +345,12 @@ fun UploadCharacterArtScreen(
                     }
 
                     // Book info section
-                    SectionCard(title = "Book Info", icon = "📚") {
+                    SectionCard(title = localizeHelper.localize(Res.string.book_info), icon = "📚") {
                         OutlinedTextField(
                             value = bookTitle,
                             onValueChange = { bookTitle = it },
-                            label = { Text("Book Title *") },
-                            placeholder = { Text("e.g., Harry Potter and the Sorcerer's Stone") },
+                            label = { Text(localizeHelper.localize(Res.string.book_title_1)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.eg_harry_potter_and_the_sorcerers_stone)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
@@ -358,8 +361,8 @@ fun UploadCharacterArtScreen(
                         OutlinedTextField(
                             value = bookAuthor,
                             onValueChange = { bookAuthor = it },
-                            label = { Text("Author") },
-                            placeholder = { Text("e.g., J.K. Rowling") },
+                            label = { Text(localizeHelper.localize(Res.string.author)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.eg_jk_rowling)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
@@ -367,12 +370,12 @@ fun UploadCharacterArtScreen(
                     }
 
                     // AI info section
-                    SectionCard(title = "AI Generation Info", icon = "🤖") {
+                    SectionCard(title = localizeHelper.localize(Res.string.ai_generation_info), icon = "🤖") {
                         OutlinedTextField(
                             value = aiModel,
                             onValueChange = { aiModel = it },
-                            label = { Text("AI Model Used") },
-                            placeholder = { Text("e.g., Midjourney, DALL-E, Stable Diffusion") },
+                            label = { Text(localizeHelper.localize(Res.string.ai_model_used)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.eg_midjourney_dall_e_stable_diffusion)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
@@ -383,8 +386,8 @@ fun UploadCharacterArtScreen(
                         OutlinedTextField(
                             value = prompt,
                             onValueChange = { prompt = it },
-                            label = { Text("Prompt Used") },
-                            placeholder = { Text("Share the prompt you used (optional)") },
+                            label = { Text(localizeHelper.localize(Res.string.prompt_used)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.share_the_prompt_you_used_optional)) },
                             modifier = Modifier.fillMaxWidth(),
                             minLines = 2,
                             maxLines = 4,
@@ -396,9 +399,9 @@ fun UploadCharacterArtScreen(
                     // Cache filtered styles to avoid filtering on every recomposition
                     val availableStyles = remember { ArtStyleFilter.entries.filter { it != ArtStyleFilter.ALL } }
                     
-                    SectionCard(title = "Art Style", icon = "🎨") {
+                    SectionCard(title = localizeHelper.localize(Res.string.art_style), icon = "🎨") {
                         Text(
-                            text = "Select applicable styles:",
+                            text = localizeHelper.localize(Res.string.select_applicable_styles),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -500,6 +503,7 @@ fun UploadCharacterArtScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun UploadTopBar(onBack: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 2.dp
@@ -511,7 +515,7 @@ private fun UploadTopBar(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
             }
             
             Spacer(Modifier.width(8.dp))
@@ -522,12 +526,12 @@ private fun UploadTopBar(onBack: () -> Unit) {
             
             Column {
                 Text(
-                    text = "Upload Character Art",
+                    text = localizeHelper.localize(Res.string.upload_character_art),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Share your AI-generated art",
+                    text = localizeHelper.localize(Res.string.share_your_ai_generated_art),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -542,6 +546,7 @@ private fun ImagePickerSection(
     onPickImage: () -> Unit,
     isWideScreen: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val hasImage = selectedImagePath != null
     val height = if (isWideScreen) 300.dp else 220.dp
     
@@ -586,13 +591,13 @@ private fun ImagePickerSection(
                     )
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        text = "Image Selected",
+                        text = localizeHelper.localize(Res.string.image_selected),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(Modifier.height(4.dp))
                     TextButton(onClick = onPickImage) {
-                        Text("Change Image")
+                        Text(localizeHelper.localize(Res.string.change_image))
                     }
                 }
             } else {
@@ -601,7 +606,7 @@ private fun ImagePickerSection(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.padding(24.dp)
                 ) {
-                    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                    val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.pulse))
                     val scale by infiniteTransition.animateFloat(
                         initialValue = 1f,
                         targetValue = 1.1f,
@@ -609,7 +614,7 @@ private fun ImagePickerSection(
                             animation = tween(1000),
                             repeatMode = RepeatMode.Reverse
                         ),
-                        label = "iconPulse"
+                        label = localizeHelper.localize(Res.string.iconpulse)
                     )
                     
                     Icon(
@@ -624,7 +629,7 @@ private fun ImagePickerSection(
                     Spacer(Modifier.height(16.dp))
                     
                     Text(
-                        text = "Tap to Select Image",
+                        text = localizeHelper.localize(Res.string.tap_to_select_image),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -632,7 +637,7 @@ private fun ImagePickerSection(
                     Spacer(Modifier.height(8.dp))
                     
                     Text(
-                        text = "PNG, JPG up to 10MB\nRecommended: 1024x1024 or higher",
+                        text = localizeHelper.localize(Res.string.png_jpg_up_to_10mbnrecommended_1024x1024_or_higher),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -677,6 +682,7 @@ private fun SectionCard(
 
 @Composable
 private fun GuidelinesCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -689,7 +695,7 @@ private fun GuidelinesCard() {
                 Text("📋", fontSize = 20.sp)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Submission Guidelines",
+                    text = localizeHelper.localize(Res.string.submission_guidelines),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -732,6 +738,7 @@ private fun ImageSourceToggle(
     selectedMode: ImageSourceMode,
     onModeChange: (ImageSourceMode) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -748,7 +755,7 @@ private fun ImageSourceToggle(
             // Pick from device
             ToggleOption(
                 icon = Icons.Outlined.Image,
-                label = "Pick Image",
+                label = localizeHelper.localize(Res.string.pick_image),
                 emoji = "📁",
                 isSelected = selectedMode == ImageSourceMode.PICK_FILE,
                 onClick = { onModeChange(ImageSourceMode.PICK_FILE) },
@@ -758,7 +765,7 @@ private fun ImageSourceToggle(
             // Generate with AI
             ToggleOption(
                 icon = Icons.Outlined.AutoAwesome,
-                label = "Generate AI",
+                label = localizeHelper.localize(Res.string.generate_ai),
                 emoji = "✨",
                 isSelected = selectedMode == ImageSourceMode.GENERATE_AI,
                 onClick = { onModeChange(ImageSourceMode.GENERATE_AI) },
@@ -881,6 +888,7 @@ private fun AIGeneratorSection(
     onGenerate: () -> Unit,
     isWideScreen: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val height = if (isWideScreen) 400.dp else 320.dp
     val hasApiKey = apiKey.isNotBlank() || !provider.requiresApiKey
     var showModelDropdown by remember { mutableStateOf(false) }
@@ -933,7 +941,7 @@ private fun AIGeneratorSection(
                         Spacer(Modifier.width(4.dp))
                         Icon(
                             Icons.Default.ArrowDropDown,
-                            contentDescription = "Change provider",
+                            contentDescription = localizeHelper.localize(Res.string.change_provider),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -974,7 +982,7 @@ private fun AIGeneratorSection(
                         color = MaterialTheme.colorScheme.tertiaryContainer
                     ) {
                         Text(
-                            text = "✓ FREE",
+                            text = localizeHelper.localize(Res.string.free_1),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
@@ -985,7 +993,7 @@ private fun AIGeneratorSection(
             
             // Model selector
             Text(
-                text = "AI Model",
+                text = localizeHelper.localize(Res.string.ai_model),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1034,7 +1042,7 @@ private fun AIGeneratorSection(
                         } else {
                             Icon(
                                 Icons.Default.ArrowDropDown,
-                                contentDescription = "Select model"
+                                contentDescription = localizeHelper.localize(Res.string.select_model)
                             )
                         }
                     }
@@ -1083,7 +1091,7 @@ private fun AIGeneratorSection(
             
             // Style selector
             Text(
-                text = "Art Style",
+                text = localizeHelper.localize(Res.string.art_style),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1118,9 +1126,9 @@ private fun AIGeneratorSection(
             OutlinedTextField(
                 value = prompt,
                 onValueChange = onPromptChange,
-                label = { Text("Describe the character") },
+                label = { Text(localizeHelper.localize(Res.string.describe_the_character)) },
                 placeholder = { 
-                    Text("e.g., Young wizard with round glasses, messy black hair, lightning scar on forehead...") 
+                    Text(localizeHelper.localize(Res.string.eg_young_wizard_with_round)) 
                 },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
@@ -1149,7 +1157,7 @@ private fun AIGeneratorSection(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "Fill in Character Name and Book Title above first",
+                        text = localizeHelper.localize(Res.string.fill_in_character_name_and_book_title_above_first),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
@@ -1231,6 +1239,7 @@ private fun GeneratedImagePreview(
     onRegenerate: () -> Unit,
     isWideScreen: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val height = if (isWideScreen) 350.dp else 280.dp
     var isFullScreen by remember { mutableStateOf(false) }
     
@@ -1253,7 +1262,7 @@ private fun GeneratedImagePreview(
                 model = ImageRequest.Builder(context)
                     .data(imageBytes)
                     .build(),
-                contentDescription = "Generated character art",
+                contentDescription = localizeHelper.localize(Res.string.generated_character_art),
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(16.dp))
@@ -1370,6 +1379,7 @@ private fun FullScreenImageDialog(
     imageBytes: ByteArray,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.fillMaxSize(0.95f),
@@ -1384,7 +1394,7 @@ private fun FullScreenImageDialog(
                     model = ImageRequest.Builder(context)
                         .data(imageBytes)
                         .build(),
-                    contentDescription = "Generated character art full view",
+                    contentDescription = localizeHelper.localize(Res.string.generated_character_art_full_view),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp)),
@@ -1394,7 +1404,7 @@ private fun FullScreenImageDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )
@@ -1410,6 +1420,7 @@ private fun MultiProviderApiKeyDialog(
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var apiKey by remember { mutableStateOf(currentKey) }
     var showKey by remember { mutableStateOf(false) }
     
@@ -1446,7 +1457,7 @@ private fun MultiProviderApiKeyDialog(
                 OutlinedTextField(
                     value = apiKey,
                     onValueChange = { apiKey = it },
-                    label = { Text("API Key") },
+                    label = { Text(localizeHelper.localize(Res.string.api_key)) },
                     placeholder = { 
                         Text(when (provider) {
                             AIProviderOption.GEMINI -> "AIza..."
@@ -1473,7 +1484,7 @@ private fun MultiProviderApiKeyDialog(
                 )
                 
                 Text(
-                    text = "🔒 Your API key is stored locally and never shared.",
+                    text = localizeHelper.localize(Res.string.your_api_key_is_stored_locally_and_never_shared),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1484,12 +1495,12 @@ private fun MultiProviderApiKeyDialog(
                 onClick = { onSave(apiKey) },
                 enabled = apiKey.isNotBlank()
             ) {
-                Text("Save")
+                Text(localizeHelper.localize(Res.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -1504,13 +1515,14 @@ private fun ProviderSelectorDialog(
     onProviderSelect: (AIProviderOption) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("🤖", fontSize = 24.sp)
                 Spacer(Modifier.width(8.dp))
-                Text("Choose AI Provider")
+                Text(localizeHelper.localize(Res.string.choose_ai_provider))
             }
         },
         text = {
@@ -1553,7 +1565,7 @@ private fun ProviderSelectorDialog(
                             if (isSelected) {
                                 Icon(
                                     Icons.Default.Check,
-                                    contentDescription = "Selected",
+                                    contentDescription = localizeHelper.localize(Res.string.selected),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -1564,7 +1576,7 @@ private fun ProviderSelectorDialog(
                                     color = MaterialTheme.colorScheme.tertiaryContainer
                                 ) {
                                     Text(
-                                        text = "FREE",
+                                        text = localizeHelper.localize(Res.string.free_2),
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -1578,7 +1590,7 @@ private fun ProviderSelectorDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )

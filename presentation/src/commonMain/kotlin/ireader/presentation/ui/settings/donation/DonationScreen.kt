@@ -36,7 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.back
 import ireader.i18n.resources.donate_now
 import ireader.i18n.resources.donate_via_card_1
@@ -226,7 +226,7 @@ private fun ReymitPaymentCard(
             
             // Info about Reymit supporting both card and crypto
             Text(
-                text = "Reymit accepts card payments and cryptocurrency",
+                text = localizeHelper.localize(Res.string.reymit_accepts_card_payments_and_cryptocurrency),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
             )

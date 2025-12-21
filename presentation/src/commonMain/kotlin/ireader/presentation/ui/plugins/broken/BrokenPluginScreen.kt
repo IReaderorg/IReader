@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Information about a broken plugin.
@@ -47,18 +49,19 @@ fun BrokenPluginScreen(
     onReportIssue: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scrollState = rememberScrollState()
     
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Plugin Not Working") },
+                title = { Text(localizeHelper.localize(Res.string.plugin_not_working)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 },
@@ -137,7 +140,7 @@ fun BrokenPluginScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Error",
+                            text = localizeHelper.localize(Res.string.notification_error),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onErrorContainer
@@ -179,7 +182,7 @@ fun BrokenPluginScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Possible Causes",
+                                text = localizeHelper.localize(Res.string.possible_causes),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -235,7 +238,7 @@ fun BrokenPluginScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "What You Can Try",
+                                text = localizeHelper.localize(Res.string.what_you_can_try),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -296,7 +299,7 @@ fun BrokenPluginScreen(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Update Plugin")
+                        Text(localizeHelper.localize(Res.string.update_plugin))
                     }
                 }
                 
@@ -314,7 +317,7 @@ fun BrokenPluginScreen(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Check for App Updates")
+                    Text(localizeHelper.localize(Res.string.check_for_app_updates))
                 }
                 
                 // Uninstall button
@@ -335,7 +338,7 @@ fun BrokenPluginScreen(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Uninstall Plugin")
+                        Text(localizeHelper.localize(Res.string.uninstall_plugin))
                     }
                 }
                 
@@ -351,7 +354,7 @@ fun BrokenPluginScreen(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Report Issue")
+                        Text(localizeHelper.localize(Res.string.report_issue))
                     }
                 }
             }
@@ -362,7 +365,7 @@ fun BrokenPluginScreen(
             TextButton(
                 onClick = onSkipForNow
             ) {
-                Text("Skip for now (don't show again)")
+                Text(localizeHelper.localize(Res.string.skip_for_now_dont_show_again))
             }
             
             Spacer(modifier = Modifier.height(32.dp))

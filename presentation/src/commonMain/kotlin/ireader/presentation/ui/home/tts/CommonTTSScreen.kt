@@ -83,7 +83,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.auto_next
 import ireader.i18n.resources.auto_next_chapter_1
 import ireader.i18n.resources.automatically_play_next_chapter_when_current_ends
@@ -1031,6 +1031,7 @@ private fun ParagraphStatusIcon(
     isInPlayingChunk: Boolean = false,
     textColor: Color
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Only show icon if loading or cached (removed blue play icon for cleaner UI)
     if (!isLoadingCache && !isCached) return
     
@@ -1053,7 +1054,7 @@ private fun ParagraphStatusIcon(
                 // Checkmark icon for cached paragraphs
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Cached",
+                    contentDescription = localizeHelper.localize(Res.string.cached),
                     modifier = Modifier.size(12.dp),
                     tint = Color(0xFF4CAF50) // Green
                 )
@@ -1942,7 +1943,7 @@ fun TTSSettingsPanelCommon(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Sentence Highlighting",
+                                        text = localizeHelper.localize(Res.string.sentence_highlighting),
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                     Text(
@@ -1964,7 +1965,7 @@ fun TTSSettingsPanelCommon(
                 }
                 
                 // Content Filter Section
-                SettingSectionCommon(title = "Content Filter") {
+                SettingSectionCommon(title = localizeHelper.localize(Res.string.content_filter)) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -1975,11 +1976,11 @@ fun TTSSettingsPanelCommon(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Enable Content Filter",
+                                    text = localizeHelper.localize(Res.string.enable_content_filter),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
-                                    text = "Remove unwanted text patterns using regex",
+                                    text = localizeHelper.localize(Res.string.remove_unwanted_text_patterns_using_regex),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1998,11 +1999,11 @@ fun TTSSettingsPanelCommon(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = "Filter Patterns (one regex per line)",
+                                    text = localizeHelper.localize(Res.string.filter_patterns_one_regex_per_line),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
-                                    text = "Syntax: .* = any chars, (?:A|B) = A or B\n\n" +
+                                    text = localizeHelper.localize(Res.string.syntax_any_chars_ab_a_or_bnn) +
                                            "Examples:\n" +
                                            "• Use arrow keys.*chapter - nav hints\n" +
                                            "• (?:A|D|←|→).*chapter - keyboard shortcuts\n" +
@@ -2018,7 +2019,7 @@ fun TTSSettingsPanelCommon(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(150.dp),
-                                    placeholder = { Text("Use arrow keys.*chapter\n(?:A|D|←|→).*chapter\nRead more at.*") },
+                                    placeholder = { Text(localizeHelper.localize(Res.string.use_arrow_keyschapternadchapternread_more_at)) },
                                     textStyle = MaterialTheme.typography.bodySmall,
                                     minLines = 4,
                                     maxLines = 8

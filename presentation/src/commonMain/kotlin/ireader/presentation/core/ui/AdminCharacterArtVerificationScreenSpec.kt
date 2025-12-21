@@ -60,6 +60,8 @@ import ireader.domain.models.characterart.CharacterArt
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.safePopBackStack
 import ireader.presentation.ui.characterart.CharacterArtViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Admin screen for verifying character art submissions
@@ -69,6 +71,7 @@ class AdminCharacterArtVerificationScreenSpec {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Content() {
+        val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
         val vm: CharacterArtViewModel = getIViewModel()
         val state by vm.state.collectAsState()
@@ -89,7 +92,7 @@ class AdminCharacterArtVerificationScreenSpec {
         if (showApproveAllDialog) {
             AlertDialog(
                 onDismissRequest = { showApproveAllDialog = false },
-                title = { Text("Approve All") },
+                title = { Text(localizeHelper.localize(Res.string.approve_all)) },
                 text = {
                     Text("Are you sure you want to approve all ${state.pendingArt.size} pending submissions?")
                 },
@@ -105,7 +108,7 @@ class AdminCharacterArtVerificationScreenSpec {
                 },
                 dismissButton = {
                     TextButton(onClick = { showApproveAllDialog = false }) {
-                        Text("Cancel")
+                        Text(localizeHelper.localize(Res.string.cancel))
                     }
                 }
             )
@@ -115,16 +118,16 @@ class AdminCharacterArtVerificationScreenSpec {
         if (showRejectDialog && selectedArt != null) {
             AlertDialog(
                 onDismissRequest = { showRejectDialog = false },
-                title = { Text("Reject Art") },
+                title = { Text(localizeHelper.localize(Res.string.reject_art)) },
                 text = {
                     Column {
-                        Text("Reason for rejection:")
+                        Text(localizeHelper.localize(Res.string.reason_for_rejection))
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = rejectReason,
                             onValueChange = { rejectReason = it },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("Enter reason...") }
+                            placeholder = { Text(localizeHelper.localize(Res.string.enter_reason)) }
                         )
                     }
                 },
@@ -142,7 +145,7 @@ class AdminCharacterArtVerificationScreenSpec {
                 },
                 dismissButton = {
                     TextButton(onClick = { showRejectDialog = false }) {
-                        Text("Cancel")
+                        Text(localizeHelper.localize(Res.string.cancel))
                     }
                 }
             )
@@ -160,26 +163,26 @@ class AdminCharacterArtVerificationScreenSpec {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Character Art Verification") },
+                    title = { Text(localizeHelper.localize(Res.string.character_art_verification)) },
                     navigationIcon = {
                         IconButton(onClick = { navController.safePopBackStack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     },
                     actions = {
                         // Auto-approve old pending art (7+ days)
                         IconButton(onClick = { vm.autoApproveOldPendingArt(7) }) {
-                            Icon(Icons.Default.Schedule, contentDescription = "Auto-approve 7+ days old")
+                            Icon(Icons.Default.Schedule, contentDescription = localizeHelper.localize(Res.string.auto_approve_7_days_old))
                         }
                         // Approve All button
                         if (state.pendingArt.isNotEmpty()) {
                             IconButton(onClick = { showApproveAllDialog = true }) {
-                                Icon(Icons.Default.DoneAll, contentDescription = "Approve All")
+                                Icon(Icons.Default.DoneAll, contentDescription = localizeHelper.localize(Res.string.approve_all))
                             }
                         }
                         // Refresh button
                         IconButton(onClick = { vm.loadPendingArtForVerification() }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                            Icon(Icons.Default.Refresh, contentDescription = localizeHelper.localize(Res.string.refresh))
                         }
                     }
                 )
@@ -218,7 +221,7 @@ class AdminCharacterArtVerificationScreenSpec {
                             )
                             Spacer(Modifier.height(16.dp))
                             TextButton(onClick = { vm.loadPendingArtForVerification() }) {
-                                Text("Refresh")
+                                Text(localizeHelper.localize(Res.string.refresh))
                             }
                         }
                     }
@@ -264,6 +267,7 @@ private fun PendingArtCard(
     onApprove: (featured: Boolean) -> Unit,
     onReject: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showFeaturedOption by remember { mutableStateOf(false) }
     
     Card(
@@ -360,7 +364,7 @@ private fun PendingArtCard(
                 ) {
                     Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Reject")
+                    Text(localizeHelper.localize(Res.string.reject))
                 }
                 
                 // Approve button
@@ -370,7 +374,7 @@ private fun PendingArtCard(
                 ) {
                     Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Approve")
+                    Text(localizeHelper.localize(Res.string.approve))
                 }
             }
             
@@ -388,7 +392,7 @@ private fun PendingArtCard(
                         },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Normal")
+                        Text(localizeHelper.localize(Res.string.normal))
                     }
                     Button(
                         onClick = {
@@ -400,7 +404,7 @@ private fun PendingArtCard(
                             containerColor = MaterialTheme.colorScheme.tertiary
                         )
                     ) {
-                        Text("⭐ Featured")
+                        Text(localizeHelper.localize(Res.string.featured))
                     }
                 }
             }

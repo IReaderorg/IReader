@@ -97,7 +97,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.HistoryWithRelations
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.all_time
 import ireader.i18n.resources.cancel
 import ireader.i18n.resources.clear

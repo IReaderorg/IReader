@@ -9,7 +9,7 @@ import ireader.domain.services.common.ServiceState
 import ireader.domain.usecases.download.DownloadUseCases
 import ireader.domain.utils.extensions.ioDispatcher
 import ireader.i18n.LocalizeHelper
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.download_failed_title
 import ireader.i18n.resources.downloads_stopped
 import ireader.i18n.resources.retry_failed

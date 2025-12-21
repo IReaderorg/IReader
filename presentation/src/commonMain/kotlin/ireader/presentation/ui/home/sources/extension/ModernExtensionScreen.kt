@@ -50,7 +50,7 @@
 //import ireader.domain.models.entities.Catalog
 //import ireader.i18n.UiEvent
 //import ireader.i18n.asString
-//import ireader.i18n.resources.Res
+//import ireader.i18n.resources.*
 //import ireader.i18n.resources.extensions
 //import ireader.i18n.resources.font_weight_1
 //import ireader.i18n.resources.pill_offset

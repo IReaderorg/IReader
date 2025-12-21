@@ -61,7 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.backup.BackupInfo
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.about_google_drive_backup
 import ireader.i18n.resources.are_you_sure_you_want
 import ireader.i18n.resources.available_backups

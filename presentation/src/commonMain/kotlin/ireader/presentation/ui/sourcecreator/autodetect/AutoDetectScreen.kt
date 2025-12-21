@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import ireader.domain.usersource.autodetect.SelectorAutoDetector
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Screen for auto-detecting CSS selectors from a webpage.
@@ -28,13 +30,14 @@ fun AutoDetectScreen(
     onApplySelections: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Auto-Detect Selectors") },
+                title = { Text(localizeHelper.localize(Res.string.auto_detect_selectors)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 }
             )
@@ -66,7 +69,7 @@ fun AutoDetectScreen(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Enter a page URL and the app will analyze it to suggest CSS selectors automatically.",
+                        text = localizeHelper.localize(Res.string.enter_a_page_url_and),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -78,7 +81,7 @@ fun AutoDetectScreen(
             OutlinedTextField(
                 value = state.url,
                 onValueChange = onUrlChange,
-                label = { Text("Page URL") },
+                label = { Text(localizeHelper.localize(Res.string.page_url)) },
                 placeholder = { Text("https://example.com/search?q=test") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -89,7 +92,7 @@ fun AutoDetectScreen(
             
             // Page type selection
             Text(
-                text = "What type of page is this?",
+                text = localizeHelper.localize(Res.string.what_type_of_page_is_this),
                 style = MaterialTheme.typography.labelMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -122,11 +125,11 @@ fun AutoDetectScreen(
                         strokeWidth = 2.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Analyzing...")
+                    Text(localizeHelper.localize(Res.string.analyzing))
                 } else {
                     Icon(Icons.Default.Search, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Analyze Page")
+                    Text(localizeHelper.localize(Res.string.analyze_page))
                 }
             }
             
@@ -162,13 +165,14 @@ private fun DetectionResults(
     onSelectResult: (String, SelectorAutoDetector.DetectionResult) -> Unit,
     onApply: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            text = "Detected Selectors",
+            text = localizeHelper.localize(Res.string.detected_selectors),
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = "Tap to select the best option for each field",
+            text = localizeHelper.localize(Res.string.tap_to_select_the_best_option_for_each_field),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -182,7 +186,7 @@ private fun DetectionResults(
             if (result.bookList.isNotEmpty()) {
                 item {
                     DetectionCategory(
-                        title = "Book List Container",
+                        title = localizeHelper.localize(Res.string.book_list_container),
                         fieldKey = "bookList",
                         results = result.bookList,
                         selectedResult = selectedResults["bookList"],
@@ -194,7 +198,7 @@ private fun DetectionResults(
             if (result.title.isNotEmpty()) {
                 item {
                     DetectionCategory(
-                        title = "Title",
+                        title = localizeHelper.localize(Res.string.title),
                         fieldKey = "title",
                         results = result.title,
                         selectedResult = selectedResults["title"],
@@ -206,7 +210,7 @@ private fun DetectionResults(
             if (result.author.isNotEmpty()) {
                 item {
                     DetectionCategory(
-                        title = "Author",
+                        title = localizeHelper.localize(Res.string.author),
                         fieldKey = "author",
                         results = result.author,
                         selectedResult = selectedResults["author"],
@@ -218,7 +222,7 @@ private fun DetectionResults(
             if (result.cover.isNotEmpty()) {
                 item {
                     DetectionCategory(
-                        title = "Cover Image",
+                        title = localizeHelper.localize(Res.string.cover_image),
                         fieldKey = "cover",
                         results = result.cover,
                         selectedResult = selectedResults["cover"],
@@ -230,7 +234,7 @@ private fun DetectionResults(
             if (result.description.isNotEmpty()) {
                 item {
                     DetectionCategory(
-                        title = "Description",
+                        title = localizeHelper.localize(Res.string.description),
                         fieldKey = "description",
                         results = result.description,
                         selectedResult = selectedResults["description"],
@@ -242,7 +246,7 @@ private fun DetectionResults(
             if (result.link.isNotEmpty()) {
                 item {
                     DetectionCategory(
-                        title = "Link URL",
+                        title = localizeHelper.localize(Res.string.link_url),
                         fieldKey = "link",
                         results = result.link,
                         selectedResult = selectedResults["link"],
@@ -254,7 +258,7 @@ private fun DetectionResults(
             if (result.chapterList.isNotEmpty()) {
                 item {
                     DetectionCategory(
-                        title = "Chapter List",
+                        title = localizeHelper.localize(Res.string.chapter_list),
                         fieldKey = "chapterList",
                         results = result.chapterList,
                         selectedResult = selectedResults["chapterList"],
@@ -266,7 +270,7 @@ private fun DetectionResults(
             if (result.content.isNotEmpty()) {
                 item {
                     DetectionCategory(
-                        title = "Content",
+                        title = localizeHelper.localize(Res.string.content),
                         fieldKey = "content",
                         results = result.content,
                         selectedResult = selectedResults["content"],

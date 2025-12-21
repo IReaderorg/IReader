@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import ireader.domain.models.quote.BuddyAnimation
 import ireader.domain.models.quote.BuddyMood
 import ireader.domain.models.quote.ReadingBuddyState
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Animated Reading Buddy character - a cute rabbit using emoji art
@@ -30,7 +32,8 @@ fun ReadingBuddyCharacter(
     state: ReadingBuddyState,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "buddy")
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.buddy))
     
     // Bounce animation
     val bounceOffset by infiniteTransition.animateFloat(
@@ -51,7 +54,7 @@ fun ReadingBuddyCharacter(
             ),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "bounce"
+        label = localizeHelper.localize(Res.string.bounce)
     )
     
     // Scale animation for celebrate
@@ -66,7 +69,7 @@ fun ReadingBuddyCharacter(
             animation = tween(600, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "scale"
+        label = localizeHelper.localize(Res.string.scale)
     )
     
     // Rotation for wave
@@ -81,7 +84,7 @@ fun ReadingBuddyCharacter(
             animation = tween(400),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "rotation"
+        label = localizeHelper.localize(Res.string.rotation)
     )
     
     Column(

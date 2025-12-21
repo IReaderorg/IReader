@@ -53,7 +53,7 @@ fun AppUpdateFullScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        text = "App Update Available",
+                        text = localizeHelper.localize(Res.string.app_update_available),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -201,9 +201,10 @@ private fun UpdateIcon(
     isConnecting: Boolean,
     progress: Float
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
-        label = "download_progress"
+        label = localizeHelper.localize(Res.string.download_progress_1)
     )
     
     Box(
@@ -278,6 +279,7 @@ private fun VersionComparisonCard(
     currentVersion: String,
     newVersion: String
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -295,7 +297,7 @@ private fun VersionComparisonCard(
             // Current version
             VersionChip(
                 version = currentVersion,
-                label = "Current",
+                label = localizeHelper.localize(Res.string.current),
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
             
@@ -310,7 +312,7 @@ private fun VersionComparisonCard(
             // New version
             VersionChip(
                 version = newVersion,
-                label = "New",
+                label = localizeHelper.localize(Res.string.add_as_new),
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         }
@@ -419,6 +421,7 @@ private fun DownloadProgressCard(
 
 @Composable
 private fun ReleaseNotesCard(releaseNotes: String) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -440,7 +443,7 @@ private fun ReleaseNotesCard(releaseNotes: String) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "What's New",
+                    text = localizeHelper.localize(Res.string.whats_new_1),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -459,6 +462,7 @@ private fun ReleaseNotesCard(releaseNotes: String) {
 
 @Composable
 private fun DownloadInfoCard(asset: ireader.domain.models.update_service_models.ReleaseAsset) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -481,7 +485,7 @@ private fun DownloadInfoCard(asset: ireader.domain.models.update_service_models.
             
             Column {
                 Text(
-                    text = "Download Information",
+                    text = localizeHelper.localize(Res.string.download_information),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -504,6 +508,7 @@ private fun ErrorCard(
     message: String,
     onRetry: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -533,7 +538,7 @@ private fun ErrorCard(
             
             TextButton(onClick = onRetry) {
                 Text(
-                    text = "Retry",
+                    text = localizeHelper.localize(Res.string.notification_retry),
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
@@ -552,6 +557,7 @@ private fun ActionButtons(
     onCancelDownload: () -> Unit,
     localizeHelper: ireader.i18n.LocalizeHelper
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -576,7 +582,7 @@ private fun ActionButtons(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Install Now",
+                        text = localizeHelper.localize(Res.string.install_now),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -587,7 +593,7 @@ private fun ActionButtons(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Install Later")
+                    Text(localizeHelper.localize(Res.string.install_later))
                 }
             }
             
@@ -629,7 +635,7 @@ private fun ActionButtons(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Download & Install",
+                        text = localizeHelper.localize(Res.string.download_install),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -653,7 +659,7 @@ private fun ActionButtons(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Later")
+                        Text(localizeHelper.localize(Res.string.later))
                     }
                     
                     TextButton(
@@ -662,7 +668,7 @@ private fun ActionButtons(
                             .weight(1f)
                             .height(48.dp)
                     ) {
-                        Text("Skip Version")
+                        Text(localizeHelper.localize(Res.string.skip_version))
                     }
                 }
             }

@@ -67,7 +67,7 @@ fun FeatureStoreScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            AnimatedContent(targetState = showSearch, label = "search_bar") { isSearching ->
+            AnimatedContent(targetState = showSearch, label = localizeHelper.localize(Res.string.search_bar)) { isSearching ->
                 if (isSearching) {
                     ModernSearchBar(
                         searchQuery = state.searchQuery,
@@ -144,7 +144,7 @@ private fun ModernTopBar(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Discover plugins to enhance your reading",
+                    text = localizeHelper.localize(Res.string.discover_plugins_to_enhance_your_reading),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -188,7 +188,7 @@ private fun ModernSearchBar(
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear")
+                            Icon(Icons.Default.Clear, contentDescription = localizeHelper.localize(Res.string.clear_1))
                         }
                     }
                 },
@@ -722,6 +722,7 @@ private fun DownloadProgressButton(
     progress: DownloadProgress,
     onCancel: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(contentAlignment = Alignment.Center) {
         CircularProgressIndicator(
             progress = { if (progress.progress > 0f) progress.progress else 0f },
@@ -732,7 +733,7 @@ private fun DownloadProgressButton(
         IconButton(onClick = onCancel, modifier = Modifier.size(36.dp)) {
             Icon(
                 Icons.Default.Close,
-                contentDescription = "Cancel",
+                contentDescription = localizeHelper.localize(Res.string.cancel),
                 modifier = Modifier.size(18.dp),
                 tint = MaterialTheme.colorScheme.error
             )
@@ -855,12 +856,13 @@ private fun PriceBadge(monetization: PluginMonetization?, modifier: Modifier = M
 
 @Composable
 private fun ModernLoadingState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator(modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Loading plugins...",
+                text = localizeHelper.localize(Res.string.loading_plugins),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -870,6 +872,7 @@ private fun ModernLoadingState() {
 
 @Composable
 private fun ModernErrorState(error: String, onRetry: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -883,7 +886,7 @@ private fun ModernErrorState(error: String, onRetry: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Something went wrong",
+                text = localizeHelper.localize(Res.string.something_went_wrong),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -898,7 +901,7 @@ private fun ModernErrorState(error: String, onRetry: () -> Unit) {
             Button(onClick = onRetry) {
                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Try Again")
+                Text(localizeHelper.localize(Res.string.try_again))
             }
         }
     }

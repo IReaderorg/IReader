@@ -42,7 +42,7 @@ import ireader.domain.utils.removeIf
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.NO_VALUE
 import ireader.i18n.UiText
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.something_wrong_with_book
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toDomainColor

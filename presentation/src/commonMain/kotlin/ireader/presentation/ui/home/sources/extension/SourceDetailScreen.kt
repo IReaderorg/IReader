@@ -1,16 +1,55 @@
 package ireader.presentation.ui.home.sources.extension
 
-import ireader.presentation.core.LocalNavigator
-
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.filled.Source
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Update
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,15 +63,42 @@ import ireader.domain.models.entities.CatalogRemote
 import ireader.domain.usecases.source.ReportBrokenSourceUseCase
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
-import ireader.i18n.resources.*
+import ireader.i18n.resources.actions
+import ireader.i18n.resources.available
+import ireader.i18n.resources.cancel
+import ireader.i18n.resources.description
+import ireader.i18n.resources.eg_source_not_loading_broken
+import ireader.i18n.resources.eighteen
+import ireader.i18n.resources.go_back
+import ireader.i18n.resources.icon_url
+import ireader.i18n.resources.info
+import ireader.i18n.resources.installed
+import ireader.i18n.resources.language
+import ireader.i18n.resources.package_name
+import ireader.i18n.resources.package_url
+import ireader.i18n.resources.please_describe_the_issue
+import ireader.i18n.resources.report_as_broken
+import ireader.i18n.resources.report_source_as_broken
+import ireader.i18n.resources.repository
+import ireader.i18n.resources.source_id
+import ireader.i18n.resources.status
+import ireader.i18n.resources.submit_report
+import ireader.i18n.resources.technical_details
+import ireader.i18n.resources.unknown
+import ireader.i18n.resources.version_code
+import ireader.i18n.resources.version_name
+import ireader.i18n.resources.you_are_about_to_report
+import ireader.i18n.resources.your_report_will_be_stored_locally_for_review
+import ireader.presentation.core.LocalNavigator
+import ireader.presentation.core.safePopBackStack
+import ireader.presentation.imageloader.IImageLoader
 import ireader.presentation.ui.component.IScaffold
 import ireader.presentation.ui.component.reusable_composable.AppIconButton
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.home.sources.extension.composables.LetterIcon
-import ireader.presentation.imageloader.IImageLoader
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import ireader.presentation.ui.core.theme.LocalLocalizeHelper
-import ireader.presentation.core.safePopBackStack
+
 data class SourceDetailScreen(
     val catalog: Catalog
 ) {
@@ -525,12 +591,13 @@ private fun LanguagePill(language: String) {
 
 @Composable
 private fun NsfwBadge() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.errorContainer
     ) {
         Text(
-            text = "18+",
+            text = localizeHelper.localize(Res.string.eighteen),
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onErrorContainer,
@@ -600,7 +667,7 @@ private fun ReportSourceDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "You are about to report \"$sourceName\" as broken or not working properly.",
+                    text = localizeHelper.localize(Res.string.you_are_about_to_report)+ "$sourceName\" as broken or not working properly.",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 

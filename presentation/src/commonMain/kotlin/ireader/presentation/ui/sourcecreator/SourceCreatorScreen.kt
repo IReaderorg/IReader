@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.sourcecreator.components.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Screen for creating and editing user-defined sources.
@@ -61,6 +63,7 @@ fun SourceCreatorScreen(
     onExploreCoverUrlChange: (String) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val tabs = SourceCreatorTab.entries
     
     Scaffold(
@@ -69,12 +72,12 @@ fun SourceCreatorScreen(
                 title = { Text(if (state.isEditing) "Edit Source" else "Create Source") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onShowJson) {
-                        Icon(Icons.Default.Code, contentDescription = "View/Import JSON")
+                        Icon(Icons.Default.Code, contentDescription = localizeHelper.localize(Res.string.viewimport_json))
                     }
                     IconButton(onClick = onSave, enabled = !state.isSaving) {
                         if (state.isSaving) {
@@ -83,7 +86,7 @@ fun SourceCreatorScreen(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Icon(Icons.Default.Save, contentDescription = "Save")
+                            Icon(Icons.Default.Save, contentDescription = localizeHelper.localize(Res.string.save))
                         }
                     }
                 }

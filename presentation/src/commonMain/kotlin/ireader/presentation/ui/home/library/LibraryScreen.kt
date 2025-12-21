@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.BookItem
 import ireader.domain.models.entities.Category
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.empty_library
 import ireader.presentation.ui.core.ui.EmptyScreen
 import ireader.presentation.ui.home.library.components.EditCategoriesDialog

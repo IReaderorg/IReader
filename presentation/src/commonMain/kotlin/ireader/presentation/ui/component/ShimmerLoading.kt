@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Creates a shimmer brush effect for loading placeholders.
@@ -43,13 +45,14 @@ fun shimmerBrush(
     targetValue: Float = 1000f,
     durationMillis: Int = 1000
 ): Brush {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val shimmerColors = listOf(
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
     )
 
-    val transition = rememberInfiniteTransition(label = "shimmer")
+    val transition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.shimmer))
     val translateAnimation by transition.animateFloat(
         initialValue = 0f,
         targetValue = targetValue,
@@ -57,7 +60,7 @@ fun shimmerBrush(
             animation = tween(durationMillis, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
-        label = "shimmer_translate"
+        label = localizeHelper.localize(Res.string.shimmer_translate)
     )
 
     return Brush.linearGradient(

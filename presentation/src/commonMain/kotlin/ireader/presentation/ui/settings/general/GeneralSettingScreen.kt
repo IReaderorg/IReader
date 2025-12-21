@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.UiPreferences
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.add_novels_to_library_only
 import ireader.i18n.resources.allow_loading_lnreader_compatible_javascript
 import ireader.i18n.resources.api_settings
@@ -216,8 +216,8 @@ fun GeneralSettingScreen(
                 },
                 Components.Switch(
                         preference = vm.showCharacterArtInDetails,
-                        title = "Show Character Art",
-                        subtitle = "Display AI-generated character art gallery in book details",
+                        title = localizeHelper.localize(Res.string.show_character_art),
+                        subtitle = localizeHelper.localize(Res.string.display_ai_generated_character_art),
                         icon = Icons.Filled.Settings
                 ),
                 
@@ -261,7 +261,7 @@ fun GeneralSettingScreen(
                 
                 // Mass Translation Section
                 Components.Header(
-                        text = "Mass Translation",
+                        text = localizeHelper.localize(Res.string.mass_translation),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Translate
                 ),
@@ -269,8 +269,8 @@ fun GeneralSettingScreen(
                     vm.bypassTranslationWarning?.let { pref ->
                         ireader.presentation.ui.component.components.SwitchPreference(
                             preference = pref,
-                            title = "Bypass Translation Warning",
-                            subtitle = "Skip rate limit warnings when mass translating chapters. May exhaust API credits or cause IP blocks.",
+                            title = localizeHelper.localize(Res.string.bypass_translation_warning),
+                            subtitle = localizeHelper.localize(Res.string.skip_rate_limit_warnings_when),
                             icon = Icons.Filled.Warning
                         )
                     }
@@ -279,8 +279,8 @@ fun GeneralSettingScreen(
                     vm.translationRateLimitDelay?.let { pref ->
                         ireader.presentation.ui.component.components.SliderPreference(
                             preferenceAsLong = pref,
-                            title = "Translation Rate Limit Delay",
-                            subtitle = "Delay between translation requests to prevent rate limiting",
+                            title = localizeHelper.localize(Res.string.translation_rate_limit_delay),
+                            subtitle = localizeHelper.localize(Res.string.delay_between_translation_requests_to),
                             icon = Icons.Filled.Timer,
                             valueRange = 1000f..10000f,
                             steps = 17,
@@ -354,14 +354,14 @@ fun GeneralSettingScreen(
                 
                 // Storage Settings Section
                 Components.Header(
-                        text = "Storage Settings",
+                        text = localizeHelper.localize(Res.string.storage_settings),
                         padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
                         icon = Icons.Filled.Storage
                 ),
                 Components.Switch(
                         preference = vm.preferSafStorage,
-                        title = "Prefer SAF Storage",
-                        subtitle = "Save JS sources, extensions, backups, and epubs to SAF folder when available. Falls back to cache if unavailable.",
+                        title = localizeHelper.localize(Res.string.prefer_saf_storage),
+                        subtitle = localizeHelper.localize(Res.string.save_js_sources_extensions_backups),
                         icon = Icons.Filled.Storage
                 ),
                 

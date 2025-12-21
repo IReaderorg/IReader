@@ -10,7 +10,7 @@ import ireader.presentation.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.language_added
 
 class BrowseSettingsViewModel(

@@ -62,7 +62,7 @@ import ireader.domain.models.BookCover
 import ireader.domain.models.DisplayMode
 import ireader.domain.models.entities.BookItem
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.has_unread_chapters
 import ireader.i18n.resources.in_library
 import ireader.i18n.resources.in_library_1

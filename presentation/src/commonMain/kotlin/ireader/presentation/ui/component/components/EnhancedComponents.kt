@@ -665,7 +665,7 @@ fun PreferenceGroupPreview() {
                         onClick = { /* Handle click */ }
                     )
                     RowPreference(
-                        title = "Font Size",
+                        title = localizeHelper.localize(Res.string.font_size),
                         subtitle = localizeHelper.localize(Res.string.medium),
                         onClick = { /* Handle click */ }
                     )

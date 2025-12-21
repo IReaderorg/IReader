@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.plugins.DeveloperPlugin
 import ireader.domain.plugins.PluginAccessGrant
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Developer Portal screen for plugin developers.
@@ -26,6 +28,7 @@ fun DeveloperPortalScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state
 
     Scaffold(
@@ -44,13 +47,13 @@ fun DeveloperPortalScreen(
                             else onNavigateBack()
                         }
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
                     if (state.selectedPlugin != null && state.remainingGrants > 0) {
                         IconButton(onClick = { viewModel.showGrantDialog() }) {
-                            Icon(Icons.Default.PersonAdd, contentDescription = "Grant Access")
+                            Icon(Icons.Default.PersonAdd, contentDescription = localizeHelper.localize(Res.string.grant_access))
                         }
                     }
                 }
@@ -81,7 +84,7 @@ fun DeveloperPortalScreen(
                     modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
                     action = {
                         TextButton(onClick = { viewModel.clearError() }) {
-                            Text("Dismiss")
+                            Text(localizeHelper.localize(Res.string.notification_dismiss))
                         }
                     }
                 ) {
@@ -96,11 +99,11 @@ fun DeveloperPortalScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     action = {
                         TextButton(onClick = { viewModel.clearGrantSuccess() }) {
-                            Text("OK")
+                            Text(localizeHelper.localize(Res.string.ok))
                         }
                     }
                 ) {
-                    Text("Access granted successfully!")
+                    Text(localizeHelper.localize(Res.string.access_granted_successfully))
                 }
             }
         }
@@ -131,6 +134,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
 
 @Composable
 private fun NotDeveloperState(error: String?, modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -144,7 +148,7 @@ private fun NotDeveloperState(error: String?, modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Developer Portal",
+            text = localizeHelper.localize(Res.string.developer_portal),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
@@ -156,7 +160,7 @@ private fun NotDeveloperState(error: String?, modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Developer badges are granted to plugin creators who contribute to the IReader ecosystem.",
+            text = localizeHelper.localize(Res.string.developer_badges_are_granted_to),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -169,6 +173,7 @@ private fun PluginListContent(
     onPluginClick: (DeveloperPlugin) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (plugins.isEmpty()) {
         Column(
             modifier = modifier.fillMaxSize().padding(32.dp),
@@ -183,12 +188,12 @@ private fun PluginListContent(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "No plugins yet",
+                text = localizeHelper.localize(Res.string.no_plugins_yet),
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Create and publish plugins to manage them here",
+                text = localizeHelper.localize(Res.string.create_and_publish_plugins_to_manage_them_here),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -201,7 +206,7 @@ private fun PluginListContent(
         ) {
             item {
                 Text(
-                    text = "Your Plugins",
+                    text = localizeHelper.localize(Res.string.your_plugins),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -221,6 +226,7 @@ private fun PluginCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth()
@@ -264,9 +270,9 @@ private fun PluginCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                StatItem(label = "Users", value = plugin.activeUsers.toString())
-                StatItem(label = "Purchases", value = plugin.totalPurchases.toString())
-                StatItem(label = "Grants", value = "${plugin.grantedUsers}/${plugin.maxGrants}")
+                StatItem(label = localizeHelper.localize(Res.string.users), value = plugin.activeUsers.toString())
+                StatItem(label = localizeHelper.localize(Res.string.purchases), value = plugin.totalPurchases.toString())
+                StatItem(label = localizeHelper.localize(Res.string.grants), value = "${plugin.grantedUsers}/${plugin.maxGrants}")
             }
         }
     }
@@ -297,6 +303,7 @@ private fun PluginDetailContent(
     onRevokeAccess: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -307,7 +314,7 @@ private fun PluginDetailContent(
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Statistics",
+                        text = localizeHelper.localize(Res.string.statistics),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -316,9 +323,9 @@ private fun PluginDetailContent(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        StatItem(label = "Downloads", value = (stats?.totalDownloads ?: 0).toString())
-                        StatItem(label = "Purchases", value = (stats?.totalPurchases ?: 0).toString())
-                        StatItem(label = "Active", value = (stats?.activeUsers ?: 0).toString())
+                        StatItem(label = localizeHelper.localize(Res.string.downloads), value = (stats?.totalDownloads ?: 0).toString())
+                        StatItem(label = localizeHelper.localize(Res.string.purchases), value = (stats?.totalPurchases ?: 0).toString())
+                        StatItem(label = localizeHelper.localize(Res.string.active_downloads), value = (stats?.activeUsers ?: 0).toString())
                     }
                     if (plugin.monetizationType == "PREMIUM") {
                         Spacer(modifier = Modifier.height(8.dp))
@@ -342,7 +349,7 @@ private fun PluginDetailContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Access Grants",
+                    text = localizeHelper.localize(Res.string.access_grants),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -374,11 +381,11 @@ private fun PluginDetailContent(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "No grants yet",
+                            text = localizeHelper.localize(Res.string.no_grants_yet),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            text = "Grant access to users for testing or promotion",
+                            text = localizeHelper.localize(Res.string.grant_access_to_users_for_testing_or_promotion),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -399,6 +406,7 @@ private fun GrantCard(
     onRevoke: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -424,11 +432,11 @@ private fun GrantCard(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Revoke")
+                    Text(localizeHelper.localize(Res.string.revoke))
                 }
             } else {
                 Text(
-                    text = "Revoked",
+                    text = localizeHelper.localize(Res.string.revoked),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -449,10 +457,11 @@ private fun GrantAccessDialog(
     onGrant: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Default.PersonAdd, contentDescription = null) },
-        title = { Text("Grant Plugin Access") },
+        title = { Text(localizeHelper.localize(Res.string.grant_plugin_access)) },
         text = {
             Column {
                 Text(
@@ -463,8 +472,8 @@ private fun GrantAccessDialog(
                 OutlinedTextField(
                     value = username,
                     onValueChange = onUsernameChange,
-                    label = { Text("Username") },
-                    placeholder = { Text("Enter username") },
+                    label = { Text(localizeHelper.localize(Res.string.username)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.enter_username)) },
                     singleLine = true,
                     enabled = !isGranting,
                     modifier = Modifier.fillMaxWidth()
@@ -473,8 +482,8 @@ private fun GrantAccessDialog(
                 OutlinedTextField(
                     value = reason,
                     onValueChange = onReasonChange,
-                    label = { Text("Reason") },
-                    placeholder = { Text("e.g., Beta tester, Contributor") },
+                    label = { Text(localizeHelper.localize(Res.string.reason)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.eg_beta_tester_contributor)) },
                     singleLine = true,
                     enabled = !isGranting,
                     modifier = Modifier.fillMaxWidth()
@@ -497,13 +506,13 @@ private fun GrantAccessDialog(
                 if (isGranting) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                 } else {
-                    Text("Grant")
+                    Text(localizeHelper.localize(Res.string.grant))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isGranting) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

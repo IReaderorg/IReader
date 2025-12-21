@@ -460,7 +460,7 @@ private fun PiperEngineCard(
                 isNativeLibraryFailed -> {
                     // Show error message and help link
                     Text(
-                        text = "Piper requires Visual C++ Redistributable. Please install it from Microsoft and restart the app.",
+                        text = localizeHelper.localize(Res.string.piper_requires_visual_c_redistributable),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -476,7 +476,7 @@ private fun PiperEngineCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Install Piper Plugin")
+                        Text(localizeHelper.localize(Res.string.install_piper_plugin))
                     }
                 }
                 else -> {

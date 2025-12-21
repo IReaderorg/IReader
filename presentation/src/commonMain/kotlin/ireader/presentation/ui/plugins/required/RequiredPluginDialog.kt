@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Dialog wrapper for RequiredPluginScreen
@@ -145,6 +147,7 @@ fun RequiredPluginCard(
     onInstallClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val config = remember(pluginType) {
         when (pluginType) {
             RequiredPluginType.NONE -> PluginConfig(
@@ -193,7 +196,7 @@ fun RequiredPluginCard(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Plugin Required",
+                text = localizeHelper.localize(Res.string.plugin_required),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
@@ -224,7 +227,7 @@ fun RequiredPluginCard(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text("Install")
+                    Text(localizeHelper.localize(Res.string.install))
                 }
             }
         }

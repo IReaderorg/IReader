@@ -1,30 +1,64 @@
 package ireader.presentation.ui.readinghub
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -37,6 +71,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.quote.Quote
 import ireader.domain.models.quote.QuoteCardStyle
+import ireader.i18n.resources.Res
+import ireader.i18n.resources.back
+import ireader.i18n.resources.be_the_first_to_share_your_favorite_book_quotes
+import ireader.i18n.resources.change_style
+import ireader.i18n.resources.choose_style
+import ireader.i18n.resources.like
+import ireader.i18n.resources.loading
+import ireader.i18n.resources.loading_quotes
+import ireader.i18n.resources.no_quotes_yet
+import ireader.i18n.resources.quote_of_the_day
+import ireader.i18n.resources.quotes
+import ireader.i18n.resources.rotation
+import ireader.i18n.resources.scale
+import ireader.i18n.resources.share
+import ireader.i18n.resources.submit_your_quote
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -138,6 +188,7 @@ fun QuotesScreen(
 
 @Composable
 private fun QuotesLoadingScreen() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -157,7 +208,7 @@ private fun QuotesLoadingScreen() {
             verticalArrangement = Arrangement.Center
         ) {
             // Animated book icon
-            val infiniteTransition = rememberInfiniteTransition(label = "loading")
+            val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.loading))
             val scale by infiniteTransition.animateFloat(
                 initialValue = 0.8f,
                 targetValue = 1.2f,
@@ -165,7 +216,7 @@ private fun QuotesLoadingScreen() {
                     animation = tween(800, easing = FastOutSlowInEasing),
                     repeatMode = RepeatMode.Reverse
                 ),
-                label = "scale"
+                label = localizeHelper.localize(Res.string.scale)
             )
             val rotation by infiniteTransition.animateFloat(
                 initialValue = -5f,
@@ -174,7 +225,7 @@ private fun QuotesLoadingScreen() {
                     animation = tween(600, easing = FastOutSlowInEasing),
                     repeatMode = RepeatMode.Reverse
                 ),
-                label = "rotation"
+                label = localizeHelper.localize(Res.string.rotation)
             )
             
             Text(
@@ -191,7 +242,7 @@ private fun QuotesLoadingScreen() {
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "Loading quotes...",
+                text = localizeHelper.localize(Res.string.loading_quotes),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White.copy(alpha = 0.8f)
             )
@@ -224,6 +275,7 @@ private fun QuotesLoadingScreen() {
 
 @Composable
 private fun EmptyQuotesScreen(onSubmitQuote: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -246,7 +298,7 @@ private fun EmptyQuotesScreen(onSubmitQuote: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "No quotes yet",
+                text = localizeHelper.localize(Res.string.no_quotes_yet),
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -255,7 +307,7 @@ private fun EmptyQuotesScreen(onSubmitQuote: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Be the first to share your favorite book quotes!",
+                text = localizeHelper.localize(Res.string.be_the_first_to_share_your_favorite_book_quotes),
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -288,6 +340,7 @@ private fun InstagramStyleQuoteCard(
     onShare: () -> Unit,
     onDoubleTap: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showHeart by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     
@@ -333,7 +386,7 @@ private fun InstagramStyleQuoteCard(
                         Text("✨", fontSize = 16.sp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Quote of the Day",
+                            text = localizeHelper.localize(Res.string.quote_of_the_day),
                             style = MaterialTheme.typography.labelMedium,
                             color = textColor,
                             fontWeight = FontWeight.SemiBold
@@ -422,7 +475,7 @@ private fun InstagramStyleQuoteCard(
                 ) {
                     Icon(
                         imageVector = if (quote.isLikedByUser) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Like",
+                        contentDescription = localizeHelper.localize(Res.string.like),
                         tint = if (quote.isLikedByUser) Color(0xFFFF6B6B) else Color.White,
                         modifier = Modifier.size(28.dp)
                     )
@@ -447,14 +500,14 @@ private fun InstagramStyleQuoteCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Share,
-                        contentDescription = "Share",
+                        contentDescription = localizeHelper.localize(Res.string.share),
                         tint = Color.White,
                         modifier = Modifier.size(28.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Share",
+                    text = localizeHelper.localize(Res.string.share),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.8f)
                 )
@@ -525,6 +578,7 @@ private fun QuotesTopBar(
     currentPage: Int,
     totalPages: Int
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -540,14 +594,14 @@ private fun QuotesTopBar(
         IconButton(onClick = onBack) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = localizeHelper.localize(Res.string.back),
                 tint = Color.White
             )
         }
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Quotes",
+                text = localizeHelper.localize(Res.string.quotes),
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -564,7 +618,7 @@ private fun QuotesTopBar(
         IconButton(onClick = onStylePicker) {
             Icon(
                 Icons.Outlined.Palette,
-                contentDescription = "Change Style",
+                contentDescription = localizeHelper.localize(Res.string.change_style),
                 tint = Color.White
             )
         }
@@ -576,6 +630,7 @@ private fun QuotesBottomBar(
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -599,7 +654,7 @@ private fun QuotesBottomBar(
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Submit Your Quote",
+                text = localizeHelper.localize(Res.string.submit_your_quote),
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(vertical = 4.dp)
             )
@@ -647,6 +702,7 @@ private fun StylePickerBottomSheet(
     onStyleChange: (QuoteCardStyle) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface
@@ -657,7 +713,7 @@ private fun StylePickerBottomSheet(
                 .padding(24.dp)
         ) {
             Text(
-                text = "Choose Style",
+                text = localizeHelper.localize(Res.string.choose_style),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )

@@ -24,6 +24,7 @@ import ireader.presentation.ui.component.reusable_composable.MidSizeTextComposab
 import ireader.presentation.ui.component.reusable_composable.TopAppBarBackButton
 import ireader.presentation.ui.settings.components.SettingsItem
 import ireader.presentation.ui.settings.components.SettingsSectionHeader
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Community Hub - A parent screen that groups all community-related features
@@ -54,6 +55,7 @@ fun CommunityHubScreen(
     onAdminCharacterArtVerification: () -> Unit = {},
     onAdminUserPanel: () -> Unit = {},
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -99,7 +101,7 @@ fun CommunityHubScreen(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Connect with other readers, compete on leaderboards, and customize your profile",
+                            text = localizeHelper.localize(Res.string.connect_with_other_readers_compete),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -110,7 +112,7 @@ fun CommunityHubScreen(
             // Discover Section
             item {
                 SettingsSectionHeader(
-                    title = "Discover",
+                    title = localizeHelper.localize(Res.string.discover),
                     icon = Icons.Filled.Explore
                 )
             }
@@ -145,14 +147,14 @@ fun CommunityHubScreen(
             // Creative Section
             item {
                 SettingsSectionHeader(
-                    title = "Creative",
+                    title = localizeHelper.localize(Res.string.creative),
                     icon = Icons.Filled.Palette
                 )
             }
             
             item {
                 SettingsItem(
-                    title = "Character Art Gallery",
+                    title = localizeHelper.localize(Res.string.character_art_gallery),
                     description = "Browse and share AI-generated character art",
                     icon = Icons.Filled.Image,
                     onClick = onCharacterArtGallery
@@ -161,7 +163,7 @@ fun CommunityHubScreen(
             
             item {
                 SettingsItem(
-                    title = "Reading Buddy",
+                    title = localizeHelper.localize(Res.string.reading_buddy),
                     description = "Your reading companion with daily quotes",
                     icon = Icons.Filled.Pets,
                     onClick = onReadingBuddy
@@ -171,7 +173,7 @@ fun CommunityHubScreen(
             // Tools Section
             item {
                 SettingsSectionHeader(
-                    title = "Tools",
+                    title = localizeHelper.localize(Res.string.tools),
                     icon = Icons.Filled.Build
                 )
             }
@@ -187,7 +189,7 @@ fun CommunityHubScreen(
             
             item {
                 SettingsItem(
-                    title = "Community Source",
+                    title = localizeHelper.localize(Res.string.community_source),
                     description = "Share and download AI translations with the community",
                     icon = Icons.Filled.CloudSync,
                     onClick = onCommunitySource
@@ -196,7 +198,7 @@ fun CommunityHubScreen(
             
             item {
                 SettingsItem(
-                    title = "User Sources",
+                    title = localizeHelper.localize(Res.string.user_sources),
                     description = "Create custom sources to scrape novels from any website",
                     icon = Icons.Filled.Extension,
                     onClick = onUserSources
@@ -205,7 +207,7 @@ fun CommunityHubScreen(
             
             item {
                 SettingsItem(
-                    title = "Legado Sources",
+                    title = localizeHelper.localize(Res.string.legado_sources),
                     description = "Import book sources from Legado/阅读 format",
                     icon = Icons.Filled.CloudDownload,
                     onClick = onLegadoSources
@@ -231,7 +233,7 @@ fun CommunityHubScreen(
             
             item {
                 SettingsItem(
-                    title = "Plugin Repositories",
+                    title = localizeHelper.localize(Res.string.plugin_repositories),
                     description = "Manage plugin sources and add custom repositories",
                     icon = Icons.Filled.Storage,
                     onClick = onPluginRepository
@@ -240,7 +242,7 @@ fun CommunityHubScreen(
             
             item {
                 SettingsItem(
-                    title = "Developer Portal",
+                    title = localizeHelper.localize(Res.string.developer_portal),
                     description = "Manage your plugins and grant access to users",
                     icon = Icons.Filled.Code,
                     onClick = onDeveloperPortal
@@ -302,7 +304,7 @@ fun CommunityHubScreen(
                 
                 item {
                     SettingsItem(
-                        title = "Character Art Verification",
+                        title = localizeHelper.localize(Res.string.character_art_verification),
                         description = "Review and approve character art submissions",
                         icon = Icons.Outlined.Image,
                         onClick = onAdminCharacterArtVerification
@@ -311,7 +313,7 @@ fun CommunityHubScreen(
                 
                 item {
                     SettingsItem(
-                        title = "User Management",
+                        title = localizeHelper.localize(Res.string.user_management),
                         description = "Manage users, assign badges, and reset passwords",
                         icon = Icons.Outlined.People,
                         onClick = onAdminUserPanel

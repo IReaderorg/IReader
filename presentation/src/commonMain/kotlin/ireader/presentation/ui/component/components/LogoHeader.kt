@@ -18,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.i18n.Images.eternityLight
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.ireader_logo
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.ui.core.theme.AppColors

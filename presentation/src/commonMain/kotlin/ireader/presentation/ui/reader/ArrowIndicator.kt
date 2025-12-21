@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Premium arrow indicator with void-like appearance and smooth animations.
@@ -52,6 +54,7 @@ fun ArrowIndicator(
     chapterName: String? = null,
     isTop: Boolean = true
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Early exit: Don't render anything if there's no swipe activity
     // This is the primary guard to prevent showing indicator without user interaction
     val hasSwipeActivity = swipeRefreshState.isSwipeInProgress || 
@@ -70,7 +73,7 @@ fun ArrowIndicator(
     }
     
     // Smooth bounce animation when fully pulled
-    val infiniteTransition = rememberInfiniteTransition(label = "bounce")
+    val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.bounce))
     val bounceOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = if (progress > 0.7f) 8f else 0f,
@@ -78,7 +81,7 @@ fun ArrowIndicator(
             animation = tween(500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "bounceOffset"
+        label = localizeHelper.localize(Res.string.bounceoffset)
     )
     
     // Glow pulse effect
@@ -89,14 +92,14 @@ fun ArrowIndicator(
             animation = tween(1000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "glowPulse"
+        label = localizeHelper.localize(Res.string.glowpulse)
     )
     
     // Animated glow when near trigger
     val glowAlpha by animateFloatAsState(
         targetValue = if (progress > 0.6f) glowPulse else 0f,
         animationSpec = tween(200),
-        label = "glow"
+        label = localizeHelper.localize(Res.string.glow)
     )
     
     // Derive colors from the provided text color
@@ -157,7 +160,7 @@ fun ArrowIndicator(
             // Chapter info at top for bottom indicator - only show when progress is high enough
             if (!isTop && chapterName != null && progress > 0.5f) {
                 Text(
-                    text = "NEXT CHAPTER",
+                    text = localizeHelper.localize(Res.string.next_chapter_2),
                     color = color.copy(alpha = 0.6f * progress),
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,
@@ -224,7 +227,7 @@ fun ArrowIndicator(
                         .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Release to load",
+                        text = localizeHelper.localize(Res.string.release_to_load),
                         color = color.copy(alpha = 0.9f),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
@@ -236,7 +239,7 @@ fun ArrowIndicator(
             if (isTop && chapterName != null && progress > 0.5f) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "PREVIOUS CHAPTER",
+                    text = localizeHelper.localize(Res.string.previous_chapter_2),
                     color = color.copy(alpha = 0.6f * progress),
                     fontSize = 9.sp,
                     fontWeight = FontWeight.Bold,

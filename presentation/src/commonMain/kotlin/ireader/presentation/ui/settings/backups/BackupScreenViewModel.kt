@@ -252,7 +252,7 @@ class BackupScreenViewModel(
         scope.launch {
             when (val result = fileSystemService.pickFile(
                 fileTypes = listOf("zip"),
-                title = "Select LNReader Backup"
+                title = localizeHelper.localize(Res.string.select_lnreader_backup)
             )) {
                 is ireader.domain.services.common.ServiceResult.Success -> {
                     importLNReaderBackupFromUri(result.data)

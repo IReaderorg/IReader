@@ -137,7 +137,7 @@ fun BrowseTopAppBar(
                 )
             }
         },
-        label = "SearchModeTransition"
+        label = localizeHelper.localize(Res.string.searchmodetransition)
     ) { inSearchMode ->
         if (inSearchMode) {
             // Full-width search toolbar
@@ -262,6 +262,7 @@ private fun NormalBrowseToolbar(
     layouts: List<DisplayMode>,
     localizeHelper: ireader.i18n.LocalizeHelper
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Toolbar(
         scrollBehavior = scrollBehavior,
         title = {
@@ -407,6 +408,7 @@ private fun ExpandingSearchField(
     placeholder: String,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val focusRequester = remember { FocusRequester() }
     
     // Animate the search field expansion
@@ -417,7 +419,7 @@ private fun ExpandingSearchField(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "SearchFieldAlpha"
+        label = localizeHelper.localize(Res.string.searchfieldalpha)
     )
     
     // Auto-focus and trigger expansion animation

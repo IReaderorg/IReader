@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import ireader.domain.models.characterart.CharacterArt
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Section displaying character art related to the current book.
@@ -59,6 +61,7 @@ fun CharacterArtSection(
     onArtClick: (CharacterArt) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Don't show section if no art available
     if (characterArtList.isEmpty()) {
         return
@@ -81,14 +84,14 @@ fun CharacterArtSection(
                 Text("🎨", fontSize = 20.sp)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Character Art",
+                    text = localizeHelper.localize(Res.string.character_art),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
             
             TextButton(onClick = onViewAll) {
-                Text("View All")
+                Text(localizeHelper.localize(Res.string.view_all))
             }
         }
         
@@ -179,6 +182,7 @@ fun CharacterArtEmptyState(
     onUpload: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -198,13 +202,13 @@ fun CharacterArtEmptyState(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "No character art yet",
+                text = localizeHelper.localize(Res.string.no_character_art_yet_1),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onUpload) {
-                Text("Be the first to upload!")
+                Text(localizeHelper.localize(Res.string.be_the_first_to_upload))
             }
         }
     }

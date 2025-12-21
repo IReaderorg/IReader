@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Modern full-screen app update dialog
@@ -90,8 +92,9 @@ private fun UpdateAvailableContent(
     onRemindLater: () -> Unit,
     onSkipVersion: () -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Animated icon
-    val infiniteTransition = rememberInfiniteTransition(label = "icon")
+    val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.icon))
     val scale by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 1.1f,
@@ -99,7 +102,7 @@ private fun UpdateAvailableContent(
             animation = tween(1000, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "scale"
+        label = localizeHelper.localize(Res.string.scale)
     )
     
     // Update icon with gradient background
@@ -129,7 +132,7 @@ private fun UpdateAvailableContent(
     
     // Title
     Text(
-        text = "New Update Available!",
+        text = localizeHelper.localize(Res.string.new_update_available),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
@@ -144,7 +147,7 @@ private fun UpdateAvailableContent(
     ) {
         VersionChip(
             version = state.currentVersion,
-            label = "Current",
+            label = localizeHelper.localize(Res.string.current),
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         )
         
@@ -159,7 +162,7 @@ private fun UpdateAvailableContent(
         
         VersionChip(
             version = state.newVersion,
-            label = "New",
+            label = localizeHelper.localize(Res.string.add_as_new),
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         )
     }
@@ -187,7 +190,7 @@ private fun UpdateAvailableContent(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "What's New",
+                        text = localizeHelper.localize(Res.string.whats_new_1),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -256,7 +259,7 @@ private fun UpdateAvailableContent(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Download & Install",
+            text = localizeHelper.localize(Res.string.download_install),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -283,7 +286,7 @@ private fun UpdateAvailableContent(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = "Later",
+                text = localizeHelper.localize(Res.string.later),
                 style = MaterialTheme.typography.labelLarge,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -297,7 +300,7 @@ private fun UpdateAvailableContent(
                 .height(44.dp),
         ) {
             Text(
-                text = "Skip Version",
+                text = localizeHelper.localize(Res.string.skip_version),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -312,14 +315,15 @@ private fun DownloadingContent(
     progress: Float,
     onCancel: () -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(300),
-        label = "progress"
+        label = localizeHelper.localize(Res.string.progress_1)
     )
     
     // Animated download icon
-    val infiniteTransition = rememberInfiniteTransition(label = "download")
+    val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.download_1))
     val offsetY by infiniteTransition.animateFloat(
         initialValue = -5f,
         targetValue = 5f,
@@ -327,7 +331,7 @@ private fun DownloadingContent(
             animation = tween(600, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "offsetY"
+        label = localizeHelper.localize(Res.string.offsety)
     )
     
     Box(
@@ -350,7 +354,7 @@ private fun DownloadingContent(
     Spacer(modifier = Modifier.height(20.dp))
     
     Text(
-        text = "Downloading Update...",
+        text = localizeHelper.localize(Res.string.downloading_update_1),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
@@ -390,7 +394,7 @@ private fun DownloadingContent(
             modifier = Modifier.size(18.dp),
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text("Cancel")
+        Text(localizeHelper.localize(Res.string.cancel))
     }
 }
 
@@ -399,6 +403,7 @@ private fun DownloadedContent(
     onInstall: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Success animation
     Box(
         modifier = Modifier
@@ -425,7 +430,7 @@ private fun DownloadedContent(
     Spacer(modifier = Modifier.height(20.dp))
     
     Text(
-        text = "Download Complete!",
+        text = localizeHelper.localize(Res.string.download_complete),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
@@ -434,7 +439,7 @@ private fun DownloadedContent(
     Spacer(modifier = Modifier.height(8.dp))
     
     Text(
-        text = "Ready to install the new version",
+        text = localizeHelper.localize(Res.string.ready_to_install_the_new_version),
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
@@ -459,7 +464,7 @@ private fun DownloadedContent(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Install Now",
+            text = localizeHelper.localize(Res.string.install_now),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
         )
@@ -472,7 +477,7 @@ private fun DownloadedContent(
         modifier = Modifier.height(44.dp),
     ) {
         Text(
-            text = "Install Later",
+            text = localizeHelper.localize(Res.string.install_later),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

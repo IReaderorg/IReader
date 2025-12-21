@@ -37,19 +37,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ireader.i18n.UiText
+import ireader.i18n.asString
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.back
+import ireader.i18n.resources.donations
+import ireader.i18n.resources.reading
 import ireader.i18n.resources.refresh
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlinx.coroutines.launch
 
-enum class LeaderboardTab(val title: String, val icon: @Composable () -> Unit) {
+enum class LeaderboardTab(val title: UiText, val icon: @Composable () -> Unit) {
     READING(
-        title = "Reading",
+        title = UiText.MStringResource(Res.string.reading),
         icon = { Icon(Icons.Default.MenuBook, contentDescription = null) }
     ),
     DONATIONS(
-        title = "Donations",
+        title = UiText.MStringResource(Res.string.donations),
         icon = { Icon(Icons.Default.Favorite, contentDescription = null) }
     )
 }
@@ -159,7 +163,7 @@ fun CombinedLeaderboardScreen(
                                 tab.icon()
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = tab.title,
+                                    text = tab.title.asString(localizeHelper),
                                     fontWeight = if (pagerState.currentPage == index) 
                                         FontWeight.Bold 
                                     else 

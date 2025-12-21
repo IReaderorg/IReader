@@ -57,13 +57,13 @@ fun BrokenSourceScreen(
     val alpha by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = tween(500),
-        label = "alpha"
+        label = localizeHelper.localize(Res.string.alpha)
     )
     
     val scale by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0.9f,
         animationSpec = tween(400),
-        label = "scale"
+        label = localizeHelper.localize(Res.string.scale)
     )
     
     Column(

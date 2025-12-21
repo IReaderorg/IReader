@@ -11,6 +11,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.data.engines.ContentType
 import ireader.domain.data.engines.ToneType
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Compact advanced AI translation settings
@@ -28,6 +30,7 @@ fun AdvancedSettingsSection(
     isAiEngine: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (!isAiEngine) return
 
     Card(
@@ -45,7 +48,7 @@ fun AdvancedSettingsSection(
             // Content Type
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Content Type",
+                    text = localizeHelper.localize(Res.string.content_type),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -75,7 +78,7 @@ fun AdvancedSettingsSection(
             // Tone Type
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Tone",
+                    text = localizeHelper.localize(Res.string.tone_type),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -110,13 +113,13 @@ fun AdvancedSettingsSection(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Preserve Style",
+                        text = localizeHelper.localize(Res.string.preserve_style),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1
                     )
                     Text(
-                        text = "Keep original writing style",
+                        text = localizeHelper.localize(Res.string.keep_original_writing_style),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,

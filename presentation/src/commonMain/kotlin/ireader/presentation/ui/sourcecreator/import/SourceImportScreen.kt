@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.usersource.model.UserSource
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Screen for importing sources from JSON or URL.
@@ -34,13 +36,14 @@ fun SourceImportScreen(
     onConfirmImport: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Import Sources") },
+                title = { Text(localizeHelper.localize(Res.string.import_sources)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 }
             )
@@ -96,6 +99,7 @@ private fun ImportOptions(
     isLoading: Boolean,
     error: String?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedTab by remember { mutableStateOf(0) }
     
     Column(
@@ -122,7 +126,7 @@ private fun ImportOptions(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Import sources from Legado/Yuedu JSON format. You can paste JSON directly, enter a URL, or import from clipboard.",
+                    text = localizeHelper.localize(Res.string.import_sources_from_legadoyuedu_json),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -135,13 +139,13 @@ private fun ImportOptions(
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
-                text = { Text("Paste JSON") },
+                text = { Text(localizeHelper.localize(Res.string.paste_json)) },
                 icon = { Icon(Icons.Default.Code, contentDescription = null) }
             )
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                text = { Text("From URL") },
+                text = { Text(localizeHelper.localize(Res.string.from_url)) },
                 icon = { Icon(Icons.Default.Link, contentDescription = null) }
             )
         }
@@ -202,6 +206,7 @@ private fun JsonImportTab(
     onImportFromClipboard: () -> Unit,
     isLoading: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -210,8 +215,8 @@ private fun JsonImportTab(
         OutlinedTextField(
             value = jsonInput,
             onValueChange = onJsonInput,
-            label = { Text("JSON Content") },
-            placeholder = { Text("Paste Legado source JSON here...") },
+            label = { Text(localizeHelper.localize(Res.string.json_content)) },
+            placeholder = { Text(localizeHelper.localize(Res.string.paste_legado_source_json_here)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
@@ -230,7 +235,7 @@ private fun JsonImportTab(
             ) {
                 Icon(Icons.Default.ContentPaste, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Paste from Clipboard")
+                Text(localizeHelper.localize(Res.string.paste_from_clipboard))
             }
             
             Button(
@@ -247,7 +252,7 @@ private fun JsonImportTab(
                     Icon(Icons.Default.FileDownload, contentDescription = null)
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Import")
+                Text(localizeHelper.localize(Res.string.import_action))
             }
         }
         
@@ -255,7 +260,7 @@ private fun JsonImportTab(
         
         // Example format
         Text(
-            text = "Expected format:",
+            text = localizeHelper.localize(Res.string.expected_format),
             style = MaterialTheme.typography.labelMedium
         )
         Card(
@@ -287,11 +292,12 @@ private fun UrlImportTab(
     onImport: () -> Unit,
     isLoading: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column {
         OutlinedTextField(
             value = urlInput,
             onValueChange = onUrlInput,
-            label = { Text("Source URL") },
+            label = { Text(localizeHelper.localize(Res.string.source_url_1)) },
             placeholder = { Text("https://raw.githubusercontent.com/...") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -301,7 +307,7 @@ private fun UrlImportTab(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Supported URLs: GitHub raw files, Gist, direct JSON links",
+            text = localizeHelper.localize(Res.string.supported_urls_github_raw_files),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -322,7 +328,7 @@ private fun UrlImportTab(
                 Icon(Icons.Default.CloudDownload, contentDescription = null)
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Import from URL")
+            Text(localizeHelper.localize(Res.string.import_from_url))
         }
     }
 }
@@ -338,6 +344,7 @@ private fun ImportedSourcesList(
     onConfirm: () -> Unit,
     isImporting: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = Modifier.fillMaxSize()) {
         // Header with selection controls
         Surface(
@@ -357,10 +364,10 @@ private fun ImportedSourcesList(
                 )
                 Row {
                     TextButton(onClick = onSelectAll) {
-                        Text("Select All")
+                        Text(localizeHelper.localize(Res.string.select_all))
                     }
                     TextButton(onClick = onDeselectAll) {
-                        Text("Deselect All")
+                        Text(localizeHelper.localize(Res.string.deselect_all))
                     }
                 }
             }
@@ -399,7 +406,7 @@ private fun ImportedSourcesList(
                         strokeWidth = 2.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Importing...")
+                    Text(localizeHelper.localize(Res.string.importing))
                 } else {
                     Icon(Icons.Default.Check, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))

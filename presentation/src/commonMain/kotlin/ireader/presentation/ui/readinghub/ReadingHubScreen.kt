@@ -38,6 +38,8 @@ import ireader.domain.models.quote.QuoteCardStyle
 import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.readingbuddy.components.ReadingBuddyCharacter
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +50,7 @@ fun ReadingHubScreen(
     onNavigateToQuotes: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by vm.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val isWideScreen = isTableUi()
@@ -78,16 +81,16 @@ fun ReadingHubScreen(
     if (state.showResetConfirmDialog) {
         AlertDialog(
             onDismissRequest = { vm.dismissResetConfirmDialog() },
-            title = { Text("Reset Statistics?") },
-            text = { Text("This will reset all your reading statistics, streaks, and achievements. This action cannot be undone.") },
+            title = { Text(localizeHelper.localize(Res.string.reset_statistics)) },
+            text = { Text(localizeHelper.localize(Res.string.this_will_reset_all_your)) },
             confirmButton = {
                 TextButton(
                     onClick = { vm.resetStatistics() },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) { Text("Reset") }
+                ) { Text(localizeHelper.localize(Res.string.reset_cover)) }
             },
             dismissButton = {
-                TextButton(onClick = { vm.dismissResetConfirmDialog() }) { Text("Cancel") }
+                TextButton(onClick = { vm.dismissResetConfirmDialog() }) { Text(localizeHelper.localize(Res.string.cancel)) }
             }
         )
     }
@@ -119,10 +122,11 @@ private fun ModernReadingHubTopBar(
     onBack: () -> Unit,
     onReset: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val infiniteTransition = rememberInfiniteTransition(label = "bounce")
+                val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.bounce))
                 val bounce by infiniteTransition.animateFloat(
                     initialValue = 0f,
                     targetValue = -4f,
@@ -130,7 +134,7 @@ private fun ModernReadingHubTopBar(
                         animation = tween(600, easing = FastOutSlowInEasing),
                         repeatMode = RepeatMode.Reverse
                     ),
-                    label = "bounce"
+                    label = localizeHelper.localize(Res.string.bounce)
                 )
                 
                 Text(
@@ -143,12 +147,12 @@ private fun ModernReadingHubTopBar(
                 
                 Column {
                     Text(
-                        text = "Reading Hub",
+                        text = localizeHelper.localize(Res.string.reading_hub),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Track your reading journey",
+                        text = localizeHelper.localize(Res.string.track_your_reading_journey),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -157,14 +161,14 @@ private fun ModernReadingHubTopBar(
         },
         navigationIcon = {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
             }
         },
         actions = {
             IconButton(onClick = onReset) {
                 Icon(
                     Icons.Outlined.Refresh,
-                    contentDescription = "Reset Statistics",
+                    contentDescription = localizeHelper.localize(Res.string.reset_statistics_1),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -282,6 +286,7 @@ private fun HeroSection(state: ReadingHubState) {
 
 @Composable
 private fun QuickStatsRow(statistics: ReadingStatisticsType1) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -289,21 +294,21 @@ private fun QuickStatsRow(statistics: ReadingStatisticsType1) {
         StatChip(
             icon = Icons.AutoMirrored.Filled.MenuBook,
             value = statistics.totalChaptersRead.toString(),
-            label = "Chapters",
+            label = localizeHelper.localize(Res.string.chapters),
             gradient = listOf(Color(0xFF667EEA), Color(0xFF764BA2)),
             modifier = Modifier.weight(1f)
         )
         StatChip(
             icon = Icons.Default.CheckCircle,
             value = statistics.booksCompleted.toString(),
-            label = "Books",
+            label = localizeHelper.localize(Res.string.books),
             gradient = listOf(Color(0xFF11998E), Color(0xFF38EF7D)),
             modifier = Modifier.weight(1f)
         )
         StatChip(
             icon = Icons.Default.Schedule,
             value = formatTimeCompact(statistics.totalReadingTimeMinutes),
-            label = "Time",
+            label = localizeHelper.localize(Res.string.time),
             gradient = listOf(Color(0xFFF093FB), Color(0xFFF5576C)),
             modifier = Modifier.weight(1f)
         )
@@ -347,6 +352,7 @@ private fun StreakCard(
     longestStreak: Int,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
@@ -365,7 +371,7 @@ private fun StreakCard(
                 color = Color(0xFFFF6B35)
             )
             Text(
-                text = "day streak",
+                text = localizeHelper.localize(Res.string.day_streak),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -392,10 +398,11 @@ private fun LevelCard(
     experience: Int,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(1000, easing = FastOutSlowInEasing),
-        label = "progress"
+        label = localizeHelper.localize(Res.string.progress_1)
     )
     
     Card(
@@ -448,6 +455,7 @@ private fun LevelCard(
 
 @Composable
 private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -458,7 +466,7 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                 Text(text = "📊", fontSize = 22.sp)
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Detailed Statistics",
+                    text = localizeHelper.localize(Res.string.detailed_statistics),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -474,13 +482,13 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                 ) {
                     DetailStatItem(
                         emoji = "⏱️",
-                        label = "Total Time",
+                        label = localizeHelper.localize(Res.string.total_time),
                         value = formatDetailedTime(statistics.totalReadingTimeMinutes),
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatItem(
                         emoji = "📖",
-                        label = "Currently Reading",
+                        label = localizeHelper.localize(Res.string.currently_reading),
                         value = statistics.currentlyReading.toString(),
                         modifier = Modifier.weight(1f)
                     )
@@ -492,13 +500,13 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                 ) {
                     DetailStatItem(
                         emoji = "⚡",
-                        label = "Reading Speed",
+                        label = localizeHelper.localize(Res.string.reading_speed),
                         value = "${statistics.averageReadingSpeedWPM} WPM",
                         modifier = Modifier.weight(1f)
                     )
                     DetailStatItem(
                         emoji = "📅",
-                        label = "Last Read",
+                        label = localizeHelper.localize(Res.string.last_read),
                         value = formatLastRead(statistics.lastReadDate),
                         modifier = Modifier.weight(1f)
                     )
@@ -510,7 +518,7 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                 ) {
                     DetailStatItem(
                         emoji = "📚",
-                        label = "Avg/Day",
+                        label = localizeHelper.localize(Res.string.avgday),
                         value = formatDetailedTime(
                             if (statistics.readingStreak > 0) statistics.totalReadingTimeMinutes / statistics.readingStreak else 0
                         ),
@@ -518,7 +526,7 @@ private fun DetailedStatsSection(statistics: ReadingStatisticsType1) {
                     )
                     DetailStatItem(
                         emoji = "🏆",
-                        label = "Longest Streak",
+                        label = localizeHelper.localize(Res.string.longest_streak),
                         value = "${statistics.longestStreak} days",
                         modifier = Modifier.weight(1f)
                     )
@@ -568,6 +576,7 @@ private fun AchievementsSection(
     unlockedAchievements: List<BuddyAchievement>,
     allAchievements: List<BuddyAchievement>
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -583,7 +592,7 @@ private fun AchievementsSection(
                     Text(text = "🏆", fontSize = 22.sp)
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Achievements",
+                        text = localizeHelper.localize(Res.string.achievements),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -614,7 +623,7 @@ private fun AchievementsSection(
                         Text("🎯", fontSize = 40.sp)
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Start reading to unlock achievements!",
+                            text = localizeHelper.localize(Res.string.start_reading_to_unlock),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -632,7 +641,7 @@ private fun AchievementsSection(
                 if (allAchievements.size > unlockedAchievements.size) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Next to unlock:",
+                        text = localizeHelper.localize(Res.string.next_to_unlock),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -703,6 +712,7 @@ private fun AchievementBadge(achievement: BuddyAchievement, isUnlocked: Boolean)
 
 @Composable
 private fun QuotesEntryCard(dailyQuote: Quote?, onNavigateToQuotes: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -722,14 +732,14 @@ private fun QuotesEntryCard(dailyQuote: Quote?, onNavigateToQuotes: () -> Unit) 
                     Text(text = "💭", fontSize = 22.sp)
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Quotes",
+                        text = localizeHelper.localize(Res.string.quotes),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Icon(
                     Icons.Default.ChevronRight,
-                    contentDescription = "View Quotes",
+                    contentDescription = localizeHelper.localize(Res.string.view_quotes),
                     tint = MaterialTheme.colorScheme.onTertiaryContainer
                 )
             }
@@ -746,7 +756,7 @@ private fun QuotesEntryCard(dailyQuote: Quote?, onNavigateToQuotes: () -> Unit) 
                             Text("✨", fontSize = 14.sp)
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Quote of the Day",
+                                text = localizeHelper.localize(Res.string.quote_of_the_day),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.SemiBold
@@ -779,7 +789,7 @@ private fun QuotesEntryCard(dailyQuote: Quote?, onNavigateToQuotes: () -> Unit) 
             Spacer(modifier = Modifier.height(12.dp))
             
             Text(
-                text = "Tap to explore all quotes →",
+                text = localizeHelper.localize(Res.string.tap_to_explore_all_quotes),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
             )
@@ -789,6 +799,7 @@ private fun QuotesEntryCard(dailyQuote: Quote?, onNavigateToQuotes: () -> Unit) 
 
 @Composable
 private fun GenresSection(genres: List<ireader.domain.models.entities.GenreCount>) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -799,7 +810,7 @@ private fun GenresSection(genres: List<ireader.domain.models.entities.GenreCount
                 Text(text = "📚", fontSize = 22.sp)
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Favorite Genres",
+                    text = localizeHelper.localize(Res.string.favorite_genres),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -850,13 +861,14 @@ private fun AchievementUnlockedDialog(
     achievement: BuddyAchievement,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("🎉", fontSize = 48.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Achievement Unlocked!")
+                Text(localizeHelper.localize(Res.string.achievement_unlocked))
             }
         },
         text = {
@@ -887,7 +899,7 @@ private fun AchievementUnlockedDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Awesome!")
+                Text(localizeHelper.localize(Res.string.awesome))
             }
         }
     )

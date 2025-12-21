@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import ireader.domain.usersource.help.SourceCreatorHelp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Text field with integrated help tooltip.
@@ -28,6 +30,7 @@ fun HelpfulTextField(
     modifier: Modifier = Modifier,
     singleLine: Boolean = true
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showHelp by remember { mutableStateOf(false) }
     val helpTopic = helpTopicId?.let { SourceCreatorHelp.getTopicById(it) }
     
@@ -52,7 +55,7 @@ fun HelpfulTextField(
                     IconButton(onClick = { showHelp = !showHelp }) {
                         Icon(
                             if (showHelp) Icons.Default.Close else Icons.Default.Help,
-                            contentDescription = "Help",
+                            contentDescription = localizeHelper.localize(Res.string.help),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -80,6 +83,7 @@ fun InlineHelpCard(
     topic: SourceCreatorHelp.HelpTopic,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
@@ -104,7 +108,7 @@ fun InlineHelpCard(
                 ) {
                     Icon(
                         Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = localizeHelper.localize(Res.string.close),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -169,6 +173,7 @@ fun FloatingHelpButton(
     helpTopicId: String,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showDialog by remember { mutableStateOf(false) }
     val topic = SourceCreatorHelp.getTopicById(helpTopicId)
     
@@ -178,7 +183,7 @@ fun FloatingHelpButton(
     ) {
         Icon(
             Icons.Default.HelpOutline,
-            contentDescription = "Help",
+            contentDescription = localizeHelper.localize(Res.string.help),
             tint = MaterialTheme.colorScheme.primary
         )
     }
@@ -199,6 +204,7 @@ fun HelpDialog(
     topic: SourceCreatorHelp.HelpTopic,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(topic.title) },
@@ -214,7 +220,7 @@ fun HelpDialog(
                 
                 if (topic.examples.isNotEmpty()) {
                     Text(
-                        text = "Examples:",
+                        text = localizeHelper.localize(Res.string.examples),
                         style = MaterialTheme.typography.titleSmall
                     )
                     topic.examples.take(3).forEach { example ->
@@ -248,7 +254,7 @@ fun HelpDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Got it")
+                Text(localizeHelper.localize(Res.string.got_it))
             }
         }
     )
@@ -262,6 +268,7 @@ fun ErrorWithSuggestions(
     errorType: String,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val fixes = SourceCreatorHelp.ErrorMessages.commonFixes[errorType]
     
     if (fixes != null) {
@@ -290,7 +297,7 @@ fun ErrorWithSuggestions(
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "Try these fixes:",
+                    text = localizeHelper.localize(Res.string.try_these_fixes),
                     style = MaterialTheme.typography.labelMedium
                 )
                 
@@ -328,6 +335,7 @@ fun SelectorInput(
     isRequired: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     var showHelp by remember { mutableStateOf(false) }
     val helpTopic = helpTopicId?.let { SourceCreatorHelp.getTopicById(it) }
@@ -346,7 +354,7 @@ fun SelectorInput(
                         IconButton(onClick = { showHelp = !showHelp }) {
                             Icon(
                                 Icons.Default.Help,
-                                contentDescription = "Help",
+                                contentDescription = localizeHelper.localize(Res.string.help),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -354,7 +362,7 @@ fun SelectorInput(
                     IconButton(onClick = { expanded = !expanded }) {
                         Icon(
                             if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = "Suggestions"
+                            contentDescription = localizeHelper.localize(Res.string.suggestions)
                         )
                     }
                 }
@@ -370,7 +378,7 @@ fun SelectorInput(
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
                     Text(
-                        text = "Common selectors:",
+                        text = localizeHelper.localize(Res.string.common_selectors),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

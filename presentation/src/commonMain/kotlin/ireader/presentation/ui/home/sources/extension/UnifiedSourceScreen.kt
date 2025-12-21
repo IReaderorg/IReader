@@ -70,7 +70,7 @@ import ireader.domain.models.entities.UserSourceCatalog
 import ireader.domain.models.entities.key
 import ireader.i18n.UiEvent
 import ireader.i18n.asString
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.available
 import ireader.i18n.resources.installed
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
@@ -209,6 +209,7 @@ private fun ModernSegmentedControl(
     segments: List<SegmentData>,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val primaryColor = MaterialTheme.colorScheme.primary
     val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
     val onPrimary = MaterialTheme.colorScheme.onPrimary
@@ -236,7 +237,7 @@ private fun ModernSegmentedControl(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessMediumLow
                 ),
-                label = "indicator_offset"
+                label = localizeHelper.localize(Res.string.indicator_offset)
             )
 
             Box(
@@ -337,6 +338,7 @@ private fun InstalledSourcesContent(
     onMigrateFromSource: ((Long) -> Unit)? = null,
     onNavigateToUserSources: (() -> Unit)? = null,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scrollState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
     }
@@ -381,8 +383,8 @@ private fun InstalledSourcesContent(
     if (usersSources.isEmpty()) {
         EmptyStateView(
             icon = Icons.Default.Explore,
-            title = "No Sources Installed",
-            subtitle = "Switch to Available tab to install sources"
+            title = localizeHelper.localize(Res.string.no_sources_installed),
+            subtitle = localizeHelper.localize(Res.string.switch_to_available_tab_to_install_sources)
         )
     } else {
         LazyColumn(
@@ -458,6 +460,7 @@ private fun AvailableSourcesContent(
     onDeleteUserSource: ((String) -> Unit)? = null,
     onShowDetails: ((Catalog) -> Unit)? = null,
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showLoginDialog by remember { mutableStateOf(false) }
     var loginSourceId by remember { mutableStateOf<Long?>(null) }
     var loginSourceName by remember { mutableStateOf("") }
@@ -537,8 +540,8 @@ private fun AvailableSourcesContent(
     } else if (hasNoRemoteSources) {
         EmptyStateView(
             icon = Icons.Default.Extension,
-            title = "No Extensions Available",
-            subtitle = "Pull to refresh or add a repository"
+            title = localizeHelper.localize(Res.string.no_extensions_available),
+            subtitle = localizeHelper.localize(Res.string.pull_to_refresh_or_add_a_repository)
         )
     } else {
         LazyColumn(
@@ -673,6 +676,7 @@ private fun NoRepositoryStateView(
     onAddRepository: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -702,7 +706,7 @@ private fun NoRepositoryStateView(
             
             // Title
             Text(
-                text = "No Repository Configured",
+                text = localizeHelper.localize(Res.string.no_repository_configured),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -710,7 +714,7 @@ private fun NoRepositoryStateView(
             
             // Subtitle
             Text(
-                text = "Add a repository to browse and install extensions for reading novels from various sources.",
+                text = localizeHelper.localize(Res.string.add_a_repository_to_browse),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -731,7 +735,7 @@ private fun NoRepositoryStateView(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Add Repository")
+                    Text(localizeHelper.localize(Res.string.add_repository))
                 }
             }
             
@@ -746,13 +750,13 @@ private fun NoRepositoryStateView(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Popular Repositories",
+                        text = localizeHelper.localize(Res.string.popular_repositories),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "• IReader Extensions\n• LNReader Plugins",
+                        text = localizeHelper.localize(Res.string.ireader_extensionsn_lnreader_plugins),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                     )

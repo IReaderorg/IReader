@@ -33,7 +33,7 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import ireader.domain.preferences.prefs.ChapterDisplayMode
 import ireader.i18n.asString
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.chapter_number
 import ireader.i18n.resources.source_title
 import ireader.presentation.ui.book.viewmodel.BookDetailViewModel

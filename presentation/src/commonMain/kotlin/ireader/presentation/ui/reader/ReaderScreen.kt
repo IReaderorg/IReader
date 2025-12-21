@@ -62,6 +62,8 @@ import ireader.presentation.ui.reader.reverse_swip_refresh.SwipeRefreshState
 import ireader.presentation.ui.reader.viewmodel.ReaderScreenViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Pre-computed modifiers for ReaderScreen to avoid recreation on each recomposition
@@ -173,6 +175,7 @@ private fun ReadingScreenContent(
         onChangeBrightness: (Float) -> Unit,
         onToggleAutoBrightness: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Pre-compute background color to avoid repeated conversions
     val backgroundColor = remember(vm.backgroundColor.value) { 
         vm.backgroundColor.value.toComposeColor() 
@@ -395,12 +398,12 @@ private fun ReadingScreenContent(
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                         androidx.compose.material3.Text(
-                                            text = "Generating art prompt...",
+                                            text = localizeHelper.localize(Res.string.generating_art_prompt),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         androidx.compose.material3.Text(
-                                            text = "Analyzing chapter with Gemini AI",
+                                            text = localizeHelper.localize(Res.string.analyzing_chapter_with_gemini_ai),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )

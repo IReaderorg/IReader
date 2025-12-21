@@ -7,6 +7,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.domain.services.tts_service.v2.TTSSleepTimerUseCase
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Sleep timer dialog for TTS playback
@@ -18,11 +20,12 @@ fun SleepTimerDialog(
     onCancel: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val timerOptions = listOf(5, 10, 15, 30, 45, 60, 90, 120)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Sleep Timer") },
+        title = { Text(localizeHelper.localize(Res.string.sleep_timer)) },
         text = {
             Column {
                 if (currentState?.isEnabled == true) {
@@ -38,7 +41,7 @@ fun SleepTimerDialog(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Timer Active",
+                                text = localizeHelper.localize(Res.string.timer_active),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
@@ -59,13 +62,13 @@ fun SleepTimerDialog(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Add more time:",
+                        text = localizeHelper.localize(Res.string.add_more_time),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     Text(
-                        text = "Stop playback after:",
+                        text = localizeHelper.localize(Res.string.stop_playback_after),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -106,13 +109,13 @@ fun SleepTimerDialog(
                     onCancel()
                     onDismiss()
                 }) {
-                    Text("Cancel Timer")
+                    Text(localizeHelper.localize(Res.string.cancel_timer))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )

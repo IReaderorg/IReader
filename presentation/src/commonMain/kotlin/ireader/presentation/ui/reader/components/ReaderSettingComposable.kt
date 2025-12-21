@@ -49,7 +49,7 @@ import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.launchIO
 import ireader.i18n.UiText
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.alignment
 import ireader.i18n.resources.auto_translate_next_chapter
 import ireader.i18n.resources.auto_translate_next_chapter_summary
@@ -719,8 +719,8 @@ fun GeneralScreenTab(
             // Reduced animations toggle for older devices
             SwitchPreference(
                 preference = vm.readerPreferences.reducedAnimations().get(),
-                title = "Reduced Animations",
-                subtitle = "Disable animations for better performance on older devices",
+                title = localizeHelper.localize(Res.string.reduced_animations),
+                subtitle = localizeHelper.localize(Res.string.disable_animations_for_better_performance),
                 onValueChange = { enabled ->
                     vm.readerPreferences.reducedAnimations().set(enabled)
                 }
@@ -734,8 +734,8 @@ fun GeneralScreenTab(
         item {
             SwitchPreference(
                 preference = vm.contentFilterEnabled,
-                title = "Enable Content Filter",
-                subtitle = "Remove unwanted text patterns from chapters using regex"
+                title = localizeHelper.localize(Res.string.enable_content_filter),
+                subtitle = localizeHelper.localize(Res.string.remove_unwanted_text_patterns_from)
             )
         }
         if (vm.contentFilterEnabled.value) {
@@ -1103,6 +1103,7 @@ fun ContentFilterPatternsEditor(
     contentFilterUseCase: ireader.domain.usecases.reader.ContentFilterUseCase,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var editedPatterns by remember { mutableStateOf(patterns) }
     var testText by remember { mutableStateOf("") }
     var testResult by remember { mutableStateOf<String?>(null) }
@@ -1129,8 +1130,8 @@ fun ContentFilterPatternsEditor(
                 }
                 validationError = if (errors.isNotEmpty()) errors.joinToString("\n") else null
             },
-            label = { Text("Regex Patterns (one per line)") },
-            placeholder = { Text("Use arrow keys.*chapter\n(?:A|D|←|→).*chapter\nRead more at.*") },
+            label = { Text(localizeHelper.localize(Res.string.regex_patterns_one_per_line)) },
+            placeholder = { Text(localizeHelper.localize(Res.string.use_arrow_keyschapternadchapternread_more_at)) },
             modifier = Modifier.fillMaxWidth().height(150.dp),
             isError = hasValidationError,
             supportingText = if (hasValidationError) {
@@ -1153,14 +1154,14 @@ fun ContentFilterPatternsEditor(
                 },
                 enabled = validationError == null && editedPatterns != patterns
             ) {
-                Text("Save Patterns")
+                Text(localizeHelper.localize(Res.string.save_patterns))
             }
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Test Filter",
+            text = localizeHelper.localize(Res.string.test_filter),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -1170,8 +1171,8 @@ fun ContentFilterPatternsEditor(
         androidx.compose.material3.OutlinedTextField(
             value = testText,
             onValueChange = { newValue: String -> testText = newValue },
-            label = { Text("Sample Text") },
-            placeholder = { Text("Paste text to test the filter...") },
+            label = { Text(localizeHelper.localize(Res.string.sample_text)) },
+            placeholder = { Text(localizeHelper.localize(Res.string.paste_text_to_test_the_filter)) },
             modifier = Modifier.fillMaxWidth().height(80.dp),
             maxLines = 3
         )
@@ -1189,13 +1190,13 @@ fun ContentFilterPatternsEditor(
                 },
                 enabled = testText.isNotBlank() && editedPatterns.isNotBlank()
             ) {
-                Text("Test")
+                Text(localizeHelper.localize(Res.string.test))
             }
             
             val hasTestResult = testResult != null
             if (hasTestResult) {
                 TextButton(onClick = { testResult = null }) {
-                    Text("Clear")
+                    Text(localizeHelper.localize(Res.string.clear_1))
                 }
             }
         }
@@ -1205,7 +1206,7 @@ fun ContentFilterPatternsEditor(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Result:",
+                text = localizeHelper.localize(Res.string.result),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1234,7 +1235,7 @@ fun ContentFilterPatternsEditor(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Tip: Use regex patterns to remove unwanted text.\n" +
+            text = localizeHelper.localize(Res.string.tip_use_regex_patterns_to_remove_unwanted_textn) +
                    "• .* = any characters\n" +
                    "• (?:A|B) = A or B\n" +
                    "• \\\\[ and \\\\] = literal brackets\n\n" +

@@ -14,6 +14,8 @@ import ireader.domain.usersource.model.UserSource
 import ireader.presentation.ui.sourcecreator.components.JsonDialog
 import ireader.presentation.ui.sourcecreator.components.RuleSyntaxHelpDialog
 import ireader.presentation.ui.sourcecreator.components.UserSourceCard
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * State for the user sources list screen.
@@ -66,28 +68,29 @@ fun UserSourcesListScreen(
     onCancelDeleteAll: () -> Unit = {},
     snackbarHostState: SnackbarHostState
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("User Sources") },
+                title = { Text(localizeHelper.localize(Res.string.user_sources)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onShowHelpDialog) {
-                        Icon(Icons.Default.Help, contentDescription = "Help")
+                        Icon(Icons.Default.Help, contentDescription = localizeHelper.localize(Res.string.help))
                     }
                     IconButton(onClick = onShowImportDialog) {
-                        Icon(Icons.Default.FileDownload, contentDescription = "Import")
+                        Icon(Icons.Default.FileDownload, contentDescription = localizeHelper.localize(Res.string.import_action))
                     }
                     if (state.sources.isNotEmpty()) {
                         IconButton(onClick = onExportAll) {
-                            Icon(Icons.Default.FileUpload, contentDescription = "Export All")
+                            Icon(Icons.Default.FileUpload, contentDescription = localizeHelper.localize(Res.string.export_all))
                         }
                         IconButton(onClick = onShowDeleteAllDialog) {
-                            Icon(Icons.Default.DeleteSweep, contentDescription = "Delete All")
+                            Icon(Icons.Default.DeleteSweep, contentDescription = localizeHelper.localize(Res.string.delete_all))
                         }
                     }
                 }
@@ -165,7 +168,7 @@ fun UserSourcesListScreen(
     if (state.showDeleteConfirmDialog && state.sourceToDelete != null) {
         AlertDialog(
             onDismissRequest = onCancelDelete,
-            title = { Text("Delete Source") },
+            title = { Text(localizeHelper.localize(Res.string.delete_source)) },
             text = { Text("Are you sure you want to delete \"${state.sourceToDelete.sourceName}\"?") },
             confirmButton = {
                 TextButton(onClick = onConfirmDelete) {
@@ -174,7 +177,7 @@ fun UserSourcesListScreen(
             },
             dismissButton = {
                 TextButton(onClick = onCancelDelete) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -193,7 +196,7 @@ fun UserSourcesListScreen(
     if (state.showDeleteAllConfirmDialog) {
         AlertDialog(
             onDismissRequest = onCancelDeleteAll,
-            title = { Text("Delete All Sources") },
+            title = { Text(localizeHelper.localize(Res.string.delete_all_sources)) },
             text = { 
                 Text("Are you sure you want to delete all ${state.sources.size} user sources? This action cannot be undone.") 
             },
@@ -204,7 +207,7 @@ fun UserSourcesListScreen(
             },
             dismissButton = {
                 TextButton(onClick = onCancelDeleteAll) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -219,6 +222,7 @@ private fun EmptyState(
     onLegadoImport: () -> Unit,
     onHelp: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -262,7 +266,7 @@ private fun EmptyState(
             ) {
                 Icon(Icons.Default.AutoAwesome, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Create with Wizard (Recommended)")
+                Text(localizeHelper.localize(Res.string.create_with_wizard_recommended))
             }
             
             Row(
@@ -271,13 +275,13 @@ private fun EmptyState(
                 OutlinedButton(onClick = onImport) {
                     Icon(Icons.Default.FileDownload, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Import")
+                    Text(localizeHelper.localize(Res.string.import_action))
                 }
                 
                 OutlinedButton(onClick = onCreateNew) {
                     Icon(Icons.Default.Code, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Advanced")
+                    Text(localizeHelper.localize(Res.string.advanced))
                 }
             }
             
@@ -288,13 +292,13 @@ private fun EmptyState(
             ) {
                 Icon(Icons.Default.CloudDownload, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Import Legado Sources")
+                Text(localizeHelper.localize(Res.string.import_legado_sources))
             }
             
             TextButton(onClick = onHelp) {
                 Icon(Icons.Default.Help, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Learn How to Create Sources")
+                Text(localizeHelper.localize(Res.string.learn_how_to_create_sources))
             }
         }
     }
@@ -311,6 +315,7 @@ private fun CreateSourceFab(
     onCreateWithWizard: () -> Unit,
     onImport: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -332,7 +337,7 @@ private fun CreateSourceFab(
                     },
                     containerColor = MaterialTheme.colorScheme.secondaryContainer
                 ) {
-                    Icon(Icons.Default.FileDownload, contentDescription = "Import")
+                    Icon(Icons.Default.FileDownload, contentDescription = localizeHelper.localize(Res.string.import_action))
                 }
                 
                 SmallFloatingActionButton(
@@ -342,7 +347,7 @@ private fun CreateSourceFab(
                     },
                     containerColor = MaterialTheme.colorScheme.secondaryContainer
                 ) {
-                    Icon(Icons.Default.Code, contentDescription = "Advanced")
+                    Icon(Icons.Default.Code, contentDescription = localizeHelper.localize(Res.string.advanced))
                 }
                 
                 SmallFloatingActionButton(
@@ -352,7 +357,7 @@ private fun CreateSourceFab(
                     },
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer
                 ) {
-                    Icon(Icons.Default.AutoAwesome, contentDescription = "Wizard")
+                    Icon(Icons.Default.AutoAwesome, contentDescription = localizeHelper.localize(Res.string.wizard))
                 }
             }
         }
@@ -361,7 +366,7 @@ private fun CreateSourceFab(
         FloatingActionButton(onClick = onToggle) {
             Icon(
                 if (expanded) Icons.Default.Close else Icons.Default.Add,
-                contentDescription = "Create Source"
+                contentDescription = localizeHelper.localize(Res.string.create_source)
             )
         }
     }

@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import ireader.domain.models.entities.Chapter
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.next_chapter_1
 import ireader.i18n.resources.previous_chapter_1
 import ireader.presentation.ui.component.reusable_composable.AppIcon

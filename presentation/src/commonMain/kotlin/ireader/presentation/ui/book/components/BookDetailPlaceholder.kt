@@ -23,6 +23,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Placeholder UI for Book Detail screen.
@@ -236,6 +238,7 @@ private fun PlaceholderActions(placeholderColor: androidx.compose.ui.graphics.Co
 
 @Composable
 private fun PlaceholderSummary(placeholderColor: androidx.compose.ui.graphics.Color) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -243,7 +246,7 @@ private fun PlaceholderSummary(placeholderColor: androidx.compose.ui.graphics.Co
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Summary",
+            text = localizeHelper.localize(Res.string.summary),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
@@ -262,6 +265,7 @@ private fun PlaceholderSummary(placeholderColor: androidx.compose.ui.graphics.Co
 
 @Composable
 private fun PlaceholderChaptersHeader(placeholderColor: androidx.compose.ui.graphics.Color) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -270,7 +274,7 @@ private fun PlaceholderChaptersHeader(placeholderColor: androidx.compose.ui.grap
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Chapters",
+            text = localizeHelper.localize(Res.string.chapters),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )

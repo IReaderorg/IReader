@@ -13,6 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * A wrapper that shows shimmer loading immediately while deferring
@@ -43,6 +45,7 @@ fun DeferredScreen(
     shimmer: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var isReady by remember { mutableStateOf(delayMs == 0L) }
     
     LaunchedEffect(Unit) {
@@ -58,7 +61,7 @@ fun DeferredScreen(
             fadeIn(animationSpec = tween(animationDurationMs)) togetherWith
                 fadeOut(animationSpec = tween(animationDurationMs / 2))
         },
-        label = "DeferredScreenTransition"
+        label = localizeHelper.localize(Res.string.deferredscreentransition)
     ) { ready ->
         if (ready) {
             content()
@@ -128,6 +131,7 @@ fun DeferredScreenWithCondition(
     shimmer: @Composable () -> Unit,
     content: @Composable () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var minTimeElapsed by remember { mutableStateOf(minDisplayMs == 0L) }
     var hasBeenReady by remember { mutableStateOf(isReady) }
     
@@ -153,7 +157,7 @@ fun DeferredScreenWithCondition(
             fadeIn(animationSpec = tween(animationDurationMs)) togetherWith
                 fadeOut(animationSpec = tween(animationDurationMs / 2))
         },
-        label = "DeferredScreenWithConditionTransition"
+        label = localizeHelper.localize(Res.string.deferredscreenwithconditiontransition)
     ) { ready ->
         if (ready) {
             content()

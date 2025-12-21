@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +30,7 @@ fun SubmitQuoteScreen(
     onSubmit: (text: String, bookTitle: String, author: String, category: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var quoteText by remember { mutableStateOf("") }
     var bookTitle by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
@@ -76,7 +79,7 @@ fun SubmitQuoteScreen(
                         .padding(24.dp)
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        val infiniteTransition = rememberInfiniteTransition(label = "pen")
+                        val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.pen))
                         val scale by infiniteTransition.animateFloat(
                             initialValue = 1f,
                             targetValue = 1.1f,
@@ -84,11 +87,11 @@ fun SubmitQuoteScreen(
                                 animation = tween(800),
                                 repeatMode = RepeatMode.Reverse
                             ),
-                            label = "scale"
+                            label = localizeHelper.localize(Res.string.scale)
                         )
                         
                         Text(
-                            text = "✍️",
+                            text = localizeHelper.localize(Res.string._1),
                             fontSize = 48.sp,
                             modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale }
                         )
@@ -96,7 +99,7 @@ fun SubmitQuoteScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         
                         Text(
-                            text = "Share Your Favorite Quote",
+                            text = localizeHelper.localize(Res.string.share_your_favorite_quote),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -104,7 +107,7 @@ fun SubmitQuoteScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         
                         Text(
-                            text = "Inspire other readers with memorable passages",
+                            text = localizeHelper.localize(Res.string.inspire_other_readers_with_memorable_passages),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -125,8 +128,8 @@ fun SubmitQuoteScreen(
                     OutlinedTextField(
                         value = quoteText,
                         onValueChange = { quoteText = it },
-                        label = { Text("Quote") },
-                        placeholder = { Text("Enter the quote text...") },
+                        label = { Text(localizeHelper.localize(Res.string.quote_text)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.enter_quote_text)) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 4,
                         maxLines = 6,
@@ -136,8 +139,8 @@ fun SubmitQuoteScreen(
                     OutlinedTextField(
                         value = bookTitle,
                         onValueChange = { bookTitle = it },
-                        label = { Text("Book Title") },
-                        placeholder = { Text("e.g., The Great Gatsby") },
+                        label = { Text(localizeHelper.localize(Res.string.book_title)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.eg_the_great_gatsby)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(16.dp)
@@ -146,8 +149,8 @@ fun SubmitQuoteScreen(
                     OutlinedTextField(
                         value = author,
                         onValueChange = { author = it },
-                        label = { Text("Author (optional)") },
-                        placeholder = { Text("e.g., F. Scott Fitzgerald") },
+                        label = { Text(localizeHelper.localize(Res.string.author_optional)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.eg_f_scott_fitzgerald)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(16.dp)
@@ -156,8 +159,8 @@ fun SubmitQuoteScreen(
                     OutlinedTextField(
                         value = category,
                         onValueChange = { category = it },
-                        label = { Text("Category (optional)") },
-                        placeholder = { Text("e.g., Inspirational, Romance, Fantasy") },
+                        label = { Text(localizeHelper.localize(Res.string.category_optional)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.eg_inspirational_romance_fantasy)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(16.dp)
@@ -216,7 +219,7 @@ fun SubmitQuoteScreen(
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Submission Guidelines",
+                            text = localizeHelper.localize(Res.string.submission_guidelines),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )

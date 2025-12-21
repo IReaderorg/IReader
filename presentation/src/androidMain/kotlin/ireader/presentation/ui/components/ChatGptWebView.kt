@@ -104,6 +104,7 @@ private fun WebViewUnavailableContent(
     onClose: () -> Unit,
     localizeHelper: ireader.i18n.LocalizeHelper
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -257,6 +258,7 @@ private fun ChatGptWebViewTopBar(
     engine: WebscrapingTranslateEngine,
     onClose: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -393,6 +395,7 @@ private fun ChatGptWebViewRetryButtons(
     webViewState: ChatGptWebViewState,
     localizeHelper: ireader.i18n.LocalizeHelper
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = Modifier.fillMaxWidth()) {
         Button(
             onClick = { webViewState.retry() },

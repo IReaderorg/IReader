@@ -55,7 +55,7 @@ import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.file.rememberPlatformDirectoryPickerLauncher
 import ireader.domain.preferences.prefs.UiPreferences
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.grant_storage_permission
 import ireader.i18n.resources.permission_feature_backup_desc
 import ireader.i18n.resources.permission_feature_backup_title
@@ -68,6 +68,7 @@ import ireader.i18n.resources.storage_permission_privacy_note
 import ireader.i18n.resources.storage_permission_subtitle
 import ireader.i18n.resources.storage_permission_title
 import kotlinx.coroutines.delay
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
 /**
  * Modern, beautiful storage folder selection screen using FileKit.
@@ -80,6 +81,7 @@ fun StorageFolderPickerScreen(
     onFolderSelected: (String) -> Unit,
     onSkip: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
     var showContent by remember { mutableStateOf(false) }
     var isSelectingFolder by remember { mutableStateOf(false) }
@@ -92,7 +94,7 @@ fun StorageFolderPickerScreen(
     
     // Platform-specific directory picker - uses OpenDocumentTree on Android for proper SAF permissions
     val directoryPicker = rememberPlatformDirectoryPickerLauncher(
-        title = "Select IReader Storage Folder"
+        title = localizeHelper.localize(Res.string.select_ireader_storage_folder)
     ) { folderPath ->
         isSelectingFolder = false
         if (folderPath != null) {
@@ -276,11 +278,12 @@ fun StorageFolderPickerScreen(
 
 @Composable
 private fun PermissionIcon() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var animationPlayed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
         targetValue = if (animationPlayed) 1f else 0.8f,
         animationSpec = tween(500),
-        label = "icon_scale"
+        label = localizeHelper.localize(Res.string.icon_scale)
     )
     
     LaunchedEffect(Unit) {

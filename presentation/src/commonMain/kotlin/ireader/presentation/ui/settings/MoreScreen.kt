@@ -232,14 +232,14 @@ fun MoreScreen(
         // Reading Hub Section
         item {
             SettingsSectionHeader(
-                title = "Reading Hub",
+                title = localizeHelper.localize(Res.string.reading_hub),
                 icon = Icons.Filled.Pets
             )
         }
         
         item {
             SettingsItem(
-                title = "Reading Hub",
+                title = localizeHelper.localize(Res.string.reading_hub),
                 description = "Statistics, achievements, quotes & your reading buddy",
                 icon = Icons.Filled.Pets,
                 onClick = onReadingBuddy

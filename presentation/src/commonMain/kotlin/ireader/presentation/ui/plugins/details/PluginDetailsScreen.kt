@@ -158,7 +158,7 @@ private fun ModernDetailsTopBar(
         },
         actions = {
             if (plugin != null) {
-                IconButton(onClick = { }) { Icon(Icons.Default.Share, contentDescription = "Share") }
+                IconButton(onClick = { }) { Icon(Icons.Default.Share, contentDescription = localizeHelper.localize(Res.string.share)) }
             }
         },
         scrollBehavior = scrollBehavior,
@@ -385,6 +385,7 @@ private fun ModernPluginDetailsContent(
     onPluginClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val plugin = state.plugin ?: return
     
     LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 100.dp)) {
@@ -411,7 +412,7 @@ private fun ModernPluginDetailsContent(
         
         // About section
         item {
-            ModernSection(title = "About", icon = Icons.Outlined.Info) {
+            ModernSection(title = localizeHelper.localize(Res.string.about), icon = Icons.Outlined.Info) {
                 Text(
                     text = plugin.manifest.description,
                     style = MaterialTheme.typography.bodyMedium,
@@ -422,7 +423,7 @@ private fun ModernPluginDetailsContent(
         
         // What's New section (if available)
         item {
-            ModernSection(title = "What's New", icon = Icons.Outlined.NewReleases) {
+            ModernSection(title = localizeHelper.localize(Res.string.whats_new_1), icon = Icons.Outlined.NewReleases) {
                 Text(
                     text = "Version ${plugin.manifest.version}",
                     style = MaterialTheme.typography.titleSmall,
@@ -430,7 +431,7 @@ private fun ModernPluginDetailsContent(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Bug fixes and performance improvements",
+                    text = localizeHelper.localize(Res.string.bug_fixes_and_performance_improvements),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -439,7 +440,7 @@ private fun ModernPluginDetailsContent(
         
         // Developer section
         item {
-            ModernSection(title = "Developer", icon = Icons.Outlined.Person) {
+            ModernSection(title = localizeHelper.localize(Res.string.developer), icon = Icons.Outlined.Person) {
                 DeveloperCard(
                     author = plugin.manifest.author,
                     otherPlugins = state.otherPluginsByDeveloper,
@@ -451,7 +452,7 @@ private fun ModernPluginDetailsContent(
         // Permissions section
         if (plugin.manifest.permissions.isNotEmpty()) {
             item {
-                ModernSection(title = "Permissions", icon = Icons.Outlined.Security) {
+                ModernSection(title = localizeHelper.localize(Res.string.permissions), icon = Icons.Outlined.Security) {
                     plugin.manifest.permissions.forEach { permission ->
                         PermissionItem(permission = permission)
                     }
@@ -462,7 +463,7 @@ private fun ModernPluginDetailsContent(
         // Resource usage (if installed)
         if (state.resourceUsage != null && state.resourcePercentages != null) {
             item {
-                ModernSection(title = "Resource Usage", icon = Icons.Outlined.Memory) {
+                ModernSection(title = localizeHelper.localize(Res.string.resource_usage), icon = Icons.Outlined.Memory) {
                     ResourceUsageSection(usage = state.resourceUsage!!, percentages = state.resourcePercentages!!)
                 }
             }
@@ -470,11 +471,11 @@ private fun ModernPluginDetailsContent(
         
         // Reviews section
         item {
-            ModernSection(title = "Reviews", icon = Icons.Outlined.RateReview, action = {
+            ModernSection(title = localizeHelper.localize(Res.string.reviews), icon = Icons.Outlined.RateReview, action = {
                 TextButton(onClick = onWriteReview) {
                     Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Write Review")
+                    Text(localizeHelper.localize(Res.string.write_review))
                 }
             }) {
                 if (state.reviews.isEmpty()) {
@@ -491,7 +492,7 @@ private fun ModernPluginDetailsContent(
         
         // Additional info
         item {
-            ModernSection(title = "Additional Information", icon = Icons.Outlined.Info) {
+            ModernSection(title = localizeHelper.localize(Res.string.additional_information), icon = Icons.Outlined.Info) {
                 InfoGrid(plugin = plugin)
             }
         }
@@ -554,23 +555,24 @@ private fun ModernHeroSection(plugin: PluginInfo) {
 
 @Composable
 private fun QuickStatsRow(plugin: PluginInfo, reviewCount: Int, modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         StatCard(
             icon = Icons.Default.RateReview,
             value = reviewCount.toString(),
-            label = "Reviews",
+            label = localizeHelper.localize(Res.string.reviews),
             modifier = Modifier.weight(1f)
         )
         StatCard(
             icon = Icons.Default.Star,
             value = plugin.rating?.let { ireader.presentation.ui.core.utils.toDecimalString(it.toDouble(), 1) } ?: "N/A",
-            label = "Rating",
+            label = localizeHelper.localize(Res.string.rating),
             modifier = Modifier.weight(1f)
         )
         StatCard(
             icon = Icons.Default.Update,
             value = plugin.manifest.version,
-            label = "Version",
+            label = localizeHelper.localize(Res.string.version),
             modifier = Modifier.weight(1f)
         )
     }
@@ -628,6 +630,7 @@ private fun DeveloperCard(
     otherPlugins: List<PluginInfo>,
     onPluginClick: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Surface(
@@ -655,7 +658,7 @@ private fun DeveloperCard(
         
         if (otherPlugins.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "More by this developer", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = localizeHelper.localize(Res.string.more_by_this_developer), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(otherPlugins.take(5)) { plugin ->
@@ -718,12 +721,13 @@ private fun PermissionItem(permission: ireader.plugin.api.PluginPermission) {
 
 @Composable
 private fun InfoGrid(plugin: PluginInfo) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        InfoRow(label = "Type", value = getCategoryDisplayName(plugin.manifest.type))
-        InfoRow(label = "Version", value = plugin.manifest.version)
-        InfoRow(label = "Min IReader Version", value = plugin.manifest.minIReaderVersion)
-        InfoRow(label = "Platforms", value = plugin.manifest.platforms.joinToString(", ") { it.name })
-        plugin.fileSize?.let { InfoRow(label = "Size", value = formatFileSize(it)) }
+        InfoRow(label = localizeHelper.localize(Res.string.type), value = getCategoryDisplayName(plugin.manifest.type))
+        InfoRow(label = localizeHelper.localize(Res.string.version), value = plugin.manifest.version)
+        InfoRow(label = localizeHelper.localize(Res.string.min_ireader_version), value = plugin.manifest.minIReaderVersion)
+        InfoRow(label = localizeHelper.localize(Res.string.platforms), value = plugin.manifest.platforms.joinToString(", ") { it.name })
+        plugin.fileSize?.let { InfoRow(label = localizeHelper.localize(Res.string.size), value = formatFileSize(it)) }
     }
 }
 
@@ -760,29 +764,31 @@ private fun TypeBadge(type: PluginType, modifier: Modifier = Modifier) {
 
 @Composable
 private fun ModernLoadingState() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator(modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Loading plugin details...", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = localizeHelper.localize(Res.string.loading_plugin_details), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
 private fun ModernErrorState(error: String, onRetry: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
             Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.error)
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Something went wrong", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(text = localizeHelper.localize(Res.string.something_went_wrong), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = error, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(24.dp))
             Button(onClick = onRetry) {
                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Try Again")
+                Text(localizeHelper.localize(Res.string.try_again))
             }
         }
     }

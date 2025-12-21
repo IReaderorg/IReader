@@ -16,6 +16,22 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.usersource.model.UserSource
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
+import ireader.i18n.resources.about_legado_sources
+import ireader.i18n.resources.back
+import ireader.i18n.resources.clear_1
+import ireader.i18n.resources.deselect_all
+import ireader.i18n.resources.fetch_sources
+import ireader.i18n.resources.import_from_url
+import ireader.i18n.resources.import_legado_sources
+import ireader.i18n.resources.json_content
+import ireader.i18n.resources.legado_description
+import ireader.i18n.resources.parse_json
+import ireader.i18n.resources.paste_json
+import ireader.i18n.resources.popular_repositories
+import ireader.i18n.resources.select_all
+import ireader.i18n.resources.source_url_1
 
 /**
  * Screen for importing Legado/阅读 format sources.
@@ -38,19 +54,20 @@ fun LegadoSourceImportScreen(
     onClearParsed: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Import Legado Sources") },
+                title = { Text(localizeHelper.localize(Res.string.import_legado_sources)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 },
                 actions = {
                     if (state.parsedSources.isNotEmpty()) {
                         IconButton(onClick = onClearParsed) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear")
+                            Icon(Icons.Default.Clear, contentDescription = localizeHelper.localize(Res.string.clear_1))
                         }
                     }
                 }
@@ -124,6 +141,7 @@ private fun ImportInputContent(
     onParseJson: () -> Unit,
     onToggleJsonInput: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -139,14 +157,14 @@ private fun ImportInputContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Import from URL",
+                        text = localizeHelper.localize(Res.string.import_from_url),
                         style = MaterialTheme.typography.titleMedium
                     )
                     
                     OutlinedTextField(
                         value = state.sourceUrl,
                         onValueChange = onUrlChange,
-                        label = { Text("Source URL") },
+                        label = { Text(localizeHelper.localize(Res.string.source_url_1)) },
                         placeholder = { Text("https://...") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -155,7 +173,7 @@ private fun ImportInputContent(
                         trailingIcon = {
                             if (state.sourceUrl.isNotBlank()) {
                                 IconButton(onClick = { onUrlChange("") }) {
-                                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                    Icon(Icons.Default.Clear, contentDescription = localizeHelper.localize(Res.string.clear_1))
                                 }
                             }
                         }
@@ -168,7 +186,7 @@ private fun ImportInputContent(
                     ) {
                         Icon(Icons.Default.CloudDownload, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Fetch Sources")
+                        Text(localizeHelper.localize(Res.string.fetch_sources))
                     }
                 }
             }
@@ -200,14 +218,14 @@ private fun ImportInputContent(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "Paste JSON",
+                            text = localizeHelper.localize(Res.string.paste_json),
                             style = MaterialTheme.typography.titleMedium
                         )
                         
                         OutlinedTextField(
                             value = state.jsonContent,
                             onValueChange = onJsonChange,
-                            label = { Text("JSON Content") },
+                            label = { Text(localizeHelper.localize(Res.string.json_content)) },
                             placeholder = { Text("[{\"bookSourceUrl\": ...}]") },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -222,7 +240,7 @@ private fun ImportInputContent(
                         ) {
                             Icon(Icons.Default.Code, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Parse JSON")
+                            Text(localizeHelper.localize(Res.string.parse_json))
                         }
                     }
                 }
@@ -232,7 +250,7 @@ private fun ImportInputContent(
         // Popular Repositories Section
         item {
             Text(
-                text = "Popular Repositories",
+                text = localizeHelper.localize(Res.string.popular_repositories),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -267,12 +285,12 @@ private fun ImportInputContent(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "About Legado Sources",
+                            text = localizeHelper.localize(Res.string.about_legado_sources),
                             style = MaterialTheme.typography.titleSmall
                         )
                     }
                     Text(
-                        text = "Legado (阅读) is a popular Chinese novel reader app. " +
+                        text = localizeHelper.localize(Res.string.legado_description) +
                                "You can import book sources from Legado format JSON files. " +
                                "Sources will be converted to work with IReader.",
                         style = MaterialTheme.typography.bodySmall,
@@ -335,6 +353,7 @@ private fun SourceSelectionContent(
     onSelectAll: () -> Unit,
     onDeselectAll: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(modifier = Modifier.fillMaxSize()) {
         // Selection header
         Surface(
@@ -353,10 +372,10 @@ private fun SourceSelectionContent(
                 )
                 Row {
                     TextButton(onClick = onSelectAll) {
-                        Text("Select All")
+                        Text(localizeHelper.localize(Res.string.select_all))
                     }
                     TextButton(onClick = onDeselectAll) {
-                        Text("Deselect All")
+                        Text(localizeHelper.localize(Res.string.deselect_all))
                     }
                 }
             }

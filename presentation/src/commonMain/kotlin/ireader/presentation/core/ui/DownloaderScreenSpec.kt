@@ -19,7 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.toSavedDownload
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.pause
 import ireader.i18n.resources.resume
 import ireader.i18n.resources.start

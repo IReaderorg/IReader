@@ -33,6 +33,8 @@ import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.presentation.ui.component.isTableUi
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Detail screen for viewing character art
@@ -50,6 +52,7 @@ fun CharacterArtDetailScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val isWideScreen = isTableUi()
     val scrollState = rememberScrollState()
     var showReportDialog by remember { mutableStateOf(false) }
@@ -74,8 +77,8 @@ fun CharacterArtDetailScreen(
     if (showDeleteDialog && onDeleteClick != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Art?") },
-            text = { Text("This action cannot be undone.") },
+            title = { Text(localizeHelper.localize(Res.string.delete_art)) },
+            text = { Text(localizeHelper.localize(Res.string.action_cannot_be_undone)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -86,12 +89,12 @@ fun CharacterArtDetailScreen(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text(localizeHelper.localize(Res.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(localizeHelper.localize(Res.string.cancel))
                 }
             }
         )
@@ -119,7 +122,7 @@ fun CharacterArtDetailScreen(
                             contentColor = Color.White
                         )
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                     
                     // Actions
@@ -131,7 +134,7 @@ fun CharacterArtDetailScreen(
                                 contentColor = Color.White
                             )
                         ) {
-                            Icon(Icons.Outlined.Share, contentDescription = "Share")
+                            Icon(Icons.Outlined.Share, contentDescription = localizeHelper.localize(Res.string.share))
                         }
                         
                         Box {
@@ -142,7 +145,7 @@ fun CharacterArtDetailScreen(
                                     contentColor = Color.White
                                 )
                             ) {
-                                Icon(Icons.Default.MoreVert, contentDescription = "More")
+                                Icon(Icons.Default.MoreVert, contentDescription = localizeHelper.localize(Res.string.more))
                             }
                             
                             DropdownMenu(
@@ -150,7 +153,7 @@ fun CharacterArtDetailScreen(
                                 onDismissRequest = { showMoreMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Report") },
+                                    text = { Text(localizeHelper.localize(Res.string.report)) },
                                     onClick = {
                                         showMoreMenu = false
                                         showReportDialog = true
@@ -329,6 +332,7 @@ private fun ZoomControls(
     onReset: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
@@ -341,7 +345,7 @@ private fun ZoomControls(
             IconButton(onClick = onZoomOut, enabled = scale > 1f) {
                 Icon(
                     Icons.Default.ZoomOut,
-                    contentDescription = "Zoom out",
+                    contentDescription = localizeHelper.localize(Res.string.zoom_out),
                     tint = Color.White
                 )
             }
@@ -358,7 +362,7 @@ private fun ZoomControls(
             IconButton(onClick = onZoomIn, enabled = scale < 4f) {
                 Icon(
                     Icons.Default.ZoomIn,
-                    contentDescription = "Zoom in",
+                    contentDescription = localizeHelper.localize(Res.string.zoom_in),
                     tint = Color.White
                 )
             }
@@ -367,7 +371,7 @@ private fun ZoomControls(
                 IconButton(onClick = onReset) {
                     Icon(
                         Icons.Default.Refresh,
-                        contentDescription = "Reset zoom",
+                        contentDescription = localizeHelper.localize(Res.string.reset_zoom),
                         tint = Color.White
                     )
                 }
@@ -381,6 +385,7 @@ private fun ArtInfoContent(
     art: CharacterArt,
     onLikeClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Character name and like button
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -445,7 +450,7 @@ private fun ArtInfoContent(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Description",
+                    text = localizeHelper.localize(Res.string.description),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -471,7 +476,7 @@ private fun ArtInfoContent(
                     Text("??", fontSize = 18.sp)
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "AI Generation Info",
+                        text = localizeHelper.localize(Res.string.ai_generation_info),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -480,7 +485,7 @@ private fun ArtInfoContent(
                 if (art.aiModel.isNotBlank()) {
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        text = "Model",
+                        text = localizeHelper.localize(Res.string.model),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -494,7 +499,7 @@ private fun ArtInfoContent(
                 if (art.prompt.isNotBlank()) {
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        text = "Prompt",
+                        text = localizeHelper.localize(Res.string.prompt),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -569,10 +574,11 @@ private fun LikeButtonLarge(
     likesCount: Int,
     onClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scale by animateFloatAsState(
         targetValue = if (isLiked) 1.1f else 1f,
         animationSpec = spring(dampingRatio = 0.4f),
-        label = "likeScale"
+        label = localizeHelper.localize(Res.string.likescale)
     )
     
     Surface(
@@ -616,6 +622,7 @@ private fun ReportDialog(
     onDismiss: () -> Unit,
     onReport: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedReason by remember { mutableStateOf<String?>(null) }
     var customReason by remember { mutableStateOf("") }
     
@@ -630,7 +637,7 @@ private fun ReportDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Report Art") },
+        title = { Text(localizeHelper.localize(Res.string.report_art)) },
         text = {
             Column {
                 Text(
@@ -662,7 +669,7 @@ private fun ReportDialog(
                     OutlinedTextField(
                         value = customReason,
                         onValueChange = { customReason = it },
-                        label = { Text("Please specify") },
+                        label = { Text(localizeHelper.localize(Res.string.please_specify)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -684,7 +691,7 @@ private fun ReportDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )

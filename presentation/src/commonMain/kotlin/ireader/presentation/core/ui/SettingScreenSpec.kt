@@ -103,7 +103,7 @@ class SettingScreenSpec {
                 ),
                 SearchableSettingItem(
                     id = "theme",
-                    title = "Theme",
+                    title = localizeHelper.localize(Res.string.theme),
                     description = "Light, dark, or system default theme",
                     icon = Icons.Default.DarkMode,
                     section = localizeHelper.localize(Res.string.appearance),
@@ -111,7 +111,7 @@ class SettingScreenSpec {
                 ),
                 SearchableSettingItem(
                     id = "colors",
-                    title = "Colors",
+                    title = localizeHelper.localize(Res.string.colors),
                     description = "Dynamic colors and Material You",
                     icon = Icons.Default.ColorLens,
                     section = localizeHelper.localize(Res.string.appearance),

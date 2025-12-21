@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ireader.plugin.api.*
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Renders declarative UI components from plugins.
@@ -198,6 +200,7 @@ private fun RenderList(
     component: PluginUIComponent.ItemList,
     onEvent: (PluginUIEvent) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         component.items.forEach { item ->
             ListItem(
@@ -212,7 +215,7 @@ private fun RenderList(
                                 eventType = UIEventType.CLICK
                             ))
                         }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete",
+                            Icon(Icons.Default.Delete, contentDescription = localizeHelper.localize(Res.string.delete),
                                 tint = MaterialTheme.colorScheme.error)
                         }
                     }

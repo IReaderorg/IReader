@@ -39,6 +39,8 @@ import ireader.presentation.ui.home.tts.CommonTTSScreenState
 import ireader.presentation.ui.home.tts.TTSContentDisplay
 import ireader.presentation.ui.home.tts.TTSMediaControls
 import kotlinx.coroutines.flow.collectLatest
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Adapter that bridges TTS v2 state to CommonTTSScreenState
@@ -202,6 +204,7 @@ fun TTSV2CommonScreen(
     isTabletOrDesktop: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Convert v2 state to CommonTTSScreenState
     val commonState = rememberTTSV2StateAdapter(adapter, sleepTimerState)
     
@@ -275,7 +278,7 @@ fun TTSV2CommonScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     },
                     actions = {
@@ -291,7 +294,7 @@ fun TTSV2CommonScreen(
                                 ) {
                                     Icon(
                                         Icons.Default.Timer,
-                                        contentDescription = "Sleep Timer",
+                                        contentDescription = localizeHelper.localize(Res.string.sleep_timer),
                                         tint = if (sleepTimerState?.isEnabled == true)
                                             MaterialTheme.colorScheme.primary
                                         else
@@ -303,7 +306,7 @@ fun TTSV2CommonScreen(
                         
                         // Settings button
                         IconButton(onClick = onOpenSettings) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings")
+                            Icon(Icons.Default.Settings, contentDescription = localizeHelper.localize(Res.string.settings))
                         }
                     }
                 )

@@ -20,6 +20,8 @@ import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.i18n.UiText
 import ireader.presentation.ui.core.modifier.supportDesktopScroll
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Wrapper class to adapt TranslationPlugin to TranslateEngine interface
@@ -83,6 +85,7 @@ fun TranslationSettingsScreenV2(
     onNavigateToLogin: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
@@ -123,7 +126,7 @@ fun TranslationSettingsScreenV2(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Translation Settings",
+                        text = localizeHelper.localize(Res.string.translation_settings),
                         style = MaterialTheme.typography.titleLarge,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -133,7 +136,7 @@ fun TranslationSettingsScreenV2(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 },
@@ -160,7 +163,7 @@ fun TranslationSettingsScreenV2(
             // Engine Selection Section
             item(key = "engine_header") {
                 SectionHeader(
-                    title = "Translation Engine",
+                    title = localizeHelper.localize(Res.string.translation_engine),
                     icon = Icons.Default.Translate
                 )
             }
@@ -177,7 +180,7 @@ fun TranslationSettingsScreenV2(
             if (showApiKeySection) {
                 item(key = "api_key_header") {
                     SectionHeader(
-                        title = "API Key",
+                        title = localizeHelper.localize(Res.string.api_key),
                         icon = Icons.Default.Key
                     )
                 }
@@ -197,7 +200,7 @@ fun TranslationSettingsScreenV2(
             if (isGeminiSelected) {
                 item(key = "gemini_model_header") {
                     SectionHeader(
-                        title = "Gemini Model",
+                        title = localizeHelper.localize(Res.string.gemini_model),
                         icon = Icons.Default.ModelTraining
                     )
                 }
@@ -230,7 +233,7 @@ fun TranslationSettingsScreenV2(
             if (isAiEngine) {
                 item(key = "advanced_header") {
                     SectionHeader(
-                        title = "Advanced",
+                        title = localizeHelper.localize(Res.string.advanced),
                         icon = Icons.Default.Tune
                     )
                 }

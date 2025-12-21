@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.tts_engine_manager
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.presentation.ui.core.theme.currentOrThrow
@@ -67,13 +67,13 @@ actual fun TTSEngineSettingsScreen(
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "iOS Text-to-Speech",
+                            text = localizeHelper.localize(Res.string.ios_text_to_speech),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "iOS uses the built-in AVSpeechSynthesizer for text-to-speech. " +
+                            text = localizeHelper.localize(Res.string.ios_uses_the_built_in) +
                                    "Voice settings can be configured in iOS Settings > Accessibility > Spoken Content.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
@@ -91,7 +91,7 @@ actual fun TTSEngineSettingsScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Open iOS Settings")
+                    Text(localizeHelper.localize(Res.string.open_ios_settings))
                 }
             }
         }
@@ -126,7 +126,7 @@ actual fun TTSVoiceSelectionScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Voice Selection",
+                        text = localizeHelper.localize(Res.string.voice_selection),
                         style = MaterialTheme.typography.headlineSmall
                     )
                     IconButton(onClick = onDismiss) {
@@ -137,7 +137,7 @@ actual fun TTSVoiceSelectionScreen(
                 HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                 
                 Text(
-                    text = "iOS voices are managed through the system. " +
+                    text = localizeHelper.localize(Res.string.ios_voices_are_managed_through_the_system) +
                            "You can download additional voices in iOS Settings > Accessibility > Spoken Content > Voices.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -153,7 +153,7 @@ actual fun TTSVoiceSelectionScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Open iOS Settings")
+                    Text(localizeHelper.localize(Res.string.open_ios_settings))
                 }
             }
         }

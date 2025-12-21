@@ -101,6 +101,8 @@ import ireader.domain.models.characterart.CharacterArt
 import ireader.domain.models.characterart.CharacterArtSort
 import ireader.domain.models.characterart.GalleryViewMode
 import ireader.presentation.ui.component.isTableUi
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 
 /**
@@ -117,6 +119,7 @@ fun CharacterArtGalleryScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues()
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by vm.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -155,7 +158,7 @@ fun CharacterArtGalleryScreen(
                 ExtendedFloatingActionButton(
                     onClick = onUploadClick,
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Upload Art") },
+                    text = { Text(localizeHelper.localize(Res.string.upload_art)) },
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -211,6 +214,7 @@ private fun GalleryTopBar(
     onBack: () -> Unit,
     isWideScreen: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var isSearchExpanded by remember { mutableStateOf(false) }
     
     Surface(
@@ -224,7 +228,7 @@ private fun GalleryTopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
             }
             
             AnimatedVisibility(
@@ -243,12 +247,12 @@ private fun GalleryTopBar(
                     )
                     Column {
                         Text(
-                            text = "Character Gallery",
+                            text = localizeHelper.localize(Res.string.character_gallery),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "AI-generated character art",
+                            text = localizeHelper.localize(Res.string.ai_generated_character_art),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -267,7 +271,7 @@ private fun GalleryTopBar(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 8.dp),
-                    placeholder = { Text("Search characters, books...") },
+                    placeholder = { Text(localizeHelper.localize(Res.string.search_characters_books)) },
                     singleLine = true,
                     shape = RoundedCornerShape(24.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -281,7 +285,7 @@ private fun GalleryTopBar(
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { onSearchChange("") }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Clear")
+                                Icon(Icons.Default.Clear, contentDescription = localizeHelper.localize(Res.string.clear_1))
                             }
                         }
                     }
@@ -422,10 +426,11 @@ private fun ViewModeButton(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scale by animateFloatAsState(
         targetValue = if (selected) 1.1f else 1f,
         animationSpec = spring(dampingRatio = 0.6f),
-        label = "scale"
+        label = localizeHelper.localize(Res.string.scale)
     )
     
     Surface(
@@ -499,12 +504,13 @@ private fun CharacterArtCard(
     onLikeClick: () -> Unit,
     isWideScreen: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val interactionSource = remember { MutableInteractionSource() }
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1f,
         animationSpec = spring(dampingRatio = 0.6f),
-        label = "cardScale"
+        label = localizeHelper.localize(Res.string.cardscale)
     )
     
     Card(
@@ -787,10 +793,11 @@ private fun LikeButton(
     modifier: Modifier = Modifier,
     compact: Boolean = false
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scale by animateFloatAsState(
         targetValue = if (isLiked) 1.2f else 1f,
         animationSpec = spring(dampingRatio = 0.4f),
-        label = "likeScale"
+        label = localizeHelper.localize(Res.string.likescale)
     )
     
     Surface(
@@ -855,7 +862,8 @@ private fun LoadingContent(isWideScreen: Boolean) {
 
 @Composable
 private fun ShimmerCard() {
-    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.shimmer))
     val alpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.7f,
@@ -863,7 +871,7 @@ private fun ShimmerCard() {
             animation = tween(1000),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "shimmerAlpha"
+        label = localizeHelper.localize(Res.string.shimmeralpha)
     )
     
     Card(
@@ -884,6 +892,7 @@ private fun ShimmerCard() {
 
 @Composable
 private fun EmptyGalleryContent(onUploadClick: () -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -896,14 +905,14 @@ private fun EmptyGalleryContent(onUploadClick: () -> Unit) {
             Text("🎨", fontSize = 64.sp)
             
             Text(
-                text = "No Character Art Yet",
+                text = localizeHelper.localize(Res.string.no_character_art_yet),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
             
             Text(
-                text = "Be the first to share AI-generated art of your favorite book characters!",
+                text = localizeHelper.localize(Res.string.be_the_first_to_share),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -917,7 +926,7 @@ private fun EmptyGalleryContent(onUploadClick: () -> Unit) {
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Upload First Art")
+                Text(localizeHelper.localize(Res.string.upload_first_art))
             }
         }
     }

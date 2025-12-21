@@ -27,19 +27,19 @@ fun PluginRepositoryScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val localizeHelper = LocalLocalizeHelper.current
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val state by viewModel.state
     var showAddDialog by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Plugin Repositories") },
+                title = { Text(localizeHelper.localize(Res.string.plugin_repositories)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 },
@@ -51,11 +51,11 @@ fun PluginRepositoryScreen(
                         )
                     } else {
                         IconButton(onClick = { viewModel.refreshAllRepositories() }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Refresh all")
+                            Icon(Icons.Default.Refresh, contentDescription = localizeHelper.localize(Res.string.refresh_all))
                         }
                     }
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add repository")
+                        Icon(Icons.Default.Add, contentDescription = localizeHelper.localize(Res.string.add_repository_1))
                     }
                 }
             )
@@ -80,7 +80,7 @@ fun PluginRepositoryScreen(
                     modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp),
                     action = {
                         TextButton(onClick = { viewModel.clearError() }) {
-                            Text("Dismiss")
+                            Text(localizeHelper.localize(Res.string.notification_dismiss))
                         }
                     }
                 ) {
@@ -137,6 +137,7 @@ private fun RepositoryCard(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -206,7 +207,7 @@ private fun RepositoryCard(
                     TextButton(onClick = onRefresh) {
                         Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Refresh")
+                        Text(localizeHelper.localize(Res.string.refresh))
                     }
                     if (!repository.isOfficial) {
                         TextButton(
@@ -217,7 +218,7 @@ private fun RepositoryCard(
                         ) {
                             Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Remove")
+                            Text(localizeHelper.localize(Res.string.remove))
                         }
                     }
                 }
@@ -231,6 +232,7 @@ private fun AddRepositoryDialog(
     onDismiss: () -> Unit,
     onAdd: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var url by remember { mutableStateOf("") }
     var isValid by remember { mutableStateOf(false) }
     
@@ -243,7 +245,7 @@ private fun AddRepositoryDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Default.AddLink, contentDescription = null) },
-        title = { Text("Add Plugin Repository") },
+        title = { Text(localizeHelper.localize(Res.string.add_plugin_repository)) },
         text = {
             Column {
                 Text(
@@ -254,12 +256,12 @@ private fun AddRepositoryDialog(
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("Repository URL") },
+                    label = { Text(localizeHelper.localize(Res.string.repository_url)) },
                     placeholder = { Text("https://example.com/plugins/index.json") },
                     singleLine = true,
                     isError = url.isNotBlank() && !isValid,
                     supportingText = if (url.isNotBlank() && !isValid) {
-                        { Text("URL must start with https:// and end with index.json") }
+                        { Text(localizeHelper.localize(Res.string.url_must_start_with_https_and_end_with_indexjson)) }
                     } else null,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -270,12 +272,12 @@ private fun AddRepositoryDialog(
                 onClick = { onAdd(url) },
                 enabled = isValid
             ) {
-                Text("Add")
+                Text(localizeHelper.localize(Res.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(localizeHelper.localize(Res.string.cancel))
             }
         }
     )
@@ -296,6 +298,7 @@ private fun EmptyState(
     onAddClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -309,12 +312,12 @@ private fun EmptyState(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No repositories configured",
+            text = localizeHelper.localize(Res.string.no_repositories_configured),
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Add a plugin repository to browse and install plugins",
+            text = localizeHelper.localize(Res.string.add_a_plugin_repository_to),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -322,7 +325,7 @@ private fun EmptyState(
         Button(onClick = onAddClick) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Add Repository")
+            Text(localizeHelper.localize(Res.string.add_repository))
         }
     }
 }

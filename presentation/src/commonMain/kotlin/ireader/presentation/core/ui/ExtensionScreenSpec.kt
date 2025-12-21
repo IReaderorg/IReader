@@ -39,7 +39,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.CatalogLocal
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.add
 import ireader.i18n.resources.add_repository
 import ireader.i18n.resources.cancel

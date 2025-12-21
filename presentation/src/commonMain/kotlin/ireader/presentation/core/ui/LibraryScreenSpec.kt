@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.library_screen_label
 import ireader.presentation.core.IModalSheets
 import ireader.presentation.core.LocalNavigator

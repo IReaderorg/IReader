@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalUriHandler
 import ireader.i18n.discord
 import ireader.i18n.localize
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.more
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.core.NavigationRoutes

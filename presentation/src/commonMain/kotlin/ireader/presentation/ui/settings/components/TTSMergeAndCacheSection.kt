@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import kotlin.math.roundToInt
+import ireader.i18n.resources.*
 
 /**
  * TTS Text Merging and Chapter Caching Settings Section
@@ -39,13 +40,14 @@ fun TTSMergeAndCacheSection(
     onClearCache: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Section header
         Text(
-            text = "TTS Text Merging",
+            text = localizeHelper.localize(Res.string.tts_text_merging),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -70,7 +72,7 @@ fun TTSMergeAndCacheSection(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Merge multiple paragraphs into larger chunks for smoother reading. " +
+                    text = localizeHelper.localize(Res.string.merge_multiple_paragraphs_into_larger) +
                            "This reduces server requests and provides better audio continuity. " +
                            "Set to 0 to disable merging.",
                     style = MaterialTheme.typography.bodySmall,
@@ -101,7 +103,7 @@ fun TTSMergeAndCacheSection(
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "Remote Engines",
+                            text = localizeHelper.localize(Res.string.tts_remote_engines),
                             style = MaterialTheme.typography.titleSmall
                         )
                     }
@@ -113,7 +115,7 @@ fun TTSMergeAndCacheSection(
                 }
                 
                 Text(
-                    text = "Merge words for Gradio/online TTS engines",
+                    text = localizeHelper.localize(Res.string.tts_merge_words_remote),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -170,7 +172,7 @@ fun TTSMergeAndCacheSection(
                             tint = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = "Native Engines",
+                            text = localizeHelper.localize(Res.string.tts_native_engines),
                             style = MaterialTheme.typography.titleSmall
                         )
                     }
@@ -182,7 +184,7 @@ fun TTSMergeAndCacheSection(
                 }
                 
                 Text(
-                    text = "Merge words for Android TTS, Piper, Sherpa engines",
+                    text = localizeHelper.localize(Res.string.tts_merge_words_native),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -222,7 +224,7 @@ fun TTSMergeAndCacheSection(
         
         // Chapter caching section header
         Text(
-            text = "Chapter Audio Caching",
+            text = localizeHelper.localize(Res.string.tts_chapter_caching),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -257,12 +259,12 @@ fun TTSMergeAndCacheSection(
                                 MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Download Chapter Audio",
+                            text = localizeHelper.localize(Res.string.download_chapter_audio),
                             style = MaterialTheme.typography.titleSmall
                         )
                     }
                     Text(
-                        text = "Pre-download entire chapter audio for offline playback (remote engines only)",
+                        text = localizeHelper.localize(Res.string.tts_download_chapter_audio_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -288,7 +290,7 @@ fun TTSMergeAndCacheSection(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Cache Duration",
+                            text = localizeHelper.localize(Res.string.tts_cache_duration),
                             style = MaterialTheme.typography.titleSmall
                         )
                         Text(
@@ -299,7 +301,7 @@ fun TTSMergeAndCacheSection(
                     }
                     
                     Text(
-                        text = "Auto-delete cached audio after this many days",
+                        text = localizeHelper.localize(Res.string.tts_cache_duration_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -352,7 +354,7 @@ fun TTSMergeAndCacheSection(
                     ) {
                         Column {
                             Text(
-                                text = "Cache Status",
+                                text = localizeHelper.localize(Res.string.tts_cache_status),
                                 style = MaterialTheme.typography.titleSmall
                             )
                             Text(
@@ -375,7 +377,7 @@ fun TTSMergeAndCacheSection(
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Clear Cache")
+                            Text(localizeHelper.localize(Res.string.tts_clear_cache))
                         }
                     }
                 }

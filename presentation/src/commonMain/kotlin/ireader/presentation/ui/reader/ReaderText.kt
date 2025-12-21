@@ -78,7 +78,7 @@ import ireader.domain.models.prefs.PreferenceValues
 import ireader.domain.models.prefs.mapTextAlign
 import ireader.domain.preferences.prefs.ReadingMode
 import ireader.domain.utils.extensions.currentTimeToLong
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.image
 import ireader.presentation.core.toComposeColor
 import ireader.presentation.core.toComposeFontFamily
@@ -1209,13 +1209,14 @@ private fun OverscrollPrevIndicator(
     dragOffset: Float,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Only show when dragging (offset > threshold)
     val showThreshold = 20f
     val maxOffset = 120f
     val progress = ((dragOffset - showThreshold) / (maxOffset - showThreshold)).coerceIn(0f, 1f)
     
     if (progress > 0f) {
-        val infiniteTransition = rememberInfiniteTransition(label = "bounce")
+        val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.bounce))
         val bounceOffset by infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = 6f,
@@ -1223,7 +1224,7 @@ private fun OverscrollPrevIndicator(
                 animation = tween(600, easing = FastOutSlowInEasing),
                 repeatMode = RepeatMode.Reverse
             ),
-            label = "bounceOffset"
+            label = localizeHelper.localize(Res.string.bounceoffset)
         )
         
         Box(
@@ -1256,7 +1257,7 @@ private fun OverscrollPrevIndicator(
                 
                 if (prevChapter != null && progress > 0.5f) {
                     Text(
-                        text = "Release for previous",
+                        text = localizeHelper.localize(Res.string.release_for_previous),
                         color = textColor.copy(alpha = 0.5f * progress),
                         fontSize = 11.sp
                     )
@@ -1270,7 +1271,7 @@ private fun OverscrollPrevIndicator(
                     )
                 } else if (prevChapter == null && progress > 0.3f) {
                     Text(
-                        text = "First chapter",
+                        text = localizeHelper.localize(Res.string.first_chapter),
                         color = textColor.copy(alpha = 0.4f * progress),
                         fontSize = 11.sp
                     )
@@ -1296,7 +1297,8 @@ private fun ChapterVoidSpace(
     isLoading: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "void")
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.void))
     
     // Smooth floating animation
     val floatOffset by infiniteTransition.animateFloat(
@@ -1306,7 +1308,7 @@ private fun ChapterVoidSpace(
             animation = tween(3000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "float"
+        label = localizeHelper.localize(Res.string.float)
     )
     
     // Breathing glow effect
@@ -1317,7 +1319,7 @@ private fun ChapterVoidSpace(
             animation = tween(2000, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "glow"
+        label = localizeHelper.localize(Res.string.glow)
     )
     
     // Pulse for the continue button
@@ -1328,7 +1330,7 @@ private fun ChapterVoidSpace(
             animation = tween(1500, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "pulse"
+        label = localizeHelper.localize(Res.string.pulse)
     )
     
     // Use reader colors directly - no hardcoded colors
@@ -1407,7 +1409,7 @@ private fun ChapterVoidSpace(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = "CHAPTER COMPLETE",
+                    text = localizeHelper.localize(Res.string.chapter_complete),
                     color = contentTextColorMuted,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
@@ -1449,7 +1451,7 @@ private fun ChapterVoidSpace(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "View Comments",
+                    text = localizeHelper.localize(Res.string.view_comments),
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     color = contentTextColorSubtle,
@@ -1466,7 +1468,7 @@ private fun ChapterVoidSpace(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Loading...",
+                    text = localizeHelper.localize(Res.string.loading_1),
                     color = contentTextColorMuted,
                     fontSize = 12.sp
                 )
@@ -1513,7 +1515,7 @@ private fun ChapterVoidSpace(
                         .padding(12.dp)
                 ) {
                     Text(
-                        text = "Continue Reading",
+                        text = localizeHelper.localize(Res.string.continue_reading),
                         color = contentTextColorMuted,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
@@ -1522,7 +1524,7 @@ private fun ChapterVoidSpace(
                     Spacer(modifier = Modifier.height(4.dp))
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Next chapter",
+                        contentDescription = localizeHelper.localize(Res.string.next_chapter),
                         tint = accentColor,
                         modifier = Modifier
                             .size(28.dp)
@@ -1545,7 +1547,7 @@ private fun ChapterVoidSpace(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "THE END",
+                        text = localizeHelper.localize(Res.string.the_end),
                         color = contentTextColorMuted,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -1553,7 +1555,7 @@ private fun ChapterVoidSpace(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "You've completed this story",
+                        text = localizeHelper.localize(Res.string.youve_completed_this_story),
                         color = contentTextColorSubtle,
                         fontSize = 12.sp
                     )

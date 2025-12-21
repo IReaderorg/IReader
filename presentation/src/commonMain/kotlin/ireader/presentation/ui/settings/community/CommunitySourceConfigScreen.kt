@@ -59,6 +59,7 @@ import ireader.presentation.ui.component.components.Toolbar
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import org.koin.compose.koinInject
 import ireader.presentation.core.safePopBackStack
+import ireader.i18n.resources.*
 class CommunitySourceConfigScreen {
     
     @OptIn(ExperimentalMaterial3Api::class)
@@ -72,10 +73,10 @@ class CommunitySourceConfigScreen {
         Scaffold(
             topBar = {
                 Toolbar(
-                    title = { Text("Community Source") },
+                    title = { Text(localizeHelper.localize(Res.string.community_source)) },
                     navigationIcon = {
                         IconButton(onClick = { navController.safePopBackStack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                         }
                     }
                 )
@@ -179,6 +180,7 @@ class CommunitySourceConfigScreen {
 
 @Composable
 private fun CommunityInfoCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -203,13 +205,13 @@ private fun CommunityInfoCard() {
             
             Column {
                 Text(
-                    text = "Community Source",
+                    text = localizeHelper.localize(Res.string.community_source),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Browse and read novels translated by the community. Share your own translations to help others!",
+                    text = localizeHelper.localize(Res.string.browse_and_read_novels_translated),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )
@@ -223,6 +225,7 @@ private fun EnableToggleCard(
     enabled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -236,13 +239,13 @@ private fun EnableToggleCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Enable Community Source",
+                    text = localizeHelper.localize(Res.string.enable_community_source),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Show Community Source in your catalog list",
+                    text = localizeHelper.localize(Res.string.show_community_source_in_your_catalog_list),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -269,6 +272,7 @@ private fun UrlConfigCard(
     isTesting: Boolean,
     testResult: String?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showApiKey by remember { mutableStateOf(false) }
     
     Card(
@@ -288,7 +292,7 @@ private fun UrlConfigCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Supabase Configuration",
+                    text = localizeHelper.localize(Res.string.supabase_configuration),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -297,7 +301,7 @@ private fun UrlConfigCard(
             Spacer(modifier = Modifier.height(4.dp))
             
             Text(
-                text = "Configure your own Supabase instance for community content, or leave empty to use the default.",
+                text = localizeHelper.localize(Res.string.configure_your_own_supabase_instance),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -307,7 +311,7 @@ private fun UrlConfigCard(
             OutlinedTextField(
                 value = url,
                 onValueChange = onUrlChanged,
-                label = { Text("Supabase URL") },
+                label = { Text(localizeHelper.localize(Res.string.supabase_url)) },
                 placeholder = { Text("https://your-project.supabase.co") },
                 leadingIcon = { Icon(Icons.Default.Link, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
@@ -319,8 +323,8 @@ private fun UrlConfigCard(
             OutlinedTextField(
                 value = apiKey,
                 onValueChange = onApiKeyChanged,
-                label = { Text("API Key (anon key)") },
-                placeholder = { Text("eyJhbGciOiJIUzI1NiIs...") },
+                label = { Text(localizeHelper.localize(Res.string.api_key_anon_key)) },
+                placeholder = { Text(localizeHelper.localize(Res.string.eyjhbgcioijiuzi1niis)) },
                 leadingIcon = { Icon(Icons.Default.Key, contentDescription = null) },
                 trailingIcon = {
                     IconButton(onClick = { showApiKey = !showApiKey }) {
@@ -353,7 +357,7 @@ private fun UrlConfigCard(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Test")
+                        Text(localizeHelper.localize(Res.string.test))
                     }
                 }
                 
@@ -363,7 +367,7 @@ private fun UrlConfigCard(
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Save")
+                    Text(localizeHelper.localize(Res.string.save))
                 }
             }
             
@@ -395,6 +399,7 @@ private fun ContributorSettingsCard(
     onShowBadgeChanged: (Boolean) -> Unit,
     onCheckCommunityFirstChanged: (Boolean) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -412,7 +417,7 @@ private fun ContributorSettingsCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Contributor Settings",
+                    text = localizeHelper.localize(Res.string.contributor_settings),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -423,8 +428,8 @@ private fun ContributorSettingsCard(
             OutlinedTextField(
                 value = contributorName,
                 onValueChange = onContributorNameChanged,
-                label = { Text("Display Name") },
-                placeholder = { Text("Your name for contributions") },
+                label = { Text(localizeHelper.localize(Res.string.display_name)) },
+                placeholder = { Text(localizeHelper.localize(Res.string.your_name_for_contributions)) },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -439,11 +444,11 @@ private fun ContributorSettingsCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Auto-share Translations",
+                        text = localizeHelper.localize(Res.string.auto_share_translations),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Automatically share your translations with the community",
+                        text = localizeHelper.localize(Res.string.automatically_share_your_translations_with),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -464,11 +469,11 @@ private fun ContributorSettingsCard(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "AI Translations Only",
+                            text = localizeHelper.localize(Res.string.ai_translations_only),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            text = "Only share high-quality AI translations (OpenAI, Gemini, DeepSeek)",
+                            text = localizeHelper.localize(Res.string.only_share_high_quality_ai),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -489,11 +494,11 @@ private fun ContributorSettingsCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Check Community First",
+                        text = localizeHelper.localize(Res.string.check_community_first),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Look for existing community translations before translating",
+                        text = localizeHelper.localize(Res.string.look_for_existing_community_translations),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -513,11 +518,11 @@ private fun ContributorSettingsCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Show Contributor Badge",
+                        text = localizeHelper.localize(Res.string.show_contributor_badge),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Display badge on your profile for contributions",
+                        text = localizeHelper.localize(Res.string.display_badge_on_your_profile_for_contributions),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -540,6 +545,7 @@ private fun ContentPreferencesCard(
     onNsfwChanged: (Boolean) -> Unit,
     onRatingChanged: (Int) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -557,7 +563,7 @@ private fun ContentPreferencesCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Content Preferences",
+                    text = localizeHelper.localize(Res.string.content_preferences),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -574,7 +580,7 @@ private fun ContentPreferencesCard(
             
             // Language selection would be a dropdown in a real implementation
             Text(
-                text = "Tap to change language preference",
+                text = localizeHelper.localize(Res.string.tap_to_change_language_preference),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -590,11 +596,11 @@ private fun ContentPreferencesCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Show NSFW Content",
+                        text = localizeHelper.localize(Res.string.show_nsfw_content),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Display adult content in search results",
+                        text = localizeHelper.localize(Res.string.display_adult_content_in_search_results),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -612,7 +618,7 @@ private fun ContentPreferencesCard(
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "Only show translations with this rating or higher",
+                text = localizeHelper.localize(Res.string.only_show_translations_with_this_rating_or_higher),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -622,6 +628,7 @@ private fun ContentPreferencesCard(
 
 @Composable
 private fun DatabaseSchemaCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     
     Card(
@@ -649,7 +656,7 @@ private fun DatabaseSchemaCard() {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Database Schema",
+                        text = localizeHelper.localize(Res.string.database_schema),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -666,7 +673,7 @@ private fun DatabaseSchemaCard() {
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "Required Tables:",
+                    text = localizeHelper.localize(Res.string.required_tables),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -714,7 +721,7 @@ private fun DatabaseSchemaCard() {
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "Run the migration_community_source.sql file in your Supabase SQL Editor to create these tables.",
+                    text = localizeHelper.localize(Res.string.run_the_migration_community_sourcesql),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -773,6 +780,7 @@ private fun CloudflareConfigCard(
     onSave: () -> Unit,
     onTest: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var showApiToken by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(!isConfigured) }
     
@@ -805,7 +813,7 @@ private fun CloudflareConfigCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = "Cloudflare D1 + R2",
+                            text = localizeHelper.localize(Res.string.cloudflare_d1_r2),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -825,7 +833,7 @@ private fun CloudflareConfigCard(
             if (!expanded) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "High-capacity storage for community translations with compression",
+                    text = localizeHelper.localize(Res.string.high_capacity_storage_for_community),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -837,7 +845,7 @@ private fun CloudflareConfigCard(
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "Cloudflare provides 5GB D1 + 10GB R2 free tier for translation storage",
+                    text = localizeHelper.localize(Res.string.cloudflare_provides_5gb_d1_10gb),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -847,8 +855,8 @@ private fun CloudflareConfigCard(
                 OutlinedTextField(
                     value = accountId,
                     onValueChange = onAccountIdChanged,
-                    label = { Text("Account ID") },
-                    placeholder = { Text("Your Cloudflare Account ID") },
+                    label = { Text(localizeHelper.localize(Res.string.account_id)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.your_cloudflare_account_id)) },
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -859,8 +867,8 @@ private fun CloudflareConfigCard(
                 OutlinedTextField(
                     value = apiToken,
                     onValueChange = onApiTokenChanged,
-                    label = { Text("API Token") },
-                    placeholder = { Text("Token with D1 and R2 permissions") },
+                    label = { Text(localizeHelper.localize(Res.string.api_token)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.token_with_d1_and_r2_permissions)) },
                     leadingIcon = { Icon(Icons.Default.Key, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = { showApiToken = !showApiToken }) {
@@ -880,8 +888,8 @@ private fun CloudflareConfigCard(
                 OutlinedTextField(
                     value = d1DatabaseId,
                     onValueChange = onD1DatabaseIdChanged,
-                    label = { Text("D1 Database ID") },
-                    placeholder = { Text("UUID of your D1 database") },
+                    label = { Text(localizeHelper.localize(Res.string.d1_database_id)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.uuid_of_your_d1_database)) },
                     leadingIcon = { Icon(Icons.Default.Storage, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -892,8 +900,8 @@ private fun CloudflareConfigCard(
                 OutlinedTextField(
                     value = r2BucketName,
                     onValueChange = onR2BucketNameChanged,
-                    label = { Text("R2 Bucket Name") },
-                    placeholder = { Text("e.g., community-translations") },
+                    label = { Text(localizeHelper.localize(Res.string.r2_bucket_name)) },
+                    placeholder = { Text(localizeHelper.localize(Res.string.eg_community_translations)) },
                     leadingIcon = { Icon(Icons.Default.Cloud, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -904,7 +912,7 @@ private fun CloudflareConfigCard(
                 OutlinedTextField(
                     value = r2PublicUrl,
                     onValueChange = onR2PublicUrlChanged,
-                    label = { Text("R2 Public URL (Optional)") },
+                    label = { Text(localizeHelper.localize(Res.string.r2_public_url_optional)) },
                     placeholder = { Text("https://your-bucket.r2.dev") },
                     leadingIcon = { Icon(Icons.Default.Link, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth(),
@@ -931,11 +939,11 @@ private fun CloudflareConfigCard(
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(
-                                text = "Enable Compression",
+                                text = localizeHelper.localize(Res.string.enable_compression),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = "Reduce storage usage by ~40%",
+                                text = localizeHelper.localize(Res.string.reduce_storage_usage_by_40),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -965,7 +973,7 @@ private fun CloudflareConfigCard(
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
                         } else {
-                            Text("Validate")
+                            Text(localizeHelper.localize(Res.string.validate))
                         }
                     }
                     
@@ -975,7 +983,7 @@ private fun CloudflareConfigCard(
                     ) {
                         Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Save")
+                        Text(localizeHelper.localize(Res.string.save))
                     }
                 }
                 

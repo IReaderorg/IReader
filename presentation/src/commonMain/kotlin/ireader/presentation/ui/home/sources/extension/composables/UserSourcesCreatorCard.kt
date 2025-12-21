@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Card that navigates to the User Sources Creator screen.
@@ -19,6 +21,7 @@ fun UserSourcesCreatorCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         onClick = onClick,
         modifier = modifier
@@ -54,12 +57,12 @@ fun UserSourcesCreatorCard(
             // Text content
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "User Sources",
+                    text = localizeHelper.localize(Res.string.user_sources),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Create your own sources or import from others",
+                    text = localizeHelper.localize(Res.string.create_your_own_sources_or_import_from_others),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -68,7 +71,7 @@ fun UserSourcesCreatorCard(
             // Add icon
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Create",
+                contentDescription = localizeHelper.localize(Res.string.create),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

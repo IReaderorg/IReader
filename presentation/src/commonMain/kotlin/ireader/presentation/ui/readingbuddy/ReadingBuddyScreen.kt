@@ -99,6 +99,8 @@ import ireader.presentation.ui.component.isTableUi
 import ireader.presentation.ui.readingbuddy.components.QuoteCard
 import ireader.presentation.ui.readingbuddy.components.ReadingBuddyCharacter
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 enum class ReadingBuddyTab(val title: String, val icon: @Composable () -> Unit) {
     BUDDY("Buddy", { Icon(Icons.Default.Pets, contentDescription = null, modifier = Modifier.size(20.dp)) }),
@@ -239,6 +241,7 @@ fun ReadingBuddyScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ModernTopBar(onBack: () -> Unit, isWideScreen: Boolean) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 2.dp
@@ -250,13 +253,13 @@ private fun ModernTopBar(onBack: () -> Unit, isWideScreen: Boolean) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
             }
             
             Spacer(modifier = Modifier.width(8.dp))
             
             // Animated rabbit emoji
-            val infiniteTransition = rememberInfiniteTransition(label = "bounce")
+            val infiniteTransition = rememberInfiniteTransition(label = localizeHelper.localize(Res.string.bounce))
             val bounce by infiniteTransition.animateFloat(
                 initialValue = 0f,
                 targetValue = -4f,
@@ -264,7 +267,7 @@ private fun ModernTopBar(onBack: () -> Unit, isWideScreen: Boolean) {
                     animation = tween(500, easing = FastOutSlowInEasing),
                     repeatMode = RepeatMode.Reverse
                 ),
-                label = "bounce"
+                label = localizeHelper.localize(Res.string.bounce)
             )
             
             Text(
@@ -277,12 +280,12 @@ private fun ModernTopBar(onBack: () -> Unit, isWideScreen: Boolean) {
             
             Column {
                 Text(
-                    text = "Reading Buddy",
+                    text = localizeHelper.localize(Res.string.reading_buddy),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Your reading companion",
+                    text = localizeHelper.localize(Res.string.your_reading_companion),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -293,6 +296,7 @@ private fun ModernTopBar(onBack: () -> Unit, isWideScreen: Boolean) {
 
 @Composable
 private fun ModernBottomNav(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 8.dp,
@@ -309,7 +313,7 @@ private fun ModernBottomNav(selectedIndex: Int, onTabSelected: (Int) -> Unit) {
                 val animatedWeight by animateFloatAsState(
                     targetValue = if (isSelected) 1.5f else 1f,
                     animationSpec = spring(dampingRatio = 0.8f),
-                    label = "weight"
+                    label = localizeHelper.localize(Res.string.weight)
                 )
                 
                 Surface(
@@ -393,6 +397,7 @@ private fun ModernBuddyTab(state: ReadingBuddyScreenState, isWideScreen: Boolean
 
 @Composable
 private fun HeroBuddySection(state: ReadingBuddyScreenState, isWideScreen: Boolean) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val gradientColors = listOf(
         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
         MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f),
@@ -419,9 +424,9 @@ private fun HeroBuddySection(state: ReadingBuddyScreenState, isWideScreen: Boole
             Row(
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                QuickStat(emoji = "🔥", value = "${state.buddyState.currentStreak}", label = "Streak")
-                QuickStat(emoji = "⭐", value = "Lv.${state.buddyState.level}", label = "Level")
-                QuickStat(emoji = "📚", value = "${state.buddyState.totalBooksRead}", label = "Books")
+                QuickStat(emoji = "🔥", value = "${state.buddyState.currentStreak}", label = localizeHelper.localize(Res.string.streak))
+                QuickStat(emoji = "⭐", value = "Lv.${state.buddyState.level}", label = localizeHelper.localize(Res.string.level))
+                QuickStat(emoji = "📚", value = "${state.buddyState.totalBooksRead}", label = localizeHelper.localize(Res.string.books))
             }
         }
     }
@@ -447,6 +452,7 @@ private fun QuickStat(emoji: String, value: String, label: String) {
 
 @Composable
 private fun ModernStatsCard(state: ReadingBuddyScreenState, modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
@@ -463,7 +469,7 @@ private fun ModernStatsCard(state: ReadingBuddyScreenState, modifier: Modifier =
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Reading Stats",
+                    text = localizeHelper.localize(Res.string.reading_stats),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -511,10 +517,11 @@ private fun StatItemModern(emoji: String, value: String, label: String) {
 
 @Composable
 private fun ModernLevelCard(level: Int, progress: Float, modifier: Modifier = Modifier) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(1000, easing = FastOutSlowInEasing),
-        label = "progress"
+        label = localizeHelper.localize(Res.string.progress_1)
     )
     
     Card(
@@ -581,7 +588,7 @@ private fun ModernLevelCard(level: Int, progress: Float, modifier: Modifier = Mo
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Keep reading to level up! 📖",
+                text = localizeHelper.localize(Res.string.keep_reading_to_level_up_1),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
             )
@@ -592,6 +599,7 @@ private fun ModernLevelCard(level: Int, progress: Float, modifier: Modifier = Mo
 
 @Composable
 private fun ModernAchievementsCard(achievements: List<BuddyAchievement>, isWideScreen: Boolean) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -608,7 +616,7 @@ private fun ModernAchievementsCard(achievements: List<BuddyAchievement>, isWideS
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Achievements",
+                    text = localizeHelper.localize(Res.string.achievements),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -638,7 +646,7 @@ private fun ModernAchievementsCard(achievements: List<BuddyAchievement>, isWideS
                         Text("🎯", fontSize = 40.sp)
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Start reading to unlock achievements!",
+                            text = localizeHelper.localize(Res.string.start_reading_to_unlock),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -705,6 +713,7 @@ private fun ModernDailyQuoteTab(
     onShare: () -> Unit,
     isWideScreen: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val contentPadding = if (isWideScreen) 24.dp else 16.dp
     
     LazyColumn(
@@ -721,12 +730,12 @@ private fun ModernDailyQuoteTab(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "✨ Today's Quote",
+                        text = localizeHelper.localize(Res.string.todays_quote_1),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "A daily dose of inspiration",
+                        text = localizeHelper.localize(Res.string.a_daily_dose_of_inspiration),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -768,7 +777,7 @@ private fun ModernDailyQuoteTab(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Card Style",
+                            text = localizeHelper.localize(Res.string.card_style),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -797,6 +806,7 @@ private fun ModernDailyQuoteTab(
 
 @Composable
 private fun EmptyQuoteCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -813,13 +823,13 @@ private fun EmptyQuoteCard() {
             Text("📚", fontSize = 64.sp)
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "No quotes yet!",
+                text = localizeHelper.localize(Res.string.no_quotes_yet_1),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Be the first to submit a quote",
+                text = localizeHelper.localize(Res.string.be_the_first_to_submit_a_quote),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -838,6 +848,7 @@ private fun ModernAllQuotesTab(
     onShare: (Quote) -> Unit,
     isWideScreen: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val contentPadding = if (isWideScreen) 24.dp else 16.dp
     
     if (state.isLoading) {
@@ -850,13 +861,13 @@ private fun ModernAllQuotesTab(
                 Text("📚", fontSize = 72.sp)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "No quotes yet",
+                    text = localizeHelper.localize(Res.string.no_quotes_yet),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Submit the first quote!",
+                    text = localizeHelper.localize(Res.string.submit_the_first_quote),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -895,6 +906,7 @@ private fun ModernQuoteListItem(
     onLike: () -> Unit,
     onShare: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -965,7 +977,7 @@ private fun ModernQuoteListItem(
                     ) {
                         Icon(
                             if (quote.isLikedByUser) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Like",
+                            contentDescription = localizeHelper.localize(Res.string.like),
                             modifier = Modifier.size(18.dp),
                             tint = if (quote.isLikedByUser) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -981,7 +993,7 @@ private fun ModernQuoteListItem(
                 IconButton(onClick = onShare) {
                     Icon(
                         Icons.Outlined.Share,
-                        contentDescription = "Share",
+                        contentDescription = localizeHelper.localize(Res.string.share),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -1000,6 +1012,7 @@ private fun ModernSubmitQuoteTab(
     onSubmit: (String, String, String, String) -> Unit,
     isWideScreen: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var quoteText by remember { mutableStateOf("") }
     var bookTitle by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
@@ -1028,14 +1041,14 @@ private fun ModernSubmitQuoteTab(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Submit a Quote",
+                        text = localizeHelper.localize(Res.string.submit_a_quote),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Share your favorite quotes with the community!",
+                    text = localizeHelper.localize(Res.string.share_favorite_quotes),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1053,8 +1066,8 @@ private fun ModernSubmitQuoteTab(
                     OutlinedTextField(
                         value = quoteText,
                         onValueChange = { quoteText = it },
-                        label = { Text("Quote *") },
-                        placeholder = { Text("Enter the quote text...") },
+                        label = { Text(localizeHelper.localize(Res.string.quote)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.enter_quote_text)) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3,
                         maxLines = 6,
@@ -1070,8 +1083,8 @@ private fun ModernSubmitQuoteTab(
                     OutlinedTextField(
                         value = bookTitle,
                         onValueChange = { bookTitle = it },
-                        label = { Text("Book Title *") },
-                        placeholder = { Text("Enter the book title...") },
+                        label = { Text(localizeHelper.localize(Res.string.book_title_1)) },
+                        placeholder = { Text(localizeHelper.localize(Res.string.enter_book_title)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
@@ -1091,8 +1104,8 @@ private fun ModernSubmitQuoteTab(
                             OutlinedTextField(
                                 value = author,
                                 onValueChange = { author = it },
-                                label = { Text("Author") },
-                                placeholder = { Text("Optional") },
+                                label = { Text(localizeHelper.localize(Res.string.author)) },
+                                placeholder = { Text(localizeHelper.localize(Res.string.optional)) },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true,
                                 shape = RoundedCornerShape(12.dp),
@@ -1103,8 +1116,8 @@ private fun ModernSubmitQuoteTab(
                             OutlinedTextField(
                                 value = chapterTitle,
                                 onValueChange = { chapterTitle = it },
-                                label = { Text("Chapter") },
-                                placeholder = { Text("Optional") },
+                                label = { Text(localizeHelper.localize(Res.string.chapter)) },
+                                placeholder = { Text(localizeHelper.localize(Res.string.optional)) },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true,
                                 shape = RoundedCornerShape(12.dp),
@@ -1117,8 +1130,8 @@ private fun ModernSubmitQuoteTab(
                         OutlinedTextField(
                             value = author,
                             onValueChange = { author = it },
-                            label = { Text("Author (optional)") },
-                            placeholder = { Text("Enter the author name...") },
+                            label = { Text(localizeHelper.localize(Res.string.author_optional)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.enter_author_name)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
@@ -1132,8 +1145,8 @@ private fun ModernSubmitQuoteTab(
                         OutlinedTextField(
                             value = chapterTitle,
                             onValueChange = { chapterTitle = it },
-                            label = { Text("Chapter (optional)") },
-                            placeholder = { Text("Enter the chapter name...") },
+                            label = { Text(localizeHelper.localize(Res.string.chapter_optional)) },
+                            placeholder = { Text(localizeHelper.localize(Res.string.enter_chapter_name)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
@@ -1195,7 +1208,7 @@ private fun ModernSubmitQuoteTab(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Quotes will be reviewed by admins before appearing publicly. Make sure your quote is accurate and properly attributed.",
+                        text = localizeHelper.localize(Res.string.quotes_will_be_reviewed_by),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1213,6 +1226,7 @@ private fun ModernAchievementDialog(
     achievement: BuddyAchievement,
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val emoji = when {
         achievement.name.contains("BOOK") -> "📚"
         achievement.name.contains("CHAPTER") -> "📖"
@@ -1252,7 +1266,7 @@ private fun ModernAchievementDialog(
                 Text("🎉", fontSize = 32.sp)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Achievement Unlocked!",
+                    text = localizeHelper.localize(Res.string.achievement_unlocked),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center

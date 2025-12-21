@@ -68,7 +68,7 @@ import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.DesktopTTSService
 import ireader.domain.services.tts_service.GradioTTSConfig
 import ireader.domain.services.tts_service.GradioTTSManager
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.add_custom_tts_engine
 import ireader.i18n.resources.available_engines
 import ireader.i18n.resources.custom

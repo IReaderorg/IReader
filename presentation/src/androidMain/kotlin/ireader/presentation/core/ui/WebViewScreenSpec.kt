@@ -77,7 +77,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.back
 import ireader.i18n.resources.cancel
 import ireader.i18n.resources.close
@@ -594,6 +594,7 @@ private fun WebViewFloatingActionButton(
     screenState: WebViewScreenState,
     localizeHelper: ireader.i18n.LocalizeHelper
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     // Only show FAB if at least one of the fetch options is enabled
     if (screenState.enableBookFetch || screenState.enableChapterFetch || screenState.enableChaptersFetch) {
         FloatingActionButton(

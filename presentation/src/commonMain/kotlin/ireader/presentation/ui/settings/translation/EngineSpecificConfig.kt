@@ -19,6 +19,8 @@ import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.presentation.ui.settings.general.MlKitInitState
 import ireader.presentation.ui.settings.general.TestConnectionState
 import ireader.presentation.ui.settings.general.TranslationSettingsViewModel
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Compact engine-specific configuration sections
@@ -120,6 +122,7 @@ private fun OllamaPluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val plugin = pluginEngine.getPlugin()
     
     // Load saved values from plugin
@@ -164,7 +167,7 @@ private fun OllamaPluginConfig(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "Ollama Configuration",
+                    text = localizeHelper.localize(Res.string.ollama_configuration),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -203,7 +206,7 @@ private fun OllamaPluginConfig(
 
             // Info
             Text(
-                text = "Install Ollama from ollama.ai. Make sure the server is running.",
+                text = localizeHelper.localize(Res.string.install_ollama_from_ollamaai_make),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
@@ -218,6 +221,7 @@ private fun OllamaPluginConfig(
 private fun LibreTranslatePluginInfo(
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -239,12 +243,12 @@ private fun LibreTranslatePluginInfo(
             )
             Column {
                 Text(
-                    text = "LibreTranslate - Ready to use",
+                    text = localizeHelper.localize(Res.string.libretranslate_ready_to_use),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Free and open-source. No API key required.",
+                    text = localizeHelper.localize(Res.string.free_and_open_source_no_api_key_required),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -261,6 +265,7 @@ private fun HuggingFacePluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val plugin = pluginEngine.getPlugin()
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
@@ -297,7 +302,7 @@ private fun HuggingFacePluginConfig(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "HuggingFace Configuration",
+                    text = localizeHelper.localize(Res.string.huggingface_configuration),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -329,7 +334,7 @@ private fun HuggingFacePluginConfig(
 
             // Info
             Text(
-                text = "Get your API key from huggingface.co/settings/tokens",
+                text = localizeHelper.localize(Res.string.get_your_api_key_from_huggingfacecosettingstokens),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
@@ -345,6 +350,7 @@ private fun OpenAIPluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val plugin = pluginEngine.getPlugin()
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
@@ -381,7 +387,7 @@ private fun OpenAIPluginConfig(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "OpenAI Configuration",
+                    text = localizeHelper.localize(Res.string.openai_configuration),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -413,7 +419,7 @@ private fun OpenAIPluginConfig(
 
             // Info
             Text(
-                text = "Get your API key from platform.openai.com/api-keys",
+                text = localizeHelper.localize(Res.string.get_your_api_key_from_platformopenaicomapi_keys),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
@@ -429,6 +435,7 @@ private fun DeepSeekPluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val plugin = pluginEngine.getPlugin()
     var apiKey by remember { mutableStateOf("") }
     var showApiKey by remember { mutableStateOf(false) }
@@ -465,7 +472,7 @@ private fun DeepSeekPluginConfig(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "DeepSeek Configuration",
+                    text = localizeHelper.localize(Res.string.deepseek_configuration),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -497,7 +504,7 @@ private fun DeepSeekPluginConfig(
 
             // Info
             Text(
-                text = "Get your API key from platform.deepseek.com",
+                text = localizeHelper.localize(Res.string.get_your_api_key_from_platformdeepseekcom),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
@@ -513,6 +520,7 @@ private fun GenericPluginConfig(
     pluginEngine: PluginTranslateEngineWrapper,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val plugin = pluginEngine.getPlugin()
     val requiresApiKey = pluginEngine.requiresApiKey
     var apiKey by remember { mutableStateOf("") }
@@ -600,7 +608,7 @@ private fun GenericPluginConfig(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "No API key required",
+                        text = localizeHelper.localize(Res.string.no_api_key_required),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -620,6 +628,7 @@ private fun OllamaConfig(
     testState: TestConnectionState,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -699,7 +708,7 @@ private fun OllamaConfig(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "OK",
+                                text = localizeHelper.localize(Res.string.ok),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -717,7 +726,7 @@ private fun OllamaConfig(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "Failed",
+                                text = localizeHelper.localize(Res.string.failed),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -739,7 +748,7 @@ private fun OllamaConfig(
 
             // Info
             Text(
-                text = "Install Ollama from ollama.ai",
+                text = localizeHelper.localize(Res.string.install_ollama_from_ollamaai),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 maxLines = 1
@@ -752,6 +761,7 @@ private fun OllamaConfig(
 private fun LibreTranslateInfo(
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -772,7 +782,7 @@ private fun LibreTranslateInfo(
                 modifier = Modifier.size(18.dp)
             )
             Text(
-                text = "LibreTranslate - No API key required",
+                text = localizeHelper.localize(Res.string.libretranslate_no_api_key_required),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -788,6 +798,7 @@ private fun WebViewLoginConfig(
     onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -811,7 +822,7 @@ private fun WebViewLoginConfig(
                     maxLines = 1
                 )
                 Text(
-                    text = "Sign in required",
+                    text = localizeHelper.localize(Res.string.sign_in_required),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
@@ -843,6 +854,7 @@ private fun GoogleMlKitConfig(
     onResetState: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var sourceLanguage by remember { mutableStateOf("en") }
     var targetLanguage by remember { mutableStateOf("es") }
     var expanded by remember { mutableStateOf(false) }
@@ -935,7 +947,7 @@ private fun GoogleMlKitConfig(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "Download Language Models",
+                    text = localizeHelper.localize(Res.string.download_language_models),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -943,7 +955,7 @@ private fun GoogleMlKitConfig(
             
             // Info text
             Text(
-                text = "Google ML Kit requires downloading language models for offline translation. Select your language pair and initialize.",
+                text = localizeHelper.localize(Res.string.google_ml_kit_requires_downloading),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -956,7 +968,7 @@ private fun GoogleMlKitConfig(
             ) {
                 // Source language dropdown
                 LanguageDropdown(
-                    label = "From",
+                    label = localizeHelper.localize(Res.string.from),
                     selectedCode = sourceLanguage,
                     languages = languages,
                     onLanguageSelected = { sourceLanguage = it },
@@ -972,7 +984,7 @@ private fun GoogleMlKitConfig(
                 
                 // Target language dropdown
                 LanguageDropdown(
-                    label = "To",
+                    label = localizeHelper.localize(Res.string.to),
                     selectedCode = targetLanguage,
                     languages = languages,
                     onLanguageSelected = { targetLanguage = it },
@@ -1023,7 +1035,7 @@ private fun GoogleMlKitConfig(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "Ready",
+                                text = localizeHelper.localize(Res.string.ready),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -1041,7 +1053,7 @@ private fun GoogleMlKitConfig(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "Failed",
+                                text = localizeHelper.localize(Res.string.failed),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.error
                             )

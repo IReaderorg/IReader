@@ -32,6 +32,8 @@ import ireader.plugin.api.PluginUIEvent
 import ireader.plugin.api.PluginUIProvider
 import ireader.plugin.api.PluginUIScreen
 import kotlinx.coroutines.launch
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Host composable that renders plugin screens.
@@ -45,6 +47,7 @@ fun PluginScreenHost(
     context: PluginScreenContext,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scope = rememberCoroutineScope()
     
     // Check if plugin provides declarative UI
@@ -65,7 +68,7 @@ fun PluginScreenHost(
                 title = { Text(currentScreen?.title ?: "Plugin") },
                 navigationIcon = {
                     IconButton(onClick = context.onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(Icons.Default.Close, contentDescription = localizeHelper.localize(Res.string.close))
                     }
                 }
             )
@@ -90,7 +93,7 @@ fun PluginScreenHost(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Loading plugin...")
+                    Text(localizeHelper.localize(Res.string.loading_plugin))
                 }
             }
         }

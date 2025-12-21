@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.quote.Quote
 import ireader.domain.models.quote.QuoteCardStyle
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Beautiful shareable quote card with various styles
@@ -35,6 +37,7 @@ fun QuoteCard(
     modifier: Modifier = Modifier,
     showActions: Boolean = true
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val (backgroundBrush, textColor, accentColor) = getStyleColors(style)
     
     Card(
@@ -144,7 +147,7 @@ fun QuoteCard(
                         ) {
                             Icon(
                                 imageVector = if (quote.isLikedByUser) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                contentDescription = "Like",
+                                contentDescription = localizeHelper.localize(Res.string.like),
                                 tint = if (quote.isLikedByUser) Color(0xFFE91E63) else textColor.copy(alpha = 0.7f),
                                 modifier = Modifier.size(24.dp)
                             )
@@ -167,7 +170,7 @@ fun QuoteCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Share",
+                                contentDescription = localizeHelper.localize(Res.string.share),
                                 tint = textColor
                             )
                         }
@@ -177,7 +180,7 @@ fun QuoteCard(
                 // App branding
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "📚 IReader",
+                    text = localizeHelper.localize(Res.string.ireader),
                     style = MaterialTheme.typography.labelSmall,
                     color = textColor.copy(alpha = 0.5f)
                 )
@@ -196,6 +199,7 @@ fun QuoteCardCompact(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -253,7 +257,7 @@ fun QuoteCardCompact(
                 ) {
                     Icon(
                         imageVector = if (quote.isLikedByUser) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Like",
+                        contentDescription = localizeHelper.localize(Res.string.like),
                         tint = if (quote.isLikedByUser) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )

@@ -22,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.SourceStatus
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Badge component to display source status.
@@ -34,6 +36,7 @@ fun SourceStatusBadge(
     showLabel: Boolean = false,
     compact: Boolean = true
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val (icon, color, label) = remember(status) {
         getStatusConfig(status)
     }
@@ -41,7 +44,7 @@ fun SourceStatusBadge(
     val animatedColor by animateColorAsState(
         targetValue = color,
         animationSpec = tween(300),
-        label = "status_color"
+        label = localizeHelper.localize(Res.string.status_color)
     )
     
     if (compact) {
@@ -139,6 +142,7 @@ fun SourceStatusDot(
     modifier: Modifier = Modifier,
     size: Int = 8
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val (_, color, _) = remember(status) {
         getStatusConfig(status)
     }
@@ -152,7 +156,7 @@ fun SourceStatusDot(
         } else {
             tween(durationMillis = 0)
         },
-        label = "pulse"
+        label = localizeHelper.localize(Res.string.pulse)
     )
     
     Box(

@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.Glossary
 import ireader.domain.models.entities.GlossaryTermType
 import ireader.i18n.UiText
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.glossary_exported_successfully
 import kotlinx.collections.immutable.ImmutableList
 import platform.UIKit.UIPasteboard

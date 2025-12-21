@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Section title component.
@@ -80,12 +82,13 @@ fun JsonDialog(
     onDismiss: () -> Unit,
     onImport: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var editableJson by remember(jsonContent) { mutableStateOf(jsonContent) }
     val clipboardManager = LocalClipboardManager.current
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Source JSON") },
+        title = { Text(localizeHelper.localize(Res.string.source_json)) },
         text = {
             Column {
                 Row(
@@ -99,7 +102,7 @@ fun JsonDialog(
                     ) {
                         Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Copy")
+                        Text(localizeHelper.localize(Res.string.copy))
                     }
                     TextButton(
                         onClick = {
@@ -110,7 +113,7 @@ fun JsonDialog(
                     ) {
                         Icon(Icons.Default.ContentPaste, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Paste")
+                        Text(localizeHelper.localize(Res.string.paste))
                     }
                 }
                 
@@ -136,12 +139,12 @@ fun JsonDialog(
         },
         confirmButton = {
             TextButton(onClick = { onImport(editableJson) }) {
-                Text("Import")
+                Text(localizeHelper.localize(Res.string.import_action))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )
@@ -161,6 +164,7 @@ fun UserSourceCard(
     onToggleEnabled: (Boolean) -> Unit,
     onShare: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -204,10 +208,10 @@ fun UserSourceCard(
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = onShare) {
-                    Text("Share")
+                    Text(localizeHelper.localize(Res.string.share))
                 }
                 TextButton(onClick = onEdit) {
-                    Text("Edit")
+                    Text(localizeHelper.localize(Res.string.edit))
                 }
                 TextButton(onClick = onDelete) {
                     Text("Delete", color = MaterialTheme.colorScheme.error)
@@ -224,9 +228,10 @@ fun UserSourceCard(
 fun RuleSyntaxHelpDialog(
     onDismiss: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Rule Syntax Help") },
+        title = { Text(localizeHelper.localize(Res.string.rule_syntax_help)) },
         text = {
             SelectionContainer {
                 Column {
@@ -267,7 +272,7 @@ fun RuleSyntaxHelpDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(localizeHelper.localize(Res.string.close))
             }
         }
     )

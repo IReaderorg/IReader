@@ -170,6 +170,7 @@ private fun DownloadProgressIndicator(
     progress: DownloadProgress,
     onCancel: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.widthIn(min = 80.dp)
@@ -189,7 +190,7 @@ private fun DownloadProgressIndicator(
             ) {
                 Icon(
                     imageVector = Icons.Default.Cancel,
-                    contentDescription = "Cancel download",
+                    contentDescription = localizeHelper.localize(Res.string.cancel_download),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.error
                 )

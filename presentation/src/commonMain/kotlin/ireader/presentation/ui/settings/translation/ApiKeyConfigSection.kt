@@ -15,6 +15,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ireader.presentation.ui.settings.general.TestConnectionState
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Compact API key input with visibility toggle and test connection
@@ -29,6 +31,7 @@ fun ApiKeyConfigSection(
     testState: TestConnectionState,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var isKeyVisible by remember { mutableStateOf(false) }
 
     Card(
@@ -116,7 +119,7 @@ fun ApiKeyConfigSection(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "OK",
+                                text = localizeHelper.localize(Res.string.ok),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -134,7 +137,7 @@ fun ApiKeyConfigSection(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "Failed",
+                                text = localizeHelper.localize(Res.string.failed),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.error
                             )

@@ -19,6 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ireader.domain.models.entities.SourceStatus
 import ireader.domain.models.entities.SourceUnavailableInfo
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Full screen displayed when a source is unavailable.
@@ -37,6 +39,7 @@ fun UnavailableSourceScreen(
     onOpenWebView: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val scrollState = rememberScrollState()
     val statusColor = getStatusColor(info.status)
     val statusIcon = getStatusIcon(info.status)
@@ -45,12 +48,12 @@ fun UnavailableSourceScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Source Unavailable") },
+                title = { Text(localizeHelper.localize(Res.string.source_unavailable)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = localizeHelper.localize(Res.string.back)
                         )
                     }
                 },
@@ -129,7 +132,7 @@ fun UnavailableSourceScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "What happened?",
+                            text = localizeHelper.localize(Res.string.what_happened),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onErrorContainer
@@ -170,7 +173,7 @@ fun UnavailableSourceScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Suggestion",
+                            text = localizeHelper.localize(Res.string.suggestion),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -202,7 +205,7 @@ fun UnavailableSourceScreen(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "Error Details",
+                            text = localizeHelper.localize(Res.string.error_details),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -236,7 +239,7 @@ fun UnavailableSourceScreen(
             TextButton(
                 onClick = onSkipForNow
             ) {
-                Text("Skip for now (don't show again)")
+                Text(localizeHelper.localize(Res.string.skip_for_now_dont_show_again))
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -252,6 +255,7 @@ private fun ActionButtons(
     onInstallPlugin: (() -> Unit)?,
     onOpenWebView: (() -> Unit)?
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -273,7 +277,7 @@ private fun ActionButtons(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Install Required Plugin")
+                        Text(localizeHelper.localize(Res.string.install_required_plugin))
                     }
                 }
             }
@@ -293,7 +297,7 @@ private fun ActionButtons(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Login to Source")
+                        Text(localizeHelper.localize(Res.string.login_to_source))
                     }
                 }
             }
@@ -316,7 +320,7 @@ private fun ActionButtons(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Try Again")
+                Text(localizeHelper.localize(Res.string.try_again))
             }
         }
         
@@ -338,7 +342,7 @@ private fun ActionButtons(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Uninstall Source")
+                Text(localizeHelper.localize(Res.string.uninstall_source))
             }
         }
     }
@@ -355,6 +359,7 @@ fun UnavailableSourceBanner(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val statusColor = getStatusColor(info.status)
     
     Card(
@@ -397,7 +402,7 @@ fun UnavailableSourceBanner(
                 IconButton(onClick = onAction) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Retry",
+                        contentDescription = localizeHelper.localize(Res.string.notification_retry),
                         tint = statusColor
                     )
                 }
@@ -406,7 +411,7 @@ fun UnavailableSourceBanner(
             IconButton(onClick = onDismiss) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Dismiss",
+                    contentDescription = localizeHelper.localize(Res.string.notification_dismiss),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

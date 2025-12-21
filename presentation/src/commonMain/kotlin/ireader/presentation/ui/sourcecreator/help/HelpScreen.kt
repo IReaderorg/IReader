@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.usersource.help.SourceCreatorHelp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Help and tutorial screen for source creation.
@@ -24,6 +26,7 @@ fun HelpScreen(
     onBack: () -> Unit,
     onStartTutorial: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var selectedTopic by remember { mutableStateOf<SourceCreatorHelp.HelpTopic?>(null) }
     
     Scaffold(
@@ -38,7 +41,7 @@ fun HelpScreen(
                             onBack()
                         }
                     }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = localizeHelper.localize(Res.string.back))
                     }
                 }
             )
@@ -68,6 +71,7 @@ private fun HelpTopicsList(
     onStartTutorial: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -97,12 +101,12 @@ private fun HelpTopicsList(
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Interactive Tutorial",
+                            text = localizeHelper.localize(Res.string.interactive_tutorial),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Step-by-step guide to create your first source",
+                            text = localizeHelper.localize(Res.string.step_by_step_guide_to_create_your_first_source),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -119,7 +123,7 @@ private fun HelpTopicsList(
         // Help topics
         item {
             Text(
-                text = "Help Topics",
+                text = localizeHelper.localize(Res.string.help_topics),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -136,6 +140,7 @@ private fun HelpTopicsList(
 
 @Composable
 private fun QuickTipsCard() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     
     Card(
@@ -156,7 +161,7 @@ private fun QuickTipsCard() {
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "Quick Tips",
+                        text = localizeHelper.localize(Res.string.quick_tips),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -218,6 +223,7 @@ private fun HelpTopicDetail(
     onRelatedTopicClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -235,7 +241,7 @@ private fun HelpTopicDetail(
         if (topic.examples.isNotEmpty()) {
             item {
                 Text(
-                    text = "Examples",
+                    text = localizeHelper.localize(Res.string.examples_1),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -257,7 +263,7 @@ private fun HelpTopicDetail(
         if (topic.relatedTopics.isNotEmpty()) {
             item {
                 Text(
-                    text = "Related Topics",
+                    text = localizeHelper.localize(Res.string.related_topics),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -332,6 +338,7 @@ private fun ExampleCard(example: SourceCreatorHelp.HelpExample) {
 
 @Composable
 private fun TipsCard(tips: List<String>) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
@@ -348,7 +355,7 @@ private fun TipsCard(tips: List<String>) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Tips",
+                    text = localizeHelper.localize(Res.string.tips),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )

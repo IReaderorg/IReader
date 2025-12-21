@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import ireader.plugin.api.PluginMenuItem
 import ireader.plugin.api.PluginScreen
 import ireader.plugin.api.PluginScreenContext
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Bottom sheet showing available plugin menu items in the reader.
@@ -27,6 +29,7 @@ fun ReaderPluginMenuSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val sheetState = rememberModalBottomSheetState()
     
     ModalBottomSheet(
@@ -40,7 +43,7 @@ fun ReaderPluginMenuSheet(
                 .padding(bottom = 32.dp)
         ) {
             Text(
-                text = "Plugins",
+                text = localizeHelper.localize(Res.string.plugins),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
@@ -129,6 +132,7 @@ fun PluginQuickAccessFab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     if (hasPlugins) {
         FloatingActionButton(
             onClick = onClick,
@@ -137,7 +141,7 @@ fun PluginQuickAccessFab(
         ) {
             Icon(
                 Icons.Default.Extension,
-                contentDescription = "Plugins",
+                contentDescription = localizeHelper.localize(Res.string.plugins),
                 tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }

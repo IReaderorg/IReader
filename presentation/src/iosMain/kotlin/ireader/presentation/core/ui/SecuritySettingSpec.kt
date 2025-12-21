@@ -2,7 +2,7 @@ package ireader.presentation.core.ui
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.security
 import ireader.presentation.core.LocalNavigator
 import ireader.presentation.ui.component.IScaffold

@@ -1,7 +1,7 @@
 package ireader.presentation.ui.settings.general
 
 import androidx.compose.runtime.Composable
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.manage_notification
 import ireader.presentation.ui.component.components.Components
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper

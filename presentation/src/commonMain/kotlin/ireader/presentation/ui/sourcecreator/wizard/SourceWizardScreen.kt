@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.usersource.templates.SourceTemplates
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Step-by-step wizard for creating sources.
@@ -37,16 +39,17 @@ fun SourceWizardScreen(
     onSave: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val steps = WizardStep.entries
     val currentIndex = steps.indexOf(state.currentStep)
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Source") },
+                title = { Text(localizeHelper.localize(Res.string.create_source)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(Icons.Default.Close, contentDescription = localizeHelper.localize(Res.string.close))
                     }
                 }
             )
@@ -89,7 +92,7 @@ fun SourceWizardScreen(
                     slideInHorizontally { it } + fadeIn() togetherWith
                     slideOutHorizontally { -it } + fadeOut()
                 },
-                label = "wizard_step"
+                label = localizeHelper.localize(Res.string.wizard_step)
             ) { step ->
                 Box(
                     modifier = Modifier
@@ -206,6 +209,7 @@ private fun WizardBottomBar(
     onBack: () -> Unit,
     onNext: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(
         tonalElevation = 3.dp
     ) {
@@ -219,7 +223,7 @@ private fun WizardBottomBar(
                 OutlinedButton(onClick = onBack) {
                     Icon(Icons.Default.ArrowBack, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Back")
+                    Text(localizeHelper.localize(Res.string.back))
                 }
             } else {
                 Spacer(modifier = Modifier.width(1.dp))
@@ -245,12 +249,13 @@ private fun ChooseMethodStep(
     onSelectTemplate: (SourceTemplates.SourceTemplate) -> Unit,
     onStartFromScratch: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
             Text(
-                text = "How would you like to create your source?",
+                text = localizeHelper.localize(Res.string.how_would_you_like_to_create_your_source),
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -260,7 +265,7 @@ private fun ChooseMethodStep(
         item {
             MethodCard(
                 icon = Icons.Default.Create,
-                title = "Start from Scratch",
+                title = localizeHelper.localize(Res.string.start_from_scratch),
                 description = "Create a completely custom source",
                 onClick = onStartFromScratch
             )
@@ -268,7 +273,7 @@ private fun ChooseMethodStep(
         
         item {
             Text(
-                text = "Or choose a template:",
+                text = localizeHelper.localize(Res.string.or_choose_a_template),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -382,16 +387,17 @@ private fun BasicInfoStep(
     onSourceGroupChange: (String) -> Unit,
     onLangChange: (String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         HelpCard(
-            text = "Enter the website's name and URL. The URL should be the main page of the novel site (e.g., https://example.com)"
+            text = localizeHelper.localize(Res.string.enter_the_websites_name_and)
         )
         
         OutlinedTextField(
             value = sourceName,
             onValueChange = onSourceNameChange,
-            label = { Text("Source Name *") },
-            placeholder = { Text("My Novel Site") },
+            label = { Text(localizeHelper.localize(Res.string.source_name)) },
+            placeholder = { Text(localizeHelper.localize(Res.string.my_novel_site)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -399,7 +405,7 @@ private fun BasicInfoStep(
         OutlinedTextField(
             value = sourceUrl,
             onValueChange = onSourceUrlChange,
-            label = { Text("Website URL *") },
+            label = { Text(localizeHelper.localize(Res.string.website_url)) },
             placeholder = { Text("https://example.com") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
@@ -408,8 +414,8 @@ private fun BasicInfoStep(
         OutlinedTextField(
             value = sourceGroup,
             onValueChange = onSourceGroupChange,
-            label = { Text("Group (optional)") },
-            placeholder = { Text("English, Chinese, etc.") },
+            label = { Text(localizeHelper.localize(Res.string.group_optional)) },
+            placeholder = { Text(localizeHelper.localize(Res.string.english_chinese_etc)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -417,8 +423,8 @@ private fun BasicInfoStep(
         OutlinedTextField(
             value = lang,
             onValueChange = onLangChange,
-            label = { Text("Language Code") },
-            placeholder = { Text("en, zh, ko, etc.") },
+            label = { Text(localizeHelper.localize(Res.string.language_code)) },
+            placeholder = { Text(localizeHelper.localize(Res.string.en_zh_ko_etc)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -434,10 +440,11 @@ private fun SearchRulesStep(
     onTest: () -> Unit,
     isTesting: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             HelpCard(
-                text = "Configure how to search for books. The 'Book List' selector finds each book in search results. Use {{key}} for the search term in the URL."
+                text = localizeHelper.localize(Res.string.configure_how_to_search_for)
             )
         }
         
@@ -445,10 +452,10 @@ private fun SearchRulesStep(
             OutlinedTextField(
                 value = source.searchUrl,
                 onValueChange = { onSelectorChange("searchUrl", it) },
-                label = { Text("Search URL *") },
-                placeholder = { Text("{{baseUrl}}/search?q={{key}}") },
+                label = { Text(localizeHelper.localize(Res.string.search_url_1)) },
+                placeholder = { Text(localizeHelper.localize(Res.string.baseurlsearchqkey)) },
                 modifier = Modifier.fillMaxWidth(),
-                supportingText = { Text("Use {{key}} for search term, {{page}} for page number") }
+                supportingText = { Text(localizeHelper.localize(Res.string.use_key_for_search_term_page_for_page_number)) }
             )
         }
         
@@ -456,7 +463,7 @@ private fun SearchRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleSearch.bookList,
                 onValueChange = { onSelectorChange("search.bookList", it) },
-                label = "Book List Selector *",
+                label = localizeHelper.localize(Res.string.book_list_selector),
                 suggestions = suggestions
             )
         }
@@ -465,7 +472,7 @@ private fun SearchRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleSearch.name,
                 onValueChange = { onSelectorChange("search.name", it) },
-                label = "Book Name Selector *",
+                label = localizeHelper.localize(Res.string.book_name_selector),
                 suggestions = SelectorSuggestions.titleSelectors
             )
         }
@@ -474,7 +481,7 @@ private fun SearchRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleSearch.bookUrl,
                 onValueChange = { onSelectorChange("search.bookUrl", it) },
-                label = "Book URL Selector *",
+                label = localizeHelper.localize(Res.string.book_url_selector),
                 suggestions = SelectorSuggestions.linkSelectors
             )
         }
@@ -495,10 +502,11 @@ private fun BookInfoRulesStep(
     source: ireader.domain.usersource.model.UserSource,
     onSelectorChange: (String, String) -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             HelpCard(
-                text = "Configure how to get book details from the book's page. These selectors find the title, author, description, etc."
+                text = localizeHelper.localize(Res.string.configure_how_to_get_book)
             )
         }
         
@@ -506,7 +514,7 @@ private fun BookInfoRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleBookInfo.name,
                 onValueChange = { onSelectorChange("bookInfo.name", it) },
-                label = "Book Name Selector",
+                label = localizeHelper.localize(Res.string.book_name_selector_1),
                 suggestions = SelectorSuggestions.titleSelectors
             )
         }
@@ -515,7 +523,7 @@ private fun BookInfoRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleBookInfo.author,
                 onValueChange = { onSelectorChange("bookInfo.author", it) },
-                label = "Author Selector",
+                label = localizeHelper.localize(Res.string.author_selector),
                 suggestions = SelectorSuggestions.authorSelectors
             )
         }
@@ -524,8 +532,8 @@ private fun BookInfoRulesStep(
             OutlinedTextField(
                 value = source.ruleBookInfo.intro,
                 onValueChange = { onSelectorChange("bookInfo.intro", it) },
-                label = { Text("Description Selector") },
-                placeholder = { Text("div.description") },
+                label = { Text(localizeHelper.localize(Res.string.description_selector)) },
+                placeholder = { Text(localizeHelper.localize(Res.string.divdescription)) },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -534,7 +542,7 @@ private fun BookInfoRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleBookInfo.coverUrl,
                 onValueChange = { onSelectorChange("bookInfo.coverUrl", it) },
-                label = "Cover Image Selector",
+                label = localizeHelper.localize(Res.string.cover_image_selector),
                 suggestions = SelectorSuggestions.coverSelectors
             )
         }
@@ -550,10 +558,11 @@ private fun ChapterRulesStep(
     onTest: () -> Unit,
     isTesting: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             HelpCard(
-                text = "Configure how to get the chapter list. The 'Chapter List' selector finds each chapter item."
+                text = localizeHelper.localize(Res.string.configure_how_to_get_the)
             )
         }
         
@@ -561,7 +570,7 @@ private fun ChapterRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleToc.chapterList,
                 onValueChange = { onSelectorChange("toc.chapterList", it) },
-                label = "Chapter List Selector *",
+                label = localizeHelper.localize(Res.string.chapter_list_selector),
                 suggestions = suggestions
             )
         }
@@ -570,7 +579,7 @@ private fun ChapterRulesStep(
             OutlinedTextField(
                 value = source.ruleToc.chapterName,
                 onValueChange = { onSelectorChange("toc.chapterName", it) },
-                label = { Text("Chapter Name Selector *") },
+                label = { Text(localizeHelper.localize(Res.string.chapter_name_selector)) },
                 placeholder = { Text("a") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -580,7 +589,7 @@ private fun ChapterRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleToc.chapterUrl,
                 onValueChange = { onSelectorChange("toc.chapterUrl", it) },
-                label = "Chapter URL Selector *",
+                label = localizeHelper.localize(Res.string.chapter_url_selector),
                 suggestions = SelectorSuggestions.linkSelectors
             )
         }
@@ -605,10 +614,11 @@ private fun ContentRulesStep(
     onTest: () -> Unit,
     isTesting: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             HelpCard(
-                text = "Configure how to read chapter content. The 'Content' selector finds the main text of each chapter."
+                text = localizeHelper.localize(Res.string.configure_how_to_read_chapter)
             )
         }
         
@@ -616,7 +626,7 @@ private fun ContentRulesStep(
             SelectorFieldWithSuggestions(
                 value = source.ruleContent.content,
                 onValueChange = { onSelectorChange("content.content", it) },
-                label = "Content Selector *",
+                label = localizeHelper.localize(Res.string.content_selector),
                 suggestions = suggestions
             )
         }
@@ -625,10 +635,10 @@ private fun ContentRulesStep(
             OutlinedTextField(
                 value = source.ruleContent.purify,
                 onValueChange = { onSelectorChange("content.purify", it) },
-                label = { Text("Remove Elements (optional)") },
-                placeholder = { Text("div.ads, script") },
+                label = { Text(localizeHelper.localize(Res.string.remove_elements_optional)) },
+                placeholder = { Text(localizeHelper.localize(Res.string.divads_script)) },
                 modifier = Modifier.fillMaxWidth(),
-                supportingText = { Text("Comma-separated selectors for ads, scripts, etc.") }
+                supportingText = { Text(localizeHelper.localize(Res.string.comma_separated_selectors_for_ads_scripts_etc)) }
             )
         }
         
@@ -652,9 +662,10 @@ private fun TestAndSaveStep(
     onTestAll: () -> Unit,
     isTesting: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         HelpCard(
-            text = "Review your source configuration and test it before saving."
+            text = localizeHelper.localize(Res.string.review_your_source_configuration_and)
         )
         
         // Summary card
@@ -696,6 +707,7 @@ private fun TestAndSaveStep(
 
 @Composable
 private fun TestStatusRow(label: String, result: TestResult?) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -703,9 +715,9 @@ private fun TestStatusRow(label: String, result: TestResult?) {
     ) {
         Text(label)
         when {
-            result == null -> Icon(Icons.Default.HorizontalRule, contentDescription = "Not tested")
-            result.success -> Icon(Icons.Default.CheckCircle, contentDescription = "Success", tint = MaterialTheme.colorScheme.primary)
-            else -> Icon(Icons.Default.Error, contentDescription = "Failed", tint = MaterialTheme.colorScheme.error)
+            result == null -> Icon(Icons.Default.HorizontalRule, contentDescription = localizeHelper.localize(Res.string.not_tested))
+            result.success -> Icon(Icons.Default.CheckCircle, contentDescription = localizeHelper.localize(Res.string.notification_success), tint = MaterialTheme.colorScheme.primary)
+            else -> Icon(Icons.Default.Error, contentDescription = localizeHelper.localize(Res.string.failed), tint = MaterialTheme.colorScheme.error)
         }
     }
 }
@@ -743,6 +755,7 @@ private fun SelectorFieldWithSuggestions(
     label: String,
     suggestions: List<Pair<String, String>>
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     var expanded by remember { mutableStateOf(false) }
     
     Column {
@@ -755,7 +768,7 @@ private fun SelectorFieldWithSuggestions(
                 IconButton(onClick = { expanded = !expanded }) {
                     Icon(
                         if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = "Suggestions"
+                        contentDescription = localizeHelper.localize(Res.string.suggestions)
                     )
                 }
             }

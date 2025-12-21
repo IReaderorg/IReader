@@ -36,7 +36,7 @@ import ireader.domain.services.processstate.ProcessStateManager
 import ireader.domain.services.processstate.ReaderProcessState
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.UiText
-import ireader.i18n.resources.Res
+import ireader.i18n.resources.*
 import ireader.i18n.resources.this_is_first_chapter
 import ireader.i18n.resources.this_is_last_chapter
 import ireader.presentation.core.IModalDrawer

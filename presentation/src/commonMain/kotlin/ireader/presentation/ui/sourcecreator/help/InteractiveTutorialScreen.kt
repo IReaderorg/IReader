@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ireader.domain.usersource.help.SourceCreatorHelp
+import ireader.presentation.ui.core.theme.LocalLocalizeHelper
+import ireader.i18n.resources.*
 
 /**
  * Interactive step-by-step tutorial for creating sources.
@@ -21,6 +23,7 @@ fun InteractiveTutorialScreen(
     onBack: () -> Unit,
     onComplete: () -> Unit
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     val steps = SourceCreatorHelp.beginnerTutorial
     var currentStepIndex by remember { mutableStateOf(0) }
     val currentStep = steps[currentStepIndex]
@@ -28,10 +31,10 @@ fun InteractiveTutorialScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tutorial") },
+                title = { Text(localizeHelper.localize(Res.string.tutorial)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(Icons.Default.Close, contentDescription = localizeHelper.localize(Res.string.close))
                     }
                 }
             )
@@ -81,7 +84,7 @@ fun InteractiveTutorialScreen(
                     slideInHorizontally { it } + fadeIn() togetherWith
                     slideOutHorizontally { -it } + fadeOut()
                 },
-                label = "tutorial_step"
+                label = localizeHelper.localize(Res.string.tutorial_step)
             ) { step ->
                 TutorialStepContent(step = step)
             }
@@ -91,6 +94,7 @@ fun InteractiveTutorialScreen(
 
 @Composable
 private fun TutorialStepContent(step: SourceCreatorHelp.TutorialStep) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -145,7 +149,7 @@ private fun TutorialStepContent(step: SourceCreatorHelp.TutorialStep) {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Field to fill:",
+                            text = localizeHelper.localize(Res.string.field_to_fill),
                             style = MaterialTheme.typography.labelMedium
                         )
                     }
@@ -177,7 +181,7 @@ private fun TutorialStepContent(step: SourceCreatorHelp.TutorialStep) {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Example:",
+                            text = localizeHelper.localize(Res.string.example),
                             style = MaterialTheme.typography.labelMedium
                         )
                     }
@@ -207,6 +211,7 @@ private fun TutorialStepContent(step: SourceCreatorHelp.TutorialStep) {
 
 @Composable
 private fun WelcomeVisual() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -224,7 +229,7 @@ private fun WelcomeVisual() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "What you'll learn:",
+                text = localizeHelper.localize(Res.string.what_youll_learn),
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -259,6 +264,7 @@ private fun WelcomeVisual() {
 
 @Composable
 private fun CompleteVisual() {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -279,13 +285,13 @@ private fun CompleteVisual() {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "You're ready!",
+                text = localizeHelper.localize(Res.string.youre_ready),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Now try creating a source for your favorite website.",
+                text = localizeHelper.localize(Res.string.now_try_creating_a_source),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -301,6 +307,7 @@ private fun TutorialBottomBar(
     onNext: () -> Unit,
     isLastStep: Boolean
 ) {
+    val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     Surface(tonalElevation = 3.dp) {
         Row(
             modifier = Modifier
@@ -312,7 +319,7 @@ private fun TutorialBottomBar(
                 OutlinedButton(onClick = onBack) {
                     Icon(Icons.Default.ArrowBack, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Back")
+                    Text(localizeHelper.localize(Res.string.back))
                 }
             } else {
                 Spacer(modifier = Modifier.width(1.dp))
