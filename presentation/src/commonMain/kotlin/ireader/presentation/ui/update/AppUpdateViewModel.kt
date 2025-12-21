@@ -1,5 +1,6 @@
 package ireader.presentation.ui.update
 
+import androidx.compose.runtime.Stable
 import ireader.core.log.Log
 import ireader.domain.models.update_service_models.Release
 import ireader.domain.models.update_service_models.ReleaseAsset
@@ -14,6 +15,7 @@ import kotlin.time.ExperimentalTime
 /**
  * State for the app update screen
  */
+@Stable
 data class AppUpdateState(
     val isLoading: Boolean = false,
     val release: Release? = null,

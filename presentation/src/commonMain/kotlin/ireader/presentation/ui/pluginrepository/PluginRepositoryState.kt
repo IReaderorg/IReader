@@ -1,8 +1,11 @@
 package ireader.presentation.ui.pluginrepository
 
+import androidx.compose.runtime.Stable
+
 /**
  * State for the Plugin Repository screen
  */
+@Stable
 data class PluginRepositoryState(
     val repositories: List<PluginRepository> = emptyList(),
     val isLoading: Boolean = false,
@@ -13,6 +16,7 @@ data class PluginRepositoryState(
 /**
  * Plugin repository data
  */
+@Stable
 data class PluginRepository(
     val id: Long = 0,
     val url: String,
@@ -27,6 +31,7 @@ data class PluginRepository(
 /**
  * Plugin entry from repository index
  */
+@Stable
 data class PluginEntry(
     val id: String,
     val name: String,

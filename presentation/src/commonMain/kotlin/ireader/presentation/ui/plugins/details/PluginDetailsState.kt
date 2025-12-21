@@ -1,5 +1,6 @@
 package ireader.presentation.ui.plugins.details
 
+import androidx.compose.runtime.Stable
 import ireader.domain.models.remote.PluginRatingStats
 import ireader.domain.models.remote.PluginReview
 import ireader.domain.plugins.PluginInfo
@@ -11,6 +12,7 @@ import ireader.presentation.ui.featurestore.PluginUpdateInfo
  * State for the Plugin Details screen
  * Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 7.1, 7.2, 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 13.1, 13.2, 13.3, 4.8, 4.9, 4.10
  */
+@Stable
 data class PluginDetailsState(
     val plugin: PluginInfo? = null,
     val reviews: List<PluginReview> = emptyList(),

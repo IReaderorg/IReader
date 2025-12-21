@@ -45,6 +45,7 @@ enum class RequiredPluginType {
 /**
  * State for the required plugin screen
  */
+@Stable
 data class RequiredPluginState(
     val pluginType: RequiredPluginType,
     val isLoading: Boolean = false,

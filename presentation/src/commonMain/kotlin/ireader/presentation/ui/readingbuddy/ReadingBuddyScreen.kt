@@ -775,8 +775,11 @@ private fun ModernDailyQuoteTab(
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
+                    // Cache the list to avoid recreation on each recomposition
+                    val styleList = remember { QuoteCardStyle.entries.toList() }
+                    
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(QuoteCardStyle.entries.toList()) { style ->
+                        items(styleList) { style ->
                             FilterChip(
                                 selected = state.selectedCardStyle == style,
                                 onClick = { onStyleChange(style) },
@@ -867,7 +870,7 @@ private fun ModernAllQuotesTab(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(state.approvedQuotes) { quote ->
+                items(state.approvedQuotes, key = { it.id }) { quote ->
                     ModernQuoteListItem(quote, { onLike(quote.id) }, { onShare(quote) })
                 }
             }
@@ -877,7 +880,7 @@ private fun ModernAllQuotesTab(
                 contentPadding = PaddingValues(contentPadding),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(state.approvedQuotes) { quote ->
+                items(state.approvedQuotes, key = { it.id }) { quote ->
                     ModernQuoteListItem(quote, { onLike(quote.id) }, { onShare(quote) })
                 }
             }

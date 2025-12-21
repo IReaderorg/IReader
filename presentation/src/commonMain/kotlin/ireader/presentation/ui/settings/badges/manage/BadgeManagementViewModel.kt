@@ -1,5 +1,6 @@
 package ireader.presentation.ui.settings.badges.manage
 
+import androidx.compose.runtime.Stable
 import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.BadgeRarity
 import ireader.domain.models.remote.BadgeType
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@Stable
 data class BadgeManagementState(
     val ownedBadges: List<Badge> = emptyList(),
     val userBadges: List<UserBadge> = emptyList(),

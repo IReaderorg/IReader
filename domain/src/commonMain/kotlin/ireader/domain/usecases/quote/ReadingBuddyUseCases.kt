@@ -81,11 +81,14 @@ class ReadingBuddyUseCases(
     }
 
     /**
-     * Record that user started reading
+     * Record that user started reading.
+     * Note: Streak is updated when leaving the reader screen via TrackReadingProgressUseCase
+     * to avoid double counting.
      */
     suspend fun onReadingStarted() {
         statisticsRepository.updateLastInteractionTime(currentTimeToLong())
-        updateStreak()
+        // Streak update removed - handled by TrackReadingProgressUseCase.updateReadingStreak()
+        // when user leaves the reader screen
     }
     
     /**
@@ -153,32 +156,8 @@ class ReadingBuddyUseCases(
     }
     
     /**
-     * Update reading streak using the unified database
+     * Check and award streak achievements based on current streak
      */
-    private suspend fun updateStreak() {
-        val now = currentTimeToLong()
-        val lastRead = statisticsRepository.getLastReadDate() ?: 0L
-        val currentStreak = statisticsRepository.getCurrentStreak()
-        
-        val daysSinceLastRead = if (lastRead > 0) {
-            (now - lastRead) / (1000 * 60 * 60 * 24)
-        } else {
-            Long.MAX_VALUE
-        }
-        
-        val newStreak = when {
-            daysSinceLastRead <= 1 -> currentStreak + 1
-            daysSinceLastRead <= 2 -> currentStreak // Same day or next day
-            else -> 1 // Streak broken, start fresh
-        }
-        
-        // Use updateStreakWithLongest to automatically track longest streak
-        statisticsRepository.updateStreakWithLongest(newStreak, now)
-        
-        // Check streak achievements
-        checkStreakAchievements(newStreak)
-    }
-    
     private suspend fun checkStreakAchievements(streak: Int) {
         when (streak) {
             3 -> unlockAchievement(BuddyAchievement.STREAK_3)

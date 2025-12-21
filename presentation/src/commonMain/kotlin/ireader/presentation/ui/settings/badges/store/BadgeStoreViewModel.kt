@@ -1,5 +1,6 @@
 package ireader.presentation.ui.settings.badges.store
 
+import androidx.compose.runtime.Stable
 import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.PaymentProof
 import ireader.domain.usecases.badge.GetAvailableBadgesUseCase
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@Stable
 data class BadgeStoreState(
     val badges: List<Badge> = emptyList(),
     val isLoading: Boolean = false,

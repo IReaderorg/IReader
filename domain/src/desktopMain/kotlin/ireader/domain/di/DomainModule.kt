@@ -50,6 +50,9 @@ actual val DomainModule: Module = module {
     // Include TTS v2 module for new clean TTS architecture
     includes(ireader.domain.services.tts_service.v2.ttsV2Module)
     
+    // Process State Manager for handling process death
+    single { ireader.domain.services.processstate.ProcessStateManager(get()) }
+    
     // FileSystem implementation for desktop
     single<ireader.core.io.FileSystem> {
         ireader.core.io.DesktopFileSystem()

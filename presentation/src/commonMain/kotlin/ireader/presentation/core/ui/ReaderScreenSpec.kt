@@ -25,12 +25,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ireader.core.log.Log
 import ireader.core.util.getBuildNumber
 import ireader.domain.preferences.prefs.ReadingMode
+import ireader.domain.services.processstate.ProcessStateManager
+import ireader.domain.services.processstate.ReaderProcessState
 import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.UiText
 import ireader.i18n.resources.Res
@@ -87,6 +90,7 @@ data class ReaderScreenSpec(
                 )
             })
         val platformReader: PlatformReaderSettingReader = koinInject()
+        val processStateManager: ProcessStateManager = koinInject()
         val readerState by vm.state.collectAsState()
         
         // Extract values from state
@@ -101,6 +105,45 @@ data class ReaderScreenSpec(
         val navController = requireNotNull(LocalNavigator.current) { "LocalNavigator not provided" }
 
         val swipeState = rememberSwipeRefreshState(isRefreshing = false)
+        
+        // Restore scroll position from process death state
+        val restoredState = remember { processStateManager.getReaderState() }
+        LaunchedEffect(restoredState, successState) {
+            if (restoredState != null && 
+                restoredState.bookId == bookId && 
+                restoredState.chapterId == chapterId &&
+                successState != null) {
+                // Restore scroll position
+                try {
+                    delay(100) // Wait for content to load
+                    scrollState.scrollTo(restoredState.scrollPosition)
+                } catch (e: Exception) {
+                    Log.warn { "Failed to restore scroll position: ${e.message}" }
+                }
+                // Clear restored state after applying
+                processStateManager.clearReaderState()
+            }
+        }
+        
+        // Save state periodically for process death recovery
+        LaunchedEffect(scrollState.value, chapter?.id) {
+            if (chapter != null) {
+                // Debounce state saving to avoid excessive writes
+                delay(500)
+                processStateManager.saveReaderState(
+                    ReaderProcessState(
+                        bookId = bookId,
+                        chapterId = chapter.id,
+                        scrollPosition = scrollState.value,
+                        scrollOffset = 0,
+                        readingParagraph = 0,
+                        isReaderModeEnabled = successState?.isReaderModeEnabled ?: true,
+                        timestamp = currentTimeToLong()
+                    )
+                )
+            }
+        }
+        
         DisposableEffect(key1 = true) {
             onDispose {
                 platformReader.apply {
@@ -108,6 +151,8 @@ data class ReaderScreenSpec(
                         vm.restoreSetting(context, scrollState, lazyListState)
                     }
                 }
+                // Clear process state when user intentionally leaves the screen
+                processStateManager.clearReaderState()
             }
         }
         

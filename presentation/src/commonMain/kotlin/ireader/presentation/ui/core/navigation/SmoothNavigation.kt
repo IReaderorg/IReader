@@ -18,9 +18,9 @@ import androidx.navigation.compose.NavHost
  * 
  * This wrapper provides:
  * - Persistent background color to prevent white flashes
- * - Smooth fade and slide animations
+ * - Ultra-fast fade animations for native-like feel
  * - Consistent behavior across light and dark themes
- * - Optimized transition timing for better UX
+ * - Optimized transition timing (100ms) matching native Android
  */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -41,47 +41,36 @@ fun SmoothNavigationHost(
             navController = navController,
             startDestination = startDestination,
             modifier = Modifier.fillMaxSize(),
+            // Native-like transitions: 100ms fade only, no slide (slide causes jank)
             enterTransition = {
                 fadeIn(
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
-                    )
-                ) + slideInHorizontally(
-                    initialOffsetX = { it / 10 },
-                    animationSpec = tween(
-                        durationMillis = 300,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 100,
+                        easing = LinearEasing
                     )
                 )
             },
             exitTransition = {
                 fadeOut(
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 100,
+                        easing = LinearEasing
                     )
                 )
             },
             popEnterTransition = {
                 fadeIn(
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 100,
+                        easing = LinearEasing
                     )
                 )
             },
             popExitTransition = {
                 fadeOut(
                     animationSpec = tween(
-                        durationMillis = 200,
-                        easing = FastOutSlowInEasing
-                    )
-                ) + slideOutHorizontally(
-                    targetOffsetX = { it / 10 },
-                    animationSpec = tween(
-                        durationMillis = 300,
-                        easing = FastOutSlowInEasing
+                        durationMillis = 100,
+                        easing = LinearEasing
                     )
                 )
             },
@@ -92,43 +81,44 @@ fun SmoothNavigationHost(
 
 /**
  * Custom transition extensions for different navigation scenarios
+ * All optimized for native-like 100ms transitions
  */
 
 // Fade transition for dialogs and overlays
-fun fadeTransition(durationMillis: Int = 200): EnterTransition {
-    return fadeIn(animationSpec = tween(durationMillis))
+fun fadeTransition(durationMillis: Int = 100): EnterTransition {
+    return fadeIn(animationSpec = tween(durationMillis, easing = LinearEasing))
 }
 
-fun fadeOutTransition(durationMillis: Int = 200): ExitTransition {
-    return fadeOut(animationSpec = tween(durationMillis))
+fun fadeOutTransition(durationMillis: Int = 100): ExitTransition {
+    return fadeOut(animationSpec = tween(durationMillis, easing = LinearEasing))
 }
 
-// Slide from bottom (for bottom sheets style)
+// Slide from bottom (for bottom sheets style) - faster for native feel
 fun slideUpTransition(): EnterTransition {
     return slideInVertically(
         initialOffsetY = { it },
-        animationSpec = tween(300, easing = FastOutSlowInEasing)
-    ) + fadeIn(animationSpec = tween(200))
+        animationSpec = tween(150, easing = LinearEasing)
+    ) + fadeIn(animationSpec = tween(100))
 }
 
 fun slideDownTransition(): ExitTransition {
     return slideOutVertically(
         targetOffsetY = { it },
-        animationSpec = tween(300, easing = FastOutSlowInEasing)
-    ) + fadeOut(animationSpec = tween(200))
+        animationSpec = tween(150, easing = LinearEasing)
+    ) + fadeOut(animationSpec = tween(100))
 }
 
-// Scale transition for detail screens
+// Scale transition for detail screens - subtle and fast
 fun scaleInTransition(): EnterTransition {
     return scaleIn(
-        initialScale = 0.95f,
-        animationSpec = tween(300, easing = FastOutSlowInEasing)
-    ) + fadeIn(animationSpec = tween(200))
+        initialScale = 0.97f,
+        animationSpec = tween(100, easing = LinearEasing)
+    ) + fadeIn(animationSpec = tween(100))
 }
 
 fun scaleOutTransition(): ExitTransition {
     return scaleOut(
-        targetScale = 0.95f,
-        animationSpec = tween(300, easing = FastOutSlowInEasing)
-    ) + fadeOut(animationSpec = tween(200))
+        targetScale = 0.97f,
+        animationSpec = tween(100, easing = LinearEasing)
+    ) + fadeOut(animationSpec = tween(100))
 }

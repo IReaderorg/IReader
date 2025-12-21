@@ -1,5 +1,6 @@
 package ireader.presentation.ui.settings.community
 
+import androidx.compose.runtime.Stable
 import ireader.core.log.Log
 import ireader.domain.community.CommunityPreferences
 import ireader.domain.community.CommunityRepository
@@ -7,6 +8,7 @@ import ireader.domain.community.cloudflare.CommunityTranslationRepository
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
 
+@Stable
 data class CommunitySourceConfigState(
     val communitySourceEnabled: Boolean = true,
     val communitySourceUrl: String = "",

@@ -1,10 +1,12 @@
 package ireader.presentation.ui.sourcecreator
 
+import androidx.compose.runtime.Stable
 import ireader.domain.usersource.model.*
 
 /**
  * UI State for the Source Creator screen.
  */
+@Stable
 data class SourceCreatorState(
     // Basic Info
     val sourceName: String = "",

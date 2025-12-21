@@ -1,5 +1,6 @@
 package ireader.presentation.ui.settings.viewmodels
 
+import androidx.compose.runtime.Stable
 import ireader.core.log.Log
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.preferences.prefs.AppPreferences
@@ -8,6 +9,7 @@ import ireader.domain.services.tts.AITTSProvider
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
 
+@Stable
 data class AITTSSettingsState(
     val useAITTS: Boolean = false,
     val selectedProvider: AITTSProvider = AITTSProvider.NATIVE_ANDROID,

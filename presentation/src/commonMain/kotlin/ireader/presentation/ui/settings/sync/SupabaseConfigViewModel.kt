@@ -1,12 +1,13 @@
 package ireader.presentation.ui.settings.sync
 
-
+import androidx.compose.runtime.Stable
 import ireader.domain.data.repository.RemoteRepository
 import ireader.domain.preferences.prefs.SupabasePreferences
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
 import ireader.domain.utils.extensions.currentTimeToLong
 
+@Stable
 data class SupabaseConfigState(
     val autoSyncEnabled: Boolean = true,
     val syncOnWifiOnly: Boolean = true,

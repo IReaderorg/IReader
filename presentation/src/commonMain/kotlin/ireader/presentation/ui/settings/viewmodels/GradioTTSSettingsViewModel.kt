@@ -1,5 +1,6 @@
 package ireader.presentation.ui.settings.viewmodels
 
+import androidx.compose.runtime.Stable
 import ireader.core.log.Log
 import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.services.tts_service.GradioParam
@@ -15,6 +16,7 @@ import ireader.domain.utils.extensions.currentTimeToLong
 /**
  * State for Gradio TTS settings screen
  */
+@Stable
 data class GradioTTSSettingsState(
     val useGradioTTS: Boolean = false,
     val configs: List<GradioTTSConfig> = emptyList(),

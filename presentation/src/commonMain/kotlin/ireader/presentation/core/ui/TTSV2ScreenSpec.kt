@@ -72,6 +72,8 @@ import ireader.domain.preferences.prefs.AppPreferences
 import ireader.domain.preferences.prefs.ReaderPreferences
 import ireader.domain.services.common.TranslationService
 import ireader.domain.services.common.TranslationStatus
+import ireader.domain.services.processstate.ProcessStateManager
+import ireader.domain.services.processstate.TTSProcessState
 import ireader.domain.services.tts_service.GradioTTSManager
 import ireader.domain.services.tts_service.TTSChapterCache
 import ireader.domain.services.tts_service.TTSChapterDownloadManager
@@ -86,6 +88,7 @@ import ireader.domain.services.tts_service.v2.TTSSleepTimerUseCase
 import ireader.domain.services.tts_service.v2.TTSV2ServiceStarter
 import ireader.domain.usecases.translate.TranslationEnginesManager
 import ireader.domain.usecases.translation.GetAllTranslationsForChapterUseCase
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.localize
 import ireader.i18n.resources.Res
 import ireader.i18n.resources.content
@@ -167,6 +170,7 @@ class TTSV2ScreenSpec(
         val chapterCache: TTSChapterCache = koinInject()
         val serviceStarter: TTSV2ServiceStarter = koinInject()
         val gradioTTSManager: GradioTTSManager = koinInject()
+        val processStateManager: ProcessStateManager = koinInject()
         
         // Set up platform-specific intents for notification actions
         LaunchedEffect(Unit) {
@@ -679,6 +683,24 @@ class TTSV2ScreenSpec(
             }
         }
         
+        // Save TTS state periodically for process death recovery
+        LaunchedEffect(state.chapter?.id, currentParagraph, isPlaying) {
+            if (state.chapter != null) {
+                // Debounce state saving to avoid excessive writes
+                delay(500)
+                processStateManager.saveTTSState(
+                    TTSProcessState(
+                        bookId = bookId,
+                        chapterId = state.chapter?.id ?: chapterId,
+                        sourceId = sourceId,
+                        readingParagraph = currentParagraph,
+                        wasPlaying = isPlaying,
+                        timestamp = currentTimeToLong()
+                    )
+                )
+            }
+        }
+        
         // Cleanup on dispose - only cleanup ViewModel resources, NOT the controller
         // The controller state should persist while the service is running
         DisposableEffect(Unit) {
@@ -686,6 +708,8 @@ class TTSV2ScreenSpec(
                 // Don't call viewModel.onCleared() as it would reset the controller
                 // The controller is managed by the service lifecycle
                 Log.warn { "TTSV2ScreenSpec: Screen disposed, keeping controller state" }
+                // Clear process state when user intentionally leaves the screen
+                processStateManager.clearTTSState()
             }
         }
 

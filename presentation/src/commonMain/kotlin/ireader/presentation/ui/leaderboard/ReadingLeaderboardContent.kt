@@ -410,37 +410,33 @@ private fun ReadingPodiumPlace(entry: LeaderboardEntry, place: Int, height: Dp) 
 private fun ReadingLeaderboardEntryCard(entry: LeaderboardEntry, isCurrentUser: Boolean, animationDelay: Int = 0) {
     val backgroundColor = if (isCurrentUser) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
     val borderColor = if (isCurrentUser) MaterialTheme.colorScheme.secondary else Color.Transparent
-    var visible by remember { mutableStateOf(false) }
     
-    LaunchedEffect(Unit) { kotlinx.coroutines.delay(animationDelay.toLong()); visible = true }
-    
-    AnimatedVisibility(visible = visible, enter = fadeIn() + slideInVertically(initialOffsetY = { it / 4 })) {
-        Card(
-            modifier = Modifier.fillMaxWidth().then(if (isCurrentUser) Modifier.border(2.dp, borderColor, RoundedCornerShape(16.dp)) else Modifier),
-            colors = CardDefaults.cardColors(containerColor = backgroundColor),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = if (isCurrentUser) 4.dp else 1.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                ReadingRankBadge(rank = entry.rank, size = 48.dp)
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(entry.username, style = MaterialTheme.typography.titleMedium, fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        if (entry.hasBadge) { Spacer(modifier = Modifier.width(6.dp)); Text(when (entry.badgeType) { "supporter" -> "??"; "nft" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.bodyMedium) }
-                        if (isCurrentUser) { Spacer(modifier = Modifier.width(8.dp)); Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.secondary) { Text("YOU", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondary, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } }
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Timer, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(formatReadingTime(entry.totalReadingTimeMinutes), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-                    }
+    // Direct rendering without AnimatedVisibility for better list performance
+    Card(
+        modifier = Modifier.fillMaxWidth().then(if (isCurrentUser) Modifier.border(2.dp, borderColor, RoundedCornerShape(16.dp)) else Modifier),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isCurrentUser) 4.dp else 1.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            ReadingRankBadge(rank = entry.rank, size = 48.dp)
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(entry.username, style = MaterialTheme.typography.titleMedium, fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (entry.hasBadge) { Spacer(modifier = Modifier.width(6.dp)); Text(when (entry.badgeType) { "supporter" -> "??"; "nft" -> "??"; "premium" -> "?"; else -> "??" }, style = MaterialTheme.typography.bodyMedium) }
+                    if (isCurrentUser) { Spacer(modifier = Modifier.width(8.dp)); Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.secondary) { Text("YOU", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondary, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } }
                 }
-                if (entry.rank <= 10) {
-                    Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (entry.rank <= 3) Color(0xFFFFD700).copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.EmojiEvents, null, tint = if (entry.rank <= 3) Color(0xFFFFD700) else MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                    }
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Timer, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(formatReadingTime(entry.totalReadingTimeMinutes), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                }
+            }
+            if (entry.rank <= 10) {
+                Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(if (entry.rank <= 3) Color(0xFFFFD700).copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.EmojiEvents, null, tint = if (entry.rank <= 3) Color(0xFFFFD700) else MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                 }
             }
         }

@@ -1,5 +1,6 @@
 package ireader.presentation.ui.community
 
+import androidx.compose.runtime.Stable
 import ireader.domain.models.entities.Glossary
 import ireader.domain.models.entities.GlobalGlossary
 import ireader.domain.models.entities.GlossaryTermType
@@ -9,6 +10,7 @@ import ireader.domain.models.entities.GlossarySyncStatus
  * UI State for the Community Glossary Screen
  * Supports both local book glossaries and global glossaries
  */
+@Stable
 data class GlossaryState(
     val isLoading: Boolean = false,
     val glossaryEntries: List<Glossary> = emptyList(),
@@ -48,6 +50,7 @@ enum class GlossaryViewMode {
 /**
  * Simple book info for the glossary screen (local books)
  */
+@Stable
 data class BookInfo(
     val id: Long,
     val title: String,
@@ -57,6 +60,7 @@ data class BookInfo(
 /**
  * Global book info for glossaries not tied to local library
  */
+@Stable
 data class GlobalBookInfo(
     val bookKey: String,
     val title: String,

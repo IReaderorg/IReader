@@ -39,7 +39,6 @@ import ireader.presentation.ui.settings.reader.SettingsReaderViewModel
 import ireader.presentation.ui.settings.repository.SourceRepositoryViewModel
 import ireader.presentation.ui.settings.security.SecuritySettingsViewModel
 import ireader.presentation.ui.settings.security.SettingsSecurityViewModel
-import ireader.presentation.ui.settings.statistics.StatisticsViewModel
 import ireader.presentation.ui.settings.tracking.SettingsTrackingViewModel
 import ireader.presentation.ui.settings.viewmodels.AITTSSettingsViewModel
 import org.koin.dsl.module
@@ -172,7 +171,6 @@ val PresentationModules = module {
     factory  { ReaderSettingScreenViewModel(get(), get(), get()) }
     factory  { SourceRepositoryViewModel(get(), get()) }
     factory  { SecuritySettingsViewModel(get(), get()) }
-    factory  { StatisticsViewModel(get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationViewModel(get(), get()) }
     factory  { AITTSSettingsViewModel(get(), get()) }
     factory  { ireader.presentation.ui.settings.donation.DonationTriggerViewModel(get()) }

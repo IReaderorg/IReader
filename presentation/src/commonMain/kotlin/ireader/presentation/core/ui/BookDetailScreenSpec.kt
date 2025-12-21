@@ -38,6 +38,9 @@ import ireader.core.source.CatalogSource
 import ireader.core.source.HttpSource
 import ireader.core.startup.ScreenProfiler
 import ireader.domain.models.entities.Chapter
+import ireader.domain.services.processstate.BookDetailProcessState
+import ireader.domain.services.processstate.ProcessStateManager
+import ireader.domain.utils.extensions.currentTimeToLong
 import ireader.i18n.LAST_CHAPTER
 import ireader.i18n.UiText
 import ireader.i18n.localize
@@ -68,6 +71,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 /**
@@ -105,6 +109,9 @@ data class BookDetailScreenSpec constructor(
             key = bookId,
             parameters = { parametersOf(BookDetailViewModel.Param(bookId)) }
         )
+        
+        // Inject process state manager for process death handling
+        val processStateManager: ProcessStateManager = koinInject()
         
         // Mark after ViewModel obtained
         LaunchedEffect(Unit) {
@@ -236,6 +243,7 @@ data class BookDetailScreenSpec constructor(
                             state = s,
                             snackbarHostState = snackbarHostState,
                             navigationCallbacks = navigationCallbacks,
+                            processStateManager = processStateManager,
                         )
                     }
                 
@@ -261,6 +269,7 @@ data class BookDetailScreenSpec constructor(
         state: BookDetailState.Success,
         snackbarHostState: SnackbarHostState,
         navigationCallbacks: NavigationCallbacks,
+        processStateManager: ProcessStateManager,
     ) {
         val scope = rememberCoroutineScope()
         
@@ -282,6 +291,22 @@ data class BookDetailScreenSpec constructor(
             .distinctUntilChanged()
             .collect { (index, offset) ->
                 vm.saveScrollPosition(index, offset)
+                // Also save to process state manager for process death recovery
+                processStateManager.saveBookDetailState(
+                    BookDetailProcessState(
+                        bookId = state.book.id,
+                        scrollIndex = index,
+                        scrollOffset = offset,
+                        timestamp = currentTimeToLong()
+                    )
+                )
+            }
+        }
+        
+        // Clear process state when user leaves the screen intentionally
+        androidx.compose.runtime.DisposableEffect(Unit) {
+            onDispose {
+                processStateManager.clearBookDetailState()
             }
         }
         

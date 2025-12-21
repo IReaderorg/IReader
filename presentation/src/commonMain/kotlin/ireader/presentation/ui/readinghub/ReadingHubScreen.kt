@@ -2,6 +2,8 @@ package ireader.presentation.ui.readinghub
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,11 +23,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.entities.ReadingStatisticsType1
@@ -46,6 +50,7 @@ enum class ReadingHubTab(val title: String, val icon: ImageVector) {
     QUOTES("Quotes", Icons.Default.FormatQuote),
     SUBMIT("Submit", Icons.Default.Add)
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,7 +112,7 @@ fun ReadingHubScreen(
     
     Scaffold(
         topBar = {
-            ReadingHubTopBar(
+            ModernReadingHubTopBar(
                 onBack = onBack,
                 onReset = { vm.showResetConfirmDialog() }
             )
@@ -120,22 +125,13 @@ fun ReadingHubScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Tab Row
-            ScrollableTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary,
-                edgePadding = 16.dp
-            ) {
-                ReadingHubTab.entries.forEachIndexed { index, tab ->
-                    Tab(
-                        selected = pagerState.currentPage == index,
-                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
-                        text = { Text(tab.title) },
-                        icon = { Icon(tab.icon, contentDescription = null, modifier = Modifier.size(20.dp)) }
-                    )
+            // Modern Tab Row with pills
+            ModernTabRow(
+                selectedTab = pagerState.currentPage,
+                onTabSelected = { index ->
+                    coroutineScope.launch { pagerState.animateScrollToPage(index) }
                 }
-            }
+            )
             
             // Content
             HorizontalPager(
@@ -143,8 +139,8 @@ fun ReadingHubScreen(
                 modifier = Modifier.fillMaxSize()
             ) { page ->
                 when (page) {
-                    0 -> OverviewTab(state, isWideScreen)
-                    1 -> StatsTab(state, isWideScreen)
+                    0 -> ModernOverviewTab(state, isWideScreen)
+                    1 -> ModernStatsTab(state, isWideScreen)
                     2 -> QuotesTab(
                         state = state,
                         onToggleLike = { vm.toggleLike(it) },
@@ -163,132 +159,186 @@ fun ReadingHubScreen(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ReadingHubTopBar(
+private fun ModernReadingHubTopBar(
     onBack: () -> Unit,
     onReset: () -> Unit
 ) {
-    TopAppBar(
-        title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // Animated emoji
-                val infiniteTransition = rememberInfiniteTransition(label = "bounce")
-                val bounce by infiniteTransition.animateFloat(
-                    initialValue = 0f,
-                    targetValue = -4f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(500, easing = FastOutSlowInEasing),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = "bounce"
-                )
-                
-                Text(
-                    text = "📚",
-                    fontSize = 24.sp,
-                    modifier = Modifier.offset(y = bounce.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = "Reading Hub",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Your reading journey",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        },
-        navigationIcon = {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-        },
-        actions = {
-            IconButton(onClick = onReset) {
-                Icon(Icons.Outlined.Refresh, contentDescription = "Reset Statistics")
+            
+            // Animated emoji
+            val infiniteTransition = rememberInfiniteTransition(label = "bounce")
+            val bounce by infiniteTransition.animateFloat(
+                initialValue = 0f,
+                targetValue = -4f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(600, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "bounce"
+            )
+            
+            Text(
+                text = "📚",
+                fontSize = 28.sp,
+                modifier = Modifier.offset(y = bounce.dp)
+            )
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Reading Hub",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Track your reading journey",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    )
-}
-
-// ==================== OVERVIEW TAB ====================
-
-@Composable
-private fun OverviewTab(state: ReadingHubState, isWideScreen: Boolean) {
-    val contentPadding = if (isWideScreen) 16.dp else 12.dp
-    
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = contentPadding, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Hero Section with Buddy
-        item {
-            HeroBuddyCard(state)
-        }
-        
-        // Quick Stats
-        item {
-            QuickStatsRow(state.statistics)
-        }
-        
-        // Streak Card
-        item {
-            StreakCard(
-                currentStreak = state.statistics.readingStreak,
-                longestStreak = state.statistics.longestStreak
-            )
-        }
-        
-        // Level Progress
-        item {
-            LevelProgressCard(
-                level = state.buddyState.level,
-                progress = state.levelProgress,
-                experience = state.buddyState.experience
-            )
-        }
-        
-        // Achievements Preview
-        item {
-            AchievementsPreviewCard(state.unlockedAchievements)
-        }
-        
-        // Daily Quote Preview
-        if (state.dailyQuote != null) {
-            item {
-                DailyQuotePreviewCard(state.dailyQuote!!)
+            
+            IconButton(onClick = onReset) {
+                Icon(
+                    Icons.Outlined.Refresh,
+                    contentDescription = "Reset Statistics",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
 }
 
 @Composable
-private fun HeroBuddyCard(state: ReadingHubState) {
+private fun ModernTabRow(
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(ReadingHubTab.entries.size) { index ->
+            val tab = ReadingHubTab.entries[index]
+            val isSelected = selectedTab == index
+            
+            FilterChip(
+                selected = isSelected,
+                onClick = { onTabSelected(index) },
+                label = {
+                    Text(
+                        text = tab.title,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = tab.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        }
+    }
+}
+
+
+// ==================== MODERN OVERVIEW TAB ====================
+
+@Composable
+private fun ModernOverviewTab(state: ReadingHubState, isWideScreen: Boolean) {
+    val contentPadding = if (isWideScreen) 20.dp else 16.dp
+    
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = contentPadding, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Hero Card with Buddy
+        item {
+            ModernHeroCard(state)
+        }
+        
+        // Stats Grid
+        item {
+            ModernStatsGrid(state.statistics)
+        }
+        
+        // Streak & Level Row
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ModernStreakCard(
+                    currentStreak = state.statistics.readingStreak,
+                    longestStreak = state.statistics.longestStreak,
+                    modifier = Modifier.weight(1f)
+                )
+                ModernLevelCard(
+                    level = state.buddyState.level,
+                    progress = state.levelProgress,
+                    experience = state.buddyState.experience,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        
+        // Achievements
+        item {
+            ModernAchievementsCard(state.unlockedAchievements)
+        }
+        
+        // Daily Quote
+        if (state.dailyQuote != null) {
+            item {
+                ModernDailyQuoteCard(state.dailyQuote!!)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernHeroCard(state: ReadingHubState) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        )
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(8.dp, RoundedCornerShape(28.dp)),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    Brush.verticalGradient(
+                    Brush.linearGradient(
                         listOf(
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                            MaterialTheme.colorScheme.background
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.secondaryContainer
                         )
                     )
                 )
@@ -303,11 +353,91 @@ private fun HeroBuddyCard(state: ReadingHubState) {
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                ) {
+                    Text(
+                        text = state.buddyState.message,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernStatsGrid(statistics: ReadingStatisticsType1) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        ModernStatChip(
+            icon = Icons.AutoMirrored.Filled.MenuBook,
+            value = statistics.totalChaptersRead.toString(),
+            label = "Chapters",
+            gradient = listOf(Color(0xFF667EEA), Color(0xFF764BA2)),
+            modifier = Modifier.weight(1f)
+        )
+        ModernStatChip(
+            icon = Icons.Default.CheckCircle,
+            value = statistics.booksCompleted.toString(),
+            label = "Books",
+            gradient = listOf(Color(0xFF11998E), Color(0xFF38EF7D)),
+            modifier = Modifier.weight(1f)
+        )
+        ModernStatChip(
+            icon = Icons.Default.Schedule,
+            value = formatReadingTimeCompact(statistics.totalReadingTimeMinutes),
+            label = "Time",
+            gradient = listOf(Color(0xFFF093FB), Color(0xFFF5576C)),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+
+@Composable
+private fun ModernStatChip(
+    icon: ImageVector,
+    value: String,
+    label: String,
+    gradient: List<Color>,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.shadow(4.dp, RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Brush.linearGradient(gradient))
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = state.buddyState.message,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = value,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.9f)
                 )
             }
         }
@@ -315,129 +445,52 @@ private fun HeroBuddyCard(state: ReadingHubState) {
 }
 
 @Composable
-private fun QuickStatsRow(statistics: ReadingStatisticsType1) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        QuickStatCard(
-            icon = Icons.AutoMirrored.Filled.MenuBook,
-            value = statistics.totalChaptersRead.toString(),
-            label = "Chapters",
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.weight(1f)
-        )
-        QuickStatCard(
-            icon = Icons.Default.CheckCircle,
-            value = statistics.booksCompleted.toString(),
-            label = "Books",
-            color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.weight(1f)
-        )
-        QuickStatCard(
-            icon = Icons.Default.Schedule,
-            value = formatReadingTime(statistics.totalReadingTimeMinutes),
-            label = "Time",
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun QuickStatCard(
-    icon: ImageVector,
-    value: String,
-    label: String,
-    color: Color,
+private fun ModernStreakCard(
+    currentStreak: Int,
+    longestStreak: Int,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(28.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun StreakCard(currentStreak: Int, longestStreak: Int) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFFF6B35).copy(alpha = 0.15f)
         )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = "🔥", fontSize = 40.sp)
-                Column {
-                    Text(
-                        text = "Reading Streak",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Best: $longestStreak days",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "$currentStreak",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFF6B35)
-                )
-                Text(
-                    text = "days",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Text(text = "🔥", fontSize = 32.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "$currentStreak",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFFF6B35)
+            )
+            Text(
+                text = "day streak",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Best: $longestStreak",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
         }
     }
 }
 
 @Composable
-private fun LevelProgressCard(level: Int, progress: Float, experience: Int) {
+private fun ModernLevelCard(
+    level: Int,
+    progress: Float,
+    experience: Int,
+    modifier: Modifier = Modifier
+) {
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(1000, easing = FastOutSlowInEasing),
@@ -445,55 +498,38 @@ private fun LevelProgressCard(level: Int, progress: Float, experience: Int) {
     )
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
         )
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "⭐", fontSize = 24.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Level $level",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.primary
-                ) {
-                    Text(
-                        text = "$experience XP",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = "⭐", fontSize = 32.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Level $level",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
+            // Progress bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(12.dp)
-                    .clip(RoundedCornerShape(6.dp))
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
                     .background(MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.1f))
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(animatedProgress)
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(RoundedCornerShape(4.dp))
                         .background(
                             Brush.horizontalGradient(
                                 listOf(
@@ -505,19 +541,19 @@ private fun LevelProgressCard(level: Int, progress: Float, experience: Int) {
                 )
             }
             
-            Spacer(modifier = Modifier.height(8.dp))
-            
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${(animatedProgress * 100).toInt()}% to Level ${level + 1}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                text = "$experience XP",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
     }
 }
 
+
 @Composable
-private fun AchievementsPreviewCard(achievements: List<BuddyAchievement>) {
+private fun ModernAchievementsCard(achievements: List<BuddyAchievement>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -530,12 +566,7 @@ private fun AchievementsPreviewCard(achievements: List<BuddyAchievement>) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Outlined.EmojiEvents,
-                        contentDescription = null,
-                        tint = Color(0xFFFFD700),
-                        modifier = Modifier.size(24.dp)
-                    )
+                    Text(text = "🏆", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Achievements",
@@ -544,13 +575,14 @@ private fun AchievementsPreviewCard(achievements: List<BuddyAchievement>) {
                     )
                 }
                 Surface(
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
-                        text = "${achievements.size} unlocked",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall
+                        text = "${achievements.size}",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -575,9 +607,9 @@ private fun AchievementsPreviewCard(achievements: List<BuddyAchievement>) {
                     }
                 }
             } else {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(achievements.take(5)) { achievement ->
-                        AchievementChip(achievement)
+                        ModernAchievementChip(achievement)
                     }
                 }
             }
@@ -586,45 +618,42 @@ private fun AchievementsPreviewCard(achievements: List<BuddyAchievement>) {
 }
 
 @Composable
-private fun AchievementChip(achievement: BuddyAchievement) {
+private fun ModernAchievementChip(achievement: BuddyAchievement) {
     val emoji = getAchievementEmoji(achievement.name)
     
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = emoji, fontSize = 18.sp)
-            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = emoji, fontSize = 16.sp)
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = achievement.title,
                 style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
 
 @Composable
-private fun DailyQuotePreviewCard(quote: Quote) {
+private fun ModernDailyQuoteCard(quote: Quote) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f)
         )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.FormatQuote,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.size(24.dp)
-                )
+                Text(text = "💭", fontSize = 20.sp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Quote of the Day",
@@ -638,7 +667,8 @@ private fun DailyQuotePreviewCard(quote: Quote) {
             Text(
                 text = "\"${quote.text}\"",
                 style = MaterialTheme.typography.bodyLarge,
-                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                lineHeight = 24.sp
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -646,235 +676,153 @@ private fun DailyQuotePreviewCard(quote: Quote) {
             Text(
                 text = "— ${quote.bookTitle}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium
             )
         }
     }
 }
 
-// Helper functions
-private fun formatReadingTime(minutes: Long): String {
-    return when {
-        minutes < 60 -> "${minutes}m"
-        minutes < 1440 -> "${minutes / 60}h"
-        else -> "${minutes / 1440}d"
-    }
-}
 
-private fun getAchievementEmoji(name: String): String {
-    return when {
-        name.contains("BOOK", ignoreCase = true) -> "📚"
-        name.contains("CHAPTER", ignoreCase = true) -> "📖"
-        name.contains("STREAK", ignoreCase = true) -> "🔥"
-        name.contains("NIGHT", ignoreCase = true) -> "🌙"
-        name.contains("EARLY", ignoreCase = true) -> "🌅"
-        name.contains("MARATHON", ignoreCase = true) -> "🏃"
-        name.contains("QUOTE", ignoreCase = true) -> "💬"
-        else -> "🏅"
-    }
-}
+// ==================== MODERN STATS TAB ====================
 
 @Composable
-private fun AchievementUnlockedDialog(
-    achievement: BuddyAchievement,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🎉", fontSize = 48.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Achievement Unlocked!")
-            }
-        },
-        text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = achievement.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = achievement.description,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    Text(
-                        text = "+${achievement.xpReward} XP",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Awesome!")
-            }
-        }
-    )
-}
-
-
-// ==================== STATS TAB ====================
-
-@Composable
-private fun StatsTab(state: ReadingHubState, isWideScreen: Boolean) {
-    val contentPadding = if (isWideScreen) 16.dp else 12.dp
+private fun ModernStatsTab(state: ReadingHubState, isWideScreen: Boolean) {
+    val contentPadding = if (isWideScreen) 20.dp else 16.dp
     val stats = state.statistics
     
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = contentPadding, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(horizontal = contentPadding, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Reading Time Card
         item {
-            DetailedStatCard(
+            ModernDetailCard(
                 title = "Reading Time",
-                icon = Icons.Default.Schedule,
-                iconColor = MaterialTheme.colorScheme.primary,
-                stats = listOf(
-                    StatItem("Total", formatDetailedTime(stats.totalReadingTimeMinutes)),
-                    StatItem("Average/Day", formatDetailedTime(if (stats.readingStreak > 0) stats.totalReadingTimeMinutes / stats.readingStreak else 0)),
-                    StatItem("Speed", "${stats.averageReadingSpeedWPM} WPM")
-                )
-            )
+                emoji = "⏱️",
+                gradient = listOf(Color(0xFF667EEA), Color(0xFF764BA2))
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ModernStatRow("Total Time", formatDetailedTime(stats.totalReadingTimeMinutes))
+                    ModernStatRow(
+                        "Average/Day",
+                        formatDetailedTime(
+                            if (stats.readingStreak > 0) stats.totalReadingTimeMinutes / stats.readingStreak else 0
+                        )
+                    )
+                    ModernStatRow("Reading Speed", "${stats.averageReadingSpeedWPM} WPM")
+                }
+            }
         }
         
         // Reading Progress Card
         item {
-            DetailedStatCard(
+            ModernDetailCard(
                 title = "Reading Progress",
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                iconColor = MaterialTheme.colorScheme.tertiary,
-                stats = listOf(
-                    StatItem("Chapters Read", stats.totalChaptersRead.toString()),
-                    StatItem("Books Completed", stats.booksCompleted.toString()),
-                    StatItem("Currently Reading", stats.currentlyReading.toString())
-                )
-            )
+                emoji = "📖",
+                gradient = listOf(Color(0xFF11998E), Color(0xFF38EF7D))
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ModernStatRow("Chapters Read", stats.totalChaptersRead.toString())
+                    ModernStatRow("Books Completed", stats.booksCompleted.toString())
+                    ModernStatRow("Currently Reading", stats.currentlyReading.toString())
+                }
+            }
         }
         
         // Streaks Card
         item {
-            DetailedStatCard(
+            ModernDetailCard(
                 title = "Streaks",
-                icon = Icons.Default.LocalFireDepartment,
-                iconColor = Color(0xFFFF6B35),
-                stats = listOf(
-                    StatItem("Current Streak", "${stats.readingStreak} days"),
-                    StatItem("Longest Streak", "${stats.longestStreak} days"),
-                    StatItem("Last Read", formatLastRead(stats.lastReadDate))
-                )
-            )
+                emoji = "🔥",
+                gradient = listOf(Color(0xFFFF6B35), Color(0xFFFF9A5A))
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ModernStatRow("Current Streak", "${stats.readingStreak} days")
+                    ModernStatRow("Longest Streak", "${stats.longestStreak} days")
+                    ModernStatRow("Last Read", formatLastRead(stats.lastReadDate))
+                }
+            }
         }
         
         // Favorite Genres
         if (stats.favoriteGenres.isNotEmpty()) {
             item {
-                GenresCard(stats.favoriteGenres)
+                ModernGenresCard(stats.favoriteGenres)
             }
         }
         
         // All Achievements
         item {
-            AllAchievementsCard(state.unlockedAchievements, state.allAchievements)
+            ModernAllAchievementsCard(state.unlockedAchievements, state.allAchievements)
         }
     }
 }
 
 @Composable
-private fun DetailedStatCard(
+private fun ModernDetailCard(
     title: String,
-    icon: ImageVector,
-    iconColor: Color,
-    stats: List<StatItem>
+    emoji: String,
+    gradient: List<Color>,
+    content: @Composable () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
+        Column {
+            // Header with gradient
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Brush.horizontalGradient(gradient))
+                    .padding(16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = emoji, fontSize = 24.sp)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            stats.forEach { stat ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = stat.label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = stat.value,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                if (stat != stats.last()) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                    )
-                }
+            // Content
+            Box(modifier = Modifier.padding(16.dp)) {
+                content()
             }
         }
     }
 }
 
-private data class StatItem(val label: String, val value: String)
-
-private fun formatDetailedTime(minutes: Long): String {
-    return when {
-        minutes < 60 -> "$minutes min"
-        minutes < 1440 -> "${minutes / 60}h ${minutes % 60}m"
-        else -> "${minutes / 1440}d ${(minutes % 1440) / 60}h"
+@Composable
+private fun ModernStatRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
-private fun formatLastRead(timestamp: Long): String {
-    if (timestamp == 0L) return "Never"
-    val now = ireader.domain.utils.extensions.currentTimeToLong()
-    val diff = now - timestamp
-    val days = diff / (1000 * 60 * 60 * 24)
-    return when {
-        days == 0L -> "Today"
-        days == 1L -> "Yesterday"
-        days < 7 -> "$days days ago"
-        else -> "${days / 7} weeks ago"
-    }
-}
 
 @Composable
-private fun GenresCard(genres: List<ireader.domain.models.entities.GenreCount>) {
+private fun ModernGenresCard(genres: List<ireader.domain.models.entities.GenreCount>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -882,13 +830,8 @@ private fun GenresCard(genres: List<ireader.domain.models.entities.GenreCount>) 
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.Category,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
+                Text(text = "📚", fontSize = 20.sp)
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Favorite Genres",
                     style = MaterialTheme.typography.titleMedium,
@@ -905,19 +848,26 @@ private fun GenresCard(genres: List<ireader.domain.models.entities.GenreCount>) 
                         color = MaterialTheme.colorScheme.secondaryContainer
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = genreCount.genre,
-                                style = MaterialTheme.typography.labelMedium
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Medium
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "(${genreCount.bookCount})",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
-                            )
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = "${genreCount.bookCount}",
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
@@ -927,7 +877,7 @@ private fun GenresCard(genres: List<ireader.domain.models.entities.GenreCount>) 
 }
 
 @Composable
-private fun AllAchievementsCard(
+private fun ModernAllAchievementsCard(
     unlockedAchievements: List<BuddyAchievement>,
     allAchievements: List<BuddyAchievement>
 ) {
@@ -943,31 +893,32 @@ private fun AllAchievementsCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Outlined.EmojiEvents,
-                        contentDescription = null,
-                        tint = Color(0xFFFFD700),
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(text = "🏆", fontSize = 20.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "All Achievements",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-                Text(
-                    text = "${unlockedAchievements.size}/${allAchievements.size}",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = "${unlockedAchievements.size}/${allAchievements.size}",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(16.dp))
             
             allAchievements.forEach { achievement ->
                 val isUnlocked = unlockedAchievements.any { it.name == achievement.name }
-                AchievementRow(achievement, isUnlocked)
+                ModernAchievementRow(achievement, isUnlocked)
                 if (achievement != allAchievements.last()) {
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -980,7 +931,7 @@ private fun AllAchievementsCard(
 }
 
 @Composable
-private fun AchievementRow(achievement: BuddyAchievement, isUnlocked: Boolean) {
+private fun ModernAchievementRow(achievement: BuddyAchievement, isUnlocked: Boolean) {
     val emoji = getAchievementEmoji(achievement.name)
     
     Row(
@@ -989,11 +940,22 @@ private fun AchievementRow(achievement: BuddyAchievement, isUnlocked: Boolean) {
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = if (isUnlocked) emoji else "🔒",
-            fontSize = 24.sp,
-            modifier = Modifier.width(40.dp)
-        )
+        // Icon with background
+        Surface(
+            shape = CircleShape,
+            color = if (isUnlocked) 
+                MaterialTheme.colorScheme.primaryContainer 
+            else 
+                MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Text(
+                text = if (isUnlocked) emoji else "🔒",
+                fontSize = 20.sp,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(12.dp))
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -1007,7 +969,7 @@ private fun AchievementRow(achievement: BuddyAchievement, isUnlocked: Boolean) {
                 text = achievement.description,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                    alpha = if (isUnlocked) 1f else 0.5f
+                    alpha = if (isUnlocked) 0.8f else 0.4f
                 )
             )
         }
@@ -1015,18 +977,20 @@ private fun AchievementRow(achievement: BuddyAchievement, isUnlocked: Boolean) {
         if (isUnlocked) {
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = Color(0xFF4CAF50).copy(alpha = 0.15f)
             ) {
                 Text(
-                    text = "+${achievement.xpReward} XP",
+                    text = "+${achievement.xpReward}",
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4CAF50)
                 )
             }
         }
     }
 }
+
 
 // ==================== QUOTES TAB ====================
 
@@ -1038,12 +1002,12 @@ private fun QuotesTab(
     onStyleChange: (QuoteCardStyle) -> Unit,
     isWideScreen: Boolean
 ) {
-    val contentPadding = if (isWideScreen) 16.dp else 12.dp
+    val contentPadding = if (isWideScreen) 20.dp else 16.dp
     
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = contentPadding, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(horizontal = contentPadding, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Style selector
         item {
@@ -1084,7 +1048,7 @@ private fun QuotesTab(
                 )
             }
             
-            items(state.quotes) { quote ->
+            items(state.quotes, key = { it.id }) { quote ->
                 QuoteCard(
                     quote = quote,
                     style = state.selectedCardStyle,
@@ -1121,12 +1085,16 @@ private fun QuoteStyleSelector(
             
             Spacer(modifier = Modifier.height(12.dp))
             
+            val styleList = remember { QuoteCardStyle.entries.toList() }
+            
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(QuoteCardStyle.entries.toList()) { style ->
+                items(styleList) { style ->
                     FilterChip(
                         selected = selectedStyle == style,
                         onClick = { onStyleChange(style) },
-                        label = { Text(style.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                        label = { 
+                            Text(style.name.lowercase().replaceFirstChar { it.uppercase() }) 
+                        }
                     )
                 }
             }
@@ -1160,6 +1128,7 @@ private fun EmptyQuotesPlaceholder() {
     }
 }
 
+
 // ==================== SUBMIT TAB ====================
 
 @Composable
@@ -1168,7 +1137,7 @@ private fun SubmitQuoteTab(
     onSubmit: (text: String, bookTitle: String, author: String, category: String) -> Unit,
     isWideScreen: Boolean
 ) {
-    val contentPadding = if (isWideScreen) 16.dp else 12.dp
+    val contentPadding = if (isWideScreen) 20.dp else 16.dp
     
     var quoteText by remember { mutableStateOf("") }
     var bookTitle by remember { mutableStateOf("") }
@@ -1177,8 +1146,8 @@ private fun SubmitQuoteTab(
     
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = contentPadding, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(horizontal = contentPadding, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
             Card(
@@ -1188,11 +1157,7 @@ private fun SubmitQuoteTab(
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Create,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                        Text(text = "✍️", fontSize = 24.sp)
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = "Submit a Quote",
@@ -1267,7 +1232,8 @@ private fun SubmitQuoteTab(
                         if (state.isSubmitting) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                         }
@@ -1332,5 +1298,103 @@ private fun SubmitQuoteTab(
                 }
             }
         }
+    }
+}
+
+
+// ==================== DIALOGS ====================
+
+@Composable
+private fun AchievementUnlockedDialog(
+    achievement: BuddyAchievement,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("🎉", fontSize = 48.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Achievement Unlocked!")
+            }
+        },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = achievement.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = achievement.description,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = "+${achievement.xpReward} XP",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Awesome!")
+            }
+        }
+    )
+}
+
+// ==================== HELPER FUNCTIONS ====================
+
+private fun formatReadingTimeCompact(minutes: Long): String {
+    return when {
+        minutes < 60 -> "${minutes}m"
+        minutes < 1440 -> "${minutes / 60}h"
+        else -> "${minutes / 1440}d"
+    }
+}
+
+private fun formatDetailedTime(minutes: Long): String {
+    return when {
+        minutes < 60 -> "$minutes min"
+        minutes < 1440 -> "${minutes / 60}h ${minutes % 60}m"
+        else -> "${minutes / 1440}d ${(minutes % 1440) / 60}h"
+    }
+}
+
+private fun formatLastRead(timestamp: Long): String {
+    if (timestamp == 0L) return "Never"
+    val now = ireader.domain.utils.extensions.currentTimeToLong()
+    val diff = now - timestamp
+    val days = diff / (1000 * 60 * 60 * 24)
+    return when {
+        days == 0L -> "Today"
+        days == 1L -> "Yesterday"
+        days < 7 -> "$days days ago"
+        days < 30 -> "${days / 7} weeks ago"
+        else -> "${days / 30} months ago"
+    }
+}
+
+private fun getAchievementEmoji(name: String): String {
+    return when {
+        name.contains("BOOK", ignoreCase = true) -> "📚"
+        name.contains("CHAPTER", ignoreCase = true) -> "📖"
+        name.contains("STREAK", ignoreCase = true) -> "🔥"
+        name.contains("NIGHT", ignoreCase = true) -> "🌙"
+        name.contains("EARLY", ignoreCase = true) -> "🌅"
+        name.contains("MARATHON", ignoreCase = true) -> "🏃"
+        name.contains("QUOTE", ignoreCase = true) -> "💬"
+        name.contains("SPEED", ignoreCase = true) -> "⚡"
+        name.contains("TIME", ignoreCase = true) -> "⏰"
+        else -> "🏅"
     }
 }

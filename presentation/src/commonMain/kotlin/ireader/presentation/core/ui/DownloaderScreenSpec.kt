@@ -13,7 +13,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import ireader.domain.models.entities.toSavedDownload
 import ireader.i18n.localize
@@ -48,6 +50,12 @@ object DownloaderScreenSpec {
         val isPaused = serviceState == ireader.domain.services.common.ServiceState.PAUSED
         val downloads = vm.downloads
         val scrollState = rememberLazyListState()
+        
+        // Use derivedStateOf to avoid unnecessary recompositions when scrolling
+        val isFabExpanded by remember {
+            derivedStateOf { scrollState.firstVisibleItemIndex == 0 }
+        }
+        
         IScaffold(
             topBar = { scrollBehavior ->
             DownloaderTopAppBar(
@@ -112,7 +120,7 @@ object DownloaderScreenSpec {
                         },
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        expanded = scrollState.firstVisibleItemIndex == 0,
+                        expanded = isFabExpanded,
                         shape =  RoundedCornerShape(12)
                     )
                 }

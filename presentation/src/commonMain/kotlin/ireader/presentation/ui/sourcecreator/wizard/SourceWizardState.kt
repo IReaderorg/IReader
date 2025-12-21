@@ -1,11 +1,13 @@
 package ireader.presentation.ui.sourcecreator.wizard
 
+import androidx.compose.runtime.Stable
 import ireader.domain.usersource.model.UserSource
 import ireader.domain.usersource.templates.SourceTemplates
 
 /**
  * State for the step-by-step source creation wizard.
  */
+@Stable
 data class SourceWizardState(
     val currentStep: WizardStep = WizardStep.CHOOSE_METHOD,
     val selectedTemplate: SourceTemplates.SourceTemplate? = null,
@@ -68,6 +70,7 @@ enum class WizardStep(val title: String, val description: String) {
 /**
  * Result of testing a source rule.
  */
+@Stable
 data class TestResult(
     val success: Boolean,
     val message: String,

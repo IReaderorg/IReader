@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Stable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -68,6 +69,7 @@ import ireader.i18n.resources.failed
 import ireader.i18n.resources.remaining
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 
+@Stable
 data class MigrationProgressState(
     val totalBooks: Int = 0,
     val completedBooks: Int = 0,
@@ -82,7 +84,9 @@ data class MigrationProgressState(
     val isCancelled: Boolean = false
 )
 
+@Stable
 data class MigrationResult(
+    val bookId: Long = 0L,
     val bookTitle: String,
     val targetSourceName: String,
     val isSuccess: Boolean,
@@ -165,7 +169,7 @@ fun ModernMigrationProgressScreen(
                     )
                 }
 
-                items(state.completedMigrations) { migration ->
+                items(state.completedMigrations, key = { it.bookId }) { migration ->
                     CompletedMigrationCard(migration)
                 }
             }
@@ -181,7 +185,7 @@ fun ModernMigrationProgressScreen(
                     )
                 }
 
-                items(state.failedMigrations) { migration ->
+                items(state.failedMigrations, key = { it.bookId }) { migration ->
                     FailedMigrationCard(migration)
                 }
             }

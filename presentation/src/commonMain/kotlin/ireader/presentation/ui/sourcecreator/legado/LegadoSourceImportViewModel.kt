@@ -1,5 +1,6 @@
 package ireader.presentation.ui.sourcecreator.legado
 
+import androidx.compose.runtime.Stable
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 /**
  * State for the Legado source import screen.
  */
+@Stable
 data class LegadoSourceImportState(
     val sourceUrl: String = "",
     val jsonContent: String = "",

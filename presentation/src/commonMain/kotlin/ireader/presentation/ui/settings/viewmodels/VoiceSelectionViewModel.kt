@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.viewmodels
 
-
+import androidx.compose.runtime.Stable
 import ireader.domain.catalogs.VoiceCatalog
 import ireader.domain.models.tts.VoiceModel
 import ireader.domain.preferences.prefs.UiPreferences
@@ -192,6 +192,7 @@ class VoiceSelectionViewModel(
 /**
  * State for voice selection screen
  */
+@Stable
 data class VoiceSelectionState(
     val allVoices: List<VoiceModel> = emptyList(),
     val filteredVoices: List<VoiceModel> = emptyList(),
@@ -205,6 +206,7 @@ data class VoiceSelectionState(
 /**
  * Download progress information
  */
+@Stable
 data class DownloadProgress(
     val voiceId: String,
     val progress: Float // 0.0 to 1.0

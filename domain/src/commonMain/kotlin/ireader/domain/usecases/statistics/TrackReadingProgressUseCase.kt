@@ -1,6 +1,7 @@
 package ireader.domain.usecases.statistics
 
 import ireader.domain.data.repository.ReadingStatisticsRepository
+import ireader.domain.utils.extensions.currentTimeToLong
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -18,7 +19,8 @@ class TrackReadingProgressUseCase(
     }
 
     /**
-     * Track reading time in minutes
+     * Track reading time in minutes.
+     * Only tracks if duration is at least 1 minute to avoid noise.
      */
     suspend fun trackReadingTime(durationMillis: Long) {
         val minutes = durationMillis.milliseconds.inWholeMinutes
@@ -28,9 +30,9 @@ class TrackReadingProgressUseCase(
     }
 
     /**
-     * Update reading streak based on last read date
-     * Checks if user read on consecutive days and updates streak accordingly
-     * Also automatically tracks the longest streak in the database
+     * Update reading streak based on last read date.
+     * Uses proper day boundary calculation to determine if user read on consecutive days.
+     * Also automatically tracks the longest streak in the database.
      */
     suspend fun updateReadingStreak(currentDateMillis: Long) {
         val lastReadDate = statisticsRepository.getLastReadDate()
@@ -45,9 +47,19 @@ class TrackReadingProgressUseCase(
         val daysSinceLastRead = calculateDaysDifference(lastReadDate, currentDateMillis)
         
         val newStreak = when {
-            daysSinceLastRead == 0L -> currentStreak // Same day, keep current streak
-            daysSinceLastRead == 1L -> currentStreak + 1 // Next day, increment streak
-            else -> 1 // Streak broken (more than 1 day gap), reset to 1
+            daysSinceLastRead == 0L -> {
+                // Same day - just update the last read date, keep streak
+                // But ensure streak is at least 1
+                maxOf(currentStreak, 1)
+            }
+            daysSinceLastRead == 1L -> {
+                // Next day - increment streak
+                currentStreak + 1
+            }
+            else -> {
+                // Streak broken (more than 1 day gap) - reset to 1
+                1
+            }
         }
         
         // Use updateStreakWithLongest to automatically track longest streak
@@ -55,18 +67,18 @@ class TrackReadingProgressUseCase(
     }
 
     /**
-     * Calculate the difference in days between two timestamps
-     * Normalizes timestamps to start of day (midnight) for accurate day comparison
+     * Calculate the difference in days between two timestamps.
+     * Uses UTC day boundaries for consistent calculation across timezones.
      */
     private fun calculateDaysDifference(date1Millis: Long, date2Millis: Long): Long {
         val millisInDay = 24 * 60 * 60 * 1000L
         
-        // Normalize both dates to start of day (midnight)
-        val date1StartOfDay = (date1Millis / millisInDay) * millisInDay
-        val date2StartOfDay = (date2Millis / millisInDay) * millisInDay
+        // Normalize both dates to start of day (midnight UTC)
+        val date1Day = date1Millis / millisInDay
+        val date2Day = date2Millis / millisInDay
         
         // Calculate difference in days
-        return kotlin.math.abs(date2StartOfDay - date1StartOfDay) / millisInDay
+        return kotlin.math.abs(date2Day - date1Day)
     }
 
     /**

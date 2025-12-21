@@ -117,13 +117,15 @@ class ReaderStatisticsViewModel(
     
     /**
      * Called when a chapter is closed
+     * Note: Reading time tracking is handled by ReaderScreenSpec's DisposableEffect
+     * to avoid double counting. This method only tracks chapter completion and streak.
      */
     fun onChapterClosed() {
         val openTime = chapterOpenTimestamp ?: return
         val closeTime = currentTimeToLong()
         val readingTime = closeTime - openTime
         
-        // Track reading time
+        // Track reading time locally for session stats
         totalReadingTimeMs += readingTime
         
         // Update session stats
@@ -132,7 +134,7 @@ class ReaderStatisticsViewModel(
             chaptersRead = _sessionStats.chaptersRead + 1
         )
         
-        // Save to preferences and database
+        // Save to preferences (local tracking only, not database)
         scope.launch {
             try {
                 val currentTotal = readerPreferences.totalReadingTimeMillis().get()
@@ -141,14 +143,8 @@ class ReaderStatisticsViewModel(
                 val currentChapters = readerPreferences.chaptersCompleted().get()
                 readerPreferences.chaptersCompleted().set(currentChapters + 1)
                 
-                // Track reading time in statistics database (convert to minutes)
-                val readingMinutes = readingTime / 60000
-                if (readingMinutes > 0) {
-                    trackReadingProgressUseCase.trackReadingTime(readingTime)
-                }
-                
-                // Update reading streak
-                trackReadingProgressUseCase.updateReadingStreak(closeTime)
+                // Note: Reading time to database is tracked by ReaderScreenSpec's DisposableEffect
+                // to avoid double counting. We only track streak here.
                 
                 // Track chapter completion if user read at least 80% of the chapter
                 if (currentProgress >= 0.8f && wordsRead > 0) {

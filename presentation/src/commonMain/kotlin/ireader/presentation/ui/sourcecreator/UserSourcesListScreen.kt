@@ -18,6 +18,7 @@ import ireader.presentation.ui.sourcecreator.components.UserSourceCard
 /**
  * State for the user sources list screen.
  */
+@Stable
 data class UserSourcesListState(
     val sources: List<UserSource> = emptyList(),
     val isLoading: Boolean = false,

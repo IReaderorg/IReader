@@ -398,6 +398,7 @@ enum class PageType(val displayName: String) {
 /**
  * State for auto-detect screen.
  */
+@Stable
 data class AutoDetectState(
     val url: String = "",
     val pageType: PageType = PageType.SEARCH,

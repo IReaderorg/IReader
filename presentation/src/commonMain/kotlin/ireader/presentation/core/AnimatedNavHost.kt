@@ -44,11 +44,12 @@ fun AnimatedNavHost(
     // Linear easing is smoother for short animations - no acceleration/deceleration jank
     val smoothEasing = remember { LinearEasing }
     
-    // Very short duration for snappy, responsive feel
-    // 150ms is fast enough to feel instant but slow enough to be perceived
+    // Ultra-short duration for native-like instant response
+    // 100ms is the sweet spot - fast enough to feel instant, smooth enough to perceive
+    // Native Android Settings uses ~100ms for most transitions
     val fadeAnimationSpec: FiniteAnimationSpec<Float> = remember {
         tween(
-            durationMillis = 150,
+            durationMillis = 100,
             easing = smoothEasing
         )
     }

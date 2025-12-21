@@ -125,6 +125,14 @@ fun LibraryScreen(
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
             
+            // Pre-compute filtered categories to avoid recalculation on each recomposition
+            val nonSystemCategories = remember(state.categories) {
+                state.categories.filter { !it.category.isSystemCategory }
+            }
+            val nonSystemCategoryList = remember(state.categories) {
+                state.categories.map { it.category }.filter { !it.isSystemCategory }
+            }
+            
             EditCategoriesDialog(
                 vm = vm,
                 showDialog = showCategoryDialog,
@@ -134,13 +142,13 @@ fun LibraryScreen(
                 onRemoteInInsertQueue = editCategoryOnRemoteInInsertQueue,
                 onAddToInsertQueue = editCategoryOnAddToInsertQueue,
                 onRemoteInDeleteQueue = editCategoryOnRemoteInDeleteQueue,
-                categories = state.categories.filter { !it.category.isSystemCategory }
+                categories = nonSystemCategories
             )
             
             // Update Category Dialog
             if (state.showUpdateCategoryDialog) {
                 ireader.presentation.ui.home.library.components.UpdateCategoryDialog(
-                    categories = state.categories.map { it.category }.filter { !it.isSystemCategory },
+                    categories = nonSystemCategoryList,
                     onCategorySelected = { category -> vm.updateCategory(category.id) },
                     onDismiss = { vm.hideUpdateCategoryDialog() }
                 )

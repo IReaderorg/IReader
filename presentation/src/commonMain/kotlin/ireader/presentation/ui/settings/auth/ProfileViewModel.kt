@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.auth
 
-
+import androidx.compose.runtime.Stable
 import ireader.domain.models.remote.Badge
 import ireader.domain.models.remote.ConnectionStatus
 import ireader.domain.models.remote.User
@@ -282,6 +282,7 @@ class ProfileViewModel(
     }
 }
 
+@Stable
 data class ProfileState(
     val currentUser: User? = null,
     val isLoading: Boolean = false,

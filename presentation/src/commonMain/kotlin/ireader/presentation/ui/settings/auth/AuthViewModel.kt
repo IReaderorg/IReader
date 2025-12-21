@@ -1,6 +1,6 @@
 package ireader.presentation.ui.settings.auth
 
-
+import androidx.compose.runtime.Stable
 import ireader.domain.usecases.remote.RemoteBackendUseCases
 import ireader.presentation.ui.core.viewmodel.StateViewModel
 import kotlinx.coroutines.launch
@@ -201,6 +201,7 @@ sealed class AuthError {
     }
 }
 
+@Stable
 data class AuthState(
     val email: String = "",
     val password: String = "",

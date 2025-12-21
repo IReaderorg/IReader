@@ -239,66 +239,53 @@ private fun PopularBooksList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Header card
-        item {
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn() + expandVertically()
-            ) {
-                HeaderCard(totalBooks = books.size)
-            }
+        // Header card - no animation needed, instant display
+        item(key = "header") {
+            HeaderCard(totalBooks = books.size)
         }
         
-        // Books list
-        itemsIndexed(books) { index, book ->
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 300,
-                        delayMillis = index * 50
-                    )
-                ) + slideInVertically(
-                    initialOffsetY = { it / 2 }
+        // Books list - use animateItem() for smooth list animations instead of AnimatedVisibility
+        itemsIndexed(
+            items = books,
+            key = { _, book -> book.bookId }
+        ) { index, book ->
+            // Direct rendering without AnimatedVisibility for better performance
+            if (index < 3) {
+                TopBookCard(
+                    book = book,
+                    rank = index + 1,
+                    isLoading = loadingBookIds.contains(book.bookId),
+                    onClick = { onBookClick(book) },
+                    onExternalLinkClick = { onExternalLinkClick(book.bookUrl) }
                 )
-            ) {
-                if (index < 3) {
-                    TopBookCard(
-                        book = book,
-                        rank = index + 1,
-                        isLoading = loadingBookIds.contains(book.bookId),
-                        onClick = { onBookClick(book) },
-                        onExternalLinkClick = { onExternalLinkClick(book.bookUrl) }
-                    )
-                } else {
-                    PopularBookCard(
-                        book = book,
-                        rank = index + 1,
-                        isLoading = loadingBookIds.contains(book.bookId),
-                        onClick = { onBookClick(book) },
-                        onExternalLinkClick = { onExternalLinkClick(book.bookUrl) }
-                    )
-                }
+            } else {
+                PopularBookCard(
+                    book = book,
+                    rank = index + 1,
+                    isLoading = loadingBookIds.contains(book.bookId),
+                    onClick = { onBookClick(book) },
+                    onExternalLinkClick = { onExternalLinkClick(book.bookUrl) }
+                )
             }
         }
         
         // Loading more indicator
         if (isLoadingMore) {
-            item {
+            item(key = "loading") {
                 LoadingMoreIndicator()
             }
         }
         
         // Rate limit message
         if (isRateLimited) {
-            item {
+            item(key = "rate_limit") {
                 RateLimitMessage()
             }
         }
         
         // End of list message
         if (!hasMore && books.isNotEmpty()) {
-            item {
+            item(key = "end") {
                 EndOfListMessage()
             }
         }

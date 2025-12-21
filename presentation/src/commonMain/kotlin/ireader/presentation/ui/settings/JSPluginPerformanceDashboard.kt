@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,10 @@ fun JSPluginPerformanceDashboard(
     modifier: Modifier = Modifier
 ) {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
+    
+    // Cache the entries list to avoid recreation on each recomposition
+    val metricsList = remember(metrics) { metrics.entries.toList() }
+    
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -35,7 +40,7 @@ fun JSPluginPerformanceDashboard(
             )
         }
         
-        if (metrics.isEmpty()) {
+        if (metricsList.isEmpty()) {
             item {
                 Text(
                     text = localizeHelper.localize(Res.string.no_performance_data_available_yet),
@@ -44,7 +49,7 @@ fun JSPluginPerformanceDashboard(
                 )
             }
         } else {
-            items(metrics.entries.toList()) { (pluginId, metric) ->
+            items(metricsList) { (pluginId, metric) ->
                 PluginMetricsCard(pluginId, metric)
             }
         }
