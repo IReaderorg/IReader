@@ -26,12 +26,22 @@ sealed class IReaderError : Exception() {
     ) : IReaderError()
     
     /**
-     * Source/plugin related errors
+     * Source/extension related errors
      */
     data class SourceError(
         override val message: String,
         val sourceId: Long? = null,
         val sourceName: String? = null,
+        override val cause: Throwable? = null
+    ) : IReaderError()
+    
+    /**
+     * Plugin related errors
+     */
+    data class PluginError(
+        override val message: String,
+        val pluginId: String? = null,
+        val pluginName: String? = null,
         override val cause: Throwable? = null
     ) : IReaderError()
     
@@ -78,6 +88,8 @@ fun Throwable.toIReaderError(): IReaderError {
     val errorMessage = this.message?.lowercase() ?: ""
     return when {
         this is IReaderError -> this
+        
+        // Network errors
         errorMessage.contains("unknown host") || errorMessage.contains("unable to resolve") -> 
             IReaderError.NetworkError(
                 message = "No internet connection",
@@ -88,11 +100,60 @@ fun Throwable.toIReaderError(): IReaderError {
                 message = "Connection timeout",
                 cause = this
             )
+        errorMessage.contains("connection refused") ->
+            IReaderError.NetworkError(
+                message = "Connection refused",
+                cause = this
+            )
+        
+        // Plugin errors
+        this is ClassNotFoundException || this is NoClassDefFoundError ->
+            IReaderError.PluginError(
+                message = "Plugin class not found: ${this.message}",
+                cause = this
+            )
+        this is LinkageError || this is UnsatisfiedLinkError ->
+            IReaderError.PluginError(
+                message = "Plugin native library error: ${this.message}",
+                cause = this
+            )
+        errorMessage.contains("plugin") ->
+            IReaderError.PluginError(
+                message = this.message ?: "Plugin error",
+                cause = this
+            )
+        
+        // Source errors
+        errorMessage.contains("source") || errorMessage.contains("extension") ||
+        errorMessage.contains("catalog") ->
+            IReaderError.SourceError(
+                message = this.message ?: "Source error",
+                cause = this
+            )
+        
+        // Parse errors
+        errorMessage.contains("parse") || errorMessage.contains("json") ||
+        errorMessage.contains("xml") || errorMessage.contains("html") ->
+            IReaderError.ParseError(
+                message = "Failed to parse content: ${this.message}",
+                cause = this
+            )
+        
+        // Storage errors
         this is okio.IOException || errorMessage.contains("io") || errorMessage.contains("file") -> 
             IReaderError.StorageError(
                 message = "File operation failed: ${this.message}",
                 cause = this
             )
+        
+        // Auth errors
+        errorMessage.contains("401") || errorMessage.contains("403") ||
+        errorMessage.contains("unauthorized") || errorMessage.contains("forbidden") ->
+            IReaderError.AuthError(
+                message = "Authentication required",
+                cause = this
+            )
+        
         else -> IReaderError.UnknownError(
             message = this.message ?: "An unknown error occurred",
             cause = this

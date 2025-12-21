@@ -488,4 +488,20 @@ class UiPreferences(private val preferenceStore: PreferenceStore) {
     fun featureStoreCacheDurationHours(): Preference<Int> {
         return preferenceStore.getInt("feature_store_cache_duration_hours", 24)
     }
+    
+    // ============================================================================
+    // Storage Settings
+    // ============================================================================
+    
+    /**
+     * Whether to prefer SAF (Storage Access Framework) folder for saving files.
+     * When enabled and SAF folder is available without access issues, files like
+     * JS sources, IReader sources, backups, and epubs will be saved directly to
+     * the SAF folder instead of the cache directory.
+     * Falls back to cache directory if SAF is unavailable or has permission issues.
+     * Default: false (use cache directory)
+     */
+    fun preferSafStorage(): Preference<Boolean> {
+        return preferenceStore.getBoolean("prefer_saf_storage", false)
+    }
 }

@@ -352,6 +352,21 @@ fun GeneralSettingScreen(
                 
                 Components.Space,
                 
+                // Storage Settings Section
+                Components.Header(
+                        text = "Storage Settings",
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+                        icon = Icons.Filled.Storage
+                ),
+                Components.Switch(
+                        preference = vm.preferSafStorage,
+                        title = "Prefer SAF Storage",
+                        subtitle = "Save JS sources, extensions, backups, and epubs to SAF folder when available. Falls back to cache if unavailable.",
+                        icon = Icons.Filled.Storage
+                ),
+                
+                Components.Space,
+                
                 // Catalog Settings Section
                 Components.Header(
                         text = localizeHelper.localize(Res.string.catalog_settings),
@@ -611,6 +626,9 @@ class GeneralSettingScreenViewModel(
     
     // Character Art preferences
     val showCharacterArtInDetails = uiPreferences.showCharacterArtInDetails().asStateIn(scope)
+    
+    // Storage preferences
+    val preferSafStorage = uiPreferences.preferSafStorage().asStateIn(scope)
 
     /**
      * Returns language choices filtered to only include languages that have

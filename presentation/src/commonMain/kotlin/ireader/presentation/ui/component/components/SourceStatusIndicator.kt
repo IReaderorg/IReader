@@ -32,6 +32,11 @@ fun SourceStatusIndicator(
     showLabel: Boolean = false
 ) {
     val (color, icon, label) = when (status) {
+        is SourceStatus.Working -> Triple(
+            Color(0xFF4CAF50), // Green
+            Icons.Default.CheckCircle,
+            "Working"
+        )
         is SourceStatus.Online -> Triple(
             Color(0xFF4CAF50), // Green
             Icons.Default.CheckCircle,
@@ -51,6 +56,36 @@ fun SourceStatusIndicator(
             Color(0xFFF44336), // Red
             Icons.Default.Warning,
             "Error"
+        )
+        is SourceStatus.Outdated -> Triple(
+            Color(0xFFFF9800), // Orange
+            Icons.Default.Warning,
+            "Outdated"
+        )
+        is SourceStatus.LoadFailed -> Triple(
+            Color(0xFFF44336), // Red
+            Icons.Default.Error,
+            "Load Failed"
+        )
+        is SourceStatus.RequiresPlugin -> Triple(
+            Color(0xFF9C27B0), // Purple
+            Icons.Default.Warning,
+            "Plugin Required"
+        )
+        is SourceStatus.Incompatible -> Triple(
+            Color(0xFFF44336), // Red
+            Icons.Default.Error,
+            "Incompatible"
+        )
+        is SourceStatus.Deprecated -> Triple(
+            Color(0xFF795548), // Brown
+            Icons.Default.Warning,
+            "Deprecated"
+        )
+        is SourceStatus.Unknown -> Triple(
+            Color(0xFF9E9E9E), // Gray
+            Icons.Default.Warning,
+            "Unknown"
         )
     }
     
@@ -87,10 +122,17 @@ fun SourceStatusDot(
     modifier: Modifier = Modifier
 ) {
     val color = when (status) {
+        is SourceStatus.Working -> Color(0xFF4CAF50) // Green
         is SourceStatus.Online -> Color(0xFF4CAF50) // Green
         is SourceStatus.Offline -> Color(0xFFF44336) // Red
         is SourceStatus.LoginRequired -> Color(0xFFFFC107) // Yellow/Amber
         is SourceStatus.Error -> Color(0xFFF44336) // Red
+        is SourceStatus.Outdated -> Color(0xFFFF9800) // Orange
+        is SourceStatus.LoadFailed -> Color(0xFFF44336) // Red
+        is SourceStatus.RequiresPlugin -> Color(0xFF9C27B0) // Purple
+        is SourceStatus.Incompatible -> Color(0xFFF44336) // Red
+        is SourceStatus.Deprecated -> Color(0xFF795548) // Brown
+        is SourceStatus.Unknown -> Color(0xFF9E9E9E) // Gray
     }
     
     Box(

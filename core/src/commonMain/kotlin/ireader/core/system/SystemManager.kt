@@ -34,9 +34,11 @@ class SystemManager(
     fun initialize() {
         IReaderLog.info("Initializing SystemManager", tag = "SystemManager")
         
-        GlobalExceptionHandler.initialize { throwable ->
-            handleCrash(throwable)
-        }
+        GlobalExceptionHandler.initialize(
+            onCrash = { throwable ->
+                handleCrash(throwable)
+            }
+        )
         
         startHealthMonitoring()
         

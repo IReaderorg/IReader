@@ -324,10 +324,17 @@ private fun LanguageChip(language: Language) {
 @Composable
 private fun StatusDot(status: SourceStatus) {
     val color = when (status) {
+        is SourceStatus.Working -> Color(0xFF4CAF50)
         is SourceStatus.Online -> Color(0xFF4CAF50)
         is SourceStatus.Offline -> Color(0xFFF44336)
         is SourceStatus.LoginRequired -> Color(0xFFFF9800)
         is SourceStatus.Error -> Color(0xFFFF5722)
+        is SourceStatus.Outdated -> Color(0xFFFF9800)
+        is SourceStatus.LoadFailed -> Color(0xFFF44336)
+        is SourceStatus.RequiresPlugin -> Color(0xFF9C27B0)
+        is SourceStatus.Incompatible -> Color(0xFFF44336)
+        is SourceStatus.Deprecated -> Color(0xFF795548)
+        is SourceStatus.Unknown -> Color(0xFF9E9E9E)
     }
     
     Box(

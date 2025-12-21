@@ -71,7 +71,7 @@ class CommunitySource(
                 ChapterInfo(
                     key = metadata.id,
                     name = buildChapterName(metadata),
-                    number = metadata.chapterNumber,
+                    number = parseChapterNumber(metadata.chapterName, metadata.chapterNumber),
                     dateUpload = metadata.createdAt,
                     scanlator = metadata.contributorName.ifBlank { "Anonymous" }
                 )
@@ -82,10 +82,35 @@ class CommunitySource(
         }
     }
     
+    /**
+     * Parse chapter number from chapter name.
+     * Extracts numeric value from strings like "Chapter 12", "Ch. 5", "12 - Title", etc.
+     * Falls back to metadata chapter number if parsing fails.
+     */
+    private fun parseChapterNumber(chapterName: String, fallback: Float): Float {
+        // Try to extract number from chapter name
+        // Patterns: "Chapter 12", "Ch. 5", "12 - Title", "Episode 3", etc.
+        val patterns = listOf(
+            Regex("""(?:chapter|ch\.?|episode|ep\.?)\s*(\d+(?:\.\d+)?)""", RegexOption.IGNORE_CASE),
+            Regex("""^(\d+(?:\.\d+)?)\s*[-:.]"""),
+            Regex("""(\d+(?:\.\d+)?)""")
+        )
+        
+        for (pattern in patterns) {
+            val match = pattern.find(chapterName)
+            if (match != null) {
+                val numberStr = match.groupValues[1]
+                numberStr.toFloatOrNull()?.let { return it }
+            }
+        }
+        
+        return fallback
+    }
+    
     private fun buildChapterName(metadata: TranslationMetadata): String {
-        val langSuffix = " [${metadata.targetLanguage.uppercase()}]"
+        // Don't add language suffix to chapter name - language is now in book title
         val engineSuffix = " (${metadata.engineId})"
-        return "${metadata.chapterName}$langSuffix$engineSuffix"
+        return "${metadata.chapterName}$engineSuffix"
     }
     
     override suspend fun getPageList(chapter: ChapterInfo, commands: List<Command<*>>): List<Page> {
@@ -117,7 +142,7 @@ class CommunitySource(
             listOf(Text("Error loading chapter: ${e.message}"))
         }
     }
-    
+
     override suspend fun getMangaList(sort: Listing?, page: Int): MangasPageInfo {
         if (!isConfigured() || translationRepository == null) {
             return MangasPageInfo(
@@ -142,13 +167,14 @@ class CommunitySource(
             val mangas = books.map { (key, bookTranslations) ->
                 val first = bookTranslations.first()
                 val chapterCount = bookTranslations.size
-                val languages = bookTranslations.map { it.targetLanguage }.distinct().joinToString(", ")
+                val languages = bookTranslations.map { it.targetLanguage }.distinct()
+                val languageDisplay = languages.joinToString(", ") { it.uppercase() }
                 
                 MangaInfo(
                     key = key,
-                    title = first.bookTitle,
+                    title = "${first.bookTitle} [$languageDisplay]",
                     author = first.bookAuthor,
-                    description = "Community translations: $chapterCount chapters\nLanguages: $languages\nContributors: ${bookTranslations.map { it.contributorName }.distinct().take(3).joinToString(", ")}",
+                    description = "Community translations: $chapterCount chapters\nContributors: ${bookTranslations.map { it.contributorName }.distinct().take(3).joinToString(", ")}",
                     genres = listOf("Community", "AI Translation"),
                     status = MangaInfo.UNKNOWN,
                     cover = first.bookCover.ifBlank { ICON_URL }
@@ -200,13 +226,14 @@ class CommunitySource(
             val mangas = books.map { (key, bookTranslations) ->
                 val first = bookTranslations.first()
                 val chapterCount = bookTranslations.size
-                val languages = bookTranslations.map { it.targetLanguage }.distinct().joinToString(", ")
+                val languages = bookTranslations.map { it.targetLanguage }.distinct()
+                val languageDisplay = languages.joinToString(", ") { it.uppercase() }
                 
                 MangaInfo(
                     key = key,
-                    title = first.bookTitle,
+                    title = "${first.bookTitle} [$languageDisplay]",
                     author = first.bookAuthor,
-                    description = "Community translations: $chapterCount chapters\nLanguages: $languages\nContributors: ${bookTranslations.map { it.contributorName }.distinct().take(3).joinToString(", ")}",
+                    description = "Community translations: $chapterCount chapters\nContributors: ${bookTranslations.map { it.contributorName }.distinct().take(3).joinToString(", ")}",
                     genres = listOf("Community", "AI Translation"),
                     status = MangaInfo.UNKNOWN,
                     cover = first.bookCover.ifBlank { ICON_URL }
@@ -225,7 +252,7 @@ class CommunitySource(
             )
         }
     }
-    
+
     private fun createWelcomePlaceholder(): MangaInfo {
         return MangaInfo(
             key = "welcome",
