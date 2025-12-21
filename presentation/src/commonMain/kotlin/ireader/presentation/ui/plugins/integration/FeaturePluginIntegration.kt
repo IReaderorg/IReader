@@ -10,14 +10,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import ireader.domain.plugins.FeaturePlugin
 import ireader.domain.plugins.PluginManager
-import ireader.domain.plugins.PluginMenuItem
-import ireader.domain.plugins.PluginScreen
 import ireader.domain.plugins.PluginStatus
 import ireader.domain.plugins.PluginType
-import ireader.domain.plugins.ReaderContext
+import ireader.plugin.api.FeaturePlugin
 import ireader.plugin.api.PluginAction
+import ireader.plugin.api.PluginMenuItem
+import ireader.plugin.api.PluginScreen
+import ireader.plugin.api.PluginScreenContext
+import ireader.plugin.api.ReaderContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -79,34 +80,48 @@ class FeaturePluginIntegration(
     }
     
     /**
+     * Find a plugin screen by route pattern
+     */
+    fun findScreenByRoute(route: String): PluginScreen? {
+        return getPluginScreens().find { screen ->
+            // Match route patterns like "notes/{bookId}/{chapterId}" with actual routes
+            val pattern = screen.route.replace(Regex("\\{[^}]+\\}"), "[^/]+")
+            route.matches(Regex(pattern))
+        }
+    }
+    
+    /**
      * Handle reader context events and notify all feature plugins
      * Requirements: 6.3
      * 
      * @param context Current reading context
      * @param scope Coroutine scope for executing actions
      * @param navController Navigation controller for navigation actions
+     * @return List of actions from plugins
      */
     fun handleReaderContext(
         context: ReaderContext,
         scope: CoroutineScope,
         navController: NavHostController
-    ) {
-        scope.launch {
-            try {
-                val featurePlugins = getEnabledFeaturePlugins()
-                
-                featurePlugins.forEach { plugin ->
-                    try {
-                        val action = plugin.onReaderContext(context)
-                        action?.let { executePluginAction(it, navController) }
-                    } catch (e: Exception) {
-                        // Log error but continue with other plugins
-                    }
+    ): List<PluginAction> {
+        val actions = mutableListOf<PluginAction>()
+        
+        try {
+            val featurePlugins = getEnabledFeaturePlugins()
+            
+            featurePlugins.forEach { plugin ->
+                try {
+                    val action = plugin.onReaderContext(context)
+                    action?.let { actions.add(it) }
+                } catch (e: Exception) {
+                    // Log error but continue with other plugins
                 }
-            } catch (e: Exception) {
-                // Don't disrupt main app functionality
             }
+        } catch (e: Exception) {
+            // Don't disrupt main app functionality
         }
+        
+        return actions
     }
     
     /**
@@ -116,7 +131,7 @@ class FeaturePluginIntegration(
      * @param action Plugin action to execute
      * @param navController Navigation controller for navigation actions
      */
-    private fun executePluginAction(
+    fun executePluginAction(
         action: PluginAction,
         navController: NavHostController
     ) {
@@ -127,7 +142,12 @@ class FeaturePluginIntegration(
                 }
                 is PluginAction.ShowNotification -> {
                     // This would integrate with the app's notification system
-                    // For now, we'll just log it
+                }
+                is PluginAction.ShowMenu -> {
+                    // Menu items are handled by the UI layer
+                }
+                is PluginAction.ShowBottomSheet -> {
+                    // Bottom sheets are handled by the UI layer
                 }
                 is PluginAction.Custom -> {
                     // Custom actions would be handled by specific plugin implementations
@@ -185,8 +205,16 @@ class FeaturePluginIntegration(
      */
     private fun getEnabledFeaturePlugins(): List<FeaturePlugin> {
         return pluginManager.getEnabledPlugins()
-            .filter { it.manifest.type == PluginType.FEATURE }
+            .filter { it.manifest.type == ireader.plugin.api.PluginType.FEATURE ||
+                     it.manifest.type == ireader.plugin.api.PluginType.AI }
             .filterIsInstance<FeaturePlugin>()
+    }
+    
+    /**
+     * Check if any feature plugins are available
+     */
+    fun hasFeaturePlugins(): Boolean {
+        return getEnabledFeaturePlugins().isNotEmpty()
     }
 }
 

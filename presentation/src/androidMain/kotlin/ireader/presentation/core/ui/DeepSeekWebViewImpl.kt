@@ -51,6 +51,7 @@ private const val TAG = "DeepSeekWebViewImpl"
 private const val DEEPSEEK_URL = "https://chat.deepseek.com"
 
 @SuppressLint("SetJavaScriptEnabled")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 actual fun DeepSeekWebViewImpl(
     engine: WebscrapingTranslateEngine,
@@ -62,7 +63,7 @@ actual fun DeepSeekWebViewImpl(
     // State - using primitive state variants for better performance
     var isLoading by remember { mutableStateOf(true) }
     var isLoggedIn by remember { mutableStateOf(false) }
-    var isCaptchaRequired = remember { mutableStateOf(false) }
+    val isCaptchaRequired = remember { mutableStateOf(false) }
     var currentUrl by remember { mutableStateOf(DEEPSEEK_URL) }
     var messageToSend by remember { mutableStateOf<String?>(null) }
     var progress by remember { mutableFloatStateOf(0f) }
@@ -449,6 +450,7 @@ private fun createJavaScriptInterface(
 }
 
 // Inject JavaScript to listen for DeepSeek responses
+@Suppress("UNUSED_PARAMETER")
 private fun injectResponseListener(
     webView: WebView, 
     engine: WebscrapingTranslateEngine,
@@ -594,6 +596,7 @@ private fun checkForCloudflare(url: String, view: WebView, isCaptchaRequired: Mu
 }
 
 // Function to handle "Skip to content" button
+@Suppress("LongMethod")
 private fun handleSkipToContentButton(webView: WebView) {
     val js = """
         (function() {
@@ -663,6 +666,7 @@ private fun handleSkipToContentButton(webView: WebView) {
 }
 
 // Helper function to assist with Cloudflare challenges
+@Suppress("UNUSED_PARAMETER")
 private fun injectCloudflareHelper(webView: WebView) {
     // Do nothing - let the user complete the verification manually
     android.util.Log.d(TAG, "Letting user complete Cloudflare verification manually")
@@ -720,6 +724,7 @@ private fun setDesktopMode(webView: WebView) {
 }
 
 // Save cookies from the WebView
+@Suppress("UNUSED_PARAMETER")
 private fun saveCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
     val cookieManager = android.webkit.CookieManager.getInstance()
     val cookies = cookieManager.getCookie(DEEPSEEK_URL)
@@ -732,6 +737,7 @@ private fun saveCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
 }
 
 // Save cookies from context
+@Suppress("UNUSED_PARAMETER")
 private fun saveCookies(context: android.content.Context, engine: WebscrapingTranslateEngine) {
     val cookieManager = android.webkit.CookieManager.getInstance()
     val cookies = cookieManager.getCookie(DEEPSEEK_URL)
@@ -744,6 +750,7 @@ private fun saveCookies(context: android.content.Context, engine: WebscrapingTra
 }
 
 // Load cookies into WebView
+@Suppress("UNUSED_PARAMETER")
 private fun loadCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
     val cookieManager = android.webkit.CookieManager.getInstance()
     cookieManager.removeAllCookies(null)
@@ -757,4 +764,4 @@ private fun loadCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
         }
     }
     cookieManager.flush()
-} 
+}

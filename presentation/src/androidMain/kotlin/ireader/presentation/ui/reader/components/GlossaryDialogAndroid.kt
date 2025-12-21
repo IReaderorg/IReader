@@ -17,6 +17,7 @@ import ireader.i18n.UiText
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
+@Suppress("LongMethod", "TooGenericExceptionCaught")
 actual fun GlossaryDialogWithFilePickers(
     glossaryEntries: ImmutableList<Glossary>,
     bookTitle: String?,
@@ -108,7 +109,7 @@ private fun writeToUri(context: Context, uri: Uri, content: String): Boolean {
         }
         true
     } catch (e: Exception) {
-        e.printStackTrace()
+        android.util.Log.e("GlossaryDialog", "Failed to write glossary to URI: $uri", e)
         false
     }
 }

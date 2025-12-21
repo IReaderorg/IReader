@@ -17,7 +17,7 @@ actual suspend fun createFontFamilyFromFile(file: VirtualFile): FontFamily {
             Font(javaFile, FontWeight.Normal)
         )
     } catch (e: Exception) {
-        e.printStackTrace()
+        android.util.Log.e("FontRegistry", "Failed to load font from file: ${file.path}", e)
         FontFamily.Default
     }
 }

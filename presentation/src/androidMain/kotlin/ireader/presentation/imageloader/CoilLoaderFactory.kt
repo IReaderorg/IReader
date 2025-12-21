@@ -35,21 +35,14 @@ class CoilLoaderFactory(
 ) : SingletonImageLoader.Factory {
     
     companion object {
-        // Increased disk cache for faster subsequent loads
-        private const val DISK_CACHE_SIZE_DEFAULT = 100L * 1024 * 1024 // 100MB
-        
         // Increased memory cache for instant display
         private const val MEMORY_CACHE_PERCENT_LOW = 0.20
         private const val MEMORY_CACHE_PERCENT_MEDIUM = 0.25
         private const val MEMORY_CACHE_PERCENT_HIGH = 0.30
-        
-        // ZERO crossfade for native-like instant display
-        private const val CROSSFADE_LOW = 0
-        private const val CROSSFADE_MEDIUM = 0
-        private const val CROSSFADE_HIGH = 0 // Even high-end gets instant display
     }
     
     @OptIn(ExperimentalCoroutinesApi::class)
+    @Suppress("LongMethod")
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         val performanceTier = DevicePerformanceUtil.getPerformanceTier(context as Context)
         val isLowEnd = performanceTier == DevicePerformanceUtil.PerformanceTier.LOW

@@ -288,6 +288,7 @@ private fun PreferenceDividerPreviewAndroid() {
 @Preview(name = "Complete Settings Screen", showBackground = true, heightDp = 800)
 @Preview(name = "Complete Settings Screen - Dark", showBackground = true, heightDp = 800, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
+@Suppress("LongMethod")
 private fun CompleteSettingsScreenPreviewAndroid() {
     val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
     MaterialTheme {

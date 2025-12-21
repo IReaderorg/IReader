@@ -103,6 +103,7 @@ actual fun LazyColumnScrollbar(
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
  */
 @Composable
+@Suppress("UNUSED_PARAMETER")
 private fun LazyColumnScrollbar(
     listState: LazyListState,
     rightSide: Boolean = true,
@@ -224,11 +225,13 @@ private class LazyColumnScrollbarState(
         return top * topRealMax / topMax
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun setDragOffset(value: Float, dragOffset: Float): Float {
         val maxValue = (1f - normalizedThumbSize).coerceAtLeast(0f)
         return value.coerceIn(0f, maxValue)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     suspend fun setScrollOffset(newOffset: Float, dragOffset: Float) {
         val totalItemsCount = listState.layoutInfo.totalItemsCount.toFloat()
         val exactIndex = offsetCorrectionInverse(totalItemsCount * dragOffset)
@@ -296,6 +299,7 @@ private fun BoxWithConstraintsScope.LazyColumnScrollbarIndicator(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun BoxWithConstraintsScope.LazyColumnScrollbarThumb(
     scrollbarState: LazyColumnScrollbarState,

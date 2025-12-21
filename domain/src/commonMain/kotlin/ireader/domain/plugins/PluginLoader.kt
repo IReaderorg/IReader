@@ -25,41 +25,138 @@ class PluginLoader(
         isLenient = true
     }
     
+    // Additional plugin directories (e.g., SAF folder for testing)
+    private val additionalPluginDirs = mutableListOf<String>()
+    
     /**
-     * Load all plugins from the plugins directory
+     * Add an additional directory to scan for plugins.
+     * Useful for testing via ADB push to a SAF-accessible folder.
+     */
+    fun addPluginDirectory(path: String) {
+        if (path.isNotBlank() && !additionalPluginDirs.contains(path)) {
+            additionalPluginDirs.add(path)
+            println("[PluginLoader] Added plugin directory: $path")
+        }
+    }
+    
+    /**
+     * Remove an additional plugin directory.
+     */
+    fun removePluginDirectory(path: String) {
+        additionalPluginDirs.remove(path)
+    }
+    
+    /**
+     * Get all plugin directories being scanned.
+     */
+    fun getPluginDirectories(): List<String> {
+        val dirs = mutableListOf<String>()
+        dirs.add(fileSystem.getDataDirectory().resolve("plugins").path)
+        dirs.addAll(additionalPluginDirs)
+        return dirs
+    }
+    
+    /**
+     * Load all plugins from the plugins directory and additional directories
      * Scans for .iplugin files and loads each valid plugin
      */
     suspend fun loadAll(): List<Plugin> {
         return withContext(Dispatchers.Default) {
-            val pluginsDir = fileSystem.getDataDirectory().resolve("plugins")
-            println("[PluginLoader] Loading plugins from: ${pluginsDir.path}")
+            val allPlugins = mutableListOf<Plugin>()
+            val loadedIds = mutableSetOf<String>()
             
-            if (!pluginsDir.exists()) {
-                println("[PluginLoader] Plugins directory does not exist, creating it")
-                pluginsDir.mkdirs()
-                return@withContext emptyList()
+            // Load from main plugins directory
+            val mainPluginsDir = fileSystem.getDataDirectory().resolve("plugins")
+            println("[PluginLoader] Loading plugins from main dir: ${mainPluginsDir.path}")
+            
+            if (!mainPluginsDir.exists()) {
+                println("[PluginLoader] Main plugins directory does not exist, creating it")
+                mainPluginsDir.mkdirs()
+            } else {
+                val plugins = loadFromDirectory(mainPluginsDir, loadedIds)
+                allPlugins.addAll(plugins)
             }
             
-            val allFiles = pluginsDir.listFiles()
-            println("[PluginLoader] Found ${allFiles.size} files in plugins directory")
-            
-            val ipluginFiles = allFiles.filter { it.isFile() && it.extension == "iplugin" }
-            println("[PluginLoader] Found ${ipluginFiles.size} .iplugin files: ${ipluginFiles.map { it.name }}")
-            
-            ipluginFiles.mapNotNull { file ->
+            // Load from additional directories (e.g., SAF folder for testing)
+            for (additionalDir in additionalPluginDirs) {
                 try {
-                    println("[PluginLoader] Loading plugin: ${file.name}")
-                    val plugin = loadPlugin(file)
-                    println("[PluginLoader] Loaded plugin: ${plugin?.manifest?.id} (type: ${plugin?.manifest?.type})")
-                    plugin
+                    val dir = fileSystem.getFile(additionalDir)
+                    if (dir.exists() && dir.isDirectory()) {
+                        println("[PluginLoader] Loading plugins from additional dir: $additionalDir")
+                        val plugins = loadFromDirectory(dir, loadedIds)
+                        allPlugins.addAll(plugins)
+                    } else {
+                        println("[PluginLoader] Additional dir not found or not a directory: $additionalDir")
+                    }
                 } catch (e: Exception) {
-                    // Log error but continue loading other plugins
-                    println("[PluginLoader] Failed to load plugin from ${file.name}: ${e.message}")
-                    e.printStackTrace()
-                    null
+                    println("[PluginLoader] Error loading from additional dir $additionalDir: ${e.message}")
                 }
             }
+            
+            // Also check common test locations
+            val testLocations = listOf(
+                "/sdcard/Download/plugins",
+                "/sdcard/IReader/plugins",
+                "/storage/emulated/0/Download/plugins",
+                "/storage/emulated/0/IReader/plugins"
+            )
+            
+            for (testPath in testLocations) {
+                if (!additionalPluginDirs.contains(testPath)) {
+                    try {
+                        val testDir = fileSystem.getFile(testPath)
+                        if (testDir.exists() && testDir.isDirectory()) {
+                            println("[PluginLoader] Found test plugins dir: $testPath")
+                            val plugins = loadFromDirectory(testDir, loadedIds)
+                            allPlugins.addAll(plugins)
+                        }
+                    } catch (_: Exception) {
+                        // Ignore - test location not accessible
+                    }
+                }
+            }
+            
+            println("[PluginLoader] Total plugins loaded: ${allPlugins.size}")
+            allPlugins
         }
+    }
+    
+    /**
+     * Load plugins from a specific directory
+     */
+    private suspend fun loadFromDirectory(
+        dir: VirtualFile,
+        loadedIds: MutableSet<String>
+    ): List<Plugin> {
+        val plugins = mutableListOf<Plugin>()
+        
+        val allFiles = dir.listFiles()
+        println("[PluginLoader] Found ${allFiles.size} files in ${dir.path}")
+        
+        val ipluginFiles = allFiles.filter { it.isFile() && it.extension == "iplugin" }
+        println("[PluginLoader] Found ${ipluginFiles.size} .iplugin files: ${ipluginFiles.map { it.name }}")
+        
+        for (file in ipluginFiles) {
+            try {
+                println("[PluginLoader] Loading plugin: ${file.name}")
+                val plugin = loadPlugin(file)
+                if (plugin != null) {
+                    // Skip if already loaded (from another directory)
+                    if (loadedIds.contains(plugin.manifest.id)) {
+                        println("[PluginLoader] Skipping duplicate plugin: ${plugin.manifest.id}")
+                        continue
+                    }
+                    loadedIds.add(plugin.manifest.id)
+                    plugins.add(plugin)
+                    println("[PluginLoader] Loaded plugin: ${plugin.manifest.id} (type: ${plugin.manifest.type})")
+                }
+            } catch (e: Exception) {
+                println("[PluginLoader] Failed to load plugin from ${file.name}: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+        
+        return plugins
     }
     
     /**

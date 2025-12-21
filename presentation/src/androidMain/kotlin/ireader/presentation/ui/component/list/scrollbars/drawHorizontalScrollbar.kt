@@ -51,9 +51,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.InspectorInfo
@@ -132,19 +129,7 @@ private class ScrollbarNode(
     
     // Cached values
     private var thickness: Float = 0f
-    private var color: Color = Color.Black.copy(alpha = 0.364f)
-    
-    private val nestedScrollConnection = object : NestedScrollConnection {
-        override fun onPostScroll(
-            consumed: Offset,
-            available: Offset,
-            source: NestedScrollSource,
-        ): Offset {
-            val delta = if (orientation == Orientation.Horizontal) consumed.x else consumed.y
-            if (delta != 0f) scrolled.tryEmit(Unit)
-            return Offset.Zero
-        }
-    }
+    private val color: Color = Color.Black.copy(alpha = 0.364f)
     
     init {
         scope.launch {
@@ -167,6 +152,7 @@ private class ScrollbarNode(
         this.positionOffset = positionOffset
     }
     
+    @Suppress("CyclomaticComplexMethod")
     override fun ContentDrawScope.draw() {
         drawContent()
         

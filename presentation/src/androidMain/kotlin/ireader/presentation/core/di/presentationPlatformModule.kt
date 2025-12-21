@@ -55,5 +55,4 @@ actual val presentationPlatformModule = module  {
     single<ireader.presentation.core.theme.DynamicColorScheme> { 
         ireader.presentation.core.theme.AndroidDynamicColorScheme(get()) 
     }
-
 }

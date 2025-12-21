@@ -172,6 +172,7 @@ private class WebViewScreenState(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("LongParameterList")
 private fun WebViewScreenContent(
     vm: WebViewPageModel,
     navController: NavHostController?,
@@ -243,6 +244,7 @@ private fun WebViewScreenContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("UNUSED_PARAMETER", "LongParameterList", "LongMethod")
 private fun ModernWebViewTopBar(
     scrollBehavior: TopAppBarScrollBehavior,
     currentUrl: String,
@@ -416,6 +418,7 @@ private fun ModernWebViewTopBar(
 }
 
 @Composable
+@Suppress("LongParameterList", "LongMethod")
 private fun ActionMenu(
     onFetchBook: () -> Unit,
     onFetchChapter: () -> Unit,
@@ -546,6 +549,7 @@ private fun ActionMenuItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("LongParameterList")
 private fun WebViewTopBar(
     vm: WebViewPageModel,
     navController: NavHostController?,
@@ -609,6 +613,7 @@ private fun WebViewFloatingActionButton(
 }
 
 @Composable
+@Suppress("LongParameterList")
 private fun WebViewActionMenu(
     vm: WebViewPageModel,
     scope: CoroutineScope,
@@ -689,6 +694,7 @@ private fun WebViewFetchFeedback(screenState: WebViewScreenState) {
     }
 }
 
+@Suppress("LongParameterList", "TooGenericExceptionCaught")
 private fun handleFetchBook(
     vm: WebViewPageModel,
     webView: android.webkit.WebView?,
@@ -720,6 +726,7 @@ private fun handleFetchBook(
     }
 }
 
+@Suppress("LongParameterList", "TooGenericExceptionCaught")
 private fun handleFetchChapter(
     vm: WebViewPageModel,
     webView: android.webkit.WebView?,
@@ -751,6 +758,7 @@ private fun handleFetchChapter(
     }
 }
 
+@Suppress("LongParameterList", "TooGenericExceptionCaught")
 private fun handleFetchChapters(
     vm: WebViewPageModel,
     webView: android.webkit.WebView?,

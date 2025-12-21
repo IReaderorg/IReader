@@ -267,6 +267,7 @@ class DefaultAutoFetchDetector : AutoFetchDetector {
         }
     }
     
+    @Suppress("CyclomaticComplexMethod")
     override suspend fun autoFetch(
         url: String,
         webView: WebView,

@@ -11,12 +11,16 @@ import kotlinx.serialization.Serializable
  * Different loaders can support different source formats:
  * - Tachiyomi/Mihon extensions (APK-based)
  * - LNReader sources (JS-based)
+ * - IReader built-in sources
  * - Custom sources
  * 
  * All sources are unified through the [UnifiedSource] interface,
  * allowing IReader to display them in the same UI regardless of origin.
+ * 
+ * Source loaders should also implement [ExtensionLoader] to handle
+ * the actual loading of extension files.
  */
-interface SourceLoaderPlugin : Plugin {
+interface SourceLoaderPlugin : Plugin, ExtensionLoader {
     /**
      * Loader type identifier.
      */
@@ -84,6 +88,7 @@ interface SourceLoaderPlugin : Plugin {
     
     /**
      * Install an extension (if supported).
+     * Uses the ExtensionLoader and ExtensionInstaller interfaces.
      */
     suspend fun installExtension(
         extension: SourceExtensionMeta,
@@ -104,6 +109,18 @@ interface SourceLoaderPlugin : Plugin {
      * Check for extension updates (if supported).
      */
     suspend fun checkForUpdates(): List<SourceExtensionUpdate> = emptyList()
+    
+    /**
+     * Get the extension installer for this loader.
+     * Returns null if installation is not supported.
+     */
+    fun getInstaller(): ExtensionInstaller? = null
+    
+    /**
+     * Get the extension downloader for this loader.
+     * Returns null if downloading is not supported.
+     */
+    fun getDownloader(): ExtensionDownloader? = null
 }
 
 /**

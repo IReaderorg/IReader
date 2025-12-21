@@ -12,7 +12,7 @@ actual fun NavHostController.navigateTo(spec: WebViewScreenSpec) {
     // Using launchSingleTop and popUpTo to prevent duplicate destinations and manage back stack
     navigate(
         NavigationRoutes.webView(
-            url = spec.url ?: "",
+            url = spec.url.orEmpty(),
             sourceId = spec.sourceId,
             bookId = spec.bookId,
             chapterId = spec.chapterId,

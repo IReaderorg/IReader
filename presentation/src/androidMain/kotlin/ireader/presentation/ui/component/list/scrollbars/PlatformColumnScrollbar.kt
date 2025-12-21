@@ -79,6 +79,7 @@ actual fun ColumnScrollbar(
  * @param thumbMinHeight Thumb minimum height proportional to total scrollbar's height (eg: 0.1 -> 10% of total)
  * @param visibleHeightDp Visible height of column view
  */
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun ColumnScrollbar(
     state: ScrollState,

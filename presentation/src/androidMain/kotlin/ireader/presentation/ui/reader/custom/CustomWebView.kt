@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.viewinterop.AndroidView
-import ireader.presentation.ui.reader.custom.WebViewNavigator
 import ireader.presentation.ui.web.WebViewState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +47,7 @@ import kotlinx.coroutines.withContext
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun WebView(
         modifier: Modifier = Modifier,
         preconfigureWebView: WebView? = null,
@@ -57,7 +57,6 @@ fun WebView(
 //    client: ireader.ui.reader.custom.AccompanistWebViewClient = remember { ireader.ui.reader.custom.AccompanistWebViewClient() },
 //    chromeClient: ireader.ui.reader.custom.AccompanistWebChromeClient = remember { ireader.ui.reader.custom.AccompanistWebChromeClient() }
 ) {
-    val scope = rememberCoroutineScope()
     var webView by remember { mutableStateOf<WebView?>(null) }
 
     BackHandler(captureBackPresses && navigator.canGoBack) {

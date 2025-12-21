@@ -108,7 +108,7 @@ class WebViewPageModel(
     private val webpageImpl: WebViewPageStateImpl,
     val webViewManager : WebViewManger,
     val autoFetchDetector: AutoFetchDetector = DefaultAutoFetchDetector(),
-    private val localizeHelper: LocalizeHelper
+    @Suppress("UNUSED_PARAMETER") localizeHelper: LocalizeHelper
 ) : ireader.presentation.ui.core.viewmodel.BaseViewModel(), WebViewPageState by webpageImpl {
     data class Param(
         val url: String?,
@@ -205,13 +205,11 @@ class WebViewPageModel(
             webView: WebView,
     ) {
         val catalog = catalog
-        // Don't change state to Fetching - keep button always enabled
-        val previousState = fetchChapterState
         fetchChapterState = FetchButtonState.Fetching(FetchButtonState.FetchType.CHAPTER)
         scope.launch {
             try {
                 val pageSource = webView.getHtml()
-                val url = webView.url ?: ""
+                val url = webView.url.orEmpty()
                 remoteUseCases.getRemoteReadingContent(
                     chapter,
                     catalog,
@@ -237,7 +235,7 @@ class WebViewPageModel(
                 // Try smart extraction on error
                 try {
                     val pageSource = webView.getHtml()
-                    val url = webView.url ?: ""
+                    val url = webView.url.orEmpty()
                     trySmartExtraction(chapter, pageSource, url)
                 } catch (fallbackError: Exception) {
                     fetchChapterState = FetchButtonState.Enabled // Reset to enabled on error
@@ -247,6 +245,7 @@ class WebViewPageModel(
         }
     }
     
+    @Suppress("UNUSED_PARAMETER")
     private fun trySmartExtraction(chapter: Chapter, pageSource: String, url: String) {
         try {
             val extractor = SmartContentExtractor()
@@ -279,7 +278,7 @@ class WebViewPageModel(
         scope.launch {
             try {
                 val pageSource = webView.getHtml()
-                val url = webView.url ?: ""
+                val url = webView.url.orEmpty()
                 val localChapters = getChapterUseCase.findChaptersByBookId(book.id)
                 remoteUseCases.getRemoteChapters(
                     book,
@@ -323,7 +322,7 @@ class WebViewPageModel(
         scope.launch {
             try {
                 val pageSource = webView.getHtml()
-                val url = webView.originalUrl ?: webView.url ?: ""
+                val url = webView.originalUrl ?: webView.url.orEmpty()
                 remoteUseCases.getBookDetail(
                     book ?: Book(key = url, title = "", sourceId = source?.id ?: 0),
                     catalog,
@@ -383,7 +382,7 @@ class WebViewPageModel(
         scope.launch {
             try {
                 val result = autoFetchDetector.autoFetch(
-                    url = webView.url ?: "",
+                    url = webView.url.orEmpty(),
                     webView = webView,
                     source = source,
                     viewModel = this@WebViewPageModel
@@ -411,7 +410,7 @@ class WebViewPageModel(
      */
     suspend fun detectNovelContent(webView: WebView): NovelDetectionResult {
         return autoFetchDetector.detectNovelContent(
-            url = webView.url ?: "",
+            url = webView.url.orEmpty(),
             webView = webView,
             source = source
         )

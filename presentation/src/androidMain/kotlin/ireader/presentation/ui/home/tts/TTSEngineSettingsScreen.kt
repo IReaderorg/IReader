@@ -206,6 +206,7 @@ private fun openAndroidSystemTTSSettings(context: android.content.Context) {
  * Shows available system TTS voices
  */
 @Composable
+@Suppress("LongMethod")
 actual fun TTSVoiceSelectionScreen(
     isDesktop: Boolean,
     onDismiss: () -> Unit

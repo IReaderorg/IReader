@@ -2,7 +2,6 @@ package ireader.presentation.ui.reader.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -14,8 +13,6 @@ import java.io.File
  */
 @Composable
 actual fun rememberCustomFontFamily(font: CustomFont?): FontFamily {
-    val context = LocalContext.current
-    
     return remember(font) {
         if (font == null || font.filePath.isEmpty()) {
             FontFamily.Default
@@ -30,8 +27,8 @@ actual fun rememberCustomFontFamily(font: CustomFont?): FontFamily {
                 } else {
                     FontFamily.Default
                 }
-            } catch (e: Exception) {
-                // If font loading fails, fallback to default
+            } catch (@Suppress("SwallowedException") e: Exception) {
+                // If font loading fails, fallback to default - this is expected behavior
                 FontFamily.Default
             }
         }

@@ -52,6 +52,7 @@ private const val TAG = "ChatGptWebViewImpl"
 private const val CHATGPT_URL = "https://chat.openai.com"
 
 @SuppressLint("SetJavaScriptEnabled")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 actual fun ChatGptWebViewImpl(
     engine: WebscrapingTranslateEngine,
@@ -64,7 +65,7 @@ actual fun ChatGptWebViewImpl(
     // State - using primitive state variants for better performance
     var isLoading by remember { mutableStateOf(true) }
     var isLoggedIn by remember { mutableStateOf(false) }
-    var isCaptchaRequired = remember { mutableStateOf(false) }
+    val isCaptchaRequired = remember { mutableStateOf(false) }
     var currentUrl by remember { mutableStateOf(CHATGPT_URL) }
     var messageToSend by remember { mutableStateOf<String?>(null) }
     var progress by remember { mutableFloatStateOf(0f) }
@@ -451,6 +452,7 @@ private fun createJavaScriptInterface(
 }
 
 // Inject JavaScript to listen for ChatGPT responses
+@Suppress("UNUSED_PARAMETER")
 private fun injectResponseListener(
     webView: WebView, 
     engine: WebscrapingTranslateEngine,
@@ -534,6 +536,7 @@ private fun sendMessageToChatGPT(webView: WebView, message: String) {
 }
 
 // Save cookies from the WebView
+@Suppress("UNUSED_PARAMETER")
 private fun saveCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
     val cookieManager = android.webkit.CookieManager.getInstance()
     val cookies = cookieManager.getCookie("https://chat.openai.com")
@@ -546,6 +549,7 @@ private fun saveCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
 }
 
 // Save cookies from context
+@Suppress("UNUSED_PARAMETER")
 private fun saveCookies(context: android.content.Context, engine: WebscrapingTranslateEngine) {
     val cookieManager = android.webkit.CookieManager.getInstance()
     val cookies = cookieManager.getCookie("https://chat.openai.com")
@@ -558,6 +562,7 @@ private fun saveCookies(context: android.content.Context, engine: WebscrapingTra
 }
 
 // Load cookies into WebView
+@Suppress("UNUSED_PARAMETER")
 private fun loadCookies(webView: WebView, engine: WebscrapingTranslateEngine) {
     val cookieManager = android.webkit.CookieManager.getInstance()
     cookieManager.removeAllCookies(null)
@@ -626,12 +631,14 @@ private fun checkForCloudflare(url: String, view: WebView, isCaptchaRequired: Mu
 }
 
 // Helper function to assist with Cloudflare challenges
+@Suppress("UNUSED_PARAMETER")
 private fun injectCloudflareHelper(webView: WebView) {
     // Do nothing - let the user complete the verification manually
     android.util.Log.d(TAG, "Letting user complete Cloudflare verification manually")
 }
 
 // Function to handle "Skip to content" button
+@Suppress("LongMethod")
 private fun handleSkipToContentButton(webView: WebView) {
     val js = """
         (function() {
@@ -749,4 +756,4 @@ private fun setDesktopMode(webView: WebView) {
     webView.evaluateJavascript(cssInjection) { result ->
         android.util.Log.d(TAG, "CSS injection result: $result")
     }
-} 
+}

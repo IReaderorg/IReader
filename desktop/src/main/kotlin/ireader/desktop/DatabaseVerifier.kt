@@ -272,4 +272,4 @@ object DatabaseVerifier {
         stmt.execute(updatesViewSql)
         println("updatesView created successfully.")
     }
-} 
+}

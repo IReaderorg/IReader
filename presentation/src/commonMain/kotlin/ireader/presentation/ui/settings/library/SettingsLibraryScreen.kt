@@ -318,15 +318,6 @@ fun SettingsLibraryScreen(
                     onClick = { viewModel.navigateToCategoryManagement() }
                 )
             }
-            
-            item {
-                SettingsItem(
-                    title = localizeHelper.localize(Res.string.library_statistics),
-                    description = "View detailed library statistics and analytics",
-                    icon = Icons.Outlined.Analytics,
-                    onClick = { viewModel.navigateToLibraryStatistics() }
-                )
-            }
         }
     }
     

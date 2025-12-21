@@ -57,8 +57,8 @@ class WindowInsetsController(private val window: Window) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = navigationBarContrastEnforced
             }
-        } catch (e: Exception) {
-            // Silently fail on unsupported devices
+        } catch (@Suppress("SwallowedException") e: Exception) {
+            // Silently fail on unsupported devices - this is expected behavior
         }
     }
     
@@ -83,8 +83,8 @@ class WindowInsetsController(private val window: Window) {
             window.decorView.post {
                 window.decorView.invalidate()
             }
-        } catch (e: Exception) {
-            // Silently fail on unsupported devices
+        } catch (@Suppress("SwallowedException") e: Exception) {
+            // Silently fail on unsupported devices - this is expected behavior
         }
     }
     
@@ -126,7 +126,6 @@ class WindowInsetsController(private val window: Window) {
 @Composable
 fun rememberWindowInsetsController(): WindowInsetsController {
     val context = LocalContext.current
-    val view = LocalView.current
     val window = (context as Activity).window
     
     return remember { WindowInsetsController(window) }

@@ -26,18 +26,21 @@ interface TachiSourceLoaderPlugin : SourceLoaderPlugin {
     
     override fun supportsRepositories(): Boolean = true
     
+    override val supportedFormats: List<ExtensionFormat>
+        get() = listOf(ExtensionFormat.APK)
+    
     // ==================== Tachi-Specific Methods ====================
     
     /**
      * Load a Tachiyomi extension from an APK file.
      * @return Extension info with loaded sources
      */
-    suspend fun loadExtension(apkPath: String): TachiExtensionInfo
+    suspend fun loadTachiExtension(apkPath: String): TachiExtensionInfo
     
     /**
-     * Unload an extension and release resources.
+     * Unload a Tachi extension and release resources.
      */
-    suspend fun unloadExtension(pkgName: String)
+    fun unloadTachiExtension(pkgName: String)
     
     /**
      * Get the raw Tachi source (for advanced usage).
@@ -50,9 +53,9 @@ interface TachiSourceLoaderPlugin : SourceLoaderPlugin {
     fun getTachiCatalogueSources(): List<TachiCatalogueSource>
     
     /**
-     * Validate an APK before loading.
+     * Validate a Tachi APK before loading.
      */
-    suspend fun validateExtension(apkPath: String): TachiValidationResult
+    suspend fun validateTachiExtension(apkPath: String): TachiValidationResult
     
     /**
      * Get loaded Tachi extensions.

@@ -143,6 +143,16 @@ fun CommonNavHost(
             ireader.presentation.core.ui.ReadingHubScreenSpec().Content()
         }
         
+        // Quotes Screen - Instagram-style immersive quotes browsing
+        composable(NavigationRoutes.quotesScreen) {
+            ireader.presentation.core.ui.QuotesScreenSpec().Content()
+        }
+        
+        // Submit Quote Screen - Submit new quotes
+        composable(NavigationRoutes.submitQuote) {
+            ireader.presentation.core.ui.SubmitQuoteScreenSpec().Content()
+        }
+        
         // Community Hub - parent screen for all community features
         composable(NavigationRoutes.communityHub) {
             ireader.presentation.core.ui.CommunityHubScreenSpec().Content()

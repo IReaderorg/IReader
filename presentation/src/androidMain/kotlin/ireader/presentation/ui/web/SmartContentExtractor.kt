@@ -316,8 +316,7 @@ class SmartContentExtractor {
             })();
             """.trimIndent()
         ) { result ->
-            continuation.resume(result ?: "") {}
+            continuation.resume(result.orEmpty()) {}
         }
     }
-
 }

@@ -298,6 +298,7 @@ private fun ChatGptWebViewTopBar(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun ChatGptWebViewStatusMessages(
     webViewState: ChatGptWebViewState,
     localizeHelper: ireader.i18n.LocalizeHelper
@@ -423,6 +424,7 @@ private fun ChatGptWebViewRetryButtons(
     }
 }
 @Composable
+@Suppress("LongMethod", "TooGenericExceptionCaught")
 private fun ChatGptWebViewMain(
     webViewState: ChatGptWebViewState,
     engine: WebscrapingTranslateEngine,
@@ -546,6 +548,7 @@ private fun isWebViewAvailable(context: Context): Boolean {
 }
 
 // Create WebView with appropriate settings
+@Suppress("UNUSED_PARAMETER")
 private fun createWebView(context: Context, engine: WebscrapingTranslateEngine): WebView {
     android.util.Log.d(TAG, "Creating WebView with enhanced settings")
     return WebView(context).apply {
@@ -830,6 +833,7 @@ private fun WebView.sendMessageToChatGPT(message: String) {
 }
 
 // Save cookies
+@Suppress("UNUSED_PARAMETER")
 private fun saveCookies(context: Context, engine: WebscrapingTranslateEngine) {
     val cookieManager = CookieManager.getInstance()
     val cookies = cookieManager.getCookie("https://chat.openai.com")
@@ -867,4 +871,4 @@ private fun WebView.loadCookies(cookies: String) {
         }
     }
     cookieManager.flush()
-} 
+}

@@ -157,5 +157,4 @@ actual class PlatformReaderSettingReader(
     actual fun WebView() {
         ireader.presentation.ui.reader.custom.WebView(preconfigureWebView = webViewManager.webView)
     }
-
 }

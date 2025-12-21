@@ -157,6 +157,7 @@ actual class QuoteCardSharer(
         }
     }
     
+    @Suppress("UNUSED_PARAMETER")
     private fun drawBokehEffect(canvas: Canvas, width: Int, height: Int, colors: StyleColors) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val random = Random(123)
@@ -282,6 +283,7 @@ actual class QuoteCardSharer(
         canvas.drawRoundRect(innerRect, 4f, 4f, paint)
     }
     
+    @Suppress("LongMethod")
     private fun drawContentCard(canvas: Canvas, width: Int, height: Int, quote: Quote, colors: StyleColors, style: QuoteCardStyle) {
         val cardMargin = 60f
         val cardTop = 180f
@@ -310,7 +312,6 @@ actual class QuoteCardSharer(
         textPaint.letterSpacing = 0.01f
         val quoteLines = wrapText(quote.text, textPaint, (width - cardMargin * 2 - 80).toInt())
         val lineHeight = 64f
-        val quoteTextHeight = quoteLines.size * lineHeight
         
         // Position opening quote mark at top left of text area
         var currentY = cardTop + 60f
@@ -463,6 +464,7 @@ actual class QuoteCardSharer(
         return lines
     }
     
+    @Suppress("LongMethod")
     private fun getStyleColors(style: QuoteCardStyle): StyleColors {
         return when (style) {
             QuoteCardStyle.GRADIENT_SUNSET -> StyleColors(

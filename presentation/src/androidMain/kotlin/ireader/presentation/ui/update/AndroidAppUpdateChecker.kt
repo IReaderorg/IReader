@@ -27,7 +27,7 @@ import java.io.File
 class AndroidAppUpdateChecker(
     private val context: Application,
     private val httpClients: HttpClients,
-    private val appPreferences: AppPreferences,
+    @Suppress("UNUSED_PARAMETER") appPreferences: AppPreferences,
 ) : AppUpdateChecker {
     
     private val json = Json { 

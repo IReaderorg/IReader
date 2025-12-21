@@ -39,6 +39,7 @@ import okio.Source
  * Available request parameter:
  * - [USE_CUSTOM_COVER_KEY]: Use custom cover if set by user, default is true
  */
+@Suppress("LongParameterList")
 class BookCoverFetcher(
     private val url: String?,
     private val isLibraryManga: Boolean,
@@ -112,6 +113,7 @@ class BookCoverFetcher(
         )
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun fileUriLoader(uri: String): FetchResult {
         throw NotImplementedError("URI loading must be implemented platform-specifically")
     }

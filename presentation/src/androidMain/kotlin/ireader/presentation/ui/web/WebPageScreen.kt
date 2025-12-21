@@ -66,6 +66,7 @@ import ireader.i18n.resources.Res
 @ExperimentalCoroutinesApi
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun WebPageScreen(
     viewModel: WebViewPageModel,
     source: ireader.core.source.CatalogSource?,
@@ -230,6 +231,7 @@ private fun WebPageErrorContent(
 }
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 private fun WebPageMainContent(
     webViewState: WebViewState,
     viewModel: WebViewPageModel,
@@ -277,6 +279,7 @@ private fun WebPageProgressIndicator(
     }
 }
 
+@Suppress("UNUSED_PARAMETER")
 private fun createOptimizedWebView(
     context: Context,
     viewModel: WebViewPageModel,
@@ -350,7 +353,7 @@ private fun createOptimizedWebViewClient(
             super.onPageFinished(view, url)
             webViewState.loadingState = LoadingState.Finished()
             webViewState.lastLoadedUrl = url
-            webViewState.pageTitle = view.title ?: ""
+            webViewState.pageTitle = view.title.orEmpty()
             screenState.canGoBack = view.canGoBack()
             screenState.canGoForward = view.canGoForward()
             

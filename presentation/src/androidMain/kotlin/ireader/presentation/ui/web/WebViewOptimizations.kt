@@ -45,17 +45,9 @@ object WebViewResourceOptimizer {
     )
     
     /**
-     * Resource types that can be blocked for faster loading
-     */
-    private val blockableResourceTypes = setOf(
-        "image", // Can be enabled/disabled based on settings
-        "media",
-        "font" // Fonts can slow down initial load
-    )
-    
-    /**
      * Check if a resource should be blocked
      */
+    @Suppress("UNUSED_PARAMETER")
     fun shouldBlockResource(url: String, resourceType: String? = null): Boolean {
         // Check if URL matches blocked patterns
         val urlLower = url.lowercase()
@@ -82,6 +74,7 @@ object WebViewResourceOptimizer {
     /**
      * Intercept and optimize resource loading
      */
+    @Suppress("UNUSED_PARAMETER")
     fun interceptRequest(
         view: WebView?,
         request: WebResourceRequest,

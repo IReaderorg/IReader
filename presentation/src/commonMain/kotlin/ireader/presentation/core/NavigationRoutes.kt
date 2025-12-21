@@ -38,6 +38,8 @@ object NavigationRoutes {
     const val webView = "webView"
     const val browseSettings = "browseSettings"
     const val readingHub = "readingHub"
+    const val quotesScreen = "quotesScreen"
+    const val submitQuote = "submitQuote"
     const val communityHub = "communityHub"
     const val characterArtGallery = "characterArtGallery"
     const val characterArtUpload = "characterArtUpload"

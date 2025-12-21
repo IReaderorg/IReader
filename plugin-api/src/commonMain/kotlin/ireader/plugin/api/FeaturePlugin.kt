@@ -88,15 +88,54 @@ data class PluginMenuItem(
 
 /**
  * Screen provided by a plugin.
+ * The content is a Composable lambda that receives PluginScreenContext.
  */
 data class PluginScreen(
     /** Navigation route for the screen */
     val route: String,
     /** Screen title */
     val title: String,
-    /** Screen content (Composable function reference) */
+    /** 
+     * Screen content - should be a @Composable (PluginScreenContext) -> Unit lambda.
+     * The app will invoke this with the appropriate context.
+     */
     val content: Any
 )
+
+/**
+ * Context passed to plugin screens for rendering.
+ */
+data class PluginScreenContext(
+    /** Current book ID (if in reader context) */
+    val bookId: Long? = null,
+    /** Current chapter ID (if in reader context) */
+    val chapterId: Long? = null,
+    /** Chapter title */
+    val chapterTitle: String? = null,
+    /** Book title */
+    val bookTitle: String? = null,
+    /** Selected text (if any) */
+    val selectedText: String? = null,
+    /** Chapter content (for AI processing) */
+    val chapterContent: String? = null,
+    /** Callback to dismiss the screen */
+    val onDismiss: () -> Unit = {},
+    /** Plugin's data storage */
+    val dataStorage: PluginDataStorageApi? = null
+)
+
+/**
+ * Simple data storage API for plugins to persist data.
+ */
+interface PluginDataStorageApi {
+    suspend fun putString(key: String, value: String)
+    suspend fun getString(key: String, defaultValue: String = ""): String
+    suspend fun putLong(key: String, value: Long)
+    suspend fun getLong(key: String, defaultValue: Long = 0L): Long
+    suspend fun putBoolean(key: String, value: Boolean)
+    suspend fun getBoolean(key: String, defaultValue: Boolean = false): Boolean
+    suspend fun remove(key: String)
+}
 
 /**
  * Reading context provided to feature plugins.
@@ -127,6 +166,20 @@ sealed class PluginAction {
      * Show a notification.
      */
     data class ShowNotification(val title: String, val message: String) : PluginAction()
+    
+    /**
+     * Show plugin menu items.
+     */
+    data class ShowMenu(val menuItemIds: List<String>) : PluginAction()
+    
+    /**
+     * Show a bottom sheet with plugin content.
+     * The content lambda receives PluginScreenContext.
+     */
+    data class ShowBottomSheet(
+        val title: String,
+        val content: Any // @Composable (PluginScreenContext) -> Unit
+    ) : PluginAction()
     
     /**
      * Execute custom action.
