@@ -82,6 +82,24 @@ sealed class IReaderError : Exception() {
 }
 
 /**
+ * Check if the throwable is a class loading error (JVM-specific exceptions).
+ * Uses class name matching for multiplatform compatibility.
+ */
+private fun Throwable.isClassLoadingError(): Boolean {
+    val className = this::class.simpleName ?: return false
+    return className in setOf("ClassNotFoundException", "NoClassDefFoundError")
+}
+
+/**
+ * Check if the throwable is a linkage error (JVM-specific exceptions).
+ * Uses class name matching for multiplatform compatibility.
+ */
+private fun Throwable.isLinkageError(): Boolean {
+    val className = this::class.simpleName ?: return false
+    return className in setOf("LinkageError", "UnsatisfiedLinkError")
+}
+
+/**
  * Extension function to convert generic exceptions to IReaderError
  */
 fun Throwable.toIReaderError(): IReaderError {
@@ -106,13 +124,13 @@ fun Throwable.toIReaderError(): IReaderError {
                 cause = this
             )
         
-        // Plugin errors
-        this is ClassNotFoundException || this is NoClassDefFoundError ->
+        // Plugin errors (JVM-specific exceptions, check by class name for multiplatform)
+        isClassLoadingError() ->
             IReaderError.PluginError(
                 message = "Plugin class not found: ${this.message}",
                 cause = this
             )
-        this is LinkageError || this is UnsatisfiedLinkError ->
+        isLinkageError() ->
             IReaderError.PluginError(
                 message = "Plugin native library error: ${this.message}",
                 cause = this

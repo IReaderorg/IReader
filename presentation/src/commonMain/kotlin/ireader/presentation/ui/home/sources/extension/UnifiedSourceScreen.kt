@@ -48,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -242,7 +243,7 @@ private fun ModernSegmentedControl(
                 modifier = Modifier
                     .width(segmentWidth)
                     .height(48.dp)
-                    .offset(x = segmentWidth * indicatorOffset)
+                    .offset { IntOffset((segmentWidth * indicatorOffset).roundToPx(), 0) }
                     .clip(RoundedCornerShape(12.dp))
                     .background(primaryColor)
             )

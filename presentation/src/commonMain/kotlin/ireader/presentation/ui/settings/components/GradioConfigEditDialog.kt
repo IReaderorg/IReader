@@ -124,7 +124,7 @@ fun GradioConfigEditDialog(
                     )
                 }
                 
-                itemsIndexed(parameters) { index, param ->
+                itemsIndexed(parameters, key = { index, param -> "${param.name}-$index" }) { index, param ->
                     ParameterEditor(
                         param = param,
                         onUpdate = { newParam ->

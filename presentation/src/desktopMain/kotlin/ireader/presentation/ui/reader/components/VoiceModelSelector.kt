@@ -86,7 +86,7 @@ fun VoiceModelSelector(
                         .heightIn(max = 400.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(models) { model ->
+                    items(models, key = { it.id }) { model ->
                         VoiceModelItem(
                             model = model,
                             isSelected = model.id == selectedModelId,

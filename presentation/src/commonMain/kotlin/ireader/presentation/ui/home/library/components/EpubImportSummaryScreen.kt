@@ -125,6 +125,9 @@ fun EpubImportSummaryDialog(
                 
                 // Failed imports list
                 if (summary.failureCount > 0) {
+                    // Cache filtered results to avoid filtering on every recomposition
+                    val failedResults = remember(summary.results) { summary.results.filter { !it.success } }
+                    
                     Text(
                         text = localize(Res.string.failed_files),
                         style = MaterialTheme.typography.titleSmall
@@ -136,7 +139,7 @@ fun EpubImportSummaryDialog(
                             .height(200.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(summary.results.filter { !it.success }) { result ->
+                        items(failedResults, key = { it.fileName }) { result ->
                             FailedImportItem(result)
                         }
                     }

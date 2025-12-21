@@ -40,7 +40,7 @@ val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocaliz
             LazyRow(
                 contentPadding = PaddingValues(4.dp)
             ) {
-                items(themes.size) { index ->
+                items(themes.size, key = { themes[it].id }) { index ->
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 4.dp)

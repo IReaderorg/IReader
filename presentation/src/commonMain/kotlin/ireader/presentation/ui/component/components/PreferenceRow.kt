@@ -572,7 +572,7 @@ fun ChipPreference(
                     state = lazyRowState,
                     modifier = Modifier.supportDesktopHorizontalLazyListScroll(lazyRowState, scope)
                 ) {
-                    items(count = preference.size) { index ->
+                    items(count = preference.size, key = { "chip-$it" }) { index ->
                         FilterChip(
                                 modifier = Modifier.semantics {
                                     contentDescription = "${preference[index]}. ${if (index == selected) "Selected" else "Not selected"}"

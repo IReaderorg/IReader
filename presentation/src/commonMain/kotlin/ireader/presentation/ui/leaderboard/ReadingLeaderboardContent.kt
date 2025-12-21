@@ -196,7 +196,7 @@ private fun ReadingLeaderboardList(
             }
         }
         
-        itemsIndexed(state.leaderboard) { index, entry ->
+        itemsIndexed(state.leaderboard, key = { _, entry -> entry.odId }) { index, entry ->
             ReadingLeaderboardEntryCard(
                 entry = entry,
                 isCurrentUser = entry.userId == state.userRank?.userId,

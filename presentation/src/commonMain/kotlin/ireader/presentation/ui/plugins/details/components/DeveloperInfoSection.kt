@@ -104,7 +104,7 @@ fun DeveloperInfoSection(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                items(otherPlugins) { plugin ->
+                items(otherPlugins, key = { it.id }) { plugin ->
                     OtherPluginCard(
                         plugin = plugin,
                         onClick = { onPluginClick(plugin.id) }

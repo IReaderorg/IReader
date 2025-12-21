@@ -176,7 +176,7 @@ fun ModernGlobalSearchCard(
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(book.items.size) { index ->
+                        items(book.items.size, key = { book.items[it].key }) { index ->
                             BookImage(
                                 modifier = Modifier
                                     .height(200.dp)
@@ -223,7 +223,7 @@ fun SkeletonLoadingRow() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(3) {
+        items(3, key = { "shimmer-$it" }) {
             Box(
                 modifier = Modifier
                     .height(200.dp)
@@ -277,7 +277,7 @@ fun GlobalSearchBookInfo(
         }
         Spacer(modifier = Modifier.height(20.dp))
         LazyRow(modifier = Modifier) {
-            items(book.items.size) { index ->
+            items(book.items.size, key = { book.items[it].key }) { index ->
                 BookImage(
                     modifier = Modifier
                         .height(250.dp)

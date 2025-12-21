@@ -51,7 +51,7 @@ fun ExtensionManagementScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(installedExtensions) { extension ->
+            items(installedExtensions, key = { it.sourceId }) { extension ->
                 ExtensionManagementCard(
                     extension = extension,
                     onShowSecurity = { onShowSecurity(extension) },

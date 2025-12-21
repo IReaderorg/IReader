@@ -29,7 +29,7 @@ fun PluginUIRenderer(
         modifier = modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(screen.components) { component ->
+        items(screen.components, key = { it.hashCode() }) { component ->
             RenderComponent(component, onEvent)
         }
     }

@@ -193,7 +193,7 @@ fun FontScreen(
             contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            items(vm.uiFonts) { fontName ->
+            items(vm.uiFonts, key = { it }) { fontName ->
                 FontItem(
                     fontName = fontName,
                     isSelected = fontName == vm.font?.value?.name,

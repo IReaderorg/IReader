@@ -84,7 +84,7 @@ fun RepositoryManagementScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(repositories) { repository ->
+                items(repositories, key = { it.url }) { repository ->
                     RepositoryCard(
                         repository = repository,
                         onRemove = { onRemoveRepository(repository) },

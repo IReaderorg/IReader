@@ -181,7 +181,7 @@ private fun PluginManagementContent(
         }
         
         // Installed plugins list
-        items(state.installedPlugins) { plugin ->
+        items(state.installedPlugins, key = { it.id }) { plugin ->
             InstalledPluginItem(
                 plugin = plugin,
                 hasUpdate = state.updatesAvailable.containsKey(plugin.id),

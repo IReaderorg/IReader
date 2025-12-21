@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 
@@ -341,7 +342,7 @@ private fun DownloadingContent(
             contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
-                .offset(y = offsetY.dp),
+                .offset { IntOffset(0, offsetY.dp.roundToPx()) },
             tint = MaterialTheme.colorScheme.primary,
         )
     }

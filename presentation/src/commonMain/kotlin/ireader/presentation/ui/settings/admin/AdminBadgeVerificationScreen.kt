@@ -171,7 +171,7 @@ fun AdminBadgeVerificationScreen(
                             }
                         }
                         
-                        items(state.pendingProofs) { proof ->
+                        items(state.pendingProofs, key = { it.id }) { proof ->
                             PaymentProofCard(
                                 proof = proof,
                                 onApprove = { viewModel.verifyPaymentProof(proof.id, approve = true) },

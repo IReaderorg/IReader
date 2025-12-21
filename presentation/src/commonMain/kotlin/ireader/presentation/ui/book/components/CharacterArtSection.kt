@@ -99,7 +99,7 @@ fun CharacterArtSection(
             contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(characterArtList) { art ->
+            items(characterArtList, key = { it.id }) { art ->
                 CharacterArtCard(
                     art = art,
                     onClick = { onArtClick(art) }

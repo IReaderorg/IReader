@@ -48,6 +48,7 @@ import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Palette
@@ -269,7 +270,7 @@ private fun ModernTopBar(onBack: () -> Unit, isWideScreen: Boolean) {
             Text(
                 text = "🐰",
                 fontSize = 28.sp,
-                modifier = Modifier.offset(y = bounce.dp)
+                modifier = Modifier.offset { IntOffset(0, bounce.dp.roundToPx()) }
             )
             
             Spacer(modifier = Modifier.width(12.dp))
@@ -645,7 +646,7 @@ private fun ModernAchievementsCard(achievements: List<BuddyAchievement>, isWideS
                 }
             } else {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(achievements) { achievement ->
+                    items(achievements, key = { it.name }) { achievement ->
                         ModernAchievementChip(achievement)
                     }
                 }
@@ -779,7 +780,7 @@ private fun ModernDailyQuoteTab(
                     val styleList = remember { QuoteCardStyle.entries.toList() }
                     
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(styleList) { style ->
+                        items(styleList, key = { it.name }) { style ->
                             FilterChip(
                                 selected = state.selectedCardStyle == style,
                                 onClick = { onStyleChange(style) },

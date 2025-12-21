@@ -111,7 +111,7 @@ fun EpubImportProgressDialog(
                         .height(200.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(progress.files) { fileState ->
+                    items(progress.files, key = { it.fileName }) { fileState ->
                         FileImportItem(fileState)
                     }
                 }

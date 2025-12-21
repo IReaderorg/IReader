@@ -372,7 +372,7 @@ private fun LanguageSelectionDialog(
             LazyColumn(
                 modifier = Modifier.heightIn(max = 400.dp)
             ) {
-                items(AppLocales.AVAILABLE_LOCALES) { langCode ->
+                items(AppLocales.AVAILABLE_LOCALES, key = { it }) { langCode ->
                     val isSelected = langCode == selectedLanguage
                     ListItem(
                         headlineContent = {

@@ -320,7 +320,7 @@ private fun FilterChipsRow(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(ArtStyleFilter.entries) { filter ->
+                items(ArtStyleFilter.entries, key = { it.name }) { filter ->
                     FilterChip(
                         selected = selectedFilter == filter,
                         onClick = { onFilterChange(filter) },
@@ -838,7 +838,7 @@ private fun LoadingContent(isWideScreen: Boolean) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        items(8) {
+        items(8, key = { "shimmer-$it" }) {
             ShimmerCard()
         }
     }

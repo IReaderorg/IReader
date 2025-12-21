@@ -317,7 +317,7 @@ private fun ModernCategoryChips(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
     ) {
-        items(categories) { (type, iconAndLabel) ->
+        items(categories, key = { it.first?.name ?: "all" }) { (type, iconAndLabel) ->
             val (icon, label) = iconAndLabel
             val isSelected = selectedCategory == type
             

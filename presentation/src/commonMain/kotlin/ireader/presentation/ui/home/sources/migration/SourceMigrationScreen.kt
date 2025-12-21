@@ -180,7 +180,7 @@ fun SourceMigrationScreen(
                         LazyColumn(
                             modifier = Modifier.weight(1f)
                         ) {
-                            items(novels) { novel ->
+                            items(novels, key = { it.id }) { novel ->
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()

@@ -393,6 +393,9 @@ fun UploadCharacterArtScreen(
                     }
 
                     // Style tags section
+                    // Cache filtered styles to avoid filtering on every recomposition
+                    val availableStyles = remember { ArtStyleFilter.entries.filter { it != ArtStyleFilter.ALL } }
+                    
                     SectionCard(title = "Art Style", icon = "🎨") {
                         Text(
                             text = "Select applicable styles:",
@@ -405,7 +408,7 @@ fun UploadCharacterArtScreen(
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(ArtStyleFilter.entries.filter { it != ArtStyleFilter.ALL }) { style ->
+                            items(availableStyles, key = { it.name }) { style ->
                                 val isSelected = style in selectedTags
                                 FilterChip(
                                     selected = isSelected,
@@ -1096,7 +1099,7 @@ private fun AIGeneratorSection(
                     "watercolor" to "🖌️",
                     "oil painting" to "🖼️"
                 )
-                items(styles) { (style, emoji) ->
+                items(styles, key = { it.first }) { (style, emoji) ->
                     FilterChip(
                         selected = selectedStyle == style,
                         onClick = { onStyleChange(style) },

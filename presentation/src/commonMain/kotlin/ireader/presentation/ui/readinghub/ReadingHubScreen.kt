@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.entities.ReadingStatisticsType1
 import ireader.domain.models.quote.BuddyAchievement
@@ -135,7 +136,7 @@ private fun ModernReadingHubTopBar(
                 Text(
                     text = "📚",
                     fontSize = 28.sp,
-                    modifier = Modifier.offset(y = bounce.dp)
+                    modifier = Modifier.offset { IntOffset(0, bounce.dp.roundToPx()) }
                 )
                 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -642,7 +643,7 @@ private fun AchievementsSection(
                     }.take(3)
                     
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(lockedAchievements) { achievement ->
+                        items(lockedAchievements, key = { it.name }) { achievement ->
                             AchievementBadge(achievement, isUnlocked = false)
                         }
                     }
@@ -805,7 +806,7 @@ private fun GenresSection(genres: List<ireader.domain.models.entities.GenreCount
             Spacer(modifier = Modifier.height(16.dp))
             
             LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(genres) { genreCount ->
+                items(genres, key = { it.genre }) { genreCount ->
                     Surface(
                         shape = RoundedCornerShape(20.dp),
                         color = MaterialTheme.colorScheme.secondaryContainer

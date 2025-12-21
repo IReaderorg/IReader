@@ -223,7 +223,7 @@ private fun PluginMarketplaceContent(
                     )
                 }
             } else {
-                items(state.filteredPlugins) { plugin ->
+                items(state.filteredPlugins, key = { it.id }) { plugin ->
                     PluginCard(
                         plugin = plugin,
                         onClick = { onPluginClick(plugin.id) },

@@ -115,7 +115,7 @@ private fun LazyListScope.FiltersPage(
     filters: List<ChaptersFilters>,
     onClick: (ChaptersFilters.Type) -> Unit
 ) {
-    items(filters) { (filter, state) ->
+    items(filters, key = { it.first.name }) { (filter, state) ->
         ClickableRow(onClick = { onClick(filter) }) {
             TriStateCheckbox(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -150,7 +150,7 @@ private fun LazyListScope.SortPage(
     onClick: (ChapterSort.Type) -> Unit
 ) {
 
-    items(ChapterSort.types.toList()) { type ->
+    items(ChapterSort.types.toList(), key = { it.name }) { type ->
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         ClickableRow(onClick = { onClick(type) }) {
             val iconModifier = Modifier.requiredWidth(56.dp)
@@ -180,7 +180,7 @@ private fun LazyListScope.DispalyPage(
     onLayoutSelected: (ChapterDisplayMode) -> Unit,
     selectedLayout: ChapterDisplayMode
 ) {
-    items(layouts) { layout ->
+    items(layouts, key = { it.name }) { layout ->
         val localizeHelper = requireNotNull(LocalLocalizeHelper.current) { "LocalLocalizeHelper not provided" }
         Column(
             Modifier

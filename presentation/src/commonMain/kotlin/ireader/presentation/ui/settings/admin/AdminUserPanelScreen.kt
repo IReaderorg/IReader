@@ -521,7 +521,7 @@ private fun AssignBadgeDialog(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(unassignedBadges) { badge ->
+                    items(unassignedBadges, key = { it.id }) { badge ->
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -275,7 +275,7 @@ private fun ChooseMethodStep(
         }
         
         // Templates
-        items(SourceTemplates.allTemplates) { template ->
+        items(SourceTemplates.allTemplates, key = { it.id }) { template ->
             TemplateCard(
                 template = template,
                 onClick = { onSelectTemplate(template) }

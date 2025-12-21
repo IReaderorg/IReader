@@ -227,7 +227,7 @@ fun EpubExportDialog(
                     
                     // Chapter list (only shown when "Select Chapters" is chosen)
                     if (!selectAllChapters) {
-                        items(chapters) { chapter ->
+                        items(chapters, key = { it.id }) { chapter ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

@@ -141,7 +141,7 @@ class RepositoryScreenSpec {
                 LazyColumn(
                     modifier = Modifier.padding(padding)
                 ) {
-                    items(vm.sources.value) { source ->
+                    items(vm.sources.value, key = { it.id }) { source ->
                         PreferenceRow(title = source.visibleName(), subtitle = source.key , action = {
                             Row {
                                 if(source.id >= 0) {

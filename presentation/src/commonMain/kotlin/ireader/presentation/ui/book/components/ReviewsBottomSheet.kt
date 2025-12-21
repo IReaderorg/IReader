@@ -99,7 +99,7 @@ fun ReviewsBottomSheet(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(reviews) { review ->
+                items(reviews, key = { it.id }) { review ->
                     val userBadges = userBadgesMap[review.userId] ?: emptyList()
                     val primaryBadge = userBadges.find { it.isPrimary }?.let { userBadge ->
                         ireader.domain.models.remote.Badge(

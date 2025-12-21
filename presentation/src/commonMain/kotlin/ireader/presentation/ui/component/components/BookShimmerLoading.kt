@@ -84,7 +84,7 @@ fun BookShimmerLoading(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(12.dp)
     ) {
-        items(itemCount) { index ->
+        items(itemCount, key = { "book-shimmer-$it" }) { index ->
             // Staggered animation effect by offsetting the animation based on item index
             val itemDelay = index * 100
             val itemTransition = rememberInfiniteTransition(label = "itemTransition$index")

@@ -50,7 +50,7 @@ fun FeaturedPluginsSection(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(plugins) { plugin ->
+            items(plugins, key = { it.id }) { plugin ->
                 FeaturedPluginCard(
                     plugin = plugin,
                     onClick = { onPluginClick(plugin.id) },

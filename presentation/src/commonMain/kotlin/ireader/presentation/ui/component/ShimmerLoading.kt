@@ -119,7 +119,7 @@ fun LibraryShimmerLoading(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(12) {
+        items(12, key = { "shimmer-$it" }) {
             Column(
                 modifier = Modifier.padding(4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally

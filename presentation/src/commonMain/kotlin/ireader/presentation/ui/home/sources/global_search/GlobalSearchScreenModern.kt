@@ -544,7 +544,7 @@ private fun LoadingContent() {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(4) {
+        items(4, key = { "shimmer-$it" }) {
             Box(
                 modifier = Modifier
                     .height(220.dp)

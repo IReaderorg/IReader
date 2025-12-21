@@ -44,7 +44,7 @@ fun UpdateCategoryDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    items(categories) { category ->
+                    items(categories, key = { it.id }) { category ->
                         CategoryItem(
                             category = category,
                             onClick = {

@@ -70,7 +70,10 @@ fun ReaderScreenDrawer(
                 modifier = Modifier.fillMaxSize(),
                 state = drawerScrollState
             ) {
-                items(count = chapters.size) { index ->
+                items(
+                    count = chapters.size,
+                    key = { index -> chapters[index].id }
+                ) { index ->
                     ChapterRow(
                         modifier = modifier,
                         chapter = chapters[index],

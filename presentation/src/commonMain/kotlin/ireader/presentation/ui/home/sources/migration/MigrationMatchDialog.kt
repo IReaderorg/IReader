@@ -140,7 +140,7 @@ fun MigrationMatchDialog(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(matches) { match ->
+                            items(matches, key = { it.novel.id }) { match ->
                                 MatchItem(
                                     match = match,
                                     onSelect = { onConfirm(match.novel) }

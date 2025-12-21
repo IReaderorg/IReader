@@ -71,7 +71,7 @@ fun ReaderPluginMenuSheet(
                 }
             } else {
                 LazyColumn {
-                    items(menuItems) { item ->
+                    items(menuItems, key = { it.id }) { item ->
                         PluginMenuItemRow(
                             item = item,
                             onClick = { onMenuItemClick(item) }

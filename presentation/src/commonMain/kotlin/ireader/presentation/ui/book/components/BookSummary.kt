@@ -88,7 +88,10 @@ fun BookSummary(
                     onClick = { onExpanded(!expanded) },
                 ),
         )
-        if (genres.isNotEmpty()) {
+        // Cache filtered genres to avoid filtering on every recomposition
+        val filteredGenres = remember(genres) { genres.filter { it.isNotBlank() } }
+        
+        if (filteredGenres.isNotEmpty()) {
             if (expanded) {
                 androidx.compose.foundation.layout.FlowRow(
                     modifier = Modifier
@@ -97,7 +100,7 @@ fun BookSummary(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    genres.filter { it.isNotBlank() }.forEach { genre ->
+                    filteredGenres.forEach { genre ->
                         TagsChip(genre) {}
                     }
                 }
@@ -106,7 +109,7 @@ fun BookSummary(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(genres.filter { it.isNotBlank() }) { genre ->
+                    items(filteredGenres, key = { it }) { genre ->
                         TagsChip(genre) {}
                     }
                 }

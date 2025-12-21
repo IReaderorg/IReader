@@ -216,7 +216,7 @@ fun CloudBackupScreen(
                     )
                 }
                 
-                items(cloudBackups) { backup ->
+                items(cloudBackups, key = { it.id }) { backup ->
                     CloudBackupItem(
                         backup = backup,
                         onDownload = { onDownloadBackup(backup) },

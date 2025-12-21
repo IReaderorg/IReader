@@ -129,7 +129,7 @@ fun VoiceSelectionContent(
                 }
                 
                 // Language chips
-                items(state.supportedLanguages) { language ->
+                items(state.supportedLanguages, key = { it }) { language ->
                     FilterChip(
                         selected = state.selectedLanguage == language,
                         onClick = { onLanguageSelected(language) },

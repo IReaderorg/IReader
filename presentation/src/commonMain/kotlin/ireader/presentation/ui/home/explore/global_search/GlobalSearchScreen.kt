@@ -140,7 +140,7 @@ fun GlobalSearchScreen(
                         }
 
                         // Show results grouped by source
-                        items(state.results) { result ->
+                        items(state.results, key = { it.sourceId }) { result ->
                             SearchResultSection(
                                 result = result,
                                 onBookClick = { book ->

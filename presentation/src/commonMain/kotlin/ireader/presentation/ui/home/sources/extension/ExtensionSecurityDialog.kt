@@ -87,7 +87,7 @@ fun ExtensionSecurityDialog(
                     )
                 }
                 
-                items(security.permissions) { permission ->
+                items(security.permissions, key = { it }) { permission ->
                     Row(
                         modifier = Modifier.padding(start = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -115,7 +115,7 @@ fun ExtensionSecurityDialog(
                         )
                     }
                     
-                    items(security.securityWarnings) { warning ->
+                    items(security.securityWarnings, key = { it }) { warning ->
                         Row(
                             modifier = Modifier.padding(start = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),

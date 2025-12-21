@@ -208,7 +208,7 @@ private fun PluginListContent(
                 )
             }
 
-            items(plugins) { plugin ->
+            items(plugins, key = { it.id }) { plugin ->
                 PluginCard(plugin = plugin, onClick = { onPluginClick(plugin) })
             }
         }
@@ -386,7 +386,7 @@ private fun PluginDetailContent(
                 }
             }
         } else {
-            items(grants) { grant ->
+            items(grants, key = { it.id }) { grant ->
                 GrantCard(grant = grant, onRevoke = { onRevokeAccess(grant.id) })
             }
         }

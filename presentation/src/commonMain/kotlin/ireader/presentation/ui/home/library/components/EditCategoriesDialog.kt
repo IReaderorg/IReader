@@ -42,7 +42,7 @@ fun EditCategoriesDialog(
             title = { Text(localizeHelper.localize(Res.string.edit_category)) },
             text = {
                 LazyColumn {
-                    items(items = categories) { category ->
+                    items(items = categories, key = { it.category.id }) { category ->
                         Row(
                             modifier = Modifier
                                 .requiredHeight(48.dp)

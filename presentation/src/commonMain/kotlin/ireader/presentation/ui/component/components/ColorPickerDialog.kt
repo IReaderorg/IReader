@@ -182,7 +182,7 @@ private fun ColorPresets(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(56.dp)
         ) {
-            items(presets) { color ->
+            items(presets, key = { it.hashCode() }) { color ->
                 ColorPresetItem(
                     color = color,
                     borderColor = borderColor,
@@ -197,7 +197,7 @@ private fun ColorPresets(
         }
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         LazyRow {
-            items(shades) { color ->
+            items(shades, key = { it.hashCode() }) { color ->
                 ColorPresetItem(
                     color = color,
                     borderColor = borderColor,

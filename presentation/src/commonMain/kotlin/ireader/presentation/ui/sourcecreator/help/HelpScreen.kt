@@ -125,7 +125,7 @@ private fun HelpTopicsList(
             )
         }
         
-        items(SourceCreatorHelp.allTopics) { topic ->
+        items(SourceCreatorHelp.allTopics, key = { it.id }) { topic ->
             HelpTopicCard(
                 topic = topic,
                 onClick = { onTopicClick(topic) }
@@ -241,7 +241,7 @@ private fun HelpTopicDetail(
                 )
             }
             
-            items(topic.examples) { example ->
+            items(topic.examples, key = { it.title }) { example ->
                 ExampleCard(example = example)
             }
         }
@@ -263,7 +263,7 @@ private fun HelpTopicDetail(
                 )
             }
             
-            items(topic.relatedTopics) { topicId ->
+            items(topic.relatedTopics, key = { it }) { topicId ->
                 val relatedTopic = SourceCreatorHelp.getTopicById(topicId)
                 if (relatedTopic != null) {
                     Card(

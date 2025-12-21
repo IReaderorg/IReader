@@ -316,7 +316,7 @@ fun <T> SettingsSingleChoiceDialog(
         },
         text = {
             LazyColumn {
-                items(options.size) { index ->
+                items(options.size, key = { it }) { index ->
                     val option = options[index]
                     val isSelected = index == selectedIndex
                     val label = optionLabel(option)
@@ -389,7 +389,7 @@ fun <T> SettingsMultiChoiceDialog(
         },
         text = {
             LazyColumn {
-                items(options.size) { index ->
+                items(options.size, key = { it }) { index ->
                     val option = options[index]
                     val isSelected = index in currentSelection
                     val label = optionLabel(option)

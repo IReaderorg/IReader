@@ -401,7 +401,7 @@ private fun MigrationSetupView(
         }
         
         // Novel list
-        items(novels) { novel ->
+        items(novels, key = { it.id }) { novel ->
             ModernNovelCard(
                 novel = novel,
                 isSelected = selectedNovels.contains(novel.id),
@@ -780,7 +780,7 @@ private fun ModernMigrationProgressView(
                     )
                 }
                 
-                items(matches) { match ->
+                items(matches, key = { it.book.id }) { match ->
                     ModernMatchCard(
                         match = match,
                         onSelect = { onMatchSelected(match) }

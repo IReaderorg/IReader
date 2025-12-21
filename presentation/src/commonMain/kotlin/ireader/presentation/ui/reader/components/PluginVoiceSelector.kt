@@ -94,7 +94,7 @@ fun PluginVoiceSelector(
                             .heightIn(max = 400.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(filteredVoices) { voiceWithSource ->
+                        items(filteredVoices, key = { it.voice.id }) { voiceWithSource ->
                             VoiceItem(
                                 voiceWithSource = voiceWithSource,
                                 isSelected = voiceWithSource.voice.id == state.selectedVoiceId,

@@ -260,7 +260,7 @@ private fun ColorPicker(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(colors) { color ->
+        items(colors, key = { it.hashCode() }) { color ->
             Box(
                 modifier = Modifier
                     .size(56.dp)

@@ -84,7 +84,7 @@ fun ChangelogScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(changelogEntries) { entry ->
+            items(changelogEntries, key = { it.version }) { entry ->
                 ChangelogCard(entry = entry)
             }
         }

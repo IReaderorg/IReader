@@ -126,7 +126,7 @@ fun MigrationSourceDialog(
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                items(sources) { source ->
+                                items(sources, key = { it.sourceId }) { source ->
                                     MigrationSourceCard(
                                         source = source,
                                         isSelected = selectedSource == source,

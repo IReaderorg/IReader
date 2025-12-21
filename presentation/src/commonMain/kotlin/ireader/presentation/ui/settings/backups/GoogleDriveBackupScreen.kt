@@ -260,7 +260,7 @@ fun GoogleDriveBackupScreen(
                             )
                         }
                         
-                        items(backups) { backup ->
+                        items(backups, key = { it.id }) { backup ->
                             BackupItem(
                                 backup = backup,
                                 onRestore = { showRestoreConfirmation = backup },

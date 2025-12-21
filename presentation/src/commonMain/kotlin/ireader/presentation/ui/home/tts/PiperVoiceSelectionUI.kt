@@ -479,7 +479,7 @@ private fun FilterChipsRow(
                             label = { Text(localizeHelper.localize(Res.string.all)) }
                         )
                     }
-                    items(VoiceGender.entries.size) { index ->
+                    items(VoiceGender.entries.size, key = { VoiceGender.entries[it].name }) { index ->
                         val gender = VoiceGender.entries[index]
                         FilterChip(
                             selected = selectedGender == gender,
@@ -518,7 +518,7 @@ private fun FilterChipsRow(
                             label = { Text(localizeHelper.localize(Res.string.all)) }
                         )
                     }
-                    items(VoiceQuality.entries.size) { index ->
+                    items(VoiceQuality.entries.size, key = { VoiceQuality.entries[it].name }) { index ->
                         val quality = VoiceQuality.entries[index]
                         FilterChip(
                             selected = selectedQuality == quality,
@@ -549,7 +549,7 @@ private fun FilterChipsRow(
                                 label = { Text(localizeHelper.localize(Res.string.all)) }
                             )
                         }
-                        items(availableLanguages.size) { index ->
+                        items(availableLanguages.size, key = { availableLanguages[it] }) { index ->
                             val lang = availableLanguages[index]
                             FilterChip(
                                 selected = selectedLanguage == lang,

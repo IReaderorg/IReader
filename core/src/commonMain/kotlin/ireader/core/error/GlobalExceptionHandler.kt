@@ -194,11 +194,8 @@ object GlobalExceptionHandler {
             // Parse errors are recoverable
             throwable is IReaderError.ParseError -> true
             
-            // Class loading errors from plugins are recoverable
-            throwable is ClassNotFoundException -> true
-            throwable is NoClassDefFoundError -> true
-            throwable is LinkageError -> true
-            throwable is UnsatisfiedLinkError -> true
+            // Class loading errors from plugins are recoverable (JVM-specific, check by name for multiplatform)
+            isClassLoadingError(throwable) -> true
             
             // Check message for plugin/source related errors
             throwable.message?.let { msg ->
@@ -212,6 +209,20 @@ object GlobalExceptionHandler {
             // Default: not recoverable
             else -> false
         }
+    }
+    
+    /**
+     * Check if the throwable is a class loading error (JVM-specific exceptions).
+     * Uses class name matching for multiplatform compatibility.
+     */
+    private fun isClassLoadingError(throwable: Throwable): Boolean {
+        val className = throwable::class.simpleName ?: return false
+        return className in setOf(
+            "ClassNotFoundException",
+            "NoClassDefFoundError",
+            "LinkageError",
+            "UnsatisfiedLinkError"
+        )
     }
     
     /**

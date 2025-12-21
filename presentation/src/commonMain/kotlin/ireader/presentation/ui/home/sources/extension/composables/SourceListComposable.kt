@@ -25,7 +25,7 @@ fun SourceListComposable(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        items(sources.size) { index ->
+        items(sources.size, key = { sources[it].sourceId }) { index ->
             CatalogItem(
                 catalog = sources[index],
                 onClick = {

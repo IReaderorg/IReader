@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import ireader.presentation.ui.core.theme.LocalLocalizeHelper
 import ireader.i18n.resources.*
 import ireader.i18n.resources.Res
@@ -184,7 +185,7 @@ fun DotsTyping() {
     ) = Spacer(
         Modifier
             .size(dotSize)
-            .offset(y = -offset.dp)
+            .offset { IntOffset(0, -offset.dp.roundToPx()) }
             .background(
                 color = MaterialTheme.colorScheme.primary,
                 shape = CircleShape
@@ -237,7 +238,7 @@ fun DotsCollision() {
     ) = Spacer(
         Modifier
             .size(dotSize)
-            .offset(x = offset.dp)
+            .offset { IntOffset(offset.dp.roundToPx(), 0) }
             .background(
                 color = MaterialTheme.colorScheme.primary,
                 shape = CircleShape

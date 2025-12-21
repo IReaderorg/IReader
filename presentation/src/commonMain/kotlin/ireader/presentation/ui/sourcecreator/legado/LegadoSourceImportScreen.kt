@@ -238,7 +238,7 @@ private fun ImportInputContent(
             )
         }
         
-        items(state.popularRepositories) { repo ->
+        items(state.popularRepositories, key = { it.url }) { repo ->
             RepositoryCard(
                 repository = repo,
                 onClick = { onFetchFromRepository(repo) }

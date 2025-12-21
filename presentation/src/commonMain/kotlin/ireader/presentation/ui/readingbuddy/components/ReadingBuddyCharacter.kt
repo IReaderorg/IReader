@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import ireader.domain.models.quote.BuddyAnimation
 import ireader.domain.models.quote.BuddyMood
@@ -90,7 +91,7 @@ fun ReadingBuddyCharacter(
         // Buddy container with animations
         Box(
             modifier = Modifier
-                .offset(y = bounceOffset.dp)
+                .offset { IntOffset(0, bounceOffset.dp.roundToPx()) }
                 .scale(scale),
             contentAlignment = Alignment.Center
         ) {

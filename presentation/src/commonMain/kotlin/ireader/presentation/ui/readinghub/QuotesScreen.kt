@@ -664,7 +664,7 @@ private fun StylePickerBottomSheet(
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(QuoteCardStyle.entries) { style ->
+                items(QuoteCardStyle.entries, key = { it.name }) { style ->
                     StylePreviewChip(
                         style = style,
                         isSelected = style == selectedStyle,

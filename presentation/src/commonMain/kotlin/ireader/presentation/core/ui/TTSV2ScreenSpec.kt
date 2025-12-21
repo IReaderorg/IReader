@@ -260,17 +260,19 @@ class TTSV2ScreenSpec(
         val savedGradioConfigId by appPreferences.activeGradioConfigId().changes().collectAsState(
             initial = appPreferences.activeGradioConfigId().get()
         )
-        // Use default preset if no config is saved
-        val activeGradioConfigId = remember(savedGradioConfigId) {
-            savedGradioConfigId.ifEmpty { "coqui_ireader" }
+        // Use default preset if no config is saved - derivedStateOf for efficient updates
+        val activeGradioConfigId by remember {
+            derivedStateOf { savedGradioConfigId.ifEmpty { "coqui_ireader" } }
         }
         
         // Selected Piper voice model - observe changes to display in UI
         val selectedPiperModel by appPreferences.selectedPiperModel().changes().collectAsState(
             initial = appPreferences.selectedPiperModel().get()
         )
-        // Always consider configured since we have a default preset
-        val isGradioConfigured = remember(activeGradioConfigId) { activeGradioConfigId.isNotEmpty() }
+        // Always consider configured since we have a default preset - derivedStateOf for efficiency
+        val isGradioConfigured by remember {
+            derivedStateOf { activeGradioConfigId.isNotEmpty() }
+        }
         
         // Chunk mode settings - observe changes to re-chunk when user changes word count
         val mergeWordsRemote by readerPreferences.ttsMergeWordsRemote().changes().collectAsState(
@@ -304,8 +306,13 @@ class TTSV2ScreenSpec(
             }
         }
         
-        val isDownloading = downloadState == TTSChapterDownloadManager.DownloadState.DOWNLOADING ||
-            downloadState == TTSChapterDownloadManager.DownloadState.PAUSED
+        // Use derivedStateOf to avoid recomposition when downloadState changes to unrelated values
+        val isDownloading by remember {
+            derivedStateOf {
+                downloadState == TTSChapterDownloadManager.DownloadState.DOWNLOADING ||
+                    downloadState == TTSChapterDownloadManager.DownloadState.PAUSED
+            }
+        }
         
         // WPM Calibration state (rolling average)
         var calibratedWPM by remember { mutableStateOf<Float?>(null) }
@@ -1376,7 +1383,10 @@ private fun TTSV2ScreenDrawer(
                 modifier = Modifier.fillMaxSize(),
                 state = drawerScrollState
             ) {
-                items(count = chapters.size) { index ->
+                items(
+                    count = chapters.size,
+                    key = { index -> chapters[index].id }  // Stable key for better recomposition
+                ) { index ->
                     ChapterRow(
                         modifier = Modifier,
                         chapter = chapters[index],

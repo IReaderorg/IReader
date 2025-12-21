@@ -49,7 +49,7 @@ fun JSPluginPerformanceDashboard(
                 )
             }
         } else {
-            items(metricsList) { (pluginId, metric) ->
+            items(metricsList, key = { it.first }) { (pluginId, metric) ->
                 PluginMetricsCard(pluginId, metric)
             }
         }
